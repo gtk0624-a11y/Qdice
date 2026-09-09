@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+<title>질문 주사위 (오늘 수업용)</title>
+<style>
+  :root { --navy: #1F3864; --light: #DCE6F1; --gray: #F2F2F2; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;
+    background: var(--gray);
+    color: #222;
+  }
+  header { background: var(--navy); color: #fff; padding: 16px 20px; text-align: center; }
+  header h1 { margin: 0; font-size: 20px; }
+  header p { margin: 4px 0 0; font-size: 13px; color: var(--light); }
+  main { max-width: 520px; margin: 0 auto; padding: 20px; }
+
+  .notice {
+    background: #FFF3CD;
+    border: 1px solid #FFE69C;
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: 14px;
+    margin-bottom: 18px;
+    color: #664d03;
+  }
+  label { font-weight: bold; display: block; margin-bottom: 4px; }
+  textarea {
+    width: 100%;
+    min-height: 70px;
+    font-size: 16px;
+    padding: 10px;
+    border: 2px solid #ccc;
+    border-radius: 10px;
+    resize: vertical;
+    font-family: inherit;
+    margin-bottom: 18px;
+  }
+  .dice-box {
+    background: #fff;
+    border: 3px solid var(--navy);
+    border-radius: 20px;
+    height: 160px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 48px;
+    font-weight: bold;
+    color: var(--navy);
+    margin-bottom: 16px;
+  }
+  button {
+    width: 100%;
+    padding: 16px;
+    font-size: 18px;
+    font-weight: bold;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    margin-bottom: 12px;
+  }
+  .roll-btn { background: var(--navy); color: #fff; }
+  .roll-btn:disabled { background: #999; }
+  .reset-btn { background: #fff; color: var(--navy); border: 2px solid var(--navy); }
+  .result-note {
+    text-align: center;
+    font-size: 14px;
+    color: #555;
+    margin-top: -4px;
+    margin-bottom: 20px;
+  }
+  footer { text-align: center; color: #999; font-size: 12px; padding: 20px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🎲 질문 주사위</h1>
+  <p>질문 사냥꾼 · 닫힌질문 → 열린질문 다듬기</p>
+</header>
+
+<main>
+  <div class="notice">
+    이 화면은 <b>제출 기능이 없습니다.</b> 주사위를 굴려서 나온 낱말을 <b>학습지 활동③</b>에 직접 옮겨 적으세요.
+  </div>
+
+  <label>① 정교화할 닫힌질문</label>
+  <textarea id="origInput" placeholder="예: 정의란 뭐야?"></textarea>
+
+  <label>② 주사위 굴리기</label>
+  <div class="dice-box" id="diceBox">🎲</div>
+  <button class="roll-btn" id="rollBtn">주사위 굴리기</button>
+  <p class="result-note" id="resultNote"></p>
+
+  <button class="reset-btn" id="resetBtn">다음 질문 하러 가기 (초기화)</button>
+</main>
+
+<footer>© 김정환 · M.A.D.T (Moral And Digital Teacher)</footer>
+
+<script>
+const WORDS = ["누가", "언제", "어디서", "무엇을", "어떻게", "왜"];
+const origInput = document.getElementById("origInput");
+const diceBox = document.getElementById("diceBox");
+const rollBtn = document.getElementById("rollBtn");
+const resultNote = document.getElementById("resultNote");
+const resetBtn = document.getElementById("resetBtn");
+
+rollBtn.addEventListener("click", () => {
+  const orig = origInput.value.trim();
+  if (!orig) {
+    alert("먼저 ①에 정교화할 닫힌질문을 적어주세요.");
+    return;
+  }
+  rollBtn.disabled = true;
+  resultNote.textContent = "";
+  let count = 0;
+  const spin = setInterval(() => {
+    diceBox.textContent = WORDS[Math.floor(Math.random() * WORDS.length)];
+    count++;
+    if (count > 12) {
+      clearInterval(spin);
+      const finalWord = WORDS[Math.floor(Math.random() * WORDS.length)];
+      diceBox.textContent = finalWord;
+      rollBtn.disabled = false;
+      resultNote.textContent = "'" + finalWord + "'가 나왔어요! 학습지 활동③에 옮겨 적으세요.";
+    }
+  }, 80);
+});
+
+resetBtn.addEventListener("click", () => {
+  origInput.value = "";
+  diceBox.textContent = "🎲";
+  resultNote.textContent = "";
+  rollBtn.disabled = false;
+  origInput.focus();
+});
+</script>
+</body>
+</html>
