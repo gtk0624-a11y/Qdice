@@ -416,8 +416,8 @@ async function initBackend(){
    ========================================================= */
 const $app = document.getElementById('app');
 const qs = new URLSearchParams(location.search);
-const MODE = qs.get('mode')==='teacher' ? 'teacher' : 'student';
-let ROOM = (qs.get('room')||'').toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,8);
+const MODE = (/teacher/i.test(qs.get('mode')||'') || qs.has('teacher') || /teacher/i.test(location.hash)) ? 'teacher' : 'student';
+let ROOM = (qs.get('room')||'').replace(/\*/g,'').toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,8);
 const esc = s => String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let toastTimer=null;
 function toast(msg){ document.querySelectorAll('.toast').forEach(x=>x.remove()); const t=document.createElement('div'); t.className='toast'; t.textContent=msg; document.body.appendChild(t); clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.remove(),2600); }
