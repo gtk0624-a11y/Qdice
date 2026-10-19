@@ -170,7 +170,15 @@ footer{text-align:center;color:var(--sub);font-size:12.5px;margin-top:30px}
    ① 설정 — 여기 두 군데만 바꾸면 됩니다
    ========================================================= */
 // Firebase 설정을 붙여 넣으세요. (null 이면 '체험 모드' = 같은 기기·같은 브라우저 안에서만 연동)
-const FIREBASE_CONFIG = null;
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyAPJAMUITr6w0H63Ze1L1eViCsuq3zXlbE",
+  authDomain: "nation-game-cf684.firebaseapp.com",
+  databaseURL: "https://nation-game-cf684-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "nation-game-cf684",
+  storageBucket: "nation-game-cf684.firebasestorage.app",
+  messagingSenderId: "947361689624",
+  appId: "1:947361689624:web:9f09cd27fbd2334ae0136d"
+};
 /* 예시)
 const FIREBASE_CONFIG = {
   apiKey: "AIza....",
