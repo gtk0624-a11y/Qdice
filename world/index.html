@@ -1,0 +1,1026 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>세계로 나간 우리 나라</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+:root{
+  --bg:#f5f1e8; --paper:#fffdf8; --ink:#1f2a44; --sub:#5b6478; --line:#e4dccb;
+  --accent:#e4572e; --accent2:#2a9d8f; --gold:#f4a261; --blue:#3a6ea5; --soft:#fbefe0;
+  --ok:#2a9d8f; --warn:#e9a23b; --bad:#d64545; --shadow:0 2px 0 rgba(31,42,68,.08),0 8px 24px rgba(31,42,68,.06);
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:Pretendard,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;font-size:17px;line-height:1.55;-webkit-tap-highlight-color:transparent}
+button{font-family:inherit;font-size:inherit;color:inherit;cursor:pointer}
+input,textarea{font-family:inherit;font-size:16px;color:var(--ink)}
+.wrap{max-width:860px;margin:0 auto;padding:16px 16px 120px}
+.twrap{max-width:1280px;margin:0 auto;padding:16px 16px 80px}
+.top{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.top h1{font-size:20px;margin:0;flex:1;min-width:180px}
+.pill{display:inline-flex;align-items:center;gap:6px;background:var(--paper);border:1.5px solid var(--line);border-radius:999px;padding:4px 12px;font-size:14px;font-weight:600}
+.pill.live{border-color:var(--ok);color:var(--ok)}
+.pill.demo{border-color:var(--warn);color:#a86b00}
+.card{background:var(--paper);border:1.5px solid var(--line);border-radius:18px;padding:20px;box-shadow:var(--shadow);margin-bottom:16px}
+h2{font-size:23px;margin:0 0 12px}
+h3{font-size:18px;margin:18px 0 8px}
+.muted{color:var(--sub);font-size:15px}
+.tip{background:#eef6f5;border-left:5px solid var(--accent2);border-radius:10px;padding:12px 14px;margin:0 0 16px;font-size:15.5px}
+.tip b{color:#1d6f65}
+.steps{display:flex;gap:4px;margin:0 0 14px}
+.steps div{flex:1;height:8px;border-radius:4px;background:var(--line)}
+.steps div.on{background:var(--accent)}
+.steps div.done{background:var(--accent2)}
+.stepname{font-size:14px;color:var(--sub);margin-bottom:6px;font-weight:600}
+.grid{display:grid;gap:10px}
+.g2{grid-template-columns:repeat(2,1fr)}
+.g3{grid-template-columns:repeat(3,1fr)}
+.g4{grid-template-columns:repeat(4,1fr)}
+@media (max-width:640px){.g3,.g4{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:420px){.g2{grid-template-columns:1fr}}
+.opt{background:#fff;border:2px solid var(--line);border-radius:14px;padding:12px;text-align:left;transition:.12s;display:block;width:100%}
+.opt:hover{border-color:#cdbf9f}
+.opt.sel{border-color:var(--accent);background:#fff4ef;box-shadow:0 0 0 3px rgba(228,87,46,.15)}
+.opt .e{font-size:28px;line-height:1}
+.opt .t{font-weight:700;margin-top:4px}
+.opt .d{font-size:14px;color:var(--sub);margin-top:2px}
+.opt .pc{font-size:13px;margin-top:6px}
+.bigopt{display:flex;gap:12px;align-items:flex-start;padding:14px 16px;font-size:16.5px}
+.bigopt .lt{flex:none;width:30px;height:30px;border-radius:50%;background:var(--ink);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800}
+.bigopt.sel .lt{background:var(--accent)}
+.btn{border:none;border-radius:14px;padding:13px 20px;font-weight:700;background:var(--ink);color:#fff;font-size:17px}
+.btn:active{transform:translateY(1px)}
+.btn.acc{background:var(--accent)}
+.btn.teal{background:var(--accent2)}
+.btn.ghost{background:transparent;border:2px solid var(--line);color:var(--ink)}
+.btn.sm{padding:8px 12px;font-size:14.5px;border-radius:10px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.navbar{position:fixed;left:0;right:0;bottom:0;background:rgba(255,253,248,.96);border-top:1.5px solid var(--line);padding:12px 16px calc(12px + env(safe-area-inset-bottom));display:flex;justify-content:center;gap:10px;z-index:20}
+.navbar .in{max-width:860px;width:100%;display:flex;gap:10px;justify-content:space-between}
+.field{width:100%;border:2px solid var(--line);border-radius:12px;padding:12px 14px;background:#fff}
+.field:focus{outline:none;border-color:var(--accent2)}
+textarea.field{min-height:84px;resize:vertical}
+label.lb{display:block;font-weight:700;margin:14px 0 6px}
+.flag{display:inline-flex;width:84px;height:56px;border-radius:8px;overflow:hidden;position:relative;border:2px solid rgba(0,0,0,.15);flex:none}
+.flag i{flex:1}
+.flag span{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:26px;text-shadow:0 1px 2px rgba(0,0,0,.25)}
+.flag.sm{width:42px;height:28px;border-radius:5px}
+.flag.sm span{font-size:14px}
+.flag.lg{width:150px;height:100px;border-radius:12px}
+.flag.lg span{font-size:48px}
+.sw{display:flex;gap:8px;flex-wrap:wrap}
+.sw button{width:38px;height:38px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 1.5px var(--line)}
+.sw button.sel{box-shadow:0 0 0 3px var(--ink)}
+.sym button{width:46px;height:46px;border-radius:12px;background:#fff;border:2px solid var(--line);font-size:24px}
+.sym button.sel{border-color:var(--accent);background:#fff4ef}
+.brow{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px dashed var(--line)}
+.brow .nm{flex:1}
+.brow .nm b{display:block}
+.brow .nm small{color:var(--sub)}
+.stp{display:flex;align-items:center;gap:8px}
+.stp button{width:42px;height:42px;border-radius:12px;border:2px solid var(--line);background:#fff;font-size:22px;font-weight:800}
+.stp .v{min-width:30px;text-align:center;font-weight:800;font-size:20px}
+.dots{display:flex;gap:3px;flex-wrap:wrap;max-width:140px}
+.dots i{width:9px;height:9px;border-radius:50%;background:var(--accent2)}
+.remain{position:sticky;top:0;background:var(--ink);color:#fff;border-radius:12px;padding:10px 14px;font-weight:700;display:flex;justify-content:space-between;z-index:5;margin-bottom:8px}
+.remain.zero{background:var(--accent2)}
+.remain.over{background:var(--bad)}
+.bars{display:grid;gap:7px}
+.bar{display:grid;grid-template-columns:78px 1fr 34px;align-items:center;gap:8px;font-size:14.5px;font-weight:600}
+.bar .tr{height:14px;background:#efe8da;border-radius:7px;overflow:hidden}
+.bar .tr i{display:block;height:100%;border-radius:7px;transition:width .4s}
+.bar .n{text-align:right;font-variant-numeric:tabular-nums}
+.bars.mini .bar{grid-template-columns:44px 1fr 26px;font-size:12px;gap:5px}
+.bars.mini .bar .tr{height:8px}
+.scene{background:var(--soft);border-radius:14px;padding:16px;margin-bottom:14px}
+.scene .tag{display:inline-block;background:var(--ink);color:#fff;border-radius:8px;padding:3px 10px;font-size:13.5px;font-weight:700;margin-bottom:8px}
+.scene .src{font-size:13px;color:var(--sub);margin-top:6px}
+.persona{background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:12px;display:flex;gap:10px;align-items:flex-start}
+.persona .av{font-size:32px;line-height:1}
+.persona .face{font-size:22px}
+.persona .q{font-size:14.5px}
+.persona .who{font-size:13px;color:var(--sub);font-weight:700}
+.typebadge{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:5px 14px;font-weight:800;color:#fff;font-size:15px}
+.hero{display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+.law{background:#fff;border:2px solid var(--ink);border-radius:12px;padding:14px 16px;font-family:"Nanum Myeongjo",serif}
+.law p{margin:4px 0}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:2px solid var(--line);background:#fff;border-radius:999px;padding:8px 14px;font-weight:700;font-size:15px}
+.chip.sel{border-color:var(--accent2);background:#e8f5f3;color:#1d6f65}
+.toast{position:fixed;left:50%;top:18px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:12px 20px;border-radius:12px;z-index:100;font-weight:700;max-width:90vw;box-shadow:var(--shadow);animation:pop .2s}
+@keyframes pop{from{transform:translate(-50%,-10px);opacity:0}to{transform:translate(-50%,0);opacity:1}}
+.overlay{position:fixed;inset:0;background:rgba(20,26,40,.6);z-index:50;display:flex;align-items:flex-start;justify-content:center;overflow:auto;padding:24px 16px}
+.modal{background:var(--paper);border-radius:20px;max-width:760px;width:100%;padding:22px;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.modal.alert{border:4px solid var(--bad)}
+.blink{animation:blink 1.2s infinite}
+@keyframes blink{50%{opacity:.5}}
+.banner{border-radius:14px;padding:14px 16px;margin-bottom:14px;font-weight:700}
+.banner.ok{background:#e3f4f1;color:#16655b}
+.banner.warn{background:#fff3dc;color:#8a5a00}
+.banner.bad{background:#fde8e8;color:#9b2c2c}
+.center{text-align:center}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.sp{flex:1}
+/* teacher */
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0 16px}
+.tabs button{border:2px solid var(--line);background:var(--paper);border-radius:12px;padding:9px 14px;font-weight:700;font-size:15.5px}
+.tabs button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.seg{display:inline-flex;border:2px solid var(--ink);border-radius:12px;overflow:hidden}
+.seg button{border:none;background:#fff;padding:9px 14px;font-weight:700;font-size:15px}
+.seg button.on{background:var(--ink);color:#fff}
+.ngrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+.ncard{background:#fff;border:1.5px solid var(--line);border-radius:16px;padding:14px;text-align:left;width:100%}
+.ncard:hover{border-color:var(--accent)}
+.ncard .nh{display:flex;gap:10px;align-items:center;margin-bottom:8px}
+.ncard .nn{font-weight:800;font-size:17px;line-height:1.25}
+.ncard .ns{font-size:13px;color:var(--sub)}
+.ncard .a1{font-size:13.5px;color:var(--sub);margin:6px 0 8px;font-style:italic}
+.stat{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.stat .box{background:var(--paper);border:1.5px solid var(--line);border-radius:14px;padding:10px 16px;min-width:110px}
+.stat .box b{font-size:26px;display:block;line-height:1.1}
+.stat .box small{color:var(--sub);font-weight:600}
+.obar{display:grid;grid-template-columns:1fr;gap:4px;margin:8px 0}
+.obar .lbl{display:flex;justify-content:space-between;font-size:15px;font-weight:600;gap:8px}
+.obar .tr{height:22px;background:#efe8da;border-radius:6px;overflow:hidden}
+.obar .tr i{display:block;height:100%}
+.rlist{margin:6px 0 4px 0;padding:0;list-style:none;font-size:14.5px}
+.rlist li{padding:6px 10px;background:#fff;border:1px solid var(--line);border-radius:8px;margin-bottom:5px}
+.rlist li b{color:var(--sub);font-weight:700;margin-right:6px}
+.prog{display:flex;flex-wrap:wrap;gap:6px}
+.prog span{font-size:13px;border-radius:8px;padding:3px 9px;background:#fff;border:1.5px solid var(--line);font-weight:600}
+.prog span.done{background:#e3f4f1;border-color:var(--ok);color:#16655b}
+.concept table{width:100%;border-collapse:collapse;font-size:15.5px}
+.concept td,.concept th{border:1px solid var(--line);padding:9px 10px;vertical-align:top;text-align:left}
+.concept th{background:var(--soft);width:22%}
+.rank{display:flex;gap:12px;align-items:center;padding:12px;background:#fff;border:1.5px solid var(--line);border-radius:14px;margin-bottom:10px}
+.rank .no{font-size:26px;font-weight:900;width:36px;text-align:center}
+.qrbox{display:flex;justify-content:center;padding:16px;background:#fff;border-radius:12px}
+.url{word-break:break-all;background:#fff;border:1.5px dashed var(--line);padding:10px;border-radius:10px;font-size:15px;font-weight:600}
+footer{text-align:center;color:var(--sub);font-size:12.5px;margin-top:30px}
+/* world */
+.up{color:#16855b;font-weight:800;margin-left:3px;font-size:12px}.dn{color:var(--bad);font-weight:800;margin-left:3px;font-size:12px}
+.bar{grid-template-columns:78px 1fr 58px}.bars.mini .bar{grid-template-columns:44px 1fr 26px}
+.gauge{background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:12px 14px;margin:10px 0}
+.gauge .gl{display:flex;justify-content:space-between;margin-bottom:6px}
+.gauge .gt{position:relative;height:18px;background:#efe8da;border-radius:9px;overflow:hidden}
+.gauge .gt i{display:block;height:100%;transition:width .5s}.gauge .gt em{position:absolute;top:0;bottom:0;width:2px;background:var(--ink)}
+.reason{background:#fff8e6;border:2px solid var(--gold);border-radius:14px;padding:14px 16px;margin:14px 0 4px}
+.reason .rn{font-size:19px;font-weight:800;margin:4px 0}
+.quote{background:#fff;border-left:5px solid var(--accent2);border-radius:8px;padding:10px 14px}
+.chain{padding-left:22px}.chain li{margin:4px 0;font-weight:600}
+.pz{display:flex;gap:10px;align-items:center;font-weight:600}.pzn{flex:none;width:30px;height:30px;border-radius:50%;background:var(--line);display:flex;align-items:center;justify-content:center;font-weight:800}
+.pz.sel .pzn{background:var(--accent);color:#fff}
+.oxr,.ckr{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-bottom:1px dashed var(--line);flex-wrap:wrap}
+.okc{color:#16855b}.noc{color:var(--bad)}
+.ckr .seg button{min-width:42px}
+.mirror{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0}.mirror>div{background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:14px;text-align:center}
+.mirror .big{font-size:28px;font-weight:900;margin-top:6px}
+.pcard{background:#fff;border:1.5px solid var(--line);border-left:6px solid var(--accent2);border-radius:12px;padding:12px 14px}
+.pcard p{margin:6px 0}.pd{font-weight:800}.ps{display:inline-block;font-size:13px;background:#e8f5f3;color:#1d6f65;border-radius:999px;padding:2px 10px;font-weight:700}
+.vwall{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
+.vcard{background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:12px 14px}.vcard p{margin:6px 0}.vh{font-size:13.5px;font-weight:700;color:var(--sub)}
+.plist{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:8px}.pi .btn.sm{padding:5px 8px}.pi b{white-space:nowrap}
+.pi{display:flex;align-items:center;gap:8px;background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:8px 10px}
+.pi.done{border-color:var(--ok);background:#f2faf8}.pi span small{display:block;color:var(--sub);font-size:12.5px}
+.pbar .pg{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.pbar .pg .tabs{margin:6px 0}
+.rbox{padding:8px 0;border-bottom:1px dashed var(--line)}
+.obh{border-left:6px solid;padding:4px 10px;font-weight:800;background:#fff;border-radius:6px;margin-bottom:6px}
+.ncard.selc{border-color:var(--accent);box-shadow:0 0 0 3px rgba(228,87,46,.18)}.ncard:disabled{opacity:.45}
+details{margin-top:12px;background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:10px 14px}summary{font-weight:700;cursor:pointer}
+@media (max-width:520px){.mirror{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<footer id="foot">© 김정환 · M.A.D.T (Moral And Digital Teacher)</footer>
+<script type="module">
+/* =========================================================
+   ① 설정 — 국가 만들기와 같은 Firebase를 씁니다
+   ========================================================= */
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyAPJAMUITr6w0H63Ze1L1eViCsuq3zXlbE",
+  authDomain: "nation-game-cf684.firebaseapp.com",
+  databaseURL: "https://nation-game-cf684-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "nation-game-cf684",
+  storageBucket: "nation-game-cf684.firebasestorage.app",
+  messagingSenderId: "947361689624",
+  appId: "1:947361689624:web:9f09cd27fbd2334ae0136d"
+};
+const TEACHER_PIN = '1234';
+const qs = new URLSearchParams(location.search);
+const FORCE_DEMO = qs.has('demo');
+
+/* =========================================================
+   국가 만들기 데이터 (1차시 나라를 그대로 읽기 위해 같은 내용)
+   ========================================================= */
+const IND = [
+  {k:'safe',n:'안전',e:'🛡️',c:'#3a6ea5'},
+  {k:'free',n:'자유',e:'🕊️',c:'#8e6cc4'},
+  {k:'equal',n:'평등',e:'⚖️',c:'#e4572e'},
+  {k:'welfare',n:'복지',e:'🤲',c:'#2a9d8f'},
+  {k:'eco',n:'경제',e:'💰',c:'#e9a23b'},
+  {k:'trust',n:'신뢰',e:'🤝',c:'#d16ba5'}
+];
+const TERR = [
+  {k:'island',n:'바다 위 섬나라',e:'🏝️',d:'무역이 활발하지만 태풍에 약해요',eff:{eco:5,safe:-3}},
+  {k:'plain',n:'넓은 평야',e:'🌾',d:'식량이 풍부하고 살기 좋아요',eff:{eco:3,welfare:3}},
+  {k:'mount',n:'높은 산악 지대',e:'⛰️',d:'방어엔 유리, 교통은 불편해요',eff:{safe:5,eco:-2}},
+  {k:'river',n:'큰 강이 흐르는 땅',e:'🏞️',d:'산업이 발달하지만 홍수가 잦아요',eff:{eco:5,safe:-4}}
+];
+const POP = [
+  {k:'s',n:'작은 나라',e:'🏡',d:'국민 100만 명 · 서로 잘 아는 공동체',eff:{trust:5,eco:-3}},
+  {k:'m',n:'중간 나라',e:'🏘️',d:'국민 3천만 명',eff:{}},
+  {k:'l',n:'큰 나라',e:'🏙️',d:'국민 2억 명 · 시장은 크지만 의견 모으기 어려움',eff:{eco:5,trust:-5}}
+];
+const GOV = [
+  {k:'demo',n:'민주 공화국',e:'🗳️',d:'주권이 국민에게 있고, 국민이 선거로 대표를 뽑아요.',pro:'시민의 자유와 참여 보장',con:'결정이 느릴 수 있음',eff:{free:10,trust:10}},
+  {k:'const',n:'입헌 군주국',e:'👑',d:'왕이 있지만 헌법과 의회가 실제로 나라를 운영해요.',pro:'전통과 안정',con:'왕실 유지 비용',eff:{free:6,trust:5,safe:3,eco:-2}},
+  {k:'elite',n:'소수 엘리트 통치',e:'🎩',d:'똑똑하거나 부유한 소수가 나라 일을 결정해요.',pro:'빠르고 전문적인 결정',con:'소수의 이익만 챙길 위험',eff:{eco:10,equal:-15,trust:-5}},
+  {k:'dict',n:'1인 독재',e:'🗿',d:'지도자 한 명이 모든 권력을 가져요.',pro:'명령이 빠르고 질서정연',con:'권력 남용을 막을 수 없음',eff:{safe:10,eco:3,free:-20,trust:-15}}
+];
+const TAX = [
+  {k:'low',n:'세금 적게',e:'🪙',pts:10,d:'국민 부담 ↓ · 국가 예산 10칸',eff:{eco:8,free:4}},
+  {k:'mid',n:'세금 보통',e:'💵',pts:15,d:'국가 예산 15칸',eff:{}},
+  {k:'high',n:'세금 많이',e:'💰',pts:20,d:'국민 부담 ↑ · 국가 예산 20칸',eff:{eco:-8,free:-4,trust:-3}}
+];
+const BUDGET = [
+  {k:'def',n:'국방·치안',e:'🛡️',role:'생명과 안전 보호',per:{safe:3,free:-0.5},zero:{safe:-12}},
+  {k:'dis',n:'재난·환경',e:'🌊',role:'생명과 안전 보호',per:{safe:2,welfare:1},zero:{safe:-6}},
+  {k:'med',n:'의료·보건',e:'🏥',role:'생명·안전 + 인간다운 삶',per:{welfare:2,safe:1},zero:{welfare:-6,safe:-4}},
+  {k:'wel',n:'복지(노인·장애·빈곤)',e:'🤲',role:'인간다운 삶 보장',per:{welfare:3,equal:2},zero:{welfare:-10,equal:-5}},
+  {k:'edu',n:'교육',e:'📚',role:'인간다운 삶 보장',per:{equal:1.5,eco:1.5,trust:1},zero:{equal:-5,eco:-5}},
+  {k:'job',n:'경제·일자리',e:'🏭',role:'인간다운 삶 보장',per:{eco:3,equal:-0.5},zero:{eco:-10}}
+];
+const CARDS = [
+  {id:'c1',tag:'안전·편리 ↔ 사생활',t:'스마트 인증서 하나로!',src:'교과서 144쪽 생각 열기',
+   s:'정부가 시민의 모든 정보를 직접 관리하는 시스템을 만들자고 합니다. 스마트 인증서 하나로 신분 확인과 결제가 모두 되고, 주민등록증·여권·현금은 사용이 중지됩니다.',
+   opts:[
+    {t:'도입한다. 모든 정보를 국가가 통합 관리한다.',eff:{safe:8,eco:6,free:-15,trust:-5}},
+    {t:'원하는 사람만 쓰게 하고, 개인정보 보호법을 강하게 만든다.',eff:{eco:3,free:3,trust:5}},
+    {t:'도입하지 않는다.',eff:{free:8,eco:-3}}]},
+  {id:'c2',tag:'공공의 안전 ↔ 사생활',t:'거리마다 얼굴 인식 CCTV',src:'교과서 146쪽 쟁점 ①',
+   s:'범죄를 막기 위해 전국 거리에 얼굴 인식 CCTV를 설치하자는 의견이 나왔습니다. 누가 언제 어디에 있었는지 국가가 모두 알 수 있게 됩니다.',
+   opts:[
+    {t:'전국에 설치하고 실시간으로 추적한다.',eff:{safe:15,free:-15}},
+    {t:'범죄가 잦은 곳에만 설치하고, 영상은 30일 뒤 삭제한다.',eff:{safe:7,free:-3,trust:3}},
+    {t:'설치하지 않는다.',eff:{safe:-8,free:8}}]},
+  {id:'c3',tag:'공공 질서 ↔ 개인의 자유',t:'껌 씹으면 벌금 40만 원?',src:'교과서 148쪽 스스로 탐구하기',
+   s:'이웃 나라는 쓰레기 투기 200만 원, 껌 씹기 40만 원, 침 뱉기 40만 원, 화장실 물 안 내리기 100만 원의 벌금을 매겨 아주 깨끗합니다. 우리나라도 따라 할까요?',
+   opts:[
+    {t:'그대로 따라 한다. 깨끗하고 안전한 나라가 우선!',eff:{safe:6,free:-12,trust:-4}},
+    {t:'남에게 피해를 주는 행동에만 적당한 벌금을 매긴다.',eff:{safe:3,free:2,trust:3}},
+    {t:'벌금 대신 캠페인과 교육으로 해결한다.',eff:{free:8,safe:-4,trust:2}}]},
+  {id:'c4',tag:'불평등 해소 ↔ 재산권',t:'부자에게 세금을 더?',src:'교과서 147쪽 쟁점 ②',
+   s:'상위 1% 부자가 나라 전체 재산의 절반을 가지고 있습니다. 가난한 시민을 돕기 위해 부자에게 세금을 더 걷자는 주장과, 열심히 번 재산을 빼앗는 것이라는 주장이 맞섭니다.',
+   opts:[
+    {t:'상위 1%의 재산에 높은 세금(부유세)을 매겨 복지에 쓴다.',eff:{equal:15,welfare:5,eco:-8,free:-5}},
+    {t:'소득이 많을수록 조금씩 더 내게 한다(누진세 강화).',eff:{equal:8,welfare:2,eco:-3}},
+    {t:'모두 같은 비율로 낸다. 재산은 개인의 것!',eff:{eco:8,free:3,equal:-12}}]},
+  {id:'c5',tag:'사회 안정 ↔ 자유와 평등',t:'태어날 때 직업이 정해진다면',src:'교과서 145쪽 《멋진 신세계》',
+   s:'AI가 아기의 능력을 분석해 다섯 계급으로 나누고 평생 직업을 정해 주면, 실업자가 0%가 되고 사회가 안정된다고 합니다.',
+   opts:[
+    {t:'도입한다. 모두 일자리가 있고 질서가 생긴다.',eff:{eco:10,safe:5,free:-25,equal:-15,trust:-5}},
+    {t:'AI는 진로를 추천만 하고, 선택은 개인이 한다.',eff:{free:3,eco:3,trust:3}},
+    {t:'국가는 진로에 전혀 관여하지 않는다.',eff:{free:6,equal:-3}}]},
+  {id:'c6',tag:'국가의 역할 ① 생명과 안전',t:'비만 오면 잠기는 마을',src:'교과서 152쪽',
+   s:'“이 마을은 비만 오면 침수가 되는데, 이제 나는 어찌해야 하나.” 해마다 같은 마을이 물에 잠기고 있습니다.',
+   opts:[
+    {t:'큰 예산을 들여 배수 시설·제방을 짓고 이주도 지원한다.',eff:{safe:12,welfare:5,eco:-8}},
+    {t:'피해가 날 때마다 재난 지원금을 준다.',eff:{welfare:5,safe:2,eco:-4}},
+    {t:'각자 보험을 들어 스스로 대비하게 한다.',eff:{eco:5,safe:-10,equal:-5}}]},
+  {id:'c7',tag:'국가의 역할 ② 인간다운 삶',t:'홀로 지내는 어르신',src:'교과서 152쪽',
+   s:'“어휴, 가족도 없이 혼자 계셔서 쓰러지신 줄도 몰랐어요.” 홀로 사는 어르신이 늘고 있습니다.',
+   opts:[
+    {t:'국가 돌봄 매니저가 정기 방문하고 응급 호출기를 준다.',eff:{welfare:12,equal:5,eco:-6}},
+    {t:'이웃·자원봉사자와 어르신을 연결하도록 국가가 지원한다.',eff:{welfare:7,trust:8,eco:-2}},
+    {t:'가족이나 본인이 책임진다.',eff:{eco:4,welfare:-12,equal:-4}}]},
+  {id:'c8',tag:'법 준수 ↔ 시민 불복종',t:'정부 비판 금지법',src:'교과서 147쪽 쟁점 ③',
+   s:'의회가 ‘정부를 비판하는 SNS 글 금지법’을 통과시켰습니다. 시민들이 일부러 비판 글을 올리고 평화 시위를 하며 “처벌도 받겠다”고 합니다.',
+   opts:[
+    {t:'법은 법이다. 강하게 단속하고 처벌한다.',eff:{safe:5,free:-15,trust:-15}},
+    {t:'처벌은 하되, 법을 고칠지 공청회를 연다.',eff:{free:5,trust:8}},
+    {t:'법을 즉시 없애고, 시민과 소통하는 창구를 만든다.',eff:{free:12,trust:12,safe:-3}}]}
+];
+const EVENTS = [
+  {id:'flood',e:'🌧️',t:'대홍수 발생!',s:'기록적인 폭우로 강가 마을 3곳이 물에 잠겼습니다. 이재민 2만 명이 생겼어요. 우리 나라는 어떻게 대응할까요?',
+   opts:[
+    {t:'국가 긴급 예산 투입 — 임시 주택과 생활비를 지원한다.',eff:{welfare:6,safe:6,eco:-8}},
+    {t:'국가는 장비를 지원하고, 시민 자원봉사단을 모집해 함께 복구한다. (태안 사례처럼)',eff:{safe:5,trust:10,eco:-3}},
+    {t:'각 지역이 알아서 복구하게 맡긴다.',eff:{eco:3,safe:-10,trust:-10}}]},
+  {id:'virus',e:'🦠',t:'감염병 유행!',s:'전파력이 강한 새 감염병이 빠르게 퍼지고 있습니다.',
+   opts:[
+    {t:'모든 국민에게 위치 추적 앱을 의무로 깔게 하고 확진자 동선을 공개한다.',eff:{safe:12,free:-15,trust:-3}},
+    {t:'검사·치료를 무료로 지원하고, 개인정보는 최소한만 공개한다.',eff:{safe:6,welfare:5,eco:-6}},
+    {t:'개인이 알아서 조심하도록 안내만 한다.',eff:{free:5,safe:-12,welfare:-5}}]},
+  {id:'crisis',e:'📉',t:'경제 위기!',s:'세계 경제가 흔들리며 실업자가 크게 늘었습니다. 가게들이 문을 닫고 있어요.',
+   opts:[
+    {t:'세금을 올려 실업자에게 기본 생활비를 지원한다.',eff:{welfare:10,equal:5,eco:-5,free:-3}},
+    {t:'기업 세금을 깎아 일자리를 늘리게 한다.',eff:{eco:10,equal:-6}},
+    {t:'국가가 공공 일자리를 만들고 직업 훈련을 제공한다.',eff:{eco:4,welfare:4,trust:4}}]},
+  {id:'protest',e:'📢',t:'대규모 평화 시위!',s:'‘청소년 밤 10시 이후 외출 금지법’에 반대하는 시민들이 법을 어기고 밤에 모여 평화 시위를 하고 있습니다. 처벌도 받겠다고 밝혔어요.',
+   opts:[
+    {t:'경찰을 투입해 강제 해산하고 주동자를 엄하게 처벌한다.',eff:{safe:4,free:-12,trust:-12}},
+    {t:'법은 지키게 하되, 시위대 대표와 공개 토론회를 연다.',eff:{trust:8,free:3}},
+    {t:'법이 부당했음을 인정하고 즉시 폐지한다.',eff:{free:10,trust:6,safe:-3}}]}
+];
+const DUTIES = [
+  {k:'army',n:'🪖 국방의 의무'},{k:'work',n:'🛠️ 근로의 의무'},{k:'study',n:'📖 교육의 의무'},
+  {k:'tax',n:'🧾 납세의 의무'},{k:'join',n:'🙋 공동체 일에 참여'},{k:'bal',n:'⚖️ 공익과 사익의 조화'}
+];
+const PERSONAS = [
+  {n:'홀로 사는 어르신',e:'👵',w:{welfare:.6,safe:.4},q:['돌봐 주는 사람이 있어 외롭지 않아요.','그럭저럭 지내지만 아프면 걱정이에요.','쓰러져도 아무도 모를까 봐 무서워요…']},
+  {n:'강가 마을 주민',e:'🧑‍🌾',w:{safe:.6,trust:.4},q:['비가 와도 이제 안심이에요!','대책이 조금 더 필요해요.','비만 오면 또 잠길까 봐 잠을 못 자요.']},
+  {n:'중학생',e:'🧑‍🎓',w:{free:.4,equal:.3,trust:.3},q:['내 꿈을 내가 정할 수 있어 좋아요!','하고 싶은 말을 다 하긴 어려워요.','내 삶을 내가 선택할 수 없어요…']},
+  {n:'가게 사장님',e:'🧑‍🍳',w:{eco:.6,free:.4},q:['장사가 잘되고 마음도 편해요.','세금이랑 규제가 조금 부담돼요.','가게 문을 닫아야 할 것 같아요…']},
+  {n:'장애가 있는 시민',e:'🧑‍🦽',w:{equal:.5,welfare:.5},q:['차별 없이 함께 살 수 있어요.','아직 불편한 곳이 많아요.','이 나라에 내 자리는 없는 것 같아요.']},
+  {n:'시민 기자',e:'📰',w:{free:.5,trust:.5},q:['정부를 자유롭게 비판할 수 있어요!','기사 쓸 때 눈치가 보여요.','진실을 쓰면 잡혀갈까 두려워요.']}
+];
+const TYPES = {
+  control:{n:'통제 국가',e:'🔒',c:'#5c6370',d:'질서와 안전을 위해 국가가 시민의 삶을 강하게 통제하는 나라입니다. 겉으로는 안정적이지만, 《멋진 신세계》처럼 시민이 스스로 삶을 선택하기 어렵습니다.',q:'안전과 질서를 위해 자유를 어디까지 포기할 수 있을까?'},
+  welfare:{n:'복지 국가',e:'🏥',c:'#2a9d8f',d:'국가가 세금을 거둬 모든 시민의 인간다운 삶을 적극적으로 보장하는 나라입니다.',q:'복지를 위한 세금 부담과 개인의 재산권은 어떻게 조화시킬까?'},
+  night:{n:'최소 국가(야경 국가)',e:'🌙',c:'#3a4a7a',d:'국가는 치안·국방처럼 생명과 안전을 지키는 최소한의 일만 하고, 나머지는 개인에게 맡기는 나라입니다.',q:'스스로 살아가기 어려운 시민은 누가 도와야 할까?'},
+  market:{n:'시장 중심 국가',e:'📈',c:'#d48a1a',d:'경제 성장과 개인의 경쟁을 가장 중요하게 여기는 나라입니다. 부유하지만 시민 사이의 격차가 클 수 있습니다.',q:'경제 성장의 열매는 누구에게 돌아가고 있을까?'},
+  civic:{n:'시민 참여 국가',e:'🤝',c:'#c2508f',d:'국가와 시민이 활발히 소통·협력하고, 시민의 자유와 참여가 살아 있는 나라입니다.',q:'시민이 권리만 누리고 의무를 다하지 않는다면 어떻게 될까?'},
+  balance:{n:'균형 국가',e:'⚖️',c:'#3a6ea5',d:'안전·자유·평등·복지·경제·신뢰가 고르게 갖춰진 나라입니다.',q:'모든 것을 조금씩 갖춘 나라가 정말 최선일까? 놓친 시민은 없을까?'},
+  shaky:{n:'흔들리는 국가',e:'🌪️',c:'#d64545',d:'몇몇 영역에서 시민의 불만이 큰 나라입니다. 어떤 국가의 역할이 부족했는지 살펴보세요.',q:'우리 나라에서 가장 불행한 시민은 누구이고, 왜일까?'}
+};
+const COLORS = ['#e63946','#f4a261','#f1c40f','#2a9d8f','#3a86ff','#1d3557','#8e6cc4','#ffffff','#111111','#6a994e'];
+const SYMS = ['⭐','🌙','☀️','🦅','🐉','🌳','⛰️','🌊','🔥','🌸','🦁','📚','🕊️','⚡','🍀','🐯'];
+const STEPNAMES = ['입장','국가 탄생','주권','세금·예산','정책 결정','헌법','선포'];
+
+/* =========================================================
+   국가 만들기 지표 계산
+   ========================================================= */
+const byK = (arr,k)=>arr.find(x=>x.k===k);
+function norm(d){
+  d = d||{};
+  return {
+    name:d.name||'', flag:Object.assign({c1:'#e63946',c2:'#1d3557',sym:'⭐'},d.flag||{}),
+    terr:d.terr||null, pop:d.pop||null, gov:d.gov||null, tax:d.tax||null,
+    budget:d.budget||{}, choices:d.choices||{}, events:d.events||{},
+    con:{a1:(d.con&&d.con.a1)||'',a2:(d.con&&d.con.a2)||'',duties:Object.values((d.con&&d.con.duties)||[])}
+  };
+}
+function computeInd(d){
+  d = norm(d);
+  const v={safe:40,free:40,equal:40,welfare:40,eco:40,trust:40};
+  const add=eff=>{ if(!eff) return; for(const k in eff) v[k]+=eff[k]; };
+  add(byK(TERR,d.terr)?.eff); add(byK(POP,d.pop)?.eff); add(byK(GOV,d.gov)?.eff); add(byK(TAX,d.tax)?.eff);
+  if(d.tax){
+    for(const b of BUDGET){
+      const p = +d.budget[b.k]||0;
+      if(p===0) add(b.zero); else for(const k in b.per) v[k]+=b.per[k]*p;
+    }
+  }
+  for(const c of CARDS){ const ch=d.choices[c.id]; if(ch && ch.opt!=null && c.opts[ch.opt]) add(c.opts[ch.opt].eff); }
+  for(const e of EVENTS){ const r=d.events[e.id]; if(r && r.opt!=null && e.opts[r.opt]) add(e.opts[r.opt].eff); }
+  for(const k in v) v[k]=Math.max(0,Math.min(100,Math.round(v[k])));
+  return v;
+}
+function nationType(v,d){
+  d=norm(d);
+  if(v.free<35 && (v.safe>=55 || d.gov==='dict')) return 'control';
+  if(v.welfare>=65 && v.equal>=60) return 'welfare';
+  if(v.safe>=55 && v.welfare<45 && v.equal<50) return 'night';
+  if(v.eco>=65 && v.equal<45) return 'market';
+  if(v.trust>=70 && v.free>=65) return 'civic';
+  if(Math.min(...Object.values(v))>=50) return 'balance';
+  return 'shaky';
+}
+function personaScore(p,v){ let s=0; for(const k in p.w) s+=v[k]*p.w[k]; return Math.round(s); }
+function budgetUsed(d){ return BUDGET.reduce((a,b)=>a+(+norm(d).budget[b.k]||0),0); }
+
+
+/* =========================================================
+   ② 세계 문제 게임 데이터 (교과서 158~167쪽 기반)
+   ========================================================= */
+const OPT = [
+  {k:'A',n:'자국 우선',e:'🛡️',c:'#6b7280',d:'우리 나라 국민과 경제를 먼저 지킨다'},
+  {k:'B',n:'국제 협력',e:'🤝',c:'#3a6ea5',d:'다른 나라들과 비용을 나눠 함께 해결한다'},
+  {k:'C',n:'인도적 지원',e:'🕊️',c:'#2a9d8f',d:'우리 경제를 덜어 피해국 사람들을 직접 돕는다'}
+];
+const OWN = {A:{eco:4}, B:{eco:-3,trust:1}, C:{eco:-5,trust:2}};
+const CRISES = [
+  {id:'r1',e:'🌾',t:'빈곤과 기아',sub:'세계 곡물 가격 폭등',src:'교과서 159쪽',
+   s:'가뭄과 분쟁으로 세계 곡물 가격이 두 배로 뛰었습니다. 가난한 나라에서는 끼니를 거르는 아이들이 늘고, 학교 대신 일터로 나가는 아이들이 생기고 있습니다.',
+   opts:{A:'곡물 수출을 막고 비축해서 우리 국민 식량부터 지킨다.',B:'여러 나라와 곡물을 공동 비축하고 가격을 함께 안정시킨다.',C:'우리 곡물과 예산을 기아 지역 아이들에게 직접 보낸다.'},
+   hit:['welfare','equal'],vk:'welfare',
+   facts:['원인: 열악한 환경, 자연재해, 불공정한 분배','심각성: 생존 위협, 교육·의료에서 소외, 아동 노동 같은 인권 침해']},
+  {id:'r2',e:'🌊',t:'기후 변화',sub:'섬나라가 가라앉고 있다',src:'교과서 160쪽 투발루 수중 연설',
+   s:'해수면이 계속 올라 섬나라와 강가 마을이 물에 잠기고 있습니다. 한 섬나라 장관은 바닷물 속에 선 채 “우리는 가라앉고 있다”고 연설했습니다. 터전을 잃은 환경 난민이 늘고 있습니다.',
+   opts:{A:'탄소 감축은 경제에 부담이다. 우리 산업부터 지킨다.',B:'모든 나라가 함께 탄소를 줄이는 국제 협약에 참여한다.',C:'피해 섬나라에 기후 기금을 보내고 환경 난민을 받아들인다.'},
+   hit:['safe','eco'],vk:'safe',vterr:['island','river'],
+   facts:['결과: 생물종 멸종, 농토의 사막화, 해수면 상승, 환경 난민 발생, 인류 생존 위협']},
+  {id:'r3',e:'🕊️',t:'전쟁과 폭력',sub:'분쟁 난민이 국경으로',src:'교과서 158쪽 쿠르디, 159쪽',
+   s:'이웃 지역에서 영토와 자원을 둘러싼 전쟁이 일어났습니다. 수십만 명의 난민이 국경으로 몰려들고, 바다를 건너다 목숨을 잃는 아이들도 생겼습니다.',
+   opts:{A:'국경을 닫고 우리 나라 안전부터 지킨다.',B:'국제기구와 함께 평화 협상을 돕고 난민을 나눠 받는다.',C:'난민 캠프에 의료진과 구호품을 보내고 난민을 받아들인다.'},
+   hit:['safe','trust'],vk:'safe',
+   facts:['원인: 영토 분쟁, 천연자원 확보, 인종·민족·종교의 대립','심각성: 무고한 사람들의 생명 위협, 난민 증가, 세계적 불안과 공포']}
+];
+const REASONS = [
+  {k:'link',after:'r2',n:'① 지구촌의 모든 사람은 서로 연결되어 있다',d:'한 나라의 선택이 모든 나라의 삶에 번집니다. 방금 결과판에서 직접 확인했습니다.'},
+  {k:'value',after:'r3',n:'② 보편적 가치와 관련되어 있다',d:'모든 인류가 자유·평등·정의·평화를 누릴 수 있어야 합니다. 국경 밖의 고통도 인간다운 삶의 문제입니다.'},
+  {k:'future',after:'puzzle',n:'③ 미래 세대에게도 영향을 준다',d:'오늘의 선택이 후손이 살아갈 터전을 정합니다. 건강하고 안전한 토대를 물려주어야 합니다.'}
+];
+const PUZ = [
+  {k:1,t:'전 세계에서 소고기 소비가 늘어났다'},
+  {k:2,t:'소 사육이 늘며 메탄가스 배출이 많아졌다'},
+  {k:3,t:'지구의 평균 기온이 올라갔다'},
+  {k:4,t:'빙하가 녹고 해수면이 높아졌다'},
+  {k:5,t:'섬나라가 잠기고 환경 난민이 생겼다'}
+];
+const CITIZENS = [
+  {e:'🧒',n:'곡물값이 올라 학교를 그만두고 일터로 나간 아이',q:'저도 친구들처럼 학교에 다니고 싶었어요.'},
+  {e:'🏝️',n:'바닷물에 집과 학교를 잃은 섬마을 청소년',q:'할아버지가 살던 땅이 바다가 되었어요.'},
+  {e:'🎒',n:'전쟁을 피해 국경을 넘은 난민 청소년',q:'총소리가 없는 곳에서 잠들고 싶어요.'}
+];
+const CHECK = [
+  '지구 공동체의 일원으로서 나의 위치를 알고 있다.',
+  '세계 인권에 관한 문제를 이해하고 있다.',
+  '지구 공동체의 일원으로서 지구적 문제에 책임감을 느낀다.',
+  '지구적 문제를 해결하는 데 협동심을 잘 발휘할 수 있다.',
+  '지구에 공존하는 다양한 문화의 차이를 이해하고 있다.',
+  '앞으로 세계 시민의 자질을 갖출 필요성은 점점 커질 것이다.'
+];
+const DAYS = [
+  {k:'water',d:'3월 22일',n:'세계 물의 날',b:'깨끗한 물을 쓰지 못하는 사람들의 문제를 알리기 위한 날'},
+  {k:'tb',d:'3월 24일',n:'세계 결핵의 날',b:'결핵이 개발도상국에서 수많은 목숨을 앗아 가는 병임을 알리기 위한 날'},
+  {k:'earth',d:'4월 22일',n:'지구의 날',b:'환경 오염의 심각성을 알리기 위한 날'},
+  {k:'env',d:'6월 5일',n:'세계 환경의 날',b:'지구 환경을 지키기 위해 유엔이 정한 날'},
+  {k:'child',d:'6월 12일',n:'세계 아동 노동 반대의 날',b:'아동 노동을 없애기 위해 국제노동기구가 정한 날'},
+  {k:'refugee',d:'6월 20일',n:'세계 난민의 날',b:'난민 보호에 관심을 모으기 위해 유엔이 정한 날'},
+  {k:'food',d:'10월 16일',n:'세계 식량의 날',b:'기아와 식량 문제를 알리기 위한 날'},
+  {k:'poverty',d:'10월 17일',n:'세계 빈곤 퇴치의 날',b:'빈곤을 없애기 위한 노력을 다짐하는 날'},
+  {k:'hr',d:'12월 10일',n:'세계 인권의 날',b:'세계 인권 선언 채택을 기념하는 날'}
+];
+const SCOPES = ['나 혼자','우리 반·학교','가족·이웃','온라인(SNS·캠페인)'];
+const OX1 = [{q:'빈곤과 기아는 인간다운 삶과 생존을 위협한다.',a:'O'},{q:'전 지구적 문제는 개인이나 개별 국가에게만 책임이 있다.',a:'X'}];
+const OX2 = [{q:'세계 시민은 전 지구적 문제에 관심을 가지고 해결하려고 노력하는 사람이다.',a:'O'},{q:'전 지구적 문제의 해결은 국가적 노력만으로도 충분하다.',a:'X'}];
+const QUICK = [
+  {k:'control',v:{safe:70,free:25,equal:40,welfare:40,eco:55,trust:30}},
+  {k:'welfare',v:{safe:55,free:55,equal:65,welfare:70,eco:40,trust:55}},
+  {k:'night',v:{safe:65,free:60,equal:40,welfare:35,eco:55,trust:45}},
+  {k:'market',v:{safe:50,free:60,equal:35,welfare:40,eco:72,trust:45}},
+  {k:'civic',v:{safe:50,free:70,equal:55,welfare:50,eco:45,trust:72}},
+  {k:'balance',v:{safe:55,free:55,equal:55,welfare:55,eco:55,trust:55}}
+];
+const PHASES = [
+  {k:'lobby',n:'입장',ch:2,e:'🚪'},
+  {k:'r1',n:'위기1 빈곤·기아',ch:2,e:'🌾'},
+  {k:'r2',n:'위기2 기후',ch:2,e:'🌊'},
+  {k:'r3',n:'위기3 전쟁',ch:2,e:'🕊️'},
+  {k:'puzzle',n:'연결 퍼즐',ch:2,e:'🧩'},
+  {k:'wrap1',n:'정리(OX)',ch:2,e:'✅'},
+  {k:'citizen',n:'시민 반전',ch:3,e:'🙋'},
+  {k:'check',n:'자기 점검',ch:3,e:'🪞'},
+  {k:'plan',n:'실천 계획',ch:3,e:'📅'},
+  {k:'wrap2',n:'정리(OX)',ch:3,e:'✅'}
+];
+
+/* =========================================================
+   ③ 계산
+   ========================================================= */
+const clamp = (x,a=0,b=100)=>Math.max(a,Math.min(b,x));
+const meanV = v => Math.round(IND.reduce((s,i)=>s+(+v[i.k]||0),0)/IND.length);
+const avg = a => a.length ? a.reduce((s,x)=>s+x,0)/a.length : 0;
+function victims(c, P, ids){
+  const set = new Set();
+  if(c.vterr) ids.forEach(id=>{ if(c.vterr.includes(P[id].terr)) set.add(id); });
+  if(!set.size && ids.length){
+    const n = Math.max(1, Math.ceil(ids.length*0.3));
+    [...ids].sort((a,b)=>P[a].base[c.vk]-P[b].base[c.vk]).slice(0,n).forEach(id=>set.add(id));
+  }
+  return set;
+}
+function calc(){
+  const P = DATA.players || {};
+  const ids = Object.keys(P).filter(id=>P[id] && P[id].base);
+  const cur = {}; ids.forEach(id=>cur[id]=Object.assign({},P[id].base));
+  const rev = (DATA.meta && DATA.meta.rev) || {};
+  const rounds = []; let W = 50;
+  for(const c of CRISES){
+    const A = (DATA.ans && DATA.ans[c.id]) || {};
+    const cnt = {A:0,B:0,C:0};
+    ids.forEach(id=>{ const a=A[id]; if(a && cnt[a.opt]!=null) cnt[a.opt]++; });
+    const tot = cnt.A+cnt.B+cnt.C;
+    const r = {c, cnt, tot, revealed:!!rev[c.id], before:{}, after:{}, vict:new Set(), dW:0, k:0};
+    ids.forEach(id=>r.before[id]=Object.assign({},cur[id]));
+    if(r.revealed && tot>0){
+      const a=cnt.A/tot, b=cnt.B/tot, cc=cnt.C/tot;
+      r.k = b + 1.2*cc - 1.5*a;
+      r.dW = Math.round(20*a - 12*b - 15*cc);
+      W = clamp(W + r.dW);
+      r.vict = victims(c, P, ids);
+      ids.forEach(id=>{
+        const m = r.vict.has(id) ? 1.5 : 1;
+        c.hit.forEach(h=>{ cur[id][h] += Math.round(10*r.k*m); });
+        const mine = A[id]; if(mine && OWN[mine.opt]) for(const k in OWN[mine.opt]) cur[id][k] += OWN[mine.opt][k];
+        for(const k in cur[id]) cur[id][k] = clamp(Math.round(cur[id][k]));
+      });
+    }
+    ids.forEach(id=>r.after[id]=Object.assign({},cur[id]));
+    r.W = W; rounds.push(r);
+  }
+  const avgBase = Math.round(avg(ids.map(id=>meanV(P[id].base))));
+  const avgNow = Math.round(avg(ids.map(id=>meanV(cur[id]))));
+  const done = rounds.every(r=>r.revealed);
+  return {P, ids, cur, rounds, W, avgBase, avgNow, done, win: done && ids.length>0 && avgNow>avgBase && W<50};
+}
+function aCount(sid){ let n={A:0,B:0,C:0}; for(const c of CRISES){ const a=DATA.ans&&DATA.ans[c.id]&&DATA.ans[c.id][sid]; if(a&&n[a.opt]!=null) n[a.opt]++; } return n; }
+function buildAssign(){
+  const W = calc(); const ids = W.ids;
+  if(!ids.length) return {};
+  // 지금 평균 지표가 가장 낮은(형편이 가장 어려운) 나라들
+  const sorted = [...ids].sort((a,b)=>meanV(W.cur[a])-meanV(W.cur[b]));
+  const T = sorted.slice(0, Math.max(1, Math.min(ids.length, Math.ceil(ids.length/4))));
+  const out = {};
+  [...ids].sort((a,b)=>(+W.P[a].num||999)-(+W.P[b].num||999)).forEach((id,j)=>{
+    let t = T[j % T.length];
+    if(t===id && ids.length>1){ t = T.length>1 ? T[(j+1)%T.length] : sorted.find(x=>x!==id); }
+    // 그 나라가 실제로 피해국이었던 위기에 맞춘 시민 신분
+    const hits = W.rounds.map((r,i)=>r.vict.has(t)?i:-1).filter(i=>i>=0);
+    out[id] = {t, p: hits.length ? hits[j % hits.length] : j % CITIZENS.length};
+  });
+  return out;
+}
+
+/* =========================================================
+   ④ 저장소
+   ========================================================= */
+const clean = o => o==null ? null : JSON.parse(JSON.stringify(o));
+let DBMODE='demo', backend=null;
+async function initBackend(){
+  if(!FORCE_DEMO && FIREBASE_CONFIG && FIREBASE_CONFIG.apiKey && FIREBASE_CONFIG.databaseURL){
+    try{
+      const A = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js');
+      const D = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js');
+      const db = D.getDatabase(A.initializeApp(FIREBASE_CONFIG));
+      backend = {
+        set:(p,v)=>D.set(D.ref(db,p),clean(v)),
+        update:(p,v)=>D.update(D.ref(db,p),clean(v)),
+        remove:p=>D.remove(D.ref(db,p)),
+        on:(p,cb)=>D.onValue(D.ref(db,p),s=>cb(s.val()),err=>toast('⚠️ 데이터베이스 연결 오류: '+err.message))
+      };
+      DBMODE='live'; return;
+    }catch(e){ console.error(e); toast('⚠️ Firebase 연결 실패 → 체험 모드로 실행합니다'); }
+  }
+  // 체험 모드: localStorage + BroadcastChannel (같은 브라우저의 여러 탭끼리 연동)
+  const KEY='natgame_demo_db';
+  const bc = ('BroadcastChannel' in window) ? new BroadcastChannel('natgame') : null;
+  const L=[];
+  const read=()=>{ try{ return JSON.parse(localStorage.getItem(KEY))||{}; }catch(e){ return {}; } };
+  const parts=p=>p.split('/').filter(Boolean);
+  const getAt=(t,p)=>parts(p).reduce((o,k)=>o==null?undefined:o[k],t);
+  const setAt=(t,p,v)=>{ const ks=parts(p); let o=t; for(let i=0;i<ks.length-1;i++){ if(typeof o[ks[i]]!=='object'||o[ks[i]]===null) o[ks[i]]={}; o=o[ks[i]]; } const last=ks[ks.length-1]; if(v==null) delete o[last]; else o[last]=clean(v); };
+  const fire=()=>{ const t=read(); L.forEach(l=>l.cb(clean(getAt(t,l.p))??null)); };
+  const write=t=>{ try{ localStorage.setItem(KEY,JSON.stringify(t)); }catch(e){} fire(); bc&&bc.postMessage(1); };
+  if(bc) bc.onmessage=fire;
+  window.addEventListener('storage',e=>{ if(e.key===KEY) fire(); });
+  backend = {
+    set:async(p,v)=>{ const t=read(); setAt(t,p,v); write(t); },
+    update:async(p,obj)=>{ const t=read(); for(const k in obj) setAt(t,p+'/'+k,obj[k]); write(t); },
+    remove:async p=>{ const t=read(); setAt(t,p,null); write(t); },
+    on:(p,cb)=>{ const l={p,cb}; L.push(l); setTimeout(()=>cb(clean(getAt(read(),p))??null),0); return ()=>{ const i=L.indexOf(l); if(i>=0) L.splice(i,1); }; }
+  };
+}
+
+
+/* =========================================================
+   ⑤ 공통 화면 도구
+   ========================================================= */
+const $app = document.getElementById('app');
+const MODE = (/teacher/i.test(qs.get('mode')||'') || qs.has('teacher')) ? 'teacher' : 'student';
+const SLOT = (qs.get('s')||'').replace(/[^0-9a-z]/gi,'').slice(0,6);
+const cleanCode = s => String(s||'').replace(/\*/g,'').toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,8);
+let SRC = cleanCode(qs.get('room'));
+const WR = () => `rooms/W${SRC}`;
+const esc = s => String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let toastTimer=null;
+function toast(msg){ document.querySelectorAll('.toast').forEach(x=>x.remove()); const t=document.createElement('div'); t.className='toast'; t.textContent=msg; document.body.appendChild(t); clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.remove(),2600); }
+function flagHTML(f,size=''){ f=Object.assign({c1:'#e63946',c2:'#1d3557',sym:'⭐'},f||{}); return `<span class="flag ${size}"><i style="background:${esc(f.c1)}"></i><i style="background:${esc(f.c2)}"></i><span>${esc(f.sym)}</span></span>`; }
+function barsHTML(v,mini=false,base=null){ return `<div class="bars ${mini?'mini':''}">${IND.map(i=>{ const d = base ? v[i.k]-base[i.k] : 0; return `<div class="bar"><span>${mini?i.e:i.e+' '+i.n}</span><span class="tr"><i style="width:${v[i.k]}%;background:${i.c}"></i></span><span class="n">${v[i.k]}${base&&d?`<small class="${d>0?'up':'dn'}">${d>0?'+':''}${d}</small>`:''}</span></div>`; }).join('')}</div>`; }
+function typeBadge(tk){ const t=TYPES[tk]||TYPES.balance; return `<span class="typebadge" style="background:${t.c}">${t.e} ${esc(t.n)}</span>`; }
+const modeBadge = () => DBMODE==='live' ? `<span class="pill live">● 실시간 연동</span>` : `<span class="pill demo">● 체험 모드</span>`;
+const ls = {get(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }, set(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }, del(k){ try{ localStorage.removeItem(k); }catch(e){} }};
+let pending=false, keepScroll=false;
+function isTyping(){ const a=document.activeElement; return a && $app.contains(a) && (a.tagName==='TEXTAREA' || (a.tagName==='INPUT' && a.type!=='button')); }
+function softRender(){ if(isTyping()){ pending=true; return; } keepScroll=true; render(); }
+document.addEventListener('focusout',()=>{ setTimeout(()=>{ if(pending && !isTyping()){ pending=false; keepScroll=true; render(); } },150); });
+function render(){ pending=false; const y=window.scrollY; (MODE==='teacher'?renderTeacher:renderStudent)(); if(keepScroll) window.scrollTo(0,y); keepScroll=false; }
+const phaseOf = () => (DATA.meta && DATA.meta.phase) || 'lobby';
+const pName = k => (PHASES.find(p=>p.k===k)||{}).n || k;
+function shareBars(cnt, tot){
+  return OPT.map(o=>{ const n=cnt[o.k]||0, p=tot?Math.round(n/tot*100):0; return `<div class="obar"><div class="lbl"><span>${o.e} ${o.n}</span><span>${n}명 · ${p}%</span></div><div class="tr"><i style="width:${p}%;background:${o.c}"></i></div></div>`; }).join('');
+}
+function gauge(W){
+  const col = W>=70?'var(--bad)':W>=50?'var(--warn)':'var(--ok)';
+  const lab = W>=70?'매우 위험':W>=50?'위험':W>=30?'회복 중':'안정';
+  return `<div class="gauge"><div class="gl"><b>🌍 세계 위기 지수</b><span style="color:${col};font-weight:800">${W} · ${lab}</span></div><div class="gt"><i style="width:${W}%;background:${col}"></i><em style="left:50%"></em></div><div class="muted" style="font-size:13px">처음 50 · 50보다 낮아져야 세계가 회복된 것입니다</div></div>`;
+}
+function hashStr(s){ let h=2166136261; for(const ch of String(s)){ h^=ch.charCodeAt(0); h=Math.imul(h,16777619); } return h>>>0; }
+function shuffled(arr, seed){ const a=[...arr]; let x=hashStr(seed)||1; for(let i=a.length-1;i>0;i--){ x=(Math.imul(x,1103515245)+12345)>>>0; const j=x%(i+1); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+
+/* =========================================================
+   ⑥ 학생 화면
+   ========================================================= */
+let DATA = {}, SRCN = {}, gotData=false, gotSrc=false;
+let ME = null, view = 'auto', claiming = false, tmpRoom='', pickSid=null;
+const DEV = (()=>{ const k='worldgame_dev'+(SLOT?'_'+SLOT:''); let d=ls.get(k); if(!d){ d='d'+Date.now().toString(36)+Math.random().toString(36).slice(2,7); ls.set(k,d); } return d; })();
+const meKey = () => 'worldgame_me_'+SRC+(SLOT?'_'+SLOT:'');
+function nationLocal(){ try{ const x=JSON.parse(ls.get('natgame_s_'+SRC+(SLOT?'_'+SLOT:''))); if(x && x.d){ x.d=norm(x.d); return x; } }catch(e){} return null; }
+let dr = {}; // 학생 입력 초안
+function draft(k){ if(!dr[k]) dr[k]={}; return dr[k]; }
+
+function playerFrom(sid, num, sname, d, extra={}){
+  d = norm(d); const v = computeInd(d);
+  return Object.assign({sid, num:String(num||''), sname:String(sname||''), name:d.name||'이름 없는 나라', flag:d.flag, terr:d.terr||'', gov:d.gov||'', base:v, btype:nationType(v,d), quick:false}, extra);
+}
+async function claim(info){
+  if(claiming) return; claiming=true;
+  try{
+    const ex = DATA.players && DATA.players[info.sid];
+    if(ex && ex.dev && ex.dev!==DEV){ ME=info.sid; view='locked'; claiming=false; render(); return; }
+    const rec = ex ? {dev:DEV} : Object.assign({}, info, {dev:DEV, joinedAt:Date.now()});
+    if(ex) await backend.update(`${WR()}/players/${info.sid}`, rec); else await backend.set(`${WR()}/players/${info.sid}`, rec);
+    ME = info.sid; ls.set(meKey(), ME); view='auto';
+  }catch(e){ toast('⚠️ 저장 실패: '+e.message); }
+  claiming=false; render();
+}
+function ensureMe(){
+  if(!gotData || !gotSrc || claiming) return;
+  const P = DATA.players || {};
+  if(ME && P[ME]){ if(P[ME].dev && P[ME].dev!==DEV){ view='locked'; } else if(view==='locked'){ view='auto'; } if(!P[ME].dev){ backend.update(`${WR()}/players/${ME}`,{dev:DEV}); } return; }
+  if(view==='find' || view==='quick') return;
+  // 1) 이 태블릿이 기억하는 세계 게임 신분
+  const saved = ls.get(meKey());
+  if(saved && P[saved]){ ME=saved; return; }
+  // 2) 이 태블릿에 저장된 국가 만들기 나라
+  const S = nationLocal();
+  if(S && S.id && S.d && S.d.name){
+    const fb = SRCN[S.id];
+    const d = fb && fb.d ? fb.d : S.d;
+    claim(playerFrom(S.id, S.num, S.sname, d));
+    return;
+  }
+  // 3) 저장된 정보가 사라졌지만 예전 기록이 있으면(재접속)
+  if(saved && SRCN[saved]){ const n=SRCN[saved]; claim(playerFrom(saved, n.num, n.sname, n.d)); return; }
+  ME=null; view='find';
+}
+function sHeader(){
+  const p = ME && DATA.players && DATA.players[ME];
+  return `<div class="top"><h1>🌍 세계로 나간 우리 나라</h1>${p?`${flagHTML(p.flag,'sm')} <b>${esc(p.name)}</b><span class="pill">${esc(p.num)}번 ${esc(p.sname)}</span>`:''}${SRC?`<span class="pill">방 ${esc(SRC)}</span>`:''}${modeBadge()}</div>`;
+}
+function vRoom(){
+  return `${sHeader()}<div class="card center"><h2>방 코드를 입력하세요</h2><p class="muted">국가 만들기 때 쓴 방 코드(예: K7PM)</p>
+  <input class="field" style="max-width:260px;text-align:center;font-size:24px;font-weight:800;letter-spacing:4px;text-transform:uppercase" data-bind="room" value="${esc(tmpRoom)}" maxlength="8">
+  <div style="margin-top:14px"><button class="btn acc" data-act="enterRoom">입장하기</button></div></div>`;
+}
+function vFind(){
+  const P = DATA.players || {};
+  const list = Object.values(SRCN||{}).filter(n=>n && n.d && n.id).sort((a,b)=>(+a.num||999)-(+b.num||999));
+  return `${sHeader()}<div class="card"><h2>🔎 내 나라를 찾지 못했어요</h2>
+  <p>지난 시간과 다른 브라우저로 들어왔거나, 기록이 지워졌을 수 있어요. 아래 목록에서 <b>내가 만든 나라</b>를 눌러 주세요.</p>
+  <div class="tip">⚠️ 친구 나라를 누르면 친구가 들어오지 못해요. 꼭 내 나라만 고르세요.</div>
+  ${list.length?`<div class="ngrid">${list.map(n=>{ const p=P[n.id]; const taken = p && p.dev && p.dev!==DEV; const sel=pickSid===n.id; return `<button class="ncard ${sel?'selc':''}" data-act="pick" data-v="${esc(n.id)}" ${taken?'disabled':''}><div class="nh">${flagHTML(norm(n.d).flag,'sm')}<div><div class="nn">${esc(norm(n.d).name||'이름 없는 나라')}</div><div class="ns">${esc(n.num)}번 ${esc(n.sname)}${taken?' · 🔒 이미 입장':''}</div></div></div></button>`; }).join('')}</div>
+  <div class="row" style="margin-top:14px"><span class="sp"></span><button class="btn acc" data-act="pickGo" ${pickSid?'':'disabled'}>이 나라로 입장</button></div>`:`<p class="muted">이 방에 선포된 나라가 아직 없어요.</p>`}
+  </div>
+  <div class="card"><h3 style="margin-top:0">🆕 지난 시간에 나라를 만들지 못했나요?</h3><p class="muted">국가 유형만 골라 30초 만에 새 나라를 만들 수 있어요.</p><button class="btn ghost" data-act="toQuick">새로 빠르게 만들기</button></div>`;
+}
+function vQuick(){
+  const q = draft('quick');
+  return `${sHeader()}<div class="card"><h2>🆕 새로 빠르게 만들기</h2>
+  <div class="grid g2"><div><label class="lb">번호</label><input class="field" inputmode="numeric" data-bind="quick.num" value="${esc(q.num||'')}" placeholder="예: 7"></div><div><label class="lb">이름</label><input class="field" data-bind="quick.sname" value="${esc(q.sname||'')}" placeholder="예: 김도덕"></div></div>
+  <label class="lb">나라 이름</label><input class="field" data-bind="quick.name" value="${esc(q.name||'')}" placeholder="예: 평화 공화국">
+  <label class="lb">어떤 나라인가요?</label>
+  <div class="grid g3">${QUICK.map(x=>{ const t=TYPES[x.k]; return `<button class="opt ${q.type===x.k?'sel':''}" data-act="qtype" data-v="${x.k}"><div class="e">${t.e}</div><div class="t">${esc(t.n)}</div><div class="d">${esc(t.d.split('.')[0])}.</div></button>`; }).join('')}</div>
+  <div class="row" style="margin-top:16px"><button class="btn ghost" data-act="toFind">← 목록으로</button><span class="sp"></span><button class="btn acc" data-act="quickGo">이 나라로 입장</button></div></div>`;
+}
+function vLocked(){
+  return `${sHeader()}<div class="card center"><h2>🔒 이 나라는 다른 태블릿에서 열려 있어요</h2><p>선생님께 <b>잠금 해제</b>를 부탁하세요. 해제되면 자동으로 들어가집니다.</p><button class="btn ghost" data-act="toFind">다른 나라 고르기</button></div>`;
+}
+function myRoundBlock(W, r){
+  const c=r.c, me=W.P[ME]; const mine = DATA.ans && DATA.ans[c.id] && DATA.ans[c.id][ME];
+  const scene = `<div class="scene"><span class="tag">${c.e} 위기 ${c.id.slice(1)} · ${esc(c.t)}</span><h2 style="margin:4px 0 8px">${esc(c.sub)}</h2><p style="margin:0">${esc(c.s)}</p><div class="src">${esc(c.src)}</div></div>`;
+  if(!mine){
+    const d = draft(c.id);
+    return `<div class="card">${scene}<p><b>${esc(me.name)}</b>의 지도자로서 어떻게 대응할까요?</p>
+    <div class="grid">${OPT.map(o=>`<button class="opt bigopt ${d.opt===o.k?'sel':''}" data-act="ropt" data-r="${c.id}" data-v="${o.k}"><span class="lt">${o.k}</span><span><b>${o.e} ${o.n}</b><br>${esc(c.opts[o.k])}<br><small class="muted">우리 나라: ${Object.entries(OWN[o.k]).map(([k,v])=>`${IND.find(i=>i.k===k).n} ${v>0?'+':''}${v}`).join(', ')}</small></span></button>`).join('')}</div>
+    <label class="lb">이렇게 선택한 이유</label><textarea class="field" data-bind="${c.id}.reason" placeholder="누구를 위해, 무엇을 지키려고 이렇게 선택했나요?">${esc(d.reason||'')}</textarea>
+    <div class="row" style="margin-top:12px"><span class="sp"></span><button class="btn acc" data-act="rsubmit" data-r="${c.id}">결정 제출</button></div></div>`;
+  }
+  const o = OPT.find(x=>x.k===mine.opt);
+  if(!r.revealed){
+    return `<div class="card">${scene}<div class="banner ok">✅ 제출 완료 — 나의 선택: ${o.e} ${o.n}</div><p class="center muted blink">다른 나라 지도자들을 기다리는 중… 선생님이 결과를 공개하면 바뀝니다.</p></div>`;
+  }
+  const b=r.before[ME], a=r.after[ME]; const dm = meanV(a)-meanV(b);
+  const isV = r.vict.has(ME);
+  const rsn = REASONS.find(x=>x.after===c.id);
+  return `<div class="card">${scene}<h3>📊 결과 — 반 전체 지도자 ${r.tot}명의 선택</h3>${shareBars(r.cnt,r.tot)}
+  ${gauge(r.W)}<p class="muted">이번 위기로 세계 위기 지수 ${r.dW>0?'+':''}${r.dW}</p>
+  ${isV?`<div class="banner bad">⚠️ 우리 나라는 이번 위기의 <b>피해국</b>이었습니다. 세계의 선택이 우리에게 1.5배로 돌아왔습니다.</div>`:''}
+  <h3>우리 나라 변화 (나의 선택: ${o.e} ${o.n})</h3>${barsHTML(a,false,b)}
+  <div class="banner ${dm>=0?'ok':'bad'}">평균 지표 ${meanV(b)} → ${meanV(a)} (${dm>=0?'+':''}${dm})</div>
+  <details><summary>📘 교과서로 정리: ${esc(c.t)}</summary><ul>${c.facts.map(f=>`<li>${esc(f)}</li>`).join('')}</ul></details>
+  ${rsn?`<div class="reason"><b>💡 전 지구적 문제에 관심을 가져야 하는 이유</b><div class="rn">${esc(rsn.n)}</div><div>${esc(rsn.d)}</div></div>`:''}</div>`;
+}
+function vLobby(W){
+  const p=W.P[ME];
+  return `<div class="card"><div class="hero">${flagHTML(p.flag,'lg')}<div><div class="muted">${esc(p.num)}번 ${esc(p.sname)}의 나라</div><h2 style="margin:2px 0 8px">${esc(p.name)}</h2>${typeBadge(p.btype)}${p.quick?' <span class="pill">빠르게 만든 나라</span>':''}</div></div>
+  <h3>📊 우리 나라 지표</h3>${barsHTML(p.base)}</div>
+  <div class="card center"><h2>🌍 ${esc(p.name)}, 세계로 나갈 준비가 되었습니다</h2><p>오늘은 우리 나라만이 아니라 <b>세계</b>에 닥친 위기에 대응합니다.<br>여러분의 선택은 <b>반 친구들의 나라 모두</b>에게 번집니다.</p>
+  <div class="tip" style="text-align:left">🏆 <b>승리 조건</b>: 마지막에 반 전체 나라의 평균 지표가 처음보다 높고, 세계 위기 지수가 50보다 낮아지는 것. 혼자 잘된 나라는 이긴 것이 아닙니다.</div>
+  <p class="muted blink">선생님 신호를 기다려 주세요…</p></div>`;
+}
+function vPuzzle(){
+  const mine = DATA.puzzle && DATA.puzzle[ME];
+  const rev = DATA.meta && DATA.meta.rev && DATA.meta.rev.puzzle;
+  const rsn = REASONS.find(x=>x.after==='puzzle');
+  const head = `<div class="scene"><span class="tag">🧩 연결 퍼즐</span><h2 style="margin:4px 0 8px">이 사건들은 어떻게 이어져 있을까?</h2><p style="margin:0">카드를 <b>원인 → 결과</b> 순서대로 하나씩 누르세요. (교과서 163쪽)</p></div>`;
+  if(mine){
+    return `<div class="card">${head}<div class="banner ${mine.ok===5?'ok':'warn'}">5장 중 ${mine.ok}장을 맞는 자리에 놓았어요.</div>
+    <h3>정답 순서</h3><ol class="chain">${PUZ.map(p=>`<li>${esc(p.t)}</li>`).join('')}</ol>
+    <h3>내가 상상한 미래</h3><p class="quote">${esc(mine.future)}</p>
+    ${rev?`<div class="reason"><b>💡 전 지구적 문제에 관심을 가져야 하는 이유</b><div class="rn">${esc(rsn.n)}</div><div>${esc(rsn.d)}</div></div>`:`<p class="muted center">선생님이 정리할 때까지 기다려 주세요.</p>`}</div>`;
+  }
+  const d = draft('puzzle'); d.order = d.order || [];
+  const cards = shuffled(PUZ, ME+'puz');
+  return `<div class="card">${head}
+  <div class="grid">${cards.map(p=>{ const i=d.order.indexOf(p.k); return `<button class="opt pz ${i>=0?'sel':''}" data-act="pz" data-v="${p.k}"><span class="pzn">${i>=0?i+1:''}</span>${esc(p.t)}</button>`; }).join('')}</div>
+  <div class="row" style="margin-top:8px"><button class="btn ghost sm" data-act="pzReset">처음부터 다시</button></div>
+  <label class="lb">이런 일이 계속된다면, 30년 뒤 미래 세대에게 어떤 일이 일어날까요?</label><textarea class="field" data-bind="puzzle.future">${esc(d.future||'')}</textarea>
+  <div class="row" style="margin-top:12px"><span class="sp"></span><button class="btn acc" data-act="pzSubmit">제출</button></div></div>`;
+}
+function oxForm(key, items, title){
+  const mine = DATA[key] && DATA[key][ME];
+  if(mine){
+    return `<div class="card"><h2>${title}</h2>${items.map((x,i)=>`<div class="oxr"><span>${i+1}. ${esc(x.q)}</span><b class="${mine.a[i]===x.a?'okc':'noc'}">${mine.a[i]} ${mine.a[i]===x.a?'⭕ 정답':'❌ 정답은 '+x.a}</b></div>`).join('')}
+    <h3>느낀 점 / 실천할 점</h3><p class="quote">${esc(mine.feel)}</p><div class="banner ok">✅ 제출 완료. 수고했어요!</div></div>`;
+  }
+  const d = draft(key); d.a = d.a || [];
+  return `<div class="card"><h2>${title}</h2>${items.map((x,i)=>`<div class="oxr"><span>${i+1}. ${esc(x.q)}</span><span class="seg">${['O','X'].map(v=>`<button class="${d.a[i]===v?'on':''}" data-act="ox" data-k="${key}" data-i="${i}" data-v="${v}">${v}</button>`).join('')}</span></div>`).join('')}
+  <label class="lb">느낀 점 / 실천할 점</label><textarea class="field" data-bind="${key}.feel" placeholder="오늘 수업에서 느낀 점이나 앞으로 실천할 점을 한두 문장으로 써 보세요.">${esc(d.feel||'')}</textarea>
+  <div class="row" style="margin-top:12px"><span class="sp"></span><button class="btn acc" data-act="oxSubmit" data-k="${key}">제출</button></div></div>`;
+}
+function vWrap1(W){
+  const p=W.P[ME], now=W.cur[ME];
+  const summ = W.done ? `<div class="card"><h2>${W.win?'🎉 세계를 구했습니다!':'😢 세계는 아직 회복되지 못했습니다'}</h2>${gauge(W.W)}
+    <p>반 전체 평균 지표 <b>${W.avgBase} → ${W.avgNow}</b></p><h3>${esc(p.name)}의 최종 변화</h3>${barsHTML(now,false,p.base)}</div>` : '';
+  return summ + oxForm('ox1', OX1, '✅ 오늘 배운 내용 확인하기');
+}
+function vCitizen(W){
+  const as = DATA.meta && DATA.meta.assign && DATA.meta.assign[ME];
+  if(!as || !W.P[as.t]) return `<div class="card center"><h2>🙋 시민 배정을 기다리는 중</h2><p class="muted">선생님이 시민 배정을 하면 새 신분이 나타납니다.</p></div>`;
+  const t=W.P[as.t], per=CITIZENS[as.p%CITIZENS.length], now=W.cur[as.t];
+  const voice = DATA.voice && DATA.voice[ME];
+  const lead = W.rounds.filter(r=>r.revealed).map(r=>`<li>${r.c.e} <b>${esc(r.c.t)}</b> — 지도자 ${r.tot}명 중 <b>${r.cnt.A}명</b>이 자국 우선을 선택</li>`).join('');
+  return `<div class="card"><div class="scene"><span class="tag">🙋 신분 변경</span><h2 style="margin:4px 0 8px">당신은 이제 지도자가 아닙니다</h2><p style="margin:0">세 번의 위기를 지나 지금 반에서 <b>형편이 가장 어려운 나라</b> 중 하나, <b>${esc(t.name)}</b>${as.t===ME?'(바로 우리 나라)':''}의 시민입니다.</p></div>
+  <div class="hero">${flagHTML(t.flag,'lg')}<div><h2 style="margin:0 0 6px">${esc(t.name)}</h2><div class="persona"><span class="av">${per.e}</span><div><div class="who">나의 새 신분</div><b>${esc(per.n)}</b><div class="q">“${esc(per.q)}”</div></div></div></div></div>
+  <h3>이 나라에 일어난 일 (처음 → 지금)</h3>${barsHTML(now,false,t.base)}
+  <div class="banner ${meanV(now)<meanV(t.base)?'bad':'warn'}">평균 지표 ${meanV(t.base)} → ${meanV(now)} · 반 평균 ${W.avgNow}보다 ${W.avgNow-meanV(now)>0?(W.avgNow-meanV(now))+'점 낮습니다':'낮지 않습니다'}</div>
+  ${lead?`<h3>그때 반의 지도자들은</h3><ul>${lead}</ul>`:''}</div>
+  ${voice?`<div class="card"><h3 style="margin-top:0">📣 내가 보낸 시민의 목소리</h3><p class="quote">${esc(voice.text)}</p><div class="banner ok">✅ 제출 완료</div></div>`:
+  `<div class="card"><h3 style="margin-top:0">📣 지도자들에게 보내는 시민의 목소리</h3><p class="muted">이 시민이 되어, 지난 시간 결정을 내린 지도자들에게 하고 싶은 말을 써 보세요.</p><textarea class="field" data-bind="voice.text" placeholder="지도자 여러분, ...">${esc(draft('voice').text||'')}</textarea><div class="row" style="margin-top:12px"><span class="sp"></span><button class="btn acc" data-act="voiceSubmit">보내기</button></div></div>`}`;
+}
+function vCheck(){
+  const mine = DATA.check && DATA.check[ME];
+  if(mine){
+    const n = aCount(ME); const s=mine.s||[];
+    const gap = (+s[2]>=4 && n.A>=2);
+    return `<div class="card"><h2>🪞 거울 보기</h2><p>체크리스트 합계 <b>${s.reduce((a,b)=>a+(+b||0),0)}점</b> / 30점</p>
+    <div class="mirror"><div><div class="muted">내가 답한 것</div><b>'지구적 문제에 책임감을 느낀다'</b><div class="big">${s[2]}점</div></div><div><div class="muted">지난 시간 내가 한 것</div><b>위기 3개 중</b><div class="big">자국 우선 ${n.A}번</div><small>협력 ${n.B} · 지원 ${n.C}</small></div></div>
+    <div class="banner ${gap?'warn':'ok'}">${gap?'생각과 행동 사이에 거리가 있어요. 그 이유는 무엇이었을까요? 비난할 일이 아니라, 세계 시민이 늘 마주하는 고민입니다.':'생각과 행동이 비교적 가까웠어요. 그 마음을 실천 계획으로 이어 가 봅시다.'}</div>
+    <h3>내가 정리한 세계 시민의 뜻</h3><p class="quote">세계 시민이란 ${esc(mine.def)}</p></div>`;
+  }
+  const d=draft('check'); d.s=d.s||[];
+  return `<div class="card"><h2>🪞 나는 세계 시민일까?</h2><p class="muted">교과서 165쪽 체크리스트 · 1점(전혀 아니다) ~ 5점(매우 그렇다)</p>
+  ${CHECK.map((q,i)=>`<div class="ckr"><div>${i+1}. ${esc(q)}</div><div class="seg">${[1,2,3,4,5].map(v=>`<button class="${+d.s[i]===v?'on':''}" data-act="ck" data-i="${i}" data-v="${v}">${v}</button>`).join('')}</div></div>`).join('')}
+  <label class="lb">세계 시민이란 ...</label><textarea class="field" data-bind="check.def" placeholder="지구 공동체의 일원으로서 ... 하는 사람이다.">${esc(d.def||'')}</textarea>
+  <div class="row" style="margin-top:12px"><span class="sp"></span><button class="btn acc" data-act="ckSubmit">제출하고 거울 보기</button></div></div>`;
+}
+function vPlan(){
+  const mine = DATA.plan && DATA.plan[ME];
+  if(mine){ const dd=DAYS.find(x=>x.k===mine.day)||{}; return `<div class="card"><h2>📅 나의 세계 시민 실천 카드</h2><div class="pcard"><div class="pd">${esc(dd.d)} · ${esc(dd.n)}</div><div class="ps">${esc(mine.scope)}</div><p><b>할 일</b> ${esc(mine.act)}</p><p><b>이유</b> ${esc(mine.why)}</p></div><div class="banner ok">✅ 제출 완료 — 선생님 화면의 실천 카드 벽에 붙었어요.</div></div>`; }
+  const d=draft('plan');
+  return `<div class="card"><h2>📅 세계 시민 실천 계획</h2><p class="muted">국제 기념일 하나를 고르고, 그날 내가 실천할 일을 계획해 보세요. (교과서 167쪽)</p>
+  <div class="grid g3">${DAYS.map(x=>`<button class="opt ${d.day===x.k?'sel':''}" data-act="day" data-v="${x.k}"><div class="t">${esc(x.n)}</div><div class="d">${esc(x.d)}</div><div class="d" style="font-size:12.5px">${esc(x.b)}</div></button>`).join('')}</div>
+  <label class="lb">어디에서 실천할까요?</label><div class="chips">${SCOPES.map(s=>`<button class="chip ${d.scope===s?'sel':''}" data-act="scope" data-v="${esc(s)}">${esc(s)}</button>`).join('')}</div>
+  <label class="lb">그날 내가 할 일 (구체적으로)</label><textarea class="field" data-bind="plan.act" placeholder="예: 급식 잔반 0 챌린지를 반 친구들과 일주일 동안 한다.">${esc(d.act||'')}</textarea>
+  <label class="lb">이 일이 세계 문제 해결과 어떻게 이어지나요?</label><textarea class="field" data-bind="plan.why">${esc(d.why||'')}</textarea>
+  <div class="row" style="margin-top:12px"><span class="sp"></span><button class="btn acc" data-act="planSubmit">제출</button></div></div>`;
+}
+function renderStudent(){
+  if(!SRC){ $app.innerHTML = vRoom(); return; }
+  if(!gotData || !gotSrc){ $app.innerHTML = `${sHeader()}<div class="card center"><p class="blink">불러오는 중…</p></div>`; return; }
+  ensureMe();
+  if(view==='quick'){ $app.innerHTML = vQuick(); return; }
+  if(view==='find'){ $app.innerHTML = vFind(); return; }
+  if(view==='locked'){ $app.innerHTML = vLocked(); return; }
+  if(!ME || !DATA.players || !DATA.players[ME]){ $app.innerHTML = `${sHeader()}<div class="card center"><p class="blink">내 나라를 불러오는 중…</p></div>`; return; }
+  const W = calc(); const ph = phaseOf();
+  let body='';
+  if(ph==='lobby') body=vLobby(W);
+  else if(/^r[123]$/.test(ph)) body=myRoundBlock(W, W.rounds[+ph[1]-1]);
+  else if(ph==='puzzle') body=vPuzzle();
+  else if(ph==='wrap1') body=vWrap1(W);
+  else if(ph==='citizen') body=vCitizen(W);
+  else if(ph==='check') body=vCheck();
+  else if(ph==='plan') body=vPlan();
+  else if(ph==='wrap2') body=oxForm('ox2', OX2, '✅ 세계 시민 — 배운 내용 확인하기');
+  $app.innerHTML = sHeader() + `<div class="stepname">${(PHASES.find(p=>p.k===ph)||{}).e||''} ${esc(pName(ph))}</div>` + body;
+}
+const need = (cond,msg)=>{ if(!cond){ toast(msg); return false; } return true; };
+const sActs = {
+  enterRoom(){ const c=cleanCode(tmpRoom); if(!need(c.length>=3,'방 코드를 확인해 주세요.')) return; const u=new URL(location.href); u.searchParams.set('room',c); location.href=u.toString(); },
+  pick(ds){ pickSid=ds.v; keepScroll=true; render(); },
+  pickGo(){ const n=SRCN[pickSid]; if(!n) return; if(!confirm(`${n.num}번 ${n.sname}의 '${norm(n.d).name}'이(가) 내 나라가 맞나요?`)) return; view='auto'; claim(playerFrom(n.id, n.num, n.sname, n.d)); },
+  toQuick(){ view='quick'; render(); }, toFind(){ view='find'; ME=null; render(); },
+  qtype(ds){ draft('quick').type=ds.v; keepScroll=true; render(); },
+  quickGo(){ const q=draft('quick'); if(!need(q.num&&q.sname,'번호와 이름을 써 주세요.')||!need(q.name,'나라 이름을 써 주세요.')||!need(q.type,'나라 유형을 골라 주세요.')) return;
+    const x=QUICK.find(z=>z.k===q.type); const sid='q'+Date.now().toString(36)+Math.random().toString(36).slice(2,5);
+    view='auto'; claim({sid,num:String(q.num),sname:String(q.sname),name:String(q.name).slice(0,30),flag:{c1:'#3a86ff',c2:'#f4a261',sym:TYPES[q.type].e},terr:'',gov:'',base:Object.assign({},x.v),btype:q.type,quick:true}); },
+  ropt(ds){ draft(ds.r).opt=ds.v; keepScroll=true; render(); },
+  async rsubmit(ds){ const d=draft(ds.r); if(!need(d.opt,'대응 방법을 골라 주세요.')||!need((d.reason||'').trim().length>=5,'이유를 5글자 이상 써 주세요.')) return;
+    await backend.set(`${WR()}/ans/${ds.r}/${ME}`,{opt:d.opt,reason:d.reason.trim(),at:Date.now()}); toast('✅ 결정을 제출했어요'); render(); },
+  pz(ds){ const d=draft('puzzle'); d.order=d.order||[]; const k=+ds.v; const i=d.order.indexOf(k); if(i>=0) d.order.splice(i,1); else d.order.push(k); keepScroll=true; render(); },
+  pzReset(){ draft('puzzle').order=[]; keepScroll=true; render(); },
+  async pzSubmit(){ const d=draft('puzzle'); if(!need((d.order||[]).length===5,'카드 5장을 모두 순서대로 눌러 주세요.')||!need((d.future||'').trim().length>=5,'미래 모습을 5글자 이상 써 주세요.')) return;
+    const ok=d.order.filter((k,i)=>k===i+1).length; await backend.set(`${WR()}/puzzle/${ME}`,{order:d.order,ok,future:d.future.trim(),at:Date.now()}); render(); },
+  ox(ds){ const d=draft(ds.k); d.a=d.a||[]; d.a[+ds.i]=ds.v; keepScroll=true; render(); },
+  async oxSubmit(ds){ const d=draft(ds.k); const items=ds.k==='ox1'?OX1:OX2; if(!need((d.a||[]).filter(Boolean).length===items.length,'OX를 모두 골라 주세요.')||!need((d.feel||'').trim().length>=5,'느낀 점을 5글자 이상 써 주세요.')) return;
+    await backend.set(`${WR()}/${ds.k}/${ME}`,{a:d.a,feel:d.feel.trim(),at:Date.now()}); render(); },
+  async voiceSubmit(){ const d=draft('voice'); if(!need((d.text||'').trim().length>=10,'10글자 이상 써 주세요.')) return; const as=DATA.meta.assign[ME];
+    await backend.set(`${WR()}/voice/${ME}`,{text:d.text.trim(),t:as.t,p:as.p,at:Date.now()}); render(); },
+  ck(ds){ const d=draft('check'); d.s=d.s||[]; d.s[+ds.i]=+ds.v; keepScroll=true; render(); },
+  async ckSubmit(){ const d=draft('check'); if(!need((d.s||[]).filter(Boolean).length===6,'6문항 모두 점수를 골라 주세요.')||!need((d.def||'').trim().length>=5,'세계 시민의 뜻을 써 주세요.')) return;
+    await backend.set(`${WR()}/check/${ME}`,{s:d.s,def:d.def.trim(),at:Date.now()}); render(); },
+  day(ds){ draft('plan').day=ds.v; keepScroll=true; render(); },
+  scope(ds){ draft('plan').scope=ds.v; keepScroll=true; render(); },
+  async planSubmit(){ const d=draft('plan'); if(!need(d.day,'기념일을 골라 주세요.')||!need(d.scope,'실천 장소를 골라 주세요.')||!need((d.act||'').trim().length>=5,'할 일을 써 주세요.')||!need((d.why||'').trim().length>=5,'이유를 써 주세요.')) return;
+    await backend.set(`${WR()}/plan/${ME}`,{day:d.day,scope:d.scope,act:d.act.trim(),why:d.why.trim(),at:Date.now()}); render(); }
+};
+let lastPhase=null;
+function startStudent(){
+  if(!SRC){ render(); return; }
+  ME = ls.get(meKey()) || null;
+  backend.on(WR(), v=>{ DATA=v||{}; gotData=true; const ph=phaseOf(); if(lastPhase && ph!==lastPhase){ window.scrollTo(0,0); toast('📢 '+pName(ph)+' 단계로 넘어갑니다'); keepScroll=false; render(); } else softRender(); lastPhase=ph; });
+  backend.on(`rooms/${SRC}/nations`, v=>{ SRCN=v||{}; gotSrc=true; softRender(); });
+}
+
+/* =========================================================
+   ⑦ 교사 화면
+   ========================================================= */
+let tab='run', showNames=false, ttmp='', openP=null;
+const pinOK = () => { try{ return sessionStorage.getItem('worldgame_pin')===TEACHER_PIN; }catch(e){ return false; } };
+function who(id){ const p=(DATA.players||{})[id]; if(!p) return '?'; return showNames ? `${esc(p.num)}번 ${esc(p.sname)}` : esc(p.name); }
+function studentURL(){ const u=new URL('./', location.href); u.search=''; u.searchParams.set('room',SRC); return u.toString(); }
+function tHeader(){
+  return `<div class="top"><h1>🌍 세계로 나간 우리 나라 · 교사</h1>${SRC?`<span class="pill">방 ${esc(SRC)}</span>`:''}${modeBadge()}<button class="btn sm ghost" data-act="names">${showNames?'🙈 이름 숨기기':'👀 이름 보기'}</button></div>`;
+}
+function phaseBar(){
+  const ph=phaseOf(); const rev=(DATA.meta&&DATA.meta.rev)||{};
+  const g = ch => PHASES.filter(p=>p.ch===ch).map(p=>`<button class="${ph===p.k?'on':''}" data-act="phase" data-v="${p.k}">${p.e} ${esc(p.n)}${rev[p.k]?' ✓':''}</button>`).join('');
+  const canRev = /^r[123]$/.test(ph) || ph==='puzzle';
+  return `<div class="card pbar"><div class="pg"><b>2차시</b><div class="tabs">${g(2)}</div></div><div class="pg"><b>3차시</b><div class="tabs">${g(3)}</div></div>
+  <div class="row">${canRev?(rev[ph]?`<span class="banner ok" style="margin:0">✅ 결과 공개됨</span><button class="btn sm ghost" data-act="unreveal">공개 취소</button>`:`<button class="btn acc" data-act="reveal">📢 ${ph==='puzzle'?'이유 ③ 공개':'결과 공개'}</button>`):''}
+  ${ph==='citizen'?`<button class="btn ghost sm" data-act="assign">🔀 시민 다시 배정</button>`:''}<span class="sp"></span>
+  <button class="btn ghost sm" data-act="qr">📱 학생 접속 QR</button></div></div>`;
+}
+function answeredSet(ph){
+  const k = /^r[123]$/.test(ph) ? DATA.ans&&DATA.ans[ph] : ph==='puzzle'?DATA.puzzle : ph==='wrap1'?DATA.ox1 : ph==='citizen'?DATA.voice : ph==='check'?DATA.check : ph==='plan'?DATA.plan : ph==='wrap2'?DATA.ox2 : null;
+  return k||{};
+}
+function tRun(W){
+  const ph=phaseOf(); const A=answeredSet(ph); const ids=[...W.ids].sort((a,b)=>(+W.P[a].num||999)-(+W.P[b].num||999));
+  const nSrc=Object.keys(SRCN||{}).length; const done=ids.filter(id=>A[id]).length;
+  return `<div class="stat"><div class="box"><b>${nSrc}</b><small>1차시에 선포된 나라</small></div><div class="box"><b>${ids.length}</b><small>입장한 나라</small></div>${ph!=='lobby'?`<div class="box"><b>${done}/${ids.length}</b><small>${esc(pName(ph))} 제출</small></div>`:''}<div class="box"><b>${W.W}</b><small>세계 위기 지수</small></div></div>
+  ${nSrc===0?`<div class="banner warn">⚠️ 방 ${esc(SRC)}에서 1차시 나라를 찾지 못했습니다. 방 코드가 맞는지 확인하세요. 학생 태블릿에 남은 나라로도 입장할 수 있습니다.</div>`:''}
+  <div class="card"><h3 style="margin-top:0">학생 현황 <small class="muted">(🔒 = 태블릿에 잠김 · 눌러서 잠금 해제)</small></h3>
+  <div class="plist">${ids.map(id=>{ const p=W.P[id]; return `<div class="pi ${A[id]?'done':''}">${flagHTML(p.flag,'sm')}<span><b>${esc(p.num)}번 ${esc(p.sname)}</b><small>${esc(p.name)}${p.quick?' · 빠른 생성':''}</small></span><span class="sp"></span>${A[id]?'✅':ph==='lobby'?'':'⏳'}${p.dev?`<button class="btn sm ghost" data-act="unlock" data-v="${esc(id)}" title="잠금 해제">🔒</button>`:''}<button class="btn sm ghost" data-act="delP" data-v="${esc(id)}" title="삭제">✕</button></div>`; }).join('')||'<p class="muted">아직 입장한 학생이 없습니다. 📱 학생 접속 QR을 띄워 주세요.</p>'}</div></div>`;
+}
+function tBoard(W){
+  const revd = W.rounds.filter(r=>r.revealed);
+  const rev=(DATA.meta&&DATA.meta.rev)||{};
+  const reasons = REASONS.filter(x=>rev[x.after]);
+  return `<div class="grid g2"><div class="card">${gauge(W.W)}
+    <h3>반 전체 평균 지표</h3><div class="stat"><div class="box"><b>${W.avgBase}</b><small>처음</small></div><div class="box"><b>${W.avgNow}</b><small>지금</small></div></div>
+    ${W.done?`<div class="banner ${W.win?'ok':'bad'}" style="font-size:20px">${W.win?'🎉 승리! 모두가 함께 나아졌습니다':'😢 실패 — 세계는 아직 회복되지 못했습니다'}</div>`:`<p class="muted">위기 3개를 모두 공개하면 승패가 나옵니다.</p>`}
+    ${reasons.length?`<h3>💡 관심을 가져야 하는 이유</h3>${reasons.map(x=>`<div class="reason"><div class="rn">${esc(x.n)}</div><div>${esc(x.d)}</div></div>`).join('')}`:''}</div>
+  <div class="card"><h3 style="margin-top:0">위기별 지도자들의 선택</h3>${W.rounds.map(r=>`<div class="rbox"><b>${r.c.e} ${esc(r.c.t)}</b> ${r.revealed?`<small class="muted">위기 지수 ${r.dW>0?'+':''}${r.dW} · 피해국 ${r.vict.size}곳</small>`:`<small class="muted">${r.tot}명 제출 · 미공개</small>`}${r.revealed?shareBars(r.cnt,r.tot):''}</div>`).join('')}</div></div>
+  ${revd.length?`<div class="card"><h3 style="margin-top:0">나라별 변화 (처음 → 지금)</h3><div class="ngrid">${W.ids.map(id=>{ const p=W.P[id], d=meanV(W.cur[id])-meanV(p.base); return `<div class="ncard"><div class="nh">${flagHTML(p.flag,'sm')}<div><div class="nn">${esc(p.name)}</div><div class="ns">${showNames?`${esc(p.num)}번 ${esc(p.sname)} · `:''}평균 ${meanV(p.base)} → ${meanV(W.cur[id])} <b class="${d>=0?'up':'dn'}">${d>=0?'+':''}${d}</b></div></div></div>${barsHTML(W.cur[id],true)}</div>`; }).join('')}</div></div>`:''}`;
+}
+function tReasons(W){
+  return W.rounds.map(r=>{ const A=(DATA.ans&&DATA.ans[r.c.id])||{};
+    return `<div class="card"><h3 style="margin-top:0">${r.c.e} ${esc(r.c.t)} <small class="muted">${r.tot}명</small></h3><div class="grid g3">${OPT.map(o=>{ const L=Object.entries(A).filter(([id,a])=>a.opt===o.k && W.P[id]); return `<div><div class="obh" style="border-color:${o.c}">${o.e} ${o.n} (${L.length})</div><ul class="rlist">${L.map(([id,a])=>`<li><b>${who(id)}</b>${esc(a.reason)}</li>`).join('')}</ul></div>`; }).join('')}</div></div>`; }).join('')
+  + `<div class="card"><h3 style="margin-top:0">🧩 연결 퍼즐 — 내가 상상한 미래</h3><ul class="rlist">${Object.entries(DATA.puzzle||{}).filter(([id])=>W.P[id]).map(([id,x])=>`<li><b>${who(id)} (${x.ok}/5)</b>${esc(x.future)}</li>`).join('')||'<li>아직 없음</li>'}</ul></div>`;
+}
+function tVoice(W){
+  const V=Object.entries(DATA.voice||{}).filter(([id])=>W.P[id]);
+  const as=(DATA.meta&&DATA.meta.assign)||{};
+  return `<div class="card"><h3 style="margin-top:0">📣 시민의 목소리 (${V.length})</h3>${Object.keys(as).length?'':`<div class="banner warn">아직 시민 배정이 없습니다. 위 단계에서 🙋 시민 반전을 누르면 자동 배정됩니다.</div>`}
+  <div class="vwall">${V.map(([id,v])=>{ const t=W.P[v.t]; const per=CITIZENS[(v.p||0)%CITIZENS.length]; return `<div class="vcard"><div class="vh">${per.e} ${esc(per.n)}${t?` · ${esc(t.name)}`:''}</div><p>${esc(v.text)}</p>${showNames?`<small class="muted">${who(id)}</small>`:''}</div>`; }).join('')||'<p class="muted">아직 없음</p>'}</div></div>`;
+}
+function tCheck(W){
+  const C=Object.entries(DATA.check||{}).filter(([id])=>W.P[id]);
+  const avgs=CHECK.map((q,i)=>C.length?(C.reduce((s,[,x])=>s+(+x.s[i]||0),0)/C.length).toFixed(1):'-');
+  const gaps=C.filter(([id,x])=>+x.s[2]>=4 && aCount(id).A>=2);
+  return `<div class="card"><h3 style="margin-top:0">🪞 세계 시민 체크리스트 반 평균 (${C.length}명)</h3>${CHECK.map((q,i)=>`<div class="obar"><div class="lbl"><span>${i+1}. ${esc(q)}</span><span>${avgs[i]}점</span></div><div class="tr"><i style="width:${avgs[i]==='-'?0:avgs[i]*20}%;background:var(--accent2)"></i></div></div>`).join('')}
+  <div class="banner warn" style="margin-top:14px">🤔 '책임감을 느낀다'에 4~5점을 주었지만 지난 시간 자국 우선을 2번 이상 고른 학생: <b>${gaps.length}명</b> / ${C.length}명<br><small>이름 없이 이 숫자만 보여 주며 묻습니다: “생각과 행동 사이의 거리는 왜 생길까?”</small></div></div>
+  <div class="card"><h3 style="margin-top:0">세계 시민이란 …</h3><ul class="rlist">${C.map(([id,x])=>`<li>${showNames?`<b>${who(id)}</b>`:''}세계 시민이란 ${esc(x.def)}</li>`).join('')||'<li>아직 없음</li>'}</ul></div>`;
+}
+function tPlan(W){
+  const P=Object.entries(DATA.plan||{}).filter(([id])=>W.P[id]);
+  const by={}; P.forEach(([id,x])=>{ (by[x.day]=by[x.day]||[]).push([id,x]); });
+  return `<div class="card"><h3 style="margin-top:0">📅 실천 카드 벽 (${P.length})</h3>${DAYS.filter(d=>by[d.k]).map(d=>`<h3>${esc(d.n)} <small class="muted">${esc(d.d)} · ${by[d.k].length}명</small></h3><div class="vwall">${by[d.k].map(([id,x])=>`<div class="pcard"><div class="ps">${esc(x.scope)}</div><p><b>할 일</b> ${esc(x.act)}</p><p><b>이유</b> ${esc(x.why)}</p>${showNames?`<small class="muted">${who(id)}</small>`:''}</div>`).join('')}</div>`).join('')||'<p class="muted">아직 없음</p>'}
+  <p class="muted">정리 발문: 이 실천들은 개인·국가·국제 차원 중 어디에 해당할까요? 개인의 실천만으로 충분할까요?</p></div>`;
+}
+function tFeel(W){
+  const sec=(key,items,title)=>{ const L=Object.entries(DATA[key]||{}).filter(([id])=>W.P[id]); const ok=items.map((x,i)=>L.filter(([,v])=>v.a&&v.a[i]===x.a).length);
+    return `<div class="card"><h3 style="margin-top:0">${title} (${L.length}명)</h3>${items.map((x,i)=>`<div class="oxr"><span>${i+1}. ${esc(x.q)} <b>(${x.a})</b></span><b>정답 ${ok[i]}/${L.length}</b></div>`).join('')}<ul class="rlist">${L.map(([id,v])=>`<li>${showNames?`<b>${who(id)}</b>`:''}${esc(v.feel)}</li>`).join('')}</ul></div>`; };
+  return sec('ox1',OX1,'✅ 2차시 OX · 느낀 점') + sec('ox2',OX2,'✅ 3차시 OX · 느낀 점');
+}
+function tRecord(){
+  return `<div class="card"><h3 style="margin-top:0">📥 기록 내려받기</h3><p>학생별 선택·이유·목소리·체크리스트·실천 계획이 한 파일로 나옵니다. 엑셀에서 바로 열립니다.</p><button class="btn teal" data-act="csv">엑셀(CSV) 내려받기</button></div>
+  <div class="card"><h3 style="margin-top:0">🗑️ 초기화</h3><p class="muted">이 세계 게임 방(W${esc(SRC)})의 기록만 지웁니다. 1차시 국가 만들기 기록은 그대로 남습니다. 3차시까지 끝내고 엑셀을 받은 뒤에 누르세요.</p><button class="btn ghost" data-act="reset">이 방 초기화</button></div>
+  <div class="card"><h3 style="margin-top:0">다른 반으로</h3><p class="muted">다른 반의 1차시 방 코드를 넣으면 그 반 세계 게임 방이 열립니다.</p><button class="btn ghost" data-act="changeRoom">방 코드 바꾸기</button></div>`;
+}
+function renderTeacher(){
+  if(!pinOK()){ $app.innerHTML = `${tHeader()}<div class="card center"><h2>🔐 교사 비밀번호</h2><input class="field" type="password" style="max-width:220px;text-align:center;font-size:22px" data-bind="pin" inputmode="numeric"><div style="margin-top:12px"><button class="btn acc" data-act="pin">확인</button></div></div>`; return; }
+  if(!SRC){ $app.innerHTML = `${tHeader()}<div class="card center"><h2>1차시 국가 만들기 방 코드를 입력하세요</h2><p class="muted">국가 만들기 교사 화면 주소 끝의 room= 뒤 4글자 (예: K7PM)</p><input class="field" style="max-width:260px;text-align:center;font-size:24px;font-weight:800;letter-spacing:4px;text-transform:uppercase" data-bind="troom" value="${esc(ttmp)}" maxlength="8"><div style="margin-top:14px"><button class="btn acc" data-act="setRoom">이 반 불러오기</button></div></div>`; return; }
+  if(!gotData || !gotSrc){ $app.innerHTML = `${tHeader()}<div class="card center"><p class="blink">불러오는 중…</p></div>`; return; }
+  const W=calc();
+  const TABS=[['run','🎮 진행'],['board','🌍 세계 상태판'],['reasons','💬 선택 이유'],['voice','📣 시민의 목소리'],['check','🪞 자기 점검'],['plan','📅 실천 카드'],['feel','✅ OX·느낀 점'],['rec','📥 기록']];
+  const body = tab==='run'?tRun(W):tab==='board'?tBoard(W):tab==='reasons'?tReasons(W):tab==='voice'?tVoice(W):tab==='check'?tCheck(W):tab==='plan'?tPlan(W):tab==='feel'?tFeel(W):tRecord();
+  $app.innerHTML = `<div class="twrap">${tHeader()}${phaseBar()}<div class="tabs">${TABS.map(([k,n])=>`<button class="${tab===k?'on':''}" data-act="tab" data-v="${k}">${n}</button>`).join('')}</div>${body}</div>`;
+}
+function csvDownload(){
+  const W=calc(); const q=s=>'"'+String(s??'').replace(/"/g,'""').replace(/\r?\n/g,' ')+'"';
+  const head=['번호','이름','나라','처음 유형','처음 평균','지금 평균','빠른 생성'];
+  CRISES.forEach(c=>head.push(`${c.t} 선택`,`${c.t} 이유`));
+  head.push('퍼즐 정답(5)','상상한 미래','2차시 OX 정답','2차시 느낀 점','시민 배정 나라','시민 신분','시민의 목소리',...CHECK.map((x,i)=>`체크${i+1}`),'세계 시민의 뜻','기념일','실천 장소','할 일','실천 이유','3차시 OX 정답','3차시 느낀 점');
+  const rows=[head.map(q).join(',')];
+  const as=(DATA.meta&&DATA.meta.assign)||{};
+  [...W.ids].sort((a,b)=>(+W.P[a].num||999)-(+W.P[b].num||999)).forEach(id=>{
+    const p=W.P[id]; const r=[p.num,p.sname,p.name,(TYPES[p.btype]||{}).n,meanV(p.base),meanV(W.cur[id]),p.quick?'예':''];
+    CRISES.forEach(c=>{ const a=DATA.ans&&DATA.ans[c.id]&&DATA.ans[c.id][id]; r.push(a?(OPT.find(o=>o.k===a.opt)||{}).n:'', a?a.reason:''); });
+    const pz=(DATA.puzzle||{})[id]; r.push(pz?pz.ok:'', pz?pz.future:'');
+    const o1=(DATA.ox1||{})[id]; r.push(o1?OX1.filter((x,i)=>o1.a[i]===x.a).length+'/'+OX1.length:'', o1?o1.feel:'');
+    const a=as[id]; r.push(a&&W.P[a.t]?W.P[a.t].name:'', a?CITIZENS[a.p%CITIZENS.length].n:'');
+    const v=(DATA.voice||{})[id]; r.push(v?v.text:'');
+    const ck=(DATA.check||{})[id]; CHECK.forEach((x,i)=>r.push(ck?ck.s[i]:'')); r.push(ck?ck.def:'');
+    const pl=(DATA.plan||{})[id]; r.push(pl?(DAYS.find(d=>d.k===pl.day)||{}).n:'', pl?pl.scope:'', pl?pl.act:'', pl?pl.why:'');
+    const o2=(DATA.ox2||{})[id]; r.push(o2?OX2.filter((x,i)=>o2.a[i]===x.a).length+'/'+OX2.length:'', o2?o2.feel:'');
+    rows.push(r.map(q).join(','));
+  });
+  const blob=new Blob(['﻿'+rows.join('\r\n')],{type:'text/csv;charset=utf-8'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`세계시민_${SRC}_${new Date().toISOString().slice(0,10)}.csv`; document.body.appendChild(a); a.click(); setTimeout(()=>a.remove(),500);
+}
+const tActs = {
+  pin(){ if(String(dr.pin||'')===TEACHER_PIN){ try{ sessionStorage.setItem('worldgame_pin',TEACHER_PIN); }catch(e){} startTeacherData(); render(); } else toast('비밀번호가 틀렸습니다.'); },
+  setRoom(){ const c=cleanCode(ttmp); if(c.length<3){ toast('방 코드를 확인해 주세요.'); return; } const u=new URL(location.href); u.searchParams.set('room',c); history.replaceState(null,'',u.toString()); SRC=c; startTeacherData(); render(); },
+  changeRoom(){ const u=new URL(location.href); u.searchParams.delete('room'); location.href=u.toString(); },
+  tab(ds){ tab=ds.v; render(); },
+  names(){ showNames=!showNames; keepScroll=true; render(); },
+  phase(ds){ const v=ds.v; const upd={phase:v};
+    if(v==='citizen' && !(DATA.meta&&DATA.meta.assign)){ upd.assign=buildAssign(); }
+    backend.update(`${WR()}/meta`,upd); if(v==='citizen') tab='voice'; else if(v==='check') tab='check'; else if(v==='plan') tab='plan'; else if(v==='wrap1'||v==='wrap2') tab='feel'; else tab='run'; },
+  reveal(){ const ph=phaseOf(); backend.update(`${WR()}/meta/rev`,{[ph]:true}); if(ph!=='puzzle') tab='board'; },
+  unreveal(){ const ph=phaseOf(); if(!confirm('결과 공개를 취소할까요?')) return; backend.remove(`${WR()}/meta/rev/${ph}`); },
+  assign(){ if(!confirm('시민 배정을 다시 할까요? 이미 쓴 목소리는 남지만, 새 신분이 바뀔 수 있습니다.')) return; backend.update(`${WR()}/meta`,{assign:buildAssign()}); },
+  unlock(ds){ if(!confirm('이 나라의 태블릿 잠금을 풀까요? 다른 태블릿에서 이 나라로 들어갈 수 있게 됩니다.')) return; backend.update(`${WR()}/players/${ds.v}`,{dev:null}); },
+  delP(ds){ if(!confirm('이 학생을 세계 게임에서 뺄까요? (1차시 나라 기록은 그대로)')) return; backend.remove(`${WR()}/players/${ds.v}`); },
+  qr(){ const url=studentURL(); const ov=document.createElement('div'); ov.className='overlay'; ov.innerHTML=`<div class="modal center"><h2>📱 학생 접속</h2><div class="qrbox" id="qrbox"></div><p class="url">${esc(url)}</p><p class="muted">지난 시간과 <b>같은 태블릿, 같은 브라우저</b>로 들어오면 자기 나라가 자동으로 뜹니다.</p><button class="btn" data-x="close">닫기</button></div>`; document.body.appendChild(ov); ov.addEventListener('click',e=>{ if(e.target===ov||e.target.dataset.x==='close') ov.remove(); }); try{ new QRCode(ov.querySelector('#qrbox'),{text:url,width:300,height:300}); }catch(e){ ov.querySelector('#qrbox').textContent='QR을 만들 수 없습니다. 위 주소를 알려 주세요.'; } },
+  csv(){ csvDownload(); },
+  reset(){ if(!confirm(`세계 게임 방 W${SRC}의 모든 기록을 지울까요? 되돌릴 수 없습니다.\n(1차시 국가 만들기 기록은 지워지지 않습니다)`)) return; backend.set(WR(),{meta:{phase:'lobby',src:SRC,resetAt:Date.now()}}); toast('초기화했습니다.'); }
+};
+let tStarted=false;
+function startTeacherData(){
+  if(tStarted || !SRC || !pinOK()) return; tStarted=true;
+  backend.on(WR(), v=>{ DATA=v||{}; gotData=true; if(!DATA.meta){ backend.update(`${WR()}/meta`,{phase:'lobby',src:SRC,createdAt:Date.now()}); } softRender(); });
+  backend.on(`rooms/${SRC}/nations`, v=>{ SRCN=v||{}; gotSrc=true; softRender(); });
+}
+
+/* =========================================================
+   ⑧ 이벤트 연결 · 시작
+   ========================================================= */
+$app.addEventListener('click', e=>{
+  const b=e.target.closest('[data-act]'); if(!b || b.disabled) return;
+  const acts = MODE==='teacher' ? tActs : sActs; const f=acts[b.dataset.act]; if(f) f(b.dataset);
+});
+$app.addEventListener('input', e=>{
+  const el=e.target; const k=el.dataset.bind; if(!k) return;
+  if(k==='room') tmpRoom=el.value; else if(k==='troom') ttmp=el.value; else if(k==='pin') dr.pin=el.value;
+  else { const [a,b]=k.split('.'); draft(a)[b]=el.value; }
+});
+$app.addEventListener('keydown', e=>{ if(e.key==='Enter' && e.target.tagName==='INPUT'){ const k=e.target.dataset.bind; if(k==='room') sActs.enterRoom(); else if(k==='troom') tActs.setRoom(); else if(k==='pin') tActs.pin(); } });
+(async function(){
+  await initBackend();
+  if(MODE==='teacher'){ startTeacherData(); render(); }
+  else { startStudent(); render(); }
+})();
+
+</script>
+</body>
+</html>
