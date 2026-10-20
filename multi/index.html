@@ -1,0 +1,1022 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>꿈결마을 이웃 프로젝트</title>
+<link rel="icon" href="ggumsong.png">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+:root{
+  --bg:#f3f5fa; --paper:#ffffff; --ink:#1b2a4a; --sub:#5b6478; --line:#dfe4ef;
+  --navy:#1f3a6e; --gink:#f2c014; --gink2:#fff6cf; --teal:#2a9d8f; --soft:#eef2fb;
+  --ok:#2a9d8f; --warn:#e9a23b; --bad:#d64545; --star:#e8a200; --moon:#5b6fd6;
+  --shadow:0 2px 0 rgba(27,42,74,.06),0 8px 24px rgba(27,42,74,.06);
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:Pretendard,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;font-size:17px;line-height:1.55;-webkit-tap-highlight-color:transparent}
+button{font-family:inherit;font-size:inherit;color:inherit;cursor:pointer}
+input,textarea{font-family:inherit;font-size:16px;color:var(--ink)}
+.wrap{max-width:860px;margin:0 auto;padding:16px 16px 120px}
+.twrap{max-width:1320px;margin:0 auto;padding:16px 16px 80px}
+.top{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.top h1{font-size:20px;margin:0;flex:1;min-width:180px;display:flex;align-items:center;gap:8px}
+.top h1 img{width:36px;height:36px;object-fit:contain}
+.pill{display:inline-flex;align-items:center;gap:6px;background:var(--paper);border:1.5px solid var(--line);border-radius:999px;padding:4px 12px;font-size:14px;font-weight:600}
+.pill.live{border-color:var(--ok);color:var(--ok)}
+.pill.demo{border-color:var(--warn);color:#a86b00}
+.card{background:var(--paper);border:1.5px solid var(--line);border-radius:18px;padding:20px;box-shadow:var(--shadow);margin-bottom:16px}
+h2{font-size:23px;margin:0 0 12px}
+h3{font-size:18px;margin:18px 0 8px}
+.muted{color:var(--sub);font-size:15px}
+.tip{background:#eef6f5;border-left:5px solid var(--teal);border-radius:10px;padding:12px 14px;margin:0 0 16px;font-size:15.5px}
+.tip b{color:#1d6f65}
+.concept{background:var(--gink2);border:2px solid var(--gink);border-radius:14px;padding:14px 16px;margin:0 0 14px}
+.concept .h{font-weight:800;color:#7a5a00;margin-bottom:4px}
+.grid{display:grid;gap:10px}
+.g2{grid-template-columns:repeat(2,1fr)}
+.g3{grid-template-columns:repeat(3,1fr)}
+@media (max-width:640px){.g3{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:440px){.g2,.g3{grid-template-columns:1fr}}
+.opt{background:#fff;border:2px solid var(--line);border-radius:14px;padding:12px;text-align:left;transition:.12s;display:block;width:100%}
+.opt:hover{border-color:#b9c3da}
+.opt.sel{border-color:var(--navy);background:#eef2fb;box-shadow:0 0 0 3px rgba(31,58,110,.15)}
+.opt.right{border-color:var(--ok);background:#e6f6f3}
+.opt.wrong{border-color:var(--bad);background:#fdeeee}
+.opt .e{font-size:28px;line-height:1}
+.opt .t{font-weight:700;margin-top:4px}
+.opt .d{font-size:14px;color:var(--sub);margin-top:2px}
+.bigopt{display:flex;gap:12px;align-items:flex-start;padding:14px 16px;font-size:16.5px}
+.bigopt .lt{flex:none;width:30px;height:30px;border-radius:50%;background:var(--ink);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800}
+.bigopt.sel .lt{background:var(--navy)}
+.btn{border:none;border-radius:14px;padding:13px 20px;font-weight:700;background:var(--ink);color:#fff;font-size:17px}
+.btn:active{transform:translateY(1px)}
+.btn.acc{background:var(--navy)}
+.btn.gink{background:var(--gink);color:#3b2d00}
+.btn.teal{background:var(--teal)}
+.btn.bad{background:var(--bad)}
+.btn.ghost{background:transparent;border:2px solid var(--line);color:var(--ink)}
+.btn.sm{padding:8px 12px;font-size:14.5px;border-radius:10px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.navbar{position:fixed;left:0;right:0;bottom:0;background:rgba(255,255,255,.96);border-top:1.5px solid var(--line);padding:12px 16px calc(12px + env(safe-area-inset-bottom));display:flex;justify-content:center;z-index:20}
+.navbar .in{max-width:860px;width:100%;display:flex;gap:10px;justify-content:space-between}
+.field{width:100%;border:2px solid var(--line);border-radius:12px;padding:12px 14px;background:#fff}
+.field:focus{outline:none;border-color:var(--teal)}
+textarea.field{min-height:84px;resize:vertical}
+label.lb{display:block;font-weight:700;margin:14px 0 6px}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.sp{flex:1}
+.center{text-align:center}
+/* 꿈송이 말풍선 */
+.say{display:flex;gap:10px;align-items:flex-end;margin:0 0 14px}
+.say img{width:68px;height:68px;object-fit:contain;flex:none;animation:bob 2.6s ease-in-out infinite}
+.say .bub{background:#fff;border:2px solid var(--navy);border-radius:18px 18px 18px 4px;padding:10px 14px;font-size:15.5px;box-shadow:var(--shadow)}
+.say .bub b{color:var(--navy)}
+.say.big img{width:110px;height:110px}
+.say.big .bub{font-size:17px}
+@keyframes bob{50%{transform:translateY(-5px) rotate(-2deg)}}
+.hero{display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px}
+.hero img{width:170px;height:170px;object-fit:contain;animation:bob 2.6s ease-in-out infinite}
+/* 팀 */
+.team{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:5px 14px;font-weight:800;color:#fff}
+.team.star{background:var(--star)} .team.moon{background:var(--moon)}
+.teambig{border-radius:22px;padding:26px;color:#fff;text-align:center}
+.teambig.star{background:linear-gradient(135deg,#f2b705,#e08e00)} .teambig.moon{background:linear-gradient(135deg,#6b7fe6,#3c4fb8)}
+.teambig .e{font-size:64px;line-height:1}
+.teambig .n{font-size:30px;font-weight:900;margin-top:6px}
+canvas.dots{width:100%;max-width:520px;aspect-ratio:3/2;background:#fff;border:2px solid var(--line);border-radius:16px;display:block;margin:0 auto}
+.coin{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:center;text-align:center}
+.coin .who{background:#fff;border:2px solid var(--line);border-radius:16px;padding:12px}
+.coin .who b{display:block;font-size:30px}
+input[type=range]{width:100%;accent-color:var(--navy);height:34px}
+/* 진행 */
+.steps{display:flex;gap:4px;margin:0 0 14px}
+.steps div{flex:1;height:8px;border-radius:4px;background:var(--line)}
+.steps div.on{background:var(--navy)}
+.steps div.done{background:var(--teal)}
+.stepname{font-size:14px;color:var(--sub);margin-bottom:6px;font-weight:600}
+/* 주민 */
+.resgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+@media (max-width:640px){.resgrid{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:480px){.resgrid{grid-template-columns:1fr}.ind .box small{font-size:11.5px}}
+.res{background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:10px 12px;position:relative}
+.res .hd{display:flex;align-items:center;gap:8px}
+.res .av{font-size:28px;line-height:1}
+.res .nm{font-weight:800;line-height:1.2}
+.res .rl{font-size:12.5px;color:var(--sub)}
+.res .fc{margin-left:auto;font-size:30px;line-height:1}
+.res .q{font-size:13.5px;color:#34405c;margin-top:6px}
+.res .tr{height:8px;background:#e9edf5;border-radius:4px;overflow:hidden;margin-top:6px}
+.res .tr i{display:block;height:100%;transition:width .4s}
+.res.low{border-color:var(--bad);background:#fff7f7}
+.ind{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px}
+.ind .box{background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:10px 12px}
+.ind .box b{font-size:26px;display:block;line-height:1.15}
+.ind .box small{color:var(--sub);font-weight:700;font-size:13px}
+@media (max-width:440px){.ind .box b{font-size:21px}}
+.pol{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px dashed var(--line)}
+.pol .nm{flex:1}
+.pol .nm b{display:block}
+.pol .nm small{color:var(--sub);font-size:13px}
+.stp{display:flex;align-items:center;gap:6px}
+.stp button{width:40px;height:40px;border-radius:12px;border:2px solid var(--line);background:#fff;font-size:22px;font-weight:800}
+.stp .v{min-width:26px;text-align:center;font-weight:800;font-size:20px}
+.remain{position:sticky;top:0;background:var(--ink);color:#fff;border-radius:12px;padding:10px 14px;font-weight:700;display:flex;justify-content:space-between;z-index:5;margin-bottom:8px}
+.remain.zero{background:var(--teal)}
+.scene{background:var(--soft);border-radius:14px;padding:16px;margin-bottom:14px}
+.scene .tag{display:inline-block;background:var(--navy);color:#fff;border-radius:8px;padding:3px 10px;font-size:13.5px;font-weight:700;margin-bottom:8px}
+.scene .src{font-size:13px;color:var(--sub);margin-top:6px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:2px solid var(--line);background:#fff;border-radius:999px;padding:8px 14px;font-weight:700;font-size:15px}
+.chip.sel{border-color:var(--navy);background:#eef2fb;color:var(--navy)}
+.symbtn{width:46px;height:46px;border-radius:12px;background:#fff;border:2px solid var(--line);font-size:24px}
+.symbtn.sel{border-color:var(--navy);background:#eef2fb}
+.flag{display:inline-flex;width:84px;height:56px;border-radius:8px;overflow:hidden;position:relative;border:2px solid rgba(0,0,0,.15);flex:none}
+.flag i{flex:1}
+.flag span{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:26px;text-shadow:0 1px 2px rgba(0,0,0,.25)}
+.flag.sm{width:42px;height:28px;border-radius:5px}
+.flag.sm span{font-size:14px}
+.cityic{display:inline-flex;width:42px;height:42px;border-radius:12px;background:var(--soft);align-items:center;justify-content:center;font-size:24px;flex:none}
+.badge{display:inline-flex;align-items:center;gap:4px;border-radius:999px;padding:3px 10px;font-weight:800;font-size:13.5px;background:var(--soft);color:var(--navy)}
+.badge.melt{background:#fde9dc;color:#a4461a} .badge.salad{background:#e2f5e7;color:#1f7a3c} .badge.apart{background:#eceef3;color:#4b5568}
+.ncard{background:#fff;border:1.5px solid var(--line);border-radius:16px;padding:14px;text-align:left;width:100%}
+.ncard.sel{border-color:var(--navy);box-shadow:0 0 0 3px rgba(31,58,110,.15)}
+.ncard .nh{display:flex;gap:10px;align-items:center;margin-bottom:8px}
+.ncard .nn{font-weight:800;font-size:17px;line-height:1.25}
+.ncard .ns{font-size:13px;color:var(--sub)}
+.slog{font-weight:900;font-size:18px;color:var(--navy);margin:6px 0;line-height:1.35}
+.small{font-size:13.5px}
+.rlist{margin:6px 0 4px;padding:0;list-style:none;font-size:14.5px}
+.rlist li{padding:6px 10px;background:#fff;border:1px solid var(--line);border-radius:8px;margin-bottom:5px}
+.toast{position:fixed;left:50%;top:18px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:12px 20px;border-radius:12px;z-index:100;font-weight:700;max-width:90vw;box-shadow:var(--shadow);animation:pop .2s}
+@keyframes pop{from{transform:translate(-50%,-10px);opacity:0}to{transform:translate(-50%,0);opacity:1}}
+.overlay{position:fixed;inset:0;background:rgba(20,26,40,.6);z-index:50;display:flex;align-items:flex-start;justify-content:center;overflow:auto;padding:24px 16px}
+.modal{background:var(--paper);border-radius:20px;max-width:760px;width:100%;padding:22px;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.modal.alert{border:4px solid var(--bad)}
+.banner{border-radius:14px;padding:14px 16px;margin-bottom:14px;font-weight:700}
+.banner.ok{background:#e3f4f1;color:#16655b}
+.banner.warn{background:#fff3dc;color:#8a5a00}
+.banner.bad{background:#fde8e8;color:#9b2c2c}
+.blink{animation:blink 1.2s infinite}
+@keyframes blink{50%{opacity:.5}}
+.delta{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.delta span{border-radius:8px;padding:3px 9px;font-weight:700;font-size:14px;background:#eef2fb}
+.delta .up{background:#e3f4f1;color:#16655b} .delta .dn{background:#fde8e8;color:#9b2c2c}
+.oxbtn{width:64px;height:52px;border-radius:12px;border:2px solid var(--line);background:#fff;font-size:24px;font-weight:900}
+.oxbtn.sel{border-color:var(--navy);background:#eef2fb}
+.oxbtn.right{border-color:var(--ok);background:#e3f4f1}
+.oxbtn.wrong{border-color:var(--bad);background:#fde8e8}
+.caselist{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+@media (max-width:640px){.caselist{grid-template-columns:repeat(2,1fr)}}
+.casebtn{background:#fff;border:2px solid var(--line);border-radius:16px;padding:14px;text-align:left}
+.casebtn .e{font-size:30px}
+.casebtn.done{border-color:var(--ok);background:#effaf7}
+/* 교사 */
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0 14px}
+.tabs button{border:2px solid var(--line);background:var(--paper);border-radius:12px;padding:9px 14px;font-weight:700;font-size:15.5px}
+.tabs button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.phasebar{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:6px}
+.phasebar .lbl{font-weight:900;color:var(--sub);width:58px;font-size:14px}
+.phasebar button{border:2px solid var(--line);background:#fff;border-radius:12px;padding:8px 12px;font-weight:700;font-size:15px}
+.phasebar button.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+.stat{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.stat .box{background:var(--paper);border:1.5px solid var(--line);border-radius:14px;padding:10px 16px;min-width:120px}
+.stat .box b{font-size:28px;display:block;line-height:1.1}
+.stat .box small{color:var(--sub);font-weight:600}
+.obar{display:grid;gap:4px;margin:8px 0}
+.obar .lbl{display:flex;justify-content:space-between;font-size:15px;font-weight:600;gap:8px}
+.obar .tr{height:24px;background:#e9edf5;border-radius:6px;overflow:hidden}
+.obar .tr i{display:block;height:100%;transition:width .5s}
+.wall{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px}
+.wcard{background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:12px;text-align:left;width:100%;font-size:15px}
+.wcard:hover{border-color:var(--navy)}
+.wcard small{display:block;color:var(--sub);font-weight:700;margin-bottom:4px}
+.ngrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+.faces{font-size:22px;letter-spacing:2px}
+.prog{display:flex;flex-wrap:wrap;gap:6px}
+.prog span{font-size:13px;border-radius:8px;padding:3px 9px;background:#fff;border:1.5px solid var(--line);font-weight:600}
+.prog span.done{background:#e3f4f1;border-color:var(--ok);color:#16655b}
+table.tb{width:100%;border-collapse:collapse;font-size:14.5px;background:#fff}
+table.tb td,table.tb th{border:1px solid var(--line);padding:7px 8px;text-align:left;vertical-align:top}
+table.tb th{background:var(--soft)}
+.qrbox{display:flex;justify-content:center;padding:16px;background:#fff;border-radius:12px}
+.url{word-break:break-all;background:#fff;border:1.5px dashed var(--line);padding:10px;border-radius:10px;font-size:15px;font-weight:600}
+.punch{font-size:28px;font-weight:900;line-height:1.35;color:var(--navy)}
+.spot{font-size:34px;font-weight:800;line-height:1.45;padding:10px}
+body.big .twrap{font-size:20px} body.big .obar .lbl{font-size:19px} body.big .wcard{font-size:18px} body.big .punch{font-size:36px}
+footer{text-align:center;color:var(--sub);font-size:12.5px;margin-top:30px;padding:0 16px 20px}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<footer id="foot">© 김정환 · M.A.D.T (Moral And Digital Teacher) · 캐릭터 ‘꿈송이’ © 김정환, 무단 사용 금지</footer>
+<script type="module">
+/* =========================================================
+   ① 설정 — 여기 두 군데만 바꾸면 됩니다
+   ========================================================= */
+// Firebase 설정 (null 이면 '체험 모드' = 같은 기기·같은 브라우저 안에서만 연동)
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyAPJAMUITr6w0H63Ze1L1eViCsuq3zXlbE",
+  authDomain: "nation-game-cf684.firebaseapp.com",
+  databaseURL: "https://nation-game-cf684-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "nation-game-cf684",
+  storageBucket: "nation-game-cf684.firebasestorage.app",
+  messagingSenderId: "947361689624",
+  appId: "1:947361689624:web:9f09cd27fbd2334ae0136d"
+};
+// 교사 화면 비밀번호
+const TEACHER_PIN = '1234';
+const CHAR = 'ggumsong.png';   // 꿈송이 그림 파일
+
+/* =========================================================
+   ② 수업 데이터 (교과서 142~152쪽)
+   ========================================================= */
+const PH = [
+  {k:'lobby',l:'27',n:'입장 대기',e:'🚪'},
+  {k:'dots',l:'27',n:'① 점 세기',e:'🔵'},
+  {k:'coins',l:'27',n:'② 코인 나누기',e:'🪙'},
+  {k:'reveal',l:'27',n:'③ 반전 공개',e:'💡'},
+  {k:'detective',l:'27',n:'④ 편견 탐정',e:'🔍'},
+  {k:'ox27',l:'27',n:'⑤ OX·성찰',e:'⭕'},
+  {k:'city',l:'28',n:'① 동네 설계',e:'🏘️'},
+  {k:'play',l:'28',n:'② 사건 대응',e:'🚨'},
+  {k:'slogan',l:'28',n:'③ 표어 만들기',e:'✍️'},
+  {k:'vote',l:'28',n:'④ 입장 바꿔 투표',e:'🗳️'},
+  {k:'wrap28',l:'28',n:'⑤ 결과·성찰',e:'🏁'}
+];
+const PHN = Object.fromEntries(PH.map(p=>[p.k,p]));
+const TIPS = {
+  lobby:'학생들이 QR 코드나 주소로 들어오게 하세요. <b>번호와 별명</b>만 입력합니다. 출신이나 경험을 묻는 칸은 없습니다.',
+  dots:'“점이 아주 잠깐 나타나요. 몇 개인지 어림해 보세요. <b>결과에 따라 팀을 나눕니다.</b>” (실제로는 무작위로 나눕니다. 반전은 ③에서 공개) · 약 3분',
+  coins:'“같은 팀 한 명, 다른 팀 한 명에게 코인 20개를 나눠 주세요. 누구인지는 서로 몰라요.” · 약 4분 · <b>결과는 아직 보여 주지 마세요.</b>',
+  reveal:'그래프를 크게 띄우고 반전을 공개하세요. “팀은 점 세기와 아무 상관 없이 <b>컴퓨터가 무작위로</b> 나눴어요.” → “의미 없는 팀인데 왜 우리 팀에 더 줬을까?” → <b>내집단 편향</b>(교과서 144쪽)',
+  detective:'꿈결마을 사건 카드 6장입니다. 답변 벽에서 좋은 답을 눌러 크게 띄워 함께 읽어 주세요. · 약 15분',
+  ox27:'OX 3문항과 성찰을 씁니다. “코인을 나눌 때 나도 내집단 편향이 있었나?” · 약 6분',
+  city:'동네 이름 정하기(국가 만들기 나라 불러오기 가능) → 동네 방향 → 정책 예산 10칸 · 약 7분',
+  play:'사건을 하나씩 발동하세요(45분 수업이면 <b>2~3개</b> 권장). 선택 통계를 보며 “왜 그렇게 골랐나요?”를 물어보세요. <b>용광로(동화)</b>를 고른 동네는 사건이 지날수록 숨은 어려움이 쌓입니다.',
+  slogan:'교과서 152쪽 표어 만들기를 태블릿으로 합니다. 표어 벽을 띄워 함께 봅니다. · 약 7분',
+  vote:'학생마다 <b>무작위 주민 카드</b>가 주어집니다. “내가 이 사람이라면 어느 동네에서 살고 싶을까?” 동네 점수는 보여 주지 않습니다. · 약 6분',
+  wrap28:'득표 결과와 <b>방향별 공존 지수</b>를 공개하고 묻습니다. “갈등이 안 보이면 공존일까?” 마지막으로 OX와 느낀 점을 씁니다.'
+};
+
+/* 27-① 점 세기 */
+const DOTS = [43, 61, 37];
+/* 27-② 코인 3라운드: 1·2는 나누기, 3은 선택 */
+const MAT = [
+  {k:'MD', us:7,  them:1,  n:'차이 최대', d:'우리 팀이 덜 받더라도 상대 팀보다 많이'},
+  {k:'FAIR',us:13, them:13, n:'똑같이',   d:'두 팀이 똑같이'},
+  {k:'MAX', us:19, them:25, n:'모두 최대', d:'두 팀 모두 가장 많이(상대가 조금 더)'}
+];
+/* 27-④ 편견 탐정 */
+const PTYPE = ['차별·배척','사회 통합 방해','새 사회 적응의 어려움'];
+const CASES = [
+  {id:'c1',e:'🍱',t:'급식실에서',s:'급식에 돼지고기를 뺀 햄버거와 채식 햄버거가 함께 나왔다. 몇몇 학생이 “왜 쟤들 때문에 메뉴를 바꿔? 특별 대우잖아!”라며 불평했다.',
+   st:['종교에 따라 먹을 수 있는 음식이 다를 수 있다.','우리가 먹는 음식이 ‘정상’이고, 다른 음식은 특별 대우다.','급식은 모든 학생이 먹을 수 있어야 한다.'],a:1,ty:0,
+   ex:'내 문화를 기준으로 다른 음식 문화를 ‘특혜’로 보는 것은 자문화 중심적 편견이에요. 이런 생각은 친구를 따돌리는 <b>배척</b>으로 이어질 수 있어요. (교과서 148쪽 햄버거 영상)'},
+  {id:'c2',e:'🗣️',t:'발표 시간',s:'전학 온 친구가 발표할 때 억양이 조금 달랐다. 몇 명이 억양을 흉내 내며 웃었고, 모둠 활동 때 아무도 그 친구와 같은 모둠을 하려 하지 않았다.',
+   st:['말투가 다르면 우리와 어울릴 수 없는 사람이다.','누구나 새 언어를 익히는 데는 시간이 걸린다.','발표는 말투보다 내용에 집중해서 들어야 한다.'],a:0,ty:0,
+   ex:'놀리고 끼워 주지 않는 것은 <b>차별·배척</b>이에요. 그 결과 친구는 새 학교에 <b>적응하기가 더 어려워져요</b>. 두 문제가 함께 생긴 경우예요.'},
+  {id:'c3',e:'🎨',t:'“어느 나라 사람이야?”',s:'한국에서 태어나고 자란 다니엘은 피부색이 다르다는 이유로 처음 만나는 사람마다 “너 한국 사람 아니지? 한국말 잘하네!”라는 말을 듣는다.',
+   st:['한국인은 정해진 피부색과 생김새를 가지고 있다.','국적과 생김새는 같은 것이 아니다.','궁금해도 상대가 불편할 수 있는 질문은 조심한다.'],a:0,ty:1,
+   ex:'같은 공동체 구성원을 자꾸 ‘바깥 사람’으로 대하면 소속감이 무너져요. 구성원이 서로를 이웃으로 여기지 못하면 <b>사회 통합</b>이 어려워져요.'},
+  {id:'c4',e:'🏭',t:'동네에 퍼진 소문',s:'“외국인 노동자 때문에 우리 일자리가 줄었다”는 소문이 돌자, 동네 가게 몇 곳이 공장에서 일하는 이주 노동자의 출입을 꺼리기 시작했다.',
+   st:['소문이 사실인지 자료로 확인해 봐야 한다.','이주 노동자는 우리 것을 빼앗으러 온 사람들이다.','일자리 문제에는 여러 원인이 함께 작용한다.'],a:1,ty:0,
+   ex:'확인되지 않은 소문으로 한 집단 전체를 탓하는 것은 편견이에요. 가게 출입을 꺼리는 것은 분명한 <b>차별</b>이에요. 이주 노동자는 노동력 부족 문제를 해소하는 데 기여하기도 해요(교과서 143쪽).'},
+  {id:'c5',e:'📄',t:'학부모 모임 안내문',s:'결혼 이민자인 린 씨는 어려운 한국어로 된 학교 안내문을 이해하지 못해 학부모 모임에 가지 못했다. 사람들은 “아이 교육에 관심이 없나 봐”라고 수군거렸다.',
+   st:['안내문을 이해하기 어려운 사람이 있을 수 있다.','모임에 오지 않은 데는 이유가 있을 수 있다.','이주민 부모는 원래 자녀 교육에 관심이 없다.'],a:2,ty:2,
+   ex:'언어 장벽 때문에 생긴 일을 ‘관심 없음’으로 오해하면, <b>새 사회에 적응하려는 사람</b>을 더 외롭게 만들어요. 통역·번역 같은 제도적 지원이 필요한 이유예요.'},
+  {id:'c6',e:'🕌',t:'작은 기도 공간',s:'동네에 다른 종교를 믿는 사람들의 작은 기도 공간이 생긴다는 소식에 “그 종교는 위험할 것 같다”며 반대 서명 운동이 시작됐다.',
+   st:['종교의 자유는 모든 사람에게 보장된다.','잘 모르는 종교는 위험할 것이다.','궁금한 점이 있으면 직접 대화해 볼 수 있다.'],a:1,ty:1,
+   ex:'잘 모르는 것을 위험하다고 단정하면 이웃 사이에 벽이 생겨 <b>사회 통합</b>이 깨져요. 먼저 <b>올바른 지식</b>을 갖추는 것이 공존의 첫걸음이에요(교과서 150쪽).'}
+];
+const OX27 = [
+  {q:'다문화 사회는 다양한 문화적 배경을 가진 사람들이 함께 살아가는 사회이다.',a:'O',ex:'다문화 사회의 뜻 그대로예요.'},
+  {q:'자기 문화만이 옳다는 확신은 다문화 사회의 통합에 이바지한다.',a:'X',ex:'자기 문화만 옳다는 생각은 편견과 차별을 낳아 통합을 방해해요.'},
+  {q:'내집단 편향이란 나와 다른 요소를 공유하는 외집단에 대해 관대한 태도를 갖는 것을 말한다.',a:'X',ex:'내집단 편향은 같은 집단은 우호적으로, 다른 집단은 싫어하거나 반감을 갖는 경향이에요. 오늘 코인 나누기에서 직접 확인했죠?'}
+];
+const OX28 = [
+  {q:'다양한 문화·종교·인종에 대한 존중은 문화적 풍요로움을 증진시킨다.',a:'O',ex:'서로 다른 문화가 만나 더 풍부한 문화가 만들어져요.'},
+  {q:'다문화 사회의 발전을 위해 자문화 중심주의적 태도가 필요하다.',a:'X',ex:'필요한 것은 문화 상대주의 관점에서 다양성을 이해하고 존중하는 태도예요.'},
+  {q:'샐러드 볼 모델은 다양한 문화적 전통을 인정하지 않는다.',a:'X',ex:'샐러드 볼은 각 재료가 제 맛을 지키며 어우러지듯, 다양한 문화적 전통을 인정해요. 오늘 게임의 🥗 방향이에요.'}
+];
+
+/* 28 동네 운영 */
+const RES = [
+  {k:'r1',n:'아미나',e:'🎓',rl:'유학생',base:40,need:'종교 때문에 먹을 수 있는 음식이 정해져 있고, 하루에 몇 번 기도할 시간이 필요해요.',
+   q:['먹을 수 있는 게 없어서 급식을 거의 굶어요…','불편한 점이 있지만 버틸 만해요.','제 문화를 존중받으니 이 동네가 제2의 고향 같아요!']},
+  {k:'r2',n:'린',e:'👩‍👧',rl:'결혼 이민자',base:40,need:'한국어가 아직 서툴러서 아이 학교 안내문을 읽기 어려워요.',
+   q:['안내문을 읽을 수 없어서 아이 학교 행사에 또 못 갔어요…','조금씩 도움을 받고 있어요.','통역 덕분에 학부모 모임에서 친구가 생겼어요!']},
+  {k:'r3',n:'라주',e:'👷',rl:'이주 노동자',base:40,need:'공장에서 야간 근무를 해요. 아파도 병원에 가기 어렵고, 임금이 늦게 나올 때가 있어요.',
+   q:['아파도 참고 일해요. 가게에서도 눈치가 보여요…','일은 힘들지만 그럭저럭 지내요.','일한 만큼 존중받으니 이 동네를 위해 더 일하고 싶어요!']},
+  {k:'r4',n:'다니엘',e:'🧑',rl:'귀화한 중학생',base:40,need:'한국에서 자랐는데, 겉모습 때문에 자꾸 “어느 나라 사람이야?”라는 질문을 받아요.',
+   q:['저는 여기 사람인데… 아무도 그렇게 봐 주지 않아요.','가끔 속상하지만 친구들이 있어요.','이제 아무도 저를 ‘외국인’이라 부르지 않아요. 그냥 우리 반 다니엘이에요!']},
+  {k:'r5',n:'프리야',e:'🪔',rl:'다른 종교를 믿는 가족',base:40,need:'우리 가족의 가장 큰 종교 명절이 한국 달력에는 없어요.',
+   q:['명절에도 숨어서 조용히 지내야 해요…','우리끼리라도 명절을 지내고 있어요.','이웃들이 우리 명절을 함께 축하해 줘요!']},
+  {k:'r6',n:'순자 할머니',e:'👵',rl:'꿈결마을 토박이',base:50,need:'50년 동안 이 동네에 살았어요. 요즘 동네가 너무 빨리 바뀌어서 낯설고 불안해요.',
+   q:['동네가 남의 동네 같아… 이웃이 누군지도 모르겠어.','낯설지만 조금씩 익숙해지는 중이야.','새 이웃들 덕분에 동네가 더 시끌벅적하고 좋아졌어!']}
+];
+const RESM = Object.fromEntries(RES.map(r=>[r.k,r]));
+const MINOR = ['r1','r2','r3','r4','r5'];
+const DIRS = [
+  {k:'melt',n:'용광로(동화)',e:'🫕',d:'새 주민이 우리 문화에 맞춰 살아야 한다. 하나의 문화로 녹아든다.',mult:0.8,base:{r1:-3,r2:-3,r3:-3,r4:-3,r5:-3,r6:6}},
+  {k:'salad',n:'샐러드 볼(다양성 존중)',e:'🥗',d:'각자의 문화를 지키면서 함께 어우러져 산다.',mult:1.2,base:{}},
+  {k:'apart',n:'각자 따로(무관심)',e:'🚪',d:'서로 간섭하지 않고 따로따로 산다.',mult:0.6,base:{r4:-5,r2:-3}}
+];
+const DIRM = Object.fromEntries(DIRS.map(d=>[d.k,d]));
+const POL = [
+  {k:'know',n:'바른 지식 교육',e:'📖',w:'공존 방법 ⑴ 올바른 지식',d:'다른 문화·종교를 바르게 배우는 강좌',per:{r6:5,r4:3,r1:1,r5:1}},
+  {k:'fest',n:'세계 문화 축제',e:'🌍',w:'공존 방법 ⑵ 문화 상대주의',d:'서로의 음식·명절·놀이를 나누는 축제',per:{r5:5,r1:3,r6:3}},
+  {k:'hosp',n:'환대 이웃 모임',e:'🤗',w:'공존 방법 ⑶ 환대하는 태도',d:'새 이웃과 짝을 맺는 멘토·환영 모임',per:{r2:4,r4:3,r6:2,r3:1}},
+  {k:'life',n:'생활 지원 센터',e:'🏥',w:'공존 방법 ⑷-① 인간다운 생활 지원',d:'통역·의료·주거 상담',per:{r2:5,r3:4}},
+  {k:'edu',n:'다문화 교육 강화',e:'🏫',w:'공존 방법 ⑷-② 다문화 교육',d:'이중 언어 교실, 다문화 감수성 수업',per:{r2:3,r4:5}},
+  {k:'right',n:'권리 보장 제도',e:'⚖️',w:'공존 방법 ⑷-③ 거주·생계·교육 권리',d:'임금·의료·교육 받을 권리 보장',per:{r3:6,r1:3}},
+  {k:'nodis',n:'차별 금지 제도',e:'🚫',w:'공존 방법 ⑷-④ 차별 없는 분위기',d:'차별 신고 센터, 차별 금지 조례',per:{r4:4,r3:3,r1:3,r5:2}}
+];
+const POLM = Object.fromEntries(POL.map(p=>[p.k,p]));
+const BUDGET = 10, PMAX = 3;
+const SYMS = ['🏡','🌳','🌻','🌈','🏮','⛲','🎡','🏔️','🌊','🍀','🌙','⭐'];
+const EVENTS = [
+  {id:'e1',e:'🍔',t:'급식 메뉴 갈등',tag:'음식 문화',src:'교과서 148쪽 햄버거 영상',pol:['know'],
+   s:'아미나와 프리야 가족이 “종교 때문에 먹을 수 없는 음식이 있어요. 급식에서 고를 수 있게 해 주세요.”라고 요청했습니다. 일부 주민은 “급식은 다 같이 똑같이 먹어야지”라며 반대합니다.',
+   opts:[
+    {t:'모두 똑같은 메뉴를 먹는다. 예외는 없다.',sh:'같은 메뉴',eff:{r1:-12,r5:-8},fb:'‘똑같이’가 언제나 ‘공정’은 아니에요. 먹을 수 없는 사람에게 똑같은 메뉴는 굶으라는 뜻이 될 수 있어요.'},
+    {t:'돼지고기 없는 메뉴·채식 메뉴를 함께 준비해 고를 수 있게 한다.',sh:'선택 메뉴',eff:{r1:12,r5:8,r6:2},fb:'교과서 148쪽 학교처럼 다양한 음식 문화를 존중했어요.'},
+    {t:'먹을 수 없는 학생은 도시락을 싸 오게 한다.',sh:'도시락 지참',eff:{r1:-4,r2:-3,r5:-2},fb:'문제는 피했지만, 그 학생들만 따로 먹게 되고 가족의 부담도 커졌어요.'}]},
+  {id:'e2',e:'📅',t:'종교 명절 휴일 논쟁',tag:'종교',src:'교과서 149쪽 인도네시아 사례',pol:['fest'],
+   s:'프리야 가족의 가장 큰 명절이 다가옵니다. “그날 학교와 직장을 쉴 수 있게 해 주세요.” 인도네시아는 여러 종교의 기념일을 모두 공휴일로 정했다고 합니다.',
+   opts:[
+    {t:'우리 달력에 없는 날이니 쉬지 않는다. 개인 사정이다.',sh:'쉬지 않음',eff:{r5:-12,r1:-4},fb:'다수의 달력만 기준이 되면 소수의 신앙은 계속 숨겨져야 해요.'},
+    {t:'종교 휴일 선택제: 자기 종교 명절에 하루씩 쉴 수 있게 한다.',sh:'휴일 선택제',eff:{r5:9,r1:6},fb:'각자의 종교를 존중하면서 모두에게 같은 기회를 줬어요.'},
+    {t:'인도네시아처럼 여러 종교 명절을 모두 마을 휴일로 정한다.',sh:'모두 휴일',eff:{r5:12,r1:8,r6:-4,r3:-3},fb:'다양성을 크게 인정했어요. 다만 쉬는 날이 늘어 가게를 하는 주민과 일당을 받는 노동자는 부담이 생겼어요.'}]},
+  {id:'e3',e:'👃',t:'“냄새가 나요” 민원',tag:'이웃 갈등',src:'교과서 146쪽 우리 사회 속 편견',pol:['hosp'],
+   s:'라주가 사는 숙소에서 고향 음식을 요리하자 “이상한 냄새가 난다”는 민원이 들어왔습니다. 순자 할머니도 “낯선 냄새라 불편하다”고 합니다.',
+   opts:[
+    {t:'숙소에 ‘냄새나는 요리 금지’ 경고문을 붙인다.',sh:'요리 금지',eff:{r3:-14,r6:4},fb:'민원은 줄었지만, 라주는 고향의 맛을 빼앗기고 ‘냄새나는 사람’이라는 낙인이 찍혔어요.'},
+    {t:'이웃 음식 나눔의 날을 열어 서로의 음식을 맛본다.',sh:'음식 나눔',eff:{r3:10,r6:8,r1:2},fb:'‘낯섦’은 ‘모름’에서 와요. 맛보고 이야기 나누자 냄새가 ‘이웃의 음식’이 되었어요.'},
+    {t:'개인 문제이니 그냥 둔다.',sh:'그냥 둠',eff:{r3:-3,r6:-6},fb:'갈등이 해결되지 않고 서로에 대한 불만만 쌓였어요.'}]},
+  {id:'e4',e:'🏭',t:'일자리 소문',tag:'경제',src:'교과서 143쪽 다문화 사회의 긍정적 측면',pol:['right','know'],
+   s:'“이주 노동자 때문에 우리 일자리가 줄었다”는 소문이 퍼지고 있습니다. 실제로 동네 공장은 일할 사람이 부족해 라주 같은 노동자를 고용했습니다.',
+   opts:[
+    {t:'이주 노동자 고용을 제한한다.',sh:'고용 제한',eff:{r3:-16,r6:4},fb:'소문만 믿고 결정했어요. 공장은 일손이 모자라고, 라주는 생계를 잃을 위기에 놓였어요.'},
+    {t:'실제 자료를 공개하고, 함께하는 일자리 박람회를 연다.',sh:'사실 확인',eff:{r3:8,r6:6,r2:2},fb:'편견을 사실로 바로잡았어요. 다문화 사회는 노동력 부족 문제 해소에 기여해요(교과서 143쪽).'},
+    {t:'소문은 소문일 뿐이니 내버려 둔다.',sh:'내버려 둠',eff:{r3:-8,r4:-4,r6:-2},fb:'바로잡지 않은 편견은 점점 커져 차별이 돼요.'}]},
+  {id:'e5',e:'📄',t:'읽을 수 없는 안내문',tag:'언어',src:'교과서 151쪽 법적·제도적 장치',pol:['life'],
+   s:'린은 아이 학교 안내문이 어려운 한국어로만 되어 있어 중요한 일정을 자꾸 놓칩니다. 학교는 “한국에 살면 한국어를 알아야 한다”는 의견과 “도와야 한다”는 의견으로 나뉘었습니다.',
+   opts:[
+    {t:'한국에 살면 한국어를 알아서 배워야 한다.',sh:'알아서',eff:{r2:-14},fb:'언어를 배우는 데는 시간이 걸려요. 그동안 린과 아이는 교육 정보에서 밀려나요.'},
+    {t:'여러 언어로 된 안내문과 통역 상담을 제공한다.',sh:'다국어 안내',eff:{r2:14},fb:'교육받을 권리를 보장하는 제도적 장치를 마련했어요(교과서 151쪽).'},
+    {t:'한국어를 잘하는 아이가 엄마에게 번역해 주게 한다.',sh:'아이가 번역',eff:{r2:-5},fb:'아이에게 어른의 짐을 지웠어요. 아이가 놓치면 린은 여전히 모르게 돼요.'}]},
+  {id:'e6',e:'🙋',t:'“너 어느 나라 사람이야?”',tag:'소속감',src:'교과서 145쪽 다문화 사회의 도덕 문제',pol:['edu','nodis'],
+   s:'다니엘은 학교에서 매일같이 “어느 나라 사람이야?”, “한국말 잘하네?”라는 말을 듣습니다. 다니엘은 한국에서 태어났습니다. 최근 다니엘은 학교에 가기 싫다고 합니다.',
+   opts:[
+    {t:'악의 없는 호기심이니 그냥 넘어간다.',sh:'넘어감',eff:{r4:-12},fb:'말하는 사람은 호기심이어도, 매일 듣는 사람에게는 ‘너는 우리가 아니야’라는 말이 돼요.'},
+    {t:'다문화 감수성 수업과 학생 캠페인을 연다.',sh:'감수성 수업',eff:{r4:12,r6:3},fb:'다문화 감수성 교육으로 차별하지 않는 분위기를 만들었어요(교과서 151쪽).'},
+    {t:'다니엘을 다른 반으로 옮긴다.',sh:'반 이동',eff:{r4:-14},fb:'문제를 일으킨 쪽이 아니라 피해를 본 쪽을 옮겼어요. 편견은 그대로 남아요.'}]}
+];
+const EVM = Object.fromEntries(EVENTS.map(e=>[e.id,e]));
+const GOVN = {demo:'🗳️ 민주 공화국',const:'👑 입헌 군주국',elite:'🎩 소수 엘리트 통치',dict:'🗿 1인 독재'};
+
+/* =========================================================
+   ③ 계산
+   ========================================================= */
+const clamp=(v,a=0,b=100)=>Math.max(a,Math.min(b,v));
+function normP(p){
+  p=p||{};
+  const o=x=>(x&&typeof x==='object')?x:{};
+  const c=o(p.city);
+  return {id:p.id||'',num:p.num||'',nick:p.nick||'',at:p.at||0,epoch:p.epoch||null,g:p.g||null,
+    dots:o(p.dots), coins:o(p.coins), mat:p.mat||null, det:o(p.det), ox27:o(p.ox27), ref27:Object.assign({a:'',b:''},o(p.ref27)), done27:!!p.done27,
+    city:{name:c.name||'',sym:c.sym||'🏡',nat:c.nat||null,dir:c.dir||null,budget:o(c.budget),ev:o(c.ev),done:!!c.done},
+    slogan:Object.assign({s:'',m:''},o(p.slogan)), vote:Object.assign({as:null,to:null,reason:''},o(p.vote)),
+    ox28:o(p.ox28), ref28:p.ref28||'', done28:!!p.done28};
+}
+function budgetUsed(c){ return POL.reduce((a,p)=>a+(+c.budget[p.k]||0),0); }
+function cityCalc(c, fired){
+  const h={}; RES.forEach(r=>h[r.k]=r.base);
+  const dir=DIRM[c.dir]; const mult=dir?dir.mult:1;
+  POL.forEach(p=>{ const n=+c.budget[p.k]||0; for(const k in p.per) h[k]+=p.per[k]*n*mult; });
+  const b=k=>+c.budget[k]||0;
+  if(!b('life')){ h.r2-=5; h.r3-=5; }
+  if(!b('right')) h.r3-=6;
+  if(!b('know')&&!b('fest')&&!b('hosp')) h.r6-=6;
+  if(dir) for(const k in dir.base) h[k]+=dir.base[k];
+  (fired||[]).forEach(eid=>{
+    const E=EVM[eid]; if(!E) return;
+    if(c.dir==='melt') MINOR.forEach(k=>h[k]-=3);
+    const ans=c.ev[eid]; if(!ans||ans.o==null) return;
+    const o=E.opts[ans.o]; const prot=E.pol.some(p=>b(p)>=2);
+    for(const k in o.eff){ let v=o.eff[k]; if(v>0) v*=mult; else if(prot) v*=0.5; h[k]+=v; }
+  });
+  for(const k in h) h[k]=Math.round(clamp(h[k]));
+  const vals=Object.values(h); const avg=Math.round(vals.reduce((a,x)=>a+x,0)/vals.length);
+  const mn=Math.min(...vals), mx=Math.max(...vals);
+  let conflict=clamp((100-avg)*0.9+(mx-mn)*0.4); if(c.dir==='melt') conflict*=0.4; if(c.dir==='apart') conflict*=0.8;
+  const minK=RES.reduce((a,r)=>h[r.k]<h[a]?r.k:a,'r1');
+  return {h,avg,conflict:Math.round(conflict),low:vals.filter(x=>x<40).length,minK};
+}
+const face=v=> v>=75?'😄':v>=58?'🙂':v>=42?'😐':v>=28?'😟':'😢';
+const hcol=v=> v>=58?'#2a9d8f':v>=42?'#e9a23b':'#d64545';
+const tier=v=> v<42?0:v<65?1:2;
+const firedList=()=>Object.entries(META.fired||{}).sort((a,b)=>a[1]-b[1]).map(x=>x[0]).filter(id=>EVM[id]);
+
+/* =========================================================
+   ④ 저장소 (Firebase 실시간 DB 또는 체험 모드)
+   ========================================================= */
+const clean = o => o==null ? null : JSON.parse(JSON.stringify(o));
+let DBMODE='demo', backend=null;
+async function initBackend(){
+  if(FIREBASE_CONFIG && FIREBASE_CONFIG.apiKey && FIREBASE_CONFIG.databaseURL){
+    try{
+      const A = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js');
+      const D = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js');
+      const db = D.getDatabase(A.initializeApp(FIREBASE_CONFIG,'multi'));
+      backend = {
+        set:(p,v)=>D.set(D.ref(db,p),clean(v)),
+        update:(p,v)=>D.update(D.ref(db,p),clean(v)),
+        remove:p=>D.remove(D.ref(db,p)),
+        on:(p,cb)=>D.onValue(D.ref(db,p),s=>cb(s.val()),err=>toast('⚠️ 데이터베이스 연결 오류: '+err.message))
+      };
+      DBMODE='live'; return;
+    }catch(e){ console.error(e); toast('⚠️ Firebase 연결 실패 → 체험 모드로 실행합니다'); }
+  }
+  const KEY='mcgame_demo_db';
+  const bc = ('BroadcastChannel' in window) ? new BroadcastChannel('mcgame') : null;
+  const L=[];
+  const read=()=>{ try{ return JSON.parse(localStorage.getItem(KEY))||{}; }catch(e){ return {}; } };
+  const parts=p=>p.split('/').filter(Boolean);
+  const getAt=(t,p)=>parts(p).reduce((o,k)=>o==null?undefined:o[k],t);
+  const setAt=(t,p,v)=>{ const ks=parts(p); let o=t; for(let i=0;i<ks.length-1;i++){ if(typeof o[ks[i]]!=='object'||o[ks[i]]===null) o[ks[i]]={}; o=o[ks[i]]; } const last=ks[ks.length-1]; if(v==null) delete o[last]; else o[last]=clean(v); };
+  const fire=()=>{ const t=read(); L.forEach(l=>l.cb(clean(getAt(t,l.p))??null)); };
+  const write=t=>{ try{ localStorage.setItem(KEY,JSON.stringify(t)); }catch(e){} fire(); bc&&bc.postMessage(1); };
+  if(bc) bc.onmessage=fire;
+  window.addEventListener('storage',e=>{ if(e.key===KEY) fire(); });
+  backend = {
+    set:async(p,v)=>{ const t=read(); setAt(t,p,v); write(t); },
+    update:async(p,obj)=>{ const t=read(); for(const k in obj) setAt(t,p+'/'+k,obj[k]); write(t); },
+    remove:async p=>{ const t=read(); setAt(t,p,null); write(t); },
+    on:(p,cb)=>{ const l={p,cb}; L.push(l); setTimeout(()=>cb(clean(getAt(read(),p))??null),0); return ()=>{ const i=L.indexOf(l); if(i>=0) L.splice(i,1); }; }
+  };
+}
+
+/* =========================================================
+   ⑤ 공통 도구
+   ========================================================= */
+const $app = document.getElementById('app');
+const qs = new URLSearchParams(location.search);
+const MODE = (/teacher/i.test(qs.get('mode')||'') || qs.has('teacher') || /teacher/i.test(location.hash)) ? 'teacher' : 'student';
+let ROOM = (qs.get('room')||'').replace(/\*/g,'').toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,8);
+const BASE = () => `rooms/${ROOM}/multi`;
+const esc = s => String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let toastTimer=null;
+function toast(msg){ document.querySelectorAll('.toast').forEach(x=>x.remove()); const t=document.createElement('div'); t.className='toast'; t.textContent=msg; document.body.appendChild(t); clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.remove(),2600); }
+const say=(html,big)=>`<div class="say ${big?'big':''}"><img src="${CHAR}" alt="꿈송이"><div class="bub">${html}</div></div>`;
+const modeBadge = () => DBMODE==='live' ? `<span class="pill live">● 실시간 연동</span>` : `<span class="pill demo">● 체험 모드</span>`;
+function flagHTML(f,size=''){ f=Object.assign({c1:'#e63946',c2:'#1d3557',sym:'⭐'},f||{}); return `<span class="flag ${size}"><i style="background:${esc(f.c1)}"></i><i style="background:${esc(f.c2)}"></i><span>${esc(f.sym)}</span></span>`; }
+function cityIcon(c){ return c.nat&&c.nat.flag ? flagHTML(c.nat.flag,'sm') : `<span class="cityic">${esc(c.sym)}</span>`; }
+const dirBadge = k => DIRM[k] ? `<span class="badge ${k}">${DIRM[k].e} ${esc(DIRM[k].n)}</span>` : '';
+const teamBadge = g => g ? `<span class="team ${g}">${g==='star'?'⭐ 별빛 팀':'🌙 달빛 팀'}</span>` : '';
+function resGrid(calc,opt={}){
+  return `<div class="resgrid">${RES.map(r=>{ const v=calc.h[r.k];
+    return `<div class="res ${v<40?'low':''}"><div class="hd"><span class="av">${r.e}</span><div><div class="nm">${esc(r.n)}</div><div class="rl">${esc(r.rl)}</div></div><span class="fc">${face(v)}</span></div>
+    ${opt.need?`<div class="q">“${esc(r.need)}”</div>`:`<div class="q">“${esc(r.q[tier(v)])}”</div>`}
+    <div class="tr"><i style="width:${v}%;background:${hcol(v)}"></i></div></div>`; }).join('')}</div>`;
+}
+function indHTML(calc){
+  return `<div class="ind"><div class="box"><small>🤝 공존 지수</small><b style="color:${hcol(calc.avg)}">${calc.avg}</b></div>
+  <div class="box"><small>⚡ 보이는 갈등</small><b>${calc.conflict}</b></div>
+  <div class="box"><small>😢 힘든 이웃</small><b style="color:${calc.low?'#d64545':'#2a9d8f'}">${calc.low}명</b></div></div>`;
+}
+let pending=false, keepScroll=false;
+function isTyping(){ const a=document.activeElement; return a && $app.contains(a) && (a.tagName==='TEXTAREA' || (a.tagName==='INPUT' && !['button','range'].includes(a.type))); }
+function softRender(){ if(isTyping()){ pending=true; return; } keepScroll=true; render(); }
+document.addEventListener('focusout',()=>{ setTimeout(()=>{ if(pending && !isTyping()){ pending=false; keepScroll=true; render(); } },150); });
+function render(){ pending=false; const y=window.scrollY; (MODE==='teacher'?renderTeacher:renderStudent)(); if(keepScroll) window.scrollTo(0,y); keepScroll=false; }
+function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+
+let META={}, PLAYERS={};
+const plist = () => Object.values(PLAYERS||{}).filter(p=>p&&p.id).map(normP).sort((a,b)=>(+a.num||999)-(+b.num||999)||a.at-b.at);
+
+/* =========================================================
+   ⑥ 학생 화면
+   ========================================================= */
+let P=null, tmpRoom='', ui={det:null, cityStep:0, evOpen:null, evDraft:{o:null,r:''}, evResult:null, dotIdx:null, dotShow:false, dotIn:'', coinDraft:10, voteTo:null, voteReason:'', natList:null, natUnsub:null};
+const SLOT = (qs.get('s')||'').replace(/[^0-9a-z]/gi,'').slice(0,6);
+const skey = () => 'mcgame_s_'+ROOM+(SLOT?'_'+SLOT:'');
+function loadP(){ try{ const x=JSON.parse(localStorage.getItem(skey())); return x?normP(x):null; }catch(e){ return null; } }
+let saveTimer=null;
+function saveP(now){ if(!P) return; try{ localStorage.setItem(skey(),JSON.stringify(P)); }catch(e){}
+  clearTimeout(saveTimer); const w=()=>backend.set(`${BASE()}/players/${P.id}`,P).catch(e=>toast('⚠️ 저장 실패: '+e.message));
+  if(now) w(); else saveTimer=setTimeout(w,500); }
+const phase = () => META.phase || 'lobby';
+
+function sHeader(){
+  const c=P&&P.city&&P.city.name?`${cityIcon(P.city)} <b>${esc(P.city.name)}</b>`:'';
+  return `<div class="top"><h1><img src="${CHAR}" alt="">꿈결마을 이웃 프로젝트</h1>${c}${P&&P.g?teamBadge(P.g):''}${DBMODE==='live'?`<span class="pill">방 ${esc(ROOM)}</span>`:''}${P&&P.nick?`<span class="pill">${esc(P.num)}번 ${esc(P.nick)}</span>`:''}${DBMODE==='live'?modeBadge():''}</div>`;
+}
+const phaseTitle = () => { const p=PHN[phase()]; return `<div class="stepname">${p.l}차시 · ${p.e} ${p.n}</div>`; };
+const waitCard = msg => `<div class="card center">${say(msg||'잘했어요! 선생님이 다음 단계를 열 때까지 잠시 기다려 주세요. 😊')}</div>`;
+
+function vJoinRoom(){
+  return `${sHeader()}<div class="card center"><div class="hero"><img src="${CHAR}" alt="꿈송이"><h2>꿈결마을에 온 걸 환영해요!</h2></div>
+  <p class="muted">선생님 화면에 보이는 방 코드를 입력하세요.</p>
+  <input class="field" style="max-width:260px;text-align:center;font-size:24px;font-weight:800;letter-spacing:4px;text-transform:uppercase" data-bind="room" value="${esc(tmpRoom)}" maxlength="8">
+  <div style="margin-top:14px"><button class="btn acc" data-act="enterRoom">입장하기</button></div></div>`;
+}
+function vJoin(){
+  return `${sHeader()}<div class="card"><div class="hero"><img src="${CHAR}" alt="꿈송이"><h2>안녕! 나는 꿈결마을의 꿈송이야</h2></div>
+  ${say('우리 꿈결마을에는 요즘 <b>새 이웃</b>들이 많이 이사 오고 있어. 함께 잘 살려면 어떻게 해야 할지, 오늘 나랑 같이 알아보자!')}
+  <div class="grid g2"><div><label class="lb">번호</label><input class="field" inputmode="numeric" data-bind="num" value="${esc(P.num)}" placeholder="예: 7"></div>
+  <div><label class="lb">별명 <span class="muted">(10자 이내)</span></label><input class="field" maxlength="10" data-bind="nick" value="${esc(P.nick)}" placeholder="예: 은행잎"></div></div>
+  <p class="muted small">※ 이름 대신 별명을 써요. 출신이나 가족 이야기는 묻지 않아요.</p></div>
+  <div class="navbar"><div class="in"><span></span><button class="btn acc" data-act="join">입장하기 →</button></div></div>`;
+}
+function vLobby(){ return `${sHeader()}<div class="card center"><div class="hero"><img src="${CHAR}" alt="꿈송이"></div>${say(`반가워, <b>${esc(P.nick)}</b>! 선생님이 시작하면 화면이 바뀔 거야. 잠깐만 기다려 줘.`,true)}</div>`; }
+
+/* 27-① 점 세기 */
+function vDots(){
+  const n=Object.keys(P.dots).length;
+  if(P.g && n>=DOTS.length) return `${sHeader()}${phaseTitle()}${vTeamCard()}`;
+  if(n>=DOTS.length){ assignTeam(); return vDots(); }
+  const i=n;
+  return `${sHeader()}${phaseTitle()}<div class="card">
+  ${say(`점이 <b>아주 잠깐</b> 나타났다가 사라져. 몇 개였는지 어림해서 적어 봐! 결과를 보고 <b>팀</b>을 나눌 거야. (${i+1}/${DOTS.length})`)}
+  <canvas class="dots" id="dotc" width="600" height="400"></canvas>
+  <div class="row" style="justify-content:center;margin-top:12px">${ui.dotIdx===i&&!ui.dotShow?`<input class="field" style="max-width:160px;text-align:center;font-size:22px;font-weight:800" inputmode="numeric" data-bind="dotIn" value="${esc(ui.dotIn)}" placeholder="몇 개?"><button class="btn acc" data-act="dotSubmit">확인</button>`:`<button class="btn gink" data-act="dotShow" ${ui.dotShow?'disabled':''}>👀 점 보기</button>`}</div></div>`;
+}
+function drawDots(n){
+  const cv=document.getElementById('dotc'); if(!cv) return; const g=cv.getContext('2d'); g.clearRect(0,0,600,400);
+  if(!ui.dotShow){ g.fillStyle='#c7cfe0'; g.font='bold 30px Pretendard,sans-serif'; g.textAlign='center'; g.fillText(ui.dotIdx===Object.keys(P.dots).length?'몇 개였을까요?':'준비되면 [점 보기]를 누르세요',300,210); return; }
+  const pts=[]; let guard=0;
+  while(pts.length<n && guard++<5000){ const x=30+Math.random()*540, y=30+Math.random()*340; if(pts.every(p=>(p[0]-x)**2+(p[1]-y)**2>400)) pts.push([x,y]); }
+  g.fillStyle='#1f3a6e'; pts.forEach(p=>{ g.beginPath(); g.arc(p[0],p[1],8,0,Math.PI*2); g.fill(); });
+}
+function assignTeam(){ if(P.g) return; P.g = Math.random()<0.5?'star':'moon'; saveP(true); }
+function vTeamCard(){
+  const star=P.g==='star';
+  return `<div class="card"><div class="teambig ${P.g}"><div class="e">${star?'⭐':'🌙'}</div><div class="n">${star?'별빛 팀':'달빛 팀'}</div>
+  <div style="font-weight:700;margin-top:6px">점 세기 결과, 당신은 <b>${star?'점을 실제보다 많이 세는':'점을 실제보다 적게 세는'}</b> 사람이에요.</div></div>
+  <div style="margin-top:14px">${say(`이제부터 너는 <b>${star?'⭐ 별빛 팀':'🌙 달빛 팀'}</b>이야! 선생님이 다음 단계를 열 때까지 기다려 줘.`)}</div></div>`;
+}
+
+/* 27-② 코인 */
+function coinPair(r){ // 결정적 의사 무작위
+  const seed=(P.id+r).split('').reduce((a,c)=>(a*31+c.charCodeAt(0))>>>0,7);
+  return {a:10+seed%30, b:10+(seed>>5)%30, flip:!!(seed&1)};
+}
+function vCoins(){
+  if(!P.g) assignTeam();
+  const my=P.g==='star'?'⭐ 별빛 팀':'🌙 달빛 팀', ot=P.g==='star'?'🌙 달빛 팀':'⭐ 별빛 팀';
+  const done1=P.coins.r1!=null, done2=P.coins.r2!=null;
+  if(done1&&done2&&P.mat) return `${sHeader()}${phaseTitle()}${waitCard('코인 나누기 끝! 결과는 곧 선생님 화면에서 함께 볼 거야. 두근두근…')}`;
+  if(!done1||!done2){
+    const r=done1?'r2':'r1', pr=coinPair(r);
+    const L={lab:`${my} ${pr.a}번 이웃`,me:true}, R={lab:`${ot} ${pr.b}번 이웃`,me:false};
+    const [A,B]=pr.flip?[R,L]:[L,R];
+    const v=ui.coinDraft; const aVal=A.me?v:20-v;
+    return `${sHeader()}${phaseTitle()}<div class="card"><div class="stepname">라운드 ${done1?2:1} / 3</div>
+    ${say(`꿈결마을 기금 <b>코인 20개</b>를 두 이웃에게 나눠 줘. 이웃이 누구인지는 서로 몰라. 너 자신에게는 줄 수 없어.`)}
+    <div class="coin"><div class="who"><div class="muted small">${esc(A.lab)}</div><b id="ca">${aVal}</b>코인</div><div style="font-size:28px">⚖️</div><div class="who"><div class="muted small">${esc(B.lab)}</div><b id="cb">${20-aVal}</b>코인</div></div>
+    <input type="range" min="0" max="20" step="1" value="${A.me?v:20-v}" data-bind="coin" data-flip="${A.me?0:1}" style="margin-top:14px">
+    <div class="row" style="justify-content:space-between" class="muted"><span class="muted small">← 왼쪽 이웃에게 더</span><span class="muted small">오른쪽 이웃에게 더 →</span></div></div>
+    <div class="navbar"><div class="in"><span></span><button class="btn acc" data-act="coinSubmit" data-r="${r}">이렇게 나누기 →</button></div></div>`;
+  }
+  const order=shuffle([0,1,2]);
+  return `${sHeader()}${phaseTitle()}<div class="card"><div class="stepname">라운드 3 / 3</div>
+  ${say(`마지막! 세 가지 방법 중 하나를 골라 줘. 숫자는 <b>${my}</b>와 <b>${ot}</b> 전체가 받는 코인이야.`)}
+  <div class="grid">${order.map(i=>{ const m=MAT[i]; return `<button class="opt bigopt" data-act="matPick" data-v="${m.k}"><span class="lt">${'ABC'[order.indexOf(i)]}</span><span>우리 팀(${my}) <b style="font-size:22px">${m.us}</b>개 · 상대 팀(${ot}) <b style="font-size:22px">${m.them}</b>개</span></button>`; }).join('')}</div></div>`;
+}
+
+/* 27-③ 반전 */
+function classCoinStats(list){
+  const res={star:{n:0,in:0},moon:{n:0,in:0},all:{n:0,in:0},mat:{MD:0,FAIR:0,MAX:0},matN:0};
+  list.forEach(p=>{ if(!p.g) return; ['r1','r2'].forEach(r=>{ if(p.coins[r]!=null){ const v=+p.coins[r]; res[p.g].n++; res[p.g].in+=v; res.all.n++; res.all.in+=v; } }); if(p.mat){ res.mat[p.mat]++; res.matN++; } });
+  const avg=o=>o.n?Math.round(o.in/o.n*10)/10:null;
+  return {star:avg(res.star),moon:avg(res.moon),all:avg(res.all),mat:res.mat,matN:res.matN,n:res.all.n};
+}
+function vReveal(){
+  const st=classCoinStats(plist());
+  const mine=['r1','r2'].map(r=>P.coins[r]).filter(x=>x!=null);
+  const myAvg=mine.length?Math.round(mine.reduce((a,x)=>a+ +x,0)/mine.length*10)/10:null;
+  const m=MAT.find(x=>x.k===P.mat);
+  return `${sHeader()}${phaseTitle()}<div class="card">
+  ${say('비밀을 하나 알려 줄게. 사실 <b>별빛 팀과 달빛 팀은 점 세기와 아무 상관이 없어.</b> 컴퓨터가 <b>무작위</b>로 나눴어!',true)}
+  <h3>🪙 나의 코인 나누기</h3>
+  <div class="ind"><div class="box"><small>우리 팀 이웃에게 (20개 중)</small><b>${myAvg??'-'}</b></div><div class="box"><small>상대 팀 이웃에게</small><b>${myAvg==null?'-':Math.round((20-myAvg)*10)/10}</b></div><div class="box"><small>라운드 3 선택</small><b style="font-size:17px">${m?esc(m.n):'-'}</b></div></div>
+  <h3>👥 우리 반 전체 (${st.n}번 나눔)</h3>
+  <p>우리 반은 같은 팀 이웃에게 평균 <b style="font-size:22px;color:var(--navy)">${st.all??'-'}개</b>, 다른 팀 이웃에게 <b>${st.all==null?'-':Math.round((20-st.all)*10)/10}개</b>를 줬어요.</p>
+  <div class="concept"><div class="h">📌 내집단 편향 (교과서 144쪽)</div>같은 집단 안의 사람들을 더 좋아하고 우호적으로 대하지만, 다른 집단에 대해서는 싫어하거나 반감을 갖는 경향. 내집단 편향이 다른 문화를 가진 사람들에게 향하면 <b>편견과 부정적 인식</b>으로 굳어질 수 있어요.</div>
+  ${say('5분 전에 생긴, <b>아무 의미 없는 팀</b>에도 마음이 기울었다면… 피부색, 말투, 종교처럼 눈에 보이는 차이라면 어떨까?')}</div>`;
+}
+
+/* 27-④ 편견 탐정 */
+function vDetective(){
+  const doneN=CASES.filter(c=>P.det[c.id]&&P.det[c.id].txt).length;
+  if(ui.det){ return vCase(CASES.find(c=>c.id===ui.det)); }
+  return `${sHeader()}${phaseTitle()}<div class="card">
+  ${say('꿈결마을에서 사건이 6개 일어났어! 사건 속 <b>숨은 편견</b>을 찾고, 어떤 <b>도덕 문제</b>로 이어지는지 밝혀 줘, 탐정님! 🔍')}
+  <div class="concept"><div class="h">📌 다문화 사회의 도덕 문제 (교과서 145쪽)</div>① 차별하고 배척하는 문제 ② 사회 통합에 방해가 되는 문제 ③ 새로운 사회에 잘 적응하지 못하는 문제</div>
+  <div class="stepname">해결 ${doneN} / ${CASES.length}</div>
+  <div class="caselist">${CASES.map((c,i)=>{ const d=P.det[c.id]&&P.det[c.id].txt; return `<button class="casebtn ${d?'done':''}" data-act="openCase" data-v="${c.id}"><div class="e">${c.e}</div><b>사건 ${i+1}</b><div class="small">${esc(c.t)}</div><div class="small" style="margin-top:4px">${d?'✅ 해결':'🔎 조사하기'}</div></button>`; }).join('')}</div>
+  ${doneN===CASES.length?`<div class="banner ok" style="margin-top:14px">🏅 명탐정 배지 획득! 모든 사건을 해결했어요.</div>`:''}</div>`;
+}
+function vCase(c){
+  const d=Object.assign({p:null,t:null,txt:''},P.det[c.id]||{});
+  const idx=CASES.indexOf(c);
+  return `${sHeader()}${phaseTitle()}<div class="card"><div class="scene"><span class="tag">사건 ${idx+1} · ${c.e} ${esc(c.t)}</span><div>${esc(c.s)}</div></div>
+  <h3>1. 이 사건 속 <u>편견</u>은 어느 생각일까요?</h3>
+  <div class="grid">${c.st.map((s,i)=>{ let cls=''; if(d.p!=null){ if(i===c.a) cls='right'; else if(i===d.p) cls='wrong'; } return `<button class="opt ${cls}" data-act="detP" data-v="${i}" ${d.p!=null?'disabled':''}>${esc(s)}</button>`; }).join('')}</div>
+  ${d.p!=null?`<div class="banner ${d.p===c.a?'ok':'warn'}" style="margin-top:10px">${d.p===c.a?'🎯 정확해요!':'🤔 다시 읽어 봐요. 초록색 생각이 편견이에요.'}</div>`:''}
+  ${d.p!=null?`<h3>2. 이 편견은 어떤 도덕 문제로 이어질까요?</h3>
+  <div class="chips">${PTYPE.map((t,i)=>`<button class="chip ${d.t===i?'sel':''}" data-act="detT" data-v="${i}">${esc(t)}</button>`).join('')}</div>
+  ${d.t!=null?`<div style="margin-top:12px">${say((d.t===c.ty?'좋아! ':'그렇게 볼 수도 있어. 꿈송이 생각은 이래: ')+c.ex)}</div>`:''}`:''}
+  ${d.t!=null?`<h3>3. 이 편견이 계속되면 꿈결마을에는 어떤 일이 생길까요?</h3>
+  <textarea class="field" data-bind="detTxt" maxlength="150" placeholder="한두 문장으로 써 보세요.">${esc(d.txt)}</textarea>`:''}
+  </div><div class="navbar"><div class="in"><button class="btn ghost" data-act="closeCase">← 사건 목록</button>${d.t!=null?`<button class="btn acc" data-act="detSave">해결 완료 ✅</button>`:'<span></span>'}</div></div>`;
+}
+
+/* OX */
+function vOX(set,key,refHTML,doneKey){
+  const ans=P[key]; const done=P[doneKey];
+  return `<h3>⭕❌ OX 퀴즈</h3>${set.map((q,i)=>{ const a=ans['q'+i]; return `<div class="pol" style="align-items:flex-start"><div class="nm"><b>${i+1}. ${esc(q.q)}</b>${done?`<small>${a===q.a?'✅':'❌'} 정답 ${q.a} · ${esc(q.ex)}</small>`:''}</div>
+  <div class="row" style="flex:none">${['O','X'].map(o=>`<button class="oxbtn ${done?(o===q.a?'right':a===o?'wrong':''):(a===o?'sel':'')}" data-act="ox" data-k="${key}" data-i="${i}" data-v="${o}" ${done?'disabled':''}>${o}</button>`).join('')}</div></div>`; }).join('')}${refHTML}`;
+}
+function vOx27(){
+  const ref=`<h3>✍️ 느낀 점 / 실천할 점</h3>
+  <label class="lb">코인을 나눌 때 나는 어떤 마음이었나요? 나에게도 내집단 편향이 있었나요?</label><textarea class="field" data-bind="ref27a" maxlength="200">${esc(P.ref27.a)}</textarea>
+  <label class="lb">다문화 구성원을 대할 때 내가 실천할 점 한 가지</label><textarea class="field" data-bind="ref27b" maxlength="200">${esc(P.ref27.b)}</textarea>`;
+  return `${sHeader()}${phaseTitle()}<div class="card">${P.done27?`<div class="banner ok">✅ 제출 완료! 정답을 확인해 보세요. 글은 고쳐서 다시 제출할 수 있어요.</div>`:''}${vOX(OX27,'ox27',ref,'done27')}</div>
+  <div class="navbar"><div class="in"><span></span><button class="btn acc" data-act="sub27">${P.done27?'다시 제출':'제출하기'}</button></div></div>`;
+}
+
+/* 28-① 동네 설계 */
+function vCity(note){
+  const c=P.city, st=ui.cityStep;
+  const bar=`<div class="stepname">동네 설계 ${st+1}/3 · ${['이름 정하기','동네 방향','정책 예산'][st]}</div><div class="steps">${[0,1,2].map(i=>`<div class="${i<st?'done':i===st?'on':''}"></div>`).join('')}</div>`;
+  let body='', next='';
+  if(st===0){
+    const nat=META.natRoom?`<h3>🏛️ 국가 만들기에서 만든 내 나라 불러오기</h3>${ui.natList==null?'<p class="muted">불러오는 중…</p>':ui.natList.length?`<div class="ngrid">${ui.natList.map(n=>`<button class="ncard ${c.nat&&c.nat.id===n.id?'sel':''}" data-act="natPick" data-v="${esc(n.id)}"><div class="nh">${flagHTML(n.d.flag,'sm')}<div><div class="nn">${esc(n.d.name)}</div><div class="ns">${esc(n.num)}번 · ${esc(GOVN[n.d.gov]||'')}</div></div></div></button>`).join('')}</div>`:'<p class="muted">불러올 나라가 없어요. 아래에 직접 이름을 지어 주세요.</p>'}<p class="muted small">※ 국가 만들기 기록은 읽기만 해요. 원래 기록은 바뀌지 않아요.</p>`:'';
+    body=`${say('이제 네가 꿈결마을 한 동네의 <b>동네 대표</b>야! 우리 동네에 <b>새 이웃 5명</b>이 이사 왔어. 원래 살던 순자 할머니까지 <b>모두가 행복한 동네</b>를 만들어 줘.')}
+    ${nat}<label class="lb">동네 이름</label><input class="field" maxlength="14" data-bind="cname" value="${esc(c.name)}" placeholder="예: 은행나무동, 무지개마을">
+    ${c.nat?'':`<label class="lb">동네 상징</label><div class="row">${SYMS.map(s=>`<button class="symbtn ${c.sym===s?'sel':''}" data-act="sym" data-v="${s}">${s}</button>`).join('')}</div>`}
+    <h3>🏠 우리 동네 이웃들</h3>${resGrid(cityCalc(c,[]),{need:true})}`;
+    next='cityNext';
+  } else if(st===1){
+    body=`${say('우리 동네는 새 이웃과 <b>어떤 방식</b>으로 함께 살까? 방향에 따라 정책 효과가 달라져. 신중하게 골라!')}
+    <div class="grid">${DIRS.map(d=>`<button class="opt ${c.dir===d.k?'sel':''}" data-act="dir" data-v="${d.k}"><div class="e">${d.e}</div><div class="t">${esc(d.n)}</div><div class="d">${esc(d.d)}</div></button>`).join('')}</div>`;
+    next='cityNext';
+  } else {
+    const used=budgetUsed(c), calc=cityCalc(c,[]);
+    body=`${say(`마을 예산은 <b>${BUDGET}칸</b>이야. 한 정책에 최대 ${PMAX}칸까지 쓸 수 있어. 이웃들 표정을 보면서 나눠 봐!`)}
+    <div class="remain ${used===BUDGET?'zero':''}"><span>남은 예산</span><span>${BUDGET-used}칸</span></div>
+    ${POL.map(p=>{ const n=+c.budget[p.k]||0; return `<div class="pol"><span style="font-size:28px">${p.e}</span><div class="nm"><b>${esc(p.n)}</b><small>${esc(p.d)} · <i>${esc(p.w)}</i></small></div><div class="stp"><button data-act="bud" data-k="${p.k}" data-v="-1">−</button><span class="v">${n}</span><button data-act="bud" data-k="${p.k}" data-v="1">+</button></div></div>`; }).join('')}
+    <h3>👀 미리 보기</h3>${indHTML(calc)}${resGrid(calc)}`;
+    next='cityDone';
+  }
+  return `${sHeader()}${phaseTitle()}${note?'<div class="banner warn">🏘️ 먼저 우리 동네를 완성해 주세요! 그래야 다음 활동에 참여할 수 있어요.</div>':''}${bar}<div class="card">${body}</div>
+  <div class="navbar"><div class="in">${st>0?`<button class="btn ghost" data-act="cityPrev">← 이전</button>`:'<span></span>'}<button class="btn ${st===2?'gink':'acc'}" data-act="${next}">${st===2?'🎉 동네 열기':'다음 →'}</button></div></div>`;
+}
+function cityDash(showEvents=true){
+  const c=P.city, fired=firedList(), calc=cityCalc(c,fired);
+  const lowR=RESM[calc.minK];
+  const evs=showEvents&&fired.length?`<h3>🚨 우리 동네 사건 기록</h3>${fired.map(id=>{ const E=EVM[id], a=c.ev[id]; return `<div class="pol"><span style="font-size:26px">${E.e}</span><div class="nm"><b>${esc(E.t)}</b><small>${a?`${'ABC'[a.o]}. ${esc(E.opts[a.o].sh)} — “${esc(a.r)}”`:'아직 대응하지 않았어요'}</small></div>${a?'✅':`<button class="btn sm gink" data-act="evOpen" data-v="${id}">대응하기</button>`}</div>`; }).join('')}`:'';
+  const meltNote = c.dir==='melt' && fired.length ? `<div class="banner warn">🫕 용광로 동네: 새 이웃들이 자기 문화를 숨기느라 조금씩 지쳐 가고 있어요. (사건마다 새 이웃 행복 −3)</div>`:'';
+  return `<div class="row" style="margin-bottom:10px">${cityIcon(c)}<b style="font-size:20px">${esc(c.name)}</b>${dirBadge(c.dir)}${c.nat&&c.nat.gov?`<span class="badge">${esc(GOVN[c.nat.gov]||'')}</span>`:''}</div>
+  ${indHTML(calc)}${meltNote}
+  ${calc.h[calc.minK]<58?say(`지금 가장 힘든 이웃은 <b>${lowR.e} ${esc(lowR.n)}</b>이야. “${esc(lowR.q[tier(calc.h[calc.minK])])}”`):''}
+  ${resGrid(calc)}${evs}`;
+}
+function vPlay(){
+  const fired=firedList(), pend=fired.filter(id=>!P.city.ev[id]);
+  return `${sHeader()}${phaseTitle()}${pend.length?`<div class="banner bad blink">🚨 대응하지 않은 사건이 ${pend.length}개 있어요!</div>`:''}<div class="card">${fired.length?'':say('동네가 문을 열었어! 곧 꿈결마을에 <b>사건</b>이 생길 거야. 선생님이 사건을 보내면 동네 대표로서 결정해 줘.')}${cityDash()}</div>${vEventModal()}`;
+}
+function vEventModal(){
+  let id=ui.evOpen;
+  if(!id && META.event && EVM[META.event.id] && !P.city.ev[META.event.id] && !ui.evClosed?.[META.event.at]) id=META.event.id;
+  if(ui.evResult) id=ui.evResult.id;
+  if(!id) return '';
+  const E=EVM[id];
+  if(ui.evResult){
+    const r=ui.evResult, a=P.city.ev[id], o=E.opts[a.o];
+    const ds=RES.map(x=>({x,d:r.after[x.k]-r.before[x.k]})).filter(z=>z.d!==0);
+    return `<div class="overlay"><div class="modal"><h2>${E.e} ${esc(E.t)} — 결과</h2>
+    <div class="delta">${ds.length?ds.map(z=>`<span class="${z.d>0?'up':'dn'}">${z.x.e} ${esc(z.x.n)} ${z.d>0?'+':''}${z.d}</span>`).join(''):'<span>변화 없음</span>'}</div>
+    ${say(esc(o.fb).replace(/\(교과서/g,'(교과서')+(r.prot?' <br>🛡️ 미리 준비한 정책 덕분에 피해가 절반으로 줄었어요!':''))}
+    <div class="row" style="justify-content:flex-end"><button class="btn acc" data-act="evClose">확인</button></div></div></div>`;
+  }
+  const dr=ui.evDraft;
+  return `<div class="overlay"><div class="modal alert"><div class="scene"><span class="tag">🚨 사건 · ${esc(E.tag)}</span><h2 style="margin:4px 0 6px">${E.e} ${esc(E.t)}</h2><div>${esc(E.s)}</div><div class="src">${esc(E.src)}</div></div>
+  <div class="grid">${E.opts.map((o,i)=>`<button class="opt bigopt ${dr.o===i?'sel':''}" data-act="evPick" data-v="${i}"><span class="lt">${'ABC'[i]}</span><span>${esc(o.t)}</span></button>`).join('')}</div>
+  <label class="lb">왜 그렇게 결정했나요? (5글자 이상)</label><textarea class="field" data-bind="evR" maxlength="150" placeholder="이 결정이 주민들에게 어떤 영향을 줄지 생각해 보세요.">${esc(dr.r)}</textarea>
+  <div class="row" style="justify-content:space-between;margin-top:12px"><button class="btn ghost" data-act="evLater">나중에</button><button class="btn acc" data-act="evSubmit">결정하기</button></div></div></div>`;
+}
+/* 28-③ 표어 */
+function vSlogan(){
+  const s=P.slogan;
+  return `${sHeader()}${phaseTitle()}<div class="card">
+  ${say('우리 동네에 걸 <b>표어</b>를 만들어 줘! 편견과 차별이 없는 동네의 모습을 한 줄로 담아 봐. (교과서 152쪽)')}
+  <div class="concept"><div class="h">💡 교과서 예시</div>• “서로 다른 모습이지만 서로 존중하는 우리”<br>• “종교는 달라도 사랑하는 마음은 같은 우리”</div>
+  <label class="lb">우리 동네 표어 (30자 이내)</label><input class="field" maxlength="30" data-bind="slo" value="${esc(s.s)}" placeholder="표어를 써 보세요">
+  <label class="lb">표어에 담긴 의미</label><textarea class="field" maxlength="150" data-bind="slom">${esc(s.m)}</textarea>
+  ${s.s&&P._sloSaved?`<div class="banner ok" style="margin-top:12px">✅ 저장했어요. 선생님 화면 표어 벽에 올라갔어요!</div>`:''}
+  <h3>우리 동네</h3>${cityDash(false)}</div>
+  <div class="navbar"><div class="in"><span></span><button class="btn acc" data-act="sloSave">표어 걸기</button></div></div>`;
+}
+/* 28-④ 입장 바꿔 투표 */
+function cityCard(p,opt={}){
+  const c=p.city; const tops=POL.filter(x=>(+c.budget[x.k]||0)>0).sort((a,b)=>(+c.budget[b.k])-(+c.budget[a.k]));
+  const evs=firedList().filter(id=>c.ev[id]).map(id=>`${EVM[id].e} ${esc(EVM[id].opts[c.ev[id].o].sh)}`);
+  return `<div class="nh">${cityIcon(c)}<div class="sp"><div class="nn">${esc(c.name)}</div><div class="ns">${esc(p.nick)}의 동네</div></div></div>
+  <div style="margin-bottom:6px">${dirBadge(c.dir)}</div>
+  ${p.slogan.s?`<div class="slog">“${esc(p.slogan.s)}”</div>`:''}
+  <div class="small"><b>정책</b> ${tops.map(x=>`${x.e}${esc(x.n)} ${c.budget[x.k]}`).join(' · ')||'없음'}</div>
+  ${evs.length?`<div class="small" style="margin-top:4px"><b>사건 대응</b> ${evs.join(' · ')}</div>`:''}${opt.extra||''}`;
+}
+function vVote(){
+  if(!P.vote.as){ P.vote.as=RES[Math.floor(Math.random()*RES.length)].k; saveP(true); }
+  const me=RESM[P.vote.as];
+  const list=plist().filter(p=>p.id!==P.id&&p.city.done);
+  if(ui.voteTo==null && P.vote.to){ ui.voteTo=P.vote.to; ui.voteReason=P.vote.reason; }
+  return `${sHeader()}${phaseTitle()}<div class="card">
+  <div class="teambig" style="background:linear-gradient(135deg,#1f3a6e,#3d63a8)"><div class="e">${me.e}</div><div class="n">지금부터 당신은 ${esc(me.n)}</div><div style="font-weight:600;margin-top:6px">${esc(me.rl)} · “${esc(me.need)}”</div></div>
+  <div style="margin-top:14px">${say(`<b>${esc(me.n)}</b>의 입장이 되어 친구들의 동네를 둘러봐. 이 사람이라면 <b>어느 동네에서 살고 싶을까?</b> (내 동네는 빼고)`)}</div>
+  ${P.vote.to?`<div class="banner ok">✅ 투표 완료: ${esc((list.find(p=>p.id===P.vote.to)||{city:{}}).city.name||'')} — 다시 고르면 바뀌어요.</div>`:''}
+  ${list.length?'':'<p class="muted">아직 문을 연 다른 동네가 없어요.</p>'}
+  <div class="ngrid">${list.map(p=>`<button class="ncard ${ui.voteTo===p.id?'sel':''}" data-act="votePick" data-v="${p.id}">${cityCard(p)}</button>`).join('')}</div>
+  ${ui.voteTo?`<label class="lb">${esc(me.n)}의 입장에서, 이 동네를 고른 이유는?</label><textarea class="field" data-bind="voteR" maxlength="150">${esc(ui.voteReason)}</textarea>`:''}
+  </div><div class="navbar"><div class="in"><span></span><button class="btn acc" data-act="voteSubmit" ${ui.voteTo?'':'disabled'}>🗳️ 투표하기</button></div></div>`;
+}
+/* 28-⑤ 결과·성찰 */
+function vWrap(){
+  const all=plist(); const got=all.filter(p=>p.vote.to===P.id);
+  const ref=`<h3>✍️ 느낀 점 / 실천할 점</h3><textarea class="field" data-bind="ref28" maxlength="250" placeholder="다양한 문화·종교·인종이 공존하려면 나는 무엇을 할 수 있을까요?">${esc(P.ref28)}</textarea>`;
+  return `${sHeader()}${phaseTitle()}<div class="card"><h2>🏁 우리 동네 결과</h2>
+  ${P.city.done?cityDash(false):''}
+  <h3>🗳️ 우리 동네를 고른 이웃 (${got.length}표)</h3>
+  ${got.length?`<ul class="rlist">${got.map(p=>{ const r=RESM[p.vote.as]||{}; return `<li><b>${r.e||''} ${esc(r.n||'')}</b> “${esc(p.vote.reason)}”</li>`; }).join('')}</ul>`:'<p class="muted">아직 받은 표가 없어요.</p>'}
+  </div><div class="card">${P.done28?`<div class="banner ok">✅ 제출 완료! 정답을 확인해 보세요.</div>`:''}${vOX(OX28,'ox28',ref,'done28')}</div>
+  <div class="navbar"><div class="in"><span></span><button class="btn acc" data-act="sub28">${P.done28?'다시 제출':'제출하기'}</button></div></div>`;
+}
+
+function renderStudent(){
+  if(DBMODE==='live' && !ROOM){ $app.innerHTML=`<div class="wrap">${vJoinRoom()}</div>`; return; }
+  if(!P||!P.nick){ if(!P) P=normP({id:'p'+Date.now().toString(36)+Math.random().toString(36).slice(2,6)}); $app.innerHTML=`<div class="wrap">${vJoin()}</div>`; return; }
+  const ph=phase(); let h='';
+  const needCity=['play','slogan','vote','wrap28'].includes(ph) && !P.city.done;
+  if(needCity) h=vCity(true);
+  else if(ph==='lobby') h=vLobby();
+  else if(ph==='dots') h=vDots();
+  else if(ph==='coins') h=vCoins();
+  else if(ph==='reveal') h=vReveal();
+  else if(ph==='detective') h=vDetective();
+  else if(ph==='ox27') h=vOx27();
+  else if(ph==='city') h=P.city.done?`${sHeader()}${phaseTitle()}<div class="card">${say('동네 문을 열었어! 🎉 선생님이 사건 단계를 열면 진짜 운영이 시작돼.')}${cityDash(false)}<div class="row" style="justify-content:flex-end"><button class="btn ghost sm" data-act="cityEdit">✏️ 동네 다시 설계하기</button></div></div>`:vCity();
+  else if(ph==='play') h=vPlay();
+  else if(ph==='slogan') h=vSlogan();
+  else if(ph==='vote') h=vVote();
+  else if(ph==='wrap28') h=vWrap();
+  $app.innerHTML=`<div class="wrap">${h}</div>`;
+  if(ph==='dots') drawDots(DOTS[Object.keys(P.dots).length]||0);
+  if((ph==='city'||needCity) && ui.cityStep===0 && META.natRoom) loadNations();
+}
+function loadNations(){
+  if(ui.natLoaded===META.natRoom) return; ui.natLoaded=META.natRoom; ui.natList=null;
+  if(ui.natUnsub) try{ui.natUnsub();}catch(e){}
+  ui.natUnsub=backend.on(`rooms/${META.natRoom}/nations`,v=>{ ui.natList=Object.values(v||{}).filter(n=>n&&n.d&&n.d.name).sort((a,b)=>(+a.num||999)-(+b.num||999)); softRender(); });
+}
+const SACT = {
+  enterRoom(){ const r=tmpRoom.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,8); if(r.length<3) return toast('방 코드를 확인해 주세요.'); location.search='?room='+r+(SLOT?'&s='+SLOT:''); },
+  join(){ if(!String(P.num).trim()) return toast('번호를 입력해 주세요.'); if(!P.nick.trim()) return toast('별명을 입력해 주세요.'); P.nick=P.nick.trim(); P.at=Date.now(); P.epoch=META.created||null; saveP(true); render(); },
+  dotShow(){ const i=Object.keys(P.dots).length; ui.dotIdx=i; ui.dotShow=true; ui.dotIn=''; render(); setTimeout(()=>{ ui.dotShow=false; render(); const f=$app.querySelector('[data-bind=dotIn]'); f&&f.focus(); },800); },
+  dotSubmit(){ const v=parseInt(ui.dotIn,10); if(!(v>=0)) return toast('숫자를 입력해 주세요.'); P.dots['d'+Object.keys(P.dots).length]=v; ui.dotIdx=null; ui.dotIn=''; if(Object.keys(P.dots).length>=DOTS.length) assignTeam(); saveP(true); render(); },
+  coinSubmit(el){ P.coins[el.dataset.r]=ui.coinDraft; ui.coinDraft=10; saveP(true); window.scrollTo(0,0); render(); },
+  matPick(el){ P.mat=el.dataset.v; saveP(true); render(); },
+  openCase(el){ ui.det=el.dataset.v; window.scrollTo(0,0); render(); },
+  closeCase(){ ui.det=null; render(); },
+  detP(el){ const d=P.det[ui.det]=Object.assign({p:null,t:null,txt:''},P.det[ui.det]); if(d.p!=null) return; d.p=+el.dataset.v; saveP(true); keepScroll=true; render(); },
+  detT(el){ P.det[ui.det].t=+el.dataset.v; saveP(true); keepScroll=true; render(); },
+  detSave(){ const d=P.det[ui.det]; if(!d||(d.txt||'').trim().length<5) return toast('3번 질문에 5글자 이상 써 주세요.'); saveP(true); toast('✅ 사건 해결!'); ui.det=null; window.scrollTo(0,0); render(); },
+  ox(el){ const k=el.dataset.k; P[k]['q'+el.dataset.i]=el.dataset.v; saveP(); keepScroll=true; render(); },
+  sub27(){ if(Object.keys(P.ox27).length<3) return toast('OX 3문항을 모두 풀어 주세요.'); if(P.ref27.a.trim().length<5||P.ref27.b.trim().length<5) return toast('느낀 점과 실천할 점을 5글자 이상 써 주세요.'); P.done27=true; saveP(true); keepScroll=true; render(); toast('✅ 제출했어요!'); },
+  sub28(){ if(Object.keys(P.ox28).length<3) return toast('OX 3문항을 모두 풀어 주세요.'); if(P.ref28.trim().length<5) return toast('느낀 점을 5글자 이상 써 주세요.'); P.done28=true; saveP(true); keepScroll=true; render(); toast('✅ 제출했어요!'); },
+  natPick(el){ const n=(ui.natList||[]).find(x=>x.id===el.dataset.v); if(!n) return; P.city.nat={id:n.id,flag:n.d.flag,gov:n.d.gov||null,name:n.d.name}; P.city.name=n.d.name.slice(0,14); saveP(); keepScroll=true; render(); },
+  sym(el){ P.city.sym=el.dataset.v; saveP(); keepScroll=true; render(); },
+  dir(el){ P.city.dir=el.dataset.v; saveP(); keepScroll=true; render(); },
+  bud(el){ const k=el.dataset.k, d=+el.dataset.v, n=+P.city.budget[k]||0; const nv=n+d; if(nv<0) return; if(nv>PMAX) return toast(`한 정책에는 최대 ${PMAX}칸까지예요.`); if(d>0&&budgetUsed(P.city)>=BUDGET) return toast('예산을 모두 썼어요.'); P.city.budget[k]=nv; saveP(); keepScroll=true; render(); },
+  cityNext(){ const c=P.city; if(ui.cityStep===0&&!c.name.trim()) return toast('동네 이름을 정해 주세요.'); if(ui.cityStep===1&&!c.dir) return toast('동네 방향을 골라 주세요.'); ui.cityStep++; saveP(); window.scrollTo(0,0); render(); },
+  cityPrev(){ ui.cityStep=Math.max(0,ui.cityStep-1); window.scrollTo(0,0); render(); },
+  cityDone(){ const u=budgetUsed(P.city); if(u<BUDGET) return toast(`예산이 ${BUDGET-u}칸 남았어요. 모두 써 주세요.`); P.city.done=true; saveP(true); window.scrollTo(0,0); render(); toast('🎉 동네 문을 열었어요!'); },
+  cityEdit(){ if(Object.keys(P.city.ev).length) return toast('이미 사건에 대응해서 다시 설계할 수 없어요.'); P.city.done=false; ui.cityStep=0; saveP(true); render(); },
+  evOpen(el){ ui.evOpen=el.dataset.v; ui.evDraft={o:null,r:''}; render(); },
+  evPick(el){ ui.evDraft.o=+el.dataset.v; keepScroll=true; render(); },
+  evLater(){ if(META.event){ ui.evClosed=ui.evClosed||{}; ui.evClosed[META.event.at]=1; } ui.evOpen=null; ui.evDraft={o:null,r:''}; render(); },
+  evSubmit(){ const id=ui.evOpen||(META.event&&META.event.id); const d=ui.evDraft; if(!id) return; if(d.o==null) return toast('대응 방법을 골라 주세요.'); if(d.r.trim().length<5) return toast('이유를 5글자 이상 써 주세요.');
+    const fired=firedList(); const before=cityCalc(P.city,fired).h; P.city.ev[id]={o:d.o,r:d.r.trim(),at:Date.now()}; const after=cityCalc(P.city,fired).h;
+    const prot=EVM[id].pol.some(p=>(+P.city.budget[p]||0)>=2) && Object.values(EVM[id].opts[d.o].eff).some(v=>v<0);
+    ui.evResult={id,before,after,prot}; ui.evOpen=null; ui.evDraft={o:null,r:''}; saveP(true); render(); },
+  evClose(){ ui.evResult=null; render(); },
+  sloSave(){ if(P.slogan.s.trim().length<4) return toast('표어를 4글자 이상 써 주세요.'); if(P.slogan.m.trim().length<5) return toast('의미를 5글자 이상 써 주세요.'); P._sloSaved=true; saveP(true); keepScroll=true; render(); toast('✅ 표어를 걸었어요!'); },
+  votePick(el){ ui.voteTo=el.dataset.v; keepScroll=true; render(); },
+  voteSubmit(){ if(!ui.voteTo) return; if(ui.voteReason.trim().length<5) return toast('이유를 5글자 이상 써 주세요.'); P.vote.to=ui.voteTo; P.vote.reason=ui.voteReason.trim(); saveP(true); keepScroll=true; render(); toast('🗳️ 투표 완료!'); }
+};
+const SBIND = {
+  room:v=>tmpRoom=v, num:v=>P.num=v.replace(/[^0-9]/g,'').slice(0,3), nick:v=>P.nick=v.slice(0,10),
+  dotIn:v=>ui.dotIn=v.replace(/[^0-9]/g,''),
+  coin:(v,el)=>{ const n=+v; const mine=el.dataset.flip==='1'?20-n:n; ui.coinDraft=mine; const a=document.getElementById('ca'), b=document.getElementById('cb'); if(a) a.textContent=n; if(b) b.textContent=20-n; },
+  detTxt:v=>{ P.det[ui.det].txt=v; saveP(); },
+  ref27a:v=>{ P.ref27.a=v; saveP(); }, ref27b:v=>{ P.ref27.b=v; saveP(); }, ref28:v=>{ P.ref28=v; saveP(); },
+  cname:v=>{ P.city.name=v.slice(0,14); saveP(); },
+  evR:v=>ui.evDraft.r=v, slo:v=>{ P.slogan.s=v; P._sloSaved=false; saveP(); }, slom:v=>{ P.slogan.m=v; P._sloSaved=false; saveP(); },
+  voteR:v=>ui.voteReason=v
+};
+
+/* =========================================================
+   ⑦ 교사 화면
+   ========================================================= */
+let T={tab:'run', authed:false, pin:'', spot:null, showLink:false};
+try{ T.authed = sessionStorage.getItem('mcgame_t')==='1'; }catch(e){}
+const newCode = () => 'M'+Array.from({length:3},()=>'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[Math.floor(Math.random()*32)]).join('');
+const studentURL = () => location.href.split(/[?#]/)[0].replace(/teacher\.html$/,'index.html')+'?room='+ROOM;
+function setPhase(k){ backend.update(`${BASE()}/meta`,{phase:k}); }
+function obar(label,val,max,color,extra=''){ const w=max?Math.round(val/max*100):0; return `<div class="obar"><div class="lbl"><span>${label}</span><span>${extra||val}</span></div><div class="tr"><i style="width:${w}%;background:${color}"></i></div></div>`; }
+function tCoins(list){
+  const st=classCoinStats(list); const ph=phase();
+  const bias=st.all!=null? Math.round((st.all-10)*10)/10 : null;
+  const msg = st.all==null?'아직 응답이 없어요.' : bias>=1 ? `아무 의미 없는 팀인데도 우리 반은 <b>같은 팀</b>에게 평균 <b>${bias}개 더</b> 줬습니다.` : bias<=-1 ? `우리 반은 오히려 <b>다른 팀</b>에게 더 많이 줬습니다. 그런데 현실에서는 왜 차별이 생길까요?` : `우리 반은 두 팀에게 <b>거의 고르게</b> 나눴습니다. 그런데 현실에서는 왜 차별이 생길까요?`;
+  const mt=st.matN||1;
+  return `<div class="card">${ph==='reveal'?`<div class="punch" style="margin-bottom:12px">🎲 사실 팀은 <u>컴퓨터가 무작위로</u> 나눴습니다.</div>`:''}
+  <div class="stat"><div class="box"><small>나눔 횟수</small><b>${st.n}</b></div><div class="box"><small>같은 팀에게 (20개 중)</small><b style="color:var(--navy)">${st.all??'-'}</b></div><div class="box"><small>다른 팀에게</small><b>${st.all==null?'-':Math.round((20-st.all)*10)/10}</b></div></div>
+  <h3>라운드 1·2: 같은 팀 이웃에게 준 코인 (평균)</h3>
+  ${obar('⭐ 별빛 팀 → 별빛 이웃',st.star||0,20,'var(--star)',st.star==null?'-':st.star+'개')}
+  ${obar('🌙 달빛 팀 → 달빛 이웃',st.moon||0,20,'var(--moon)',st.moon==null?'-':st.moon+'개')}
+  ${obar('— 공평 기준선',10,20,'#c7cfe0','10개')}
+  <h3>라운드 3: 무엇을 골랐나 (${st.matN}명)</h3>
+  ${MAT.map(m=>obar(`${m.n} — 우리 ${m.us} · 상대 ${m.them}`,st.mat[m.k],mt,m.k==='MD'?'var(--bad)':m.k==='FAIR'?'var(--warn)':'var(--teal)',`${st.mat[m.k]}명 (${Math.round(st.mat[m.k]/mt*100)}%)`)).join('')}
+  ${ph==='reveal'?`<div class="concept" style="margin-top:14px"><div class="h">해석</div>${msg}<br>${st.mat.MD?`특히 <b>${st.mat.MD}명</b>은 우리 팀이 <b>덜 받더라도</b>(7개 &lt; 19개) 상대 팀을 이기는 쪽을 골랐습니다. → 이것이 <b>내집단 편향</b>입니다.`:''}</div>`:`<p class="muted">※ ③ 반전 공개 단계에서 해석 문구가 나타납니다.</p>`}</div>`;
+}
+function tDetective(list){
+  return CASES.map((c,ci)=>{ const ds=list.map(p=>({p,d:p.det[c.id]})).filter(x=>x.d&&x.d.p!=null);
+    const right=ds.filter(x=>x.d.p===c.a).length; const ty=[0,1,2].map(i=>ds.filter(x=>x.d.t===i).length); const tn=ty.reduce((a,b)=>a+b,0)||1;
+    const txts=ds.filter(x=>x.d.txt);
+    return `<div class="card"><h3 style="margin-top:0">${c.e} 사건 ${ci+1}. ${esc(c.t)} <span class="muted">(${ds.length}명)</span></h3><p class="small">${esc(c.s)}</p>
+    ${obar('편견 찾기 정답률',right,ds.length||1,'var(--teal)',`${right}/${ds.length}`)}
+    <div class="grid g3">${PTYPE.map((t,i)=>obar((i===c.ty?'⭐ ':'')+t,ty[i],tn,i===c.ty?'var(--navy)':'#9aa6c0',`${ty[i]}명`)).join('')}</div>
+    <div class="wall" style="margin-top:8px">${txts.map(x=>`<button class="wcard" data-act="spot" data-v="${esc(x.d.txt)}" data-w="${esc(x.p.nick)}"><small>${esc(x.p.num)}번 ${esc(x.p.nick)}</small>${esc(x.d.txt)}</button>`).join('')||'<p class="muted">아직 답이 없어요.</p>'}</div></div>`; }).join('');
+}
+function tOX(list,set,key,refFn,doneKey){
+  const ds=list.filter(p=>p[doneKey]);
+  return `<div class="card"><h3 style="margin-top:0">⭕ OX 정답률 (제출 ${ds.length}명)</h3>${set.map((q,i)=>{ const r=ds.filter(p=>p[key]['q'+i]===q.a).length; return obar(`${i+1}. ${esc(q.q)} <b>[${q.a}]</b>`,r,ds.length||1,'var(--teal)',`${r}/${ds.length}`); }).join('')}
+  <h3>✍️ 성찰 벽</h3><div class="wall">${ds.map(p=>refFn(p)).join('')||'<p class="muted">아직 없어요.</p>'}</div></div>`;
+}
+function dirStats(list){
+  const fired=firedList();
+  return DIRS.map(d=>{ const cs=list.filter(p=>p.city.done&&p.city.dir===d.k).map(p=>cityCalc(p.city,fired)); const n=cs.length; const av=k=>n?Math.round(cs.reduce((a,c)=>a+c[k],0)/n*10)/10:'-';
+    return `<tr><td>${d.e} ${esc(d.n)}</td><td>${n}</td><td><b>${av('avg')}</b></td><td>${av('conflict')}</td><td>${av('low')}</td></tr>`; }).join('');
+}
+function tCity(list){
+  const fired=firedList(), done=list.filter(p=>p.city.done);
+  const cur=META.event&&EVM[META.event.id];
+  let evStat='';
+  if(cur){ const ans=list.filter(p=>p.city.ev[cur.id]); evStat=`<div class="card"><h3 style="margin-top:0">${cur.e} 현재 사건: ${esc(cur.t)} <span class="muted">(${ans.length}/${done.length}명 응답)</span></h3><p class="small">${esc(cur.s)}</p>
+    ${cur.opts.map((o,i)=>{ const n=ans.filter(p=>p.city.ev[cur.id].o===i).length; return obar(`${'ABC'[i]}. ${esc(o.t)}`,n,ans.length||1,['#d64545','#2a9d8f','#e9a23b'][i],`${n}명`); }).join('')}
+    <div class="wall" style="margin-top:8px">${ans.map(p=>{ const a=p.city.ev[cur.id]; return `<button class="wcard" data-act="spot" data-v="${esc('['+'ABC'[a.o]+'] '+a.r)}" data-w="${esc(p.city.name)}"><small>${esc(p.city.name)} · ${'ABC'[a.o]}</small>${esc(a.r)}</button>`; }).join('')}</div></div>`; }
+  const lows={}; done.forEach(p=>{ const c=cityCalc(p.city,fired); lows[c.minK]=(lows[c.minK]||0)+1; });
+  return `<div class="card"><h3 style="margin-top:0">🚨 사건 발동</h3><div class="row">${EVENTS.map(e=>`<button class="btn sm ${META.fired&&META.fired[e.id]?'ghost':'gink'}" data-act="fire" data-v="${e.id}">${e.e} ${esc(e.t)}${META.fired&&META.fired[e.id]?' ✓':''}</button>`).join('')}</div>
+  <p class="muted small">발동하면 모든 학생 태블릿에 사건 창이 뜹니다. 이미 발동한 사건을 다시 누르면 ‘현재 사건’ 표시만 바뀝니다. ${fired.length?`· 발동한 사건 ${fired.length}개`:''}</p></div>
+  ${evStat}
+  <div class="card"><h3 style="margin-top:0">📊 동네 방향별 결과 <span class="muted">(${done.length}개 동네)</span></h3>
+  <table class="tb"><tr><th>방향</th><th>동네 수</th><th>평균 공존 지수</th><th>평균 보이는 갈등</th><th>평균 힘든 이웃</th></tr>${dirStats(list)}</table>
+  <p class="small" style="margin-top:8px"><b>가장 힘든 이웃</b>으로 가장 많이 꼽힌 사람: ${Object.entries(lows).sort((a,b)=>b[1]-a[1]).map(([k,n])=>`${RESM[k].e} ${esc(RESM[k].n)} ${n}곳`).join(' · ')||'-'}</p>
+  <p class="muted small">💬 디브리핑: “용광로 동네는 왜 ‘보이는 갈등’은 낮은데 ‘공존 지수’도 낮을까?”</p></div>
+  <div class="ngrid">${done.map(p=>{ const c=cityCalc(p.city,fired); return `<div class="ncard">${cityCard(p,{extra:`<div class="faces" style="margin-top:6px">${RES.map(r=>face(c.h[r.k])).join('')}</div><div class="small">🤝 공존 ${c.avg} · ⚡ 갈등 ${c.conflict} · 😢 ${c.low}명</div>`})}</div>`; }).join('')}</div>`;
+}
+function tSlogan(list){
+  const ds=list.filter(p=>p.slogan.s);
+  return `<div class="wall" style="grid-template-columns:repeat(auto-fill,minmax(300px,1fr))">${ds.map(p=>`<button class="wcard" data-act="spot" data-v="${esc('“'+p.slogan.s+'”\n'+p.slogan.m)}" data-w="${esc(p.city.name)}"><small>${esc(p.city.name)} · ${esc(p.nick)}</small><div class="slog">“${esc(p.slogan.s)}”</div>${esc(p.slogan.m)}</button>`).join('')||'<p class="muted">아직 표어가 없어요.</p>'}</div>`;
+}
+function tVote(list){
+  const fired=firedList(), done=list.filter(p=>p.city.done), voters=list.filter(p=>p.vote.to);
+  const rows=done.map(p=>({p,c:cityCalc(p.city,fired),v:voters.filter(x=>x.vote.to===p.id)})).sort((a,b)=>b.v.length-a.v.length||b.c.avg-a.c.avg);
+  return `<div class="card"><h3 style="margin-top:0">🗳️ 투표 현황 ${voters.length}/${list.length}명</h3>
+  ${rows.map((r,i)=>{ const by={}; r.v.forEach(x=>{by[x.vote.as]=(by[x.vote.as]||0)+1;});
+    return `<div class="ncard" style="margin-bottom:10px"><div class="row"><b style="font-size:24px;width:34px">${i+1}</b><div class="sp">${cityCard(r.p,{extra:`<div class="small" style="margin-top:6px">🤝 공존 ${r.c.avg} · ⚡ 갈등 ${r.c.conflict} · ${RES.map(x=>face(r.c.h[x.k])).join('')}</div>`})}</div><b style="font-size:26px;color:var(--navy)">${r.v.length}표</b></div>
+    ${r.v.length?`<div class="small" style="margin-top:6px">${Object.entries(by).map(([k,n])=>`${RESM[k].e}${esc(RESM[k].n)} ${n}`).join(' · ')}</div><ul class="rlist">${r.v.map(x=>`<li><b>${RESM[x.vote.as]?.e||''} ${esc(RESM[x.vote.as]?.n||'')}</b>${esc(x.vote.reason)}</li>`).join('')}</ul>`:''}</div>`; }).join('')||'<p class="muted">아직 동네가 없어요.</p>'}</div>`;
+}
+function tStatus(list){
+  const ck=b=>b?'✅':'·';
+  return `<div class="card" style="overflow:auto"><table class="tb"><tr><th>번호</th><th>별명</th><th>팀</th><th>점</th><th>코인</th><th>탐정</th><th>OX27</th><th>동네</th><th>사건</th><th>표어</th><th>투표</th><th>OX28</th></tr>
+  ${list.map(p=>`<tr><td>${esc(p.num)}</td><td>${esc(p.nick)}</td><td>${p.g?(p.g==='star'?'⭐':'🌙'):'·'}</td><td>${Object.keys(p.dots).length}/3</td><td>${(p.coins.r1!=null)+(p.coins.r2!=null)+(p.mat?1:0)}/3</td><td>${CASES.filter(c=>p.det[c.id]&&p.det[c.id].txt).length}/6</td><td>${ck(p.done27)}</td><td>${p.city.done?esc(p.city.name):'·'}</td><td>${Object.keys(p.city.ev).length}</td><td>${ck(p.slogan.s)}</td><td>${ck(p.vote.to)}</td><td>${ck(p.done28)}</td></tr>`).join('')}</table>${list.length?'':'<p class="muted">아직 들어온 학생이 없어요.</p>'}</div>`;
+}
+function tSettings(){
+  return `<div class="card"><h3 style="margin-top:0">🏛️ 국가 만들기 연동</h3>
+  <p class="small">이 반이 ‘내가 살고 싶은 국가 만들기’를 할 때 쓴 <b>방 코드</b>를 넣으면, 28차시 동네 설계에서 학생이 자기 나라를 불러올 수 있습니다. (읽기만 하며 원래 기록은 바뀌지 않습니다.)</p>
+  <div class="row"><input class="field" style="max-width:200px;text-transform:uppercase;font-weight:800;letter-spacing:2px" id="natIn" value="${esc(META.natRoom||'')}" maxlength="8" placeholder="예: AB12"><button class="btn sm acc" data-act="natSave">연결</button>${META.natRoom?`<button class="btn sm ghost" data-act="natClear">연결 해제</button>`:''}</div>
+  ${META.natRoom?`<p class="small">현재 연결: <b>${esc(META.natRoom)}</b> (나라 ${T.natCount??'…'}개)</p>`:''}</div>
+  <div class="card"><h3 style="margin-top:0">💾 기록</h3><div class="row"><button class="btn sm teal" data-act="csv">📥 CSV 내려받기</button><button class="btn sm bad" data-act="reset">🗑️ 이 방 기록 모두 지우기</button><button class="btn sm ghost" data-act="newRoom">➕ 새 방(다른 반) 만들기</button></div>
+  <p class="muted small">방 코드는 반마다 하나씩 쓰세요. 27차시와 28차시는 <b>같은 방 코드</b>로 이어서 진행합니다. 교사 비밀번호는 파일 안 TEACHER_PIN 에서 바꿀 수 있습니다.</p></div>`;
+}
+function renderTeacher(){
+  if(!T.authed){ $app.innerHTML=`<div class="wrap"><div class="card center"><div class="hero"><img src="${CHAR}" alt=""><h2>교사 화면</h2></div><p class="muted">교사 비밀번호를 입력하세요.</p>
+    <input class="field" type="password" inputmode="numeric" style="max-width:220px;text-align:center;font-size:22px" data-bind="pin"><div style="margin-top:12px"><button class="btn acc" data-act="login">들어가기</button></div></div></div>`; return; }
+  const list=plist(), ph=phase(), p=PHN[ph];
+  const phb=['27','28'].map(l=>`<div class="phasebar"><span class="lbl">${l}차시</span>${PH.filter(x=>x.l===l).map(x=>`<button class="${ph===x.k?'on':''}" data-act="phase" data-v="${x.k}">${x.e} ${x.n}</button>`).join('')}</div>`).join('');
+  let main='';
+  if(T.tab==='status') main=tStatus(list);
+  else if(T.tab==='set') main=tSettings();
+  else {
+    if(ph==='lobby'||ph==='dots') main=`<div class="card"><div class="stat"><div class="box"><small>입장</small><b>${list.length}</b></div><div class="box"><small>점 세기 완료</small><b>${list.filter(x=>Object.keys(x.dots).length>=3).length}</b></div><div class="box"><small>⭐ 별빛</small><b>${list.filter(x=>x.g==='star').length}</b></div><div class="box"><small>🌙 달빛</small><b>${list.filter(x=>x.g==='moon').length}</b></div></div><div class="prog">${list.map(x=>`<span class="${x.g?'done':''}">${esc(x.num)} ${esc(x.nick)}</span>`).join('')}</div></div>`;
+    else if(ph==='coins'||ph==='reveal') main=tCoins(list);
+    else if(ph==='detective') main=tDetective(list);
+    else if(ph==='ox27') main=tOX(list,OX27,'ox27',x=>`<button class="wcard" data-act="spot" data-v="${esc(x.ref27.a+'\n'+x.ref27.b)}" data-w="${esc(x.nick)}"><small>${esc(x.num)}번 ${esc(x.nick)}</small>${esc(x.ref27.a)}<br>→ ${esc(x.ref27.b)}</button>`,'done27');
+    else if(ph==='city'||ph==='play') main=tCity(list);
+    else if(ph==='slogan') main=tSlogan(list);
+    else if(ph==='vote') main=tVote(list);
+    else if(ph==='wrap28') main=tVote(list)+`<div class="card"><h3 style="margin-top:0">📊 방향별 결과</h3><table class="tb"><tr><th>방향</th><th>동네 수</th><th>평균 공존 지수</th><th>평균 보이는 갈등</th><th>평균 힘든 이웃</th></tr>${dirStats(list)}</table></div>`+tOX(list,OX28,'ox28',x=>`<button class="wcard" data-act="spot" data-v="${esc(x.ref28)}" data-w="${esc(x.nick)}"><small>${esc(x.num)}번 ${esc(x.nick)}</small>${esc(x.ref28)}</button>`,'done28');
+  }
+  const link = T.showLink ? `<div class="card"><div class="row" style="align-items:flex-start"><div id="qr" class="qrbox"></div><div class="sp"><h3 style="margin-top:0">학생 입장 주소</h3><div class="url">${esc(studentURL())}</div><p class="muted small">QR 코드를 찍거나 주소로 들어가면 바로 이 방에 입장합니다.</p><button class="btn sm ghost" data-act="copy">주소 복사</button></div></div></div>`:'';
+  $app.innerHTML=`<div class="twrap"><div class="top"><h1><img src="${CHAR}" alt="">꿈결마을 이웃 프로젝트 · 교사</h1>${modeBadge()}<span class="pill" style="font-size:18px">방 코드 <b style="letter-spacing:2px">${esc(ROOM)}</b></span><span class="pill">👥 ${list.length}명</span>
+  <button class="btn sm ghost" data-act="link">${T.showLink?'QR 닫기':'📱 QR·주소'}</button><button class="btn sm ghost" data-act="big">🔍 ${document.body.classList.contains('big')?'보통':'크게'}</button></div>
+  ${DBMODE!=='live'?`<div class="banner warn">⚠️ 체험 모드입니다. Firebase가 연결되지 않아 <b>이 브라우저 안에서만</b> 연동됩니다. 학생 태블릿과 연결하려면 파일의 FIREBASE_CONFIG 를 확인하세요.</div>`:''}
+  ${link}<div class="card" style="padding:14px 16px">${phb}${say(`<b>${p.l}차시 ${p.e} ${p.n}</b> — ${TIPS[ph]}`)}</div>
+  <div class="tabs">${[['run','📺 진행 화면'],['status','👥 학생 현황'],['set','⚙️ 설정']].map(([k,n])=>`<button class="${T.tab===k?'on':''}" data-act="tab" data-v="${k}">${n}</button>`).join('')}</div>
+  ${main}</div>${T.spot?`<div class="overlay" data-act="spotClose"><div class="modal"><div class="muted">${esc(T.spot.w)}</div><div class="spot">${esc(T.spot.v).replace(/\n/g,'<br>')}</div><div class="row" style="justify-content:flex-end"><button class="btn acc" data-act="spotClose">닫기</button></div></div></div>`:''}`;
+  if(T.showLink){ const q=document.getElementById('qr'); if(q&&window.QRCode) new QRCode(q,{text:studentURL(),width:180,height:180}); }
+}
+function csvExport(){
+  const list=plist(), fired=EVENTS.map(e=>e.id);
+  const H=['번호','별명','팀','점추정1','점추정2','점추정3','R1같은팀','R2같은팀','R3선택',...CASES.flatMap((c,i)=>[`사건${i+1}편견`,`사건${i+1}유형`,`사건${i+1}서술`]),'OX27','성찰27-1','성찰27-2','동네','방향',...POL.map(p=>p.n),...EVENTS.flatMap(e=>[e.t+'선택',e.t+'이유']),'공존지수','표어','표어의미','투표역할','투표대상','투표이유','OX28','느낀점28'];
+  const rows=list.map(p=>{ const c=cityCalc(p.city,firedList());
+    const oxs=(set,k)=>set.map((q,i)=>p[k]['q'+i]===q.a?'O':(p[k]['q'+i]?'X':'-')).join('');
+    return [p.num,p.nick,p.g==='star'?'별빛':p.g==='moon'?'달빛':'',p.dots.d0??'',p.dots.d1??'',p.dots.d2??'',p.coins.r1??'',p.coins.r2??'',(MAT.find(m=>m.k===p.mat)||{}).n||'',
+      ...CASES.flatMap(cs=>{ const d=p.det[cs.id]||{}; return [d.p==null?'':(d.p===cs.a?'정답':'오답'),d.t==null?'':PTYPE[d.t],d.txt||'']; }),
+      p.done27?oxs(OX27,'ox27'):'',p.ref27.a,p.ref27.b,p.city.name,(DIRM[p.city.dir]||{}).n||'',...POL.map(x=>p.city.budget[x.k]||0),
+      ...fired.flatMap(id=>{ const a=p.city.ev[id]; return a?['ABC'[a.o]+'. '+EVM[id].opts[a.o].sh,a.r]:['','']; }),
+      p.city.done?c.avg:'',p.slogan.s,p.slogan.m,(RESM[p.vote.as]||{}).n||'',((list.find(x=>x.id===p.vote.to)||{}).city||{}).name||'',p.vote.reason,p.done28?oxs(OX28,'ox28'):'',p.ref28];
+  });
+  const csv='﻿'+[H,...rows].map(r=>r.map(v=>`"${String(v??'').replace(/"/g,'""')}"`).join(',')).join('\r\n');
+  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'})); a.download=`꿈결마을_${ROOM}_${new Date().toISOString().slice(0,10)}.csv`; a.click();
+}
+let natCountUnsub=null;
+function watchNatCount(){ if(natCountUnsub){ try{natCountUnsub();}catch(e){} natCountUnsub=null; } T.natCount=null; if(META.natRoom) natCountUnsub=backend.on(`rooms/${META.natRoom}/nations`,v=>{ T.natCount=Object.keys(v||{}).length; if(T.tab==='set') softRender(); }); }
+const TACT = {
+  login(){ if(T.pin===TEACHER_PIN){ T.authed=true; try{sessionStorage.setItem('mcgame_t','1');}catch(e){} render(); } else toast('비밀번호가 다릅니다.'); },
+  phase(el){ setPhase(el.dataset.v); },
+  tab(el){ T.tab=el.dataset.v; render(); },
+  link(){ T.showLink=!T.showLink; render(); },
+  big(){ document.body.classList.toggle('big'); render(); },
+  copy(){ navigator.clipboard&&navigator.clipboard.writeText(studentURL()).then(()=>toast('주소를 복사했어요.')); },
+  fire(el){ const id=el.dataset.v; const now=Date.now(); const up={event:{id,at:now}}; up['fired/'+id]=(META.fired&&META.fired[id])||now; if(phase()!=='play') up.phase='play'; backend.update(`${BASE()}/meta`,up); toast(`🚨 ${EVM[id].t} 발동!`); },
+  spot(el){ T.spot={v:el.dataset.v,w:el.dataset.w}; render(); },
+  spotClose(el,ev){ if(ev && ev.target!==el) return; T.spot=null; render(); },
+  natSave(){ const v=(document.getElementById('natIn').value||'').toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,8); if(!v) return toast('방 코드를 입력하세요.'); if(v===ROOM) return toast('이 방이 아니라 국가 만들기 때의 방 코드를 넣어 주세요.'); backend.update(`${BASE()}/meta`,{natRoom:v}); toast('🏛️ 연결했어요.'); },
+  natClear(){ backend.update(`${BASE()}/meta`,{natRoom:null}); },
+  csv(){ csvExport(); },
+  reset(){ if(!confirm('이 방('+ROOM+')의 학생 기록을 모두 지울까요? 되돌릴 수 없습니다. (국가 만들기 기록은 지워지지 않습니다)')) return; backend.remove(BASE()).then(()=>backend.set(`${BASE()}/meta`,{phase:'lobby',created:Date.now()})); toast('🗑️ 지웠어요.'); },
+  newRoom(){ if(!confirm('새 방(다른 반용)을 만들까요? 지금 방의 기록은 그대로 남습니다.')) return; location.search='?mode=teacher&room='+newCode(); }
+};
+const TBIND = { pin:v=>T.pin=v };
+
+/* =========================================================
+   ⑧ 이벤트 연결 · 시작
+   ========================================================= */
+document.addEventListener('error',e=>{ const t=e.target; if(t&&t.tagName==='IMG'&&t.src.indexOf(CHAR)>=0){ const sp=document.createElement('span'); sp.textContent='🌼'; sp.className=t.className; sp.style.cssText='display:inline-flex;align-items:center;justify-content:center;font-size:'+Math.max(24,Math.round((t.width||60)*0.7))+'px;width:'+(t.width||60)+'px;flex:none'; t.replaceWith(sp); } },true);
+document.addEventListener('click',e=>{
+  const el=e.target.closest('[data-act]'); if(!el) return;
+  const A = MODE==='teacher'?TACT:SACT; const f=A[el.dataset.act]; if(f) f(el,e);
+});
+document.addEventListener('input',e=>{
+  const el=e.target.closest('[data-bind]'); if(!el) return;
+  const B = MODE==='teacher'?TBIND:SBIND; const f=B[el.dataset.bind]; if(f) f(el.value,el);
+});
+document.addEventListener('keydown',e=>{ if(e.key!=='Enter') return; const el=e.target.closest('[data-bind]'); if(!el||el.tagName==='TEXTAREA') return;
+  const map={room:'enterRoom',pin:'login',dotIn:'dotSubmit'}; const a=map[el.dataset.bind]; if(a){ e.preventDefault(); (MODE==='teacher'?TACT:SACT)[a](); } });
+
+(async function start(){
+  await initBackend();
+  if(MODE==='teacher'){
+    if(!ROOM){ ROOM=newCode(); history.replaceState(null,'','?mode=teacher&room='+ROOM); }
+    let first=true;
+    backend.on(`${BASE()}/meta`,v=>{ const old=META.natRoom; META=v||{}; if(first&&!v){ backend.set(`${BASE()}/meta`,{phase:'lobby',created:Date.now()}); } first=false; if(old!==META.natRoom) watchNatCount(); softRender(); });
+    backend.on(`${BASE()}/players`,v=>{ PLAYERS=v||{}; softRender(); });
+    render(); return;
+  }
+  if(DBMODE!=='live' && !ROOM) ROOM='SOLO';
+  if(!ROOM){ render(); return; }
+  P=loadP();
+  let lastPhase=null, lastEvAt=null;
+  backend.on(`${BASE()}/meta`,v=>{ META=v||{}; const ph=phase();
+    if(P&&P.epoch&&META.created&&P.epoch!==META.created){ try{localStorage.removeItem(skey());}catch(e){} P=null; ui.cityStep=0; ui.det=null; ui.evResult=null; ui.voteTo=null; toast('선생님이 기록을 초기화했어요. 다시 입장해 주세요.'); render(); return; }
+    if(P&&P.nick&&!P.epoch&&META.created){ P.epoch=META.created; saveP(true); }
+    if(ph!==lastPhase){ ui.det=null; ui.evOpen=null; if(lastPhase!==null) window.scrollTo(0,0); lastPhase=ph; render(); return; }
+    const at=META.event&&META.event.at; if(at!==lastEvAt){ lastEvAt=at; ui.evOpen=null; }
+    softRender(); });
+  backend.on(`${BASE()}/players`,v=>{ PLAYERS=v||{};
+    if(P&&P.nick&&PLAYERS[P.id]==null&&P.epoch&&P.epoch===META.created){ saveP(true); }   // 연결이 끊겼다 돌아온 경우 내 기록 다시 올림
+    if(['reveal','vote','wrap28'].includes(phase())) softRender(); });
+  if(P&&P.nick&&P.city.done) ui.cityStep=2;
+  render();
+})();
+</script>
+</body>
+</html>
