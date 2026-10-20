@@ -115,6 +115,7 @@ label.lb{display:block;font-weight:700;margin:14px 0 6px}
 .overlay{position:fixed;inset:0;background:rgba(20,26,40,.6);z-index:50;display:flex;align-items:flex-start;justify-content:center;overflow:auto;padding:24px 16px}
 .modal{background:var(--paper);border-radius:20px;max-width:760px;width:100%;padding:22px;box-shadow:0 20px 60px rgba(0,0,0,.3)}
 .modal.alert{border:4px solid var(--bad)}
+.modal.opp{border:4px solid var(--ok)}
 .blink{animation:blink 1.2s infinite}
 @keyframes blink{50%{opacity:.5}}
 .banner{border-radius:14px;padding:14px 16px;margin-bottom:14px;font-weight:700}
@@ -282,28 +283,104 @@ const CARDS = [
     {t:'처벌은 하되, 법을 고칠지 공청회를 연다.',eff:{free:5,trust:8}},
     {t:'법을 즉시 없애고, 시민과 소통하는 창구를 만든다.',eff:{free:12,trust:12,safe:-3}}]}
 ];
+const KIND = {crisis:'🚨 위기', ops:'🏛️ 국가 운영', opp:'🌟 기회'};
 const EVENTS = [
-  {id:'flood',e:'🌧️',t:'대홍수 발생!',s:'기록적인 폭우로 강가 마을 3곳이 물에 잠겼습니다. 이재민 2만 명이 생겼어요. 우리 나라는 어떻게 대응할까요?',
+  {id:'flood',kind:'crisis',e:'🌧️',t:'대홍수 발생!',s:'기록적인 폭우로 강가 마을 3곳이 물에 잠겼습니다. 이재민 2만 명이 생겼어요. 우리 나라는 어떻게 대응할까요?',
+   prep:[['dis',1]],prepName:'재난·환경 예산',base:{safe:-12,welfare:-6,eco:-6},
    opts:[
     {t:'국가 긴급 예산 투입 — 임시 주택과 생활비를 지원한다.',eff:{welfare:6,safe:6,eco:-8}},
     {t:'국가는 장비를 지원하고, 시민 자원봉사단을 모집해 함께 복구한다. (태안 사례처럼)',eff:{safe:5,trust:10,eco:-3}},
     {t:'각 지역이 알아서 복구하게 맡긴다.',eff:{eco:3,safe:-10,trust:-10}}]},
-  {id:'virus',e:'🦠',t:'감염병 유행!',s:'전파력이 강한 새 감염병이 빠르게 퍼지고 있습니다.',
+  {id:'virus',kind:'crisis',e:'🦠',t:'감염병 유행!',s:'전파력이 강한 새 감염병이 빠르게 퍼지고 있습니다.',
+   prep:[['med',1]],prepName:'의료·보건 예산',base:{safe:-10,welfare:-8,eco:-6},
    opts:[
     {t:'모든 국민에게 위치 추적 앱을 의무로 깔게 하고 확진자 동선을 공개한다.',eff:{safe:12,free:-15,trust:-3}},
     {t:'검사·치료를 무료로 지원하고, 개인정보는 최소한만 공개한다.',eff:{safe:6,welfare:5,eco:-6}},
     {t:'개인이 알아서 조심하도록 안내만 한다.',eff:{free:5,safe:-12,welfare:-5}}]},
-  {id:'crisis',e:'📉',t:'경제 위기!',s:'세계 경제가 흔들리며 실업자가 크게 늘었습니다. 가게들이 문을 닫고 있어요.',
+  {id:'quake',kind:'crisis',e:'🌋',t:'강한 지진 발생!',s:'규모 6.8의 강한 지진이 도시를 덮쳤습니다. 건물이 무너지고 도로가 끊겼어요.',
+   prep:[['dis',1],['def',0.5]],prepName:'재난·환경 + 국방·치안(절반)',base:{safe:-14,eco:-8,welfare:-4},
+   opts:[
+    {t:'군대와 경찰을 총동원해 구조하고, 위험 지역은 강제로 대피시킨다.',eff:{safe:8,free:-5,eco:-4}},
+    {t:'구조는 국가가, 복구는 국가와 시민 봉사단이 함께 한다.',eff:{safe:5,trust:8,eco:-3}},
+    {t:'피해 주민에게 돈을 나눠 주고 스스로 복구하게 한다.',eff:{welfare:4,eco:-6,safe:-2}}]},
+  {id:'border',kind:'crisis',e:'⚔️',t:'이웃 나라의 국경 도발!',s:'이웃 나라 군대가 국경 근처에서 훈련을 하며, 우리 땅 일부가 자기 땅이라고 주장합니다.',
+   prep:[['def',1]],prepName:'국방·치안 예산',base:{safe:-14,eco:-4,trust:-4},
+   opts:[
+    {t:'군대를 국경에 대규모로 배치해 맞대응한다.',eff:{safe:8,eco:-8,free:-3}},
+    {t:'외교관을 보내 대화로 풀고, 국제기구에 도움을 요청한다.',eff:{safe:4,trust:4,eco:-1}},
+    {t:'충돌을 피하려고 그 땅을 양보한다.',eff:{safe:-6,trust:-8,eco:2}}]},
+  {id:'cyber',kind:'crisis',e:'💻',t:'국가 전산망 해킹!',s:'해커들이 국가 전산망을 공격해 은행·병원·학교 시스템이 멈췄습니다.',
+   prep:[['def',0.5],['edu',0.5]],prepName:'국방·치안(절반) + 교육(절반)',base:{safe:-8,eco:-8,trust:-4},
+   opts:[
+    {t:'모든 국민의 인터넷 사용을 국가가 실시간으로 감시한다.',eff:{safe:8,free:-15,trust:-4}},
+    {t:'보안 전문가를 채용하고, 중요한 자료를 백업하는 체계를 만든다.',eff:{safe:6,eco:-4}},
+    {t:'각 기업과 기관이 알아서 복구하게 한다.',eff:{eco:2,safe:-6,trust:-4}}]},
+  {id:'crisis',kind:'ops',e:'📉',t:'경제 위기!',s:'세계 경제가 흔들리며 실업자가 크게 늘었습니다. 가게들이 문을 닫고 있어요.',
+   prep:[['job',1],['edu',0.5]],prepName:'경제·일자리 + 교육(절반)',base:{eco:-12,welfare:-6,equal:-4},
    opts:[
     {t:'세금을 올려 실업자에게 기본 생활비를 지원한다.',eff:{welfare:10,equal:5,eco:-5,free:-3}},
     {t:'기업 세금을 깎아 일자리를 늘리게 한다.',eff:{eco:10,equal:-6}},
     {t:'국가가 공공 일자리를 만들고 직업 훈련을 제공한다.',eff:{eco:4,welfare:4,trust:4}}]},
-  {id:'protest',e:'📢',t:'대규모 평화 시위!',s:'‘청소년 밤 10시 이후 외출 금지법’에 반대하는 시민들이 법을 어기고 밤에 모여 평화 시위를 하고 있습니다. 처벌도 받겠다고 밝혔어요.',
+  {id:'aging',kind:'ops',e:'👴',t:'고령화 시대!',s:'노인 인구가 빠르게 늘어 일할 사람은 줄고, 돌봄과 연금에 드는 돈은 늘고 있습니다.',
+   prep:[['wel',1],['med',0.5]],prepName:'복지 + 의료·보건(절반)',base:{welfare:-8,eco:-6},
+   opts:[
+    {t:'세금을 올려 연금과 돌봄 서비스를 늘린다.',eff:{welfare:10,eco:-6,free:-2}},
+    {t:'정년을 늘리고 어르신 일자리를 만든다.',eff:{eco:4,welfare:4,trust:2}},
+    {t:'어르신 부양은 가족이 책임진다.',eff:{eco:3,welfare:-8,equal:-4}}]},
+  {id:'protest',kind:'ops',e:'📢',t:'대규모 평화 시위!',s:'‘청소년 밤 10시 이후 외출 금지법’에 반대하는 시민들이 법을 어기고 밤에 모여 평화 시위를 하고 있습니다. 처벌도 받겠다고 밝혔어요.',
+   prep:[],prepName:'',base:{safe:-4,trust:-6},
    opts:[
     {t:'경찰을 투입해 강제 해산하고 주동자를 엄하게 처벌한다.',eff:{safe:4,free:-12,trust:-12}},
     {t:'법은 지키게 하되, 시위대 대표와 공개 토론회를 연다.',eff:{trust:8,free:3}},
-    {t:'법이 부당했음을 인정하고 즉시 폐지한다.',eff:{free:10,trust:6,safe:-3}}]}
+    {t:'법이 부당했음을 인정하고 즉시 폐지한다.',eff:{free:10,trust:6,safe:-3}}]},
+  {id:'talent',kind:'opp',e:'🎓',t:'인재들이 자라났다!',s:'그동안 길러 낸 학생들이 과학자·의사·예술가로 자라나 나라 곳곳에서 활약하기 시작했습니다.',
+   prep:[['edu',1]],prepName:'교육 예산',base:{eco:10,trust:4,equal:4},
+   opts:[
+    {t:'뛰어난 인재에게 집중 지원해 세계 최고로 키운다.',eff:{eco:8,equal:-5}},
+    {t:'모든 학생이 재능을 찾도록 무료 교육을 더 넓힌다.',eff:{equal:6,welfare:3,eco:2}},
+    {t:'인재들이 해외에서 경험을 쌓도록 유학을 지원한다.',eff:{eco:3,free:3,trust:-2}}]},
+  {id:'invest',kind:'opp',e:'🚀',t:'신산업 투자 기회!',s:'AI·반도체 같은 새로운 산업이 떠오르고 있습니다. 지금 투자하면 나라가 크게 부유해질 수 있어요.',
+   prep:[['job',1]],prepName:'경제·일자리 예산',base:{eco:12,safe:2},
+   opts:[
+    {t:'복지 예산까지 끌어와 국가가 대규모로 투자한다.',eff:{eco:12,welfare:-6,equal:-3}},
+    {t:'기업과 함께 투자하고, 생긴 일자리를 지역에 고루 나눈다.',eff:{eco:6,equal:4}},
+    {t:'실패할 수 있으니 투자하지 않는다.',eff:{eco:-3,welfare:2}}]},
+  {id:'resource',kind:'opp',e:'💎',t:'귀한 자원 발견!',s:'우리 땅에서 귀한 광물(희토류)이 대량으로 발견되었습니다! 캐낼 기술과 산업이 있어야 이익을 볼 수 있어요.',
+   prep:[['job',0.5],['edu',0.5]],prepName:'경제·일자리(절반) + 교육(절반)',base:{eco:10},
+   opts:[
+    {t:'외국 기업에 채굴권을 팔아 빨리 돈을 번다.',eff:{eco:8,safe:-3,trust:-3}},
+    {t:'국가가 직접 개발하고, 수익을 국민 복지에 쓴다.',eff:{eco:4,welfare:5,equal:3}},
+    {t:'환경 파괴를 막기 위해 개발을 미룬다.',eff:{trust:3,welfare:2,eco:-2}}]},
+  {id:'defense',kind:'opp',e:'🛰️',t:'국방 기술 개발 성공!',s:'국방 연구소가 새로운 첨단 드론 기술 개발에 성공했습니다.',
+   prep:[['def',1]],prepName:'국방·치안 예산',base:{safe:10,eco:4},
+   opts:[
+    {t:'다른 나라에 수출해 큰돈을 번다.',eff:{eco:8,trust:-4}},
+    {t:'재난 구조·농업 등 민간에도 기술을 개방한다.',eff:{safe:4,eco:4,welfare:3}},
+    {t:'기술을 비밀로 하고 국방에만 쓴다.',eff:{safe:7,free:-2}}]},
+  {id:'culture',kind:'opp',e:'🎤',t:'우리 문화가 세계적 인기!',s:'우리나라의 음악과 드라마가 세계적으로 큰 인기를 얻고 있습니다!',
+   prep:[['edu',1]],prepName:'교육(문화·예술) 예산',base:{eco:6,trust:6},
+   opts:[
+    {t:'관광·문화 산업에 집중 투자해 돈을 번다.',eff:{eco:8,equal:-2}},
+    {t:'예술인 지원과 문화 교육을 모든 지역에 넓힌다.',eff:{trust:5,equal:3,welfare:2}},
+    {t:'국가는 간섭하지 않고 민간에 맡긴다.',eff:{free:4,eco:3}}]}
 ];
+const LV_CRISIS=[{min:6,n:'철저한 대비',m:0.2,c:'ok',d:'평소에 꾸준히 투자한 덕분에 피해가 80% 줄었어요!'},{min:3,n:'대비됨',m:0.5,c:'ok',d:'준비가 되어 있어 피해가 절반으로 줄었어요.'},{min:1,n:'대비 부족',m:1,c:'warn',d:'준비가 부족해 피해를 그대로 입었어요.'},{min:0,n:'무방비',m:1.5,c:'bad',d:'준비가 전혀 없어 피해가 1.5배로 커졌어요!'}];
+const LV_OPP=[{min:6,n:'최고 수준 투자',m:1.5,c:'ok',d:'꾸준한 투자가 큰 열매를 맺었어요! (효과 1.5배)'},{min:3,n:'충분한 투자',m:1,c:'ok',d:'투자한 만큼 성과를 거뒀어요.'},{min:1,n:'투자 부족',m:0.5,c:'warn',d:'투자가 적어 효과가 절반에 그쳤어요.'},{min:0,n:'투자 없음',m:0,c:'bad',d:'투자가 없어 이 기회를 살리지 못했어요.'}];
+function eventImpact(d,e,v){
+  const b=norm(d).budget;
+  const pts=(e.prep||[]).reduce((a,p)=>a+(+b[p[0]]||0)*p[1],0);
+  const LV=e.kind==='opp'?LV_OPP:LV_CRISIS;
+  const lv=(e.prep&&e.prep.length)?LV.find(x=>pts>=x.min):{n:'신뢰가 좌우',m:1,c:'warn',d:'이 사건은 예산보다 시민의 신뢰가 결과를 좌우해요.'};
+  let m=lv.m; const notes=[];
+  const tr=Math.round(Math.max(0,Math.min(100,v?v.trust:50)));
+  if(e.kind!=='opp'){
+    if(tr>=65){ m*=0.7; notes.push({c:'ok',t:`🤝 시민 신뢰 ${tr}점 — 시민들이 정부와 힘을 모아 피해가 더 줄었어요.`}); }
+    else if(tr<35){ m*=1.3; notes.push({c:'bad',t:`😠 시민 신뢰 ${tr}점 — 시민들이 정부를 믿지 않아 혼란이 더 커졌어요.`}); }
+  } else if(tr>=65 && m>0){ m*=1.2; notes.push({c:'ok',t:`🤝 시민 신뢰 ${tr}점 — 시민들의 참여로 효과가 더 커졌어요.`}); }
+  const scaled={}; for(const k in e.base){ const x=Math.round(e.base[k]*m); if(x) scaled[k]=x; }
+  return {pts,lv,m,notes,scaled};
+}
+function fmtEff(o){ return IND.filter(i=>o&&o[i.k]).map(i=>`${i.n} ${o[i.k]>0?'+':''}${o[i.k]}`).join(' · '); }
 const DUTIES = [
   {k:'army',n:'🪖 국방의 의무'},{k:'work',n:'🛠️ 근로의 의무'},{k:'study',n:'📖 교육의 의무'},
   {k:'tax',n:'🧾 납세의 의무'},{k:'join',n:'🙋 공동체 일에 참여'},{k:'bal',n:'⚖️ 공익과 사익의 조화'}
@@ -342,7 +419,7 @@ function norm(d){
     con:{a1:(d.con&&d.con.a1)||'',a2:(d.con&&d.con.a2)||'',duties:Object.values((d.con&&d.con.duties)||[])}
   };
 }
-function computeInd(d){
+function computeInd(d,log){
   d = norm(d);
   const v={safe:40,free:40,equal:40,welfare:40,eco:40,trust:40};
   const add=eff=>{ if(!eff) return; for(const k in eff) v[k]+=eff[k]; };
@@ -354,7 +431,9 @@ function computeInd(d){
     }
   }
   for(const c of CARDS){ const ch=d.choices[c.id]; if(ch && ch.opt!=null && c.opts[ch.opt]) add(c.opts[ch.opt].eff); }
-  for(const e of EVENTS){ const r=d.events[e.id]; if(r && r.opt!=null && e.opts[r.opt]) add(e.opts[r.opt].eff); }
+  const evs=EVENTS.filter(e=>{ const r=d.events[e.id]; return r && r.opt!=null && e.opts[r.opt]; }).sort((a,b)=>(d.events[a.id].at||0)-(d.events[b.id].at||0));
+  for(const e of evs){ const imp=eventImpact(d,e,v); const ch=e.opts[d.events[e.id].opt].eff; add(imp.scaled); add(ch);
+    if(log){ const delta={}; for(const k of new Set([...Object.keys(imp.scaled),...Object.keys(ch)])){ const x=(imp.scaled[k]||0)+(ch[k]||0); if(x) delta[k]=x; } log.push({e,imp,opt:d.events[e.id].opt,delta}); } }
   for(const k in v) v[k]=Math.max(0,Math.min(100,Math.round(v[k])));
   return v;
 }
@@ -500,7 +579,7 @@ function vBudget(){
   <div class="remain ${left===0?'zero':left<0?'over':''}"><span>남은 예산</span><span>${left} / ${total}칸</span></div>
   ${BUDGET.map(b=>{const p=+d.budget[b.k]||0; return `<div class="brow"><div style="font-size:28px">${b.e}</div><div class="nm"><b>${esc(b.n)}</b><small>${esc(b.role)}</small><div class="dots">${'<i></i>'.repeat(p)}</div></div><div class="stp"><button data-act="bud" data-k="${b.k}" data-v="-1">−</button><span class="v">${p}</span><button data-act="bud" data-k="${b.k}" data-v="1">+</button></div></div>`;}).join('')}
   <h3>📊 지금 우리 나라 예상 상태 <span class="muted">(정책 결정 전)</span></h3>${barsHTML(v)}
-  <p class="muted">💡 0칸인 분야는 시민이 크게 불만을 가져요.</p>`:''}
+  <p class="muted">💡 0칸인 분야는 시민이 크게 불만을 가져요. 그리고 평소에 넣은 예산은 나중에 <b>위기</b>가 닥치거나 <b>기회</b>가 왔을 때 결과를 바꿔요!</p>`:''}
   </div>${nav(true)}`;
 }
 function vCard(){
@@ -538,7 +617,7 @@ function vResult(){
   let top='';
   if(S.submitted && DBMODE!=='live'){
     top=`<div class="banner ok">🎉 ${esc(S.d.name)} 선포 완료! 선생님이 부르는 <b>위기 사건</b> 버튼을 눌러 대응해 보세요.</div>
-    <div class="card"><h3 style="margin-top:0">🚨 위기 사건 <span class="muted">(선생님 안내에 따라 하나씩)</span></h3><div class="grid g4">${EVENTS.map((e,i)=>{const dn=!!S.d.events[e.id]; return `<button class="opt ${dn?'sel':''}" data-act="selfEvent" data-v="${e.id}" ${dn?'disabled':''}><div class="e">${e.e}</div><div class="t">${i+1}. ${esc(e.t)}</div><div class="d">${dn?'✅ 대응 완료':'눌러서 대응하기'}</div></button>`;}).join('')}</div></div>`;
+    <div class="card"><h3 style="margin-top:0">🎲 사건 <span class="muted">(선생님이 부르는 사건을 하나씩 눌러요)</span></h3>${['crisis','ops','opp'].map(kd=>`<div class="muted" style="font-weight:800;margin:10px 0 6px">${KIND[kd]}</div><div class="grid g4">${EVENTS.filter(e=>e.kind===kd).map(e=>{const dn=!!S.d.events[e.id]; return `<button class="opt ${dn?'sel':''}" data-act="selfEvent" data-v="${e.id}" ${dn?'disabled':''}><div class="e">${e.e}</div><div class="t">${esc(e.t)}</div><div class="d">${dn?'✅ 결정 완료':'눌러서 결정하기'}</div></button>`;}).join('')}</div>`).join('')}</div>`;
   } else if(S.submitted){
     top=`<div class="banner ok">🎉 선포 완료! 선생님 화면에 ${esc(S.d.name)}이(가) 나타났어요. 선생님의 안내를 기다려 주세요.</div>`;
     if(META.event && !S.d.events[META.event.id]) top+=`<div class="banner bad blink">🚨 위기 사건 발생! 대응이 필요합니다.</div>`;
@@ -548,8 +627,8 @@ function vResult(){
     top=`<div class="banner warn">아직 선포 전이에요. 결과를 확인하고 마음에 들면 <b>국가 선포하기</b>를 누르세요. 고치고 싶으면 이전으로 돌아가도 돼요.</div>`;
     if(META.event) top+=`<div class="banner bad">🚨 위기 사건이 발생했어요! 국가를 선포하면 대응할 수 있어요.</div>`;
   }
-  const evDone = EVENTS.filter(e=>S.d.events[e.id]);
-  const evHTML = evDone.length?`<h3>🚨 위기 대응 기록</h3>${evDone.map(e=>`<div class="persona" style="margin-bottom:8px"><div class="av">${e.e}</div><div><div class="who">${esc(e.t)}</div><div class="q">${'ABC'[S.d.events[e.id].opt]}. ${esc(e.opts[S.d.events[e.id].opt].t)}</div></div></div>`).join('')}`:'';
+  const nlog=[]; computeInd(S.d,nlog);
+  const evHTML = nlog.length?`<h3>📰 ${esc(S.d.name)} 뉴스</h3>${nlog.map(x=>`<div class="persona" style="margin-bottom:8px"><div class="av">${x.e.e}</div><div><div class="who">${KIND[x.e.kind]} · ${esc(x.e.t)} <span class="typebadge" style="background:var(--${x.imp.lv.c});font-size:12px;padding:2px 8px">${esc(x.imp.lv.n)}</span></div><div class="q">${esc(x.imp.lv.d)}</div><div class="q">→ ${'ABC'[x.opt]}. ${esc(x.e.opts[x.opt].t)}</div><div class="muted" style="font-size:13.5px">지표 변화: ${fmtEff(x.delta)||'없음'}</div></div></div>`).join('')}`:'';
   const bottom = S.submitted
     ? `<div class="navbar"><div class="in"><button class="btn ghost" data-act="reedit">✏️ 고쳐서 다시 선포</button>${META.phase==='vote'?`<button class="btn teal" data-act="toVote">🗳️ 투표하기</button>`:'<span></span>'}</div></div>`
     : nav(true,'🎉 국가 선포하기','submit','acc');
@@ -574,11 +653,17 @@ function vVote(){
 }
 function vEventModal(){
   const e=EVENTS.find(x=>x.id===(curEv()||{}).id); if(!e) return '';
-  return `<div class="overlay"><div class="modal alert"><h2>${e.e} ${esc(e.t)}</h2><div class="scene">${esc(e.s)}</div>
-  <p class="muted">${esc(S.d.name)}의 대통령(지도자)으로서 결정하세요!</p>
+  const v=computeInd(S.d), imp=eventImpact(S.d,e,v), opp=e.kind==='opp';
+  return `<div class="overlay"><div class="modal ${opp?'opp':'alert'}"><div class="muted" style="font-weight:800">${KIND[e.kind]}</div><h2>${e.e} ${esc(e.t)}</h2><div class="scene">${esc(e.s)}</div>
+  <div class="card" style="padding:14px;margin-bottom:12px;box-shadow:none"><b>📊 ${esc(S.d.name)}의 ${opp?'투자 상태':'준비 상태'}</b>
+   <div style="margin-top:8px">${e.prep&&e.prep.length?`${esc(e.prepName)} <b>${imp.pts}칸</b> → `:''}<span class="typebadge" style="background:var(--${imp.lv.c})">${esc(imp.lv.n)}</span></div>
+   <div style="margin-top:6px">${esc(imp.lv.d)}</div>
+   ${imp.notes.map(n=>`<div style="margin-top:4px">${esc(n.t)}</div>`).join('')}
+   <div style="margin-top:10px;font-weight:800">${opp?'🎁 얻는 효과':'💥 입는 피해'}: ${fmtEff(imp.scaled)||'없음'}</div></div>
+  <p class="muted">이제 ${esc(S.d.name)}의 지도자로서 어떻게 할지 결정하세요!</p>
   <div class="grid">${e.opts.map((o,i)=>`<button class="opt bigopt ${evDraft.opt===i?'sel':''}" data-act="evpick" data-o="${i}"><span class="lt">${'ABC'[i]}</span><span>${esc(o.t)}</span></button>`).join('')}</div>
-  <label class="lb">✏️ 이렇게 대응한 이유</label><textarea class="field" data-bind="evreason" maxlength="200">${esc(evDraft.reason)}</textarea>
-  <div style="margin-top:14px;display:flex;justify-content:space-between">${DBMODE!=='live'?'<button class="btn ghost" data-act="evclose">닫기</button>':'<span></span>'}<button class="btn acc" data-act="evsubmit">대응 결정!</button></div></div></div>`;
+  <label class="lb">✏️ 이렇게 결정한 이유</label><textarea class="field" data-bind="evreason" maxlength="200">${esc(evDraft.reason)}</textarea>
+  <div style="margin-top:14px;display:flex;justify-content:space-between">${DBMODE!=='live'?'<button class="btn ghost" data-act="evclose">닫기</button>':'<span></span>'}<button class="btn acc" data-act="evsubmit">결정!</button></div></div></div>`;
 }
 function renderStudent(){
   if(!ROOM){ $app.innerHTML=vJoinRoom(); return; }
@@ -630,8 +715,8 @@ const SACT = {
   evclose(){ localEv=null; render(); },
   evpick(ds){ evDraft.opt=+ds.o; render(); },
   async evsubmit(){ if(evDraft.opt==null) return toast('대응 방법을 고르세요.'); if(evDraft.reason.trim().length<5) return toast('이유를 5글자 이상 써 주세요.');
-    const id=curEv().id; S.d.events[id]={opt:evDraft.opt,reason:evDraft.reason}; saveS();
-    await backend.set(`rooms/${ROOM}/nations/${S.id}/d/events/${id}`,S.d.events[id]); evDraft={opt:null,reason:''}; localEv=null; toast('✅ 대응 완료! 나라의 지표가 바뀌었어요.'); render(); }
+    const id=curEv().id; S.d.events[id]={opt:evDraft.opt,reason:evDraft.reason,at:Date.now()}; saveS();
+    await backend.set(`rooms/${ROOM}/nations/${S.id}/d/events/${id}`,S.d.events[id]); evDraft={opt:null,reason:''}; localEv=null; toast('✅ 결정 완료! 우리 나라 뉴스와 지표를 확인하세요.'); render(); }
 };
 function bindStudentInput(t){
   const b=t.dataset.bind, v=t.value;
@@ -699,13 +784,17 @@ function tPolicy(L){
 }
 function tEvents(L){
   const cur=DATA.meta&&DATA.meta.event;
-  return `<div class="card"><h2>🚨 위기 사건 보내기</h2><p class="muted">버튼을 누르면 <b>선포를 마친 학생 태블릿</b>에 사건 창이 뜹니다. 학생 대응에 따라 각 나라의 지표와 유형이 바뀝니다. 한 번에 하나씩 진행하세요.</p>
-  <div class="grid g4">${EVENTS.map(e=>`<button class="opt ${cur&&cur.id===e.id?'sel':''}" data-act="launch" data-v="${e.id}"><div class="e">${e.e}</div><div class="t">${esc(e.t)}</div><div class="d">${esc(e.s)}</div></button>`).join('')}</div>
-  ${cur?`<div class="banner bad" style="margin-top:12px">진행 중: ${esc(EVENTS.find(x=>x.id===cur.id)?.t||'')} <button class="btn sm" style="margin-left:10px" data-act="endEvent">사건 종료(창 닫기)</button></div>`:''}</div>
-  ${EVENTS.map(e=>{ const st=optStats(L,e,n=>n.d.events[e.id]); const done=L.filter(n=>n.d.events[e.id]).length; if(!done) return ''; const op=openCard===e.id;
-    return `<div class="card"><div class="row"><b style="font-size:18px">${e.e} ${esc(e.t)}</b><span class="muted">${done}/${L.length}명 대응</span><span class="sp"></span><button class="btn sm ghost" data-act="openCard" data-v="${e.id}">${op?'이유 접기':'학생 이유 보기'}</button></div>
+  const logs={}; L.forEach(n=>{ const lg=[]; computeInd(n.d,lg); logs[n.id]=lg; });
+  const lvOf=(n,id)=>{ const x=(logs[n.id]||[]).find(y=>y.e.id===id); return x?x.imp.lv.n:''; };
+  return `<div class="card"><h2>🎲 사건 보내기</h2><p class="muted">버튼을 누르면 <b>선포를 마친 학생 태블릿</b>에 사건 창이 뜹니다. 결과는 각 나라의 <b>평소 예산(대비·투자)</b>과 <b>시민 신뢰</b>에 따라 달라집니다. 한 번에 하나씩 보내고, 대응이 끝나면 [사건 종료]를 누르세요. 한 시간에 2~3개를 권합니다.</p>
+  ${cur?`<div class="banner bad">진행 중: ${esc(EVENTS.find(x=>x.id===cur.id)?.t||'')} <button class="btn sm" style="margin-left:10px" data-act="endEvent">사건 종료(창 닫기)</button></div>`:''}
+  ${['crisis','ops','opp'].map(kd=>`<h3>${KIND[kd]}</h3><div class="grid g4">${EVENTS.filter(e=>e.kind===kd).map(e=>`<button class="opt ${cur&&cur.id===e.id?'sel':''}" data-act="launch" data-v="${e.id}"><div class="e">${e.e}</div><div class="t">${esc(e.t)}</div><div class="d">${e.prep&&e.prep.length?'결과를 좌우하는 예산: '+esc(e.prepName):'결과를 좌우하는 것: 시민 신뢰'}</div></button>`).join('')}</div>`).join('')}</div>
+  ${EVENTS.map(e=>{ const st=optStats(L,e,n=>n.d.events[e.id]); const doneL=L.filter(n=>n.d.events[e.id]); if(!doneL.length) return ''; const op=openCard===e.id;
+    const lvc={}; doneL.forEach(n=>{ const k=lvOf(n,e.id); lvc[k]=(lvc[k]||0)+1; });
+    return `<div class="card"><div class="row"><b style="font-size:18px">${e.e} ${esc(e.t)}</b><span class="muted">${doneL.length}/${L.length}명 대응</span><span class="sp"></span><button class="btn sm ghost" data-act="openCard" data-v="${e.id}">${op?'이유 접기':'학생 이유 보기'}</button></div>
+    <div class="chips" style="margin:8px 0">${Object.keys(lvc).map(k=>`<span class="chip">${esc(k)} ${lvc[k]}</span>`).join('')}</div>
     ${st.map(s=>`<div class="obar"><div class="lbl"><span>${'ABC'[s.i]}. ${esc(s.o.t)}</span><span>${s.who.length}명 (${s.pc}%)</span></div><div class="tr"><i style="width:${s.pc}%;background:${['#3a6ea5','#2a9d8f','#e4572e'][s.i]}"></i></div>
-    ${op&&s.who.length?`<ul class="rlist">${s.who.map(n=>`<li><b>${esc(n.num)} ${esc(n.sname)}</b>${esc(n.d.events[e.id].reason)}</li>`).join('')}</ul>`:''}</div>`).join('')}</div>`;}).join('')}`;
+    ${op&&s.who.length?`<ul class="rlist">${s.who.map(n=>`<li><b>${esc(n.num)} ${esc(n.sname)} [${esc(lvOf(n,e.id))}]</b>${esc(n.d.events[e.id].reason)}</li>`).join('')}</ul>`:''}</div>`).join('')}</div>`;}).join('')}`;
 }
 function tVotes(L){
   const votes=Object.values(DATA.votes||{}); const map={}; L.forEach(n=>map[n.id]={n,v:[]});
@@ -727,6 +816,7 @@ function tConcept(L){
   <tr><th>시민의 역할</th><td>① 공동체 일에 적극 참여 ② 공익과 사익의 조화 ③ 국방·근로·교육·납세의 4대 의무</td></tr>
   <tr><th>윤리적 쟁점</th><td>① <b>공공의 안전 ↔ 사생활</b>(스마트 인증서, CCTV, 벌금 제도) ② <b>불평등 해소 ↔ 재산권</b>(부유세) ③ <b>법 준수 ↔ 시민 불복종</b>(비판 금지법, 시위)</td></tr>
   <tr><th>국가의 모습 → 시민의 삶</th><td>같은 정책이라도 시민마다 느끼는 삶이 다르다(시민 6명의 목소리). 《멋진 신세계》형 통제 국가는 안정적이지만 자유가 없다.</td></tr>
+  <tr><th>평소 역할과 위기 관리</th><td>평소 재난·의료·국방에 쓴 예산이 위기 피해를 줄이고, 교육·경제 투자가 기회를 살린다. 시민 신뢰가 높으면 위기 때 함께 힘을 모아 피해가 더 줄어든다(소통과 협력).</td></tr>
   <tr><th>바람직한 관계</th><td><b>소통과 협력</b>(위기 사건: 태안 사례처럼 국가+시민), <b>상호 존중</b>(시위에 대한 대응)</td></tr>
   </table>
   <h3>우리 반의 국가 유형</h3><div class="chips">${Object.keys(TYPES).map(k=>`<span class="chip">${TYPES[k].e} ${esc(TYPES[k].n)} ${cnt[k]||0}</span>`).join('')}</div>
@@ -756,7 +846,7 @@ function renderTeacher(){
   <button class="btn sm teal" data-act="qr">📱 학생 접속 QR</button><button class="btn sm teal" data-act="copyLink">🔗 학생 링크 복사</button><button class="btn sm ghost" data-act="csv">📥 엑셀(CSV)</button><button class="btn sm ghost" data-act="newRoom">➕ 새 방</button><button class="btn sm ghost" data-act="reset">🗑️ 초기화</button></div>
   <div class="row"><span class="seg"><button class="${phase==='build'?'on':''}" data-act="phase" data-v="build">① 국가 만들기</button><button class="${phase==='vote'?'on':''}" data-act="phase" data-v="vote">② 갤러리·투표</button><button class="${phase==='closed'?'on':''}" data-act="phase" data-v="closed">③ 투표 마감</button></span>
   ${DATA.meta&&DATA.meta.event?`<span class="pill" style="border-color:var(--bad);color:var(--bad)">🚨 위기 사건 진행 중</span>`:''}</div>
-  <div class="tabs">${[['gallery','🏳️ 국가 갤러리'],['policy','📊 정책 선택 통계'],['event','🚨 위기 사건'],['vote','🗳️ 투표 결과'],['concept','📘 개념 정리']].map(([k,n])=>`<button class="${ttab===k?'on':''}" data-act="tab" data-v="${k}">${n}</button>`).join('')}</div>
+  <div class="tabs">${[['gallery','🏳️ 국가 갤러리'],['policy','📊 정책 선택 통계'],['event','🎲 사건·위기'],['vote','🗳️ 투표 결과'],['concept','📘 개념 정리']].map(([k,n])=>`<button class="${ttab===k?'on':''}" data-act="tab" data-v="${k}">${n}</button>`).join('')}</div>
   ${body}</div>${openN?tNationModal():''}${showQR?tQRModal():''}`;
   if(showQR){ const el=document.getElementById('qr'); if(el && window.QRCode){ new QRCode(el,{text:studentURL(),width:300,height:300}); } else if(el){ el.innerHTML='<p class="muted">QR을 불러오지 못했어요. 아래 주소를 알려 주세요.</p>'; } }
 }
