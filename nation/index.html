@@ -746,14 +746,14 @@ function tNationModal(){
   </div></div>`;
 }
 function tQRModal(){
-  return `<div class="overlay" data-act="closeQR"><div class="modal center" data-stop="1"><h2>📱 학생 접속</h2><div style="font-size:54px;font-weight:900;letter-spacing:6px">${esc(ROOM)}</div><div class="qrbox"><div id="qr"></div></div><p class="url">${esc(studentURL())}</p><button class="btn" data-act="closeQR">닫기</button></div></div>`;
+  return `<div class="overlay" data-act="closeQR"><div class="modal center" data-stop="1"><h2>📱 학생 접속</h2><div style="font-size:54px;font-weight:900;letter-spacing:6px">${esc(ROOM)}</div><div class="qrbox"><div id="qr"></div></div><p class="url">${esc(studentURL())}</p><p><button class="btn teal" data-act="copyLink">🔗 이 링크 복사</button></p><button class="btn" data-act="closeQR">닫기</button></div></div>`;
 }
 function renderTeacher(){
   if(!tAuthed){ $app.innerHTML=vPin(); return; }
   const L=nationsList(), phase=(DATA.meta&&DATA.meta.phase)||'build';
   const body = ttab==='gallery'?tGallery(L):ttab==='policy'?tPolicy(L):ttab==='event'?tEvents(L):ttab==='vote'?tVotes(L):tConcept(L);
   $app.innerHTML = `<div class="twrap"><div class="top"><h1>🏛️ 내가 살고 싶은 국가 만들기 · 교사</h1>${modeBadge()}<span class="pill" style="font-size:18px">방 코드 <b style="letter-spacing:2px">${esc(ROOM)}</b></span>
-  <button class="btn sm teal" data-act="qr">📱 학생 접속 QR</button><button class="btn sm ghost" data-act="csv">📥 엑셀(CSV)</button><button class="btn sm ghost" data-act="newRoom">➕ 새 방</button><button class="btn sm ghost" data-act="reset">🗑️ 초기화</button></div>
+  <button class="btn sm teal" data-act="qr">📱 학생 접속 QR</button><button class="btn sm teal" data-act="copyLink">🔗 학생 링크 복사</button><button class="btn sm ghost" data-act="csv">📥 엑셀(CSV)</button><button class="btn sm ghost" data-act="newRoom">➕ 새 방</button><button class="btn sm ghost" data-act="reset">🗑️ 초기화</button></div>
   <div class="row"><span class="seg"><button class="${phase==='build'?'on':''}" data-act="phase" data-v="build">① 국가 만들기</button><button class="${phase==='vote'?'on':''}" data-act="phase" data-v="vote">② 갤러리·투표</button><button class="${phase==='closed'?'on':''}" data-act="phase" data-v="closed">③ 투표 마감</button></span>
   ${DATA.meta&&DATA.meta.event?`<span class="pill" style="border-color:var(--bad);color:var(--bad)">🚨 위기 사건 진행 중</span>`:''}</div>
   <div class="tabs">${[['gallery','🏳️ 국가 갤러리'],['policy','📊 정책 선택 통계'],['event','🚨 위기 사건'],['vote','🗳️ 투표 결과'],['concept','📘 개념 정리']].map(([k,n])=>`<button class="${ttab===k?'on':''}" data-act="tab" data-v="${k}">${n}</button>`).join('')}</div>
@@ -785,6 +785,11 @@ const TACT = {
   delN(ds){ if(!confirm('이 학생의 나라를 삭제할까요?')) return; backend.remove(`rooms/${ROOM}/nations/${ds.v}`); backend.remove(`rooms/${ROOM}/votes/${ds.v}`); openN=null; },
   openCard(ds){ openCard = openCard===ds.v?null:ds.v; keepScroll=true; render(); },
   qr(){ showQR=true; render(); },
+  async copyLink(){ const u=studentURL(); let ok=false;
+    try{ await navigator.clipboard.writeText(u); ok=true; }catch(e){}
+    if(!ok){ try{ const t=document.createElement('textarea'); t.value=u; t.style.position='fixed'; t.style.opacity='0'; document.body.appendChild(t); t.select(); ok=document.execCommand('copy'); t.remove(); }catch(e){} }
+    if(ok) toast('🔗 학생 링크를 복사했어요. 클래스룸·패들렛에 붙여 넣으세요 (방 '+ROOM+')');
+    else { showQR=true; render(); toast('복사가 막혀 있어요. QR 창 아래 주소를 직접 복사하세요.'); } },
   closeQR(){ showQR=false; render(); },
   csv(){ if(!nationsList().length) return toast('아직 선포한 나라가 없어요.'); exportCSV(); },
   newRoom(){ if(!confirm('새 방(다른 반용)을 만들까요? 지금 방의 기록은 그대로 남습니다.')) return; location.search='?mode=teacher&room='+newCode(); },
