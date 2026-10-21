@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>도덕이 사라진 하루</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;500;700;900&display=swap">
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+:root{--ink:#1d2433;--mu:#5d667a;--card:#fff;--bd:#e3e7ef;--ac:#5b5bf0;--ac2:#ff7a59;--ok:#13a06d;--bad:#e5484d;--gold:#f0a800;--bg1:#cfe3ff;--bg2:#f7f9ff}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{min-height:100vh;color:var(--ink);font:16px/1.65 'Noto Sans KR',system-ui,'Malgun Gothic',sans-serif;word-break:keep-all;background:linear-gradient(160deg,var(--bg1),var(--bg2)) fixed}
+body.dawn{--bg1:#ffd5b0;--bg2:#fff4e6}
+body.morning{--bg1:#bfe0ff;--bg2:#f2f8ff}
+body.noon{--bg1:#ffeb8f;--bg2:#fffbe8}
+body.after{--bg1:#ffc29b;--bg2:#ffefe3}
+body.eve{--bg1:#8f7cf0;--bg2:#ffc1d9}
+body.night{--bg1:#1c1f52;--bg2:#4a347f}
+.wrap{max-width:760px;margin:0 auto;padding:18px 16px 60px}
+.wide{max-width:1240px}
+h1,h2,h3,.jua{font-family:'Jua','Noto Sans KR',sans-serif;font-weight:400;letter-spacing:.2px}
+h1{font-size:34px;line-height:1.25;margin:6px 0 10px}
+h2{font-size:25px;margin:4px 0 10px}
+h3{font-size:19px;margin:14px 0 6px}
+.card{background:var(--card);color:var(--ink);border-radius:20px;padding:22px;margin-top:16px;box-shadow:0 8px 28px rgba(30,30,80,.12)}
+.mu{color:var(--mu)}
+.sm{font-size:14px}
+.center{text-align:center}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:50px;border:0;border-radius:14px;padding:12px 22px;font:inherit;font-weight:700;font-size:17px;cursor:pointer;background:var(--ac);color:#fff;transition:transform .12s,box-shadow .12s;box-shadow:0 4px 0 rgba(0,0,0,.18)}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(0,0,0,.18)}
+.btn.ghost{background:#eef0f7;color:var(--ink)}
+.btn.orange{background:var(--ac2)}
+.btn.green{background:var(--ok)}
+.btn.red{background:var(--bad)}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none}
+.btn.full{width:100%}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+input[type=text]{width:100%;font:inherit;font-size:18px;padding:12px 14px;border:2px solid var(--bd);border-radius:12px;color:var(--ink);background:#fff}
+input[type=text]:focus,textarea:focus{outline:none;border-color:var(--ac)}
+textarea{width:100%;font:inherit;font-size:16px;padding:12px;border:2px solid var(--bd);border-radius:12px;min-height:110px;resize:vertical;color:var(--ink);background:#fff}
+.code-in{font-size:30px!important;text-align:center;letter-spacing:10px;font-weight:900}
+.logo{font-size:64px;line-height:1;margin-top:12px}
+.badge{display:inline-block;padding:3px 12px;border-radius:999px;background:#eef0ff;color:var(--ac);font-weight:700;font-size:13px}
+.notice{background:#fff7e0;border:1px solid #f3d27a;color:#6b5000;border-radius:12px;padding:12px 14px;font-size:14.5px;margin-top:12px}
+.err{background:#ffecec;border:1px solid #f3a3a3;color:#8a1f1f;border-radius:12px;padding:12px 14px;margin-top:12px}
+.emos{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-top:8px}
+.emos button{font-size:30px;border:2px solid var(--bd);background:#fff;border-radius:14px;min-height:56px;cursor:pointer}
+.emos button.on{border-color:var(--ac);background:#eef0ff;transform:scale(1.06)}
+/* HUD */
+.hud{position:sticky;top:8px;z-index:5;display:grid;grid-template-columns:auto 1fr;gap:6px 16px;align-items:center;background:rgba(255,255,255,.94);color:var(--ink);border-radius:18px;padding:12px 16px;box-shadow:0 6px 20px rgba(0,0,0,.12)}
+.hud .coin{font-family:'Jua';font-size:26px;white-space:nowrap}
+.hud .coin.neg{color:var(--bad)}
+.trust{display:flex;align-items:center;gap:8px;font-size:14px}
+.trust .bar{flex:1;height:12px;background:#eceef4;border-radius:99px;overflow:hidden}
+.trust .bar i{display:block;height:100%;background:linear-gradient(90deg,#ff6b6b,#ffd166,#3ecf8e);transition:width .6s}
+.dots{grid-column:1/-1;display:flex;gap:6px}
+.dots i{flex:1;height:7px;border-radius:9px;background:#e3e6ee}
+.dots i.now{background:#b9c1ff}
+.dots i.red{background:var(--bad)}
+.dots i.green{background:var(--ok)}
+/* scene */
+.scene{position:relative;overflow:hidden}
+.clock{display:inline-block;font-family:'Jua';font-size:20px;background:#1d2433;color:#fff;padding:2px 14px;border-radius:10px}
+.bigemo{font-size:76px;line-height:1.1;margin:10px 0 2px}
+.sit{font-size:18px;margin:8px 0 4px}
+.whisper{font-size:14px;color:#8a5cf6;font-weight:700}
+.choices{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:18px}
+.ch{border:3px solid transparent;border-radius:18px;padding:16px 12px;cursor:pointer;font:inherit;text-align:center;min-height:120px;display:flex;flex-direction:column;justify-content:center;gap:6px;transition:transform .15s}
+.ch:hover{transform:translateY(-3px)}
+.ch b{font-size:18px}
+.ch span{font-size:14px;font-weight:700}
+.ch.off{background:#fff0f0;border-color:#ffb3b3}
+.ch.off span{color:var(--bad)}
+.ch.on{background:#ecfbf4;border-color:#9fe3c4}
+.ch.on span{color:var(--ok)}
+.ch .ic{font-size:34px}
+.result{margin-top:16px;padding:16px;border-radius:16px;animation:pop .35s ease}
+.result.r{background:#fff0f0}
+.result.g{background:#ecfbf4}
+.float{position:absolute;right:24px;top:20px;font-family:'Jua';font-size:34px;animation:up 1.2s ease forwards;pointer-events:none}
+.float.p{color:var(--gold)}
+.float.m{color:var(--bad)}
+@keyframes up{0%{opacity:0;transform:translateY(20px)}20%{opacity:1}100%{opacity:0;transform:translateY(-60px)}}
+@keyframes pop{0%{transform:scale(.92);opacity:0}100%{transform:scale(1);opacity:1}}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-10px)}40%{transform:translateX(10px)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}}
+.pop{animation:pop .4s ease}
+.shake{animation:shake .5s ease}
+.breaking{background:#e5484d;color:#fff;font-family:'Jua';font-size:20px;padding:6px 14px;border-radius:10px;display:inline-block;animation:blink 1s infinite}
+@keyframes blink{50%{opacity:.6}}
+.boom{border:4px solid var(--bad)}
+.bless{border:4px solid var(--ok)}
+.delta{font-family:'Jua';font-size:40px}
+.delta.m{color:var(--bad)}
+.delta.p{color:var(--ok)}
+table.st{width:100%;border-collapse:collapse;margin-top:8px}
+table.st td{padding:10px 6px;border-bottom:1px solid var(--bd)}
+table.st td:last-child{text-align:right;font-weight:900;font-family:'Jua';font-size:20px}
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.cmp div{border-radius:14px;padding:14px;text-align:center}
+.cmp .a{background:#ecfbf4}
+.cmp .b{background:#fff0f0}
+.cmp b{display:block;font-family:'Jua';font-size:28px}
+.opts{display:grid;gap:10px;margin-top:10px}
+.opt{border:2px solid var(--bd);background:#fff;border-radius:14px;padding:13px 16px;text-align:left;font:inherit;font-size:16.5px;cursor:pointer;color:var(--ink)}
+.opt.on{border-color:var(--ac);background:#eef0ff;box-shadow:0 0 0 2px var(--ac) inset;font-weight:700}
+/* s2 */
+.stm{border-top:1px dashed var(--bd);padding:16px 0}
+.stm:first-of-type{border-top:0}
+.stm p{margin:0 0 10px;font-weight:700;font-size:17px}
+.scale{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.scale button{min-height:46px;border:2px solid var(--bd);background:#fff;border-radius:10px;font:inherit;font-weight:700;cursor:pointer;color:var(--ink)}
+.scale button.on{background:var(--ac);border-color:var(--ac);color:#fff}
+.scl{display:flex;justify-content:space-between;font-size:12.5px;color:var(--mu);margin-top:3px}
+.pred{margin-top:12px;background:#f6f4ff;border-radius:12px;padding:10px 12px}
+.pred label{font-size:14.5px;font-weight:700;color:#5a3fd6}
+.pred .pv{font-family:'Jua';font-size:24px;color:#5a3fd6;min-width:64px;text-align:right}
+input[type=range]{flex:1;accent-color:#6d4cff;height:28px}
+.cnt{float:right;font-size:13px;color:var(--mu)}
+/* result bars */
+.rb{margin:10px 0 16px}
+.rb .lab{font-size:15px;font-weight:700;margin-bottom:4px}
+.track{position:relative;height:26px;background:#eef0f6;border-radius:8px;overflow:visible}
+.track .fill{height:100%;border-radius:8px;background:linear-gradient(90deg,#7c8bff,#5b5bf0);transition:width .8s}
+.track .guess{position:absolute;top:-6px;bottom:-6px;width:4px;background:var(--ac2);border-radius:3px}
+.track .guess::after{content:'내 예측';position:absolute;top:-20px;left:-18px;font-size:11px;color:var(--ac2);font-weight:900;white-space:nowrap}
+.rb .nums{display:flex;justify-content:space-between;font-size:13px;color:var(--mu);margin-top:4px}
+.fab{position:fixed;right:16px;bottom:18px;z-index:20;animation:pop .4s ease,blink 1.4s 1s infinite}
+.modal{position:fixed;inset:0;background:rgba(10,12,30,.55);z-index:30;display:flex;align-items:flex-start;justify-content:center;overflow:auto;padding:24px 12px}
+.modal .card{max-width:640px;width:100%;margin:0}
+.title-card{text-align:center;background:linear-gradient(135deg,#fff,#f1eeff)}
+.title-card .t{font-family:'Jua';font-size:34px;color:#5a3fd6}
+.title-card .ic{font-size:84px;line-height:1.1}
+.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:#1d2433;color:#fff;padding:10px 18px;border-radius:12px;z-index:50;font-size:15px;animation:pop .3s}
+.ft{text-align:center;font-size:12.5px;color:var(--mu);margin-top:26px}
+body.night .ft{color:#cfc8ff}
+/* teacher */
+.thead{display:grid;grid-template-columns:1fr auto;gap:16px;align-items:center}
+.roomcode{font-family:'Jua';font-size:64px;letter-spacing:8px;line-height:1;color:var(--ac)}
+#qr{background:#fff;padding:8px;border-radius:12px;display:inline-block}
+#qr img,#qr canvas{display:block}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+.tab{border:0;background:#fff;border-radius:12px;padding:10px 16px;font:inherit;font-weight:700;cursor:pointer;color:var(--ink);box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.tab.on{background:var(--ac);color:#fff}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{background:#f3f4fa;border-radius:999px;padding:6px 12px;font-size:15px}
+.chip small{color:var(--mu);margin-left:4px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
+.kpi{background:#f6f7fc;border-radius:14px;padding:14px}
+.kpi b{display:block;font-family:'Jua';font-size:34px;color:var(--ac)}
+.hb{display:grid;grid-template-columns:minmax(120px,240px) 1fr 70px;gap:10px;align-items:center;margin:8px 0}
+.hb .tk{height:24px;background:#eef0f6;border-radius:8px;overflow:hidden}
+.hb .tk i{display:block;height:100%;border-radius:8px}
+.hb .v{font-weight:900;text-align:right}
+.dist{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;align-items:end;height:90px;margin-top:6px}
+.dist div{background:#c9cffd;border-radius:6px 6px 0 0;position:relative;min-height:2px}
+.dist div.hi{background:#5b5bf0}
+.dist span{position:absolute;top:-18px;left:0;right:0;text-align:center;font-size:12px;font-weight:700}
+.dlab{display:grid;grid-template-columns:repeat(5,1fr);font-size:12px;text-align:center;color:var(--mu)}
+.wall{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+.note{border-radius:14px;padding:14px;font-size:17px;font-weight:700;box-shadow:0 3px 10px rgba(0,0,0,.08);animation:pop .4s}
+.note small{display:block;font-weight:400;color:#555;margin-top:6px;font-size:13px}
+.sub{border-bottom:1px solid var(--bd);padding:12px 0}
+.sub p{margin:4px 0}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media (max-width:720px){.grid2,.thead{grid-template-columns:1fr}.roomcode{font-size:48px}.choices{grid-template-columns:1fr}.hb{grid-template-columns:1fr 1fr 56px}h1{font-size:28px}}
+body.big .wide{max-width:1600px}
+body.big{font-size:20px}
+body.big .hb{grid-template-columns:minmax(160px,360px) 1fr 90px}
+</style>
+</head>
+<body>
+<main id="app" class="wrap"></main>
+<script>
+/* =========================================================
+   ① 파이어베이스 설정 — 여기에 본인 프로젝트 값을 붙여넣으세요.
+   databaseURL 이 비어 있으면 '혼자 해보기' 모드로만 작동합니다.
+   ========================================================= */
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyAPJAMUITr6w0H63Ze1L1eViCsuq3zXlbE",
+  authDomain: "nation-game-cf684.firebaseapp.com",
+  databaseURL: "https://nation-game-cf684-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "nation-game-cf684",
+  storageBucket: "nation-game-cf684.firebasestorage.app",
+  messagingSenderId: "947361689624",
+  appId: "1:947361689624:web:9f09cd27fbd2334ae0136d"
+};
+
+/* ---------- 활동 데이터 ---------- */
+const META = {code:'9도01-01', unit:'자신과의 관계', title:'도덕이 사라진 하루'};
+const SCENES = [
+  {time:'07:50', place:'등굣길 횡단보도', emo:'🚦', bg:'dawn',
+   sit:'지각 1분 전! 신호는 빨간불인데 차는 안 보인다. 오늘은 도덕 스위치가 꺼진 날, 아무도 뭐라 하지 않는다.',
+   off:{t:'그냥 건넌다', g:30, msg:'지각 면제! 아무도 신경 쓰지 않았다.'},
+   on:{t:'초록불을 기다린다', msg:'1분 지각… 벌점은 없지만 코인도 없다. 그래도 마음은 편하다.'},
+   back:{t:'그날 도시의 모든 운전자도 신호를 무시했다. 하굣길, 초록불에 건너던 당신 앞으로 차가 멈추지 않고 달려들었다. 간신히 피했지만 넘어져 다쳤다.', l:70, h:'병원비'},
+   good:{t:'모두가 신호를 지킨 덕분에 하굣길이 안전했다. 동생도 혼자 학교에 다닐 수 있다.', b:20}},
+  {time:'09:10', place:'교실 · 수행평가', emo:'📝', bg:'morning',
+   sit:'오늘 마감인 수행평가 보고서. 반에서 제일 잘하는 친구의 완성본이 공유 폴더에 열려 있다. 복사하면 10초면 끝난다.',
+   off:{t:'복사해서 제출한다', g:40, msg:'만점 예약! 10초 만에 끝냈다.'},
+   on:{t:'끝까지 직접 쓴다', msg:'1시간 동안 끙끙댔다. 코인은 없지만 내 생각이 담겼다.'},
+   back:{t:'반 전체가 서로의 보고서를 베꼈다. 똑같은 보고서 25장이 나오자 평가는 전부 무효, 재평가가 결정됐다. 게다가 누군가 당신 보고서를 베껴 당신까지 표절 의심을 받았다.', l:60, h:'재평가 + 표절 의심'},
+   good:{t:'모두 자기 힘으로 쓴 덕분에 평가가 공정했고, 선생님은 당신의 아이디어를 반 전체에 소개했다.', b:20}},
+  {time:'12:30', place:'급식실', emo:'🍗', bg:'noon',
+   sit:'오늘 메뉴는 치킨! 줄은 운동장까지 길다. 앞쪽에 서 있는 친구 사이로 슬쩍 끼어들 틈이 보인다.',
+   off:{t:'새치기한다', g:20, msg:'치킨 획득! 뒷사람들이 뭐라 했지만 오늘은 상관없다.'},
+   on:{t:'줄 끝에 선다', msg:'20분 기다렸다. 배는 고프지만 차례는 지켰다.'},
+   back:{t:'모두가 새치기를 시작했다. 줄은 무너졌고 밀치다가 식판이 엎어졌다. 결국 당신은 점심을 먹지 못했다.', l:50, h:'점심 굶음'},
+   good:{t:'모두 질서 있게 줄을 서서 마지막 사람까지 치킨을 받았다. 급식실 이모님이 웃었다.', b:20}},
+  {time:'16:00', place:'학교 앞 길', emo:'👛', bg:'after',
+   sit:'길에 지갑이 떨어져 있다. 안에는 만 원과 학생증. 주변엔 아무도 없고 CCTV도 없다.',
+   off:{t:'돈만 챙긴다', g:50, msg:'용돈 만 원 추가! 아무도 보지 못했다.'},
+   on:{t:'주인에게 돌려준다', msg:'학생증으로 주인을 찾아 돌려줬다. 코인은 없지만 "고마워"라는 말을 들었다.'},
+   back:{t:'저녁에 당신도 휴대폰을 잃어버렸다. 그런데 주운 사람도 당신과 같은 선택을 했다. 사진, 연락처, 추억이 모두 사라졌다.', l:100, h:'휴대폰 분실'},
+   good:{t:'저녁에 당신이 휴대폰을 잃어버렸지만, 주운 사람이 바로 돌려줬다. 세상이 아직 괜찮다는 걸 느꼈다.', b:30}},
+  {time:'20:00', place:'반 단톡방', emo:'💬', bg:'eve',
+   sit:'친구의 웃긴 흑역사 사진이 올라왔다. 다들 "ㅋㅋㅋ"를 치며 다른 방으로 퍼 나르는 중이다.',
+   off:{t:'나도 퍼뜨리고 웃는다', g:30, msg:'인싸 포인트 획득! 단톡방이 터졌다.'},
+   on:{t:'"그만하자"고 말한다', msg:'분위기가 잠깐 싸해졌다. 코인은 없다.'},
+   back:{t:'다음 타깃은 당신이었다. 당신의 흑역사 사진이 다른 반, 다른 학교까지 퍼졌다. 아무도 멈추지 않았다.', l:80, h:'흑역사 전교 공개'},
+   good:{t:'누군가 멈추자 다들 멈췄다. 그리고 그 단톡방에서는 그 뒤로 아무도 놀림감이 되지 않았다. 당신도.', b:20}}
+];
+const WHO = ['🙋 다른 사람을 위한 것','🙆 나 자신을 위한 것','🤝 우리 모두를 위한 것','🤔 아직 잘 모르겠다'];
+const ITEMS = [
+  '규칙을 어겨도 들키지 않는다면 지킬 이유가 없다.',
+  '도덕이 없어도 사람은 충분히 행복하게 살 수 있다.',
+  '도덕적으로 살면 손해를 볼 때가 많다.',
+  '도덕은 남을 위한 것이기도 하지만 나 자신을 위한 것이기도 하다.',
+  '아무도 보지 않을 때에도 지키고 싶은 나만의 도덕 원칙이 있다.'
+];
+const GYGES = ['😈 평소 얄미웠던 사람에게 몰래 장난치기','📄 교무실에서 시험 문제 미리 보기','🦸 아무도 모르게 어려운 사람 돕기','🙅 망토를 쓰지 않고 서랍에 넣어 둔다'];
+const NOTE_COLORS = ['#fff3b0','#ffd6e0','#d4f5e2','#d8e7ff','#ffe2c6','#eadcff'];
+const FQ = ['오늘 하루 중 가장 기억에 남는 장면은 무엇이고, 그 이유는 무엇인가요?','내가 생각하는 ‘도덕적으로 산다는 것’은 어떤 모습인가요? (오늘 활동을 근거로 써 보세요)'];
+const EMOJIS = ['🐶','🐱','🐰','🦊','🐼','🐯','🐸','🐧','🦄','🐙','🦖','🐳'];
+const STEP_KO = {join:'입장',intro:'이야기 시작',scene:'하루 체험 중',news:'뉴스 속보',twist:'부메랑',settle:'정산',s2:'예측 게임',s3:'투명망토',final:'생각 쓰기',done:'완료 ✅'};
+
+/* ---------- 공통 ---------- */
+let db = null, ONLINE = false;
+try {
+  if (FIREBASE_CONFIG.databaseURL && window.firebase) {
+    firebase.initializeApp(FIREBASE_CONFIG);
+    db = firebase.database();
+    ONLINE = true;
+  }
+} catch (e) { console.warn('파이어베이스 연결 실패:', e); }
+
+const app = document.getElementById('app');
+const P = new URLSearchParams(location.search);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const LS = {
+  get(k){ try { return JSON.parse(localStorage.getItem(k)); } catch(e){ return null; } },
+  set(k,v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} }
+};
+const FOOT = '<p class="ft">© 김정환 · M.A.D.T (Moral And Digital Teacher)</p>';
+function toast(msg){ const t=document.createElement('div'); t.className='toast'; t.textContent=msg; document.body.appendChild(t); setTimeout(()=>t.remove(),2200); }
+function setBg(c){ document.body.className = (document.body.classList.contains('big')?'big ':'') + (c||''); }
+function animateNum(el, from, to){
+  if(!el) return; const st=performance.now(), d=700;
+  (function f(n){ const k=Math.min(1,(n-st)/d); const v=Math.round(from+(to-from)*(1-Math.pow(1-k,3)));
+    el.textContent='🪙 '+v; el.classList.toggle('neg', v<0); if(k<1) requestAnimationFrame(f); })(st);
+}
+function copyText(txt){
+  const done=()=>toast('복사했어요! 📋');
+  if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(txt).then(done, fallback); } else fallback();
+  function fallback(){ const ta=document.createElement('textarea'); ta.value=txt; document.body.appendChild(ta); ta.select(); try{document.execCommand('copy'); done();}catch(e){ toast('복사하지 못했어요. 직접 선택해서 복사해 주세요.'); } ta.remove(); }
+}
+function baseUrl(){ return location.origin + location.pathname; }
+function dbErr(e){ console.error(e); toast('저장 중 문제가 생겼어요. 인터넷 연결을 확인해 주세요.'); }
+
+/* =========================================================
+   첫 화면
+   ========================================================= */
+function home(){
+  setBg('morning');
+  app.className='wrap';
+  app.innerHTML = `
+  <div class="center"><div class="logo">🌗</div>
+  <span class="badge">${META.unit} · ${META.code}</span>
+  <h1>도덕이 사라진 하루</h1>
+  <p class="mu">오늘 하루, 도시의 ‘도덕 스위치’가 꺼집니다.<br>규칙을 어겨도 아무도 혼내지 않는다면… 당신은 어떻게 할까요?</p></div>
+  <div class="card">
+    <h2>🎒 학생으로 입장</h2>
+    <p class="mu sm">선생님이 알려준 4자리 방 코드를 입력하세요.</p>
+    <input type="text" id="code" class="code-in" inputmode="numeric" maxlength="4" placeholder="0000" ${ONLINE?'':'disabled'}>
+    <button class="btn full" id="go" style="margin-top:12px" ${ONLINE?'':'disabled'}>입장하기 ▶</button>
+    ${ONLINE?'':'<div class="notice">아직 교사-학생 연동(파이어베이스)이 설정되지 않았어요. 지금은 아래의 ‘혼자 해보기’만 할 수 있어요.</div>'}
+    <div id="msg"></div>
+  </div>
+  <div class="card">
+    <div class="row" style="justify-content:space-between">
+      <div><h3 style="margin:0">🧑‍🏫 선생님</h3><p class="mu sm" style="margin:0">수업 방을 만들고 실시간 결과를 봅니다.</p></div>
+      <a class="btn ghost" href="?t=1">교사 화면 열기</a>
+    </div>
+    <hr style="border:0;border-top:1px solid var(--bd);margin:16px 0">
+    <div class="row" style="justify-content:space-between">
+      <div><h3 style="margin:0">🙋 혼자 해보기</h3><p class="mu sm" style="margin:0">저장·전송 없이 체험만 합니다.</p></div>
+      <a class="btn ghost" href="?r=SOLO">혼자 시작</a>
+    </div>
+  </div>${FOOT}`;
+  const code=document.getElementById('code');
+  const go=()=>{ const v=code.value.replace(/\D/g,''); if(v.length!==4){ document.getElementById('msg').innerHTML='<div class="err">방 코드는 숫자 4자리예요.</div>'; return;} location.href='?r='+v; };
+  document.getElementById('go').onclick=go;
+  code.addEventListener('keydown',e=>{ if(e.key==='Enter') go(); });
+}
+
+/* =========================================================
+   학생
+   ========================================================= */
+let S = null, ROOM = '', SOLO = false, REVEAL = null;
+
+function newState(){ return {step:'join', name:'', emo:'', sc:0, s1:[-1,-1,-1,-1,-1], tw:0, who:-1, s2:{v:[0,0,0,0,0], p:[50,50,50,50,50]}, s2done:false, s3:{g:-1, rule:''}, fin:{a:'',b:''}}; }
+function sid(){ let id=LS.get('moralday_sid'); if(!id){ id='s'+Date.now().toString(36)+Math.random().toString(36).slice(2,7); LS.set('moralday_sid',id);} return id; }
+function save(){
+  LS.set('moralday_'+ROOM, S);
+  if(!SOLO && ONLINE){
+    db.ref('rooms/MD'+ROOM+'/students/'+sid()).set({
+      name:S.name, emo:S.emo, step:S.step, s1:S.s1, who:S.who, s2:S.s2, s2done:S.s2done,
+      s3:S.s3, fin:S.fin, ts:firebase.database.ServerValue.TIMESTAMP
+    }).catch(dbErr);
+  }
+}
+function go(step){ S.step=step; save(); render(); window.scrollTo({top:0,behavior:'smooth'}); }
+
+async function studentStart(room){
+  ROOM = room; SOLO = room==='SOLO';
+  app.className='wrap';
+  if(!SOLO){
+    if(!ONLINE){ app.innerHTML='<div class="card"><h2>연결할 수 없어요 😢</h2><p>이 사이트는 아직 교사-학생 연동이 설정되지 않았어요. 선생님께 알려 주세요.</p><a class="btn" href="?r=SOLO">혼자 해보기로 하기</a></div>'+FOOT; return; }
+    app.innerHTML='<div class="card center"><p>방에 연결하는 중…</p></div>';
+    try{
+      const m = await db.ref('rooms/MD'+ROOM+'/meta').once('value');
+      if(!m.exists()){ app.innerHTML='<div class="card"><h2>방을 찾을 수 없어요 🔍</h2><p>방 코드 <b>'+esc(ROOM)+'</b>가 맞는지 다시 확인해 주세요.</p><a class="btn" href="'+baseUrl()+'">다시 입력하기</a></div>'+FOOT; return; }
+    }catch(e){ app.innerHTML='<div class="card"><h2>연결에 실패했어요</h2><p>인터넷 연결을 확인하고 새로고침해 주세요.</p></div>'+FOOT; return; }
+    db.ref('rooms/MD'+ROOM+'/meta').on('value', snap=>{
+      const m=snap.val()||{}; const was=REVEAL && REVEAL.on;
+      REVEAL = m.reveal ? {on:true, pct:m.pct||[], n:m.n||0} : null;
+      fab();
+      if(REVEAL && !was && S && S.s2done) toast('📊 우리 반 예측 결과가 공개됐어요!');
+    });
+  }
+  S = Object.assign(newState(), LS.get('moralday_'+ROOM) || {});
+  render();
+}
+
+function dayCoins(){ return S.s1.reduce((a,c,i)=>a+(c===1?SCENES[i].off.g:0),0); }
+function offCount(){ return S.s1.filter(x=>x===1).length; }
+function delta(i){ return S.s1[i]===1 ? -SCENES[i].back.l : SCENES[i].good.b; }
+function finalCoins(){ let t=dayCoins(); for(let i=0;i<5;i++) t+=delta(i); return t; }
+function hud(coin, cur){
+  const tr=100-offCount()*20;
+  return `<div class="hud"><div class="coin ${coin<0?'neg':''}" id="coin">🪙 ${coin}</div>
+  <div class="trust"><span>🏘️ 마을 신뢰도</span><div class="bar"><i style="width:${tr}%"></i></div><b>${tr}</b></div>
+  <div class="dots">${SCENES.map((s,i)=>`<i class="${S.s1[i]===1?'red':S.s1[i]===0?'green':(i===cur?'now':'')}"></i>`).join('')}</div></div>`;
+}
+
+function render(){
+  fab();
+  const st=S.step;
+  if(st==='join') return vJoin();
+  if(st==='intro') return vIntro();
+  if(st==='scene') return vScene();
+  if(st==='news') return vNews();
+  if(st==='twist') return vTwist();
+  if(st==='settle') return vSettle();
+  if(st==='s2') return vS2();
+  if(st==='s3') return vS3();
+  if(st==='final') return vFinal();
+  return vDone();
+}
+
+function vJoin(){
+  setBg('dawn');
+  app.innerHTML=`<div class="center"><div class="logo">🌗</div><h1>도덕이 사라진 하루</h1>
+  <p class="mu">${SOLO?'혼자 해보기 모드 · 저장·전송되지 않아요':'방 코드 <b>'+esc(ROOM)+'</b>'}</p></div>
+  <div class="card"><h2>나를 소개해 주세요</h2>
+  <label class="sm mu">이름 또는 닉네임 (최대 10자)</label>
+  <input type="text" id="nm" maxlength="10" value="${esc(S.name)}" placeholder="예: 3번 김도덕">
+  <p class="sm mu" style="margin:14px 0 0">나를 나타낼 캐릭터를 골라 주세요</p>
+  <div class="emos">${EMOJIS.map(e=>`<button data-e="${e}" class="${S.emo===e?'on':''}">${e}</button>`).join('')}</div>
+  <button class="btn full" id="ok" style="margin-top:18px">이야기 시작하기 ▶</button><div id="msg"></div></div>${FOOT}`;
+  app.querySelectorAll('.emos button').forEach(b=>b.onclick=()=>{ S.emo=b.dataset.e; app.querySelectorAll('.emos button').forEach(x=>x.classList.toggle('on',x===b)); });
+  document.getElementById('ok').onclick=()=>{
+    const n=document.getElementById('nm').value.trim();
+    if(!n||!S.emo){ document.getElementById('msg').innerHTML='<div class="err">이름과 캐릭터를 모두 정해 주세요.</div>'; return; }
+    S.name=n; go('intro');
+  };
+}
+
+function vIntro(){
+  setBg('dawn');
+  app.innerHTML=`<div class="card pop center">
+  <span class="breaking">📺 긴급 속보</span>
+  <div class="bigemo">🔌</div>
+  <h2>“오늘 하루, 도시의 도덕 스위치가 꺼졌습니다”</h2>
+  <p class="sit">오늘 아침 7시부터 밤 12시까지, 이 도시에서는 <b>규칙을 어겨도 아무도 혼내지 않고, 아무도 기억하지 않습니다.</b></p>
+  <p class="mu">당신은 하루 동안 5번의 선택을 하게 됩니다.<br>도덕을 끄면 <b style="color:var(--gold)">코인</b>을 얻고, 지키면 코인이 없어요.<br>코인을 가장 많이 모으는 방법은… 뭘까요? 😏</p>
+  <button class="btn orange" id="ok" style="margin-top:10px">${esc(S.emo)} ${esc(S.name)}의 하루 시작 ▶</button></div>${FOOT}`;
+  document.getElementById('ok').onclick=()=>{ S.sc=0; go('scene'); };
+}
+
+function vScene(){
+  const i=S.sc, sc=SCENES[i], ans=S.s1[i];
+  setBg(sc.bg);
+  app.innerHTML = hud(dayCoins(), i) + `<div class="card scene pop" id="sc">
+  <div class="row" style="justify-content:space-between"><span class="clock">⏰ ${sc.time}</span><span class="badge">장면 ${i+1} / 5</span></div>
+  <div class="bigemo">${sc.emo}</div><h2>${sc.place}</h2>
+  <p class="sit">${sc.sit}</p><p class="whisper">🔌 도덕 스위치 OFF · 아무도 보지 않음</p>
+  <div id="area"></div></div>${FOOT}`;
+  const area=document.getElementById('area');
+  if(ans===-1){
+    area.innerHTML=`<div class="choices">
+      <button class="ch off" data-c="1"><span class="ic">😈</span><b>${sc.off.t}</b><span>+${sc.off.g} 코인</span></button>
+      <button class="ch on" data-c="0"><span class="ic">😇</span><b>${sc.on.t}</b><span>코인 없음</span></button></div>`;
+    area.querySelectorAll('.ch').forEach(b=>b.onclick=()=>{
+      const c=+b.dataset.c, before=dayCoins();
+      S.s1[i]=c; save();
+      document.querySelector('.hud').outerHTML = hud(before, i);
+      animateNum(document.getElementById('coin'), before, dayCoins());
+      if(c===1){ const f=document.createElement('div'); f.className='float p'; f.textContent='+'+sc.off.g; document.getElementById('sc').appendChild(f); }
+      showRes();
+    });
+  } else showRes();
+  function showRes(){
+    const c=S.s1[i];
+    area.innerHTML=`<div class="result ${c===1?'r':'g'}"><b>${c===1?'😈 '+sc.off.t:'😇 '+sc.on.t}</b><p style="margin:6px 0 0">${c===1?sc.off.msg:sc.on.msg}</p></div>
+    <button class="btn full" id="nx" style="margin-top:14px">${i<4?'다음 시간으로 ▶':'하루가 저문다… 🌙'}</button>`;
+    document.getElementById('nx').onclick=()=>{ if(i<4){ S.sc=i+1; go('scene'); } else go('news'); };
+  }
+}
+
+function vNews(){
+  setBg('night');
+  app.innerHTML = hud(dayCoins(), 5) + `<div class="card pop center">
+  <span class="breaking">📺 밤 9시 뉴스 속보</span>
+  <div class="bigemo">🪃</div>
+  <h2>“오늘, 이 도시의 모든 사람이<br>당신과 <u>똑같은 선택</u>을 했습니다”</h2>
+  <p class="sit">당신이 신호를 무시했다면 모두가 무시했고, 당신이 지켰다면 모두가 지켰습니다.</p>
+  <p class="mu">당신의 선택이 부메랑처럼 돌아옵니다. 코인은 지켜질까요?</p>
+  <button class="btn red" id="ok">무슨 일이 일어났는지 보기 ▶</button></div>${FOOT}`;
+  document.getElementById('ok').onclick=()=>{ S.tw=0; go('twist'); };
+}
+
+function vTwist(){
+  setBg('night');
+  const i=S.tw, sc=SCENES[i], off=S.s1[i]===1;
+  let before=dayCoins(); for(let k=0;k<i;k++) before+=delta(k);
+  const after=before+delta(i);
+  app.innerHTML = hud(before, -1) + `<div class="card ${off?'boom shake':'bless pop'}">
+  <div class="row" style="justify-content:space-between"><span class="clock">${sc.emo} ${sc.place}</span><span class="badge">부메랑 ${i+1} / 5</span></div>
+  <h2 style="margin-top:12px">${off?'⚡ 모두가 “'+sc.off.t+'”를 골랐다':'🌈 모두가 “'+sc.on.t+'”를 골랐다'}</h2>
+  <p class="sit">${off?sc.back.t:sc.good.t}</p>
+  <div class="center"><div class="delta ${off?'m':'p'}">${off?'−'+sc.back.l:'+'+sc.good.b} 코인</div>
+  <p class="mu sm" style="margin:0">${off?sc.back.h:'모두가 지킨 덕분에 생긴 보너스'}</p></div>
+  <button class="btn full ${off?'':'green'}" id="nx" style="margin-top:16px">${i<4?'다음 부메랑 ▶':'최종 정산 보기 🧾'}</button></div>${FOOT}`;
+  setTimeout(()=>animateNum(document.getElementById('coin'), before, after), 350);
+  document.getElementById('nx').onclick=()=>{ if(i<4){ S.tw=i+1; go('twist'); } else go('settle'); };
+}
+
+function vSettle(){
+  setBg('night');
+  const d=dayCoins(), f=finalCoins(), n=offCount();
+  app.innerHTML = hud(f, -1) + `<div class="card pop">
+  <h2>🧾 ${esc(S.emo)} ${esc(S.name)}의 하루 정산서</h2>
+  <table class="st">
+    <tr><td>☀️ 낮에 도덕을 끄고 얻은 코인 (${n}번)</td><td style="color:var(--gold)">+${d}</td></tr>
+    <tr><td>🌙 밤에 돌아온 부메랑</td><td style="color:${f-d<0?'var(--bad)':'var(--ok)'}">${f-d>=0?'+':''}${f-d}</td></tr>
+    <tr><td><b>최종 코인</b></td><td style="color:${f<0?'var(--bad)':'var(--ac)'}">${f}</td></tr>
+  </table>
+  <div class="cmp"><div class="a">😇 모두가 지켰다면<b>+110</b></div><div class="b">😈 모두가 껐다면<b>−190</b></div></div>
+  <p class="mu sm center" style="margin-top:12px">낮에는 이득처럼 보였던 선택이, 모두가 하면 어떻게 될까요?</p></div>
+  <div class="card"><h3>🤔 그렇다면 도덕은 누구를 위한 것일까요?</h3>
+  <div class="opts">${WHO.map((w,k)=>`<button class="opt ${S.who===k?'on':''}" data-k="${k}">${w}</button>`).join('')}</div>
+  <button class="btn full orange" id="nx" style="margin-top:14px" ${S.who<0?'disabled':''}>다음 미션: 우리 반 마음 읽기 ▶</button></div>${FOOT}`;
+  app.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{ S.who=+b.dataset.k; save(); app.querySelectorAll('.opt').forEach(x=>x.classList.toggle('on',x===b)); document.getElementById('nx').disabled=false; });
+  document.getElementById('nx').onclick=()=>go('s2');
+}
+
+function vS2(){
+  setBg('morning');
+  app.innerHTML=`<div class="card pop"><span class="badge">미션 2</span>
+  <h2>🔮 우리 반 마음 읽기 게임</h2>
+  <p class="mu">① 각 문장에 대한 <b>내 생각</b>을 고르고, ${SOLO?'':'② <b>우리 반에서 몇 %가 “동의(4·5점)”할지</b> 예측해 보세요. 선생님이 결과를 공개하면 예측이 얼마나 정확했는지 점수가 나와요! 🎯'}</p>
+  ${ITEMS.map((t,i)=>`<div class="stm"><p>${i+1}. ${t}</p>
+    <div class="scale" data-i="${i}">${[1,2,3,4,5].map(k=>`<button data-k="${k}" class="${S.s2.v[i]===k?'on':''}">${k}</button>`).join('')}</div>
+    <div class="scl"><span>전혀 아니다</span><span>매우 그렇다</span></div>
+    ${SOLO?'':`<div class="pred"><label>🎯 우리 반 중 동의(4·5점)할 친구는?</label><div class="row"><input type="range" min="0" max="100" step="5" value="${S.s2.p[i]}" data-i="${i}"><span class="pv" id="pv${i}">${S.s2.p[i]}%</span></div></div>`}
+  </div>`).join('')}
+  <button class="btn full" id="ok">${S.s2done?'수정해서 다시 제출 ✔':'제출하고 다음 미션으로 ▶'}</button><div id="msg"></div></div>${FOOT}`;
+  app.querySelectorAll('.scale').forEach(g=>g.querySelectorAll('button').forEach(b=>b.onclick=()=>{
+    const i=+g.dataset.i; S.s2.v[i]=+b.dataset.k; g.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));
+  }));
+  app.querySelectorAll('input[type=range]').forEach(r=>r.oninput=()=>{ const i=+r.dataset.i; S.s2.p[i]=+r.value; document.getElementById('pv'+i).textContent=r.value+'%'; });
+  document.getElementById('ok').onclick=()=>{
+    if(S.s2.v.some(x=>!x)){ document.getElementById('msg').innerHTML='<div class="err">아직 고르지 않은 문장이 있어요.</div>'; return; }
+    S.s2done=true; go('s3');
+  };
+}
+
+function vS3(){
+  setBg('eve');
+  app.innerHTML=`<div class="card pop"><span class="badge">미션 3</span>
+  <div class="bigemo center">🧥✨</div>
+  <h2 class="center">투명망토를 얻었다!</h2>
+  <p class="sit">수상한 택배가 도착했다. 안에는 <b>24시간 동안 투명인간이 되는 망토</b>가 들어 있다. 누가 무엇을 했는지 아무도 알 수 없다.</p>
+  <h3>망토를 쓰고 가장 먼저 할 일은?</h3>
+  <div class="opts">${GYGES.map((w,k)=>`<button class="opt ${S.s3.g===k?'on':''}" data-k="${k}">${w}</button>`).join('')}</div>
+  <h3>✍️ 투명인간이 되어도 끝까지 지키고 싶은 나만의 원칙 한 줄</h3>
+  <p class="mu sm" style="margin-top:0">${SOLO?'':'선생님 화면의 ‘원칙 벽’에 붙어요. (40자 이내)'}</p>
+  <input type="text" id="rule" maxlength="40" value="${esc(S.s3.rule)}" placeholder="예: 내가 당하기 싫은 일은 남에게도 하지 않는다">
+  <button class="btn full orange" id="ok" style="margin-top:16px">원칙 붙이기 📌</button><div id="msg"></div></div>${FOOT}`;
+  app.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{ S.s3.g=+b.dataset.k; app.querySelectorAll('.opt').forEach(x=>x.classList.toggle('on',x===b)); });
+  document.getElementById('ok').onclick=()=>{
+    const r=document.getElementById('rule').value.trim();
+    if(S.s3.g<0||!r){ document.getElementById('msg').innerHTML='<div class="err">할 일을 고르고, 나만의 원칙도 한 줄 써 주세요.</div>'; return; }
+    S.s3.rule=r; go('final');
+  };
+}
+
+function vFinal(){
+  setBg('morning');
+  app.innerHTML=`<div class="card pop"><span class="badge">마지막 미션</span>
+  <h2>📝 오늘 하루를 돌아보며</h2>
+  <label><h3>Q1. ${FQ[0]}</h3><textarea id="a">${esc(S.fin.a)}</textarea></label>
+  <label><h3>Q2. ${FQ[1]}</h3><textarea id="b">${esc(S.fin.b)}</textarea></label>
+  <button class="btn full green" id="ok" style="margin-top:14px">${SOLO?'완료하고 내 칭호 받기 🏅':'선생님께 제출하고 칭호 받기 🏅'}</button><div id="msg"></div></div>${FOOT}`;
+  const ta=document.getElementById('a'), tb=document.getElementById('b');
+  ta.oninput=()=>{ S.fin.a=ta.value; LS.set('moralday_'+ROOM,S); };
+  tb.oninput=()=>{ S.fin.b=tb.value; LS.set('moralday_'+ROOM,S); };
+  document.getElementById('ok').onclick=()=>{
+    S.fin.a=ta.value.trim(); S.fin.b=tb.value.trim();
+    if(S.fin.a.length<10||S.fin.b.length<10){ document.getElementById('msg').innerHTML='<div class="err">두 질문 모두 10자 이상 써 주세요. 이유까지 쓰면 더 좋아요!</div>'; return; }
+    go('done');
+  };
+}
+
+function titleOf(n){
+  if(n===0) return ['🛡️','도덕 스위치 수호자','스위치가 꺼진 날에도 한 번도 흔들리지 않았어요. 아무도 보지 않을 때 지키는 사람이 진짜 강한 사람!'];
+  if(n<=2) return ['🌱','흔들려도 돌아오는 사람','몇 번 흔들렸지만 대부분 지켜냈어요. 흔들린 장면을 떠올려 보는 게 성장의 시작이에요.'];
+  if(n<=4) return ['🎢','스위치를 만지작거린 모험가','낮에는 코인이 쌓였지만 밤에 부메랑을 맞았죠. 오늘의 정산서가 무엇을 말해 주나요?'];
+  return ['🌪️','도덕 OFF 챔피언 (그런데…)','낮의 코인은 최고! 하지만 모두가 같은 선택을 한 밤은 혼돈이었어요. 그 혼돈 속에서 가장 먼저 다친 사람은 누구였을까요?'];
+}
+function summaryText(){
+  const L=['['+META.code+'] '+META.title,'이름: '+S.name,''];
+  L.push('■ 하루의 선택');
+  SCENES.forEach((s,i)=>L.push(' '+s.time+' '+s.place+': '+(S.s1[i]===1?'😈 '+s.off.t:'😇 '+s.on.t)));
+  L.push(' 최종 코인: '+finalCoins()+' / 도덕은 누구를 위한 것? '+(WHO[S.who]||'-'));
+  L.push('','■ 문장별 내 생각 (1~5)');
+  ITEMS.forEach((t,i)=>L.push(' '+(i+1)+'. '+t+' → '+S.s2.v[i]+(SOLO?'':' (반 예측 '+S.s2.p[i]+'%)')));
+  L.push('','■ 투명망토: '+(GYGES[S.s3.g]||'-'),'■ 나의 원칙: '+S.s3.rule,'');
+  L.push('Q1. '+FQ[0],'A. '+S.fin.a,'','Q2. '+FQ[1],'A. '+S.fin.b);
+  return L.join('\n');
+}
+function vDone(){
+  setBg('dawn');
+  const t=titleOf(offCount());
+  app.innerHTML=`<div class="card title-card pop">
+  <p class="mu" style="margin:0">${esc(S.emo)} ${esc(S.name)}의 오늘 칭호</p>
+  <div class="ic">${t[0]}</div><div class="t">${t[1]}</div>
+  <p>${t[2]}</p>
+  <p class="badge">최종 코인 ${finalCoins()} · 나의 원칙: “${esc(S.s3.rule)}”</p>
+  ${SOLO?'':'<p style="color:var(--ok);font-weight:700;margin-top:14px">✅ 선생님께 제출됐어요!</p>'}
+  </div>
+  <div class="card"><h3>📋 내 활동 정리</h3><textarea readonly rows="10" id="sum">${esc(summaryText())}</textarea>
+  <div class="row" style="margin-top:10px"><button class="btn" id="cp">복사하기</button><button class="btn ghost" id="ed">답 고치기</button>
+  ${SOLO?'<button class="btn ghost" id="rs">처음부터 다시</button>':''}</div></div>${FOOT}`;
+  document.getElementById('cp').onclick=()=>copyText(summaryText());
+  document.getElementById('ed').onclick=()=>go('final');
+  const rs=document.getElementById('rs'); if(rs) rs.onclick=()=>{ if(confirm('처음부터 다시 할까요?')){ S=newState(); save(); render(); } };
+}
+
+/* 예측 결과 */
+function fab(){
+  let f=document.getElementById('fab');
+  const show = !SOLO && REVEAL && S && S.s2done;
+  if(!show){ if(f) f.remove(); return; }
+  if(!f){ f=document.createElement('button'); f.id='fab'; f.className='btn orange fab'; f.textContent='📊 우리 반 결과 도착!'; f.onclick=openReveal; document.body.appendChild(f); }
+}
+function predScore(p, pct){ let s=0; for(let i=0;i<5;i++) s+=Math.max(0,100-Math.abs((p[i]||0)-(pct[i]||0))); return Math.round(s/5); }
+function openReveal(){
+  if(!REVEAL) return;
+  const pct=REVEAL.pct, sc=predScore(S.s2.p, pct);
+  const md=document.createElement('div'); md.className='modal';
+  md.innerHTML=`<div class="card pop"><h2>📊 우리 반 마음 읽기 결과</h2>
+  <p class="mu sm">참여 ${REVEAL.n}명 · 파란 막대 = 실제 동의 비율, 주황 선 = 내 예측</p>
+  ${ITEMS.map((t,i)=>`<div class="rb"><div class="lab">${i+1}. ${t}</div>
+    <div class="track"><div class="fill" style="width:${pct[i]||0}%"></div><div class="guess" style="left:calc(${S.s2.p[i]}% - 2px)"></div></div>
+    <div class="nums"><span>내 답: ${S.s2.v[i]}점</span><span>실제 ${pct[i]||0}% · 예측 ${S.s2.p[i]}%</span></div></div>`).join('')}
+  <div class="center"><p class="mu" style="margin:0">나의 마음 읽기 점수</p><div class="delta p">🎯 ${sc}점</div>
+  <p class="sm mu">${sc>=85?'우리 반 마음을 꿰뚫고 있어요!':sc>=70?'꽤 정확해요! 어긋난 문장은 왜 그랬을까요?':'예상과 많이 달랐네요. 친구들은 왜 그렇게 생각했을까요?'}</p></div>
+  <button class="btn full" id="cl">닫기</button></div>`;
+  document.body.appendChild(md);
+  md.querySelector('#cl').onclick=()=>md.remove();
+  md.onclick=e=>{ if(e.target===md) md.remove(); };
+}
+
+/* =========================================================
+   교사
+   ========================================================= */
+let T = {room:'', students:{}, meta:{}, tab:'live', anon:true};
+
+function teacherHome(){
+  setBg('morning'); app.className='wrap';
+  if(!ONLINE){
+    app.innerHTML=`<div class="card"><h2>🧑‍🏫 교사 화면을 쓰려면 설정이 필요해요</h2>
+    <p>이 파일의 맨 위 <b>FIREBASE_CONFIG</b> 부분에 파이어베이스 프로젝트 정보를 넣어야 학생들과 실시간으로 연결됩니다.</p>
+    <p class="mu sm">설정 전에도 ‘혼자 해보기’로 학생 화면을 체험할 수 있어요.</p>
+    <a class="btn" href="?r=SOLO">혼자 해보기</a> <a class="btn ghost" href="${baseUrl()}">처음 화면</a></div>${FOOT}`;
+    return;
+  }
+  const r=P.get('r');
+  if(r) return teacherRoom(r);
+  const last=LS.get('moralday_teacher_last');
+  app.innerHTML=`<div class="center"><div class="logo">🧑‍🏫</div><h1>교사 화면</h1><p class="mu">도덕이 사라진 하루 · 실시간 수업 방</p></div>
+  <div class="card"><button class="btn full orange" id="mk">✨ 새 수업 방 만들기</button>
+  ${last?`<button class="btn full ghost" id="ct" style="margin-top:10px">이전 방(${esc(last)}) 이어서 보기</button>`:''}
+  <div id="msg"></div></div>${FOOT}`;
+  document.getElementById('mk').onclick=async()=>{
+    const b=document.getElementById('mk'); b.disabled=true; b.textContent='방 만드는 중…';
+    try{
+      let code='';
+      for(let k=0;k<20;k++){ code=String(Math.floor(1000+Math.random()*9000)); const s=await db.ref('rooms/MD'+code+'/meta').once('value'); if(!s.exists()) break; }
+      await db.ref('rooms/MD'+code+'/meta').set({created:firebase.database.ServerValue.TIMESTAMP, reveal:false});
+      LS.set('moralday_teacher_last', code);
+      location.href='?t=1&r='+code;
+    }catch(e){ console.error(e); b.disabled=false; b.textContent='✨ 새 수업 방 만들기'; document.getElementById('msg').innerHTML='<div class="err">방을 만들지 못했어요. 파이어베이스 설정(특히 databaseURL과 보안 규칙)을 확인해 주세요.</div>'; }
+  };
+  const ct=document.getElementById('ct'); if(ct) ct.onclick=()=>location.href='?t=1&r='+last;
+}
+
+function teacherRoom(r){
+  T.room=r; LS.set('moralday_teacher_last', r);
+  setBg('morning'); app.className='wrap wide';
+  const link=baseUrl()+'?r='+r;
+  app.innerHTML=`<div class="card thead">
+    <div><span class="badge">${META.code} · ${META.title}</span>
+      <p class="mu" style="margin:8px 0 0">방 코드</p><div class="roomcode">${esc(r)}</div>
+      <p class="sm mu" style="margin:6px 0 0;word-break:break-all">${esc(link)}</p>
+      <div class="row" style="margin-top:10px"><button class="btn ghost" id="cl">🔗 링크 복사</button><button class="btn ghost" id="bg">🖥️ 큰 화면</button><button class="btn ghost" id="csv">⬇️ 엑셀(CSV) 저장</button><button class="btn ghost" id="del">🗑️ 방 데이터 삭제</button></div>
+    </div><div id="qr"></div></div>
+  <div class="tabs">
+    <button class="tab" data-t="live">👥 참여 현황</button>
+    <button class="tab" data-t="s1">🌗 하루 결과</button>
+    <button class="tab" data-t="s2">🔮 마음 읽기</button>
+    <button class="tab" data-t="s3">🧥 원칙 벽</button>
+    <button class="tab" data-t="fin">📝 제출물</button>
+  </div>
+  <div id="tb"></div>${FOOT}`;
+  if(window.QRCode){ try{ new QRCode(document.getElementById('qr'),{text:link,width:180,height:180}); }catch(e){} }
+  if(location.protocol==='file:') document.getElementById('qr').innerHTML='<p class="sm mu" style="max-width:180px">내 컴퓨터에서 연 파일이라 QR이 학생 기기에서 열리지 않아요. 깃허브에 올린 주소로 열어 주세요.</p>';
+  document.getElementById('cl').onclick=()=>copyText(link);
+  document.getElementById('bg').onclick=()=>{ document.body.classList.toggle('big'); if(document.fullscreenElement){document.exitFullscreen();}else if(document.documentElement.requestFullscreen){document.documentElement.requestFullscreen().catch(()=>{});} };
+  document.getElementById('csv').onclick=exportCSV;
+  document.getElementById('del').onclick=()=>{
+    if(!confirm('이 방의 모든 학생 응답을 삭제할까요? 삭제하면 되돌릴 수 없어요.')) return;
+    db.ref('rooms/MD'+r).remove().then(()=>{ toast('삭제했어요.'); location.href='?t=1'; }).catch(dbErr);
+  };
+  app.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{ T.tab=b.dataset.t; tRender(); });
+  db.ref('rooms/MD'+r+'/students').on('value', s=>{ T.students=s.val()||{}; tRender(); }, e=>{ document.getElementById('tb').innerHTML='<div class="err">데이터를 읽지 못했어요. 파이어베이스 보안 규칙을 확인해 주세요.</div>'; });
+  db.ref('rooms/MD'+r+'/meta').on('value', s=>{ T.meta=s.val()||{}; tRender(); });
+}
+
+function list(){ return Object.values(T.students||{}).filter(s=>s&&s.name); }
+function nm(s){ return esc((s.emo||'')+' '+s.name); }
+function arr(a){ return Array.isArray(a)?a:(a?Object.keys(a).sort((x,y)=>x-y).map(k=>a[k]):[]); }
+function calcPct(){ const L=list().filter(s=>s.s2done); return {n:L.length, pct:ITEMS.map((_,i)=>L.length?Math.round(L.filter(s=>(arr(s.s2&&s.s2.v)[i]||0)>=4).length/L.length*100):0)}; }
+
+function tRender(){
+  const tb=document.getElementById('tb'); if(!tb) return;
+  app.querySelectorAll('.tab').forEach(b=>b.classList.toggle('on', b.dataset.t===T.tab));
+  const L=list();
+  if(T.tab==='live'){
+    const by=k=>L.filter(s=>s.step===k).length;
+    tb.innerHTML=`<div class="card"><div class="kpis">
+      <div class="kpi">참여 학생<b>${L.length}명</b></div>
+      <div class="kpi">하루 체험 완료<b>${L.filter(s=>arr(s.s1).every(x=>x===0||x===1)&&arr(s.s1).length===5).length}명</b></div>
+      <div class="kpi">마음 읽기 제출<b>${L.filter(s=>s.s2done).length}명</b></div>
+      <div class="kpi">최종 제출<b>${by('done')}명</b></div></div>
+      <h3>지금 어디쯤?</h3>
+      <div class="chips">${L.length?L.sort((a,b)=>(a.name>b.name?1:-1)).map(s=>`<span class="chip">${nm(s)}<small>${STEP_KO[s.step]||''}</small></span>`).join(''):'<p class="mu">아직 들어온 학생이 없어요. 학생들에게 방 코드나 QR을 보여 주세요.</p>'}</div></div>`;
+    return;
+  }
+  if(T.tab==='s1'){
+    const done=L.filter(s=>arr(s.s1).filter(x=>x===0||x===1).length===5);
+    const per=SCENES.map((sc,i)=>{ const a=L.filter(s=>{const v=arr(s.s1)[i]; return v===0||v===1;}); const off=a.filter(s=>arr(s.s1)[i]===1).length; return {n:a.length, off, p:a.length?Math.round(off/a.length*100):0}; });
+    const avgOff = done.length? done.reduce((t,s)=>t+arr(s.s1).filter(x=>x===1).length,0)/done.length : 0;
+    const trust=Math.round(100-avgOff*20);
+    const whoN=WHO.map((_,k)=>L.filter(s=>s.who===k).length), whoT=whoN.reduce((a,b)=>a+b,0);
+    tb.innerHTML=`<div class="card"><div class="kpis">
+      <div class="kpi">하루 체험 완료<b>${done.length}명</b></div>
+      <div class="kpi">우리 반 평균 ‘도덕 OFF’<b>${avgOff.toFixed(1)}회</b></div>
+      <div class="kpi">우리 반 마을 신뢰도<b>${done.length?trust:'-'}</b></div></div>
+      <h3>장면별로 도덕을 끈 비율 😈</h3>
+      ${SCENES.map((sc,i)=>`<div class="hb"><span>${sc.emo} ${sc.time} ${sc.place}</span><div class="tk"><i style="width:${per[i].p}%;background:var(--bad)"></i></div><span class="v">${per[i].p}% <small class="mu">(${per[i].off}/${per[i].n})</small></span></div>`).join('')}
+      <p class="mu sm">💡 발문: 가장 많이 끈 장면은 어디인가요? 왜 그 장면에서는 ‘괜찮다’고 느꼈을까요?</p></div>
+      <div class="card"><h3>도덕은 누구를 위한 것일까? 🤔</h3>
+      ${WHO.map((w,k)=>`<div class="hb"><span>${w}</span><div class="tk"><i style="width:${whoT?whoN[k]/whoT*100:0}%;background:var(--ac)"></i></div><span class="v">${whoN[k]}명</span></div>`).join('')}</div>`;
+    return;
+  }
+  if(T.tab==='s2'){
+    const c=calcPct(), Ld=L.filter(s=>s.s2done), rv=T.meta&&T.meta.reveal;
+    const rank=Ld.map(s=>({s, sc:predScore(arr(s.s2.p), c.pct)})).sort((a,b)=>b.sc-a.sc).slice(0,5);
+    tb.innerHTML=`<div class="card"><div class="row" style="justify-content:space-between">
+      <div><h2 style="margin:0">🔮 우리 반 마음 읽기</h2><p class="mu sm" style="margin:0">제출 ${c.n}명 · 동의 = 4·5점</p></div>
+      <div class="row"><button class="btn orange" id="rv">${rv?'🔄 최신 결과로 다시 공개':'📢 학생들에게 결과 공개'}</button>${rv?'<button class="btn ghost" id="hd">숨기기</button>':''}</div></div>
+      ${rv?`<p class="sm" style="color:var(--ok);font-weight:700">공개 중 (공개 당시 ${T.meta.n||0}명 기준)</p>`:''}
+      <div class="grid2" style="margin-top:12px">${ITEMS.map((t,i)=>{
+        const cnt=[1,2,3,4,5].map(k=>Ld.filter(s=>arr(s.s2.v)[i]===k).length), mx=Math.max(1,...cnt);
+        const avgP=Ld.length?Math.round(Ld.reduce((a,s)=>a+(arr(s.s2.p)[i]||0),0)/Ld.length):0;
+        return `<div class="kpi" style="background:#fafbff"><b style="font-size:16px;color:var(--ink);font-family:'Noto Sans KR';font-weight:700">${i+1}. ${t}</b>
+          <div class="dist" style="margin-top:22px">${cnt.map((n,k)=>`<div class="${k>=3?'hi':''}" style="height:${n/mx*100}%"><span>${n}</span></div>`).join('')}</div>
+          <div class="dlab"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span></div>
+          <p class="sm" style="margin:8px 0 0">실제 동의 <b>${c.pct[i]}%</b> · 반 평균 예측 <b>${avgP}%</b> ${Math.abs(avgP-c.pct[i])>=20?'<span style="color:var(--bad)">⚠️ 착각 큼</span>':''}</p></div>`;}).join('')}</div>
+      <p class="mu sm">💡 발문: 예측과 실제가 가장 크게 어긋난 문장은? 우리는 왜 친구들이 그렇게 생각할 거라고 짐작했을까요?</p></div>
+      <div class="card"><h3>🎯 마음 읽기 TOP 5</h3>${rank.length?rank.map((x,k)=>`<div class="hb"><span>${['🥇','🥈','🥉','4위','5위'][k]} ${T.anon?'익명 '+(k+1):nm(x.s)}</span><div class="tk"><i style="width:${x.sc}%;background:var(--gold)"></i></div><span class="v">${x.sc}점</span></div>`).join(''):'<p class="mu">아직 제출한 학생이 없어요.</p>'}
+      <button class="btn ghost" id="an" style="margin-top:8px">${T.anon?'이름 보이기':'익명으로'}</button></div>`;
+    document.getElementById('rv').onclick=()=>{ const cc=calcPct(); if(!cc.n){ toast('아직 제출한 학생이 없어요.'); return; } db.ref('rooms/MD'+T.room+'/meta').update({reveal:true, pct:cc.pct, n:cc.n}).then(()=>toast('학생 화면에 결과가 공개됐어요!')).catch(dbErr); };
+    const hd=document.getElementById('hd'); if(hd) hd.onclick=()=>db.ref('rooms/MD'+T.room+'/meta').update({reveal:false}).catch(dbErr);
+    document.getElementById('an').onclick=()=>{ T.anon=!T.anon; tRender(); };
+    return;
+  }
+  if(T.tab==='s3'){
+    const Lr=L.filter(s=>s.s3&&s.s3.rule);
+    const gN=GYGES.map((_,k)=>L.filter(s=>s.s3&&s.s3.g===k).length), gT=gN.reduce((a,b)=>a+b,0);
+    tb.innerHTML=`<div class="card"><h3>🧥 투명망토를 쓰고 가장 먼저 할 일</h3>
+      ${GYGES.map((w,k)=>`<div class="hb"><span>${w}</span><div class="tk"><i style="width:${gT?gN[k]/gT*100:0}%;background:#8a5cf6"></i></div><span class="v">${gN[k]}명</span></div>`).join('')}
+      <p class="mu sm">💡 발문: “아무도 모른다면”이라는 조건이 우리 선택을 바꾸었나요? 바꾸지 않은 친구들은 무엇 때문일까요?</p></div>
+      <div class="card"><div class="row" style="justify-content:space-between"><h2 style="margin:0">📌 우리 반 원칙 벽 (${Lr.length})</h2><button class="btn ghost" id="an">${T.anon?'이름 보이기':'익명으로'}</button></div>
+      <div class="wall" style="margin-top:14px">${Lr.length?Lr.map((s,k)=>`<div class="note" style="background:${NOTE_COLORS[k%NOTE_COLORS.length]}">“${esc(s.s3.rule)}”<small>${T.anon?'':nm(s)}</small></div>`).join(''):'<p class="mu">아직 붙은 원칙이 없어요.</p>'}</div></div>`;
+    document.getElementById('an').onclick=()=>{ T.anon=!T.anon; tRender(); };
+    return;
+  }
+  if(T.tab==='fin'){
+    const Lf=L.filter(s=>s.step==='done');
+    tb.innerHTML=`<div class="card"><h2>📝 최종 제출물 (${Lf.length}명)</h2>
+      ${Lf.length?Lf.sort((a,b)=>(a.name>b.name?1:-1)).map(s=>{ const o=arr(s.s1).filter(x=>x===1).length; const t=titleOf(o);
+        return `<div class="sub"><b>${nm(s)}</b> <span class="badge">${t[0]} ${t[1]}</span> <span class="mu sm">OFF ${o}회</span>
+        <p><b>Q1.</b> ${esc(s.fin&&s.fin.a)}</p><p><b>Q2.</b> ${esc(s.fin&&s.fin.b)}</p></div>`;}).join(''):'<p class="mu">아직 최종 제출한 학생이 없어요.</p>'}</div>`;
+  }
+}
+
+function exportCSV(){
+  const L=list(), c=calcPct();
+  const head=['이름','캐릭터','진행','도덕OFF횟수',...SCENES.map(s=>s.time+' '+s.place),'도덕은 누구를 위해',...ITEMS.map((_,i)=>'문장'+(i+1)+' 응답'),...ITEMS.map((_,i)=>'문장'+(i+1)+' 예측%'),'예측점수','투명망토','나의 원칙','Q1','Q2'];
+  const q=v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"';
+  const rows=L.map(s=>{ const s1=arr(s.s1), v=arr(s.s2&&s.s2.v), p=arr(s.s2&&s.s2.p);
+    return [s.name,s.emo,STEP_KO[s.step]||'',s1.filter(x=>x===1).length,...SCENES.map((_,i)=>s1[i]===1?'OFF':s1[i]===0?'ON':''),WHO[s.who]||'',...ITEMS.map((_,i)=>v[i]||''),...ITEMS.map((_,i)=>s.s2done?p[i]:''),s.s2done?predScore(p,c.pct):'',GYGES[s.s3&&s.s3.g]||'',s.s3&&s.s3.rule,s.fin&&s.fin.a,s.fin&&s.fin.b].map(q).join(','); });
+  const blob=new Blob(['\ufeff'+[head.map(q).join(','),...rows].join('\r\n')],{type:'text/csv;charset=utf-8'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='도덕이사라진하루_'+T.room+'.csv'; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+}
+
+/* ---------- 시작 ---------- */
+if(P.get('t')==='1') teacherHome();
+else if(P.get('r')) studentStart(P.get('r').toUpperCase());
+else home();
+</script>
+</body>
+</html>
