@@ -589,15 +589,23 @@ let keepScroll=false;
 /* =========================================================
    ⑥ 학생 화면
    ========================================================= */
-let S=null, META={}, NATIONS={}, VOTES={}, CIT={};
+let S=null, META={}, NATIONS={}, VOTES={}, CIT={}, PROG={};
 let localEv=null; const curEv=()=> DBMODE==='live' ? META.event : localEv;
 let tmpRoom='', evDraft={opt:null,reason:''}, voteDraft={to:null,reason:''}, openVote=null, studentView='main';
 const SLOT = (qs.get('s')||'').replace(/[^0-9a-z]/gi,'').slice(0,6); // 체험용: 한 기기에서 여러 학생 흉내 (&s=1, &s=2 ...)
 const skey = () => 'natgame_s_'+ROOM+(SLOT?'_'+SLOT:'');
 function loadS(){ try{ const x=JSON.parse(localStorage.getItem(skey())); if(x){ x.d=norm(x.d); } return x; }catch(e){ return null; } }
-function saveS(){ if(!S) return; try{ localStorage.setItem(skey(),JSON.stringify(S)); }catch(e){} }
+let _pt=null;
+function saveS(){ if(!S) return; try{ localStorage.setItem(skey(),JSON.stringify(S)); }catch(e){} if(S.sname&&S.step>=1){ clearTimeout(_pt); _pt=setTimeout(pushProgress,1500); } }
 function newS(){ return {id:'s'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),num:'',sname:'',step:0,ci:0,joinedAt:Date.now(),submitted:false,voted:null,d:norm({})}; }
-function pushProgress(){ if(!S||!S.sname||!ROOM) return; backend.set(`rooms/${ROOM}/progress/${S.id}`,{num:S.num,sname:S.sname,step:S.step,submitted:!!S.submitted,at:Date.now()}); }
+function pushProgress(){ if(!S||!S.sname||!ROOM) return; backend.set(`rooms/${ROOM}/progress/${S.id}`,{num:S.num,sname:S.sname,step:S.step,ci:S.ci||0,submitted:!!S.submitted,d:S.d,at:Date.now()}); }
+const keyOf=(num,name)=>String(num||'').trim()+'|'+String(name||'').replace(/\s+/g,'').toLowerCase();
+function findMine(num,name){ const k=keyOf(num,name);
+  const nat=Object.values(NATIONS||{}).filter(n=>n&&n.d&&keyOf(n.num,n.sname)===k).sort((a,b)=>(b.submittedAt||0)-(a.submittedAt||0))[0];
+  if(nat) return {id:nat.id,d:nat.d,submitted:true,step:6,ci:0};
+  const pr=Object.entries(PROG||{}).map(([id,v])=>Object.assign({id},v)).filter(v=>v&&v.d&&keyOf(v.num,v.sname)===k&&(v.step||0)>=1).sort((a,b)=>(b.at||0)-(a.at||0))[0];
+  if(pr) return {id:pr.id,d:pr.d,submitted:false,step:Math.min(6,Math.max(1,pr.step||1)),ci:pr.ci||0};
+  return null; }
 function go(step){ S.step=step; saveS(); pushProgress(); window.scrollTo(0,0); render(); }
 
 function stepBar(){
@@ -620,6 +628,7 @@ function vJoinRoom(){
 function vJoin(){
   return `${sHeader()}<div class="card"><h2>👋 반가워요, 미래의 건국자!</h2>
   <p>오늘 여러분은 <b>내가 살고 싶은 나라</b>를 직접 세웁니다. 나라 이름과 국기를 정하고, 누가 다스릴지, 세금을 어디에 쓸지, 어려운 문제를 어떻게 해결할지 결정해요.</p>
+  <div class="banner ok">🔄 <b>이미 만들던 나라가 있나요?</b> 처음에 넣은 <b>번호와 이름을 똑같이</b> 넣고 시작하면, 다른 크롬북에서도 내 나라를 다시 찾아 이어서 할 수 있어요.</div>
   <div class="tip">⚠️ 정답은 없어요. 대신 <b>모든 선택에는 대가</b>가 있고, 선택마다 <b>이유</b>를 적어야 해요. 선생님이 여러분의 이유를 확인합니다.</div>
   <div class="grid g2"><div><label class="lb">번호</label><input class="field" inputmode="numeric" data-bind="num" value="${esc(S.num)}" placeholder="예: 7"></div>
   <div><label class="lb">이름</label><input class="field" data-bind="sname" value="${esc(S.sname)}" placeholder="예: 홍길동"></div></div></div>${nav(false,'시작하기 →')}`;
@@ -795,6 +804,8 @@ function validate(){
 const SACT = {
   enterRoom(){ const r=tmpRoom.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,8); if(!r) return toast('방 코드를 입력하세요.'); location.search='?room='+r; },
   next(){ const m=validate(); if(m) return toast('⚠️ '+m);
+    if(S.step===0){ const f=findMine(S.num,S.sname); if(f && f.id!==S.id && confirm(`${S.num}번 ${S.sname} 학생이 만들던 나라 “${(f.d&&f.d.name)||'이름 없음'}”를 찾았어요.\n이어서 할까요?\n(취소를 누르면 새 나라를 처음부터 만들어요)`)){
+      S.id=f.id; S.d=norm(f.d); S.submitted=f.submitted; S.step=f.step; S.ci=f.ci; S.joinedAt=Date.now(); saveS(); pushProgress(); window.scrollTo(0,0); toast('🔄 '+(S.d.name||'내 나라')+'를 다시 찾았어요!'); render(); return; } }
     if(S.step===4 && S.ci<CARDS.length-1){ S.ci++; saveS(); window.scrollTo(0,0); render(); return; }
     go(S.step+1); },
   prev(){ if(S.step===4 && S.ci>0){ S.ci--; saveS(); window.scrollTo(0,0); render(); return; } if(S.step===5){ S.ci=CARDS.length-1; } go(Math.max(1,S.step-1)); },
@@ -854,6 +865,7 @@ function startStudent(){
   });
   backend.on(`rooms/${ROOM}/nations`,n=>{ NATIONS=n||{}; if(studentView!=='main') softRender(); });
   backend.on(`rooms/${ROOM}/citizen`,c=>{ CIT=c||{}; if(S&&S.submitted) softRender(); });
+  backend.on(`rooms/${ROOM}/progress`,pv=>{ PROG=pv||{}; });
   backend.on(`rooms/${ROOM}/votes`,v=>{ VOTES=v||{}; if(studentView==='vote') softRender(); });
   render();
   if(S && S.sname) pushProgress();
