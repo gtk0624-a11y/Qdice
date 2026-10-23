@@ -109,6 +109,7 @@ label.lb{display:block;font-weight:700;margin:14px 0 6px}
 .law p{margin:4px 0}
 .chips{display:flex;flex-wrap:wrap;gap:8px}
 .chip{border:2px solid var(--line);background:#fff;border-radius:999px;padding:8px 14px;font-weight:700;font-size:15px}
+mark{background:#ffe48a;color:inherit;padding:0 2px;border-radius:3px}
 .chip.sel{border-color:var(--accent2);background:#e8f5f3;color:#1d6f65}
 .toast{position:fixed;left:50%;top:18px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:12px 20px;border-radius:12px;z-index:100;font-weight:700;max-width:90vw;box-shadow:var(--shadow);animation:pop .2s}
 @keyframes pop{from{transform:translate(-50%,-10px);opacity:0}to{transform:translate(-50%,0);opacity:1}}
@@ -647,9 +648,11 @@ function typeBadge(tk){ const t=TYPES[tk]; return `<span class="typebadge" style
 const modeBadge = () => DBMODE==='live' ? `<span class="pill live">● 실시간 연동</span>` : `<span class="pill demo">● 체험 모드</span>`;
 let pending=false;
 function isTyping(){ const a=document.activeElement; return a && $app.contains(a) && (a.tagName==='TEXTAREA' || (a.tagName==='INPUT' && a.type!=='button')); }
-function softRender(){ if(isTyping()){ pending=true; return; } render(); }
+let lastScroll=0, rTimer=null;
+['scroll','touchmove','wheel'].forEach(ev=>window.addEventListener(ev,()=>{ lastScroll=Date.now(); },{passive:true}));
+function softRender(){ if(isTyping()){ pending=true; return; } if(Date.now()-lastScroll<1200){ clearTimeout(rTimer); rTimer=setTimeout(softRender,700); return; } render(); }
 document.addEventListener('focusout',()=>{ setTimeout(()=>{ if(pending && !isTyping()){ pending=false; render(); } },150); });
-function render(){ pending=false; const y=window.scrollY; (MODE==='teacher'?renderTeacher:renderStudent)(); if(keepScroll) window.scrollTo(0,y); keepScroll=false; }
+function render(){ pending=false; clearTimeout(rTimer); const y=window.scrollY; $app.style.minHeight=$app.offsetHeight+'px'; (MODE==='teacher'?renderTeacher:renderStudent)(); window.scrollTo(0,y); requestAnimationFrame(()=>{ $app.style.minHeight=''; if(Math.abs(window.scrollY-y)>2) window.scrollTo(0,y); }); keepScroll=false; }
 let keepScroll=false;
 
 /* =========================================================
@@ -839,6 +842,30 @@ function vRescue(){
   <label class="lb">✏️ 이 방법을 고른 이유</label><textarea class="field" data-bind="rescuereason" maxlength="200">${esc(rescueDraft.reason)}</textarea>
   <div style="margin-top:14px;text-align:right"><button class="btn acc" data-act="rescuesubmit">결정!</button></div></div></div>`;
 }
+
+const CONCEPTS=['국가의 역할','생명과 안전','인간다운 삶','상호 존중','소통','협력','시민 불복종','권리','의무','참여','공익','사익','사생활','신뢰','책임','헌법','기본권'];
+const CONCEPT_RE=new RegExp('('+CONCEPTS.slice().sort((a,b)=>b.length-a.length).join('|')+')','g');
+function usedConcepts(txt){ return CONCEPTS.filter(c=>String(txt||'').includes(c)); }
+function hlC(txt){ return esc(txt||'').replace(CONCEPT_RE,'<mark>$1</mark>'); }
+function refQs(d){
+  d=norm(d); const nm=d.name||'우리 나라'; const rp=report(d,citsFor(S.id),votesFor(S.id)); const v=rp.v;
+  const lg=[]; computeInd(d,lg); const bad=lg.filter(x=>x.imp.lv.c==='bad');
+  const br=(rp.st.rights||[]).filter(x=>!x.ok).map(x=>RIGHTS.find(r=>r.k===x.k)).filter(Boolean);
+  const pw=PERSONAS.map(p=>({p,s:personaScore(p,v)})).sort((a,b)=>a.s-b.s)[0];
+  let q1;
+  if(rp.st.bankrupt) q1=`${nm}은(는) 경제가 ${v.eco}점까지 떨어져 국가 파산을 겪었어요. 어떤 결정이 파산을 불렀고, 다시 한다면 무엇을 바꾸겠어요?`;
+  else if(bad.length){ const x=bad[0]; q1=`${nm}은(는) ‘${x.e.t}’ 때 ‘${x.imp.lv.n}’ 상태였어요${x.e.prepName?` (${x.e.prepName} ${x.imp.pts}칸)`:''}. 평소 어떤 결정 때문이었고, 다시 한다면 무엇을 바꾸겠어요?`; }
+  else if(br.length) q1=`헌법에 ${br[0].n.replace(/^\S+\s/,'')}을(를) 약속했지만 지키지 못했어요. 왜 지키지 못했고, 지키려면 국가가 무엇을 해야 할까요?`;
+  else q1=`${nm}에서 가장 힘든 시민은 ‘${pw.p.n}’(${pw.s}점)이에요. 이 시민을 위해 국가는 무엇을 더 해야 할까요?`;
+  const Q=QUAD[rp.r.q];
+  const q2=`${nm}은(는) 관계 지도에서 ‘${Q.n}’이에요 (국가의 힘 ${rp.r.S}점, 시민의 힘 ${rp.r.C}점). ${rp.r.q==='both'?'이렇게 될 수 있었던 까닭은 무엇이고, 이 관계를 지키려면 국가와 시민이 각각 무엇을 해야 할까요?':'상생 공동체가 되려면 국가와 시민이 각각 무엇을 해야 할까요?'}`;
+  return [
+    {k:'r1',e:'🏛️',t:q1,starter:'나는 (   )을(를) 선택했는데, 그 결과 (   )은(는) (   )했다. 다시 한다면 '},
+    {k:'r2',e:'🤝',t:q2,starter:'국가는 시민의 (   )을(를) 지켜야 하고, 시민은 (   )을(를) 해야 한다. 왜냐하면 '},
+    {k:'r3',e:'🌱',t:'현실의 대한민국 시민으로서 나는 어떤 권리를 누리고 있고, 앞으로 어떤 의무와 참여를 실천할까요?',starter:'나는 (   ) 권리를 누리고 있다. 그래서 앞으로 나는 '}];
+}
+function conceptChipsHTML(){ const u=usedConcepts(['r1','r2','r3'].map(k=>refDraft[k]||'').join(' ')); return `<b>💡 오늘 배운 개념어를 2개 이상 넣어 쓰세요</b> <span class="muted">(지금 ${u.length}개 사용)</span><div class="chips" style="margin-top:6px">${CONCEPTS.map(c=>`<span class="chip ${u.includes(c)?'sel':''}">${esc(c)}</span>`).join('')}</div>`; }
+function refLen(k){ return (refDraft[k]||'').replace(/\(\s*\)/g,'').trim().length; }
 let refDraft={ans:{},r1:'',r2:'',r3:''};
 function vFinal(){
   const vc=votesFor(S.id), rp=report(S.d,citsFor(S.id),vc), mine=REF&&REF[S.id], gc=GRADE_C[rp.grade];
@@ -851,7 +878,7 @@ function vFinal(){
   ${mine?'':'<p class="muted">빈칸을 눌러 알맞은 낱말을 골라요. 필요 없는 낱말도 섞여 있어요.</p>'}
   ${CLOZE.map((c,i)=>clozeHTML(c,i,mine)).join('')}
   <h3>2. 국가 운영 소감</h3>
-  ${REFQ.map(q=>mine?`<div class="law" style="margin-bottom:8px"><b>${esc(q.t)}</b><p>${esc(mine[q.k]||'')}</p></div>`:`<label class="lb">${esc(q.t)}</label><textarea class="field" data-bind="${q.k}" maxlength="300" placeholder="${esc(q.p)}">${esc(refDraft[q.k])}</textarea>`).join('')}
+  ${(qs=>mine?qs.map(q=>`<div class="law" style="margin-bottom:8px"><b>${q.e} ${esc((mine.q||{})[q.k]||q.t)}</b><p>${hlC(mine[q.k]||'')}</p></div>`).join(''):`<div class="tip" id="cc">${conceptChipsHTML()}</div>`+qs.map(q=>`<label class="lb">${q.e} ${esc(q.t)}</label><div class="muted" style="margin:-2px 0 6px">✍️ 문장 틀: ${esc(q.starter)}… <button class="btn sm ghost" data-act="starter" data-k="${q.k}">틀 넣기</button></div><textarea class="field" style="min-height:110px" data-bind="${q.k}" maxlength="500" placeholder="30글자 이상, 내 나라의 결과를 근거로 써 주세요">${esc(refDraft[q.k])}</textarea><div class="muted" style="text-align:right;font-size:13px" id="len_${q.k}">${refLen(q.k)}자 / 30자 이상</div>`).join(''))(refQs(S.d))}
   ${mine?'<div class="banner ok" style="margin-top:12px">✅ 제출 완료! 수고했어요.</div>':''}
   </div><div class="navbar"><div class="in"><button class="btn ghost" data-act="backMain">← 내 나라</button>${mine?'<span></span>':'<button class="btn acc" data-act="reflsubmit">제출하기</button>'}</div></div>`;
 }
@@ -918,6 +945,7 @@ const SACT = {
   reedit(){ if(!confirm('나라를 고쳐서 다시 선포할까요? (지금까지의 선택은 그대로 남아 있어요)')) return; S.submitted=false; S.ci=0; go(1); },
   toVote(){ studentView='vote'; if(VOTES&&VOTES[S.id]) voteDraft={to:VOTES[S.id].to,reason:VOTES[S.id].reason||''}; window.scrollTo(0,0); render(); },
   backMain(){ studentView='main'; render(); },
+  starter(ds){ const q=refQs(S.d).find(x=>x.k===ds.k); if(!q) return; if((refDraft[ds.k]||'').trim()) return toast('이미 쓴 내용이 있어요. 지우고 누르면 틀이 들어가요.'); refDraft[ds.k]=q.starter; keepScroll=true; render(); },
   toFinal(){ studentView='final'; window.scrollTo(0,0); render(); },
   rescuepick(ds){ rescueDraft.opt=+ds.o; render(); },
   async rescuesubmit(){ if(rescueDraft.opt==null) return toast('방법을 하나 고르세요.'); if(rescueDraft.reason.trim().length<5) return toast('이유를 5글자 이상 써 주세요.');
@@ -926,9 +954,13 @@ const SACT = {
     rescueDraft={opt:null,reason:''}; toast('🔥 '+S.d.name+', 다시 일어서기 시작했어요!'); render(); },
   async reflsubmit(){ const blanks=CLOZE.flatMap((c,i)=>c.a.map((a,j)=>({k:`k${i}_${j}`,a})));
     if(blanks.some(b=>!refDraft.ans[b.k])) return toast('괄호를 모두 채워 주세요.');
-    if(REFQ.some(q=>(refDraft[q.k]||'').trim().length<10)) return toast('소감을 질문마다 10글자 이상 써 주세요.');
+    const qs=refQs(S.d);
+    if(qs.some(q=>/\(\s*\)/.test(refDraft[q.k]||''))) return toast('문장 틀의 (   ) 빈칸을 채워 주세요.');
+    if(qs.some(q=>refLen(q.k)<30)) return toast('질문마다 30글자 이상 써 주세요.');
+    const used=usedConcepts(qs.map(q=>refDraft[q.k]).join(' '));
+    if(used.length<2) return toast('오늘 배운 개념어를 2개 이상 넣어 주세요. (예: 권리, 의무, 소통, 협력)');
     const score=blanks.filter(b=>refDraft.ans[b.k]===b.a).length;
-    await backend.set(`rooms/${ROOM}/reflect/${S.id}`,{name:`${S.num}번 ${S.sname}`,ans:refDraft.ans,score,total:blanks.length,r1:refDraft.r1,r2:refDraft.r2,r3:refDraft.r3,at:Date.now()});
+    await backend.set(`rooms/${ROOM}/reflect/${S.id}`,{name:`${S.num}번 ${S.sname}`,ans:refDraft.ans,score,total:blanks.length,r1:refDraft.r1,r2:refDraft.r2,r3:refDraft.r3,q:{r1:qs[0].t,r2:qs[1].t,r3:qs[2].t},concepts:used,at:Date.now()});
     toast(`📝 제출 완료! 괄호 ${score}/${blanks.length}개 정답`); window.scrollTo(0,0); render(); },
   toCitizen(){ studentView='citizen'; window.scrollTo(0,0); render(); },
   citpick(ds){ citDraft.a[ds.c]=+ds.o; keepScroll=true; render(); },
@@ -955,7 +987,7 @@ function bindStudentInput(t){
   if(b==='citreview'){ citDraft.review=v; return; }
   if(b==='rescuereason'){ rescueDraft.reason=v; return; }
   if(b==='cloze'){ refDraft.ans[t.dataset.k]=v; return; }
-  if(b==='r1'||b==='r2'||b==='r3'){ refDraft[b]=v; return; }
+  if(b==='r1'||b==='r2'||b==='r3'){ refDraft[b]=v; const cc=document.getElementById('cc'); if(cc) cc.innerHTML=conceptChipsHTML(); const ln=document.getElementById('len_'+b); if(ln) ln.textContent=refLen(b)+'자 / 30자 이상'; return; }
   if(!S) return;
   if(b==='num') S.num=v.replace(/[^0-9]/g,'').slice(0,3);
   else if(b==='sname') S.sname=v.slice(0,10);
@@ -988,7 +1020,7 @@ function startStudent(){
 /* =========================================================
    ⑦ 교사 화면
    ========================================================= */
-let DATA={}, ttab='gallery', openN=null, openCard=null, tAuthed=false, pinDraft='', showQR=false;
+let DATA={}, ttab='gallery', openN=null, openCard=null, tAuthed=false, pinDraft='', showQR=false, showSpot=false;
 try{ tAuthed = sessionStorage.getItem('natgame_t')==='1'; }catch(e){}
 const studentURL = () => location.origin + location.pathname + '?room=' + ROOM;
 function nationsList(){ return Object.values(DATA.nations||{}).filter(n=>n&&n.d).map(n=>{ const d=norm(n.d); const v=computeInd(d); return {...n,d,v,tk:nationType(v,d)}; }).sort((a,b)=>(+a.num||0)-(+b.num||0)); }
@@ -1075,8 +1107,11 @@ function tFinal(L){
   ${refl.length?`<p>괄호 채우기 평균 <b>${(refl.reduce((a,r)=>a+(r.score||0),0)/refl.length).toFixed(1)}</b> / ${blanks.length}</p>
   <div class="chips">${blanks.map(b=>{ const ok=refl.filter(r=>(r.ans||{})[b.k]===b.a).length; const pc=Math.round(ok/refl.length*100); return `<span class="chip" style="${pc<60?'border-color:var(--bad);color:#9b2c2c':''}">${b.q}번 ${esc(b.a)} ${pc}%</span>`; }).join('')}</div>
   <p class="muted">빨간 칸 = 정답률 60% 미만 → 다시 짚어 줄 개념</p>
-  <ul class="rlist">${refl.map(r=>`<li><b>${esc(r.name||'')}</b> (${r.score}/${r.total})<br>🏛️ ${esc(r.r1||'')}<br>🤝 ${esc(r.r2||'')}<br>🌱 ${esc(r.r3||'')}</li>`).join('')}</ul>`:'<p class="muted">위쪽 <b>④ 시상식·마무리</b>를 누르면 학생 화면에 최종 결산과 마무리 활동(괄호 채우기·소감)이 나타납니다.</p>'}</div>`;
+  <div class="row" style="margin:10px 0"><b>✍️ 학생 소감</b><span class="muted">(노란색 = 개념어)</span><span class="sp"></span><button class="btn sm teal" data-act="spot">🖥️ ⭐ 고른 소감 크게 보기</button></div>
+  <ul class="rlist">${Object.entries(DATA.reflect||{}).map(([id,r])=>`<li><div class="row"><b>${esc(r.name||'')}</b><span class="muted">괄호 ${r.score}/${r.total} · 개념어 ${(r.concepts||[]).length}개</span><span class="sp"></span><button class="btn sm ${r.star?'acc':'ghost'}" data-act="star" data-v="${id}">${r.star?'⭐ 선택됨':'☆ 고르기'}</button></div>${['r1','r2','r3'].map((k,i)=>`<div style="margin-top:8px"><div class="muted" style="font-size:13px">${['🏛️','🤝','🌱'][i]} ${esc((r.q||{})[k]||'')}</div>${hlC(r[k]||'')}</div>`).join('')}</li>`).join('')}</ul>`:'<p class="muted">위쪽 <b>④ 시상식·마무리</b>를 누르면 학생 화면에 최종 결산과 마무리 활동(괄호 채우기·소감)이 나타납니다.</p>'}</div>`;
 }
+function tSpot(){ const st=Object.values(DATA.reflect||{}).filter(r=>r&&r.star);
+  return `<div class="overlay" data-act="closeSpot"><div class="modal" data-stop="1" style="max-width:1100px"><div class="row"><h2 style="margin:0">⭐ 오늘의 소감</h2><span class="sp"></span><button class="btn" data-act="closeSpot">닫기 ✕</button></div>${st.length?st.map(r=>`<div class="law" style="margin-top:14px;font-size:21px;line-height:1.75"><b>${esc(r.name||'')}</b>${['r1','r2','r3'].map(k=>r[k]?`<p>${hlC(r[k])}</p>`:'').join('')}</div>`).join(''):'<p class="muted" style="margin-top:14px">학생 소감 옆 ☆ 고르기를 눌러 보여 줄 소감을 골라 주세요.</p>'}</div></div>`; }
 function tConcept(L){
   const cnt={}; L.forEach(n=>cnt[n.tk]=(cnt[n.tk]||0)+1);
   return `<div class="card concept"><h2>📘 정리 — 게임 속 선택이 교과서의 어디와 연결될까?</h2>
@@ -1123,7 +1158,7 @@ function renderTeacher(){
   ${DATA.meta&&DATA.meta.event?`<span class="pill" style="border-color:var(--bad);color:var(--bad)">🚨 위기 사건 진행 중</span>`:''}</div>
   ${DBMODE!=='live'?`<div class="banner warn" style="margin-top:12px">⚠️ Firebase가 연결되지 않은 <b>체험 모드</b>입니다. 학생 태블릿과 연동되지 않아요. 설치 안내서 3~4단계(firebaseConfig 붙여 넣기)를 확인하세요.</div>`:''}
   <div class="tabs">${[['gallery','🏳️ 국가 갤러리'],['map','🧭 관계 지도'],['policy','📊 정책 선택 통계'],['event','🎲 사건·위기'],['vote','🗳️ 투표 결과'],['final','🏆 시상식·마무리'],['concept','📘 개념 정리']].map(([k,n])=>`<button class="${ttab===k?'on':''}" data-act="tab" data-v="${k}">${n}</button>`).join('')}</div>
-  ${body}</div>${openN?tNationModal():''}${showQR?tQRModal():''}`;
+  ${body}</div>${openN?tNationModal():''}${showQR?tQRModal():''}${showSpot?tSpot():''}`;
   if(showQR){ const el=document.getElementById('qr'); if(el && window.QRCode){ new QRCode(el,{text:studentURL(),width:300,height:300}); } else if(el){ el.innerHTML='<p class="muted">QR을 불러오지 못했어요. 아래 주소를 알려 주세요.</p>'; } }
 }
 function csvCell(s){ s=String(s??''); return /[",\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s; }
@@ -1157,6 +1192,9 @@ const TACT = {
     if(ok) toast('🔗 학생 링크를 복사했어요. 클래스룸·패들렛에 붙여 넣으세요 (방 '+ROOM+')');
     else { showQR=true; render(); toast('복사가 막혀 있어요. QR 창 아래 주소를 직접 복사하세요.'); } },
   closeQR(){ showQR=false; render(); },
+  star(ds){ const r=(DATA.reflect||{})[ds.v]; backend.update(`rooms/${ROOM}/reflect/${ds.v}`,{star:!(r&&r.star)}); },
+  spot(){ showSpot=true; render(); },
+  closeSpot(){ showSpot=false; render(); },
   csv(){ if(!nationsList().length) return toast('아직 선포한 나라가 없어요.'); exportCSV(); },
   newRoom(){ if(!confirm('새 방(다른 반용)을 만들까요? 지금 방의 기록은 그대로 남습니다.')) return; location.search='?mode=teacher&room='+newCode(); },
   reset(){ if(!confirm('이 방의 모든 나라·투표·진행 기록을 지울까요? 되돌릴 수 없습니다.')) return; backend.set(`rooms/${ROOM}`,{meta:{phase:'build',resetAt:Date.now()}}); toast('초기화했습니다.'); }
