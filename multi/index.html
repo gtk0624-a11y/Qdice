@@ -253,12 +253,12 @@ const TIPS = {
   coins:'“같은 팀 한 명, 다른 팀 한 명에게 코인 20개를 나눠 주세요. 누구인지는 서로 몰라요.” · 약 4분 · <b>결과는 아직 보여 주지 마세요.</b>',
   reveal:'그래프를 크게 띄우고 반전을 공개하세요. “팀은 점 세기와 아무 상관 없이 <b>컴퓨터가 무작위로</b> 나눴어요.” → “의미 없는 팀인데 왜 우리 팀에 더 줬을까?” → <b>내집단 편향</b>(교과서 144쪽)',
   detective:'꿈결마을 사건 카드 6장입니다. 답변 벽에서 좋은 답을 눌러 크게 띄워 함께 읽어 주세요. · 약 15분',
-  ox27:'OX 3문항과 성찰을 씁니다. “코인을 나눌 때 나도 내집단 편향이 있었나?” · 약 6분',
+  ox27:'OX 3문항과 <b>맞춤형 성찰 3문항</b>(내 코인 결과·편견 사건·실천)을 씁니다. 질문마다 30자 이상, 개념어 2개 이상. ☆로 소감을 골라 <b>크게 보기</b>나 <b>학생 화면 공유</b>를 하세요. · 약 8분',
   city:'동네 이름 정하기(국가 만들기 나라 불러오기 가능) → 동네 방향 → 정책 예산 10칸 · 약 7분',
-  play:'사건을 하나씩 발동하세요(45분 수업이면 <b>2~3개</b> 권장). 선택 통계를 보며 “왜 그렇게 골랐나요?”를 물어보세요. <b>용광로(동화)</b>를 고른 동네는 사건이 지날수록 숨은 어려움이 쌓입니다.',
+  play:'사건 8개 모두 <b>정답이 없는 딜레마</b>입니다. 45분 수업이면 <b>2~3개</b>만 발동하세요. 학생은 선택 이유와 함께 <b>‘가장 서운할 이웃’에게 한마디</b>를 씁니다. 답변 벽에서 같은 선택을 하고도 이유가 다른 답을 골라 비교해 보세요.',
   slogan:'교과서 152쪽 표어 만들기를 태블릿으로 합니다. 표어 벽을 띄워 함께 봅니다. · 약 7분',
   vote:'학생마다 <b>무작위 주민 카드</b>가 주어집니다. “내가 이 사람이라면 어느 동네에서 살고 싶을까?” 동네 점수는 보여 주지 않습니다. · 약 6분',
-  wrap28:'득표 결과와 <b>방향별 공존 지수</b>를 공개하고 묻습니다. “갈등이 안 보이면 공존일까?” 마지막으로 OX와 느낀 점을 씁니다.'
+  wrap28:'득표 결과와 <b>방향별 공존 지수</b>를 공개하고 묻습니다. “갈등이 안 보이면 공존일까?” 마지막으로 OX와 <b>맞춤형 성찰 3문항</b>(가장 힘든 이웃·입장 바꾸기·내가 건넨 한마디)을 씁니다. ☆로 고른 소감을 함께 읽으세요.'
 };
 
 /* 27-① 점 세기 */
@@ -289,7 +289,10 @@ const CASES = [
    ex:'언어 장벽 때문에 생긴 일을 ‘관심 없음’으로 오해하면, <b>새 사회에 적응하려는 사람</b>을 더 외롭게 만들어요. 통역·번역 같은 제도적 지원이 필요한 이유예요.'},
   {id:'c6',e:'🕌',t:'작은 기도 공간',s:'동네에 다른 종교를 믿는 사람들의 작은 기도 공간이 생긴다는 소식에 “그 종교는 위험할 것 같다”며 반대 서명 운동이 시작됐다.',
    st:['종교의 자유는 모든 사람에게 보장된다.','잘 모르는 종교는 위험할 것이다.','궁금한 점이 있으면 직접 대화해 볼 수 있다.'],a:1,ty:1,
-   ex:'잘 모르는 것을 위험하다고 단정하면 이웃 사이에 벽이 생겨 <b>사회 통합</b>이 깨져요. 먼저 <b>올바른 지식</b>을 갖추는 것이 공존의 첫걸음이에요(교과서 150쪽).'}
+   ex:'잘 모르는 것을 위험하다고 단정하면 이웃 사이에 벽이 생겨 <b>사회 통합</b>이 깨져요. 먼저 <b>올바른 지식</b>을 갖추는 것이 공존의 첫걸음이에요(교과서 150쪽).'},
+  {id:'c7',e:'🙅',t:'“여기 사람들은 다 그래”',s:'전학 온 지 한 달 된 친구가 “여기 애들은 외국에서 온 사람을 다 싫어해”라며 먼저 말을 걸지 않는다. 몇몇 친구가 다가갔지만 계속 피하기만 한다.',
+   st:['이 학교 학생들은 모두 외국에서 온 사람을 싫어한다.','몇 번 속상한 일을 겪었다면 마음을 닫을 수도 있다.','먼저 다가가는 쪽이 꼭 한 사람일 필요는 없다.'],a:0,ty:1,
+   ex:'편견은 ‘원래 살던 사람’만 갖는 게 아니에요. 새로 온 사람도 몇 번의 경험으로 <b>한 집단 전체</b>를 하나로 묶어 판단할 수 있어요. 서로를 일반화하면 다가갈 기회가 사라져 <b>사회 통합</b>이 어려워져요.'}
 ];
 const OX27 = [
   {q:'다문화 사회는 다양한 문화적 배경을 가진 사람들이 함께 살아가는 사회이다.',a:'O',ex:'다문화 사회의 뜻 그대로예요.'},
@@ -302,117 +305,148 @@ const OX28 = [
   {q:'샐러드 볼 모델은 다양한 문화적 전통을 인정하지 않는다.',a:'X',ex:'샐러드 볼은 각 재료가 제 맛을 지키며 어우러지듯, 다양한 문화적 전통을 인정해요. 오늘 게임의 🥗 방향이에요.'}
 ];
 
-/* 28 동네 운영 */
+/* 28 동네 운영 — 모든 선택지는 얻는 것과 잃는 것이 함께 있음(정답 없음) */
 const RES = [
-  {k:'r1',n:'아미나',e:'🎓',rl:'유학생',base:40,need:'종교 때문에 먹을 수 있는 음식이 정해져 있고, 하루에 몇 번 기도할 시간이 필요해요.',
+  {k:'r1',n:'아미나',e:'🎓',rl:'유학생',base:42,need:'종교 때문에 먹을 수 있는 음식이 정해져 있고, 하루에 몇 번 기도할 시간이 필요해요.',
    q:['먹을 수 있는 게 없어서 급식을 거의 굶어요…','불편한 점이 있지만 버틸 만해요.','제 문화를 존중받으니 이 동네가 제2의 고향 같아요!']},
-  {k:'r2',n:'린',e:'👩‍👧',rl:'결혼 이민자',base:40,need:'한국어가 아직 서툴러서 아이 학교 안내문을 읽기 어려워요.',
-   q:['안내문을 읽을 수 없어서 아이 학교 행사에 또 못 갔어요…','조금씩 도움을 받고 있어요.','통역 덕분에 학부모 모임에서 친구가 생겼어요!']},
-  {k:'r3',n:'라주',e:'👷',rl:'이주 노동자',base:40,need:'공장에서 야간 근무를 해요. 아파도 병원에 가기 어렵고, 임금이 늦게 나올 때가 있어요.',
-   q:['아파도 참고 일해요. 가게에서도 눈치가 보여요…','일은 힘들지만 그럭저럭 지내요.','일한 만큼 존중받으니 이 동네를 위해 더 일하고 싶어요!']},
-  {k:'r4',n:'다니엘',e:'🧑',rl:'귀화한 중학생',base:40,need:'한국에서 자랐는데, 겉모습 때문에 자꾸 “어느 나라 사람이야?”라는 질문을 받아요.',
-   q:['저는 여기 사람인데… 아무도 그렇게 봐 주지 않아요.','가끔 속상하지만 친구들이 있어요.','이제 아무도 저를 ‘외국인’이라 부르지 않아요. 그냥 우리 반 다니엘이에요!']},
-  {k:'r5',n:'프리야',e:'🪔',rl:'다른 종교를 믿는 가족',base:40,need:'우리 가족의 가장 큰 종교 명절이 한국 달력에는 없어요.',
+  {k:'r2',n:'린',e:'👩‍👧',rl:'결혼 이민자',base:42,need:'한국어를 배우고 싶지만 일하고 아이 키우느라 시간이 없어요. 아이 학교 안내문을 읽기 어려워요.',
+   q:['안내문을 읽을 수 없어서 아이 학교 행사에 또 못 갔어요…','조금씩 도움을 받으며 배우고 있어요.','이제 학부모 모임에서 친구도 생기고 한국어도 늘었어요!']},
+  {k:'r3',n:'라주',e:'👷',rl:'이주 노동자',base:42,need:'공장에서 야간 근무를 해요. 동네 규칙을 잘 몰라 실수할 때가 있고, 아파도 병원에 가기 어려워요.',
+   q:['실수할 때마다 눈치가 보여서 밖에 잘 안 나가요…','일은 힘들지만 그럭저럭 지내요.','이웃들이 규칙도 알려 주고 인사도 해 줘요. 여기서 오래 살고 싶어요!']},
+  {k:'r4',n:'다니엘',e:'🧑',rl:'귀화한 중학생',base:42,need:'한국에서 자랐는데, 겉모습 때문에 자꾸 “어느 나라 사람이야?”라는 질문을 받아요.',
+   q:['저는 여기 사람인데… 아무도 그렇게 봐 주지 않아요.','가끔 속상하지만 친구들이 있어요.','이제 그냥 ‘우리 반 다니엘’이에요!']},
+  {k:'r5',n:'프리야',e:'🪔',rl:'다른 종교를 믿는 가족',base:42,need:'우리 가족의 가장 큰 종교 명절이 한국 달력에는 없어요.',
    q:['명절에도 숨어서 조용히 지내야 해요…','우리끼리라도 명절을 지내고 있어요.','이웃들이 우리 명절을 함께 축하해 줘요!']},
-  {k:'r6',n:'순자 할머니',e:'👵',rl:'꿈결마을 토박이',base:50,need:'50년 동안 이 동네에 살았어요. 요즘 동네가 너무 빨리 바뀌어서 낯설고 불안해요.',
-   q:['동네가 남의 동네 같아… 이웃이 누군지도 모르겠어.','낯설지만 조금씩 익숙해지는 중이야.','새 이웃들 덕분에 동네가 더 시끌벅적하고 좋아졌어!']}
+  {k:'r6',n:'순자 할머니',e:'👵',rl:'꿈결마을 토박이',base:50,need:'50년 동안 이 동네에 살았어요. 동네가 너무 빨리 바뀌어서 낯설고, 지켜 온 규칙이 무너질까 걱정돼요.',
+   q:['동네가 남의 동네 같아… 이웃이 누군지도 모르겠어.','낯설지만 조금씩 익숙해지는 중이야.','새 이웃들 덕분에 동네가 더 시끌벅적하고 좋아졌어!']},
+  {k:'r7',n:'민수 사장님',e:'🧑‍🍳',rl:'동네 식당 사장·학부모 대표',base:50,need:'장사가 어려운데 세금과 인건비가 늘까 걱정이에요. 새 규칙이 자꾸 생기는 것도 부담돼요.',
+   q:['동네 일에 나만 손해 보는 것 같아…','걱정은 되지만 지켜보고 있어요.','손님도 이웃도 늘어서 동네에 활기가 생겼어요!']}
 ];
 const RESM = Object.fromEntries(RES.map(r=>[r.k,r]));
 const MINOR = ['r1','r2','r3','r4','r5'];
 const DIRS = [
-  {k:'melt',n:'용광로(동화)',e:'🫕',d:'새 주민이 우리 문화에 맞춰 살아야 한다. 하나의 문화로 녹아든다.',mult:0.8,base:{r1:-3,r2:-3,r3:-3,r4:-3,r5:-3,r6:6}},
-  {k:'salad',n:'샐러드 볼(다양성 존중)',e:'🥗',d:'각자의 문화를 지키면서 함께 어우러져 산다.',mult:1.2,base:{}},
-  {k:'apart',n:'각자 따로(무관심)',e:'🚪',d:'서로 간섭하지 않고 따로따로 산다.',mult:0.6,base:{r4:-5,r2:-3}}
+  {k:'melt',n:'용광로(동화)',e:'🫕',d:'새 주민이 우리 말·규칙·문화를 익혀 하나로 녹아든다.',pro:'공통 규칙이 분명해 원래 주민이 안심하고, 말이 빨리 통할 수 있어요.',con:'새 주민은 자기 문화를 숨겨야 해서 점점 지칠 수 있어요.',mult:0.9,base:{r1:-3,r2:-2,r3:-2,r4:-2,r5:-3,r6:5,r7:4}},
+  {k:'salad',n:'샐러드 볼(다양성 존중)',e:'🥗',d:'각자의 문화를 지키면서 함께 어우러져 산다.',pro:'모두가 자기 문화를 지키며 존중받을 수 있어요.',con:'변화가 많아 원래 주민이 낯설어하고, 지원 비용이 들어요.',mult:1.15,base:{r6:-3,r7:-2}},
+  {k:'apart',n:'각자 따로(무관심)',e:'🚪',d:'서로 간섭하지 않고 따로따로 산다.',pro:'부딪힐 일이 적고 비용이 거의 들지 않아요.',con:'서로를 모르니 오해가 쌓이고, 도움이 필요한 사람이 고립돼요.',mult:0.7,base:{r4:-5,r2:-4,r7:3,r6:1}}
 ];
 const DIRM = Object.fromEntries(DIRS.map(d=>[d.k,d]));
 const POL = [
-  {k:'know',n:'바른 지식 교육',e:'📖',w:'공존 방법 ⑴ 올바른 지식',d:'다른 문화·종교를 바르게 배우는 강좌',per:{r6:5,r4:3,r1:1,r5:1}},
-  {k:'fest',n:'세계 문화 축제',e:'🌍',w:'공존 방법 ⑵ 문화 상대주의',d:'서로의 음식·명절·놀이를 나누는 축제',per:{r5:5,r1:3,r6:3}},
-  {k:'hosp',n:'환대 이웃 모임',e:'🤗',w:'공존 방법 ⑶ 환대하는 태도',d:'새 이웃과 짝을 맺는 멘토·환영 모임',per:{r2:4,r4:3,r6:2,r3:1}},
-  {k:'life',n:'생활 지원 센터',e:'🏥',w:'공존 방법 ⑷-① 인간다운 생활 지원',d:'통역·의료·주거 상담',per:{r2:5,r3:4}},
-  {k:'edu',n:'다문화 교육 강화',e:'🏫',w:'공존 방법 ⑷-② 다문화 교육',d:'이중 언어 교실, 다문화 감수성 수업',per:{r2:3,r4:5}},
-  {k:'right',n:'권리 보장 제도',e:'⚖️',w:'공존 방법 ⑷-③ 거주·생계·교육 권리',d:'임금·의료·교육 받을 권리 보장',per:{r3:6,r1:3}},
-  {k:'nodis',n:'차별 금지 제도',e:'🚫',w:'공존 방법 ⑷-④ 차별 없는 분위기',d:'차별 신고 센터, 차별 금지 조례',per:{r4:4,r3:3,r1:3,r5:2}}
+  {k:'know',n:'바른 지식 교육',e:'📖',w:'공존 방법 ⑴ 올바른 지식',d:'다른 문화·종교를 바르게 배우는 강좌',con:'효과가 천천히 나타나요.',per:{r6:5,r4:3,r1:1,r5:1,r7:1}},
+  {k:'fest',n:'세계 문화 축제',e:'🌍',w:'공존 방법 ⑵ 문화 상대주의',d:'서로의 음식·명절·놀이를 나누는 축제',con:'축제만으로는 생활 문제가 풀리지 않아요.',per:{r5:5,r1:3,r6:2,r7:3}},
+  {k:'hosp',n:'환대 이웃 모임',e:'🤗',w:'공존 방법 ⑶ 환대하는 태도',d:'새 이웃과 짝을 맺는 멘토·환영 모임',con:'자원봉사자의 시간과 노력이 많이 들어요.',per:{r2:4,r4:3,r6:2,r3:2}},
+  {k:'life',n:'생활 지원 센터',e:'🏥',w:'공존 방법 ⑷-① 인간다운 생활 지원',d:'통역·의료·주거 상담',con:'세금이 들어 “왜 새 주민만?”이라는 불만이 생길 수 있어요.',per:{r2:5,r3:4,r6:-1,r7:-1}},
+  {k:'edu',n:'다문화 교육 강화',e:'🏫',w:'공존 방법 ⑷-② 다문화 교육',d:'한국어·이중 언어 교실, 다문화 감수성 수업',con:'수업 시간과 교사가 더 필요해요.',per:{r2:3,r4:5,r6:1}},
+  {k:'right',n:'권리 보장 제도',e:'⚖️',w:'공존 방법 ⑷-③ 거주·생계·교육 권리',d:'임금·의료·교육 받을 권리 보장',con:'고용주의 인건비 부담이 커져요.',per:{r3:6,r1:3,r7:-2}},
+  {k:'nodis',n:'차별 금지 제도',e:'🚫',w:'공존 방법 ⑷-④ 차별 없는 분위기',d:'차별 신고 센터, 차별 금지 조례',con:'무엇이 차별인지 기준을 두고 논란이 생길 수 있어요.',per:{r4:4,r3:3,r1:3,r5:2,r7:-1}}
 ];
 const POLM = Object.fromEntries(POL.map(p=>[p.k,p]));
 const BUDGET = 10, PMAX = 3;
 const SYMS = ['🏡','🌳','🌻','🌈','🏮','⛲','🎡','🏔️','🌊','🍀','🌙','⭐'];
 const EVENTS = [
-  {id:'e1',e:'🍔',t:'급식 메뉴 갈등',tag:'음식 문화',src:'교과서 148쪽 햄버거 영상',pol:['know'],
-   s:'아미나와 프리야 가족이 “종교 때문에 먹을 수 없는 음식이 있어요. 급식에서 고를 수 있게 해 주세요.”라고 요청했습니다. 일부 주민은 “급식은 다 같이 똑같이 먹어야지”라며 반대합니다.',
+  {id:'e1',e:'🍔',t:'급식 메뉴 갈등',tag:'음식 문화',src:'교과서 148쪽 햄버거 영상',pol:['fest'],
+   s:'아미나와 프리야 가족이 “종교 때문에 먹을 수 없는 음식이 있어요. 급식에서 고를 수 있게 해 주세요.”라고 요청했습니다. 학부모 대표인 민수 사장님은 비용과 형평성을 걱정합니다.',
+   voices:[{r:'r1',t:'먹을 수 없는 음식이 주메뉴인 날은 밥을 거의 못 먹어요.'},{r:'r7',t:'메뉴를 따로 만들면 급식비와 조리사 일이 늘어요. 다른 학부모들도 “우리 아이 메뉴도 넣어 달라”고 할 거예요.'}],
    opts:[
-    {t:'모두 똑같은 메뉴를 먹는다. 예외는 없다.',sh:'같은 메뉴',eff:{r1:-12,r5:-8},fb:'‘똑같이’가 언제나 ‘공정’은 아니에요. 먹을 수 없는 사람에게 똑같은 메뉴는 굶으라는 뜻이 될 수 있어요.'},
-    {t:'돼지고기 없는 메뉴·채식 메뉴를 함께 준비해 고를 수 있게 한다.',sh:'선택 메뉴',eff:{r1:12,r5:8,r6:2},fb:'교과서 148쪽 학교처럼 다양한 음식 문화를 존중했어요.'},
-    {t:'먹을 수 없는 학생은 도시락을 싸 오게 한다.',sh:'도시락 지참',eff:{r1:-4,r2:-3,r5:-2},fb:'문제는 피했지만, 그 학생들만 따로 먹게 되고 가족의 부담도 커졌어요.'}]},
+    {t:'지금 메뉴를 유지하고, 못 먹는 반찬만 대체 반찬으로 바꿔 준다.',sh:'대체 반찬',eff:{r1:-4,r5:-3,r7:5,r6:1},gain:'비용이 거의 들지 않고 급식 운영이 단순해요.',loss:'주메뉴를 못 먹는 날은 여전히 배가 고파요.'},
+    {t:'돼지고기 없는 메뉴와 채식 메뉴를 함께 만들어 누구나 고를 수 있게 한다.',sh:'선택 메뉴',eff:{r1:10,r5:7,r7:-6,r6:-3},gain:'종교와 신념에 따라 먹을 수 있는 음식이 생겨요(교과서 148쪽).',loss:'급식비가 오르고 조리사의 일이 늘어요. “왜 특정 학생만?”이라는 불만도 생길 수 있어요.'},
+    {t:'한 달에 한 번 ‘세계 음식의 날’을 열고, 평소에는 도시락을 허용한다.',sh:'음식의 날+도시락',eff:{r1:3,r5:3,r6:3,r7:2,r2:-3},gain:'서로의 음식을 알게 되고 비용도 적어요.',loss:'도시락을 매일 싸야 하는 가족은 부담이 커요.'}]},
   {id:'e2',e:'📅',t:'종교 명절 휴일 논쟁',tag:'종교',src:'교과서 149쪽 인도네시아 사례',pol:['fest'],
-   s:'프리야 가족의 가장 큰 명절이 다가옵니다. “그날 학교와 직장을 쉴 수 있게 해 주세요.” 인도네시아는 여러 종교의 기념일을 모두 공휴일로 정했다고 합니다.',
+   s:'프리야 가족의 가장 큰 명절이 다가옵니다. “그날 학교와 직장을 쉬게 해 주세요.” 인도네시아는 여러 종교의 기념일을 모두 공휴일로 정했다고 합니다.',
+   voices:[{r:'r5',t:'1년에 단 하루뿐인 가장 큰 명절인데, 학교와 직장에 가야 해요.'},{r:'r7',t:'명절마다 쉬는 직원이 생기면 가게 일손이 모자라요. 공휴일이 늘면 장사도 쉬어야 하고요.'}],
    opts:[
-    {t:'우리 달력에 없는 날이니 쉬지 않는다. 개인 사정이다.',sh:'쉬지 않음',eff:{r5:-12,r1:-4},fb:'다수의 달력만 기준이 되면 소수의 신앙은 계속 숨겨져야 해요.'},
-    {t:'종교 휴일 선택제: 자기 종교 명절에 하루씩 쉴 수 있게 한다.',sh:'휴일 선택제',eff:{r5:9,r1:6},fb:'각자의 종교를 존중하면서 모두에게 같은 기회를 줬어요.'},
-    {t:'인도네시아처럼 여러 종교 명절을 모두 마을 휴일로 정한다.',sh:'모두 휴일',eff:{r5:12,r1:8,r6:-4,r3:-3},fb:'다양성을 크게 인정했어요. 다만 쉬는 날이 늘어 가게를 하는 주민과 일당을 받는 노동자는 부담이 생겼어요.'}]},
-  {id:'e3',e:'👃',t:'“냄새가 나요” 민원',tag:'이웃 갈등',src:'교과서 146쪽 우리 사회 속 편견',pol:['hosp'],
-   s:'라주가 사는 숙소에서 고향 음식을 요리하자 “이상한 냄새가 난다”는 민원이 들어왔습니다. 순자 할머니도 “낯선 냄새라 불편하다”고 합니다.',
+    {t:'지금처럼 각자 개인 휴가를 써서 쉬게 한다.',sh:'개인 휴가',eff:{r5:-6,r1:-3,r7:4},gain:'달력과 일정이 그대로라 혼란이 없어요.',loss:'휴가가 적은 노동자와 학생은 명절을 지키기 어려워요.'},
+    {t:'종교 휴일 선택제: 모든 주민이 1년에 하루, 자기에게 중요한 날을 골라 쉰다.',sh:'휴일 선택제',eff:{r5:7,r1:5,r3:2,r7:-5},gain:'어떤 종교든 같은 기회를 받아요. 원래 주민도 자기 기념일에 쓸 수 있어요.',loss:'쉬는 날이 사람마다 달라 학교와 가게의 일정 조정이 복잡해져요.'},
+    {t:'인도네시아처럼 여러 종교 명절을 모두 마을 공휴일로 정한다.',sh:'모두 공휴일',eff:{r5:12,r1:8,r6:-2,r7:-7,r3:-3},gain:'종교의 다양성을 마을 전체가 함께 인정해요(교과서 149쪽).',loss:'공휴일이 늘어 가게 매출과 일당을 받는 노동자의 수입이 줄어요.'}]},
+  {id:'e3',e:'♻️',t:'분리배출 갈등',tag:'생활 규칙',src:'교과서 150쪽 올바른 지식',pol:['hosp','life'],
+   s:'라주가 사는 숙소 앞에 분리배출이 안 된 쓰레기가 자꾸 쌓입니다. 숙소의 노동자들은 규칙을 잘 몰랐다고 합니다. 순자 할머니는 “몇 번을 말해도 안 지킨다”며 화가 났습니다.',
+   voices:[{r:'r6',t:'규칙은 누구나 지켜야지. 우리도 처음엔 다 배워서 지킨 거야.'},{r:'r3',t:'고향에서는 한 통에 다 버렸어요. 안내문이 한국어로만 붙어 있어서 몰랐어요.'}],
    opts:[
-    {t:'숙소에 ‘냄새나는 요리 금지’ 경고문을 붙인다.',sh:'요리 금지',eff:{r3:-14,r6:4},fb:'민원은 줄었지만, 라주는 고향의 맛을 빼앗기고 ‘냄새나는 사람’이라는 낙인이 찍혔어요.'},
-    {t:'이웃 음식 나눔의 날을 열어 서로의 음식을 맛본다.',sh:'음식 나눔',eff:{r3:10,r6:8,r1:2},fb:'‘낯섦’은 ‘모름’에서 와요. 맛보고 이야기 나누자 냄새가 ‘이웃의 음식’이 되었어요.'},
-    {t:'개인 문제이니 그냥 둔다.',sh:'그냥 둠',eff:{r3:-3,r6:-6},fb:'갈등이 해결되지 않고 서로에 대한 불만만 쌓였어요.'}]},
-  {id:'e4',e:'🏭',t:'일자리 소문',tag:'경제',src:'교과서 143쪽 다문화 사회의 긍정적 측면',pol:['right','know'],
-   s:'“이주 노동자 때문에 우리 일자리가 줄었다”는 소문이 퍼지고 있습니다. 실제로 동네 공장은 일할 사람이 부족해 라주 같은 노동자를 고용했습니다.',
+    {t:'규칙을 어기면 과태료를 매긴다.',sh:'과태료',eff:{r6:6,r7:3,r3:-8,r4:-2},gain:'규칙이 분명해지고 동네가 빨리 깨끗해져요.',loss:'몰라서 어긴 사람도 벌을 받고, “외국인은 규칙을 안 지킨다”는 편견이 굳어질 수 있어요.'},
+    {t:'그림과 여러 언어로 된 안내문을 붙이고, 이웃이 한 달 동안 함께 버리며 알려 준다.',sh:'안내+이웃 짝',eff:{r3:7,r6:2,r7:-3},gain:'규칙도 지키고 이웃끼리 얼굴을 익혀요.',loss:'시간과 자원봉사자가 필요하고, 바뀌는 데 시간이 걸려요. 그동안 불편은 계속돼요.'},
+    {t:'숙소를 운영하는 고용주에게 관리 책임을 맡긴다.',sh:'고용주 책임',eff:{r6:4,r3:-2,r7:-5},gain:'책임질 사람이 분명해져요.',loss:'고용주의 부담이 커지고, 노동자와 이웃이 서로 알 기회는 생기지 않아요.'}]},
+  {id:'e4',e:'🏭',t:'일자리 걱정',tag:'경제',src:'교과서 143쪽 다문화 사회의 형성',pol:['right','know'],
+   s:'동네 공장은 일할 사람이 부족해 이주 노동자를 더 뽑으려 합니다. 그런데 일자리를 찾는 동네 청년들은 “우리 일자리가 줄어든다”며 걱정합니다.',
+   voices:[{r:'r3',t:'아무도 하려 하지 않던 야간 일을 우리가 하고 있어요.'},{r:'r6',t:'우리 손주도 일자리를 못 구해서 걱정이야. 동네 사람부터 뽑아야 하지 않나?'}],
    opts:[
-    {t:'이주 노동자 고용을 제한한다.',sh:'고용 제한',eff:{r3:-16,r6:4},fb:'소문만 믿고 결정했어요. 공장은 일손이 모자라고, 라주는 생계를 잃을 위기에 놓였어요.'},
-    {t:'실제 자료를 공개하고, 함께하는 일자리 박람회를 연다.',sh:'사실 확인',eff:{r3:8,r6:6,r2:2},fb:'편견을 사실로 바로잡았어요. 다문화 사회는 노동력 부족 문제 해소에 기여해요(교과서 143쪽).'},
-    {t:'소문은 소문일 뿐이니 내버려 둔다.',sh:'내버려 둠',eff:{r3:-8,r4:-4,r6:-2},fb:'바로잡지 않은 편견은 점점 커져 차별이 돼요.'}]},
-  {id:'e5',e:'📄',t:'읽을 수 없는 안내문',tag:'언어',src:'교과서 151쪽 법적·제도적 장치',pol:['life'],
-   s:'린은 아이 학교 안내문이 어려운 한국어로만 되어 있어 중요한 일정을 자꾸 놓칩니다. 학교는 “한국에 살면 한국어를 알아야 한다”는 의견과 “도와야 한다”는 의견으로 나뉘었습니다.',
+    {t:'동네 주민을 먼저 뽑고, 남는 자리만 이주 노동자를 뽑는다.',sh:'주민 우선',eff:{r6:7,r7:-2,r3:-7},gain:'동네 청년들의 걱정을 덜어 줘요.',loss:'빈자리가 그대로면 공장이 멈추고, 같은 일을 해도 차별받는다고 느낄 수 있어요.'},
+    {t:'고용은 유지하되, 동네 청년 직업 훈련과 일자리 박람회를 함께 연다.',sh:'고용 유지+훈련',eff:{r3:5,r6:4,r7:-4},gain:'걱정이 사실인지 함께 확인하고, 모두에게 기회를 넓혀요.',loss:'훈련 비용이 들고 효과가 나타나기까지 시간이 걸려요.'},
+    {t:'회사가 알아서 결정하도록 시장에 맡긴다.',sh:'시장에 맡김',eff:{r7:6,r3:4,r6:-6,r4:-2},gain:'공장은 일손을 빨리 구해요.',loss:'청년들의 불안이 풀리지 않아 이주민에 대한 반감이 커질 수 있어요.'}]},
+  {id:'e5',e:'🗣️',t:'한국어냐 통역이냐',tag:'언어',src:'교과서 151쪽 법적·제도적 장치',pol:['life','edu'],
+   s:'린은 아이 학교 안내문을 읽지 못해 중요한 일정을 자꾸 놓칩니다. 학교에서는 “통역을 지원하자”는 의견과 “한국어를 빨리 배우도록 돕는 게 먼저”라는 의견이 맞섭니다.',
+   voices:[{r:'r2',t:'배우고 싶지만 일하고 아이 키우느라 공부할 시간이 없어요.'},{r:'r6',t:'통역만 해 주면 한국어를 영영 안 배우지 않을까? 말이 통해야 이웃이 되지.'}],
    opts:[
-    {t:'한국에 살면 한국어를 알아서 배워야 한다.',sh:'알아서',eff:{r2:-14},fb:'언어를 배우는 데는 시간이 걸려요. 그동안 린과 아이는 교육 정보에서 밀려나요.'},
-    {t:'여러 언어로 된 안내문과 통역 상담을 제공한다.',sh:'다국어 안내',eff:{r2:14},fb:'교육받을 권리를 보장하는 제도적 장치를 마련했어요(교과서 151쪽).'},
-    {t:'한국어를 잘하는 아이가 엄마에게 번역해 주게 한다.',sh:'아이가 번역',eff:{r2:-5},fb:'아이에게 어른의 짐을 지웠어요. 아이가 놓치면 린은 여전히 모르게 돼요.'}]},
+    {t:'한국어 교실을 듣는 것을 조건으로 학교 지원을 해 준다.',sh:'한국어 교실 조건',eff:{r2:-4,r6:5,r7:2},gain:'시간이 지나면 혼자서도 소통할 수 있게 돼요.',loss:'당장 안내문을 못 읽는 문제는 그대로이고, 시간이 없는 사람에게는 큰 부담이에요.'},
+    {t:'여러 언어로 된 안내문과 통역을 제공한다.',sh:'통역 제공',eff:{r2:10,r6:-3,r7:-3},gain:'아이 교육 정보를 바로 알 수 있어요(교육받을 권리).',loss:'비용이 들고, 한국어를 배울 이유가 줄어든다는 걱정도 있어요.'},
+    {t:'쉬운 한국어로 안내문을 쓰고, 저녁·주말 한국어 교실을 함께 연다.',sh:'쉬운 한국어+교실',eff:{r2:6,r6:3,r7:-2,r5:2},gain:'지금도 이해할 수 있고 앞으로도 배울 수 있어요.',loss:'선생님과 공무원의 일이 늘고, 준비하는 데 시간이 걸려요.'}]},
   {id:'e6',e:'🙋',t:'“너 어느 나라 사람이야?”',tag:'소속감',src:'교과서 145쪽 다문화 사회의 도덕 문제',pol:['edu','nodis'],
-   s:'다니엘은 학교에서 매일같이 “어느 나라 사람이야?”, “한국말 잘하네?”라는 말을 듣습니다. 다니엘은 한국에서 태어났습니다. 최근 다니엘은 학교에 가기 싫다고 합니다.',
+   s:'다니엘은 한국에서 태어났지만 매일 “어느 나라 사람이야?”, “한국말 잘하네?”라는 말을 듣습니다. 묻는 친구들은 “궁금해서 물어본 건데 그것도 안 돼?”라고 합니다.',
+   voices:[{r:'r4',t:'나쁜 뜻이 아닌 건 알아요. 그래도 매일 들으면 ‘넌 우리가 아니야’라는 말 같아요.'},{r:'r7',t:'아이들이 궁금한 걸 묻는 것까지 막으면 서로 말을 안 하게 되지 않을까요?'}],
    opts:[
-    {t:'악의 없는 호기심이니 그냥 넘어간다.',sh:'넘어감',eff:{r4:-12},fb:'말하는 사람은 호기심이어도, 매일 듣는 사람에게는 ‘너는 우리가 아니야’라는 말이 돼요.'},
-    {t:'다문화 감수성 수업과 학생 캠페인을 연다.',sh:'감수성 수업',eff:{r4:12,r6:3},fb:'다문화 감수성 교육으로 차별하지 않는 분위기를 만들었어요(교과서 151쪽).'},
-    {t:'다니엘을 다른 반으로 옮긴다.',sh:'반 이동',eff:{r4:-14},fb:'문제를 일으킨 쪽이 아니라 피해를 본 쪽을 옮겼어요. 편견은 그대로 남아요.'}]}
+    {t:'악의가 없으니 지켜보고, 불편하면 다니엘이 직접 말하도록 격려한다.',sh:'지켜보기',eff:{r4:-6,r7:2},gain:'자연스러운 대화와 호기심을 막지 않아요.',loss:'다니엘 혼자 매번 설명해야 하는 부담이 남아요.'},
+    {t:'다문화 감수성 수업을 열어 ‘상처 주지 않고 질문하는 법’을 함께 배운다.',sh:'감수성 수업',eff:{r4:7,r6:2,r7:-3},gain:'호기심은 살리고 상처 주는 말은 줄여요(교과서 151쪽).',loss:'수업 시간을 따로 내야 하고, “이것도 하지 말라는 거냐”는 반발이 생길 수 있어요.'},
+    {t:'같은 말을 계속하면 학교 규칙에 따라 벌점을 준다.',sh:'벌점',eff:{r4:6,r7:-4,r6:-1},gain:'상처 주는 말이 빠르게 줄어요.',loss:'왜 문제인지 이해하지 못한 채 서로 말을 피하게 될 수 있어요.'}]},
+  {id:'e7',e:'🕌',t:'기도 공간 논쟁',tag:'종교',src:'교과서 150쪽 올바른 지식',pol:['know','nodis'],
+   s:'아미나와 친구들이 동네 빈 상가에 작은 기도 공간을 열고 싶어 합니다. 일부 주민은 “주차와 소음이 걱정된다”, “잘 모르는 종교라 불안하다”며 반대 서명을 시작했습니다.',
+   voices:[{r:'r1',t:'하루에 몇 번 기도해야 해서 가까운 곳에 조용한 공간이 꼭 필요해요.'},{r:'r6',t:'모이는 날마다 사람이 몰리면 골목이 막히잖아. 잘 모르니까 불안하기도 하고.'}],
+   opts:[
+    {t:'주민 반대가 있으니 허가하지 않는다.',sh:'허가 안 함',eff:{r1:-9,r6:4,r7:1},gain:'원래 주민의 걱정은 당장 줄어요.',loss:'종교의 자유가 제한되고, 반대가 ‘잘 몰라서 생긴 불안’ 때문이었다면 편견이 굳어져요.'},
+    {t:'허가하되, 주민 설명회를 열고 주차·소음 규칙을 함께 정한다.',sh:'설명회+규칙',eff:{r1:7,r6:2,r7:-2},gain:'서로를 알게 되고, 걱정은 규칙으로 풀어요.',loss:'합의하는 데 시간이 오래 걸리고, 모든 주민이 만족하지는 않아요.'},
+    {t:'공공건물에 모든 종교와 명상에 쓰는 ‘조용한 방’을 만든다.',sh:'공용 조용한 방',eff:{r1:5,r5:5,r6:1,r7:-3},gain:'특정 종교가 아니라 모두에게 열린 공간이 생겨요.',loss:'세금이 들고, 여럿이 함께 기도하기에는 좁을 수 있어요.'}]},
+  {id:'e8',e:'🎉',t:'세계 문화 축제',tag:'문화',src:'교과서 150쪽 문화 상대주의',pol:['hosp'],
+   s:'새 이웃들이 “고향의 음식과 춤을 소개하는 축제를 열고 싶다”고 제안했습니다. 민수 사장님은 손님이 늘 거라 기대하지만, 순자 할머니는 밤늦은 소음과 쓰레기를 걱정합니다.',
+   voices:[{r:'r5',t:'우리 문화를 숨기지 않고 소개할 수 있는 기회예요!'},{r:'r6',t:'축제는 좋은데, 지난번엔 밤 11시까지 시끄러워서 잠을 못 잤어.'}],
+   opts:[
+    {t:'크게 열고 밤까지 진행한다.',sh:'크게 열기',eff:{r5:6,r1:3,r7:6,r6:-6},gain:'서로의 문화를 알게 되고 동네 가게 매출도 늘어요.',loss:'소음과 쓰레기로 원래 주민의 생활이 불편해져요.'},
+    {t:'원래 주민과 새 주민이 함께 준비위원회를 꾸리고, 낮에만 작게 연다.',sh:'함께 준비',eff:{r5:3,r1:2,r6:4,r7:-1,r4:1},gain:'준비하면서 서로 친해지고, 걱정도 미리 조정해요.',loss:'규모가 작아 매출 효과가 적고, 준비하는 사람들의 시간이 많이 들어요.'},
+    {t:'갈등이 생길 수 있으니 열지 않는다.',sh:'열지 않음',eff:{r6:3,r5:-6,r1:-3,r7:-3},gain:'소음과 다툼은 생기지 않아요.',loss:'서로를 알 기회가 사라지고, 새 이웃은 “환영받지 못한다”고 느껴요.'}]}
 ];
 const EVM = Object.fromEntries(EVENTS.map(e=>[e.id,e]));
+/* 성찰 개념어 */
+const CON27 = ['다문화 사회','내집단 편향','편견','고정 관념','차별','배척','사회 통합','적응','문화 다양성','존중'];
+const CON28 = ['공존','존중','문화 상대주의','자문화 중심주의','환대','다문화 감수성','샐러드 볼','동화','용광로','차별','인권','관용','제도','편견'];
 const GOVN = {demo:'🗳️ 민주 공화국',const:'👑 입헌 군주국',elite:'🎩 소수 엘리트 통치',dict:'🗿 1인 독재'};
 
 /* =========================================================
    ③ 계산
    ========================================================= */
 const clamp=(v,a=0,b=100)=>Math.max(a,Math.min(b,v));
+function normRef(r){
+  if(typeof r==='string') r={r1:r};
+  r=(r&&typeof r==='object')?r:{};
+  const cs=r.concepts; return {r1:r.r1||r.a||'',r2:r.r2||'',r3:r.r3||r.b||'',q:(r.q&&typeof r.q==='object')?r.q:{},concepts:Array.isArray(cs)?cs:Object.values(cs||{})};
+}
 function normP(p){
   p=p||{};
   const o=x=>(x&&typeof x==='object')?x:{};
   const c=o(p.city);
   return {id:p.id||'',num:p.num||'',nick:p.nick||'',at:p.at||0,epoch:p.epoch||null,g:p.g||null,
-    dots:o(p.dots), coins:o(p.coins), mat:p.mat||null, det:o(p.det), ox27:o(p.ox27), ref27:Object.assign({a:'',b:''},o(p.ref27)), done27:!!p.done27,
+    dots:o(p.dots), coins:o(p.coins), mat:p.mat||null, det:o(p.det), ox27:o(p.ox27), ref27:normRef(p.ref27), done27:!!p.done27,
     city:{name:c.name||'',sym:c.sym||'🏡',nat:c.nat||null,dir:c.dir||null,budget:o(c.budget),ev:o(c.ev),done:!!c.done},
     slogan:Object.assign({s:'',m:''},o(p.slogan)), vote:Object.assign({as:null,to:null,reason:''},o(p.vote)),
-    ox28:o(p.ox28), ref28:p.ref28||'', done28:!!p.done28};
+    ox28:o(p.ox28), ref28:normRef(p.ref28), done28:!!p.done28};
 }
 function budgetUsed(c){ return POL.reduce((a,p)=>a+(+c.budget[p.k]||0),0); }
 function cityCalc(c, fired){
   const h={}; RES.forEach(r=>h[r.k]=r.base);
   const dir=DIRM[c.dir]; const mult=dir?dir.mult:1;
-  POL.forEach(p=>{ const n=+c.budget[p.k]||0; for(const k in p.per) h[k]+=p.per[k]*n*mult; });
+  POL.forEach(p=>{ const n=+c.budget[p.k]||0; for(const k in p.per){ const v=p.per[k]*n; h[k]+= v>0?v*mult:v; } });
   const b=k=>+c.budget[k]||0;
-  if(!b('life')){ h.r2-=5; h.r3-=5; }
-  if(!b('right')) h.r3-=6;
-  if(!b('know')&&!b('fest')&&!b('hosp')) h.r6-=6;
+  if(!b('life')){ h.r2-=5; h.r3-=4; }
+  if(!b('right')) h.r3-=5;
+  if(!b('know')&&!b('fest')&&!b('hosp')){ h.r6-=6; h.r7-=3; }
   if(dir) for(const k in dir.base) h[k]+=dir.base[k];
   (fired||[]).forEach(eid=>{
     const E=EVM[eid]; if(!E) return;
-    if(c.dir==='melt') MINOR.forEach(k=>h[k]-=3);
+    if(c.dir==='melt'){ MINOR.forEach(k=>h[k]-=2); h.r6+=1; h.r7+=1; }
+    if(c.dir==='apart'){ h.r4-=1; h.r2-=1; }
     const ans=c.ev[eid]; if(!ans||ans.o==null) return;
-    const o=E.opts[ans.o]; const prot=E.pol.some(p=>b(p)>=2);
+    const o=E.opts[ans.o]; if(!o) return; const prot=E.pol.some(p=>b(p)>=2);
     for(const k in o.eff){ let v=o.eff[k]; if(v>0) v*=mult; else if(prot) v*=0.5; h[k]+=v; }
   });
   for(const k in h) h[k]=Math.round(clamp(h[k]));
   const vals=Object.values(h); const avg=Math.round(vals.reduce((a,x)=>a+x,0)/vals.length);
   const mn=Math.min(...vals), mx=Math.max(...vals);
-  let conflict=clamp((100-avg)*0.9+(mx-mn)*0.4); if(c.dir==='melt') conflict*=0.4; if(c.dir==='apart') conflict*=0.8;
+  let conflict=clamp((100-avg)*0.9+(mx-mn)*0.4); if(c.dir==='melt') conflict*=0.6; if(c.dir==='apart') conflict*=0.8;
   const minK=RES.reduce((a,r)=>h[r.k]<h[a]?r.k:a,'r1');
   return {h,avg,conflict:Math.round(conflict),low:vals.filter(x=>x<40).length,minK};
 }
@@ -501,7 +535,7 @@ const plist = () => Object.values(PLAYERS||{}).filter(p=>p&&p.id).map(normP).sor
 /* =========================================================
    ⑥ 학생 화면
    ========================================================= */
-let P=null, tmpRoom='', ui={det:null, cityStep:0, evOpen:null, evDraft:{o:null,r:''}, evResult:null, dotIdx:null, dotShow:false, dotIn:'', coinDraft:10, voteTo:null, voteReason:'', natList:null, natUnsub:null};
+let P=null, tmpRoom='', ui={det:null, cityStep:0, evOpen:null, evDraft:{o:null,r:'',w:null,v:''}, evResult:null, dotIdx:null, dotShow:false, dotIn:'', coinDraft:10, voteTo:null, voteReason:'', natList:null, natUnsub:null};
 const SLOT = (qs.get('s')||'').replace(/[^0-9a-z]/gi,'').slice(0,6);
 const skey = () => 'mcgame_s_'+ROOM+(SLOT?'_'+SLOT:'');
 function loadP(){ try{ const x=JSON.parse(localStorage.getItem(skey())); return x?normP(x):null; }catch(e){ return null; } }
@@ -615,7 +649,7 @@ function vDetective(){
   const doneN=CASES.filter(c=>P.det[c.id]&&P.det[c.id].txt).length;
   if(ui.det){ return vCase(CASES.find(c=>c.id===ui.det)); }
   return `${sHeader()}${phaseTitle()}<div class="card">
-  ${say('꿈결마을에서 사건이 6개 일어났어! 사건 속 <b>숨은 편견</b>을 찾고, 어떤 <b>도덕 문제</b>로 이어지는지 밝혀 줘, 탐정님! 🔍')}
+  ${say('꿈결마을에서 사건이 ${CASES.length}개 일어났어! 사건 속 <b>숨은 편견</b>을 찾고, 어떤 <b>도덕 문제</b>로 이어지는지 밝혀 줘, 탐정님! 🔍')}
   <div class="concept"><div class="h">📌 다문화 사회의 도덕 문제 (교과서 145쪽)</div>① 차별하고 배척하는 문제 ② 사회 통합에 방해가 되는 문제 ③ 새로운 사회에 잘 적응하지 못하는 문제</div>
   <div class="stepname">해결 ${doneN} / ${CASES.length}</div>
   <div class="caselist">${CASES.map((c,i)=>{ const d=P.det[c.id]&&P.det[c.id].txt; return `<button class="casebtn ${d?'done':''}" data-act="openCase" data-v="${c.id}"><div class="e">${c.e}</div><b>사건 ${i+1}</b><div class="small">${esc(c.t)}</div><div class="small" style="margin-top:4px">${d?'✅ 해결':'🔎 조사하기'}</div></button>`; }).join('')}</div>
@@ -642,12 +676,55 @@ function vOX(set,key,refHTML,doneKey){
   return `<h3>⭕❌ OX 퀴즈</h3>${set.map((q,i)=>{ const a=ans['q'+i]; return `<div class="pol" style="align-items:flex-start"><div class="nm"><b>${i+1}. ${esc(q.q)}</b>${done?`<small>${a===q.a?'✅':'❌'} 정답 ${q.a} · ${esc(q.ex)}</small>`:''}</div>
   <div class="row" style="flex:none">${['O','X'].map(o=>`<button class="oxbtn ${done?(o===q.a?'right':a===o?'wrong':''):(a===o?'sel':'')}" data-act="ox" data-k="${key}" data-i="${i}" data-v="${o}" ${done?'disabled':''}>${o}</button>`).join('')}</div></div>`; }).join('')}${refHTML}`;
 }
+const nsp=s=>String(s||'').replace(/\s/g,'');
+const usedC=(txt,L)=>{ const t=nsp(txt); return L.filter(c=>t.includes(nsp(c))); };
+function hlC(txt,L){ let h=esc(txt||''); L.slice().sort((a,b)=>b.length-a.length).forEach(c=>{ const re=new RegExp(nsp(c).split('').join('\\s*'),'g'); h=h.replace(re,m=>`<mark>${m}</mark>`); }); return h.replace(/\n/g,'<br>'); }
+const refLen=t=>String(t||'').replace(/\(\s*\)/g,'').replace(/\s/g,'').length;
+function myCoin(){ const mine=['r1','r2'].map(r=>P.coins[r]).filter(x=>x!=null).map(Number); return mine.length?Math.round(mine.reduce((a,x)=>a+x,0)/mine.length*10)/10:null; }
+function refQs27(){
+  const a=myCoin(), m=MAT.find(x=>x.k===P.mat);
+  let q1, st1;
+  if(a==null){ q1='코인 나누기를 떠올려 보세요. 아무 의미 없이 나뉜 팀인데도 우리 반은 같은 팀에게 더 많이 줬어요. 왜 그랬을까요? 이런 마음이 현실의 다문화 사회에서는 어떤 모습으로 나타날까요?'; st1='우리 반은 (   ) 팀에 더 많이 줬다. 그 이유는 (   ) 때문이다. 현실에서 이런 마음은 '; }
+  else if(a>=11||(m&&m.k==='MD')){ q1=`코인 나누기에서 너는 같은 팀 이웃에게 평균 ${a}개, 다른 팀 이웃에게 ${Math.round((20-a)*10)/10}개를 줬고${m?`, 라운드 3에서 ‘${m.n}’을 골랐어`:''}. 5분 전에 무작위로 생긴 팀인데 왜 그렇게 했을까요? 이런 마음이 현실에서는 어떤 모습으로 나타날까요?`; st1='나는 (   ) 팀에 더 마음이 갔다. 그 이유는 (   ) 때문이다. 현실에서 이런 마음은 '; }
+  else { q1=`코인 나누기에서 너는 두 팀에 거의 고르게 나눴어(같은 팀 평균 ${a}개). 고르게 나눌 수 있었던 까닭은 무엇일까요? 그런데 피부색·말투·종교처럼 눈에 보이는 차이가 있었다면 어땠을까요?`; st1='나는 (   ) 생각으로 고르게 나눴다. 하지만 눈에 보이는 차이가 있었다면 '; }
+  const wrong=CASES.find(c=>P.det[c.id]&&P.det[c.id].p!=null&&P.det[c.id].p!==c.a);
+  const pick=wrong||CASES.filter(c=>P.det[c.id]&&P.det[c.id].txt).sort((x,y)=>(P.det[y.id].txt.length)-(P.det[x.id].txt.length))[0]||CASES[2];
+  return [
+    {k:'r1',e:'🪙',t:q1,starter:st1},
+    {k:'r2',e:'🔍',t:`편견 탐정 사건 ‘${pick.e} ${pick.t}’을(를) 다시 떠올려 보세요. 사건 속 편견은 어떤 도덕 문제(차별·배척 / 사회 통합 방해 / 적응의 어려움)로 이어질까요? 우리 주변에서 비슷한 장면을 본 적이 있다면 함께 써 보세요. (친구 이름은 쓰지 않아요)`,starter:'사건 속 (   )라는 편견은 (   ) 문제로 이어질 수 있다. 왜냐하면 '},
+    {k:'r3',e:'🌱',t:'내집단 편향과 편견을 줄이기 위해 내가 우리 반과 학교에서 실천할 수 있는 일은 무엇일까요? 구체적인 장면을 들어 써 보세요.',starter:'앞으로 나는 (   ) 상황에서 (   )하겠다. 그러면 '}];
+}
+function refQs28(){
+  const c=P.city, calc=cityCalc(c,firedList()), lw=RESM[calc.minK], nm=c.name||'우리 동네';
+  const me=RESM[P.vote.as];
+  const evs=firedList().filter(id=>c.ev[id]&&c.ev[id].w);
+  const last=evs.length?evs[evs.length-1]:null;
+  const E=last&&EVM[last], A=last&&c.ev[last], W=A&&RESM[A.w];
+  return [
+    {k:'r1',e:'🏘️',t:`${nm}에서 지금 가장 힘든 이웃은 ${lw.e} ${lw.n}(${calc.h[calc.minK]}점)이에요. 어떤 결정 때문이었을까요? 다시 운영한다면 무엇을 바꾸고, 그러면 이번에는 누가 손해를 볼까요?`,starter:'나는 (   )을(를) 결정했는데, 그 결과 (   )이(가) 힘들어졌다. 다시 한다면 '},
+    {k:'r2',e:'🔄',t:me?`투표 때 너는 ${me.e} ${me.n}(${me.rl})의 입장이었어요. 그 사람이 되어 보니 ‘살기 좋은 동네’의 기준이 어떻게 달라졌나요? 원래 내 생각과 무엇이 달랐나요?`:'다른 이웃의 입장이 되어 친구들의 동네를 볼 때, ‘살기 좋은 동네’의 기준이 어떻게 달라졌나요?',starter:'내가 (   )이(가) 되어 보니 (   )이(가) 가장 중요해 보였다. 원래 나는 '},
+    {k:'r3',e:'🤝',t:E?`‘${E.t}’ 사건에서 너는 ‘${E.opts[A.o].sh}’을(를) 골랐고, ${W?`${W.e} ${W.n}에게 “${A.v}”라고 말했어요`:'누군가는 서운했을 거예요'}. 새 이웃과 원래 주민이 함께 살려면 각자 무엇을 해야 할까요? 나는 무엇을 실천할까요?`:'새 이웃과 원래 주민이 함께 살려면 각자 무엇을 해야 할까요? 나는 무엇을 실천할까요?',starter:'공존하려면 새 이웃은 (   )하고, 원래 주민은 (   )해야 한다. 그래서 나는 '}];
+}
+function chipsHTML(n){ const R=P['ref'+n], L=n===27?CON27:CON28; const u=usedC([R.r1,R.r2,R.r3].join(' '),L);
+  return `<b>💡 오늘 배운 개념어를 2개 이상 넣어 쓰세요</b> <span class="muted">(지금 ${u.length}개 사용)</span><div class="chips" style="margin-top:6px">${L.map(c=>`<span class="chip ${u.includes(c)?'sel':''}">${esc(c)}</span>`).join('')}</div>`; }
+function vReflect(n){
+  const R=P['ref'+n], qs=n===27?refQs27():refQs28(), L=n===27?CON27:CON28, done=P['done'+n];
+  if(done) return `<h3>✍️ 나의 소감</h3>${qs.map(q=>`<div class="concept" style="background:#fff;border-color:var(--line)"><div class="muted small" style="font-weight:700">${q.e} ${esc(R.q[q.k]||q.t)}</div><div style="margin-top:4px">${hlC(R[q.k],L)}</div></div>`).join('')}<p class="muted small">노란색 = 내가 쓴 개념어 (${(R.concepts||[]).join(', ')})</p>`;
+  return `<h3>✍️ 성찰 — 소감 쓰기</h3>
+  ${say('오늘 활동에서 <b>네가 실제로 한 선택</b>을 바탕으로 질문을 만들었어. 질문마다 <b>30글자 이상</b>, 오늘 배운 <b>개념어 2개 이상</b>을 넣어 써 줘. 막히면 <b>문장 틀</b>을 넣고 (   )를 채워 봐!')}
+  <div class="tip" id="cc${n}">${chipsHTML(n)}</div>
+  ${qs.map(q=>`<label class="lb">${q.e} ${esc(q.t)}</label><div class="muted small" style="margin:-2px 0 6px">✍️ 문장 틀: ${esc(q.starter)}… <button class="btn sm ghost" data-act="starter" data-n="${n}" data-k="${q.k}">틀 넣기</button></div><textarea class="field" style="min-height:110px" data-bind="rf" data-n="${n}" data-k="${q.k}" maxlength="500" placeholder="30글자 이상, 오늘 나의 선택을 근거로 써 주세요.">${esc(R[q.k])}</textarea><div class="muted small" id="len${n}${q.k}" style="text-align:right">${refLen(R[q.k])}자 / 30자</div>`).join('')}`;
+}
+function sharedRefs(n){
+  if(!META['share'+n]) return '';
+  const st=META['star'+n]||{}; const L=n===27?CON27:CON28;
+  const ps=plist().filter(p=>st[p.id]&&p['done'+n]);
+  if(!ps.length) return '';
+  return `<div class="card"><h2>⭐ 선생님이 고른 오늘의 소감</h2>${ps.map(p=>{ const R=p['ref'+n]; return `<div class="concept" style="background:#fff;border-color:var(--gink)"><b>${esc(p.nick)}</b>${['r1','r2','r3'].map(k=>R[k]?`<div style="margin-top:6px"><div class="muted small">${esc(R.q[k]||'')}</div>${hlC(R[k],L)}</div>`:'').join('')}</div>`; }).join('')}</div>`;
+}
 function vOx27(){
-  const ref=`<h3>✍️ 느낀 점 / 실천할 점</h3>
-  <label class="lb">코인을 나눌 때 나는 어떤 마음이었나요? 나에게도 내집단 편향이 있었나요?</label><textarea class="field" data-bind="ref27a" maxlength="200">${esc(P.ref27.a)}</textarea>
-  <label class="lb">다문화 구성원을 대할 때 내가 실천할 점 한 가지</label><textarea class="field" data-bind="ref27b" maxlength="200">${esc(P.ref27.b)}</textarea>`;
-  return `${sHeader()}${phaseTitle()}<div class="card">${P.done27?`<div class="banner ok">✅ 제출 완료! 정답을 확인해 보세요. 글은 고쳐서 다시 제출할 수 있어요.</div>`:''}${vOX(OX27,'ox27',ref,'done27')}</div>
-  <div class="navbar"><div class="in"><span></span><button class="btn acc" data-act="sub27">${P.done27?'다시 제출':'제출하기'}</button></div></div>`;
+  return `${sHeader()}${phaseTitle()}<div class="card">${P.done27?`<div class="banner ok">✅ 제출 완료! OX 정답을 확인하고, 친구들의 소감도 기다려 보세요.</div>`:''}${vOX(OX27,'ox27',vReflect(27),'done27')}</div>${sharedRefs(27)}
+  <div class="navbar"><div class="in">${P.done27?`<button class="btn ghost" data-act="refEdit" data-n="27">✏️ 소감 고치기</button><span></span>`:`<span></span><button class="btn acc" data-act="subRef" data-n="27">제출하기</button>`}</div></div>`;
 }
 
 /* 28-① 동네 설계 */
@@ -657,20 +734,20 @@ function vCity(note){
   let body='', next='';
   if(st===0){
     const nat=META.natRoom?`<h3>🏛️ 국가 만들기에서 만든 내 나라 불러오기</h3>${ui.natList==null?'<p class="muted">불러오는 중…</p>':ui.natList.length?`<div class="ngrid">${ui.natList.map(n=>`<button class="ncard ${c.nat&&c.nat.id===n.id?'sel':''}" data-act="natPick" data-v="${esc(n.id)}"><div class="nh">${flagHTML(n.d.flag,'sm')}<div><div class="nn">${esc(n.d.name)}</div><div class="ns">${esc(n.num)}번 · ${esc(GOVN[n.d.gov]||'')}</div></div></div></button>`).join('')}</div>`:'<p class="muted">불러올 나라가 없어요. 아래에 직접 이름을 지어 주세요.</p>'}<p class="muted small">※ 국가 만들기 기록은 읽기만 해요. 원래 기록은 바뀌지 않아요.</p>`:'';
-    body=`${say('이제 네가 꿈결마을 한 동네의 <b>동네 대표</b>야! 우리 동네에 <b>새 이웃 5명</b>이 이사 왔어. 원래 살던 순자 할머니까지 <b>모두가 행복한 동네</b>를 만들어 줘.')}
+    body=`${say('이제 네가 꿈결마을 한 동네의 <b>동네 대표</b>야! 우리 동네에 <b>새 이웃 5명</b>이 이사 왔고, 원래 살던 <b>순자 할머니</b>와 <b>민수 사장님</b>도 있어. 모두의 사정이 달라서 <b>한쪽만 챙기면 다른 쪽이 서운해져.</b> 모두가 함께 살 수 있는 동네를 만들어 줘.')}
     ${nat}<label class="lb">동네 이름</label><input class="field" maxlength="14" data-bind="cname" value="${esc(c.name)}" placeholder="예: 은행나무동, 무지개마을">
     ${c.nat?'':`<label class="lb">동네 상징</label><div class="row">${SYMS.map(s=>`<button class="symbtn ${c.sym===s?'sel':''}" data-act="sym" data-v="${s}">${s}</button>`).join('')}</div>`}
     <h3>🏠 우리 동네 이웃들</h3>${resGrid(cityCalc(c,[]),{need:true})}`;
     next='cityNext';
   } else if(st===1){
-    body=`${say('우리 동네는 새 이웃과 <b>어떤 방식</b>으로 함께 살까? 방향에 따라 정책 효과가 달라져. 신중하게 골라!')}
-    <div class="grid">${DIRS.map(d=>`<button class="opt ${c.dir===d.k?'sel':''}" data-act="dir" data-v="${d.k}"><div class="e">${d.e}</div><div class="t">${esc(d.n)}</div><div class="d">${esc(d.d)}</div></button>`).join('')}</div>`;
+    body=`${say('우리 동네는 새 이웃과 <b>어떤 방식</b>으로 함께 살까? 세 방향 모두 <b>장점과 단점</b>이 있어. 방향에 따라 정책 효과도 달라져!')}
+    <div class="grid">${DIRS.map(d=>`<button class="opt ${c.dir===d.k?'sel':''}" data-act="dir" data-v="${d.k}"><div class="e">${d.e}</div><div class="t">${esc(d.n)}</div><div class="d">${esc(d.d)}</div><div class="small" style="margin-top:6px">👍 ${esc(d.pro)}<br>👎 ${esc(d.con)}</div></button>`).join('')}</div>`;
     next='cityNext';
   } else {
     const used=budgetUsed(c), calc=cityCalc(c,[]);
     body=`${say(`마을 예산은 <b>${BUDGET}칸</b>이야. 한 정책에 최대 ${PMAX}칸까지 쓸 수 있어. 이웃들 표정을 보면서 나눠 봐!`)}
     <div class="remain ${used===BUDGET?'zero':''}"><span>남은 예산</span><span>${BUDGET-used}칸</span></div>
-    ${POL.map(p=>{ const n=+c.budget[p.k]||0; return `<div class="pol"><span style="font-size:28px">${p.e}</span><div class="nm"><b>${esc(p.n)}</b><small>${esc(p.d)} · <i>${esc(p.w)}</i></small></div><div class="stp"><button data-act="bud" data-k="${p.k}" data-v="-1">−</button><span class="v">${n}</span><button data-act="bud" data-k="${p.k}" data-v="1">+</button></div></div>`; }).join('')}
+    ${POL.map(p=>{ const n=+c.budget[p.k]||0; return `<div class="pol"><span style="font-size:28px">${p.e}</span><div class="nm"><b>${esc(p.n)}</b><small>${esc(p.d)} · <i>${esc(p.w)}</i><br>⚠️ ${esc(p.con)}</small></div><div class="stp"><button data-act="bud" data-k="${p.k}" data-v="-1">−</button><span class="v">${n}</span><button data-act="bud" data-k="${p.k}" data-v="1">+</button></div></div>`; }).join('')}
     <h3>👀 미리 보기</h3>${indHTML(calc)}${resGrid(calc)}`;
     next='cityDone';
   }
@@ -680,8 +757,8 @@ function vCity(note){
 function cityDash(showEvents=true){
   const c=P.city, fired=firedList(), calc=cityCalc(c,fired);
   const lowR=RESM[calc.minK];
-  const evs=showEvents&&fired.length?`<h3>🚨 우리 동네 사건 기록</h3>${fired.map(id=>{ const E=EVM[id], a=c.ev[id]; return `<div class="pol"><span style="font-size:26px">${E.e}</span><div class="nm"><b>${esc(E.t)}</b><small>${a?`${'ABC'[a.o]}. ${esc(E.opts[a.o].sh)} — “${esc(a.r)}”`:'아직 대응하지 않았어요'}</small></div>${a?'✅':`<button class="btn sm gink" data-act="evOpen" data-v="${id}">대응하기</button>`}</div>`; }).join('')}`:'';
-  const meltNote = c.dir==='melt' && fired.length ? `<div class="banner warn">🫕 용광로 동네: 새 이웃들이 자기 문화를 숨기느라 조금씩 지쳐 가고 있어요. (사건마다 새 이웃 행복 −3)</div>`:'';
+  const evs=showEvents&&fired.length?`<h3>🚨 우리 동네 사건 기록</h3>${fired.map(id=>{ const E=EVM[id], a=c.ev[id]; return `<div class="pol"><span style="font-size:26px">${E.e}</span><div class="nm"><b>${esc(E.t)}</b><small>${a?`<b>${esc((E.opts[a.o]||{}).sh||'')}</b> — “${esc(a.r)}”${a.w&&RESM[a.w]?`<br>💬 ${RESM[a.w].e} ${esc(RESM[a.w].n)}에게: “${esc(a.v||'')}”`:''}`:'아직 대응하지 않았어요'}</small></div>${a?'✅':`<button class="btn sm gink" data-act="evOpen" data-v="${id}">대응하기</button>`}</div>`; }).join('')}`:'';
+  const meltNote = c.dir==='melt' && fired.length ? `<div class="banner warn">🫕 용광로 동네: 새 이웃들이 자기 문화를 숨기느라 조금씩 지쳐 가고 있어요. (사건마다 새 이웃 −2, 원래 주민 +1)</div>`:'';
   return `<div class="row" style="margin-bottom:10px">${cityIcon(c)}<b style="font-size:20px">${esc(c.name)}</b>${dirBadge(c.dir)}${c.nat&&c.nat.gov?`<span class="badge">${esc(GOVN[c.nat.gov]||'')}</span>`:''}</div>
   ${indHTML(calc)}${meltNote}
   ${calc.h[calc.minK]<58?say(`지금 가장 힘든 이웃은 <b>${lowR.e} ${esc(lowR.n)}</b>이야. “${esc(lowR.q[tier(calc.h[calc.minK])])}”`):''}
@@ -691,6 +768,7 @@ function vPlay(){
   const fired=firedList(), pend=fired.filter(id=>!P.city.ev[id]);
   return `${sHeader()}${phaseTitle()}${pend.length?`<div class="banner bad blink">🚨 대응하지 않은 사건이 ${pend.length}개 있어요!</div>`:''}<div class="card">${fired.length?'':say('동네가 문을 열었어! 곧 꿈결마을에 <b>사건</b>이 생길 거야. 선생님이 사건을 보내면 동네 대표로서 결정해 줘.')}${cityDash()}</div>${vEventModal()}`;
 }
+function evOrder(id){ let x=(P.id+id).split('').reduce((a,c)=>(a*31+c.charCodeAt(0))>>>0,11); const a=[0,1,2]; for(let i=2;i>0;i--){ x=(x*1103515245+12345)>>>0; const j=x%(i+1); [a[i],a[j]]=[a[j],a[i]]; } return a; }
 function vEventModal(){
   let id=ui.evOpen;
   if(!id && META.event && EVM[META.event.id] && !P.city.ev[META.event.id] && !ui.evClosed?.[META.event.at]) id=META.event.id;
@@ -700,15 +778,24 @@ function vEventModal(){
   if(ui.evResult){
     const r=ui.evResult, a=P.city.ev[id], o=E.opts[a.o];
     const ds=RES.map(x=>({x,d:r.after[x.k]-r.before[x.k]})).filter(z=>z.d!==0);
+    const w=RESM[a.w];
     return `<div class="overlay"><div class="modal"><h2>${E.e} ${esc(E.t)} — 결과</h2>
     <div class="delta">${ds.length?ds.map(z=>`<span class="${z.d>0?'up':'dn'}">${z.x.e} ${esc(z.x.n)} ${z.d>0?'+':''}${z.d}</span>`).join(''):'<span>변화 없음</span>'}</div>
-    ${say(esc(o.fb).replace(/\(교과서/g,'(교과서')+(r.prot?' <br>🛡️ 미리 준비한 정책 덕분에 피해가 절반으로 줄었어요!':''))}
+    <div class="grid g2"><div class="banner ok" style="margin:0">✅ 얻은 것<div style="font-weight:500;margin-top:4px">${esc(o.gain)}</div></div><div class="banner warn" style="margin:0">⚠️ 잃은 것<div style="font-weight:500;margin-top:4px">${esc(o.loss)}</div></div></div>
+    ${r.prot?'<div class="banner ok" style="margin-top:10px">🛡️ 미리 준비한 정책 덕분에 피해가 절반으로 줄었어요.</div>':''}
+    <div style="margin-top:12px">${say(`이 사건에는 <b>정답이 없어.</b> 어떤 길을 골라도 누군가는 얻고 누군가는 잃어. ${w?`네가 ${w.e} <b>${esc(w.n)}</b>에게 건넨 말 “${esc(a.v)}”을(를) 마지막 성찰 때 다시 떠올려 보자.`:''}`)}</div>
     <div class="row" style="justify-content:flex-end"><button class="btn acc" data-act="evClose">확인</button></div></div></div>`;
   }
   const dr=ui.evDraft;
   return `<div class="overlay"><div class="modal alert"><div class="scene"><span class="tag">🚨 사건 · ${esc(E.tag)}</span><h2 style="margin:4px 0 6px">${E.e} ${esc(E.t)}</h2><div>${esc(E.s)}</div><div class="src">${esc(E.src)}</div></div>
-  <div class="grid">${E.opts.map((o,i)=>`<button class="opt bigopt ${dr.o===i?'sel':''}" data-act="evPick" data-v="${i}"><span class="lt">${'ABC'[i]}</span><span>${esc(o.t)}</span></button>`).join('')}</div>
-  <label class="lb">왜 그렇게 결정했나요? (5글자 이상)</label><textarea class="field" data-bind="evR" maxlength="150" placeholder="이 결정이 주민들에게 어떤 영향을 줄지 생각해 보세요.">${esc(dr.r)}</textarea>
+  <h3 style="margin-top:0">🗣️ 두 이웃의 목소리</h3>
+  <div class="grid g2" style="margin-bottom:12px">${E.voices.map(v=>{ const r=RESM[v.r]; return `<div class="res"><div class="hd"><span class="av">${r.e}</span><div><div class="nm">${esc(r.n)}</div><div class="rl">${esc(r.rl)}</div></div></div><div class="q">“${esc(v.t)}”</div></div>`; }).join('')}</div>
+  ${say('두 사람 말 모두 <b>나름의 이유</b>가 있어. 모두를 완벽하게 만족시키는 방법은 없어. 동네 대표로서 무엇을 더 중요하게 볼지 정해 줘.')}
+  <div class="grid">${evOrder(id).map((i,pos)=>{ const o=E.opts[i]; return `<button class="opt bigopt ${dr.o===i?'sel':''}" data-act="evPick" data-v="${i}"><span class="lt">${'ABC'[pos]}</span><span>${esc(o.t)}</span></button>`; }).join('')}</div>
+  <label class="lb">① 왜 이 방법을 골랐나요? 누구의 어떤 점을 더 중요하게 생각했나요? (10글자 이상)</label><textarea class="field" data-bind="evR" maxlength="200" placeholder="예: 나는 (   )의 (   )이(가) 더 급하다고 생각했다. 왜냐하면…">${esc(dr.r)}</textarea>
+  <label class="lb">② 이 결정으로 가장 서운할 수 있는 이웃은 누구일까요?</label>
+  <div class="chips">${RES.map(r=>`<button class="chip ${dr.w===r.k?'sel':''}" data-act="evW" data-v="${r.k}">${r.e} ${esc(r.n)}</button>`).join('')}</div>
+  <label class="lb">③ 그 이웃에게 동네 대표로서 한마디 해 주세요. (10글자 이상)</label><textarea class="field" data-bind="evV" maxlength="200" placeholder="그 사람의 입장이 되어, 미안함·약속·대안을 담아 써 보세요.">${esc(dr.v)}</textarea>
   <div class="row" style="justify-content:space-between;margin-top:12px"><button class="btn ghost" data-act="evLater">나중에</button><button class="btn acc" data-act="evSubmit">결정하기</button></div></div></div>`;
 }
 /* 28-③ 표어 */
@@ -750,13 +837,12 @@ function vVote(){
 /* 28-⑤ 결과·성찰 */
 function vWrap(){
   const all=plist(); const got=all.filter(p=>p.vote.to===P.id);
-  const ref=`<h3>✍️ 느낀 점 / 실천할 점</h3><textarea class="field" data-bind="ref28" maxlength="250" placeholder="다양한 문화·종교·인종이 공존하려면 나는 무엇을 할 수 있을까요?">${esc(P.ref28)}</textarea>`;
   return `${sHeader()}${phaseTitle()}<div class="card"><h2>🏁 우리 동네 결과</h2>
   ${P.city.done?cityDash(false):''}
   <h3>🗳️ 우리 동네를 고른 이웃 (${got.length}표)</h3>
   ${got.length?`<ul class="rlist">${got.map(p=>{ const r=RESM[p.vote.as]||{}; return `<li><b>${r.e||''} ${esc(r.n||'')}</b> “${esc(p.vote.reason)}”</li>`; }).join('')}</ul>`:'<p class="muted">아직 받은 표가 없어요.</p>'}
-  </div><div class="card">${P.done28?`<div class="banner ok">✅ 제출 완료! 정답을 확인해 보세요.</div>`:''}${vOX(OX28,'ox28',ref,'done28')}</div>
-  <div class="navbar"><div class="in"><span></span><button class="btn acc" data-act="sub28">${P.done28?'다시 제출':'제출하기'}</button></div></div>`;
+  </div><div class="card">${P.done28?`<div class="banner ok">✅ 제출 완료! OX 정답을 확인해 보세요.</div>`:''}${vOX(OX28,'ox28',vReflect(28),'done28')}</div>${sharedRefs(28)}
+  <div class="navbar"><div class="in">${P.done28?`<button class="btn ghost" data-act="refEdit" data-n="28">✏️ 소감 고치기</button><span></span>`:`<span></span><button class="btn acc" data-act="subRef" data-n="28">제출하기</button>`}</div></div>`;
 }
 
 function renderStudent(){
@@ -805,8 +891,14 @@ const SACT = {
   detT(el){ P.det[ui.det].t=+el.dataset.v; saveP(true); keepScroll=true; render(); },
   detSave(){ const d=P.det[ui.det]; if(!d||(d.txt||'').trim().length<5) return toast('3번 질문에 5글자 이상 써 주세요.'); saveP(true); toast('✅ 사건 해결!'); ui.det=null; window.scrollTo(0,0); render(); },
   ox(el){ const k=el.dataset.k; P[k]['q'+el.dataset.i]=el.dataset.v; saveP(); keepScroll=true; render(); },
-  sub27(){ if(Object.keys(P.ox27).length<3) return toast('OX 3문항을 모두 풀어 주세요.'); if(P.ref27.a.trim().length<5||P.ref27.b.trim().length<5) return toast('느낀 점과 실천할 점을 5글자 이상 써 주세요.'); P.done27=true; saveP(true); keepScroll=true; render(); toast('✅ 제출했어요!'); },
-  sub28(){ if(Object.keys(P.ox28).length<3) return toast('OX 3문항을 모두 풀어 주세요.'); if(P.ref28.trim().length<5) return toast('느낀 점을 5글자 이상 써 주세요.'); P.done28=true; saveP(true); keepScroll=true; render(); toast('✅ 제출했어요!'); },
+  subRef(el){ const n=+el.dataset.n, ox=P['ox'+n], R=P['ref'+n], qs=n===27?refQs27():refQs28(), L=n===27?CON27:CON28;
+    if(Object.keys(ox).length<3) return toast('OX 3문항을 모두 풀어 주세요.');
+    if(qs.some(q=>/\(\s*\)/.test(R[q.k]||''))) return toast('문장 틀의 (   ) 빈칸을 채워 주세요.');
+    const short=qs.find(q=>refLen(R[q.k])<30); if(short) return toast(`${short.e} 질문에 30글자 이상 써 주세요.`);
+    const used=usedC(qs.map(q=>R[q.k]).join(' '),L); if(used.length<2) return toast(`오늘 배운 개념어를 2개 이상 넣어 주세요. (예: ${L.slice(0,3).join(', ')})`);
+    R.q=Object.fromEntries(qs.map(q=>[q.k,q.t])); R.concepts=used; P['done'+n]=true; saveP(true); window.scrollTo(0,0); render(); toast(`📝 제출 완료! 개념어 ${used.length}개를 썼어요.`); },
+  refEdit(el){ P['done'+el.dataset.n]=false; saveP(true); render(); },
+  starter(el){ const n=el.dataset.n,k=el.dataset.k, R=P['ref'+n]; if(String(R[k]||'').trim()) return toast('글이 비어 있을 때만 틀을 넣을 수 있어요.'); const q=(n==='27'?refQs27():refQs28()).find(x=>x.k===k); R[k]=q.starter; saveP(); keepScroll=true; render(); const t=$app.querySelector(`textarea[data-n="${n}"][data-k="${k}"]`); if(t){ t.focus(); const i=t.value.indexOf('('); if(i>=0) t.setSelectionRange(i+1,i+1); } },
   natPick(el){ const n=(ui.natList||[]).find(x=>x.id===el.dataset.v); if(!n) return; P.city.nat={id:n.id,flag:n.d.flag,gov:n.d.gov||null,name:n.d.name}; P.city.name=n.d.name.slice(0,14); saveP(); keepScroll=true; render(); },
   sym(el){ P.city.sym=el.dataset.v; saveP(); keepScroll=true; render(); },
   dir(el){ P.city.dir=el.dataset.v; saveP(); keepScroll=true; render(); },
@@ -815,13 +907,14 @@ const SACT = {
   cityPrev(){ ui.cityStep=Math.max(0,ui.cityStep-1); window.scrollTo(0,0); render(); },
   cityDone(){ const u=budgetUsed(P.city); if(u<BUDGET) return toast(`예산이 ${BUDGET-u}칸 남았어요. 모두 써 주세요.`); P.city.done=true; saveP(true); window.scrollTo(0,0); render(); toast('🎉 동네 문을 열었어요!'); },
   cityEdit(){ if(Object.keys(P.city.ev).length) return toast('이미 사건에 대응해서 다시 설계할 수 없어요.'); P.city.done=false; ui.cityStep=0; saveP(true); render(); },
-  evOpen(el){ ui.evOpen=el.dataset.v; ui.evDraft={o:null,r:''}; render(); },
+  evOpen(el){ ui.evOpen=el.dataset.v; ui.evDraft={o:null,r:'',w:null,v:''}; render(); },
   evPick(el){ ui.evDraft.o=+el.dataset.v; keepScroll=true; render(); },
-  evLater(){ if(META.event){ ui.evClosed=ui.evClosed||{}; ui.evClosed[META.event.at]=1; } ui.evOpen=null; ui.evDraft={o:null,r:''}; render(); },
-  evSubmit(){ const id=ui.evOpen||(META.event&&META.event.id); const d=ui.evDraft; if(!id) return; if(d.o==null) return toast('대응 방법을 골라 주세요.'); if(d.r.trim().length<5) return toast('이유를 5글자 이상 써 주세요.');
-    const fired=firedList(); const before=cityCalc(P.city,fired).h; P.city.ev[id]={o:d.o,r:d.r.trim(),at:Date.now()}; const after=cityCalc(P.city,fired).h;
+  evW(el){ ui.evDraft.w=el.dataset.v; keepScroll=true; render(); },
+  evLater(){ if(META.event){ ui.evClosed=ui.evClosed||{}; ui.evClosed[META.event.at]=1; } ui.evOpen=null; ui.evDraft={o:null,r:'',w:null,v:''}; render(); },
+  evSubmit(){ const id=ui.evOpen||(META.event&&META.event.id); const d=ui.evDraft; if(!id) return; if(d.o==null) return toast('대응 방법을 골라 주세요.'); if(d.r.trim().length<10) return toast('① 고른 이유를 10글자 이상 써 주세요.'); if(!d.w) return toast('② 가장 서운할 수 있는 이웃을 골라 주세요.'); if(d.v.trim().length<10) return toast('③ 그 이웃에게 하는 말을 10글자 이상 써 주세요.');
+    const fired=firedList(); const before=cityCalc(P.city,fired).h; P.city.ev[id]={o:d.o,r:d.r.trim(),w:d.w,v:d.v.trim(),at:Date.now()}; const after=cityCalc(P.city,fired).h;
     const prot=EVM[id].pol.some(p=>(+P.city.budget[p]||0)>=2) && Object.values(EVM[id].opts[d.o].eff).some(v=>v<0);
-    ui.evResult={id,before,after,prot}; ui.evOpen=null; ui.evDraft={o:null,r:''}; saveP(true); render(); },
+    ui.evResult={id,before,after,prot}; ui.evOpen=null; ui.evDraft={o:null,r:'',w:null,v:''}; saveP(true); render(); },
   evClose(){ ui.evResult=null; render(); },
   sloSave(){ if(P.slogan.s.trim().length<4) return toast('표어를 4글자 이상 써 주세요.'); if(P.slogan.m.trim().length<5) return toast('의미를 5글자 이상 써 주세요.'); P._sloSaved=true; saveP(true); keepScroll=true; render(); toast('✅ 표어를 걸었어요!'); },
   votePick(el){ ui.voteTo=el.dataset.v; keepScroll=true; render(); },
@@ -832,9 +925,9 @@ const SBIND = {
   dotIn:v=>ui.dotIn=v.replace(/[^0-9]/g,''),
   coin:(v,el)=>{ const n=+v; const mine=el.dataset.flip==='1'?20-n:n; ui.coinDraft=mine; const a=document.getElementById('ca'), b=document.getElementById('cb'); if(a) a.textContent=n; if(b) b.textContent=20-n; },
   detTxt:v=>{ P.det[ui.det].txt=v; saveP(); },
-  ref27a:v=>{ P.ref27.a=v; saveP(); }, ref27b:v=>{ P.ref27.b=v; saveP(); }, ref28:v=>{ P.ref28=v; saveP(); },
+  rf:(v,el)=>{ const n=el.dataset.n,k=el.dataset.k; P['ref'+n][k]=v; saveP(); const l=document.getElementById('len'+n+k); if(l) l.textContent=refLen(v)+'자 / 30자'; const cc=document.getElementById('cc'+n); if(cc) cc.innerHTML=chipsHTML(+n); },
   cname:v=>{ P.city.name=v.slice(0,14); saveP(); },
-  evR:v=>ui.evDraft.r=v, slo:v=>{ P.slogan.s=v; P._sloSaved=false; saveP(); }, slom:v=>{ P.slogan.m=v; P._sloSaved=false; saveP(); },
+  evR:v=>ui.evDraft.r=v, evV:v=>ui.evDraft.v=v, slo:v=>{ P.slogan.s=v; P._sloSaved=false; saveP(); }, slom:v=>{ P.slogan.m=v; P._sloSaved=false; saveP(); },
   voteR:v=>ui.voteReason=v
 };
 
@@ -888,7 +981,18 @@ function tDetective(list){
 function tOX(list,set,key,refFn,doneKey){
   const ds=list.filter(p=>p[doneKey]);
   return `<div class="card"><h3 style="margin-top:0">⭕ OX 정답률 (제출 ${ds.length}명)</h3>${set.map((q,i)=>{ const r=ds.filter(p=>p[key]['q'+i]===q.a).length; return obar(`${i+1}. ${esc(q.q)} <b>[${q.a}]</b>`,r,ds.length||1,'var(--teal)',`${r}/${ds.length}`); }).join('')}
-  <h3>✍️ 성찰 벽</h3><div class="wall">${ds.map(p=>refFn(p)).join('')||'<p class="muted">아직 없어요.</p>'}</div></div>`;
+  </div>${tRefl(list,refFn)}`;
+}
+function tRefl(list,n){
+  const L=n===27?CON27:CON28, ds=list.filter(p=>p['done'+n]), st=META['star'+n]||{}, share=!!META['share'+n];
+  const cnt={}; ds.forEach(p=>(p['ref'+n].concepts||[]).forEach(c=>cnt[c]=(cnt[c]||0)+1));
+  const nst=ds.filter(p=>st[p.id]).length;
+  return `<div class="card"><div class="row"><h3 style="margin:0">✍️ 학생 소감 (${ds.length}/${list.length}명 제출)</h3><span class="sp"></span>
+  <button class="btn sm teal" data-act="spotRef" data-n="${n}">🖥️ ⭐ 고른 소감 크게 보기 (${nst})</button>
+  <button class="btn sm ${share?'acc':'ghost'}" data-act="shareRef" data-n="${n}">${share?'📤 학생 화면에 공유 중':'📤 학생 화면에 공유하기'}</button></div>
+  <p class="small" style="margin:8px 0">개념어 사용: ${L.map(c=>`<span class="chip" style="padding:3px 10px;font-size:13px;${cnt[c]?'':'opacity:.45'}">${esc(c)} ${cnt[c]||0}</span>`).join(' ')}</p>
+  <p class="muted small">노란색 = 개념어 · ☆를 눌러 함께 읽을 소감을 고르세요. ‘공유’를 켜면 고른 소감이 학생 화면에도 나타납니다.</p>
+  <ul class="rlist">${ds.map(p=>{ const R=p['ref'+n]; return `<li><div class="row"><b>${esc(p.num)}번 ${esc(p.nick)}</b><span class="muted">개념어 ${(R.concepts||[]).length}개 · ${['r1','r2','r3'].reduce((a,k)=>a+refLen(R[k]),0)}자</span><span class="sp"></span><button class="btn sm ${st[p.id]?'acc':'ghost'}" data-act="starRef" data-n="${n}" data-v="${p.id}">${st[p.id]?'⭐ 선택됨':'☆ 고르기'}</button></div>${['r1','r2','r3'].map(k=>`<div style="margin-top:8px"><div class="muted" style="font-size:13px">${esc(R.q[k]||'')}</div>${hlC(R[k],L)}</div>`).join('')}</li>`; }).join('')||'<li class="muted">아직 제출한 학생이 없어요.</li>'}</ul></div>`;
 }
 function dirStats(list){
   const fired=firedList();
@@ -901,7 +1005,8 @@ function tCity(list){
   let evStat='';
   if(cur){ const ans=list.filter(p=>p.city.ev[cur.id]); evStat=`<div class="card"><h3 style="margin-top:0">${cur.e} 현재 사건: ${esc(cur.t)} <span class="muted">(${ans.length}/${done.length}명 응답)</span></h3><p class="small">${esc(cur.s)}</p>
     ${cur.opts.map((o,i)=>{ const n=ans.filter(p=>p.city.ev[cur.id].o===i).length; return obar(`${'ABC'[i]}. ${esc(o.t)}`,n,ans.length||1,['#d64545','#2a9d8f','#e9a23b'][i],`${n}명`); }).join('')}
-    <div class="wall" style="margin-top:8px">${ans.map(p=>{ const a=p.city.ev[cur.id]; return `<button class="wcard" data-act="spot" data-v="${esc('['+'ABC'[a.o]+'] '+a.r)}" data-w="${esc(p.city.name)}"><small>${esc(p.city.name)} · ${'ABC'[a.o]}</small>${esc(a.r)}</button>`; }).join('')}</div></div>`; }
+    <div class="wall" style="margin-top:8px">${ans.map(p=>{ const a=p.city.ev[cur.id], w=RESM[a.w]; const txt='['+'ABC'[a.o]+'] '+a.r+(w?'\n→ '+w.n+'에게: '+(a.v||''):''); return `<button class="wcard" data-act="spot" data-v="${esc(txt)}" data-w="${esc(p.city.name)}"><small>${esc(p.city.name)} · ${'ABC'[a.o]}</small>${esc(a.r)}${w?`<div style="margin-top:6px;color:var(--navy)">💬 ${w.e} ${esc(w.n)}에게: “${esc(a.v||'')}”</div>`:''}</button>`; }).join('')}</div>
+    ${ans.length?`<p class="small" style="margin-top:8px"><b>‘가장 서운할 이웃’으로 꼽힌 사람</b>: ${RES.map(r=>({r,n:ans.filter(p=>p.city.ev[cur.id].w===r.k).length})).filter(x=>x.n).sort((a,b)=>b.n-a.n).map(x=>`${x.r.e} ${esc(x.r.n)} ${x.n}명`).join(' · ')||'-'}</p><p class="muted small">💬 디브리핑: “같은 선택을 한 친구들끼리도 서운할 이웃을 다르게 꼽았나요? 왜일까요?”</p>`:''}</div>`; }
   const lows={}; done.forEach(p=>{ const c=cityCalc(p.city,fired); lows[c.minK]=(lows[c.minK]||0)+1; });
   return `<div class="card"><h3 style="margin-top:0">🚨 사건 발동</h3><div class="row">${EVENTS.map(e=>`<button class="btn sm ${META.fired&&META.fired[e.id]?'ghost':'gink'}" data-act="fire" data-v="${e.id}">${e.e} ${esc(e.t)}${META.fired&&META.fired[e.id]?' ✓':''}</button>`).join('')}</div>
   <p class="muted small">발동하면 모든 학생 태블릿에 사건 창이 뜹니다. 이미 발동한 사건을 다시 누르면 ‘현재 사건’ 표시만 바뀝니다. ${fired.length?`· 발동한 사건 ${fired.length}개`:''}</p></div>
@@ -909,7 +1014,7 @@ function tCity(list){
   <div class="card"><h3 style="margin-top:0">📊 동네 방향별 결과 <span class="muted">(${done.length}개 동네)</span></h3>
   <table class="tb"><tr><th>방향</th><th>동네 수</th><th>평균 공존 지수</th><th>평균 보이는 갈등</th><th>평균 힘든 이웃</th></tr>${dirStats(list)}</table>
   <p class="small" style="margin-top:8px"><b>가장 힘든 이웃</b>으로 가장 많이 꼽힌 사람: ${Object.entries(lows).sort((a,b)=>b[1]-a[1]).map(([k,n])=>`${RESM[k].e} ${esc(RESM[k].n)} ${n}곳`).join(' · ')||'-'}</p>
-  <p class="muted small">💬 디브리핑: “용광로 동네는 왜 ‘보이는 갈등’은 낮은데 ‘공존 지수’도 낮을까?”</p></div>
+  <p class="muted small">💬 디브리핑: “‘보이는 갈등’이 낮으면 모두 행복한 걸까? 방향마다 누가 웃고 누가 참고 있었나?”</p></div>
   <div class="ngrid">${done.map(p=>{ const c=cityCalc(p.city,fired); return `<div class="ncard">${cityCard(p,{extra:`<div class="faces" style="margin-top:6px">${RES.map(r=>face(c.h[r.k])).join('')}</div><div class="small">🤝 공존 ${c.avg} · ⚡ 갈등 ${c.conflict} · 😢 ${c.low}명</div>`})}</div>`; }).join('')}</div>`;
 }
 function tSlogan(list){
@@ -927,7 +1032,7 @@ function tVote(list){
 function tStatus(list){
   const ck=b=>b?'✅':'·';
   return `<div class="card" style="overflow:auto"><table class="tb"><tr><th>번호</th><th>별명</th><th>팀</th><th>점</th><th>코인</th><th>탐정</th><th>OX27</th><th>동네</th><th>사건</th><th>표어</th><th>투표</th><th>OX28</th></tr>
-  ${list.map(p=>`<tr><td>${esc(p.num)}</td><td>${esc(p.nick)}</td><td>${p.g?(p.g==='star'?'⭐':'🌙'):'·'}</td><td>${Object.keys(p.dots).length}/3</td><td>${(p.coins.r1!=null)+(p.coins.r2!=null)+(p.mat?1:0)}/3</td><td>${CASES.filter(c=>p.det[c.id]&&p.det[c.id].txt).length}/6</td><td>${ck(p.done27)}</td><td>${p.city.done?esc(p.city.name):'·'}</td><td>${Object.keys(p.city.ev).length}</td><td>${ck(p.slogan.s)}</td><td>${ck(p.vote.to)}</td><td>${ck(p.done28)}</td></tr>`).join('')}</table>${list.length?'':'<p class="muted">아직 들어온 학생이 없어요.</p>'}</div>`;
+  ${list.map(p=>`<tr><td>${esc(p.num)}</td><td>${esc(p.nick)}</td><td>${p.g?(p.g==='star'?'⭐':'🌙'):'·'}</td><td>${Object.keys(p.dots).length}/3</td><td>${(p.coins.r1!=null)+(p.coins.r2!=null)+(p.mat?1:0)}/3</td><td>${CASES.filter(c=>p.det[c.id]&&p.det[c.id].txt).length}/${CASES.length}</td><td>${ck(p.done27)}</td><td>${p.city.done?esc(p.city.name):'·'}</td><td>${Object.keys(p.city.ev).length}</td><td>${ck(p.slogan.s)}</td><td>${ck(p.vote.to)}</td><td>${ck(p.done28)}</td></tr>`).join('')}</table>${list.length?'':'<p class="muted">아직 들어온 학생이 없어요.</p>'}</div>`;
 }
 function tSettings(){
   return `<div class="card"><h3 style="margin-top:0">🏛️ 국가 만들기 연동</h3>
@@ -951,11 +1056,11 @@ function renderTeacher(){
     if(ph==='lobby'||ph==='dots') main=`<div class="card"><div class="stat"><div class="box"><small>입장</small><b>${list.length}</b></div><div class="box"><small>점 세기 완료</small><b>${list.filter(x=>Object.keys(x.dots).length>=3).length}</b></div><div class="box"><small>⭐ 별빛</small><b>${list.filter(x=>x.g==='star').length}</b></div><div class="box"><small>🌙 달빛</small><b>${list.filter(x=>x.g==='moon').length}</b></div></div><div class="prog">${list.map(x=>`<span class="${x.g?'done':''}">${esc(x.num)} ${esc(x.nick)}</span>`).join('')}</div></div>`;
     else if(ph==='coins'||ph==='reveal') main=tCoins(list);
     else if(ph==='detective') main=tDetective(list);
-    else if(ph==='ox27') main=tOX(list,OX27,'ox27',x=>`<button class="wcard" data-act="spot" data-v="${esc(x.ref27.a+'\n'+x.ref27.b)}" data-w="${esc(x.nick)}"><small>${esc(x.num)}번 ${esc(x.nick)}</small>${esc(x.ref27.a)}<br>→ ${esc(x.ref27.b)}</button>`,'done27');
+    else if(ph==='ox27') main=tOX(list,OX27,'ox27',27,'done27');
     else if(ph==='city'||ph==='play') main=tCity(list);
     else if(ph==='slogan') main=tSlogan(list);
     else if(ph==='vote') main=tVote(list);
-    else if(ph==='wrap28') main=tVote(list)+`<div class="card"><h3 style="margin-top:0">📊 방향별 결과</h3><table class="tb"><tr><th>방향</th><th>동네 수</th><th>평균 공존 지수</th><th>평균 보이는 갈등</th><th>평균 힘든 이웃</th></tr>${dirStats(list)}</table></div>`+tOX(list,OX28,'ox28',x=>`<button class="wcard" data-act="spot" data-v="${esc(x.ref28)}" data-w="${esc(x.nick)}"><small>${esc(x.num)}번 ${esc(x.nick)}</small>${esc(x.ref28)}</button>`,'done28');
+    else if(ph==='wrap28') main=tVote(list)+`<div class="card"><h3 style="margin-top:0">📊 방향별 결과</h3><table class="tb"><tr><th>방향</th><th>동네 수</th><th>평균 공존 지수</th><th>평균 보이는 갈등</th><th>평균 힘든 이웃</th></tr>${dirStats(list)}</table></div>`+tOX(list,OX28,'ox28',28,'done28');
   }
   const link = T.showLink ? `<div class="card"><div class="row" style="align-items:flex-start"><div id="qr" class="qrbox"></div><div class="sp"><h3 style="margin-top:0">학생 입장 주소</h3><div class="url">${esc(studentURL())}</div><p class="muted small">QR 코드를 찍거나 주소로 들어가면 바로 이 방에 입장합니다.</p><button class="btn sm ghost" data-act="copy">주소 복사</button></div></div></div>`:'';
   $app.innerHTML=`<div class="twrap"><div class="top"><h1><img src="${CHAR}" alt="">꿈결마을 이웃 프로젝트 · 교사</h1>${modeBadge()}${roomLabel(ROOM)?`<span class="pill" style="font-size:18px;border-color:var(--navy);color:var(--navy)"><b>🏫 ${esc(roomLabel(ROOM))}</b></span>`:''}<span class="pill" style="font-size:18px">방 코드 <b style="letter-spacing:2px">${esc(ROOM)}</b></span><span class="pill">👥 ${list.length}명</span><button class="btn sm teal" data-act="goPicker">🗂️ 반 바꾸기·새 방</button>
@@ -963,19 +1068,21 @@ function renderTeacher(){
   ${DBMODE!=='live'?`<div class="banner warn">⚠️ 체험 모드입니다. Firebase가 연결되지 않아 <b>이 브라우저 안에서만</b> 연동됩니다. 학생 태블릿과 연결하려면 파일의 FIREBASE_CONFIG 를 확인하세요.</div>`:''}
   ${link}<div class="card" style="padding:14px 16px">${phb}${say(`<b>${p.l}차시 ${p.e} ${p.n}</b> — ${TIPS[ph]}`)}</div>
   <div class="tabs">${[['run','📺 진행 화면'],['status','👥 학생 현황'],['set','⚙️ 설정']].map(([k,n])=>`<button class="${T.tab===k?'on':''}" data-act="tab" data-v="${k}">${n}</button>`).join('')}</div>
-  ${main}</div>${T.spot?`<div class="overlay" data-act="spotClose"><div class="modal"><div class="muted">${esc(T.spot.w)}</div><div class="spot">${esc(T.spot.v).replace(/\n/g,'<br>')}</div><div class="row" style="justify-content:flex-end"><button class="btn acc" data-act="spotClose">닫기</button></div></div></div>`:''}`;
+  ${main}</div>${T.spotRef?tSpotRef(list):''}${T.spot?`<div class="overlay" data-act="spotClose"><div class="modal"><div class="muted">${esc(T.spot.w)}</div><div class="spot">${esc(T.spot.v).replace(/\n/g,'<br>')}</div><div class="row" style="justify-content:flex-end"><button class="btn acc" data-act="spotClose">닫기</button></div></div></div>`:''}`;
   if(T.showLink){ const q=document.getElementById('qr'); if(q&&window.QRCode) new QRCode(q,{text:studentURL(),width:180,height:180}); }
 }
+function tSpotRef(list){ const n=T.spotRef, L=n===27?CON27:CON28, st=META['star'+n]||{}; const ps=list.filter(p=>st[p.id]&&p['done'+n]);
+  return `<div class="overlay" data-act="spotRefClose"><div class="modal" style="max-width:1100px"><div class="row"><h2 style="margin:0">⭐ 오늘의 소감 (${n}차시)</h2><span class="sp"></span><button class="btn" data-act="spotRefClose">닫기 ✕</button></div>${ps.length?ps.map(p=>{ const R=p['ref'+n]; return `<div class="concept" style="background:#fff;margin-top:14px;font-size:21px;line-height:1.75"><b>${esc(p.nick)}</b>${['r1','r2','r3'].map(k=>R[k]?`<p style="margin:8px 0">${hlC(R[k],L)}</p>`:'').join('')}</div>`; }).join(''):'<p class="muted" style="margin-top:14px">학생 소감 옆 ☆ 고르기를 눌러 보여 줄 소감을 골라 주세요.</p>'}</div></div>`; }
 function csvExport(){
   const list=plist(), fired=EVENTS.map(e=>e.id);
-  const H=['번호','별명','팀','점추정1','점추정2','점추정3','R1같은팀','R2같은팀','R3선택',...CASES.flatMap((c,i)=>[`사건${i+1}편견`,`사건${i+1}유형`,`사건${i+1}서술`]),'OX27','성찰27-1','성찰27-2','동네','방향',...POL.map(p=>p.n),...EVENTS.flatMap(e=>[e.t+'선택',e.t+'이유']),'공존지수','표어','표어의미','투표역할','투표대상','투표이유','OX28','느낀점28'];
+  const H=['번호','별명','팀','점추정1','점추정2','점추정3','R1같은팀','R2같은팀','R3선택',...CASES.flatMap((c,i)=>[`사건${i+1}편견`,`사건${i+1}유형`,`사건${i+1}서술`]),'OX27','성찰27-코인','성찰27-편견','성찰27-실천','개념어27','동네','방향',...POL.map(p=>p.n),...EVENTS.flatMap(e=>[e.t+'선택',e.t+'이유',e.t+'서운한이웃',e.t+'한마디']),'공존지수','표어','표어의미','투표역할','투표대상','투표이유','OX28','성찰28-동네','성찰28-입장','성찰28-공존','개념어28'];
   const rows=list.map(p=>{ const c=cityCalc(p.city,firedList());
     const oxs=(set,k)=>set.map((q,i)=>p[k]['q'+i]===q.a?'O':(p[k]['q'+i]?'X':'-')).join('');
     return [p.num,p.nick,p.g==='star'?'별빛':p.g==='moon'?'달빛':'',p.dots.d0??'',p.dots.d1??'',p.dots.d2??'',p.coins.r1??'',p.coins.r2??'',(MAT.find(m=>m.k===p.mat)||{}).n||'',
       ...CASES.flatMap(cs=>{ const d=p.det[cs.id]||{}; return [d.p==null?'':(d.p===cs.a?'정답':'오답'),d.t==null?'':PTYPE[d.t],d.txt||'']; }),
-      p.done27?oxs(OX27,'ox27'):'',p.ref27.a,p.ref27.b,p.city.name,(DIRM[p.city.dir]||{}).n||'',...POL.map(x=>p.city.budget[x.k]||0),
-      ...fired.flatMap(id=>{ const a=p.city.ev[id]; return a?['ABC'[a.o]+'. '+EVM[id].opts[a.o].sh,a.r]:['','']; }),
-      p.city.done?c.avg:'',p.slogan.s,p.slogan.m,(RESM[p.vote.as]||{}).n||'',((list.find(x=>x.id===p.vote.to)||{}).city||{}).name||'',p.vote.reason,p.done28?oxs(OX28,'ox28'):'',p.ref28];
+      p.done27?oxs(OX27,'ox27'):'',p.ref27.r1,p.ref27.r2,p.ref27.r3,(p.ref27.concepts||[]).join(' '),p.city.name,(DIRM[p.city.dir]||{}).n||'',...POL.map(x=>p.city.budget[x.k]||0),
+      ...fired.flatMap(id=>{ const a=p.city.ev[id]; return a?['ABC'[a.o]+'. '+((EVM[id].opts[a.o]||{}).sh||''),a.r,(RESM[a.w]||{}).n||'',a.v||'']:['','','','']; }),
+      p.city.done?c.avg:'',p.slogan.s,p.slogan.m,(RESM[p.vote.as]||{}).n||'',((list.find(x=>x.id===p.vote.to)||{}).city||{}).name||'',p.vote.reason,p.done28?oxs(OX28,'ox28'):'',p.ref28.r1,p.ref28.r2,p.ref28.r3,(p.ref28.concepts||[]).join(' ')];
   });
   const csv='﻿'+[H,...rows].map(r=>r.map(v=>`"${String(v??'').replace(/"/g,'""')}"`).join(',')).join('\r\n');
   const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'})); a.download=`꿈결마을_${ROOM}_${new Date().toISOString().slice(0,10)}.csv`; a.click();
@@ -995,6 +1102,10 @@ const TACT = {
   natSave(){ const v=(document.getElementById('natIn').value||'').toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,8); if(!v) return toast('방 코드를 입력하세요.'); if(v===ROOM) return toast('이 방이 아니라 국가 만들기 때의 방 코드를 넣어 주세요.'); backend.update(`${BASE()}/meta`,{natRoom:v}); toast('🏛️ 연결했어요.'); },
   natClear(){ backend.update(`${BASE()}/meta`,{natRoom:null}); },
   csv(){ csvExport(); },
+  starRef(el){ const n=el.dataset.n, id=el.dataset.v, cur=(META['star'+n]||{})[id]; backend.update(`${BASE()}/meta/star${n}`,{[id]:cur?null:true}); },
+  shareRef(el){ const n=el.dataset.n; backend.update(`${BASE()}/meta`,{['share'+n]:META['share'+n]?null:true}); toast(META['share'+n]?'공유를 껐어요.':'📤 고른 소감을 학생 화면에 공유했어요.'); },
+  spotRef(el){ T.spotRef=+el.dataset.n; render(); },
+  spotRefClose(el,ev){ if(ev && ev.target!==el) return; T.spotRef=null; render(); },
   reset(){ if(!confirm('이 방('+ROOM+')의 학생 기록을 모두 지울까요? 되돌릴 수 없습니다. (국가 만들기 기록은 지워지지 않습니다)')) return; backend.remove(BASE()).then(()=>backend.set(`${BASE()}/meta`,{phase:'lobby',created:Date.now()})); toast('🗑️ 지웠어요.'); },
   newRoom(){ location.search='?mode=teacher'; },
   goPicker(){ location.search='?mode=teacher'; },
@@ -1045,7 +1156,7 @@ document.addEventListener('keydown',e=>{ if(e.key!=='Enter') return; const el=e.
     softRender(); });
   backend.on(`${BASE()}/players`,v=>{ PLAYERS=v||{};
     if(P&&P.nick&&PLAYERS[P.id]==null&&P.epoch&&P.epoch===META.created){ saveP(true); }   // 연결이 끊겼다 돌아온 경우 내 기록 다시 올림
-    if(['reveal','vote','wrap28'].includes(phase())) softRender(); });
+    if(['reveal','vote','wrap28','ox27'].includes(phase())) softRender(); });
   if(P&&P.nick&&P.city.done) ui.cityStep=2;
   render();
 })();
