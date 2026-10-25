@@ -529,7 +529,7 @@ function vJoin(){
   ${say('우리 꿈결마을에는 요즘 <b>새 이웃</b>들이 많이 이사 오고 있어. 함께 잘 살려면 어떻게 해야 할지, 오늘 나랑 같이 알아보자!')}
   <div class="grid g2"><div><label class="lb">번호</label><input class="field" inputmode="numeric" data-bind="num" value="${esc(P.num)}" placeholder="예: 7"></div>
   <div><label class="lb">별명 <span class="muted">(10자 이내)</span></label><input class="field" maxlength="10" data-bind="nick" value="${esc(P.nick)}" placeholder="예: 은행잎"></div></div>
-  <p class="muted small">※ 이름 대신 별명을 써요. 출신이나 가족 이야기는 묻지 않아요.</p></div>
+  <div class="tip" style="margin-top:12px">🔁 <b>두 번째 시간</b>이라면 지난 시간과 <b>같은 번호·같은 별명</b>을 입력하세요. 내 기록을 찾아 이어서 해요.</div><p class="muted small">※ 이름 대신 별명을 써요. 출신이나 가족 이야기는 묻지 않아요.</p></div>
   <div class="navbar"><div class="in"><span></span><button class="btn acc" data-act="join">입장하기 →</button></div></div>`;
 }
 function vLobby(){ return `${sHeader()}<div class="card center"><div class="hero"><img src="${CHAR}" alt="꿈송이"></div>${say(`반가워, <b>${esc(P.nick)}</b>! 선생님이 시작하면 화면이 바뀔 거야. 잠깐만 기다려 줘.`,true)}</div>`; }
@@ -787,7 +787,14 @@ function loadNations(){
 }
 const SACT = {
   enterRoom(){ const r=tmpRoom.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,8); if(r.length<3) return toast('방 코드를 확인해 주세요.'); location.search='?room='+r+(SLOT?'&s='+SLOT:''); },
-  join(){ if(!String(P.num).trim()) return toast('번호를 입력해 주세요.'); if(!P.nick.trim()) return toast('별명을 입력해 주세요.'); P.nick=P.nick.trim(); P.at=Date.now(); P.epoch=META.created||null; saveP(true); render(); },
+  join(){ if(!String(P.num).trim()) return toast('번호를 입력해 주세요.'); if(!P.nick.trim()) return toast('별명을 입력해 주세요.'); P.nick=P.nick.trim();
+    // 지난 시간 기록 다시 찾기: 같은 번호(+별명)가 이 방에 있으면 그 기록으로 이어서 진행
+    const nk=x=>String(x||'').replace(/\s/g,'').toLowerCase();
+    const same=plist().filter(x=>x.id!==P.id&&String(x.num)===String(P.num));
+    let found=same.find(x=>nk(x.nick)===nk(P.nick));
+    if(!found&&same.length===1&&confirm(`${P.num}번 ‘${same[0].nick}’(으)로 이미 참여한 기록이 있어요.\n내 기록이 맞으면 [확인]을 눌러 이어서 하세요.\n(다른 친구라면 [취소])`)) found=same[0];
+    if(found){ P=normP(found); try{ localStorage.setItem(skey(),JSON.stringify(P)); }catch(e){} if(P.city.done) ui.cityStep=2; toast(`👋 다시 왔구나, ${P.nick}! 지난 기록으로 이어서 해요.`); render(); return; }
+    P.at=Date.now(); P.epoch=META.created||null; saveP(true); render(); },
   dotShow(){ const i=Object.keys(P.dots).length; ui.dotIdx=i; ui.dotShow=true; ui.dotIn=''; render(); setTimeout(()=>{ ui.dotShow=false; render(); const f=$app.querySelector('[data-bind=dotIn]'); f&&f.focus(); },800); },
   dotSubmit(){ const v=parseInt(ui.dotIn,10); if(!(v>=0)) return toast('숫자를 입력해 주세요.'); P.dots['d'+Object.keys(P.dots).length]=v; ui.dotIdx=null; ui.dotIn=''; if(Object.keys(P.dots).length>=DOTS.length) assignTeam(); saveP(true); render(); },
   coinSubmit(el){ P.coins[el.dataset.r]=ui.coinDraft; ui.coinDraft=10; saveP(true); window.scrollTo(0,0); render(); },
