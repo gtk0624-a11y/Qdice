@@ -1,0 +1,978 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>꿈결 앞바다 — 마지막 한 마리</title>
+<link rel="icon" href="ggumsong.png">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+:root{
+  --bg:#eef4f8; --paper:#ffffff; --ink:#12304a; --sub:#5a6b7d; --line:#d7e2ec;
+  --sea:#0e5a8a; --sea2:#e3f1fa; --deep:#0a3d62; --sand:#f6c453; --sand2:#fff5d6;
+  --ok:#1f9d7a; --warn:#e39a1c; --bad:#d64545; --soft:#eaf3f9;
+  --shadow:0 2px 0 rgba(18,48,74,.05),0 8px 24px rgba(18,48,74,.07);
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:Pretendard,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;font-size:17px;line-height:1.55;-webkit-tap-highlight-color:transparent}
+button{font-family:inherit;font-size:inherit;color:inherit;cursor:pointer}
+input,textarea{font-family:inherit;font-size:16px;color:var(--ink)}
+.wrap{max-width:860px;margin:0 auto;padding:16px 16px 120px}
+.twrap{max-width:1360px;margin:0 auto;padding:16px 16px 80px}
+.top{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.top h1{font-size:20px;margin:0;flex:1;min-width:180px;display:flex;align-items:center;gap:8px}
+.top h1 img{width:36px;height:36px;object-fit:contain}
+.pill{display:inline-flex;align-items:center;gap:6px;background:var(--paper);border:1.5px solid var(--line);border-radius:999px;padding:4px 12px;font-size:14px;font-weight:600}
+.pill.live{border-color:var(--ok);color:var(--ok)}
+.pill.demo{border-color:var(--warn);color:#a86b00}
+.card{background:var(--paper);border:1.5px solid var(--line);border-radius:18px;padding:20px;box-shadow:var(--shadow);margin-bottom:16px}
+h2{font-size:23px;margin:0 0 12px}
+h3{font-size:18px;margin:18px 0 8px}
+.muted{color:var(--sub);font-size:15px}
+.small{font-size:13.5px}
+.tip{background:#eaf6f2;border-left:5px solid var(--ok);border-radius:10px;padding:12px 14px;margin:0 0 14px;font-size:15.5px}
+.concept{background:var(--sand2);border:2px solid var(--sand);border-radius:14px;padding:14px 16px;margin:0 0 14px}
+.concept .h{font-weight:800;color:#7a5600;margin-bottom:4px}
+.grid{display:grid;gap:10px}
+.g2{grid-template-columns:repeat(2,1fr)} .g3{grid-template-columns:repeat(3,1fr)}
+@media (max-width:640px){.g3{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:440px){.g2,.g3{grid-template-columns:1fr}}
+.opt{background:#fff;border:2px solid var(--line);border-radius:14px;padding:12px;text-align:left;display:block;width:100%}
+.opt.sel{border-color:var(--sea);background:var(--sea2);box-shadow:0 0 0 3px rgba(14,90,138,.15)}
+.opt:disabled{opacity:.45;cursor:not-allowed}
+.opt .e{font-size:28px;line-height:1}
+.opt .t{font-weight:800;margin-top:4px}
+.opt .d{font-size:14px;color:var(--sub);margin-top:2px}
+.btn{border:none;border-radius:14px;padding:13px 20px;font-weight:700;background:var(--ink);color:#fff;font-size:17px}
+.btn:active{transform:translateY(1px)}
+.btn.acc{background:var(--sea)} .btn.sand{background:var(--sand);color:#3b2a00} .btn.ok{background:var(--ok)} .btn.bad{background:var(--bad)}
+.btn.ghost{background:transparent;border:2px solid var(--line);color:var(--ink)}
+.btn.sm{padding:8px 12px;font-size:14.5px;border-radius:10px}
+.btn.xl{padding:18px 28px;font-size:21px;border-radius:16px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.navbar{position:fixed;left:0;right:0;bottom:0;background:rgba(255,255,255,.96);border-top:1.5px solid var(--line);padding:12px 16px calc(12px + env(safe-area-inset-bottom));display:flex;justify-content:center;z-index:20}
+.navbar .in{max-width:860px;width:100%;display:flex;gap:10px;justify-content:space-between;align-items:center}
+.field{width:100%;border:2px solid var(--line);border-radius:12px;padding:12px 14px;background:#fff}
+.field:focus{outline:none;border-color:var(--sea)}
+textarea.field{min-height:96px;resize:vertical}
+label.lb{display:block;font-weight:800;margin:16px 0 6px}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.sp{flex:1}
+.center{text-align:center}
+.say{display:flex;gap:10px;align-items:flex-end;margin:0 0 14px}
+.say img{width:68px;height:68px;object-fit:contain;flex:none;animation:bob 2.6s ease-in-out infinite}
+.say .bub{background:#fff;border:2px solid var(--sea);border-radius:18px 18px 18px 4px;padding:10px 14px;font-size:15.5px;box-shadow:var(--shadow)}
+.say .bub b{color:var(--sea)}
+.say.big img{width:110px;height:110px}
+.say.big .bub{font-size:18px}
+@keyframes bob{50%{transform:translateY(-5px) rotate(-2deg)}}
+.hero{display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px}
+.hero img{width:150px;height:150px;object-fit:contain;animation:bob 2.6s ease-in-out infinite}
+.team{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:4px 13px;font-weight:800;color:#fff;font-size:15px}
+.tgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+@media (max-width:560px){.tgrid{grid-template-columns:repeat(2,1fr)}}
+.tbtn{border:3px solid transparent;border-radius:18px;padding:16px 10px;color:#fff;text-align:center;font-weight:800}
+.tbtn .e{font-size:40px;line-height:1.1}
+.tbtn.sel{border-color:var(--ink);box-shadow:0 0 0 4px rgba(18,48,74,.25)}
+.tbtn small{display:block;font-weight:600;opacity:.9}
+.stp{display:flex;align-items:center;gap:8px}
+.stp button{width:48px;height:48px;border-radius:14px;border:2px solid var(--line);background:#fff;font-size:24px;font-weight:800}
+.stp .v{min-width:36px;text-align:center;font-weight:900;font-size:26px}
+.boats{font-size:24px;letter-spacing:2px;line-height:1.2}
+.boats .off{opacity:.25}
+.species{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+@media (max-width:520px){.species{grid-template-columns:1fr}}
+.spc{background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:10px 12px}
+.spc .h{display:flex;align-items:center;gap:8px;font-weight:800}
+.spc .h .e{font-size:28px}
+.spc .lv{margin-left:auto;font-weight:800;border-radius:8px;padding:2px 9px;font-size:14px}
+.spc .tr{height:9px;background:#e7eef4;border-radius:5px;overflow:hidden;margin-top:8px}
+.spc .tr i{display:block;height:100%;transition:width .5s}
+.spc .nb{font-size:13px;color:var(--sub);margin-top:4px}
+.lv0{background:#e3f4ee;color:#11704f} .lv1{background:#e7f1fb;color:#1d5d93} .lv2{background:#fff2d9;color:#8a5a00} .lv3{background:#fde3e3;color:#a12a2a} .lv4{background:#f5d0d0;color:#7a1414} .lv5{background:#ddd;color:#444}
+.news{display:flex;gap:12px;align-items:flex-start;background:#fff8e6;border:2px solid var(--sand);border-radius:14px;padding:12px 14px;margin-bottom:10px}
+.news .e{font-size:34px;line-height:1}
+.news b{display:block;font-size:17px}
+.news .d{font-size:15px;color:#4d3b06}
+.news.kid{background:#eef3ff;border-color:#8ea3ef}
+.news.kid .d{color:#28356e}
+.kv{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+@media (max-width:560px){.kv{grid-template-columns:repeat(2,1fr)}}
+.kv .box{background:var(--soft);border-radius:12px;padding:8px 12px}
+.kv .box small{display:block;color:var(--sub);font-weight:700;font-size:13px}
+.kv .box b{font-size:22px}
+.rep{background:var(--sea2);border-radius:14px;padding:12px 14px;margin-bottom:12px}
+.rep .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.rep .chips span{background:#fff;border-radius:8px;padding:3px 9px;font-weight:700;font-size:14.5px}
+.toast{position:fixed;left:50%;top:18px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:12px 20px;border-radius:12px;z-index:100;font-weight:700;max-width:90vw;box-shadow:var(--shadow);animation:pop .2s}
+@keyframes pop{from{transform:translate(-50%,-10px);opacity:0}to{transform:translate(-50%,0);opacity:1}}
+.overlay{position:fixed;inset:0;background:rgba(10,30,50,.65);z-index:50;display:flex;align-items:center;justify-content:center;overflow:auto;padding:24px 16px}
+.modal{background:var(--paper);border-radius:20px;max-width:900px;width:100%;padding:26px;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.banner{border-radius:14px;padding:14px 16px;margin-bottom:14px;font-weight:700}
+.banner.ok{background:#e3f4ee;color:#11704f} .banner.warn{background:#fff3dc;color:#8a5a00} .banner.bad{background:#fde8e8;color:#9b2c2c} .banner.info{background:var(--sea2);color:var(--deep)}
+.chcard{background:#fff;border:2px solid var(--line);border-radius:16px;padding:14px;text-align:left;width:100%}
+.chcard.sel{border-color:var(--sea);background:var(--sea2);box-shadow:0 0 0 3px rgba(14,90,138,.15)}
+.chcard .hd{display:flex;gap:10px;align-items:center}
+.chcard .hd .e{font-size:34px}
+.chcard .nm{font-weight:900;font-size:18px;line-height:1.2}
+.chcard .sb{display:inline-block;background:var(--ink);color:#fff;border-radius:6px;padding:1px 8px;font-size:12.5px;font-weight:700;margin-top:2px}
+.chcard .qt{font-size:14.5px;color:#34485c;margin:8px 0;font-style:italic}
+.chcard ul{margin:4px 0 0;padding-left:18px;font-size:14.5px}
+.chcard .who{margin-top:8px;display:flex;gap:4px;flex-wrap:wrap}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0 14px}
+.tabs button{border:2px solid var(--line);background:var(--paper);border-radius:12px;padding:9px 14px;font-weight:700;font-size:15.5px}
+.tabs button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.phasebar{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.phasebar button{border:2px solid var(--line);background:#fff;border-radius:12px;padding:8px 12px;font-weight:700;font-size:15px}
+.phasebar button.on{background:var(--sea);color:#fff;border-color:var(--sea)}
+table.tb{width:100%;border-collapse:collapse;font-size:15px;background:#fff}
+table.tb td,table.tb th{border:1px solid var(--line);padding:7px 9px;text-align:left;vertical-align:middle}
+table.tb th{background:var(--soft)}
+table.tb td.n{text-align:right;font-variant-numeric:tabular-nums}
+.qrbox{display:flex;justify-content:center;padding:16px;background:#fff;border-radius:12px}
+.url{word-break:break-all;background:#fff;border:1.5px dashed var(--line);padding:10px;border-radius:10px;font-size:15px;font-weight:600}
+.code{font-size:56px;font-weight:900;letter-spacing:8px;color:var(--sea);line-height:1.1}
+.tboard{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+@media (max-width:900px){.tboard{grid-template-columns:repeat(2,1fr)}}
+.tcard{background:#fff;border:2px solid var(--line);border-radius:16px;padding:12px 14px}
+.tcard.ready{border-color:var(--ok);background:#f2fbf7}
+.tcard .hd{display:flex;align-items:center;gap:8px;font-weight:900;font-size:18px}
+.tcard .hd .e{font-size:26px}
+.tcard .m{font-size:13.5px;color:var(--sub)}
+.wall{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
+.wcard{background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:12px;text-align:left;width:100%;font-size:15px}
+.wcard small{display:block;color:var(--sub);font-weight:700;margin-bottom:4px}
+.spot{font-size:34px;font-weight:800;line-height:1.5;padding:10px;white-space:pre-wrap}
+.bars{display:grid;gap:8px}
+.bar .lbl{display:flex;justify-content:space-between;font-weight:700;font-size:15px;gap:8px}
+.bar .tr{height:26px;background:#e7eef4;border-radius:7px;overflow:hidden}
+.bar .tr i{display:block;height:100%;transition:width .6s}
+.ending{border-radius:20px;padding:26px;text-align:center;color:#fff}
+.ending .e{font-size:72px;line-height:1}
+.ending .n{font-size:32px;font-weight:900;margin-top:6px}
+.chart{width:100%;height:auto;background:#fff;border-radius:12px;border:1.5px solid var(--line)}
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:14px;font-weight:700;margin-top:6px}
+.legend i{display:inline-block;width:14px;height:14px;border-radius:4px;vertical-align:-2px;margin-right:4px}
+.reveal{font-size:30px;font-weight:900;line-height:1.4;color:var(--deep)}
+body.big .twrap{font-size:20px} body.big .spc .h{font-size:20px} body.big .news b{font-size:21px} body.big .news .d{font-size:18px} body.big .tcard .hd{font-size:21px}
+footer{text-align:center;color:var(--sub);font-size:12.5px;margin-top:30px;padding:0 16px 20px}
+.blink{animation:blink 1.2s infinite} @keyframes blink{50%{opacity:.45}}
+.cnt{display:inline-flex;align-items:center;justify-content:center;min-width:26px;height:26px;border-radius:13px;background:var(--sea);color:#fff;font-weight:800;font-size:14px;padding:0 8px}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<footer>© 김정환 · M.A.D.T (Moral And Digital Teacher) · 캐릭터 ‘꿈송이’ © 김정환, 무단 사용 금지</footer>
+<script type="module">
+/* =========================================================
+   ① 설정 — 여기만 바꾸면 됩니다
+   ========================================================= */
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyAPJAMUITr6w0H63Ze1L1eViCsuq3zXlbE",
+  authDomain: "nation-game-cf684.firebaseapp.com",
+  databaseURL: "https://nation-game-cf684-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "nation-game-cf684",
+  storageBucket: "nation-game-cf684.firebasestorage.app",
+  messagingSenderId: "947361689624",
+  appId: "1:947361689624:web:9f09cd27fbd2334ae0136d"
+};
+const TEACHER_PIN = '1234';      // 교사 화면 비밀번호
+const CHAR = 'ggumsong.png';     // 꿈송이 그림
+
+/*MODEL_START*/
+/* =========================================================
+   ② 바다 모델 (로지스틱 성장 + 임계점 붕괴)
+   ========================================================= */
+const SP = [
+  {k:'mk', n:'고등어', e:'🐟', K:1000, r:0.6,  p:1, s0:800, c:'#3b82c4'},
+  {k:'pl', n:'명태',   e:'🐠', K:1000, r:0.35, p:2, s0:800, c:'#e39a1c'},
+  {k:'tn', n:'참치',   e:'🐡', K:500,  r:0.25, p:5, s0:400, c:'#d64545'}
+];
+const TT = {k:'tt', n:'바다거북', e:'🐢', K:100, r:0.08, s0:80, c:'#1f9d7a'};
+const ALLS = [...SP, TT];
+const Q = 0.012;        // 배 1척이 1년에 잡는 비율(각 어종의 1.2%)
+const DENSE = 1.4;      // 촘촘한 그물: 1.4배
+const SONAR = 1.3;      // 음파탐지기: 1.3배
+const FUEL = 10, BOATC = 80, SONARC = 80, MAXH = 0.85;
+const START_MONEY = 150, START_BOATS1 = 2, START_BOATS2 = 3, BOAT_MAX = 10;
+
+const CH = {
+  free:  {k:'free', n:'자유 어업', sb:'헌장 없음', e:'🏴', max:99, dense:true,
+          q:'바다는 누구의 것도 아니다. 먼저 잡는 사람이 임자!',
+          rules:['출항·그물·배 구입 모두 자유','아무 약속도 하지 않음'],
+          lim:'나만 자유롭게 잡으면 이득일까? 모두가 그렇게 하면?'},
+  human: {k:'human', n:'자원 관리 헌장', sb:'인간 중심주의', e:'📊', max:2, dense:true,
+          q:'물고기는 인간에게 소중한 자원이다. 오래 쓰려면 아껴 써야 한다.',
+          rules:['1년에 배 2척까지만 출항(어획량 제한)','그물은 자유','점수는 돈'],
+          lim:'돈이 되는 물고기만 세고 관리한다. 돈이 안 되는 생명은?'},
+  eco:   {k:'eco', n:'생명 공동체 헌장', sb:'생태 중심주의', e:'🌍', max:2, dense:false, turtleSafe:true, income:0.85, reserve:true,
+          q:'바다의 생명은 인간에게 쓸모가 있든 없든 그 자체로 소중하다.',
+          rules:['배 2척까지만 출항','촘촘한 그물 금지','모든 생명 탈출 장치(혼획 0) → 수입 15% 감소','보호구역 지정 → 바다 전체 번식 +10%'],
+          lim:'수입이 줄면 어민의 생계는? 모든 개발을 반대할 수 있을까?'},
+  conf:  {k:'conf', n:'맹자의 그물코', sb:'유교', e:'📜', max:3, dense:false,
+          q:'“촘촘한 그물을 웅덩이에 넣지 않으면 물고기와 자라를 다 먹을 수 없을 만큼 많아진다.” — 『맹자』',
+          rules:['촘촘한 그물 금지(어린 물고기 보호)','배 3척까지 출항','사람과 자연이 서로 어울려 오래 함께 산다'],
+          lim:'그물코만 지키고 배를 늘린다면?'},
+  bud:   {k:'bud', n:'필요한 만큼', sb:'불교', e:'🪷', max:99, dense:false, turtleSafe:true, cap:80,
+          q:'모든 생명은 서로 기대어 있다. 필요한 만큼만 얻고, 걸린 생명은 놓아준다.',
+          rules:['1년 수입은 80코인까지만 — 넘게 잡힌 물고기는 바다로 돌려보냄','촘촘한 그물 금지','그물에 걸린 생명은 살려서 놓아줌(방생)'],
+          lim:'모두가 “필요한 만큼”이라 해도, 사람 수가 늘어나면?'},
+  tao:   {k:'tao', n:'쉬는 바다', sb:'도가', e:'☯️', max:4, dense:true, rest:[2,4],
+          q:'자연은 있는 그대로가 가장 좋다. 억지로 하지 않고 순리를 따른다(무위자연).',
+          rules:['2년째·4년째는 쉬는 해 — 출항하지 않음','다른 해에는 배 4척까지','바다가 스스로 회복할 시간을 준다'],
+          lim:'쉬는 해에는 무엇으로 살아갈까? 다른 팀이 그 사이에 다 잡는다면?'}
+};
+const CHK = ['free','human','eco','conf','bud','tao'];
+
+const EV = {
+  start:   {e:'🌅', t:'황금 어장의 시작', d:'꿈결 앞바다에 물고기가 가득합니다. 많이 잡을수록 부자가 됩니다. 1부가 끝났을 때 가장 돈이 많은 선단이 우승!'},
+  factory: {e:'🏭', t:'해안 공장 폐수 유입', d:'바닷가에 공장이 들어서며 폐수가 흘러듭니다. 올해 고등어·명태가 10% 줄어듭니다.'},
+  boom:    {e:'📈', t:'도시에 회 열풍!', d:'올해 수산물 값이 2배! 많이 잡을수록 큰돈을 법니다.', price:2},
+  heat:    {e:'🌡️', t:'바닷물 온도 상승', d:'찬물을 좋아하는 명태가 알을 잘 낳지 못합니다. (올해부터 명태 번식력이 줄어듭니다)'},
+  news:    {e:'🗞️', t:'“명태가 돌아오지 않는다”', d:'실제 이야기: 동해에서는 어린 명태(노가리)까지 마구 잡다가 명태가 거의 사라졌고, 2019년부터 1년 내내 명태 잡이가 금지되었습니다.'},
+  renew:   {e:'🌱', t:'10년 뒤, 다시 열린 바다', d:'10년 동안 고기잡이를 쉬자 바다가 조금씩 회복되었습니다. 이번에는 우리 팀이 정한 헌장대로 바다를 씁니다.'},
+  ghost:   {e:'🧵', t:'유령 그물', d:'바다에 버려진 그물이 바닷속 생명을 휘감고 있습니다.'},
+  kids:    {e:'👶', t:'자녀 세대가 바다를 물려받았습니다', d:'여러분은 이제 앞 세대 선장들의 아들딸입니다. 부모 세대가 남긴 바다에서 살아가야 합니다.', kid:true}
+};
+const P1EV = {1:['start'],2:['factory'],3:['boom'],4:['heat'],5:['news'],6:[]};
+function evList(part,y,P2N){
+  if(part===1) return P1EV[y]||[];
+  const a=[]; if(y===1) a.push('renew'); if(y===2) a.push('ghost'); if(y===3) a.push('boom');
+  if(y>=P2N-1 && y>=2) a.push('kids'); return a;
+}
+
+const clampN=(v,a,b)=>Math.max(a,Math.min(b,v));
+function grow(N,s,rm){
+  if(N<=0) return 0;
+  if(N<0.1*s.K){ N*=0.8; }
+  else N += s.r*rm*N*(1-N/s.K);
+  if(N<0.015*s.K) N=0;
+  return N;
+}
+function chOf(team,part){ return part===2 ? (CH[team&&team.charter]||CH.free) : CH.free; }
+function isRest(ch,part,y){ return part===2 && ch.rest && ch.rest.includes(y); }
+function maxOut(team,part,y){ const ch=chOf(team,part); if(isRest(ch,part,y)) return 0; return Math.min(team.boats||0, ch.max); }
+
+/* 한 해 결산 — 순수 함수 */
+function settle(ocean, teams, decs, ctx){
+  // ctx: {part, y, keys:[t1..], heat, P2N}
+  const evs = evList(ctx.part, ctx.y, ctx.P2N);
+  const price = evs.reduce((m,k)=>m*(EV[k].price||1),1);
+  const o = Object.assign({}, ocean);
+  const T = {}; ctx.keys.forEach(k=>T[k]=Object.assign({}, teams[k]));
+  const eff={}, info={};
+  let E=0;
+  ctx.keys.forEach(k=>{
+    const t=T[k], d=decs[k]||{}, ch=chOf(t,ctx.part), rest=isRest(ch,ctx.part,ctx.y);
+    const boats = rest?0:clampN(Math.round(+d.boats||0),0,maxOut(t,ctx.part,ctx.y));
+    const dense = !rest && boats>0 && !!d.dense && ch.dense!==false;
+    eff[k] = boats*(dense?DENSE:1)*(t.sonar?SONAR:1);
+    info[k] = {boats,dense,rest,ch};
+    E += Q*eff[k];
+  });
+  const H=Math.min(MAXH,E), sc=E>0?H/E:0;
+  const rep={}; let Hd=0;
+  const caught={mk:0,pl:0,tn:0};
+  ctx.keys.forEach(k=>{
+    const h=Q*eff[k]*sc; if(info[k].dense) Hd+=h;
+    const c={}; let val=0;
+    SP.forEach(s=>{ c[s.k]=ocean[s.k]*h; val+=c[s.k]*s.p*price; });
+    const ch=info[k].ch; let released=0;
+    if(ch.cap && val>ch.cap){ const ratio=ch.cap/val; SP.forEach(s=>{ released+=c[s.k]*(1-ratio); c[s.k]*=ratio; }); val=ch.cap; }
+    if(ch.income) val*=ch.income;
+    SP.forEach(s=>caught[s.k]+=c[s.k]);
+    rep[k]={c:{mk:Math.round(c.mk),pl:Math.round(c.pl),tn:Math.round(c.tn)}, inc:Math.round(val), boats:info[k].boats, dense:info[k].dense, rest:info[k].rest, rel:Math.round(released), kill:0};
+  });
+  SP.forEach(s=>{ o[s.k]=Math.max(0,o[s.k]-caught[s.k]); });
+  // 바다거북 혼획
+  let killTot=0; const kr={};
+  ctx.keys.forEach(k=>{ const i=info[k]; kr[k]= i.ch.turtleSafe?0: i.boats*0.012*(i.dense?2:1)*(T[k].sonar?1.2:1); });
+  const sumKr=Object.values(kr).reduce((a,x)=>a+x,0), killFrac=Math.min(0.35,sumKr);
+  ctx.keys.forEach(k=>{ const kk = sumKr>0? o.tt*killFrac*kr[k]/sumKr : 0; rep[k].kill=Math.round(kk*10)/10; killTot+=kk; });
+  o.tt=Math.max(0,o.tt-killTot);
+  // 사건
+  if(evs.includes('factory')){ o.mk*=0.9; o.pl*=0.9; }
+  if(evs.includes('ghost')){ o.tt*=0.88; }
+  const heat = ctx.heat || evs.includes('heat');
+  // 성장
+  const juv=Math.max(0.3,1-3*Hd);
+  const nEco=ctx.keys.filter(k=>info[k].ch.reserve).length, res=1+0.1*nEco;
+  o.mk=grow(o.mk,SP[0],juv*res);
+  o.pl=grow(o.pl,SP[1],juv*res*(heat?0.6:1));
+  o.tn=grow(o.tn,SP[2],res);
+  o.tt=grow(o.tt,TT,res);
+  ALLS.forEach(s=>o[s.k]=Math.round(o[s.k]*10)/10);
+  // 돈·배
+  const sfx=ctx.part===2?'2':'1';
+  ctx.keys.forEach(k=>{
+    const t=T[k], d=decs[k]||{}, r=rep[k];
+    r.fuel=r.boats*FUEL;
+    t.money=Math.round((+t.money||0)+r.inc-r.fuel);
+    let bb=0, bs=false;
+    const want=clampN(Math.round(+d.buyBoat||0),0,2);
+    for(let i=0;i<want;i++){ if(t.money>=BOATC && (t.boats||0)<BOAT_MAX){ t.money-=BOATC; t.boats=(t.boats||0)+1; bb++; } }
+    if(d.buySonar && !t.sonar && t.money>=SONARC){ t.money-=SONARC; t.sonar=true; bs=true; }
+    r.bb=bb; r.bs=bs; r.money=t.money;
+    t['earn'+sfx]=Math.round((+t['earn'+sfx]||0)+r.inc-r.fuel);
+    t['foot'+sfx]=Math.round(((+t['foot'+sfx]||0)+r.c.mk*1+r.c.pl*2+r.c.tn*5+r.kill*25)*10)/10;
+    t['kill'+sfx]=Math.round(((+t['kill'+sfx]||0)+r.kill)*10)/10;
+    t['catch'+sfx]=(+t['catch'+sfx]||0)+r.c.mk+r.c.pl+r.c.tn;
+  });
+  return {ocean:o, teams:T, rep, evs, price, heat};
+}
+function recover(ocean,years=10){
+  const o=Object.assign({},ocean), path=[];
+  for(let i=0;i<years;i++){
+    // 물고기: 이웃 바다에서 조금씩 건너와(최소 15%) 다시 번식 / 바다거북: 스스로 회복해야 함(느림)
+    SP.forEach(s=>{ if(o[s.k]<0.15*s.K) o[s.k]=0.15*s.K; o[s.k]+=s.r*o[s.k]*(1-o[s.k]/s.K); });
+    o.tt=grow(o.tt,TT,1);
+    ALLS.forEach(s=>o[s.k]=Math.round(o[s.k]*10)/10);
+    path.push(Object.assign({},o));
+  }
+  return {ocean:o,path};
+}
+const fishHealth = o => SP.reduce((a,s)=>a+Math.min(1,(+o[s.k]||0)/s.K),0)/SP.length;
+const lifeHealth = o => ALLS.reduce((a,s)=>a+Math.min(1,(+o[s.k]||0)/s.K),0)/ALLS.length;
+/*MODEL_END*/
+
+const LV = [
+  {min:0.6, n:'풍부'}, {min:0.4, n:'보통'}, {min:0.2, n:'줄어듦'}, {min:0.08, n:'위험'}, {min:0.0001, n:'거의 없음'}, {min:-1, n:'사라짐'}
+];
+const lvIdx = (N,s) => { const x=(+N||0)/s.K; return LV.findIndex(l=>x>=l.min); };
+const lvCol = i => ['#1f9d7a','#3b82c4','#e39a1c','#d64545','#8b1d1d','#888'][i];
+
+const TEAMS = [
+  {k:'t1', n:'갈매기호', e:'🐦', c:'#e76f51'},
+  {k:'t2', n:'고래호',   e:'🐳', c:'#2a9d8f'},
+  {k:'t3', n:'닻별호',   e:'⚓', c:'#4361ee'},
+  {k:'t4', n:'파도호',   e:'🌊', c:'#0e7490'},
+  {k:'t5', n:'돌고래호', e:'🐬', c:'#9b5de5'},
+  {k:'t6', n:'불가사리호', e:'⭐', c:'#d4a106'}
+];
+const TM = Object.fromEntries(TEAMS.map(t=>[t.k,t]));
+const CAUSES = [
+  {e:'⛵', t:'배를 계속 늘려서', s:'산업화'},
+  {e:'🕸️', t:'촘촘한 그물로 어린 물고기까지 잡아서', s:'무분별한 개발'},
+  {e:'📈', t:'더 많이 팔아 더 벌고 싶어서', s:'물질주의적 소비'},
+  {e:'👉', t:'다른 팀이 너무 많이 잡아서', s:'남 탓?'}
+];
+const REFQ = [
+  {k:'q1', e:'🐢', t:'바다거북은 왜 줄어들었을까요? ‘도구적 가치’와 ‘본래적 가치’라는 말을 넣어 설명해 보세요.', st:'바다거북은 돈이 되지 않아서 ( ) 가치가 없다고 여겨졌기 때문에'},
+  {k:'q2', e:'📜', t:'우리 팀이 고른 헌장은 어떤 자연관이었나요? 그 헌장의 좋은 점과 한계는 무엇이었나요?', st:'우리 팀은 ( ) 헌장을 골랐는데, 좋은 점은'},
+  {k:'q3', e:'👋', t:'라코타족은 자연에게 “안녕, 나의 친척들”이라고 인사합니다. 오늘의 바다에게 인사말을 써 보세요.', st:'안녕, 나의 ( ). '}
+];
+const CONCEPTS = ['도구적','본래적','인간 중심','생태 중심','유교','불교','도가','공존','조화','미래 세대','공유지'];
+
+/* =========================================================
+   ③ 저장소 (Firebase 실시간 DB 또는 체험 모드)
+   ========================================================= */
+const clean = o => o==null ? null : JSON.parse(JSON.stringify(o));
+let DBMODE='demo', backend=null;
+async function initBackend(){
+  if(FIREBASE_CONFIG && FIREBASE_CONFIG.apiKey && FIREBASE_CONFIG.databaseURL){
+    try{
+      const A = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js');
+      const D = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js');
+      const db = D.getDatabase(A.initializeApp(FIREBASE_CONFIG,'ocean'));
+      backend = {
+        set:(p,v)=>D.set(D.ref(db,p),clean(v)),
+        update:(p,v)=>D.update(D.ref(db,p),clean(v)),
+        remove:p=>D.remove(D.ref(db,p)),
+        on:(p,cb)=>D.onValue(D.ref(db,p),s=>cb(s.val()),err=>toast('⚠️ 데이터베이스 연결 오류: '+err.message))
+      };
+      DBMODE='live'; return;
+    }catch(e){ console.error(e); toast('⚠️ Firebase 연결 실패 → 체험 모드로 실행합니다'); }
+  }
+  const KEY='ocean_demo_db';
+  const bc = ('BroadcastChannel' in window) ? new BroadcastChannel('oceangame') : null;
+  const L=[];
+  const read=()=>{ try{ return JSON.parse(localStorage.getItem(KEY))||{}; }catch(e){ return {}; } };
+  const parts=p=>p.split('/').filter(Boolean);
+  const getAt=(t,p)=>parts(p).reduce((o,k)=>o==null?undefined:o[k],t);
+  const setAt=(t,p,v)=>{ const ks=parts(p); let o=t; for(let i=0;i<ks.length-1;i++){ if(typeof o[ks[i]]!=='object'||o[ks[i]]===null) o[ks[i]]={}; o=o[ks[i]]; } const last=ks[ks.length-1]; if(v==null) delete o[last]; else o[last]=clean(v); };
+  const fire=()=>{ const t=read(); L.forEach(l=>l.cb(clean(getAt(t,l.p))??null)); };
+  const write=t=>{ try{ localStorage.setItem(KEY,JSON.stringify(t)); }catch(e){} fire(); bc&&bc.postMessage(1); };
+  if(bc) bc.onmessage=fire;
+  window.addEventListener('storage',e=>{ if(e.key===KEY) fire(); });
+  backend = {
+    set:async(p,v)=>{ const t=read(); setAt(t,p,v); write(t); },
+    update:async(p,obj)=>{ const t=read(); for(const k in obj) setAt(t,p+'/'+k,obj[k]); write(t); },
+    remove:async p=>{ const t=read(); setAt(t,p,null); write(t); },
+    on:(p,cb)=>{ const l={p,cb}; L.push(l); setTimeout(()=>cb(clean(getAt(read(),p))??null),0); return ()=>{ const i=L.indexOf(l); if(i>=0) L.splice(i,1); }; }
+  };
+}
+
+/* =========================================================
+   ④ 공통 도구
+   ========================================================= */
+const $app = document.getElementById('app');
+const qs = new URLSearchParams(location.search);
+const MODE = (/teacher/i.test(qs.get('mode')||'') || qs.has('teacher')) ? 'teacher' : 'student';
+let ROOM = (qs.get('room')||'').toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,8);
+const BASE = () => `rooms/${ROOM}/ocean`;
+const INDEX = 'rooms/OCINDEX/list';
+const esc = s => String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let toastTimer=null;
+function toast(msg){ document.querySelectorAll('.toast').forEach(x=>x.remove()); const t=document.createElement('div'); t.className='toast'; t.textContent=msg; document.body.appendChild(t); clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.remove(),2600); }
+const say=(html,big)=>`<div class="say ${big?'big':''}"><img src="${CHAR}" alt="꿈송이"><div class="bub">${html}</div></div>`;
+const modeBadge = () => DBMODE==='live' ? `<span class="pill live">● 실시간 연동</span>` : `<span class="pill demo">● 체험 모드</span>`;
+const teamTag = k => TM[k]?`<span class="team" style="background:${TM[k].c}">${TM[k].e} ${esc(TM[k].n)}</span>`:'';
+const toArr = v => Array.isArray(v)?v.filter(x=>x!=null):(v&&typeof v==='object'?Object.keys(v).sort((a,b)=>a-b).map(k=>v[k]):[]);
+const fmt = n => (Math.round(+n||0)).toLocaleString('ko-KR');
+const charLen = s => String(s||'').replace(/\s/g,'').length;
+
+let META={}, PLAYERS={}, OCEAN=null, TEAMSD={}, DECS={}, HIST={};
+const phase = () => META.phase || 'lobby';
+const part = () => +META.part || 1;
+const year = () => +META.round || 1;
+const P1N = () => +META.P1N || 5;
+const P2N = () => +META.P2N || 4;
+const TN = () => clampN(+META.TN || 6, 2, 6);
+const keys = () => TEAMS.slice(0,TN()).map(t=>t.k);
+const plist = () => Object.values(PLAYERS||{}).filter(p=>p&&p.id&&p.nick).sort((a,b)=>(+a.num||999)-(+b.num||999)||(a.at||0)-(b.at||0));
+const members = k => plist().filter(p=>p.team===k);
+const partOver = () => year() > (part()===1?P1N():P2N());
+const rkey = () => `p${part()}_${year()}`;
+function decFor(k){
+  const t=TEAMSD[k]||{}, d=DECS[k];
+  if(d && d.r===rkey()) return Object.assign({boats:0,dense:false,buyBoat:0,buySonar:false,ready:false},d);
+  return {r:rkey(), boats:maxOut(t,part(),year()), dense:false, buyBoat:0, buySonar:false, ready:false};
+}
+
+/* --- 그래프 --- */
+function lineChart(series,opt={}){
+  const W=opt.w||720, H=opt.h||280, L=44, R=14, Tp=14, B=34;
+  const n=Math.max(...series.map(s=>s.vals.length),2);
+  const ymax=opt.ymax||100;
+  const x=i=>L+(W-L-R)*(i/(n-1)), y=v=>Tp+(H-Tp-B)*(1-Math.min(1,v/ymax));
+  let g='';
+  for(let i=0;i<=4;i++){ const v=ymax*i/4, yy=y(v); g+=`<line x1="${L}" x2="${W-R}" y1="${yy}" y2="${yy}" stroke="#e3eaf1"/><text x="${L-6}" y="${yy+4}" text-anchor="end" font-size="12" fill="#6b7c8d">${Math.round(v)}${opt.pct?'%':''}</text>`; }
+  (opt.bands||[]).forEach(b=>{ g+=`<rect x="${x(b.from)}" y="${Tp}" width="${x(b.to)-x(b.from)}" height="${H-Tp-B}" fill="${b.c}" opacity=".5"/><text x="${(x(b.from)+x(b.to))/2}" y="${Tp+14}" text-anchor="middle" font-size="12" font-weight="700" fill="#5a6b7d">${esc(b.t)}</text>`; });
+  const xl=opt.xl||((i)=>i===0?'시작':i+'년');
+  for(let i=0;i<n;i++){ if(!opt.xl && n>14 && i%2) continue; g+=`<text x="${x(i)}" y="${H-12}" text-anchor="middle" font-size="12" fill="#6b7c8d">${esc(xl(i))}</text>`; }
+  series.forEach(s=>{ const pts=s.vals.map((v,i)=>`${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(' ');
+    g+=`<polyline points="${pts}" fill="none" stroke="${s.c}" stroke-width="${s.w||3.5}" stroke-linejoin="round" ${s.dash?'stroke-dasharray="7 5"':''}/>`;
+    s.vals.forEach((v,i)=>{ g+=`<circle cx="${x(i)}" cy="${y(v)}" r="3.6" fill="${s.c}"/>`; }); });
+  return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img">${g}</svg><div class="legend">${series.map(s=>`<span><i style="background:${s.c}"></i>${esc(s.n)}</span>`).join('')}</div>`;
+}
+const pctSeries = (arr,list=SP) => list.map(s=>({n:s.e+' '+s.n, c:s.c, vals:arr.map(o=>Math.round(100*(+o[s.k]||0)/s.K))}));
+
+/* --- 바다 위기 시계 (교과서 ‘환경 위기 시계’와 같은 눈금) --- */
+function clockTime(h){ const hours=clampN(3+(0.9-h)/0.9*9,0,12); const hh=Math.floor(hours), mm=Math.floor((hours-hh)*60); return {hours, label:`${hh===0?12:hh}시 ${String(mm).padStart(2,'0')}분`, zone: hours<3?'양호':hours<6?'불량':hours<9?'심각':'위험'}; }
+function clockSVG(h,size=210){
+  const c=clockTime(h), cx=100, cy=100, r=86;
+  const arc=(a0,a1,col)=>{ const p=a=>[cx+r*Math.sin(a*Math.PI/6), cy-r*Math.cos(a*Math.PI/6)]; const [x0,y0]=p(a0),[x1,y1]=p(a1); return `<path d="M${cx},${cy} L${x0},${y0} A${r},${r} 0 0 1 ${x1},${y1} Z" fill="${col}"/>`; };
+  let s=arc(0,3,'#bfe8d6')+arc(3,6,'#cfe3f6')+arc(6,9,'#fde2b8')+arc(9,12,'#f7c1c1');
+  for(let i=1;i<=12;i++){ const a=i*Math.PI/6; s+=`<text x="${cx+70*Math.sin(a)}" y="${cy-70*Math.cos(a)+5}" text-anchor="middle" font-size="14" font-weight="800" fill="#12304a">${i}</text>`; }
+  const a=c.hours*Math.PI/6; s+=`<line x1="${cx}" y1="${cy}" x2="${cx+58*Math.sin(a)}" y2="${cy-58*Math.cos(a)}" stroke="#12304a" stroke-width="6" stroke-linecap="round"/><circle cx="${cx}" cy="${cy}" r="7" fill="#12304a"/>`;
+  return `<div class="center"><svg viewBox="0 0 200 200" width="${size}" height="${size}"><circle cx="100" cy="100" r="92" fill="#fff" stroke="#12304a" stroke-width="4"/>${s}</svg><div style="font-weight:900;font-size:20px">⏰ ${c.label} · <span style="color:${c.hours<6?'#1f9d7a':c.hours<9?'#e39a1c':'#d64545'}">${c.zone}</span></div><div class="muted small">바다 위기 시계 (물고기 기준)</div></div>`;
+}
+function speciesGrid(o,exact){
+  return `<div class="species">${SP.map(s=>{ const N=+o[s.k]||0, li=lvIdx(N,s), pc=Math.round(100*N/s.K);
+    return `<div class="spc"><div class="h"><span class="e">${s.e}</span>${esc(s.n)}<span class="lv lv${li}">${LV[li].n}</span></div>
+    <div class="tr"><i style="width:${exact?pc:[85,55,32,15,5,0][li]}%;background:${lvCol(li)}"></i></div>
+    <div class="nb">한 마리 ${s.p}코인${exact?` · ${fmt(N)}마리 (${pc}%)`:''}</div></div>`; }).join('')}</div>`;
+}
+function newsHTML(list){ return list.map(k=>{ const e=EV[k]; return `<div class="news ${e.kid?'kid':''}"><span class="e">${e.e}</span><div><b>${esc(e.t)}</b><div class="d">${esc(e.d)}</div></div></div>`; }).join(''); }
+const boatsHTML = (n,out) => `<span class="boats">${Array.from({length:n||0},(_,i)=>`<span class="${out!=null&&i>=out?'off':''}">⛵</span>`).join('')||'—'}</span>`;
+
+let pending=false, keepScroll=false;
+function isTyping(){ const a=document.activeElement; return a && $app.contains(a) && (a.tagName==='TEXTAREA' || (a.tagName==='INPUT' && !['button','range'].includes(a.type))); }
+function softRender(){ if(isTyping()){ pending=true; return; } keepScroll=true; render(); }
+document.addEventListener('focusout',()=>{ setTimeout(()=>{ if(pending && !isTyping()){ pending=false; keepScroll=true; render(); } },150); });
+function render(){ pending=false; const y=window.scrollY; (MODE==='teacher'?renderTeacher:renderStudent)(); if(keepScroll) window.scrollTo(0,y); keepScroll=false; }
+
+/* =========================================================
+   ⑤ 학생 화면
+   ========================================================= */
+let P=null, tmpRoom='', ui={a1c:null,a1t:'',why:''};
+const SLOT=(qs.get('s')||'').replace(/[^0-9a-z]/gi,'').slice(0,6);
+const skey = () => 'ocean_s_'+ROOM+(SLOT?'_'+SLOT:'');
+function loadP(){ try{ return JSON.parse(localStorage.getItem(skey()))||null; }catch(e){ return null; } }
+let saveTimer=null;
+function saveP(now){ if(!P) return; try{ localStorage.setItem(skey(),JSON.stringify(P)); }catch(e){}
+  clearTimeout(saveTimer); const w=()=>backend.set(`${BASE()}/players/${P.id}`,P).catch(e=>toast('⚠️ 저장 실패: '+e.message));
+  if(now) w(); else saveTimer=setTimeout(w,500); }
+const myTeam = () => P&&P.team&&TEAMSD[P.team] ? TEAMSD[P.team] : null;
+
+function sHeader(){
+  return `<div class="top"><h1><img src="${CHAR}" alt="">꿈결 앞바다</h1>${P&&P.team?teamTag(P.team):''}${DBMODE==='live'?`<span class="pill">방 ${esc(ROOM)}</span>`:''}${P&&P.nick?`<span class="pill">${esc(P.num)}번 ${esc(P.nick)}</span>`:''}${modeBadge()}</div>`;
+}
+const waitCard = msg => `<div class="card center">${say(msg||'좋아요! 선생님이 다음 단계를 열 때까지 잠시 기다려 주세요. 😊')}</div>`;
+
+function vJoinRoom(){
+  return `${sHeader()}<div class="card center"><div class="hero"><img src="${CHAR}" alt="꿈송이"><h2>꿈결 앞바다에 온 걸 환영해요!</h2></div>
+  <p class="muted">선생님 화면에 보이는 방 코드를 입력하세요.</p>
+  <input class="field" style="max-width:260px;text-align:center;font-size:24px;font-weight:800;letter-spacing:4px;text-transform:uppercase" data-bind="room" value="${esc(tmpRoom)}" maxlength="8">
+  <div style="margin-top:14px"><button class="btn acc" data-act="enterRoom">입장하기</button></div></div>`;
+}
+function vJoin(){
+  const d=P||{};
+  return `${sHeader()}<div class="card">${say('안녕! 나는 꿈결 앞바다 어촌의 촌장 <b>꿈송이</b>야. 오늘 너희는 이 바다에서 고기잡이를 하는 <b>선단</b>이 될 거야. 🎣',true)}
+  <label class="lb">번호</label><input class="field" style="max-width:140px" inputmode="numeric" data-bind="num" value="${esc(d.num||'')}" maxlength="3" placeholder="예: 7">
+  <label class="lb">이름</label><input class="field" style="max-width:260px" data-bind="nick" value="${esc(d.nick||'')}" maxlength="10" placeholder="이름">
+  <label class="lb">우리 모둠 선단 고르기</label>${teamPicker(d.team)}</div>
+  <div class="navbar"><div class="in"><span></span><button class="btn acc" data-act="join">입장하기 →</button></div></div>`;
+}
+function teamPicker(sel){
+  return `<div class="tgrid">${keys().map(k=>{ const t=TM[k], m=members(k).length; return `<button class="tbtn ${sel===k?'sel':''}" style="background:${t.c}" data-act="pickTeam" data-v="${k}"><div class="e">${t.e}</div>${esc(t.n)}<small>선원 ${m}명</small></button>`; }).join('')}</div>`;
+}
+function vLobby(){
+  const ms=members(P.team);
+  return `${sHeader()}<div class="card">${say(`<b>${esc(TM[P.team].n)}</b>에 탔어요! 같은 모둠 친구들이 모두 같은 선단을 골랐는지 확인하세요.`)}
+  <h3>⛵ 우리 선단 선원</h3><div class="row">${ms.map(p=>`<span class="pill">${esc(p.num)}번 ${esc(p.nick)}</span>`).join('')}</div>
+  <h3>다른 선단으로 옮기기</h3>${teamPicker(P.team)}</div>${waitCard('선생님이 게임을 시작할 때까지 기다려 주세요.')}`;
+}
+function rulesHTML(){
+  return `<div class="concept"><div class="h">🎣 게임 방법</div>
+  <ol style="margin:4px 0 0;padding-left:20px">
+  <li>매년 <b>몇 척의 배를 바다에 내보낼지</b>, <b>어떤 그물</b>을 쓸지 모둠이 함께 정해요.</li>
+  <li>배 1척은 바다에 있는 물고기의 일부를 잡아 와요. 배를 띄우면 <b>기름값 ${FUEL}코인</b>이 들어요.</li>
+  <li><b>촘촘한 그물</b>은 1.4배 더 잡지만, 어린 물고기까지 잡혀요.</li>
+  <li>번 돈으로 <b>배(${BOATC}코인)</b>나 <b>음파탐지기(${SONARC}코인, 1.3배)</b>를 살 수 있어요. 산 배는 다음 해부터 쓸 수 있어요.</li>
+  <li>물고기는 매년 새끼를 낳아 늘어나요. 하지만 <b>너무 적어지면 다시 늘지 못해요.</b></li>
+  <li>바다는 <b>모든 선단이 함께 쓰는 하나의 바다</b>예요.</li></ol></div>`;
+}
+function vIntro(){ return `${sHeader()}<div class="card">${say('꿈결 앞바다는 아주 오래전부터 물고기가 가득한 바다였어. 이제 너희가 이 바다의 선장이야!',true)}${rulesHTML()}<p class="muted">선단: ${teamTag(P.team)} · 선생님 화면을 함께 보세요.</p></div>`; }
+
+function lastRep(){ const L=META.last; if(!L||L.part!==part()||!P||!L.rep||!L.rep[P.team]) return ''; const r=L.rep[P.team];
+  return `<div class="rep"><b>📋 ${L.y}년째 결과</b>${r.rest?' — 쉬는 해였어요 ☯️':''}
+  <div class="chips">${SP.map(s=>`<span>${s.e} ${s.n} ${fmt(r.c[s.k])}마리</span>`).join('')}<span>💰 수입 +${fmt(r.inc)}</span><span>⛽ 기름값 −${fmt(r.fuel)}</span>${r.rel?`<span>🪷 바다로 돌려보냄 ${fmt(r.rel)}마리</span>`:''}${r.bb?`<span>⛵ 배 ${r.bb}척 구입</span>`:''}${r.bs?'<span>📡 음파탐지기 구입</span>':''}</div></div>`; }
+
+function vSea(){
+  const t=myTeam(); if(!t) return `${sHeader()}${waitCard('선단 정보를 불러오는 중이에요…')}`;
+  const pt=part(), y=year(), N=pt===1?P1N():P2N();
+  if(partOver()) return `${sHeader()}<div class="card center">${say(pt===1?'<b>1부가 끝났어요!</b> 선생님 화면에서 바다가 어떻게 되었는지 함께 봐요.':'<b>2부가 끝났어요!</b> 선생님 화면을 봐 주세요.',true)}${lastRep()}</div>`;
+  const ch=chOf(t,pt), rest=isRest(ch,pt,y), d=decFor(P.team), mx=maxOut(t,pt,y);
+  const kidNow=pt===2 && evList(2,y,N).includes('kids');
+  const rank = pt===1 ? (keys().map(k=>+(TEAMSD[k]||{}).money||0).sort((a,b)=>b-a).indexOf(+t.money||0)+1) : null;
+  const canBuyB = (+t.money||0) >= BOATC;
+  return `${sHeader()}
+  <div class="card"><div class="row"><h2 style="margin:0">${pt}부 · ${y}년째 <span class="muted" style="font-size:16px">/ ${N}년</span></h2><span class="sp"></span>${pt===2?`<span class="pill">${ch.e} ${esc(ch.n)}</span>`:''}</div>
+  ${kidNow?`<div class="banner info" style="margin-top:10px">👶 여러분은 이제 <b>자녀 세대</b>입니다.</div>`:''}
+  <div style="margin-top:10px">${newsHTML(evList(pt,y,P2N()))}</div>
+  <h3>🌊 바다 상황 ${META.exact?'':'<span class="muted small">(음파로 대략 본 모습)</span>'}</h3>${OCEAN?speciesGrid(OCEAN,META.exact):''}</div>
+  <div class="card"><h3 style="margin-top:0">${TM[P.team].e} 우리 선단</h3>
+  <div class="kv"><div class="box"><small>💰 돈</small><b>${fmt(t.money)}</b></div><div class="box"><small>⛵ 배</small><b>${t.boats||0}척</b></div><div class="box"><small>📡 음파탐지기</small><b>${t.sonar?'있음':'없음'}</b></div>${rank?`<div class="box"><small>🏆 돈 순위</small><b>${rank}위</b></div>`:`<div class="box"><small>📜 헌장</small><b style="font-size:16px">${esc(ch.sb)}</b></div>`}</div>
+  ${lastRep()}
+  ${rest?`<div class="banner ok" style="margin-top:12px">☯️ 올해는 <b>쉬는 바다</b>입니다. 출항하지 않고 바다가 스스로 회복하도록 둡니다.</div>`:`
+  <h3>⛵ 올해 몇 척을 내보낼까요? <span class="muted small">(최대 ${mx}척${pt===2&&ch.max<99?' · 헌장 규칙':''})</span></h3>
+  <div class="row"><div class="stp"><button data-act="dBoats" data-v="-1">−</button><span class="v">${d.boats}</span><button data-act="dBoats" data-v="1">+</button></div>${boatsHTML(t.boats,d.boats)}<span class="muted small">기름값 −${d.boats*FUEL}코인</span></div>
+  <h3>🕸️ 그물</h3>
+  <div class="grid g2"><button class="opt ${!d.dense?'sel':''}" data-act="dNet" data-v="0"><div class="e">🪢</div><div class="t">성긴 그물</div><div class="d">다 자란 물고기만 잡혀요.</div></button>
+  <button class="opt ${d.dense?'sel':''}" data-act="dNet" data-v="1" ${pt===2&&ch.dense===false?'disabled':''}><div class="e">🕸️</div><div class="t">촘촘한 그물</div><div class="d">1.4배 더 잡혀요. 어린 물고기도 함께 잡혀요.${pt===2&&ch.dense===false?' <b>(헌장으로 금지)</b>':''}</div></button></div>`}
+  <h3>🛒 상점 <span class="muted small">(결산 뒤 돈이 충분하면 구입)</span></h3>
+  <div class="grid g2"><div class="opt"><div class="row"><span class="e">⛵</span><div><div class="t">배 사기 · ${BOATC}코인</div><div class="d">다음 해부터 출항 가능 (최대 ${BOAT_MAX}척)</div></div><span class="sp"></span><div class="stp"><button data-act="dBuy" data-v="-1">−</button><span class="v">${d.buyBoat}</span><button data-act="dBuy" data-v="1">+</button></div></div></div>
+  <button class="opt ${d.buySonar?'sel':''}" data-act="dSonar" ${t.sonar?'disabled':''}><div class="row"><span class="e">📡</span><div><div class="t">음파탐지기 · ${SONARC}코인</div><div class="d">${t.sonar?'이미 있어요':'모든 배가 1.3배 더 잡아요 (한 번만 사면 계속)'}</div></div></div></button></div>
+  ${!canBuyB&&d.buyBoat?'<p class="muted small">⚠️ 지금 돈으로는 부족해요. 올해 수입이 들어온 뒤 돈이 되면 삽니다.</p>':''}
+  <p class="muted small">✋ 팀원 누구나 바꿀 수 있어요. 선생님이 <b>출항</b>을 누르는 순간의 결정이 적용돼요.${d.by?` (마지막 수정: ${esc(d.by)})`:''}</p></div>
+  <div class="navbar"><div class="in"><span class="muted small">${members(P.team).length}명의 선원</span><button class="btn ${d.ready?'ok':'acc'}" data-act="dReady">${d.ready?'✅ 결정 완료 (다시 누르면 취소)':'⚓ 우리 팀 결정 완료'}</button></div></div>`;
+}
+
+function vP1End(){
+  const a=P.a1||{};
+  if(a.done) return `${sHeader()}<div class="card">${say('답을 냈어요! 선생님 화면에서 친구들의 생각을 함께 봐요.')}<div class="rep"><b>${CAUSES[a.c].e} ${esc(CAUSES[a.c].t)}</b><div>${esc(a.t)}</div></div><button class="btn sm ghost" data-act="a1Edit">✏️ 고치기</button></div>`;
+  return `${sHeader()}<div class="card">${say('바다가 어떻게 되었나요? 선생님 화면의 그래프를 보고 답해 보세요.',true)}
+  <h3>❓ 바다가 이렇게 된 가장 큰 까닭은 무엇일까요?</h3>
+  <div class="grid">${CAUSES.map((c,i)=>`<button class="opt ${ui.a1c===i?'sel':''}" data-act="a1c" data-v="${i}"><div class="row"><span class="e">${c.e}</span><div class="t">${esc(c.t)}</div></div></button>`).join('')}</div>
+  <label class="lb">✍️ 그렇게 생각한 까닭 (10자 이상)</label><textarea class="field" data-bind="a1t" maxlength="200" placeholder="우리 팀이 실제로 한 선택을 떠올리며 써 보세요.">${esc(ui.a1t)}</textarea></div>
+  <div class="navbar"><div class="in"><span></span><button class="btn acc" data-act="a1Submit">제출하기</button></div></div>`;
+}
+
+function chCard(k,sel,act,teamsWho){
+  const c=CH[k];
+  return `<button class="chcard ${sel?'sel':''}" ${act?`data-act="${act}" data-v="${k}"`:''}><div class="hd"><span class="e">${c.e}</span><div><div class="nm">${esc(c.n)}</div><span class="sb">${esc(c.sb)}</span></div></div>
+  <div class="qt">${esc(c.q)}</div><ul>${c.rules.map(r=>`<li>${esc(r)}</li>`).join('')}</ul>${teamsWho?`<div class="who">${teamsWho}</div>`:''}</button>`;
+}
+function vCharter(){
+  const t=myTeam()||{}; const ch=t.charter;
+  return `${sHeader()}<div class="card">${say('10년 동안 고기잡이를 쉬었더니 바다가 조금 돌아왔어. 이번에는 <b>우리 선단의 약속(헌장)</b>을 먼저 정하고 바다로 나가자! 헌장은 2부 내내 <b>진짜 규칙</b>이 돼.',true)}
+  <p class="muted small">✋ 모둠이 함께 하나를 고르세요. 팀원 누구나 바꿀 수 있어요.</p>
+  <div class="grid g2">${CHK.map(k=>chCard(k,ch===k,'pickCh')).join('')}</div>
+  <label class="lb">✍️ 우리 팀이 이 헌장을 고른 까닭 (10자 이상)</label>
+  <textarea class="field" data-bind="why" maxlength="200" placeholder="1부에서 겪은 일을 떠올려 써 보세요.">${esc(ui.why||t.why||'')}</textarea>
+  ${t.why?`<p class="muted small">저장된 까닭: “${esc(t.why)}” — ${esc(t.whyBy||'')}</p>`:''}</div>
+  <div class="navbar"><div class="in"><span>${ch?`${CH[ch].e} <b>${esc(CH[ch].n)}</b> 선택됨`:'<span class="muted">헌장을 골라 주세요</span>'}</span><button class="btn acc" data-act="whySave">까닭 저장</button></div></div>`;
+}
+
+function vFinal(){
+  const rv=+META.rv||0;
+  return `${sHeader()}<div class="card">${finalBody(rv,false)}</div>`;
+}
+function vReflect(){
+  const R=P.ref||{};
+  if(R.done) return `${sHeader()}<div class="card">${say('제출 완료! 오늘 바다에서 무엇을 배웠는지 친구들과 이야기해 봐요. 🌊')}${REFQ.map(q=>`<div class="rep"><b>${q.e} ${esc(q.t)}</b><div>${esc(R[q.k])}</div></div>`).join('')}<button class="btn sm ghost" data-act="refEdit">✏️ 고치기</button></div>`;
+  const cc=CONCEPTS.filter(c=>REFQ.some(q=>String(R[q.k]||'').includes(c)));
+  return `${sHeader()}<div class="card">${say('마지막으로 오늘 바다에서 겪은 일을 정리해 볼까? 각 질문에 <b>20자 이상</b> 써 줘.',true)}
+  ${REFQ.map(q=>`<label class="lb">${q.e} ${esc(q.t)}</label><div class="muted small" style="margin:-2px 0 6px">✍️ 문장 틀: ${esc(q.st)}… <button class="btn sm ghost" data-act="starter" data-k="${q.k}">틀 넣기</button></div><textarea class="field" data-bind="rf" data-k="${q.k}" maxlength="400">${esc(R[q.k]||'')}</textarea><div class="muted small" id="len_${q.k}" style="text-align:right">${charLen(R[q.k])}자 / 20자</div>`).join('')}
+  <p class="muted small" id="ccbox">사용한 개념어: ${cc.length?cc.map(c=>`<span class="pill">${esc(c)}</span>`).join(' '):'아직 없어요 (도구적·본래적·인간 중심·생태 중심·유교·불교·도가…)'}</p></div>
+  <div class="navbar"><div class="in"><span></span><button class="btn acc" data-act="refSubmit">제출하기</button></div></div>`;
+}
+
+function renderStudent(){
+  if(!ROOM){ $app.innerHTML=`<div class="wrap">${vJoinRoom()}</div>`; return; }
+  if(!P||!P.joined||!P.nick||!P.team){ $app.innerHTML=`<div class="wrap">${vJoin()}</div>`; return; }
+  const ph=phase(); let h='';
+  if(ph==='lobby') h=vLobby();
+  else if(ph==='intro') h=vIntro();
+  else if(ph==='p1'||ph==='p2') h=vSea();
+  else if(ph==='p1end') h=vP1End();
+  else if(ph==='charter') h=vCharter();
+  else if(ph==='final') h=vFinal();
+  else if(ph==='reflect') h=vReflect();
+  else h=`${sHeader()}${waitCard('오늘 바다 여행 끝! 수고했어요. 🌊')}`;
+  $app.innerHTML=`<div class="wrap">${h}</div>`;
+}
+
+function setDec(patch){
+  if(!P||!P.team) return;
+  const d=Object.assign(decFor(P.team),patch,{r:rkey(),by:P.nick,at:Date.now()});
+  DECS[P.team]=d; keepScroll=true; render();
+  backend.set(`${BASE()}/dec/${P.team}`,d).catch(e=>toast('⚠️ 저장 실패: '+e.message));
+}
+const SACT = {
+  enterRoom(){ const c=tmpRoom.toUpperCase().replace(/[^A-Z0-9]/g,''); if(c.length<3) return toast('방 코드를 확인해 주세요.'); location.search='?room='+c; },
+  pickTeam(el){ if(!P) P={id:'p'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),at:Date.now()}; P.team=el.dataset.v; if(P.joined) saveP(true); else { try{localStorage.setItem(skey(),JSON.stringify(P));}catch(e){} } keepScroll=true; render(); },
+  join(){ P=P||{id:'p'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),at:Date.now()};
+    if(!P.num) return toast('번호를 입력해 주세요.'); if(!String(P.nick||'').trim()) return toast('이름을 입력해 주세요.'); if(!P.team) return toast('우리 모둠 선단을 골라 주세요.');
+    P.nick=P.nick.trim(); P.joined=true; P.epoch=META.created||null; saveP(true); render(); toast('⛵ '+TM[P.team].n+'에 탔어요!'); },
+  dBoats(el){ const t=myTeam(); if(!t) return; const d=decFor(P.team), mx=maxOut(t,part(),year()); const v=clampN(d.boats+(+el.dataset.v),0,mx); if(v===d.boats&&+el.dataset.v>0) return toast(`최대 ${mx}척까지 내보낼 수 있어요.`); setDec({boats:v,ready:false}); },
+  dNet(el){ const t=myTeam(); const ch=chOf(t,part()); if(el.dataset.v==='1'&&part()===2&&ch.dense===false) return toast('우리 헌장에서는 촘촘한 그물을 쓸 수 없어요.'); setDec({dense:el.dataset.v==='1',ready:false}); },
+  dBuy(el){ const t=myTeam(); const d=decFor(P.team); const v=clampN(d.buyBoat+(+el.dataset.v),0,2); if((t.boats||0)+v>BOAT_MAX) return toast(`배는 최대 ${BOAT_MAX}척까지예요.`); setDec({buyBoat:v,ready:false}); },
+  dSonar(){ const d=decFor(P.team); setDec({buySonar:!d.buySonar,ready:false}); },
+  dReady(){ const d=decFor(P.team); setDec({ready:!d.ready}); if(!d.ready) toast('⚓ 결정 완료! 선생님이 출항을 누르면 결산돼요.'); },
+  a1c(el){ ui.a1c=+el.dataset.v; keepScroll=true; render(); },
+  a1Submit(){ if(ui.a1c==null) return toast('까닭을 하나 골라 주세요.'); if(charLen(ui.a1t)<10) return toast('까닭을 10자 이상 써 주세요.'); P.a1={c:ui.a1c,t:ui.a1t.trim(),done:true,team:P.team}; saveP(true); render(); },
+  a1Edit(){ ui.a1c=P.a1.c; ui.a1t=P.a1.t; P.a1.done=false; saveP(true); render(); },
+  pickCh(el){ if(!P.team) return; backend.update(`${BASE()}/teams/${P.team}`,{charter:el.dataset.v,chBy:P.nick}); toast(CH[el.dataset.v].e+' '+CH[el.dataset.v].n+' 선택!'); },
+  whySave(){ const t=myTeam()||{}; if(!t.charter) return toast('먼저 헌장을 골라 주세요.'); const w=(ui.why||'').trim(); if(charLen(w)<10) return toast('까닭을 10자 이상 써 주세요.'); backend.update(`${BASE()}/teams/${P.team}`,{why:w,whyBy:P.nick}); ui.why=''; toast('✅ 까닭을 저장했어요.'); },
+  starter(el){ const k=el.dataset.k; P.ref=P.ref||{}; if(String(P.ref[k]||'').trim()) return toast('글이 비어 있을 때만 틀을 넣을 수 있어요.'); P.ref[k]=REFQ.find(q=>q.k===k).st; saveP(); keepScroll=true; render(); const t=$app.querySelector(`textarea[data-k="${k}"]`); if(t){ t.focus(); const i=t.value.indexOf('('); if(i>=0) t.setSelectionRange(i+1,i+2); } },
+  refSubmit(){ const R=P.ref||{}; for(const q of REFQ){ if(charLen(R[q.k])<20) return toast(`${q.e} 질문에 20자 이상 써 주세요.`); } R.done=true; R.at=Date.now(); P.ref=R; saveP(true); render(); toast('✅ 제출했어요!'); },
+  refEdit(){ P.ref.done=false; saveP(true); render(); }
+};
+const SBIND = {
+  room:v=>tmpRoom=v,
+  num:v=>{ P=P||{id:'p'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),at:Date.now()}; P.num=v.replace(/[^0-9]/g,'').slice(0,3); },
+  nick:v=>{ P=P||{id:'p'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),at:Date.now()}; P.nick=v.slice(0,10); },
+  a1t:v=>ui.a1t=v, why:v=>ui.why=v,
+  rf:(v,el)=>{ P.ref=P.ref||{}; P.ref[el.dataset.k]=v; saveP(); const l=document.getElementById('len_'+el.dataset.k); if(l) l.textContent=charLen(v)+'자 / 20자';
+    const cc=CONCEPTS.filter(c=>REFQ.some(q=>String(P.ref[q.k]||'').includes(c))); const b=document.getElementById('ccbox'); if(b) b.innerHTML='사용한 개념어: '+(cc.length?cc.map(c=>`<span class="pill">${esc(c)}</span>`).join(' '):'아직 없어요'); }
+};
+
+/* =========================================================
+   ⑥ 결과 공개 (교사·학생 공통)
+   ========================================================= */
+function finalData(){
+  const p1=toArr(HIST.p1), rec=toArr(HIST.rec), p2=toArr(HIST.p2);
+  const ks=keys();
+  const rich=ks.map(k=>({k,v:+(TEAMSD[k]||{}).earn2||0})).sort((a,b)=>b.v-a.v);
+  const foot=ks.map(k=>({k,v:+(TEAMSD[k]||{}).foot2||0})).sort((a,b)=>a.v-b.v);
+  const kills=ks.map(k=>({k,v1:+(TEAMSD[k]||{}).kill1||0,v2:+(TEAMSD[k]||{}).kill2||0}));
+  const last=p2.length?p2[p2.length-1]:(OCEAN||{});
+  return {p1,rec,p2,rich,foot,kills,last};
+}
+function finalBody(rv,big){
+  const D=finalData();
+  const steps=['📈 두 바다 비교','🏆 두 개의 순위','🐢 숨겨진 생명','🌅 우리 바다의 결말'];
+  const nav=`<div class="row" style="margin-bottom:10px">${steps.map((s,i)=>`<span class="pill" style="${i===rv?'background:var(--sea);color:#fff;border-color:var(--sea)':''}">${s}</span>`).join('')}</div>`;
+  const fishTot=o=>Math.round(100*fishHealth(o));
+  if(rv===0){
+    const n=Math.max(D.p1.length,D.p2.length);
+    const s=[{n:'1부 (자유롭게 잡은 바다)',c:'#d64545',vals:D.p1.map(fishTot)},{n:'2부 (헌장을 정한 바다)',c:'#1f9d7a',vals:D.p2.map(fishTot)}];
+    return `${nav}${say('같은 바다, 같은 사람들인데 결과가 달라요. 무엇이 달랐을까요?',big)}${lineChart(s,{ymax:100,pct:true})}
+    <div class="grid g2" style="margin-top:12px"><div><h3>1부 어종별</h3>${lineChart(pctSeries(D.p1),{ymax:100,pct:true,h:220})}</div><div><h3>2부 어종별</h3>${lineChart(pctSeries(D.p2),{ymax:100,pct:true,h:220})}</div></div>`;
+  }
+  if(rv===1){
+    const mxR=Math.max(1,...D.rich.map(x=>Math.abs(x.v))), mxF=Math.max(1,...D.foot.map(x=>x.v));
+    const ch=k=>{ const c=CH[(TEAMSD[k]||{}).charter]||CH.free; return `${c.e} ${c.sb}`; };
+    return `${nav}${say('2부에서 <b>가장 많이 번 선단</b>과 <b>바다에 가장 적은 발자국을 남긴 선단</b>이에요. 누가 진짜 이긴 걸까요?',big)}
+    <div class="grid g2"><div><h3>💰 부자 순위 (2부 순수익)</h3><div class="bars">${D.rich.map((x,i)=>`<div class="bar"><div class="lbl"><span>${i+1}. ${TM[x.k].e} ${esc(TM[x.k].n)} <span class="muted small">${ch(x.k)}</span></span><span>${fmt(x.v)}</span></div><div class="tr"><i style="width:${Math.max(2,100*Math.max(0,x.v)/mxR)}%;background:${TM[x.k].c}"></i></div></div>`).join('')}</div></div>
+    <div><h3>🌊 바다 발자국 (적을수록 바다에 덜 남김)</h3><div class="bars">${D.foot.map((x,i)=>`<div class="bar"><div class="lbl"><span>${i+1}. ${TM[x.k].e} ${esc(TM[x.k].n)} <span class="muted small">${ch(x.k)}</span></span><span>${fmt(x.v)}</span></div><div class="tr"><i style="width:${Math.max(2,100*x.v/mxF)}%;background:${TM[x.k].c}"></i></div></div>`).join('')}</div>
+    <p class="muted small">바다 발자국 = 잡은 물고기 값(기본 가격) + 그물에 걸려 죽은 생명</p></div></div>`;
+  }
+  if(rv===2){
+    const all=[...D.p1, ...D.rec, ...D.p2.slice(1)];
+    const n1=D.p1.length, n2=n1+D.rec.length;
+    const xl=i=> i===0?'1부':i===n1?'쉼':i===n2?'2부':'';
+    const tser=[{n:'🐢 바다거북',c:'#1f9d7a',w:5,vals:all.map(o=>Math.round(100*(+o.tt||0)/TT.K))},{n:'🐟 물고기 평균',c:'#9fb3c8',dash:true,vals:all.map(o=>Math.round(100*fishHealth(o)))}];
+    const bands=[{from:0,to:n1-1,t:'1부',c:'#fde2e2'},{from:n1-1,to:n2-1,t:'10년 쉼',c:'#e9f1f8'},{from:n2-1,to:all.length-1,t:'2부',c:'#e3f4ee'}];
+    const mx=Math.max(0.1,...D.kills.map(x=>x.v1+x.v2));
+    const t0=TT.s0, tEnd=+D.last.tt||0;
+    return `${nav}<div class="reveal">🐢 오늘 게임에는 <u>여러분 장부에 한 번도 나오지 않은 생명</u>이 있었습니다.</div>
+    ${say(`바다거북은 <b>한 마리도 팔 수 없어서</b> 어느 선단의 돈 계산에도 들어가지 않았어요. 하지만 고기잡이 그물에 함께 걸려 죽었어요. 처음 ${t0}마리 → 지금 <b>${Math.round(tEnd)}마리</b>.`,big)}
+    ${lineChart(tser,{ymax:100,pct:true,xl,bands})}
+    <h3>그물에 걸린 바다거북 (1부 + 2부)</h3><div class="bars">${D.kills.map(x=>`<div class="bar"><div class="lbl"><span>${TM[x.k].e} ${esc(TM[x.k].n)} <span class="muted small">${(CH[(TEAMSD[x.k]||{}).charter]||CH.free).e} ${(CH[(TEAMSD[x.k]||{}).charter]||CH.free).sb}</span></span><span>1부 ${x.v1.toFixed(1)} · 2부 ${x.v2.toFixed(1)}마리</span></div><div class="tr"><i style="width:${100*(x.v1+x.v2)/mx}%;background:${TM[x.k].c}"></i></div></div>`).join('')}</div>
+    <div class="concept" style="margin-top:14px"><div class="h">❓ 생각해 볼 질문</div>자원 관리 헌장(인간 중심)을 지킨 팀도 물고기는 지켰지만 바다거북은 세지 않았어요.<br><b>돈이 안 되는 생명은 지켜야 할 까닭이 없을까요?</b> — 도구적 가치 / 본래적 가치</div>`;
+  }
+  const h=lifeHealth(D.last), fh=fishHealth(D.last);
+  const E = h>=0.55?{e:'🐋',n:'살아 있는 바다',c:'linear-gradient(135deg,#1f9d7a,#0e5a8a)',d:'물고기도, 바다거북도 함께 살아가는 바다를 다음 세대에 물려주었습니다.'}
+          : h>=0.3?{e:'🐟',n:'겨우 버티는 바다',c:'linear-gradient(135deg,#e39a1c,#b86b00)',d:'물고기는 남았지만 바다의 친척들이 하나둘 사라지고 있습니다.'}
+          :{e:'🌫️',n:'조용해진 바다',c:'linear-gradient(135deg,#6b7c8d,#33424f)',d:'자녀 세대에게 남은 것은 텅 빈 그물뿐입니다.'};
+  return `${nav}<div class="ending" style="background:${E.c}"><div class="e">${E.e}</div><div class="n">${E.n}</div><div style="font-size:18px;margin-top:6px">${E.d}</div></div>
+  <div class="grid g2" style="margin-top:14px"><div class="card" style="margin:0">${clockSVG(fh,180)}</div><div class="card" style="margin:0"><div class="center"><div style="font-size:15px;font-weight:800;color:var(--sub)">🐟 물고기만 셌을 때</div><div style="font-size:40px;font-weight:900">${Math.round(fh*100)}점</div><div style="font-size:15px;font-weight:800;color:var(--sub);margin-top:8px">🐢 모든 생명을 셌을 때</div><div style="font-size:40px;font-weight:900;color:${h<fh-0.05?'#d64545':'#1f9d7a'}">${Math.round(h*100)}점</div></div></div></div>
+  <div class="concept" style="margin-top:14px"><div class="h">🧭 오늘의 핵심 질문</div>
+  ① 1부에서 바다를 망친 것은 누구였나요? 나쁜 사람이 있었나요?<br>② 인간 중심주의 · 생태 중심주의 · 유교 · 불교 · 도가 — 어떤 헌장이 바다와 사람 모두에게 좋았나요? 각각의 한계는?<br>③ 라코타족은 물고기와 거북을 “나의 친척들”이라 불러요. 그렇게 본다면 우리의 고기잡이는 어떻게 달라질까요?</div>`;
+}
+
+/* =========================================================
+   ⑦ 교사 화면
+   ========================================================= */
+let T={tab:'run', authed:false, pin:'', newLabel:'', openCode:'', busy:false, spot:null, big:false};
+let ROOMLIST={};
+try{ T.authed = sessionStorage.getItem('ocean_t')==='1'; }catch(e){}
+const roomLabel = c => (ROOMLIST[c]&&ROOMLIST[c].label)||'';
+const newCode = () => { const A='ABCDEFGHJKMNPQRSTUVWXYZ23456789'; let s=''; for(let i=0;i<4;i++) s+=A[Math.floor(Math.random()*A.length)]; return s; };
+const studentURL = () => location.origin+location.pathname+'?room='+ROOM;
+const PH = [
+  {k:'lobby',n:'🚪 입장'},{k:'intro',n:'📖 규칙'},{k:'p1',n:'🎣 1부 황금 어장'},{k:'p1end',n:'📉 1부 돌아보기'},
+  {k:'charter',n:'📜 헌장 정하기'},{k:'p2',n:'🌱 2부 헌장의 바다'},{k:'final',n:'🐢 결과 공개'},{k:'reflect',n:'✍️ 성찰'},{k:'end',n:'🏁 끝'}
+];
+
+function vLogin(){
+  return `<div class="wrap"><div class="top"><h1><img src="${CHAR}" alt="">꿈결 앞바다 · 교사</h1>${modeBadge()}</div>
+  <div class="card center">${say('교사 화면이에요. 비밀번호를 입력해 주세요.')}<input class="field" type="password" style="max-width:220px;text-align:center;font-size:22px" data-bind="pin" inputmode="numeric"><div style="margin-top:12px"><button class="btn acc" data-act="login">들어가기</button></div></div></div>`;
+}
+function vPicker(){
+  const rows=Object.entries(ROOMLIST).filter(([c,r])=>r&&/^[A-Z0-9]{3,8}$/.test(c)).sort((a,b)=>(b[1].at||0)-(a[1].at||0));
+  const d=t=>{ if(!t) return ''; const x=new Date(t); return `${x.getMonth()+1}/${x.getDate()} ${String(x.getHours()).padStart(2,'0')}:${String(x.getMinutes()).padStart(2,'0')}`; };
+  return `<div class="wrap"><div class="top"><h1><img src="${CHAR}" alt="">꿈결 앞바다 · 교사</h1>${modeBadge()}</div>
+  <div class="card">${say('어느 반 수업을 할까요? <b>반마다 방을 하나씩</b> 만들어 주세요.')}
+  <h3>➕ 새 반 방 만들기</h3><div class="row"><input class="field" style="max-width:260px" maxlength="12" data-bind="newLabel" value="${esc(T.newLabel)}" placeholder="반 이름 (예: 1-3반)"><button class="btn acc" data-act="pickNew">새 방 만들기</button></div>
+  <h3>📂 만든 방</h3>
+  ${rows.length?`<table class="tb"><tr><th>반</th><th>방 코드</th><th>마지막 사용</th><th></th></tr>${rows.map(([c,r])=>`<tr><td><b>${esc(r.label||'(이름 없음)')}</b></td><td style="letter-spacing:2px;font-weight:800">${esc(c)}</td><td>${d(r.at)}</td><td><div class="row"><button class="btn sm acc" data-act="pickOpen" data-v="${esc(c)}">열기</button><button class="btn sm ghost" data-act="pickRemove" data-v="${esc(c)}">목록에서 빼기</button></div></td></tr>`).join('')}</table>`:'<p class="muted">아직 만든 방이 없어요.</p>'}
+  <h3>🔑 방 코드로 열기</h3><div class="row"><input class="field" style="max-width:200px;text-transform:uppercase;font-weight:800;letter-spacing:2px" maxlength="8" data-bind="openCode" value="${esc(T.openCode)}" placeholder="예: MAB3"><button class="btn ghost" data-act="pickCode">열기</button></div>
+  ${DBMODE!=='live'?'<div class="banner warn" style="margin-top:14px">⚠️ 체험 모드입니다. 같은 브라우저의 다른 탭에서만 학생 화면이 연동됩니다.</div>':''}</div></div>`;
+}
+function tHeader(){
+  return `<div class="top"><h1><img src="${CHAR}" alt="">꿈결 앞바다 · 교사</h1><span class="pill">🏫 ${esc(roomLabel(ROOM)||'반 이름 없음')}</span><span class="pill" style="font-weight:900;letter-spacing:2px">방 ${esc(ROOM)}</span><span class="pill">👥 ${plist().length}명</span>${modeBadge()}
+  <button class="btn sm ghost" data-act="toggleBig">${T.big?'🔎 보통 글씨':'🔍 큰 글씨'}</button><button class="btn sm ghost" data-act="goPicker">반 목록</button></div>
+  <div class="phasebar">${PH.map(p=>`<button class="${phase()===p.k?'on':''}" data-act="setPhase" data-v="${p.k}">${p.n}</button>`).join('')}</div>
+  <div class="tabs">${[['run','🖥️ 수업 화면'],['teams','⛵ 선단 현황'],['answers','📝 학생 답'],['set','⚙️ 설정·링크']].map(([k,n])=>`<button class="${T.tab===k?'on':''}" data-act="tab" data-v="${k}">${n}</button>`).join('')}</div>`;
+}
+function tLobby(){
+  return `<div class="grid g2"><div class="card center"><h2>📱 학생 입장</h2><div class="code">${esc(ROOM)}</div><div class="qrbox"><div id="qr"></div></div><div class="url" style="margin-top:10px">${esc(studentURL())}</div></div>
+  <div class="card">${say('모둠마다 <b>같은 선단</b>을 고르게 해 주세요. 모두 들어오면 <b>📖 규칙</b>으로 넘어갑니다.',true)}
+  <div class="tboard">${keys().map(k=>{ const ms=members(k); return `<div class="tcard"><div class="hd"><span class="e">${TM[k].e}</span>${esc(TM[k].n)}<span class="sp"></span><span class="cnt">${ms.length}</span></div><div class="m">${ms.map(p=>esc(p.num+' '+p.nick)).join(', ')||'아직 없음'}</div></div>`; }).join('')}</div>
+  <div class="row" style="margin-top:14px;justify-content:flex-end"><button class="btn acc xl" data-act="setPhase" data-v="intro">📖 규칙 설명으로 →</button></div></div></div>`;
+}
+function tIntro(){
+  return `<div class="card">${say('꿈결 앞바다는 아주 오래전부터 물고기가 가득한 바다였어요. 오늘 여러분은 이 바다의 <b>선장</b>입니다. <b>1부가 끝났을 때 돈이 가장 많은 선단이 우승!</b>',true)}${rulesHTML()}
+  <div class="grid g3">${SP.map(s=>`<div class="spc"><div class="h"><span class="e">${s.e}</span>${esc(s.n)}<span class="lv lv0">한 마리 ${s.p}코인</span></div><div class="nb">${s.k==='mk'?'새끼를 빨리 낳아요':s.k==='pl'?'보통 속도로 늘어요':'값은 비싸지만 아주 천천히 늘어요'}</div></div>`).join('')}</div>
+  <div class="row" style="margin-top:16px;justify-content:flex-end"><button class="btn acc xl" data-act="startP1">🎣 1부 시작 (바다 준비)</button></div></div>`;
+}
+function tSea(){
+  if(!OCEAN) return `<div class="card">${say('바다가 아직 준비되지 않았어요. 아래 버튼을 눌러 주세요.')}<button class="btn acc" data-act="startP1">🎣 1부 시작</button></div>`;
+  const pt=part(), y=year(), N=pt===1?P1N():P2N(), over=partOver();
+  const ready=keys().filter(k=>decFor(k).ready).length;
+  const evs=over?[]:evList(pt,y,P2N());
+  const rk=keys().map(k=>({k,v:+(TEAMSD[k]||{}).money||0})).sort((a,b)=>b.v-a.v);
+  const L=META.last&&META.last.part===pt?META.last:null;
+  const collapsed=SP.every(s=>(+OCEAN[s.k]||0)<0.08*s.K);
+  return `<div class="grid" style="grid-template-columns:minmax(0,1fr) 300px;align-items:start">
+  <div><div class="card"><div class="row"><h2 style="margin:0">${pt===1?'🎣 1부 황금 어장':'🌱 2부 헌장의 바다'} · ${over?'끝':`${y}년째`} <span class="muted" style="font-size:17px">/ ${N}년</span></h2><span class="sp"></span><button class="btn sm ghost" data-act="toggleExact">${META.exact?'🙈 정확한 수 숨기기':'👁️ 정확한 수 공개'}</button></div>
+  <div style="margin-top:10px">${newsHTML(evs)}</div>
+  ${collapsed&&pt===1&&!over?`<div class="banner bad blink">🚨 어장이 무너지고 있습니다! 1부를 일찍 끝내도 됩니다.</div>`:''}
+  ${speciesGrid(OCEAN,META.exact)}</div>
+  <div class="card"><div class="row"><h3 style="margin:0">⛵ 선단 결정 <span class="cnt">${ready}/${keys().length}</span></h3><span class="sp"></span>
+  ${over?`<button class="btn sand xl" data-act="setPhase" data-v="${pt===1?'p1end':'final'}">${pt===1?'📉 1부 돌아보기 →':'🐢 결과 공개 →'}</button>`:`${collapsed&&pt===1?`<button class="btn ghost" data-act="endP1">1부 일찍 끝내기</button>`:''}<button class="btn acc xl" data-act="settle" ${T.busy?'disabled':''}>🎣 출항! ${y}년째 결산</button>`}</div>
+  <p class="muted small">결정하지 않은 팀은 ‘가진 배 모두 · 성긴 그물’로 출항합니다.</p>
+  <div class="tboard">${keys().map(k=>{ const t=TEAMSD[k]||{}, d=decFor(k), ch=chOf(t,pt), r=L&&L.rep[k];
+    return `<div class="tcard ${d.ready?'ready':''}"><div class="hd"><span class="e">${TM[k].e}</span>${esc(TM[k].n)}<span class="sp"></span>${d.ready?'✅':'<span class="muted small blink">결정 중</span>'}</div>
+    ${pt===2?`<div class="m">${ch.e} ${esc(ch.n)} (${esc(ch.sb)})</div>`:''}
+    <div>${boatsHTML(t.boats)} ${t.sonar?'📡':''}</div>
+    <div class="m">💰 ${fmt(t.money)}${r?` · 지난해 +${fmt(r.inc)} / ${r.rest?'☯️ 쉼':`${r.boats}척 ${r.dense?'🕸️':'🪢'}`}`:''}</div></div>`; }).join('')}</div></div></div>
+  <div><div class="card">${clockSVG(fishHealth(OCEAN))}</div>
+  ${pt===1?`<div class="card"><h3 style="margin-top:0">🏆 돈 순위</h3>${rk.map((x,i)=>`<div class="row" style="padding:4px 0"><b>${i+1}</b> ${TM[x.k].e} ${esc(TM[x.k].n)}<span class="sp"></span><b>${fmt(x.v)}</b></div>`).join('')}</div>`:`<div class="card"><h3 style="margin-top:0">📜 헌장</h3>${keys().map(k=>{ const c=chOf(TEAMSD[k],2); return `<div class="row" style="padding:3px 0">${TM[k].e} ${esc(TM[k].n)}<span class="sp"></span>${c.e} ${esc(c.sb)}</div>`; }).join('')}</div>`}
+  </div></div>`;
+}
+function tP1End(){
+  const p1=toArr(HIST.p1); const ans=plist().filter(p=>p.a1&&p.a1.done);
+  const cnt=CAUSES.map((_,i)=>ans.filter(p=>p.a1.c===i).length), mx=Math.max(1,...cnt);
+  const tot=keys().map(k=>({k,v:+(TEAMSD[k]||{}).catch1||0})); const sum=Math.max(1,tot.reduce((a,x)=>a+x.v,0));
+  return `<div class="card"><h2>📉 1부 — 바다에 무슨 일이 있었나?</h2>${say('이제 <b>정확한 물고기 수</b>를 공개합니다. 바다는 어떻게 변했나요?',true)}
+  ${lineChart(pctSeries(p1),{ymax:100,pct:true})}
+  <div class="grid g2" style="margin-top:14px"><div><h3>🎣 누가 얼마나 잡았나? (1부 전체 어획 비율)</h3><div class="bars">${tot.sort((a,b)=>b.v-a.v).map(x=>`<div class="bar"><div class="lbl"><span>${TM[x.k].e} ${esc(TM[x.k].n)}</span><span>${Math.round(100*x.v/sum)}%</span></div><div class="tr"><i style="width:${100*x.v/sum}%;background:${TM[x.k].c}"></i></div></div>`).join('')}</div>
+  <div class="concept" style="margin-top:12px"><div class="h">💡 공유지의 비극</div>모두가 함께 쓰는 자원을 각자 자기 이익만 생각해 쓰면, 결국 모두가 손해를 보게 된다.</div></div>
+  <div><h3>❓ 학생들이 고른 가장 큰 까닭 <span class="cnt">${ans.length}</span></h3><div class="bars">${CAUSES.map((c,i)=>`<div class="bar"><div class="lbl"><span>${c.e} ${esc(c.t)} <span class="muted small">${esc(c.s)}</span></span><span>${cnt[i]}명</span></div><div class="tr"><i style="width:${100*cnt[i]/mx}%;background:var(--sea)"></i></div></div>`).join('')}</div>
+  <div class="tip" style="margin-top:12px"><b>교과서 연결</b> — 환경 위기의 원인: ⛵ 산업화 · 🕸️ 무분별한 개발 · 📈 물질주의적 소비 생활. “👉 다른 팀 탓”을 고른 학생이 많다면: <b>그 팀은 나쁜 사람이었나요?</b></div></div></div>
+  <h3>💬 학생 답 (눌러서 크게 보기)</h3><div class="wall">${ans.map(p=>`<button class="wcard" data-act="spot" data-v="${esc(CAUSES[p.a1.c].e+' '+CAUSES[p.a1.c].t+'\n'+p.a1.t)}" data-w="${esc(p.nick)}"><small>${TM[p.team]?TM[p.team].e:''} ${esc(p.num)}번 ${esc(p.nick)} · ${CAUSES[p.a1.c].e}</small>${esc(p.a1.t)}</button>`).join('')||'<p class="muted">아직 답이 없어요.</p>'}</div>
+  <div class="row" style="margin-top:16px;justify-content:flex-end"><button class="btn acc xl" data-act="toCharter">📜 10년 뒤 · 헌장 정하기 →</button></div></div>`;
+}
+function tCharter(){
+  const who=k=>keys().filter(t=>(TEAMSD[t]||{}).charter===k).map(t=>teamTag(t)).join('');
+  const done=keys().filter(k=>(TEAMSD[k]||{}).charter).length;
+  return `<div class="card"><h2>📜 10년 뒤 — 우리 선단의 헌장 <span class="cnt">${done}/${keys().length}</span></h2>
+  ${say('10년 동안 고기잡이를 쉬었더니 바다가 다시 돌아왔어요. 이번에는 <b>선단마다 자연을 바라보는 약속(헌장)</b>을 하나 정하고 바다로 나갑니다. 헌장은 2부 내내 <b>진짜 게임 규칙</b>이 됩니다.',true)}
+  ${OCEAN?speciesGrid(OCEAN,false):''}
+  <div class="grid g3" style="margin-top:14px">${CHK.map(k=>chCard(k,false,null,who(k))).join('')}</div>
+  <h3>✍️ 팀별 까닭</h3><div class="wall">${keys().map(k=>{ const t=TEAMSD[k]||{}; return `<div class="wcard"><small>${TM[k].e} ${esc(TM[k].n)} · ${t.charter?CH[t.charter].e+' '+esc(CH[t.charter].n):'미선택'}</small>${esc(t.why||'(아직 없음)')}</div>`; }).join('')}</div>
+  <div class="row" style="margin-top:16px;justify-content:flex-end"><span class="muted small">헌장을 고르지 않은 팀은 ‘자유 어업’이 됩니다.</span><button class="btn acc xl" data-act="startP2">🌱 2부 출항 →</button></div></div>`;
+}
+function tFinal(){
+  const rv=+META.rv||0;
+  return `<div class="card">${finalBody(rv,true)}
+  <div class="row" style="margin-top:16px;justify-content:space-between"><button class="btn ghost" data-act="rv" data-v="-1" ${rv<=0?'disabled':''}>← 이전</button>${rv<3?`<button class="btn acc xl" data-act="rv" data-v="1">다음 공개 →</button>`:`<button class="btn sand xl" data-act="setPhase" data-v="reflect">✍️ 성찰 쓰기 →</button>`}</div></div>`;
+}
+function hlC(s){ let h=esc(s); CONCEPTS.forEach(c=>{ h=h.split(esc(c)).join(`<mark>${esc(c)}</mark>`); }); return h; }
+function tReflect(){
+  const ds=plist().filter(p=>p.ref&&p.ref.done);
+  return `<div class="card"><h2>✍️ 성찰 <span class="cnt">${ds.length}/${plist().length}</span></h2>${say('학생들이 각자 태블릿에 성찰을 씁니다. 카드를 누르면 크게 보여요.',true)}
+  ${REFQ.map(q=>`<h3>${q.e} ${esc(q.t)}</h3><div class="wall">${ds.map(p=>`<button class="wcard" data-act="spot" data-v="${esc(p.ref[q.k])}" data-w="${esc(p.nick)}"><small>${TM[p.team]?TM[p.team].e:''} ${esc(p.num)}번 ${esc(p.nick)}</small>${hlC(p.ref[q.k])}</button>`).join('')||'<p class="muted">아직 없어요.</p>'}</div>`).join('')}
+  <div class="row" style="margin-top:16px;justify-content:flex-end"><button class="btn ghost" data-act="setPhase" data-v="end">🏁 수업 끝</button></div></div>`;
+}
+function tTeams(){
+  const pt=part();
+  return `<div class="card"><h2>⛵ 선단 현황</h2><table class="tb"><tr><th>선단</th><th>선원</th><th>헌장</th><th>돈</th><th>배</th><th>📡</th><th>1부 순수익</th><th>2부 순수익</th><th>바다 발자국(2부)</th><th>거북 혼획 1·2부</th><th>올해 결정</th></tr>
+  ${keys().map(k=>{ const t=TEAMSD[k]||{}, d=decFor(k); return `<tr><td>${teamTag(k)}</td><td class="small">${members(k).map(p=>esc(p.num+' '+p.nick)).join(', ')}</td><td>${t.charter?CH[t.charter].e+' '+esc(CH[t.charter].sb):'—'}</td><td class="n">${fmt(t.money)}</td><td class="n">${t.boats||0}</td><td>${t.sonar?'✓':''}</td><td class="n">${fmt(t.earn1)}</td><td class="n">${fmt(t.earn2)}</td><td class="n">${fmt(t.foot2)}</td><td class="n">${(+t.kill1||0).toFixed(1)} · ${(+t.kill2||0).toFixed(1)}</td><td class="small">${d.ready?'✅ ':''}${d.boats}척 ${d.dense?'촘촘':'성긴'}${d.buyBoat?` · 배+${d.buyBoat}`:''}${d.buySonar?' · 📡':''}</td></tr>`; }).join('')}</table>
+  ${OCEAN?`<h3>🌊 바다 (정확한 수)</h3><table class="tb"><tr>${ALLS.map(s=>`<th>${s.e} ${s.n}</th>`).join('')}</tr><tr>${ALLS.map(s=>`<td class="n">${fmt(OCEAN[s.k])} / ${s.K} (${Math.round(100*(+OCEAN[s.k]||0)/s.K)}%)</td>`).join('')}</tr></table><p class="muted small">🐢 바다거북은 학생 화면에 나오지 않습니다. 결과 공개 3단계에서 처음 보여 주세요.</p>`:''}
+  <h3>👥 학생 (${plist().length}명)</h3><table class="tb"><tr><th>번호</th><th>이름</th><th>선단</th><th>1부 답</th><th>성찰</th></tr>${plist().map(p=>`<tr><td>${esc(p.num)}</td><td>${esc(p.nick)}</td><td>${teamTag(p.team)}</td><td>${p.a1&&p.a1.done?'✅':''}</td><td>${p.ref&&p.ref.done?'✅':''}</td></tr>`).join('')}</table></div>`;
+}
+function tAnswers(){
+  const a1=plist().filter(p=>p.a1&&p.a1.done), rf=plist().filter(p=>p.ref&&p.ref.done);
+  return `<div class="card"><h2>📝 학생 답 모아 보기</h2>
+  <h3>📉 1부 까닭 (${a1.length})</h3><table class="tb"><tr><th>학생</th><th>까닭</th><th>설명</th></tr>${a1.map(p=>`<tr><td>${esc(p.num)} ${esc(p.nick)}</td><td>${CAUSES[p.a1.c].e} ${esc(CAUSES[p.a1.c].s)}</td><td>${esc(p.a1.t)}</td></tr>`).join('')}</table>
+  <h3>📜 헌장 까닭</h3><table class="tb"><tr><th>선단</th><th>헌장</th><th>까닭</th></tr>${keys().map(k=>{ const t=TEAMSD[k]||{}; return `<tr><td>${teamTag(k)}</td><td>${t.charter?CH[t.charter].e+' '+esc(CH[t.charter].n):'—'}</td><td>${esc(t.why||'')}</td></tr>`; }).join('')}</table>
+  <h3>✍️ 성찰 (${rf.length})</h3><table class="tb"><tr><th>학생</th>${REFQ.map(q=>`<th>${q.e}</th>`).join('')}</tr>${rf.map(p=>`<tr><td>${esc(p.num)} ${esc(p.nick)}<br>${teamTag(p.team)}</td>${REFQ.map(q=>`<td class="small">${hlC(p.ref[q.k])}</td>`).join('')}</tr>`).join('')}</table>
+  <div class="row" style="margin-top:12px"><button class="btn sm acc" data-act="csv">⬇️ 엑셀(CSV)로 내려받기</button></div></div>`;
+}
+function tSet(){
+  return `<div class="grid g2"><div class="card"><h2>📱 학생 링크</h2><div class="code">${esc(ROOM)}</div><div class="qrbox"><div id="qr"></div></div><div class="url" style="margin-top:10px">${esc(studentURL())}</div>
+  <div class="row" style="margin-top:10px"><button class="btn sm acc" data-act="copy">링크 복사</button></div>
+  <h3>🏫 반 이름</h3><div class="row"><input class="field" style="max-width:200px" id="lblIn" maxlength="12" value="${esc(roomLabel(ROOM))}"><button class="btn sm acc" data-act="rename">저장</button></div></div>
+  <div class="card"><h2>⚙️ 게임 설정</h2>
+  <label class="lb">선단(모둠) 수</label><div class="row">${[4,5,6].map(n=>`<button class="btn sm ${TN()===n?'acc':'ghost'}" data-act="setN" data-k="TN" data-v="${n}">${n}개</button>`).join('')}</div>
+  <label class="lb">1부 햇수</label><div class="row">${[4,5,6].map(n=>`<button class="btn sm ${P1N()===n?'acc':'ghost'}" data-act="setN" data-k="P1N" data-v="${n}">${n}년</button>`).join('')}</div>
+  <label class="lb">2부 햇수</label><div class="row">${[3,4,5].map(n=>`<button class="btn sm ${P2N()===n?'acc':'ghost'}" data-act="setN" data-k="P2N" data-v="${n}">${n}년</button>`).join('')}</div>
+  <p class="muted small">45분 수업 권장: 1부 5년 · 2부 4년 (한 해에 약 2분). 시간이 빠듯하면 1부 4년 · 2부 3년.</p>
+  <h3>🔁 다시 하기</h3><div class="row"><button class="btn sm ghost" data-act="startP1force">🎣 1부 처음부터 다시</button><button class="btn sm bad" data-act="reset">🗑️ 이 방 기록 모두 지우기</button></div></div></div>`;
+}
+function renderTeacher(){
+  document.body.classList.toggle('big',T.big);
+  if(!T.authed){ $app.innerHTML=vLogin(); return; }
+  if(!ROOM){ $app.innerHTML=vPicker(); return; }
+  const ph=phase(); let body='';
+  if(T.tab==='teams') body=tTeams();
+  else if(T.tab==='answers') body=tAnswers();
+  else if(T.tab==='set') body=tSet();
+  else if(ph==='lobby') body=tLobby();
+  else if(ph==='intro') body=tIntro();
+  else if(ph==='p1'||ph==='p2') body=tSea();
+  else if(ph==='p1end') body=tP1End();
+  else if(ph==='charter') body=tCharter();
+  else if(ph==='final') body=tFinal();
+  else if(ph==='reflect') body=tReflect();
+  else body=`<div class="card center">${say('오늘 수업 끝! 수고하셨습니다. 🌊',true)}</div>`;
+  const spot=T.spot?`<div class="overlay" data-act="spotClose"><div class="modal"><small class="muted">${esc(T.spot.w)}</small><div class="spot">${esc(T.spot.v)}</div><div class="row" style="justify-content:flex-end"><button class="btn acc" data-act="spotClose">닫기</button></div></div></div>`:'';
+  $app.innerHTML=`<div class="twrap">${tHeader()}${body}</div>${spot}`;
+  const q=document.getElementById('qr'); if(q && window.QRCode){ q.innerHTML=''; new QRCode(q,{text:studentURL(),width:220,height:220}); }
+}
+
+function initTeams(boats, keepCharter){
+  const o={}; keys().forEach(k=>{ const old=TEAMSD[k]||{}; o[k]=Object.assign({}, keepCharter?old:{}, {money:START_MONEY,boats,sonar:false}); if(!keepCharter){ Object.assign(o[k],{earn1:0,earn2:0,foot1:0,foot2:0,kill1:0,kill2:0,catch1:0,catch2:0}); } }); return o;
+}
+function startP1Core(){
+  const o={}; ALLS.forEach(s=>o[s.k]=s.s0);
+  return backend.update(BASE(),{ocean:o, teams:initTeams(START_BOATS1,false), dec:null, hist:{p1:[o]},
+    'meta/phase':'p1','meta/part':1,'meta/round':1,'meta/heat':false,'meta/rec':false,'meta/last':null,'meta/rv':0,'meta/exact':false,'meta/started':Date.now()});
+}
+const TACT = {
+  login(){ if(T.pin===TEACHER_PIN){ T.authed=true; try{sessionStorage.setItem('ocean_t','1');}catch(e){} render(); } else toast('비밀번호가 다릅니다.'); },
+  tab(el){ T.tab=el.dataset.v; render(); },
+  toggleBig(){ T.big=!T.big; render(); },
+  setPhase(el){ const v=el.dataset.v;
+    if(v==='p1' && !META.started) return TACT.startP1();
+    if(v==='charter' && !META.rec) return TACT.toCharter();
+    if(v==='p2' && META.part!==2) return toast('먼저 ‘📜 헌장 정하기’를 거쳐 주세요.');
+    T.tab='run'; backend.update(`${BASE()}/meta`,{phase:v}); },
+  startP1(){ if(META.started && !confirm('1부를 처음부터 다시 시작할까요? 지금까지의 바다·선단 기록이 지워집니다.')) { backend.update(`${BASE()}/meta`,{phase:'p1'}); T.tab='run'; return; } T.tab='run'; startP1Core(); },
+  startP1force(){ if(!confirm('1부를 처음부터 다시 시작할까요? 바다·선단·헌장 기록이 지워집니다. (학생 입장 정보는 남습니다)')) return; T.tab='run'; startP1Core(); },
+  async settle(){
+    if(T.busy) return; if(partOver()) return;
+    T.busy=true; render();
+    try{
+      const pt=part(), y=year(), ks=keys(), decs={};
+      ks.forEach(k=>decs[k]=decFor(k));
+      const R=settle(OCEAN, TEAMSD, decs, {part:pt, y, keys:ks, heat:!!META.heat, P2N:P2N()});
+      const hk='p'+pt; const h=toArr(HIST[hk]); h.push(R.ocean);
+      const upd={ocean:R.ocean, ['hist/'+hk]:h, 'meta/round':y+1, 'meta/last':{part:pt,y,rep:R.rep,at:Date.now()}, 'meta/heat':pt===1?R.heat:false};
+      ks.forEach(k=>upd['teams/'+k]=R.teams[k]);
+      await backend.update(BASE(),upd);
+      const lost=SP.filter(s=>(+OCEAN[s.k]||0)>0 && R.ocean[s.k]===0);
+      toast(lost.length?`🚨 ${lost.map(s=>s.n).join('·')}이(가) 바다에서 사라졌습니다!`:`🎣 ${y}년째 결산 완료!`);
+    }catch(e){ console.error(e); toast('⚠️ 결산 실패: '+e.message); }
+    T.busy=false; render();
+  },
+  endP1(){ if(!confirm('1부를 여기서 끝낼까요?')) return; backend.update(`${BASE()}/meta`,{round:P1N()+1}); },
+  toggleExact(){ backend.update(`${BASE()}/meta`,{exact:!META.exact}); },
+  toCharter(){
+    if(META.rec){ T.tab='run'; backend.update(`${BASE()}/meta`,{phase:'charter'}); return; }
+    if(!OCEAN) return toast('먼저 1부를 진행해 주세요.');
+    const R=recover(OCEAN,10);
+    const upd={ocean:R.ocean,'hist/rec':R.path,'hist/p2':[R.ocean],'meta/phase':'charter','meta/rec':true,'meta/part':2,'meta/round':1,'meta/last':null,'meta/exact':false, dec:null};
+    const tm=initTeams(START_BOATS2,true); keys().forEach(k=>upd['teams/'+k]=tm[k]);
+    T.tab='run'; backend.update(BASE(),upd);
+  },
+  startP2(){ const miss=keys().filter(k=>!(TEAMSD[k]||{}).charter); if(miss.length && !confirm(`${miss.map(k=>TM[k].n).join(', ')}이(가) 헌장을 고르지 않았어요. ‘자유 어업’으로 시작할까요?`)) return;
+    const upd={'meta/phase':'p2'}; miss.forEach(k=>upd[`teams/${k}/charter`]='free'); T.tab='run'; backend.update(BASE(),upd); },
+  rv(el){ const v=clampN((+META.rv||0)+(+el.dataset.v),0,3); backend.update(`${BASE()}/meta`,{rv:v}); },
+  spot(el){ T.spot={v:el.dataset.v,w:el.dataset.w}; render(); },
+  spotClose(el,ev){ if(ev && ev.target!==el) return; T.spot=null; render(); },
+  setN(el){ const k=el.dataset.k, v=+el.dataset.v; if(k==='TN' && META.started && !confirm('게임 도중 선단 수를 바꾸면 1부를 다시 시작해야 해요. 바꿀까요?')) return; backend.update(`${BASE()}/meta`,{[k]:v}).then(()=>{ if(k==='TN'&&META.started) startP1Core(); }); },
+  copy(){ navigator.clipboard&&navigator.clipboard.writeText(studentURL()).then(()=>toast('📋 링크를 복사했어요.')); },
+  rename(){ const v=(document.getElementById('lblIn').value||'').trim().slice(0,12); backend.update(`${INDEX}/${ROOM}`,{label:v,at:Date.now()}); toast('🏫 반 이름을 저장했어요.'); },
+  reset(){ if(!confirm('이 방('+ROOM+')의 학생·바다 기록을 모두 지울까요? 되돌릴 수 없습니다.')) return; backend.remove(BASE()).then(()=>backend.set(`${BASE()}/meta`,{phase:'lobby',created:Date.now()})); toast('🗑️ 지웠어요.'); },
+  csv(){
+    const rows=[['번호','이름','선단','1부 까닭','1부 설명',...REFQ.map(q=>q.t)]];
+    plist().forEach(p=>rows.push([p.num,p.nick,TM[p.team]?TM[p.team].n:'',p.a1&&p.a1.done?CAUSES[p.a1.c].s:'',p.a1&&p.a1.done?p.a1.t:'',...REFQ.map(q=>p.ref&&p.ref[q.k]||'')]));
+    const s='﻿'+rows.map(r=>r.map(x=>'"'+String(x??'').replace(/"/g,'""')+'"').join(',')).join('\r\n');
+    const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([s],{type:'text/csv'})); a.download=`꿈결앞바다_${roomLabel(ROOM)||ROOM}.csv`; a.click(); },
+  goPicker(){ location.search='?mode=teacher'; },
+  async pickNew(){ const lb=T.newLabel.trim(); if(!lb) return toast('반 이름을 입력해 주세요. (예: 1-3반)'); const c=newCode(), now=Date.now(); await backend.set(`${INDEX}/${c}`,{label:lb,at:now,created:now}); location.search='?mode=teacher&room='+c; },
+  pickOpen(el){ location.search='?mode=teacher&room='+el.dataset.v; },
+  pickCode(){ const c=T.openCode.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,8); if(c.length<3) return toast('방 코드를 확인해 주세요.'); location.search='?mode=teacher&room='+c; },
+  pickRemove(el){ const c=el.dataset.v; if(!confirm(`${roomLabel(c)||c} 방을 목록에서 뺄까요? (기록은 지워지지 않습니다)`)) return; backend.remove(`${INDEX}/${c}`); }
+};
+const TBIND = { pin:v=>T.pin=v, newLabel:v=>T.newLabel=v, openCode:v=>T.openCode=v };
+
+/* =========================================================
+   ⑧ 이벤트 연결 · 시작
+   ========================================================= */
+document.addEventListener('error',e=>{ const t=e.target; if(t&&t.tagName==='IMG'&&t.src.indexOf(CHAR)>=0){ const sp=document.createElement('span'); sp.textContent='🐚'; sp.style.cssText='display:inline-flex;align-items:center;justify-content:center;font-size:40px;width:60px;flex:none'; t.replaceWith(sp); } },true);
+document.addEventListener('click',e=>{ const el=e.target.closest('[data-act]'); if(!el) return; const A=MODE==='teacher'?TACT:SACT; const f=A[el.dataset.act]; if(f) f(el,e); });
+document.addEventListener('input',e=>{ const el=e.target.closest('[data-bind]'); if(!el) return; const B=MODE==='teacher'?TBIND:SBIND; const f=B[el.dataset.bind]; if(f) f(el.value,el); });
+document.addEventListener('keydown',e=>{ if(e.key!=='Enter') return; const el=e.target.closest('[data-bind]'); if(!el||el.tagName==='TEXTAREA') return;
+  const map={room:'enterRoom',pin:'login',newLabel:'pickNew',openCode:'pickCode'}; const a=map[el.dataset.bind]; if(a){ e.preventDefault(); (MODE==='teacher'?TACT:SACT)[a](); } });
+
+(async function start(){
+  await initBackend();
+  const sub=()=>{
+    backend.on(`${BASE()}/players`,v=>{ PLAYERS=v||{}; if(MODE==='student'&&P&&P.joined&&PLAYERS[P.id]==null&&P.epoch&&P.epoch===META.created) saveP(true); softRender(); });
+    backend.on(`${BASE()}/ocean`,v=>{ OCEAN=v; softRender(); });
+    backend.on(`${BASE()}/teams`,v=>{ TEAMSD=v||{}; softRender(); });
+    backend.on(`${BASE()}/dec`,v=>{ DECS=v||{}; softRender(); });
+    backend.on(`${BASE()}/hist`,v=>{ HIST=v||{}; softRender(); });
+  };
+  if(MODE==='teacher'){
+    backend.on(INDEX,v=>{ ROOMLIST=v||{}; softRender(); });
+    if(!ROOM){ render(); return; }
+    backend.update(`${INDEX}/${ROOM}`,{at:Date.now()});
+    let first=true;
+    backend.on(`${BASE()}/meta`,v=>{ META=v||{}; if(first&&!v){ backend.set(`${BASE()}/meta`,{phase:'lobby',created:Date.now()}); } first=false; softRender(); });
+    sub(); render(); return;
+  }
+  if(DBMODE!=='live' && !ROOM) ROOM='SOLO';
+  if(!ROOM){ render(); return; }
+  P=loadP();
+  let lastPhase=null;
+  backend.on(`${BASE()}/meta`,v=>{ META=v||{};
+    if(P&&P.epoch&&META.created&&P.epoch!==META.created){ try{localStorage.removeItem(skey());}catch(e){} P=null; toast('선생님이 기록을 초기화했어요. 다시 입장해 주세요.'); render(); return; }
+    if(P&&P.joined&&!P.epoch&&META.created){ P.epoch=META.created; saveP(true); }
+    const ph=phase(); if(ph!==lastPhase){ if(lastPhase!==null) window.scrollTo(0,0); lastPhase=ph; render(); return; }
+    softRender(); });
+  sub(); render();
+})();
+</script>
+</body>
+</html>
