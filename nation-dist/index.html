@@ -119,6 +119,8 @@ mark{background:#ffe48a;color:inherit;padding:0 2px;border-radius:3px}
 .modal.opp{border:4px solid var(--ok)}
 .blink{animation:blink 1.2s infinite}
 @keyframes blink{50%{opacity:.5}}
+.spin{display:inline-block;animation:spin .9s ease-out}
+@keyframes spin{from{transform:rotate(0) scale(.4)}to{transform:rotate(720deg) scale(1)}}
 .banner{border-radius:14px;padding:14px 16px;margin-bottom:14px;font-weight:700}
 .banner.ok{background:#e3f4f1;color:#16655b}
 .banner.warn{background:#fff3dc;color:#8a5a00}
@@ -380,6 +382,24 @@ function eventImpact(d,e,v){
   const scaled={}; for(const k in e.base){ const x=Math.round(e.base[k]*m); if(x) scaled[k]=x; }
   return {pts,lv,m,notes,scaled};
 }
+
+const OUTCOME={great:{n:'대성공',e:'🌟',c:'ok',m:1.5,bonus:{trust:6,eco:5},d:'대응이 완벽하게 맞아떨어졌어요! 효과가 1.5배로 커지고 보너스까지 받았어요.'},ok:{n:'성공',e:'✅',c:'ok',m:1,bonus:{},d:'대응이 계획대로 진행됐어요.'},fail:{n:'실패',e:'💥',c:'bad',m:0.3,bonus:{trust:-8,eco:-6},d:'대응이 엇나갔어요! 효과는 거의 없고, 피해는 1.5배로 커지고, 신뢰와 경제까지 떨어졌어요.'}};
+function successRate(d,e,v,nOpts){
+  const imp=eventImpact(d,e,v);
+  const base={'철저한 대비':85,'대비됨':70,'대비 부족':50,'무방비':30,'최고 수준 투자':85,'충분한 투자':70,'투자 부족':50,'투자 없음':30,'신뢰가 좌우':55}[imp.lv.n]??50;
+  let p=base; const tr=v?v.trust:50; if(tr>=65)p+=10; else if(tr<35)p-=15; if(nOpts>=2)p+=10;
+  return Math.max(10,Math.min(95,p));
+}
+function evApply(e,imp,r){
+  const out=OUTCOME[r.out||'ok']; const ops=(r.opts||[r.opt]).filter(i=>e.opts[i]); const res={}; const put=(k,x)=>{ res[k]=(res[k]||0)+x; };
+  for(const k in imp.scaled){ const x=imp.scaled[k]; const mul= x<0 ? (r.out==='fail'?1.5:r.out==='great'?0.5:1) : (r.out==='fail'?0.5:r.out==='great'?1.5:1); put(k,Math.round(x*mul)); }
+  for(const i of ops){ const eff=e.opts[i].eff; for(const k in eff){ const x=eff[k]; put(k, x>0?Math.round(x*out.m):x); } }
+  for(const k in out.bonus) put(k,out.bonus[k]);
+  if(ops.length>=2){ put('eco',-4); if(r.out!=='fail'){ put('trust',3); put('welfare',3); } }
+  for(const k in res) if(!res[k]) delete res[k];
+  return res;
+}
+function evTxt(e,r){ const ops=(r.opts||[r.opt]).filter(i=>e.opts[i]); const o=OUTCOME[r.out||'ok']; return ops.map(i=>'ABC'[i]+'. '+e.opts[i].t).join(' + ')+(r.out?` (${o.e} ${o.n}${r.roll?' · 🎲'+r.roll:''})`:''); }
 function fmtEff(o){ return IND.filter(i=>o&&o[i.k]).map(i=>`${i.n} ${o[i.k]>0?'+':''}${o[i.k]}`).join(' · '); }
 const DUTIES = [
   {k:'army',n:'🪖 국방의 의무'},{k:'work',n:'🛠️ 근로의 의무'},{k:'study',n:'📖 교육의 의무'},
@@ -567,14 +587,14 @@ function computeInd(d,log,st){
     }
   }
   for(const c of CARDS){ const ch=d.choices[c.id]; if(ch && ch.opt!=null && c.opts[ch.opt]) add(c.opts[ch.opt].eff); }
-  const evs=EVENTS.filter(e=>{ const r=d.events[e.id]; return r && r.opt!=null && e.opts[r.opt]; }).sort((a,b)=>(d.events[a.id].at||0)-(d.events[b.id].at||0));
-  for(const e of evs){ const imp=eventImpact(d,e,v); const ch=e.opts[d.events[e.id].opt].eff; add(imp.scaled); add(ch);
-    if(log){ const delta={}; for(const k of new Set([...Object.keys(imp.scaled),...Object.keys(ch)])){ const x=(imp.scaled[k]||0)+(ch[k]||0); if(x) delta[k]=x; } log.push({e,imp,opt:d.events[e.id].opt,delta}); } }
+  const evs=EVENTS.filter(e=>{ const r=d.events[e.id]; return r && ((r.opts&&Object.values(r.opts).length)||(r.opt!=null&&e.opts[r.opt])); }).sort((a,b)=>(d.events[a.id].at||0)-(d.events[b.id].at||0));
+  for(const e of evs){ const r=Object.assign({},d.events[e.id]); if(r.opts) r.opts=Object.values(r.opts); const imp=eventImpact(d,e,v); const delta=evApply(e,imp,r); add(delta);
+    if(log) log.push({e,imp,opt:(r.opts||[r.opt])[0],out:r.out||'ok',roll:r.roll,delta}); }
   const rk=[]; const vv={}; for(const k in v) vv[k]=Math.max(0,Math.min(100,v[k]));
   for(const r of d.con.rights){ const RR=RIGHTS.find(x=>x.k===r); if(!RR) continue; const ok=!!RR.ok(vv,d); rk.push({k:r,ok}); v.trust+= ok?4:-8; }
   let bankrupt=false, warn=false;
-  if(d.tax && v.eco<=15){ bankrupt=true; v.welfare-=10; v.trust-=10; v.equal-=5; const RS=d.rescue&&RESCUE[d.rescue.opt]; if(RS) add(typeof RS.eff==='function'?RS.eff(v):RS.eff); }
-  else if(d.tax && v.eco<=25) warn=true;
+  if(d.tax && v.eco<=20){ bankrupt=true; v.welfare-=15; v.trust-=15; v.equal-=8; v.safe-=5; const RS=d.rescue&&RESCUE[d.rescue.opt]; if(RS) add(typeof RS.eff==='function'?RS.eff(v):RS.eff); }
+  else if(d.tax && v.eco<=30) warn=true;
   for(const k in v) v[k]=Math.max(0,Math.min(100,Math.round(v[k])));
   if(st){ st.rights=rk; st.bankrupt=bankrupt; st.warn=warn; st.rescued=!!(bankrupt&&d.rescue); }
   return v;
@@ -659,8 +679,8 @@ let keepScroll=false;
    ⑥ 학생 화면
    ========================================================= */
 let S=null, META={}, NATIONS={}, VOTES={}, CIT={}, PROG={}, REF={};
-let localEv=null; const curEv=()=> DBMODE==='live' ? META.event : localEv;
-let tmpRoom='', evDraft={opt:null,reason:''}, voteDraft={to:null,reason:''}, openVote=null, studentView='main';
+let localEv=null, evResult=null; const curEv=()=> DBMODE==='live' ? META.event : localEv;
+let tmpRoom='', evDraft={opts:[],reason:''}, voteDraft={to:null,reason:''}, openVote=null, studentView='main';
 const SLOT = (qs.get('s')||'').replace(/[^0-9a-z]/gi,'').slice(0,6); // 체험용: 한 기기에서 여러 학생 흉내 (&s=1, &s=2 ...)
 const skey = () => 'natgame_s_'+ROOM+(SLOT?'_'+SLOT:'');
 function loadS(){ try{ const x=JSON.parse(localStorage.getItem(skey())); if(x){ x.d=norm(x.d); } return x; }catch(e){ return null; } }
@@ -764,7 +784,7 @@ function vCon(){
 }
 function resultBlock(d,showLaw=true,cits=null){
   d=norm(d); const st={}; const v=computeInd(d,null,st), tk=nationType(v,d), t=TYPES[tk], gov=byK(GOV,d.gov);
-  return `${st.bankrupt?`<div class="banner bad" style="font-size:18px">💸 국가 파산! 나라 곳간이 바닥났어요. (복지·신뢰 −10, 평등 −5) ${st.rescued?'→ 극복 방법: '+esc(RESCUE[d.rescue.opt].s):'→ 다시 일어설 방법을 골라야 해요!'}</div>`:st.warn?`<div class="banner warn">⚠️ 재정 위기 경고: 경제 지표가 25점 이하예요. 15점 아래로 떨어지면 <b>국가 파산</b>!</div>`:''}<div class="hero">${flagHTML(d.flag,'lg')}<div><div style="font-size:26px;font-weight:900">${esc(d.name)}</div><div class="muted">${gov?gov.e+' '+esc(gov.n):''}${byK(IDEO,d.ideo)?' · '+byK(IDEO,d.ideo).e+' '+esc(byK(IDEO,d.ideo).n):''} · ${byK(TERR,d.terr)?.e||''} ${esc(byK(TERR,d.terr)?.n||'')} · ${esc(byK(POP,d.pop)?.n||'')}</div><div style="margin-top:6px">${typeBadge(tk)}</div></div></div>
+  return `${st.bankrupt?`<div class="banner bad" style="font-size:18px">💸 국가 파산! 나라 곳간이 바닥났어요. (복지·신뢰 −15, 평등 −8, 안전 −5) ${st.rescued?'→ 극복 방법: '+esc(RESCUE[d.rescue.opt].s):'→ 다시 일어설 방법을 골라야 해요!'}</div>`:st.warn?`<div class="banner warn">⚠️ 재정 위기 경고: 경제 지표가 30점 이하예요. 20점 아래로 떨어지면 <b>국가 파산</b>!</div>`:''}<div class="hero">${flagHTML(d.flag,'lg')}<div><div style="font-size:26px;font-weight:900">${esc(d.name)}</div><div class="muted">${gov?gov.e+' '+esc(gov.n):''}${byK(IDEO,d.ideo)?' · '+byK(IDEO,d.ideo).e+' '+esc(byK(IDEO,d.ideo).n):''} · ${byK(TERR,d.terr)?.e||''} ${esc(byK(TERR,d.terr)?.n||'')} · ${esc(byK(POP,d.pop)?.n||'')}</div><div style="margin-top:6px">${typeBadge(tk)}</div></div></div>
   <p style="margin-top:12px">${esc(t.d)}</p>
   <h3>📊 국가 지표</h3>${barsHTML(v)}${relBlock(d,cits)}
   <h3>🗣️ 우리 나라 시민들의 목소리</h3><div class="grid g2">${PERSONAS.map(p=>{const s=personaScore(p,v); const lv=s>=65?0:s>=45?1:2; return `<div class="persona"><div class="av">${p.e}</div><div><div class="who">${esc(p.n)} <span class="face">${['😄','😐','😟'][lv]}</span> ${s}점</div><div class="q">“${esc(p.q[lv])}”</div></div></div>`;}).join('')}</div>
@@ -789,11 +809,11 @@ function vResult(){
     if(META.event) top+=`<div class="banner bad">🚨 위기 사건이 발생했어요! 국가를 선포하면 대응할 수 있어요.</div>`;
   }
   const nlog=[]; computeInd(S.d,nlog);
-  const evHTML = nlog.length?`<h3>📰 ${esc(S.d.name)} 뉴스</h3>${nlog.map(x=>`<div class="persona" style="margin-bottom:8px"><div class="av">${x.e.e}</div><div><div class="who">${KIND[x.e.kind]} · ${esc(x.e.t)} <span class="typebadge" style="background:var(--${x.imp.lv.c});font-size:12px;padding:2px 8px">${esc(x.imp.lv.n)}</span></div><div class="q">${esc(x.imp.lv.d)}</div><div class="q">→ ${'ABC'[x.opt]}. ${esc(x.e.opts[x.opt].t)}</div><div class="muted" style="font-size:13.5px">지표 변화: ${fmtEff(x.delta)||'없음'}</div></div></div>`).join('')}`:'';
+  const evHTML = nlog.length?`<h3>📰 ${esc(S.d.name)} 뉴스</h3>${nlog.map(x=>`<div class="persona" style="margin-bottom:8px"><div class="av">${x.e.e}</div><div><div class="who">${KIND[x.e.kind]} · ${esc(x.e.t)} <span class="typebadge" style="background:var(--${x.imp.lv.c});font-size:12px;padding:2px 8px">${esc(x.imp.lv.n)}</span></div><div class="q">${esc(x.imp.lv.d)}</div><div class="q">→ ${esc(evTxt(x.e,S.d.events[x.e.id]))}</div><div class="muted" style="font-size:13.5px">지표 변화: ${fmtEff(x.delta)||'없음'}</div></div></div>`).join('')}`:'';
   const bottom = S.submitted
     ? `<div class="navbar"><div class="in"><button class="btn ghost" data-act="reedit">✏️ 고쳐서 다시 선포</button>${META.phase==='vote'?`<button class="btn teal" data-act="toVote">🗳️ 투표하기</button>`:'<span></span>'}</div></div>`
     : nav(true,'🎉 국가 선포하기','submit','acc');
-  const myRec = `<h3>✏️ 나의 선택과 이유</h3><ul class="rlist">${CARDS.map(c=>{const ch=S.d.choices[c.id]; return ch&&ch.opt!=null?`<li><b>${esc(c.t)}</b>${'ABC'[ch.opt]}. ${esc(c.opts[ch.opt].t)}<br>→ ${esc(ch.reason||'')}</li>`:'';}).join('')}${EVENTS.map(e=>{const r=S.d.events[e.id]; return r?`<li><b>${e.e} ${esc(e.t)}</b>${'ABC'[r.opt]}. ${esc(e.opts[r.opt].t)}<br>→ ${esc(r.reason||'')}</li>`:'';}).join('')}</ul>`;
+  const myRec = `<h3>✏️ 나의 선택과 이유</h3><ul class="rlist">${CARDS.map(c=>{const ch=S.d.choices[c.id]; return ch&&ch.opt!=null?`<li><b>${esc(c.t)}</b>${'ABC'[ch.opt]}. ${esc(c.opts[ch.opt].t)}<br>→ ${esc(ch.reason||'')}</li>`:'';}).join('')}${EVENTS.map(e=>{const r=S.d.events[e.id]; return r?`<li><b>${e.e} ${esc(e.t)}</b>${esc(evTxt(e,r))}<br>→ ${esc(r.reason||'')}</li>`:'';}).join('')}</ul>`;
   return `${sHeader()}${stepBar()}${top}<div class="card">${resultBlock(S.d,true,citsFor(S.id))}${evHTML}${myRec}</div>${bottom}`;
 }
 function vVote(){
@@ -836,7 +856,7 @@ function vCitizen(){
 let rescueDraft={opt:null,reason:''};
 function vRescue(){
   return `<div class="overlay"><div class="modal alert"><div class="muted" style="font-weight:800">💸 국가 파산</div><h2>💸 ${esc(S.d.name)} 국가 파산!</h2>
-  <div class="scene">경제 지표가 15점 아래로 떨어졌어요. 나라 곳간이 텅 비어 공무원 월급과 복지 지원금을 줄 돈이 없고, 은행들이 문을 닫고 있어요. (복지·신뢰 −10, 평등 −5)<div class="src">📖 우리나라도 1997년 외환 위기 때 국제통화기금(IMF)의 구제금융을 받았고, 시민들이 ‘금 모으기 운동’으로 함께 위기를 이겨 냈어요.</div></div>
+  <div class="scene">경제 지표가 20점 아래로 떨어졌어요. 나라 곳간이 텅 비어 공무원 월급과 복지 지원금을 줄 돈이 없고, 은행들이 문을 닫고 있어요. (복지·신뢰 −15, 평등 −8, 안전 −5)<div class="src">📖 우리나라도 1997년 외환 위기 때 국제통화기금(IMF)의 구제금융을 받았고, 시민들이 ‘금 모으기 운동’으로 함께 위기를 이겨 냈어요.</div></div>
   <p class="muted">지도자로서 나라를 다시 일으킬 방법을 고르세요. 어떤 방법이든 대가가 있어요.</p>
   <div class="grid">${RESCUE.map((o,i)=>`<button class="opt bigopt ${rescueDraft.opt===i?'sel':''}" data-act="rescuepick" data-o="${i}"><span class="lt">${'ABC'[i]}</span><span>${esc(o.t)}${o.note?`<br><small class="muted">${esc(o.note)}</small>`:''}</span></button>`).join('')}</div>
   <label class="lb">✏️ 이 방법을 고른 이유</label><textarea class="field" data-bind="rescuereason" maxlength="200">${esc(rescueDraft.reason)}</textarea>
@@ -882,6 +902,13 @@ function vFinal(){
   ${mine?'<div class="banner ok" style="margin-top:12px">✅ 제출 완료! 수고했어요.</div>':''}
   </div><div class="navbar"><div class="in"><button class="btn ghost" data-act="backMain">← 내 나라</button>${mine?'<span></span>':'<button class="btn acc" data-act="reflsubmit">제출하기</button>'}</div></div>`;
 }
+function vEvResult(){
+  const x=evResult, o=OUTCOME[x.out];
+  return `<div class="overlay"><div class="modal ${x.out==='fail'?'alert':'opp'} center"><div class="spin" style="font-size:72px">🎲</div><div class="muted" style="font-weight:700">주사위 ${x.roll} (성공 확률 ${x.p}% 이하면 성공, ${Math.round(x.p*0.3)} 이하면 대성공)</div>
+  <h2 style="font-size:38px;margin:10px 0">${o.e} ${o.n}!</h2><p style="font-size:17px">${esc(o.d)}</p>${x.combo?`<p class="muted">🔗 복합 대응: 비용 경제 −4${x.out!=='fail'?', 협력 보너스 신뢰·복지 +3':''}</p>`:''}
+  <div class="law" style="text-align:left;margin-top:10px"><b>${x.e.e} ${esc(x.e.t)} — 우리 나라 지표 변화</b><p style="font-size:18px">${fmtEff(x.delta)||'변화 없음'}</p></div>
+  <div style="margin-top:16px"><button class="btn acc" data-act="evresclose">확인</button></div></div></div>`;
+}
 function vEventModal(){
   const e=EVENTS.find(x=>x.id===(curEv()||{}).id); if(!e) return '';
   const v=computeInd(S.d), imp=eventImpact(S.d,e,v), opp=e.kind==='opp';
@@ -891,10 +918,12 @@ function vEventModal(){
    <div style="margin-top:6px">${esc(imp.lv.d)}</div>
    ${imp.notes.map(n=>`<div style="margin-top:4px">${esc(n.t)}</div>`).join('')}
    <div style="margin-top:10px;font-weight:800">${opp?'🎁 얻는 효과':'💥 입는 피해'}: ${fmtEff(imp.scaled)||'없음'}</div></div>
-  <p class="muted">이제 ${esc(S.d.name)}의 지도자로서 어떻게 할지 결정하세요!</p>
-  <div class="grid">${e.opts.map((o,i)=>`<button class="opt bigopt ${evDraft.opt===i?'sel':''}" data-act="evpick" data-o="${i}"><span class="lt">${'ABC'[i]}</span><span>${esc(o.t)}</span></button>`).join('')}</div>
+  <div class="banner warn" style="font-weight:600">🎲 대응 결과는 <b>주사위</b>로 정해져요. 평소 대비·시민 신뢰가 높을수록, 두 가지를 함께 쓰면(🔗 복합 대응) 성공 확률이 올라가요.<br>🌟 대성공: 효과 1.5배 + 보너스 · 💥 실패: 피해 1.5배 + 신뢰·경제 하락 · 🔗 복합 대응: 경제 −4, 성공하면 신뢰·복지 +3</div>
+  <p class="muted">이제 ${esc(S.d.name)}의 지도자로서 대응을 <b>1~2개</b> 고르세요!</p>
+  <div style="font-size:20px;font-weight:900;margin:6px 0 10px">🎲 지금 성공 확률: <span style="color:var(--accent)">${successRate(S.d,e,v,Math.max(1,evDraft.opts.length))}%</span>${evDraft.opts.length>=2?' <span class="muted" style="font-size:15px">(🔗 복합 대응 +10%)</span>':''}</div>
+  <div class="grid">${e.opts.map((o,i)=>`<button class="opt bigopt ${evDraft.opts.includes(i)?'sel':''}" data-act="evpick" data-o="${i}"><span class="lt">${'ABC'[i]}</span><span>${esc(o.t)}</span></button>`).join('')}</div>
   <label class="lb">✏️ 이렇게 결정한 이유</label><textarea class="field" data-bind="evreason" maxlength="200">${esc(evDraft.reason)}</textarea>
-  <div style="margin-top:14px;display:flex;justify-content:space-between">${DBMODE!=='live'?'<button class="btn ghost" data-act="evclose">닫기</button>':'<span></span>'}<button class="btn acc" data-act="evsubmit">결정!</button></div></div></div>`;
+  <div style="margin-top:14px;display:flex;justify-content:space-between">${DBMODE!=='live'?'<button class="btn ghost" data-act="evclose">닫기</button>':'<span></span>'}<button class="btn acc" data-act="evsubmit">🎲 결정하고 주사위 굴리기!</button></div></div></div>`;
 }
 function renderStudent(){
   if(!ROOM){ $app.innerHTML=vJoinRoom(); return; }
@@ -911,7 +940,8 @@ function renderStudent(){
   else if(S.step===5) html=vCon();
   else html=vResult();
   let bk=false; if(S.submitted && !S.d.rescue){ const st0={}; computeInd(S.d,null,st0); bk=st0.bankrupt; }
-  if(bk) html+=vRescue();
+  if(evResult) html+=vEvResult();
+  else if(bk) html+=vRescue();
   else { const ce=curEv(); if(S.submitted && ce && !S.d.events[ce.id] && EVENTS.some(x=>x.id===ce.id)) html+=vEventModal(); }
   $app.innerHTML=html;
 }
@@ -972,12 +1002,18 @@ const SACT = {
   pickVote(ds){ voteDraft.to=ds.v; keepScroll=true; render(); },
   async submitVote(){ if(META.phase!=='vote') return toast('투표 시간이 아니에요.'); if(!voteDraft.to) return toast('살고 싶은 나라를 선택하세요.'); if(voteDraft.reason.trim().length<5) return toast('이유를 5글자 이상 써 주세요.');
     await backend.set(`rooms/${ROOM}/votes/${S.id}`,{to:voteDraft.to,reason:voteDraft.reason,from:S.id,fromName:`${S.num}번 ${S.sname}`,at:Date.now()}); toast('🗳️ 투표 완료!'); keepScroll=true; render(); },
-  selfEvent(ds){ localEv={id:ds.v}; evDraft={opt:null,reason:''}; render(); },
+  selfEvent(ds){ localEv={id:ds.v}; evDraft={opts:[],reason:''}; render(); },
   evclose(){ localEv=null; render(); },
-  evpick(ds){ evDraft.opt=+ds.o; render(); },
-  async evsubmit(){ if(evDraft.opt==null) return toast('대응 방법을 고르세요.'); if(evDraft.reason.trim().length<5) return toast('이유를 5글자 이상 써 주세요.');
-    const id=curEv().id; S.d.events[id]={opt:evDraft.opt,reason:evDraft.reason,at:Date.now()}; saveS();
-    await backend.set(`rooms/${ROOM}/nations/${S.id}/d/events/${id}`,S.d.events[id]); evDraft={opt:null,reason:''}; localEv=null; toast('✅ 결정 완료! 우리 나라 뉴스와 지표를 확인하세요.'); render(); }
+  evpick(ds){ const o=+ds.o, a=evDraft.opts, i=a.indexOf(o); if(i>=0) a.splice(i,1); else { if(a.length>=2) return toast('최대 2개까지 함께 쓸 수 있어요.'); a.push(o); } keepScroll=true; render(); },
+  evresclose(){ evResult=null; render(); },
+  async evsubmit(){ if(!evDraft.opts.length) return toast('대응 방법을 1~2개 고르세요.'); if(evDraft.reason.trim().length<5) return toast('이유를 5글자 이상 써 주세요.');
+    const e=EVENTS.find(x=>x.id===curEv().id); const v=computeInd(S.d); const pr=successRate(S.d,e,v,evDraft.opts.length); const roll=1+Math.floor(Math.random()*100);
+    const out= roll<=Math.round(pr*0.3)?'great': roll<=pr?'ok':'fail';
+    const id=e.id, ops=evDraft.opts.slice().sort(); S.d.events[id]={opts:ops,opt:ops[0],reason:evDraft.reason,out,roll,p:pr,at:Date.now()}; saveS();
+    const lg=[]; computeInd(S.d,lg); const me=lg.find(y=>y.e.id===id);
+    evResult={e,out,roll,p:pr,combo:ops.length>=2,delta:me?me.delta:{}};
+    try{ await backend.set(`rooms/${ROOM}/nations/${S.id}/d/events/${id}`,S.d.events[id]); }catch(err){ console.error(err); }
+    evDraft={opts:[],reason:''}; localEv=null; render(); }
 };
 function bindStudentInput(t){
   const b=t.dataset.bind, v=t.value;
@@ -1041,7 +1077,7 @@ function tGallery(L){
 }
 function optStats(list, item, getCh){
   const tot=list.filter(n=>getCh(n)).length;
-  return item.opts.map((o,i)=>{ const who=list.filter(n=>{const c=getCh(n); return c&&c.opt===i;}); const pc=tot?Math.round(who.length/tot*100):0;
+  return item.opts.map((o,i)=>{ const who=list.filter(n=>{const c=getCh(n); return c&&(c.opts?Object.values(c.opts):[c.opt]).includes(i);}); const pc=tot?Math.round(who.length/tot*100):0;
     return {i,o,who,pc}; });
 }
 function tMap(L){
@@ -1068,9 +1104,9 @@ function tEvents(L){
   ${cur?`<div class="banner bad">진행 중: ${esc(EVENTS.find(x=>x.id===cur.id)?.t||'')} <button class="btn sm" style="margin-left:10px" data-act="endEvent">사건 종료(창 닫기)</button></div>`:''}
   ${['crisis','ops','opp'].map(kd=>`<h3>${KIND[kd]}</h3><div class="grid g4">${EVENTS.filter(e=>e.kind===kd).map(e=>`<button class="opt ${cur&&cur.id===e.id?'sel':''}" data-act="launch" data-v="${e.id}"><div class="e">${e.e}</div><div class="t">${esc(e.t)}</div><div class="d">${e.prep&&e.prep.length?'결과를 좌우하는 예산: '+esc(e.prepName):'결과를 좌우하는 것: 시민 신뢰'}</div></button>`).join('')}</div>`).join('')}</div>
   ${EVENTS.map(e=>{ const st=optStats(L,e,n=>n.d.events[e.id]); const doneL=L.filter(n=>n.d.events[e.id]); if(!doneL.length) return ''; const op=openCard===e.id;
-    const lvc={}; doneL.forEach(n=>{ const k=lvOf(n,e.id); lvc[k]=(lvc[k]||0)+1; });
+    const lvc={}; doneL.forEach(n=>{ const k=lvOf(n,e.id); lvc[k]=(lvc[k]||0)+1; }); const oc={}; doneL.forEach(n=>{ const o=OUTCOME[n.d.events[e.id].out||'ok']; const k=o.e+' '+o.n; oc[k]=(oc[k]||0)+1; });
     return `<div class="card"><div class="row"><b style="font-size:18px">${e.e} ${esc(e.t)}</b><span class="muted">${doneL.length}/${L.length}명 대응</span><span class="sp"></span><button class="btn sm ghost" data-act="openCard" data-v="${e.id}">${op?'이유 접기':'학생 이유 보기'}</button></div>
-    <div class="chips" style="margin:8px 0">${Object.keys(lvc).map(k=>`<span class="chip">${esc(k)} ${lvc[k]}</span>`).join('')}</div>
+    <div class="chips" style="margin:8px 0">${Object.keys(lvc).map(k=>`<span class="chip">${esc(k)} ${lvc[k]}</span>`).join('')}${Object.keys(oc).map(k=>`<span class="chip" style="border-color:var(--accent)">${esc(k)} ${oc[k]}</span>`).join('')}</div>
     ${st.map(s=>`<div class="obar"><div class="lbl"><span>${'ABC'[s.i]}. ${esc(s.o.t)}</span><span>${s.who.length}명 (${s.pc}%)</span></div><div class="tr"><i style="width:${s.pc}%;background:${['#3a6ea5','#2a9d8f','#e4572e'][s.i]}"></i></div>
     ${op&&s.who.length?`<ul class="rlist">${s.who.map(n=>`<li><b>${esc(n.num)} ${esc(n.sname)} [${esc(lvOf(n,e.id))}]</b>${esc(n.d.events[e.id].reason)}</li>`).join('')}</ul>`:''}</div>`).join('')}</div>`;}).join('')}`;
 }
@@ -1142,7 +1178,7 @@ function tNationModal(){
   <div style="margin-top:10px">${resultBlock(n.d,true,citsFor(n.id))}</div>
   <h3>💰 세금·예산</h3><p>${esc(byK(TAX,n.d.tax)?.n||'')} · ${BUDGET.map(b=>`${b.e}${esc(b.n)} ${+n.d.budget[b.k]||0}`).join(' / ')}</p>
   <h3>⚖️ 정책 선택과 이유</h3><ul class="rlist">${CARDS.map(c=>{const ch=n.d.choices[c.id]; return ch?`<li><b>${esc(c.t)}</b>${'ABC'[ch.opt]}. ${esc(c.opts[ch.opt].t)}<br>→ ${esc(ch.reason)}</li>`:'';}).join('')}</ul>
-  ${EVENTS.some(e=>n.d.events[e.id])?`<h3>🚨 위기 대응</h3><ul class="rlist">${EVENTS.map(e=>{const r=n.d.events[e.id]; return r?`<li><b>${e.e} ${esc(e.t)}</b>${'ABC'[r.opt]}. ${esc(e.opts[r.opt].t)}<br>→ ${esc(r.reason)}</li>`:'';}).join('')}</ul>`:''}
+  ${EVENTS.some(e=>n.d.events[e.id])?`<h3>🚨 위기 대응</h3><ul class="rlist">${EVENTS.map(e=>{const r=n.d.events[e.id]; return r?`<li><b>${e.e} ${esc(e.t)}</b>${esc(evTxt(e,r))}<br>→ ${esc(r.reason)}</li>`:'';}).join('')}</ul>`:''}
   </div></div>`;
 }
 function tQRModal(){
@@ -1169,7 +1205,7 @@ function exportCSV(){
     return [n.num,n.sname,d.name,byK(TERR,d.terr)?.n,byK(POP,d.pop)?.n,byK(GOV,d.gov)?.n,byK(TAX,d.tax)?.n,...BUDGET.map(b=>+d.budget[b.k]||0),
     ...CARDS.flatMap(c=>{const ch=d.choices[c.id]; return ch?['ABC'[ch.opt]+'. '+c.opts[ch.opt].t,ch.reason]:['',''];}),
     d.con.a1,d.con.a2,d.con.duties.map(k=>DUTIES.find(x=>x.k===k)?.n.replace(/^\S+\s/,'')).join(', '),
-    ...EVENTS.flatMap(e=>{const r=d.events[e.id]; return r?['ABC'[r.opt]+'. '+e.opts[r.opt].t,r.reason]:['',''];}),
+    ...EVENTS.flatMap(e=>{const r=d.events[e.id]; return r?[evTxt(e,r),r.reason]:['',''];}),
     ...IND.map(i=>n.v[i.k]),TYPES[n.tk].n,vt?(DATA.nations?.[vt.to]?.d?.name||''):'',vt?vt.reason:'',byK(IDEO,d.ideo)?.n||'',...(r=>[r.S,r.C,QUAD[r.q].n])(relation(d,citsFor(n.id))),...(c=>c?[DATA.nations?.[c.to]?.d?.name||'',CIT_CARDS.map(cc=>{const i=(c.a||{})[cc.id]; return i!=null&&cc.opts[i]?cc.t+': '+cc.opts[i].t:'';}).join(' / '),c.review||'']:['','',''])((DATA.citizen||{})[n.id]),...(rp=>[rp.st.rights.map(x=>(RIGHTS.find(r=>r.k===x.k)?.n.replace(/^\S+\s/,'')||'')+(x.ok?'○':'✕')).join(' '),rp.st.bankrupt?'파산':'',d.rescue&&RESCUE[d.rescue.opt]?RESCUE[d.rescue.opt].s:'',rp.grade,rp.score,rp.badges.map(b=>b.n).join(', ')])(report(d,citsFor(n.id),votesFor(n.id))),...(r=>r?[`${r.score}/${r.total}`,r.r1||'',r.r2||'',r.r3||'']:['','','',''])((DATA.reflect||{})[n.id])];});
   const csv='﻿'+[head,...rows].map(r=>r.map(csvCell).join(',')).join('\r\n');
   const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'})); a.download=`국가만들기_${ROOM}_${new Date().toISOString().slice(0,10)}.csv`; document.body.appendChild(a); a.click(); a.remove();
