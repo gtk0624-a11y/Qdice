@@ -119,6 +119,12 @@ mark{background:#ffe48a;color:inherit;padding:0 2px;border-radius:3px}
 .modal.opp{border:4px solid var(--ok)}
 .blink{animation:blink 1.2s infinite}
 @keyframes blink{50%{opacity:.5}}
+.slotm{transition:background .08s}.slotm.sb{background:#fff5f5!important;border:4px solid #c53030}.slotm.sg{background:#f0fff4!important;border:4px solid #2f855a}
+#slot{font-size:64px;font-weight:900;margin:14px 0}.slotm.sb #slot{color:#c53030}.slotm.sg #slot{color:#2f855a}
+@keyframes boom{0%{transform:scale(.2) rotate(-8deg);opacity:0}60%{transform:scale(1.25) rotate(3deg);opacity:1}80%{transform:scale(.95)}100%{transform:scale(1)}}
+@keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-12px)}40%,80%{transform:translateX(12px)}}
+.boom{animation:boom .6s ease-out}.shake{animation:shake .5s .6s 2}
+@keyframes beat{0%,100%{transform:scale(1)}50%{transform:scale(1.12)}}.beat{animation:beat .5s infinite}
 .spin{display:inline-block;animation:spin .9s ease-out}
 @keyframes spin{from{transform:rotate(0) scale(.4)}to{transform:rotate(720deg) scale(1)}}
 .banner{border-radius:14px;padding:14px 16px;margin-bottom:14px;font-weight:700}
@@ -688,11 +694,21 @@ let S=null, META={}, NATIONS={}, VOTES={}, CIT={}, PROG={}, REF={};
 let localEv=null, evResult=null, spinUntil=0, tRndSame=false;
 const KGRP={bad:['crisis','ops'],good:['opp'],any:['crisis','ops','opp']};
 function drawEv(g){ if(!S) return null; const left=EVENTS.filter(e=>!S.d.events[e.id]&&(!g||KGRP[g].includes(e.kind))); if(!left.length) return null;
-  const kinds=(g&&g!=='any'?KGRP[g]:['crisis','crisis','ops','opp']).filter(k=>left.some(e=>e.kind===k)); const k=kinds[Math.floor(Math.random()*kinds.length)];
+  const kinds=(g&&g!=='any'?KGRP[g]:['crisis','crisis','crisis','ops','ops','opp','opp','opp','opp']).filter(k=>left.some(e=>e.kind===k)); const k=kinds[Math.floor(Math.random()*kinds.length)];
   const pool=left.filter(e=>e.kind===k); return pool[Math.floor(Math.random()*pool.length)].id; }
-function startSpin(){ spinUntil=Date.now()+1800; setTimeout(()=>render(),1850); }
-function rndEv(ev){ if(!S||!ev) return null; if(!(S.rnd&&S.rnd.at===ev.at)){ const id=drawEv(ev.g); if(!id) return null; S.rnd={at:ev.at,id}; saveS(); startSpin(); } return {id:S.rnd.id,at:ev.at}; }
-const curEv=()=> DBMODE==='live' ? (META.event&&META.event.id==='RANDOM' ? rndEv(META.event) : META.event) : localEv;
+let revealUntil=0, revealGood=false, slotT=null;
+function startSpin(id){ const e=EVENTS.find(x=>x.id===id); revealGood=!!(e&&e.kind==='opp'); const T0=Date.now(); spinUntil=T0+4200; revealUntil=spinUntil+1800;
+  let good=Math.random()<.5, d=70; clearTimeout(slotT);
+  const tick=()=>{ const left=spinUntil-Date.now(); if(left<=0){ render(); setTimeout(()=>render(),1850); return; }
+    if(left<350) good=revealGood; else good=!good; const el=document.getElementById('slot'), m=document.getElementById('slotm'), h=document.getElementById('slothint');
+    if(el) el.textContent=good?'🎁 혜택?':'🚨 위기?'; if(m) m.className='modal center slotm '+(good?'sg':'sb');
+    if(h) h.textContent=left>2600?'두근두근… 무엇이 올까?':left>1200?'거의 다 왔어요…!':'과연…?!';
+    try{ if(navigator.vibrate&&left<1200) navigator.vibrate(20); }catch(_){}
+    d=Math.min(520,d*1.13); slotT=setTimeout(tick,d); };
+  setTimeout(tick,60); }
+function rndEv(ev){ if(!S||!ev) return null; if(!(S.rnd&&S.rnd.at===ev.at)){ const id=drawEv(ev.g); if(!id) return null; S.rnd={at:ev.at,id}; saveS(); startSpin(id); } return {id:S.rnd.id,at:ev.at}; }
+function sameEv(ev){ if(ev&&S&&S.submitted&&S.seenAt!==ev.at&&!S.d.events[ev.id]){ S.seenAt=ev.at; saveS(); startSpin(ev.id); } return ev; }
+const curEv=()=> DBMODE==='live' ? (META.event&&META.event.id==='RANDOM' ? rndEv(META.event) : sameEv(META.event)) : localEv;
 let tmpRoom='', evDraft={opts:[],reason:''}, voteDraft={to:null,reason:''}, openVote=null, studentView='main';
 const SLOT = (qs.get('s')||'').replace(/[^0-9a-z]/gi,'').slice(0,6); // 체험용: 한 기기에서 여러 학생 흉내 (&s=1, &s=2 ...)
 const skey = () => 'natgame_s_'+ROOM+(SLOT?'_'+SLOT:'');
@@ -809,7 +825,7 @@ function vResult(){
   let top='';
   if(S.submitted && DBMODE!=='live'){
     top=`<div class="banner ok">🎉 ${esc(S.d.name)} 선포 완료! 선생님이 부르는 <b>위기 사건</b> 버튼을 눌러 대응해 보세요.</div>
-    <div class="card"><h3 style="margin-top:0">🎲 사건 뽑기 <span class="muted">(어떤 사건이 올지 아무도 몰라요!)</span></h3>${EVENTS.every(e=>S.d.events[e.id])?'<div class="banner ok">모든 사건을 겪었어요!</div>':'<div class="grid g2"><button class="btn" style="background:#c53030;color:#fff;font-size:22px;padding:18px" data-act="selfEvent" data-v="bad">🚨 위기 상황!</button><button class="btn" style="background:#2f855a;color:#fff;font-size:22px;padding:18px" data-act="selfEvent" data-v="good">🎁 혜택 상황!</button></div>'}<div class="muted" style="font-weight:800;margin:12px 0 6px">지금까지 겪은 사건 ${EVENTS.filter(e=>S.d.events[e.id]).length}/${EVENTS.length}</div><div class="chips">${EVENTS.filter(e=>S.d.events[e.id]).map(e=>{const o=OUTCOME[S.d.events[e.id].out||'ok']; return `<span class="chip">${e.e} ${esc(e.t)} ${o.e}</span>`;}).join('')}</div></div><button class="btn acc" style="width:100%;margin-bottom:14px" data-act="toFinal">🏆 최종 결산 · 마무리 활동</button>`;
+    <div class="card"><h3 style="margin-top:0">🎲 사건 뽑기 <span class="muted">(어떤 사건이 올지 아무도 몰라요!)</span></h3>${EVENTS.every(e=>S.d.events[e.id])?'<div class="banner ok">모든 사건을 겪었어요!</div>':'<button class="btn" style="width:100%;background:linear-gradient(90deg,#c53030,#44337a,#2f855a);color:#fff;font-size:26px;padding:20px" data-act="selfEvent" data-v="any">🎲 운명의 사건 뽑기! <small style="font-size:14px">위기일까? 혜택일까?</small></button>'}<div class="muted" style="font-weight:800;margin:12px 0 6px">지금까지 겪은 사건 ${EVENTS.filter(e=>S.d.events[e.id]).length}/${EVENTS.length}</div><div class="chips">${EVENTS.filter(e=>S.d.events[e.id]).map(e=>{const o=OUTCOME[S.d.events[e.id].out||'ok']; return `<span class="chip">${e.e} ${esc(e.t)} ${o.e}</span>`;}).join('')}</div></div><button class="btn acc" style="width:100%;margin-bottom:14px" data-act="toFinal">🏆 최종 결산 · 마무리 활동</button>`;
   } else if(S.submitted){
     top=`<div class="banner ok">🎉 선포 완료! 선생님 화면에 ${esc(S.d.name)}이(가) 나타났어요. 선생님의 안내를 기다려 주세요.</div>`;
     { const ce=curEv(); if(ce && !S.d.events[ce.id]) top+=`<div class="banner bad blink">🚨 사건 발생! 대응이 필요합니다.</div>`; }
@@ -933,7 +949,8 @@ function vEvResult(){
 }
 function vEventModal(){
   const e=EVENTS.find(x=>x.id===(curEv()||{}).id); if(!e) return '';
-  if(Date.now()<spinUntil) return `<div class="overlay"><div class="modal alert center"><div class="spin" style="font-size:96px">🎲</div><h2 style="font-size:32px">어떤 사건이 닥칠까…?</h2><div style="font-size:40px;letter-spacing:6px">${EVENTS.map(x=>x.e).sort(()=>Math.random()-.5).slice(0,6).join(' ')}</div><p class="muted">위기일 수도, 기회일 수도 있어요!</p></div></div>`;
+  if(Date.now()<spinUntil) return `<div class="overlay"><div class="modal center slotm sb" id="slotm"><div class="beat" style="font-size:80px">🎲</div><div id="slot">🚨 위기?</div><h2 style="font-size:26px" id="slothint">두근두근… 무엇이 올까?</h2><p class="muted">${esc(S.d.name)}의 운명이 정해지는 중…</p></div></div>`;
+  if(Date.now()<revealUntil) return `<div class="overlay"><div class="modal center slotm ${revealGood?'sg':'sb'} ${revealGood?'':'shake'}"><div class="boom" style="font-size:110px">${e.e}</div><div class="boom" style="font-size:56px;font-weight:900;color:${revealGood?'#2f855a':'#c53030'}">${revealGood?'🎉 혜택 발생!':'🚨 위기 발생!'}</div><h2 class="boom" style="font-size:34px">${esc(e.t)}</h2><p style="font-size:18px">${revealGood?'기회를 잘 살리면 나라가 크게 성장해요!':'지도자의 판단이 나라의 운명을 가릅니다!'}</p></div></div>`;
   const v=computeInd(S.d), imp=eventImpact(S.d,e,v), opp=e.kind==='opp';
   return `<div class="overlay"><div class="modal ${opp?'opp':'alert'}"><div class="muted" style="font-weight:800">${KIND[e.kind]}</div><h2>${e.e} ${esc(e.t)}</h2><div class="scene">${esc(e.s)}</div>
   <div class="card" style="padding:14px;margin-bottom:12px;box-shadow:none"><b>📊 ${esc(S.d.name)}의 ${opp?'투자 상태':'준비 상태'}</b>
@@ -1025,7 +1042,7 @@ const SACT = {
   pickVote(ds){ voteDraft.to=ds.v; keepScroll=true; render(); },
   async submitVote(){ if(META.phase!=='vote') return toast('투표 시간이 아니에요.'); if(!voteDraft.to) return toast('살고 싶은 나라를 선택하세요.'); if(voteDraft.reason.trim().length<5) return toast('이유를 5글자 이상 써 주세요.');
     await backend.set(`rooms/${ROOM}/votes/${S.id}`,{to:voteDraft.to,reason:voteDraft.reason,from:S.id,fromName:`${S.num}번 ${S.sname}`,at:Date.now()}); toast('🗳️ 투표 완료!'); keepScroll=true; render(); },
-  selfEvent(ds){ const id=drawEv(ds.v); if(!id) return toast('이 종류의 사건은 모두 겪었어요!'); localEv={id}; evDraft={opts:[],reason:''}; startSpin(); render(); },
+  selfEvent(ds){ const id=drawEv(ds.v); if(!id) return toast('모든 사건을 겪었어요!'); localEv={id}; evDraft={opts:[],reason:''}; startSpin(id); render(); },
   evclose(){ localEv=null; render(); },
   evpick(ds){ const o=+ds.o, a=evDraft.opts, i=a.indexOf(o); if(i>=0) a.splice(i,1); else { if(a.length>=2) return toast('최대 2개까지 함께 쓸 수 있어요.'); a.push(o); } keepScroll=true; render(); },
   evresclose(){ evResult=null; render(); },
@@ -1126,8 +1143,8 @@ function tEvents(L){
   return `<div class="card"><h2>🎲 사건 보내기</h2><p class="muted">버튼을 누르면 <b>선포를 마친 학생 태블릿</b>에 사건 창이 뜹니다. 결과는 각 나라의 <b>평소 예산(대비·투자)</b>과 <b>시민 신뢰</b>에 따라 달라집니다. 한 번에 하나씩 보내고, 대응이 끝나면 [사건 종료]를 누르세요. 한 시간에 2~3개를 권합니다.</p>
   ${cur?`<div class="banner bad">진행 중: ${cur.id==='RANDOM'?(cur.g==='good'?'🎁 혜택 상황 (나라마다 무작위)':cur.g==='any'?'❓ 운명의 상황 (나라마다 무작위)':'🚨 위기 상황 (나라마다 무작위)'):esc((EVENTS.find(x=>x.id===cur.id)?.e||'')+' '+(EVENTS.find(x=>x.id===cur.id)?.t||''))} <button class="btn sm" style="margin-left:10px" data-act="endEvent">사건 종료(창 닫기)</button></div>`:''}
   <div class="row" style="margin:10px 0"><b>보내는 방식</b><button class="btn sm ${tRndSame?'ghost':'acc'}" data-act="rndMode" data-v="0">🎲 나라마다 다른 사건</button><button class="btn sm ${tRndSame?'acc':'ghost'}" data-act="rndMode" data-v="1">👥 모두 같은 사건</button></div>
-  <div class="grid g2" style="margin:10px 0"><button class="btn" style="background:#c53030;color:#fff;font-size:26px;padding:22px" data-act="launchRnd" data-v="bad">🚨 위기 상황!<br><small style="font-weight:600;font-size:14px">재난·전쟁·경제 위기 중 무엇이 올지 아무도 몰라요</small></button><button class="btn" style="background:#2f855a;color:#fff;font-size:26px;padding:22px" data-act="launchRnd" data-v="good">🎁 혜택 상황!<br><small style="font-weight:600;font-size:14px">인재·자원·기술·문화 중 무엇이 올지 아무도 몰라요</small></button></div>
-  <button class="btn" style="width:100%;background:#44337a;color:#fff;font-size:22px;padding:16px;margin-bottom:10px" data-act="launchRnd" data-v="any">❓ 운명의 상황! <small style="font-weight:600;font-size:14px">위기일지 혜택일지 선생님도 몰라요</small></button>
+  <button class="btn" style="width:100%;background:linear-gradient(90deg,#c53030,#44337a,#2f855a);color:#fff;font-size:32px;padding:26px;margin:6px 0 10px" data-act="launchRnd" data-v="any">🎲 운명의 사건 발생!<br><small style="font-weight:600;font-size:15px">위기일까? 혜택일까? 선생님도 학생도 몰라요. 학생 화면에서 두근두근 슬롯이 돌아가요</small></button>
+  <details style="margin-bottom:8px"><summary style="cursor:pointer;font-weight:700">종류만 정해서 보내기 (위기만 / 혜택만)</summary><div class="grid g2" style="margin:8px 0"><button class="btn" style="background:#c53030;color:#fff;font-size:20px;padding:14px" data-act="launchRnd" data-v="bad">🚨 위기 중 무작위</button><button class="btn" style="background:#2f855a;color:#fff;font-size:20px;padding:14px" data-act="launchRnd" data-v="good">🎁 혜택 중 무작위</button></div></details>
   <details><summary style="cursor:pointer;font-weight:800;margin:8px 0">📋 사건 직접 골라 보내기</summary>
   ${['crisis','ops','opp'].map(kd=>`<h3>${KIND[kd]}</h3><div class="grid g4">${EVENTS.filter(e=>e.kind===kd).map(e=>`<button class="opt ${cur&&cur.id===e.id?'sel':''}" data-act="launch" data-v="${e.id}"><div class="e">${e.e}</div><div class="t">${esc(e.t)}</div><div class="d">${e.prep&&e.prep.length?'결과를 좌우하는 예산: '+esc(e.prepName):'결과를 좌우하는 것: 시민 신뢰'}</div></button>`).join('')}</div>`).join('')}</details></div>
   ${EVENTS.map(e=>{ const st=optStats(L,e,n=>n.d.events[e.id]); const doneL=L.filter(n=>n.d.events[e.id]); if(!doneL.length) return ''; const op=openCard===e.id;
