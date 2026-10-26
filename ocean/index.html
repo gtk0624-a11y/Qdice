@@ -199,40 +199,38 @@ const FUEL = 10, BOATC = 80, SONARC = 80, MAXH = 0.85;
 const START_MONEY = 150, START_BOATS1 = 2, START_BOATS2 = 3, BOAT_MAX = 10;
 
 const CH = {
-  free:  {k:'free', n:'자유 어업', sb:'헌장 없음', e:'🏴', max:99, dense:true,
-          q:'바다는 누구의 것도 아니다. 먼저 잡는 사람이 임자!',
-          rules:['출항·그물·배 구입 모두 자유','아무 약속도 하지 않음'],
-          lim:'나만 자유롭게 잡으면 이득일까? 모두가 그렇게 하면?'},
-  human: {k:'human', n:'자원 관리 헌장', sb:'인간 중심주의', e:'📊', max:2, dense:true,
-          q:'물고기는 인간에게 소중한 자원이다. 오래 쓰려면 아껴 써야 한다.',
-          rules:['1년에 배 2척까지만 출항(어획량 제한)','그물은 자유','점수는 돈'],
-          lim:'돈이 되는 물고기만 세고 관리한다. 돈이 안 되는 생명은?'},
-  eco:   {k:'eco', n:'생명 공동체 헌장', sb:'생태 중심주의', e:'🌍', max:2, dense:false, turtleSafe:true, income:0.85, reserve:true,
-          q:'바다의 생명은 인간에게 쓸모가 있든 없든 그 자체로 소중하다.',
-          rules:['배 2척까지만 출항','촘촘한 그물 금지','모든 생명 탈출 장치(혼획 0) → 수입 15% 감소','보호구역 지정 → 바다 전체 번식 +10%'],
-          lim:'수입이 줄면 어민의 생계는? 모든 개발을 반대할 수 있을까?'},
-  conf:  {k:'conf', n:'맹자의 그물코', sb:'유교', e:'📜', max:3, dense:false,
-          q:'“촘촘한 그물을 웅덩이에 넣지 않으면 물고기와 자라를 다 먹을 수 없을 만큼 많아진다.” — 『맹자』',
-          rules:['촘촘한 그물 금지(어린 물고기 보호)','배 3척까지 출항','사람과 자연이 서로 어울려 오래 함께 산다'],
-          lim:'그물코만 지키고 배를 늘린다면?'},
-  bud:   {k:'bud', n:'필요한 만큼', sb:'불교', e:'🪷', max:99, dense:false, turtleSafe:true, cap:80,
-          q:'모든 생명은 서로 기대어 있다. 필요한 만큼만 얻고, 걸린 생명은 놓아준다.',
-          rules:['1년 수입은 80코인까지만 — 넘게 잡힌 물고기는 바다로 돌려보냄','촘촘한 그물 금지','그물에 걸린 생명은 살려서 놓아줌(방생)'],
-          lim:'모두가 “필요한 만큼”이라 해도, 사람 수가 늘어나면?'},
-  tao:   {k:'tao', n:'쉬는 바다', sb:'도가', e:'☯️', max:4, dense:true, rest:[2,4],
-          q:'자연은 있는 그대로가 가장 좋다. 억지로 하지 않고 순리를 따른다(무위자연).',
-          rules:['2년째·4년째는 쉬는 해 — 출항하지 않음','다른 해에는 배 4척까지','바다가 스스로 회복할 시간을 준다'],
-          lim:'쉬는 해에는 무엇으로 살아갈까? 다른 팀이 그 사이에 다 잡는다면?'}
+  /* free: 1부(헌장 이전)에만 쓰는 '규칙 없음' 상태 — 학생이 고를 수 없음 */
+  free:  {k:'free', n:'규칙 없음', sb:'1부', e:'🎣', max:99, dense:true, q:'', rules:[], lim:''},
+  human: {k:'human', n:'인간 중심주의', sb:'서양 · 도구적 가치', e:'📊', max:2, dense:true,
+          q:'자연은 인간의 필요를 채워 주는 수단이다. 물고기는 소중한 자원이니 오래 쓰려면 아껴 써야 한다.',
+          rules:['1년에 배 2척까지만 출항(자원 관리)','그물은 자유','점수는 돈 — 사람에게 쓸모 있는 물고기만 관리'],
+          lim:'좋은 점: 인간의 삶을 풍요롭게 함 / 한계: 지나치면 무분별한 개발과 환경 파괴로 이어짐'},
+  eco:   {k:'eco', n:'생태 중심주의', sb:'서양 · 본래적 가치', e:'🌍', max:2, dense:false, turtleSafe:true, income:0.85, reserve:true,
+          q:'자연은 인간의 이익과 상관없이 그 자체로 소중하다.',
+          rules:['배 2척까지만 출항','촘촘한 그물 금지','모든 생명 탈출 장치(그물에 걸려 죽는 생명 0) → 수입 15% 감소','보호구역 지정 → 바다 전체 번식 +10%'],
+          lim:'좋은 점: 모든 생명의 가치를 존중함 / 한계: 지나치면 인간에 의한 모든 개발을 반대하게 됨'},
+  conf:  {k:'conf', n:'유교의 자연관', sb:'동양 · 공존과 조화', e:'📜', max:3, dense:false,
+          q:'자연과 인간은 서로 유기적인 존재이며 다르지 않다. “촘촘한 그물을 웅덩이에 넣지 않으면 물고기와 자라를 다 먹을 수 없을 만큼 많아진다.” — 『맹자』',
+          rules:['촘촘한 그물 금지(어린 물고기 보호)','배 3척까지 출항','자연과 공존하며 조화롭게 이용'],
+          lim:'자연을 이용하되 조화를 지키는 균형점은 어디일까?'},
+  bud:   {k:'bud', n:'불교의 자연관', sb:'동양 · 상호 의존', e:'🪷', max:99, dense:false, turtleSafe:true, cap:80,
+          q:'자연과 인간은 밀접하게 서로 의존한다. 그러므로 모든 생명을 소중히 여겨야 한다.',
+          rules:['1년 수입은 80코인까지만 — 필요보다 많이 잡힌 물고기는 바다로 돌려보냄','촘촘한 그물 금지','그물에 걸린 생명은 살려서 놓아줌(방생)'],
+          lim:'모든 생명을 소중히 여기며 사람의 생계도 지킬 수 있을까?'},
+  tao:   {k:'tao', n:'도가의 자연관', sb:'동양 · 무위자연', e:'☯️', max:4, dense:true, rest:[2,4],
+          q:'자연은 있는 그대로 이상적이며 인간도 자연의 한 부분이다. 억지로 하지 않고 순리를 따른다.',
+          rules:['2년째·4년째는 쉬는 해 — 출항하지 않고 바다가 스스로 회복하도록 둠','다른 해에는 배 4척까지'],
+          lim:'자연의 순리를 따르는 삶은 오늘날 어떻게 가능할까?'}
 };
-const CHK = ['free','human','eco','conf','bud','tao'];
+const CHK = ['human','eco','conf','bud','tao'];
 
 const EV = {
   start:   {e:'🌅', t:'황금 어장의 시작', d:'꿈결 앞바다에 물고기가 가득합니다. 많이 잡을수록 부자가 됩니다. 1부가 끝났을 때 가장 돈이 많은 선단이 우승!'},
-  factory: {e:'🏭', t:'해안 공장 폐수 유입', d:'바닷가에 공장이 들어서며 폐수가 흘러듭니다. 올해 고등어·명태가 10% 줄어듭니다.'},
-  boom:    {e:'📈', t:'도시에 회 열풍!', d:'올해 수산물 값이 2배! 많이 잡을수록 큰돈을 법니다.', price:2},
-  heat:    {e:'🌡️', t:'바닷물 온도 상승', d:'찬물을 좋아하는 명태가 알을 잘 낳지 못합니다. (올해부터 명태 번식력이 줄어듭니다)'},
-  news:    {e:'🗞️', t:'“명태가 돌아오지 않는다”', d:'실제 이야기: 동해에서는 어린 명태(노가리)까지 마구 잡다가 명태가 거의 사라졌고, 2019년부터 1년 내내 명태 잡이가 금지되었습니다.'},
-  renew:   {e:'🌱', t:'10년 뒤, 다시 열린 바다', d:'10년 동안 고기잡이를 쉬자 바다가 조금씩 회복되었습니다. 이번에는 우리 팀이 정한 헌장대로 바다를 씁니다.'},
+  factory: {e:'🏭', t:'해안 공장 폐수 유입 [산업화]', d:'바닷가에 공장이 들어서며 폐수가 흘러듭니다. 올해 고등어·명태가 10% 줄어듭니다.'},
+  boom:    {e:'📈', t:'도시에 회 열풍! [물질주의적 소비]', d:'올해 수산물 값이 2배! 많이 잡을수록 큰돈을 법니다.', price:2},
+  heat:    {e:'🌡️', t:'바닷물 온도 상승 [지구 온난화]', d:'찬물을 좋아하는 명태가 알을 잘 낳지 못합니다. (올해부터 명태 번식력이 줄어듭니다)'},
+  news:    {e:'🗞️', t:'“명태가 돌아오지 않는다” [무분별한 개발]', d:'실제 이야기: 동해에서는 어린 명태(노가리)까지 마구 잡다가 명태가 거의 사라졌고, 2019년부터 1년 내내 명태 잡이가 금지되었습니다.'},
+  renew:   {e:'🌱', t:'10년 뒤, 다시 열린 바다', d:'10년 동안 고기잡이를 쉬자 바다가 조금씩 회복되었습니다. 이번에는 우리 팀이 고른 자연관(헌장)대로 바다와 관계를 맺습니다.'},
   ghost:   {e:'🧵', t:'유령 그물', d:'바다에 버려진 그물이 바닷속 생명을 휘감고 있습니다.'},
   kids:    {e:'👶', t:'자녀 세대가 바다를 물려받았습니다', d:'여러분은 이제 앞 세대 선장들의 아들딸입니다. 부모 세대가 남긴 바다에서 살아가야 합니다.', kid:true}
 };
@@ -353,17 +351,16 @@ const TEAMS = [
 ];
 const TM = Object.fromEntries(TEAMS.map(t=>[t.k,t]));
 const CAUSES = [
-  {e:'⛵', t:'배를 계속 늘려서', s:'산업화'},
-  {e:'🕸️', t:'촘촘한 그물로 어린 물고기까지 잡아서', s:'무분별한 개발'},
-  {e:'📈', t:'더 많이 팔아 더 벌고 싶어서', s:'물질주의적 소비'},
-  {e:'👉', t:'다른 팀이 너무 많이 잡아서', s:'남 탓?'}
+  {e:'⛵', t:'배와 음파탐지기를 계속 늘려서', s:'산업화'},
+  {e:'🕸️', t:'이익만 보고 어린 물고기까지 마구 잡아서', s:'무분별한 개발'},
+  {e:'📈', t:'더 많이 팔아 더 벌고 싶어서', s:'물질주의적 소비'}
 ];
 const REFQ = [
   {k:'q1', e:'🐢', t:'바다거북은 왜 줄어들었을까요? ‘도구적 가치’와 ‘본래적 가치’라는 말을 넣어 설명해 보세요.', st:'바다거북은 돈이 되지 않아서 ( ) 가치가 없다고 여겨졌기 때문에'},
   {k:'q2', e:'📜', t:'우리 팀이 고른 헌장은 어떤 자연관이었나요? 그 헌장의 좋은 점과 한계는 무엇이었나요?', st:'우리 팀은 ( ) 헌장을 골랐는데, 좋은 점은'},
   {k:'q3', e:'👋', t:'라코타족은 자연에게 “안녕, 나의 친척들”이라고 인사합니다. 오늘의 바다에게 인사말을 써 보세요.', st:'안녕, 나의 ( ). '}
 ];
-const CONCEPTS = ['도구적','본래적','인간 중심','생태 중심','유교','불교','도가','공존','조화','미래 세대','공유지'];
+const CONCEPTS = ['도구적','본래적','인간 중심','생태 중심','유교','불교','도가','공존','조화','미래 세대','산업화','무분별한 개발','물질주의','생태 감수성'];
 
 /* =========================================================
    ③ 저장소 (Firebase 실시간 DB 또는 체험 모드)
@@ -584,11 +581,11 @@ function vP1End(){
 function chCard(k,sel,act,teamsWho){
   const c=CH[k];
   return `<button class="chcard ${sel?'sel':''}" ${act?`data-act="${act}" data-v="${k}"`:''}><div class="hd"><span class="e">${c.e}</span><div><div class="nm">${esc(c.n)}</div><span class="sb">${esc(c.sb)}</span></div></div>
-  <div class="qt">${esc(c.q)}</div><ul>${c.rules.map(r=>`<li>${esc(r)}</li>`).join('')}</ul>${teamsWho?`<div class="who">${teamsWho}</div>`:''}</button>`;
+  <div class="qt">${esc(c.q)}</div><ul>${c.rules.map(r=>`<li>${esc(r)}</li>`).join('')}</ul>${c.lim?`<div class="small" style="margin-top:6px;color:#7a5600">💭 ${esc(c.lim)}</div>`:''}${teamsWho?`<div class="who">${teamsWho}</div>`:''}</button>`;
 }
 function vCharter(){
   const t=myTeam()||{}; const ch=t.charter;
-  return `${sHeader()}<div class="card">${say('10년 동안 고기잡이를 쉬었더니 바다가 조금 돌아왔어. 이번에는 <b>우리 선단의 약속(헌장)</b>을 먼저 정하고 바다로 나가자! 헌장은 2부 내내 <b>진짜 규칙</b>이 돼.',true)}
+  return `${sHeader()}<div class="card">${say('10년 동안 고기잡이를 쉬었더니 바다가 조금 돌아왔어. 이번에는 교과서의 <b>자연을 바라보는 다섯 관점</b> 중 하나를 우리 선단의 헌장으로 정하고 바다로 나가자! 헌장은 2부 내내 <b>진짜 규칙</b>이 돼.',true)}
   <p class="muted small">✋ 모둠이 함께 하나를 고르세요. 팀원 누구나 바꿀 수 있어요.</p>
   <div class="grid g2">${CHK.map(k=>chCard(k,ch===k,'pickCh')).join('')}</div>
   <label class="lb">✍️ 우리 팀이 이 헌장을 고른 까닭 (10자 이상)</label>
@@ -680,7 +677,7 @@ function finalBody(rv,big){
   const fishTot=o=>Math.round(100*fishHealth(o));
   if(rv===0){
     const n=Math.max(D.p1.length,D.p2.length);
-    const s=[{n:'1부 (자유롭게 잡은 바다)',c:'#d64545',vals:D.p1.map(fishTot)},{n:'2부 (헌장을 정한 바다)',c:'#1f9d7a',vals:D.p2.map(fishTot)}];
+    const s=[{n:'1부 (물고기 = 돈으로만 본 바다)',c:'#d64545',vals:D.p1.map(fishTot)},{n:'2부 (자연관을 정한 바다)',c:'#1f9d7a',vals:D.p2.map(fishTot)}];
     return `${nav}${say('같은 바다, 같은 사람들인데 결과가 달라요. 무엇이 달랐을까요?',big)}${lineChart(s,{ymax:100,pct:true})}
     <div class="grid g2" style="margin-top:12px"><div><h3>1부 어종별</h3>${lineChart(pctSeries(D.p1),{ymax:100,pct:true,h:220})}</div><div><h3>2부 어종별</h3>${lineChart(pctSeries(D.p2),{ymax:100,pct:true,h:220})}</div></div>`;
   }
@@ -704,7 +701,7 @@ function finalBody(rv,big){
     ${say(`바다거북은 <b>한 마리도 팔 수 없어서</b> 어느 선단의 돈 계산에도 들어가지 않았어요. 하지만 고기잡이 그물에 함께 걸려 죽었어요. 처음 ${t0}마리 → 지금 <b>${Math.round(tEnd)}마리</b>.`,big)}
     ${lineChart(tser,{ymax:100,pct:true,xl,bands})}
     <h3>그물에 걸린 바다거북 (1부 + 2부)</h3><div class="bars">${D.kills.map(x=>`<div class="bar"><div class="lbl"><span>${TM[x.k].e} ${esc(TM[x.k].n)} <span class="muted small">${(CH[(TEAMSD[x.k]||{}).charter]||CH.free).e} ${(CH[(TEAMSD[x.k]||{}).charter]||CH.free).sb}</span></span><span>1부 ${x.v1.toFixed(1)} · 2부 ${x.v2.toFixed(1)}마리</span></div><div class="tr"><i style="width:${100*(x.v1+x.v2)/mx}%;background:${TM[x.k].c}"></i></div></div>`).join('')}</div>
-    <div class="concept" style="margin-top:14px"><div class="h">❓ 생각해 볼 질문</div>자원 관리 헌장(인간 중심)을 지킨 팀도 물고기는 지켰지만 바다거북은 세지 않았어요.<br><b>돈이 안 되는 생명은 지켜야 할 까닭이 없을까요?</b> — 도구적 가치 / 본래적 가치</div>`;
+    <div class="concept" style="margin-top:14px"><div class="h">❓ 생각해 볼 질문</div>인간 중심주의 헌장을 지킨 팀도 물고기는 지켰지만 바다거북은 세지 않았어요.<br><b>돈이 안 되는 생명은 지켜야 할 까닭이 없을까요?</b> — 도구적 가치 / 본래적 가치</div>`;
   }
   const h=lifeHealth(D.last), fh=fishHealth(D.last);
   const E = h>=0.55?{e:'🐋',n:'살아 있는 바다',c:'linear-gradient(135deg,#1f9d7a,#0e5a8a)',d:'물고기도, 바다거북도 함께 살아가는 바다를 다음 세대에 물려주었습니다.'}
@@ -713,7 +710,7 @@ function finalBody(rv,big){
   return `${nav}<div class="ending" style="background:${E.c}"><div class="e">${E.e}</div><div class="n">${E.n}</div><div style="font-size:18px;margin-top:6px">${E.d}</div></div>
   <div class="grid g2" style="margin-top:14px"><div class="card" style="margin:0">${clockSVG(fh,180)}</div><div class="card" style="margin:0"><div class="center"><div style="font-size:15px;font-weight:800;color:var(--sub)">🐟 물고기만 셌을 때</div><div style="font-size:40px;font-weight:900">${Math.round(fh*100)}점</div><div style="font-size:15px;font-weight:800;color:var(--sub);margin-top:8px">🐢 모든 생명을 셌을 때</div><div style="font-size:40px;font-weight:900;color:${h<fh-0.05?'#d64545':'#1f9d7a'}">${Math.round(h*100)}점</div></div></div></div>
   <div class="concept" style="margin-top:14px"><div class="h">🧭 오늘의 핵심 질문</div>
-  ① 1부에서 바다를 망친 것은 누구였나요? 나쁜 사람이 있었나요?<br>② 인간 중심주의 · 생태 중심주의 · 유교 · 불교 · 도가 — 어떤 헌장이 바다와 사람 모두에게 좋았나요? 각각의 한계는?<br>③ 라코타족은 물고기와 거북을 “나의 친척들”이라 불러요. 그렇게 본다면 우리의 고기잡이는 어떻게 달라질까요?</div>`;
+  ① 1부 바다에서 본 환경 위기의 원인(산업화 · 무분별한 개발 · 물질주의적 소비)은 무엇이었나요?<br>② 인간 중심주의 · 생태 중심주의 · 유교 · 불교 · 도가 — 각 자연관의 좋은 점과 한계는?<br>③ 라코타족은 물고기와 거북을 “나의 친척들”이라 불러요. 그렇게 본다면 우리의 고기잡이는 어떻게 달라질까요?</div><div class="tip" style="margin-top:12px"><b>📘 자연과 인간의 바람직한 관계 (교과서 198쪽)</b> — 인간과 자연은 유기적으로 연결되어 있다 → 서로 <b>조화를 이루며 공존</b>하고, 인간은 자연에 대한 <b>윤리적 책임</b>을 실천해야 한다.</div>`;
 }
 
 /* =========================================================
@@ -791,24 +788,24 @@ function tP1End(){
   const p1=toArr(HIST.p1); const ans=plist().filter(p=>p.a1&&p.a1.done);
   const cnt=CAUSES.map((_,i)=>ans.filter(p=>p.a1.c===i).length), mx=Math.max(1,...cnt);
   const tot=keys().map(k=>({k,v:+(TEAMSD[k]||{}).catch1||0})); const sum=Math.max(1,tot.reduce((a,x)=>a+x.v,0));
-  return `<div class="card"><h2>📉 1부 — 바다에 무슨 일이 있었나?</h2>${say('이제 <b>정확한 물고기 수</b>를 공개합니다. 바다는 어떻게 변했나요?',true)}
+  return `<div class="card"><h2>📉 1부 — 우리 바다의 환경 위기</h2>${say('이제 <b>정확한 물고기 수</b>를 공개합니다. 바다는 어떻게 변했나요?',true)}
   ${lineChart(pctSeries(p1),{ymax:100,pct:true})}
   <div class="grid g2" style="margin-top:14px"><div><h3>🎣 누가 얼마나 잡았나? (1부 전체 어획 비율)</h3><div class="bars">${tot.sort((a,b)=>b.v-a.v).map(x=>`<div class="bar"><div class="lbl"><span>${TM[x.k].e} ${esc(TM[x.k].n)}</span><span>${Math.round(100*x.v/sum)}%</span></div><div class="tr"><i style="width:${100*x.v/sum}%;background:${TM[x.k].c}"></i></div></div>`).join('')}</div>
-  <div class="concept" style="margin-top:12px"><div class="h">💡 공유지의 비극</div>모두가 함께 쓰는 자원을 각자 자기 이익만 생각해 쓰면, 결국 모두가 손해를 보게 된다.</div></div>
+  <div class="concept" style="margin-top:12px"><div class="h">📘 환경 문제를 위기로 받아들여야 하는 까닭 (교과서 192쪽)</div>① 지구의 자정 능력을 위협하는 수준이기 때문<br>② 전 지구적인 문제로 인류를 위협하기 때문<br>③ 미래 세대에까지 영향을 미치기 때문</div></div>
   <div><h3>❓ 학생들이 고른 가장 큰 까닭 <span class="cnt">${ans.length}</span></h3><div class="bars">${CAUSES.map((c,i)=>`<div class="bar"><div class="lbl"><span>${c.e} ${esc(c.t)} <span class="muted small">${esc(c.s)}</span></span><span>${cnt[i]}명</span></div><div class="tr"><i style="width:${100*cnt[i]/mx}%;background:var(--sea)"></i></div></div>`).join('')}</div>
-  <div class="tip" style="margin-top:12px"><b>교과서 연결</b> — 환경 위기의 원인: ⛵ 산업화 · 🕸️ 무분별한 개발 · 📈 물질주의적 소비 생활. “👉 다른 팀 탓”을 고른 학생이 많다면: <b>그 팀은 나쁜 사람이었나요?</b></div></div></div>
+  <div class="tip" style="margin-top:12px"><b>📘 환경 위기의 원인 (교과서 193쪽)</b> — ⛵ 산업화 · 🕸️ 무분별한 개발 · 📈 물질주의적 소비 생활<br>그리고 1부의 바다는 물고기를 <b>돈(도구적 가치)</b>으로만 본 바다였어요. 이것은 어떤 자연관일까요?</div></div></div>
   <h3>💬 학생 답 (눌러서 크게 보기)</h3><div class="wall">${ans.map(p=>`<button class="wcard" data-act="spot" data-v="${esc(CAUSES[p.a1.c].e+' '+CAUSES[p.a1.c].t+'\n'+p.a1.t)}" data-w="${esc(p.nick)}"><small>${TM[p.team]?TM[p.team].e:''} ${esc(p.num)}번 ${esc(p.nick)} · ${CAUSES[p.a1.c].e}</small>${esc(p.a1.t)}</button>`).join('')||'<p class="muted">아직 답이 없어요.</p>'}</div>
   <div class="row" style="margin-top:16px;justify-content:flex-end"><button class="btn acc xl" data-act="toCharter">📜 10년 뒤 · 헌장 정하기 →</button></div></div>`;
 }
 function tCharter(){
   const who=k=>keys().filter(t=>(TEAMSD[t]||{}).charter===k).map(t=>teamTag(t)).join('');
   const done=keys().filter(k=>(TEAMSD[k]||{}).charter).length;
-  return `<div class="card"><h2>📜 10년 뒤 — 우리 선단의 헌장 <span class="cnt">${done}/${keys().length}</span></h2>
-  ${say('10년 동안 고기잡이를 쉬었더니 바다가 다시 돌아왔어요. 이번에는 <b>선단마다 자연을 바라보는 약속(헌장)</b>을 하나 정하고 바다로 나갑니다. 헌장은 2부 내내 <b>진짜 게임 규칙</b>이 됩니다.',true)}
+  return `<div class="card"><h2>📜 10년 뒤 — 우리 선단의 자연관(헌장) <span class="cnt">${done}/${keys().length}</span></h2>
+  ${say('10년 동안 고기잡이를 쉬었더니 바다가 다시 돌아왔어요. 이번에는 선단마다 교과서의 <b>자연을 바라보는 다섯 관점</b> 중 하나를 골라 헌장으로 삼고 바다로 나갑니다. 헌장은 2부 내내 <b>진짜 게임 규칙</b>이 됩니다.',true)}
   ${OCEAN?speciesGrid(OCEAN,false):''}
   <div class="grid g3" style="margin-top:14px">${CHK.map(k=>chCard(k,false,null,who(k))).join('')}</div>
   <h3>✍️ 팀별 까닭</h3><div class="wall">${keys().map(k=>{ const t=TEAMSD[k]||{}; return `<div class="wcard"><small>${TM[k].e} ${esc(TM[k].n)} · ${t.charter?CH[t.charter].e+' '+esc(CH[t.charter].n):'미선택'}</small>${esc(t.why||'(아직 없음)')}</div>`; }).join('')}</div>
-  <div class="row" style="margin-top:16px;justify-content:flex-end"><span class="muted small">헌장을 고르지 않은 팀은 ‘자유 어업’이 됩니다.</span><button class="btn acc xl" data-act="startP2">🌱 2부 출항 →</button></div></div>`;
+  <div class="row" style="margin-top:16px;justify-content:flex-end"><span class="muted small">헌장을 고르지 않은 팀은 ‘인간 중심주의’로 시작합니다.</span><button class="btn acc xl" data-act="startP2">🌱 2부 출항 →</button></div></div>`;
 }
 function tFinal(){
   const rv=+META.rv||0;
@@ -914,8 +911,8 @@ const TACT = {
     const tm=initTeams(START_BOATS2,true); keys().forEach(k=>upd['teams/'+k]=tm[k]);
     T.tab='run'; backend.update(BASE(),upd);
   },
-  startP2(){ const miss=keys().filter(k=>!(TEAMSD[k]||{}).charter); if(miss.length && !confirm(`${miss.map(k=>TM[k].n).join(', ')}이(가) 헌장을 고르지 않았어요. ‘자유 어업’으로 시작할까요?`)) return;
-    const upd={'meta/phase':'p2'}; miss.forEach(k=>upd[`teams/${k}/charter`]='free'); T.tab='run'; backend.update(BASE(),upd); },
+  startP2(){ const miss=keys().filter(k=>!(TEAMSD[k]||{}).charter); if(miss.length && !confirm(`${miss.map(k=>TM[k].n).join(', ')}이(가) 헌장을 고르지 않았어요. ‘인간 중심주의’로 시작할까요?`)) return;
+    const upd={'meta/phase':'p2'}; miss.forEach(k=>upd[`teams/${k}/charter`]='human'); T.tab='run'; backend.update(BASE(),upd); },
   rv(el){ const v=clampN((+META.rv||0)+(+el.dataset.v),0,3); backend.update(`${BASE()}/meta`,{rv:v}); },
   spot(el){ T.spot={v:el.dataset.v,w:el.dataset.w}; render(); },
   spotClose(el,ev){ if(ev && ev.target!==el) return; T.spot=null; render(); },
