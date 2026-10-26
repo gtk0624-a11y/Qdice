@@ -892,9 +892,18 @@ function refQs(d){
 }
 function conceptChipsHTML(){ const u=usedConcepts(['r1','r2','r3'].map(k=>refDraft[k]||'').join(' ')); return `<b>💡 오늘 배운 개념어를 2개 이상 넣어 쓰세요</b> <span class="muted">(지금 ${u.length}개 사용)</span><div class="chips" style="margin-top:6px">${CONCEPTS.map(c=>`<span class="chip ${u.includes(c)?'sel':''}">${esc(c)}</span>`).join('')}</div>`; }
 function refLen(k){ return (refDraft[k]||'').replace(/\(\s*\)/g,'').trim().length; }
-let refDraft={ans:{},r1:'',r2:'',r3:''};
+let refDraft={ans:{},r1:'',r2:'',r3:''}, _rt=null;
+function refDone(){ const r=REF&&S&&REF[S.id]; return !!(r&&!r.draft); }
+function saveRef(){ if(!S) return; S.ref=refDraft; saveS(); clearTimeout(_rt); _rt=setTimeout(pushRefDraft,1200); }
+function pushRefDraft(){ if(!S||!ROOM||refDone()) return; const r=refDraft; if(!(r.r1||r.r2||r.r3||Object.keys(r.ans||{}).length)) return;
+  Promise.resolve().then(()=>backend.set(`rooms/${ROOM}/reflect/${S.id}`,{name:`${S.num}번 ${S.sname}`,ans:r.ans||{},r1:r.r1||'',r2:r.r2||'',r3:r.r3||'',draft:true,at:Date.now()})).catch(()=>{}); }
+function refCheck(){ const blanks=CLOZE.flatMap((c,i)=>c.a.map((a,j)=>`k${i}_${j}`)); const qs=refQs(S.d); const items=[
+  [blanks.every(k=>refDraft.ans[k]),`괄호 ${blanks.filter(k=>refDraft.ans[k]).length}/${blanks.length}개 채움`],
+  ...qs.map((q,i)=>[refLen(q.k)>=30&&!/\(\s*\)/.test(refDraft[q.k]||''),`소감 ${i+1}: ${refLen(q.k)}자 (30자 이상${/\(\s*\)/.test(refDraft[q.k]||'')?', 빈칸 (   ) 남음':''})`]),
+  [usedConcepts(qs.map(q=>refDraft[q.k]||'').join(' ')).length>=2,`개념어 ${usedConcepts(qs.map(q=>refDraft[q.k]||'').join(' ')).length}/2개`]];
+  return `<b>제출 전 확인</b> <span class="muted">(쓰는 내용은 자동 저장돼요 💾)</span><div style="margin-top:4px">${items.map(([ok,t])=>`<div style="color:${ok?'var(--ok)':'#9b2c2c'};font-weight:700">${ok?'✅':'⬜'} ${esc(t)}</div>`).join('')}</div>`; }
 function vFinal(){
-  const vc=votesFor(S.id), rp=report(S.d,citsFor(S.id),vc), mine=REF&&REF[S.id], gc=GRADE_C[rp.grade];
+  const vc=votesFor(S.id), rp=report(S.d,citsFor(S.id),vc), mine=refDone()?REF[S.id]:null, gc=GRADE_C[rp.grade];
   return `${sHeader()}<div class="card center"><h2>🏆 ${esc(S.d.name)} 최종 결산</h2>
   <div style="font-size:84px;font-weight:900;color:${gc};line-height:1">${rp.grade}</div><div style="font-size:20px;font-weight:800;margin-top:6px">국가 운영 점수 ${rp.score}점</div>
   <div class="muted" style="margin-top:6px">지표 평균 ${rp.avg}점 · 헌법 약속 ${rp.kept}개 지킴 / ${rp.broken}개 어김${rp.st.bankrupt?' · 💸 파산 경험 (−10점)':''} · 🗳️ 살고 싶다는 친구 ${vc}명 · ${QUAD[rp.r.q].e} ${esc(QUAD[rp.r.q].n)}</div>
@@ -905,7 +914,7 @@ function vFinal(){
   ${CLOZE.map((c,i)=>clozeHTML(c,i,mine)).join('')}
   <h3>2. 국가 운영 소감</h3>
   ${(qs=>mine?qs.map(q=>`<div class="law" style="margin-bottom:8px"><b>${q.e} ${esc((mine.q||{})[q.k]||q.t)}</b><p>${hlC(mine[q.k]||'')}</p></div>`).join(''):`<div class="tip" id="cc">${conceptChipsHTML()}</div>`+qs.map(q=>`<label class="lb">${q.e} ${esc(q.t)}</label><div class="muted" style="margin:-2px 0 6px">✍️ 문장 틀: ${esc(q.starter)}… <button class="btn sm ghost" data-act="starter" data-k="${q.k}">틀 넣기</button></div><textarea class="field" style="min-height:110px" data-bind="${q.k}" maxlength="500" placeholder="30글자 이상, 내 나라의 결과를 근거로 써 주세요">${esc(refDraft[q.k])}</textarea><div class="muted" style="text-align:right;font-size:13px" id="len_${q.k}">${refLen(q.k)}자 / 30자 이상</div>`).join(''))(refQs(S.d))}
-  ${mine?'<div class="banner ok" style="margin-top:12px">✅ 제출 완료! 수고했어요.</div>':''}
+  ${mine?'<div class="banner ok" style="margin-top:12px">✅ 제출 완료! 수고했어요.</div>':`<div class="tip" id="chk" style="margin-top:12px">${refCheck()}</div>`}
   </div><div class="navbar"><div class="in"><button class="btn ghost" data-act="backMain">← 내 나라</button>${mine?'<span></span>':'<button class="btn acc" data-act="reflsubmit">제출하기</button>'}</div></div>`;
 }
 function vEvResult(){
@@ -981,7 +990,7 @@ const SACT = {
   reedit(){ if(!confirm('나라를 고쳐서 다시 선포할까요? (지금까지의 선택은 그대로 남아 있어요)')) return; S.submitted=false; S.ci=0; go(1); },
   toVote(){ studentView='vote'; if(VOTES&&VOTES[S.id]) voteDraft={to:VOTES[S.id].to,reason:VOTES[S.id].reason||''}; window.scrollTo(0,0); render(); },
   backMain(){ studentView='main'; render(); },
-  starter(ds){ const q=refQs(S.d).find(x=>x.k===ds.k); if(!q) return; if((refDraft[ds.k]||'').trim()) return toast('이미 쓴 내용이 있어요. 지우고 누르면 틀이 들어가요.'); refDraft[ds.k]=q.starter; keepScroll=true; render(); },
+  starter(ds){ const q=refQs(S.d).find(x=>x.k===ds.k); if(!q) return; if((refDraft[ds.k]||'').trim()) return toast('이미 쓴 내용이 있어요. 지우고 누르면 틀이 들어가요.'); refDraft[ds.k]=q.starter; saveRef(); keepScroll=true; render(); },
   toFinal(){ studentView='final'; window.scrollTo(0,0); render(); },
   rescuepick(ds){ rescueDraft.opt=+ds.o; render(); },
   async rescuesubmit(){ if(rescueDraft.opt==null) return toast('방법을 하나 고르세요.'); if(rescueDraft.reason.trim().length<5) return toast('이유를 5글자 이상 써 주세요.');
@@ -996,7 +1005,7 @@ const SACT = {
     const used=usedConcepts(qs.map(q=>refDraft[q.k]).join(' '));
     if(used.length<2) return toast('오늘 배운 개념어를 2개 이상 넣어 주세요. (예: 권리, 의무, 소통, 협력)');
     const score=blanks.filter(b=>refDraft.ans[b.k]===b.a).length;
-    await backend.set(`rooms/${ROOM}/reflect/${S.id}`,{name:`${S.num}번 ${S.sname}`,ans:refDraft.ans,score,total:blanks.length,r1:refDraft.r1,r2:refDraft.r2,r3:refDraft.r3,q:{r1:qs[0].t,r2:qs[1].t,r3:qs[2].t},concepts:used,at:Date.now()});
+    clearTimeout(_rt); try{ await backend.set(`rooms/${ROOM}/reflect/${S.id}`,{name:`${S.num}번 ${S.sname}`,ans:refDraft.ans,score,total:blanks.length,r1:refDraft.r1,r2:refDraft.r2,r3:refDraft.r3,q:{r1:qs[0].t,r2:qs[1].t,r3:qs[2].t},concepts:used,at:Date.now()}); }catch(e){ console.error(e); return toast('⚠️ 저장 실패: 인터넷 연결을 확인하고 다시 [제출하기]를 눌러 주세요. (쓴 내용은 남아 있어요)'); }
     toast(`📝 제출 완료! 괄호 ${score}/${blanks.length}개 정답`); window.scrollTo(0,0); render(); },
   toCitizen(){ studentView='citizen'; window.scrollTo(0,0); render(); },
   citpick(ds){ citDraft.a[ds.c]=+ds.o; keepScroll=true; render(); },
@@ -1028,8 +1037,8 @@ function bindStudentInput(t){
   if(b==='evreason'){ evDraft.reason=v; return; }
   if(b==='citreview'){ citDraft.review=v; return; }
   if(b==='rescuereason'){ rescueDraft.reason=v; return; }
-  if(b==='cloze'){ refDraft.ans[t.dataset.k]=v; return; }
-  if(b==='r1'||b==='r2'||b==='r3'){ refDraft[b]=v; const cc=document.getElementById('cc'); if(cc) cc.innerHTML=conceptChipsHTML(); const ln=document.getElementById('len_'+b); if(ln) ln.textContent=refLen(b)+'자 / 30자 이상'; return; }
+  if(b==='cloze'){ refDraft.ans[t.dataset.k]=v; saveRef(); const ck=document.getElementById('chk'); if(ck) ck.innerHTML=refCheck(); return; }
+  if(b==='r1'||b==='r2'||b==='r3'){ refDraft[b]=v; const cc=document.getElementById('cc'); if(cc) cc.innerHTML=conceptChipsHTML(); const ln=document.getElementById('len_'+b); if(ln) ln.textContent=refLen(b)+'자 / 30자 이상'; const ck=document.getElementById('chk'); if(ck) ck.innerHTML=refCheck(); saveRef(); return; }
   if(!S) return;
   if(b==='num') S.num=v.replace(/[^0-9]/g,'').slice(0,3);
   else if(b==='sname') S.sname=v.slice(0,10);
@@ -1042,7 +1051,7 @@ function bindStudentInput(t){
 function startStudent(){
   if(!ROOM && DBMODE!=='live') ROOM='SOLO';
   if(!ROOM){ render(); return; }
-  S=loadS();
+  S=loadS(); if(S&&S.ref) refDraft=Object.assign({ans:{},r1:'',r2:'',r3:''},S.ref,{ans:Object.assign({},S.ref.ans||{})});
   backend.on(`rooms/${ROOM}/meta`,m=>{
     const prevPhase=META.phase; META=m||{};
     if(S && META.resetAt && META.resetAt>S.joinedAt){ try{localStorage.removeItem(skey());}catch(e){} S=null; studentView='main'; toast('선생님이 방을 초기화했어요. 처음부터 시작합니다.'); }
@@ -1053,7 +1062,7 @@ function startStudent(){
   backend.on(`rooms/${ROOM}/nations`,n=>{ NATIONS=n||{}; if(studentView!=='main') softRender(); });
   backend.on(`rooms/${ROOM}/citizen`,c=>{ CIT=c||{}; if(S&&S.submitted) softRender(); });
   backend.on(`rooms/${ROOM}/progress`,pv=>{ PROG=pv||{}; });
-  backend.on(`rooms/${ROOM}/reflect`,rf=>{ REF=rf||{}; if(studentView==='final') softRender(); });
+  backend.on(`rooms/${ROOM}/reflect`,rf=>{ REF=rf||{}; const sv=S&&REF[S.id]; if(sv&&sv.draft&&!(refDraft.r1||refDraft.r2||refDraft.r3)){ refDraft={ans:Object.assign({},sv.ans||{}),r1:sv.r1||'',r2:sv.r2||'',r3:sv.r3||''}; if(S){S.ref=refDraft; saveS();} if(studentView==='final') render(); return; } if(studentView==='final') softRender(); });
   backend.on(`rooms/${ROOM}/votes`,v=>{ VOTES=v||{}; if(studentView==='vote'||studentView==='final') softRender(); });
   render();
   if(S && S.sname) pushProgress();
@@ -1140,17 +1149,17 @@ function tFinal(L){
     {e:'🔥',t:'오뚝이상 (파산 극복)',w:best(x=>x.rp.v.eco,x=>x.rp.st.bankrupt&&x.rp.st.rescued),val:x=>`파산 후 경제 ${x.rp.v.eco}점`}
   ];
   const gcnt={}; R.forEach(x=>gcnt[x.rp.grade]=(gcnt[x.rp.grade]||0)+1); const bk=R.filter(x=>x.rp.st.bankrupt).length;
-  const refl=Object.values(DATA.reflect||{});
+  const reflAll=Object.values(DATA.reflect||{}), refl=reflAll.filter(r=>r&&!r.draft), nDraft=reflAll.length-refl.length;
   const blanks=CLOZE.flatMap((c,i)=>c.a.map((a,j)=>({k:`k${i}_${j}`,a,q:i+1})));
   return `<div class="card"><h2>🏆 우리 반 국가 시상식</h2><div class="ngrid">${awards.map(a=>a.w?`<div class="ncard" style="text-align:center"><div style="font-size:42px">${a.e}</div><div style="font-weight:900;font-size:18px">${esc(a.t)}</div><div style="margin:8px 0">${flagHTML(a.w.n.d.flag)}</div><div class="nn">${esc(a.w.n.d.name)}</div><div class="ns">${esc(a.w.n.num)}번 ${esc(a.w.n.sname)}</div><div class="muted" style="margin-top:4px">${esc(a.val(a.w))}</div></div>`:`<div class="ncard" style="text-align:center;opacity:.5"><div style="font-size:42px">${a.e}</div><div style="font-weight:900">${esc(a.t)}</div><div class="muted">해당 나라 없음</div></div>`).join('')}</div></div>
   <div class="card"><h3 style="margin-top:0">📊 우리 반 국가 운영 성적</h3><div class="stat">${['S','A','B','C','D'].map(g=>`<div class="box"><b style="color:${GRADE_C[g]}">${g} ${gcnt[g]||0}</b><small>${g}등급</small></div>`).join('')}<div class="box"><b>💸 ${bk}</b><small>파산한 나라</small></div></div>
   <div class="ngrid">${R.slice().sort((a,b)=>b.rp.score-a.rp.score).map(x=>`<div class="ncard"><div class="nh">${flagHTML(x.n.d.flag,'sm')}<div><div class="nn">${esc(x.n.d.name)}</div><div class="ns">${esc(x.n.num)}번 ${esc(x.n.sname)}</div></div><span class="sp"></span><b style="font-size:30px;color:${GRADE_C[x.rp.grade]}">${x.rp.grade}</b></div><div class="ns">${x.rp.score}점${x.rp.st.bankrupt?' · 💸 파산'+(x.rp.st.rescued?' → 회복 중':''):''}</div><div style="margin-top:6px;font-size:20px">${x.rp.badges.map(b=>b.e).join(' ')}</div></div>`).join('')}</div></div>
-  <div class="card"><h3 style="margin-top:0">📝 마무리 활동 (${refl.length}/${L.length}명 제출)</h3>
-  ${refl.length?`<p>괄호 채우기 평균 <b>${(refl.reduce((a,r)=>a+(r.score||0),0)/refl.length).toFixed(1)}</b> / ${blanks.length}</p>
-  <div class="chips">${blanks.map(b=>{ const ok=refl.filter(r=>(r.ans||{})[b.k]===b.a).length; const pc=Math.round(ok/refl.length*100); return `<span class="chip" style="${pc<60?'border-color:var(--bad);color:#9b2c2c':''}">${b.q}번 ${esc(b.a)} ${pc}%</span>`; }).join('')}</div>
+  <div class="card"><h3 style="margin-top:0">📝 마무리 활동 (제출 ${refl.length}명 · ✏️ 작성 중 ${nDraft}명 / ${L.length}명)</h3>
+  ${reflAll.length?`${refl.length?`<p>괄호 채우기 평균 <b>${(refl.reduce((a,r)=>a+(r.score||0),0)/refl.length).toFixed(1)}</b> / ${blanks.length}</p>`:'<p class="muted">아직 제출한 학생이 없어요. 작성 중인 소감은 아래에 자동 저장되어 보입니다.</p>'}
+  <div class="chips">${refl.length?blanks.map(b=>{ const ok=refl.filter(r=>(r.ans||{})[b.k]===b.a).length; const pc=Math.round(ok/refl.length*100); return `<span class="chip" style="${pc<60?'border-color:var(--bad);color:#9b2c2c':''}">${b.q}번 ${esc(b.a)} ${pc}%</span>`; }).join(''):''}</div>
   <p class="muted">빨간 칸 = 정답률 60% 미만 → 다시 짚어 줄 개념</p>
   <div class="row" style="margin:10px 0"><b>✍️ 학생 소감</b><span class="muted">(노란색 = 개념어)</span><span class="sp"></span><button class="btn sm teal" data-act="spot">🖥️ ⭐ 고른 소감 크게 보기</button></div>
-  <ul class="rlist">${Object.entries(DATA.reflect||{}).map(([id,r])=>`<li><div class="row"><b>${esc(r.name||'')}</b><span class="muted">괄호 ${r.score}/${r.total} · 개념어 ${(r.concepts||[]).length}개</span><span class="sp"></span><button class="btn sm ${r.star?'acc':'ghost'}" data-act="star" data-v="${id}">${r.star?'⭐ 선택됨':'☆ 고르기'}</button></div>${['r1','r2','r3'].map((k,i)=>`<div style="margin-top:8px"><div class="muted" style="font-size:13px">${['🏛️','🤝','🌱'][i]} ${esc((r.q||{})[k]||'')}</div>${hlC(r[k]||'')}</div>`).join('')}</li>`).join('')}</ul>`:'<p class="muted">위쪽 <b>④ 시상식·마무리</b>를 누르면 학생 화면에 최종 결산과 마무리 활동(괄호 채우기·소감)이 나타납니다.</p>'}</div>`;
+  <ul class="rlist">${Object.entries(DATA.reflect||{}).map(([id,r])=>`<li><div class="row"><b>${esc(r.name||'')}</b>${r.draft?'<span class="typebadge" style="background:#d69e2e">✏️ 작성 중 (미제출·자동 저장)</span>':`<span class="muted">괄호 ${r.score}/${r.total} · 개념어 ${(r.concepts||[]).length}개</span>`}<span class="sp"></span><button class="btn sm ${r.star?'acc':'ghost'}" data-act="star" data-v="${id}">${r.star?'⭐ 선택됨':'☆ 고르기'}</button></div>${['r1','r2','r3'].map((k,i)=>`<div style="margin-top:8px"><div class="muted" style="font-size:13px">${['🏛️','🤝','🌱'][i]} ${esc((r.q||{})[k]||'')}</div>${hlC(r[k]||'')}</div>`).join('')}</li>`).join('')}</ul>`:'<p class="muted">위쪽 <b>④ 시상식·마무리</b>를 누르면 학생 화면에 최종 결산과 마무리 활동(괄호 채우기·소감)이 나타납니다.</p>'}</div>`;
 }
 function tSpot(){ const st=Object.values(DATA.reflect||{}).filter(r=>r&&r.star);
   return `<div class="overlay" data-act="closeSpot"><div class="modal" data-stop="1" style="max-width:1100px"><div class="row"><h2 style="margin:0">⭐ 오늘의 소감</h2><span class="sp"></span><button class="btn" data-act="closeSpot">닫기 ✕</button></div>${st.length?st.map(r=>`<div class="law" style="margin-top:14px;font-size:21px;line-height:1.75"><b>${esc(r.name||'')}</b>${['r1','r2','r3'].map(k=>r[k]?`<p>${hlC(r[k])}</p>`:'').join('')}</div>`).join(''):'<p class="muted" style="margin-top:14px">학생 소감 옆 ☆ 고르기를 눌러 보여 줄 소감을 골라 주세요.</p>'}</div></div>`; }
@@ -1211,7 +1220,7 @@ function exportCSV(){
     ...CARDS.flatMap(c=>{const ch=d.choices[c.id]; return ch?['ABC'[ch.opt]+'. '+c.opts[ch.opt].t,ch.reason]:['',''];}),
     d.con.a1,d.con.a2,d.con.duties.map(k=>DUTIES.find(x=>x.k===k)?.n.replace(/^\S+\s/,'')).join(', '),
     ...EVENTS.flatMap(e=>{const r=d.events[e.id]; return r?[evTxt(e,r),r.reason]:['',''];}),
-    ...IND.map(i=>n.v[i.k]),TYPES[n.tk].n,vt?(DATA.nations?.[vt.to]?.d?.name||''):'',vt?vt.reason:'',byK(IDEO,d.ideo)?.n||'',...(r=>[r.S,r.C,QUAD[r.q].n])(relation(d,citsFor(n.id))),...(c=>c?[DATA.nations?.[c.to]?.d?.name||'',CIT_CARDS.map(cc=>{const i=(c.a||{})[cc.id]; return i!=null&&cc.opts[i]?cc.t+': '+cc.opts[i].t:'';}).join(' / '),c.review||'']:['','',''])((DATA.citizen||{})[n.id]),...(rp=>[rp.st.rights.map(x=>(RIGHTS.find(r=>r.k===x.k)?.n.replace(/^\S+\s/,'')||'')+(x.ok?'○':'✕')).join(' '),rp.st.bankrupt?'파산':'',d.rescue&&RESCUE[d.rescue.opt]?RESCUE[d.rescue.opt].s:'',rp.grade,rp.score,rp.badges.map(b=>b.n).join(', ')])(report(d,citsFor(n.id),votesFor(n.id))),...(r=>r?[`${r.score}/${r.total}`,r.r1||'',r.r2||'',r.r3||'']:['','','',''])((DATA.reflect||{})[n.id])];});
+    ...IND.map(i=>n.v[i.k]),TYPES[n.tk].n,vt?(DATA.nations?.[vt.to]?.d?.name||''):'',vt?vt.reason:'',byK(IDEO,d.ideo)?.n||'',...(r=>[r.S,r.C,QUAD[r.q].n])(relation(d,citsFor(n.id))),...(c=>c?[DATA.nations?.[c.to]?.d?.name||'',CIT_CARDS.map(cc=>{const i=(c.a||{})[cc.id]; return i!=null&&cc.opts[i]?cc.t+': '+cc.opts[i].t:'';}).join(' / '),c.review||'']:['','',''])((DATA.citizen||{})[n.id]),...(rp=>[rp.st.rights.map(x=>(RIGHTS.find(r=>r.k===x.k)?.n.replace(/^\S+\s/,'')||'')+(x.ok?'○':'✕')).join(' '),rp.st.bankrupt?'파산':'',d.rescue&&RESCUE[d.rescue.opt]?RESCUE[d.rescue.opt].s:'',rp.grade,rp.score,rp.badges.map(b=>b.n).join(', ')])(report(d,citsFor(n.id),votesFor(n.id))),...(r=>r?[r.draft?'작성 중(미제출)':`${r.score}/${r.total}`,r.r1||'',r.r2||'',r.r3||'']:['','','',''])((DATA.reflect||{})[n.id])];});
   const csv='﻿'+[head,...rows].map(r=>r.map(csvCell).join(',')).join('\r\n');
   const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'})); a.download=`국가만들기_${ROOM}_${new Date().toISOString().slice(0,10)}.csv`; document.body.appendChild(a); a.click(); a.remove();
 }
