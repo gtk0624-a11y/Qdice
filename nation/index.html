@@ -682,6 +682,8 @@ let pending=false;
 function isTyping(){ const a=document.activeElement; return a && $app.contains(a) && (a.tagName==='TEXTAREA' || (a.tagName==='INPUT' && a.type!=='button')); }
 let lastScroll=0, rTimer=null;
 ['scroll','touchmove','wheel'].forEach(ev=>window.addEventListener(ev,()=>{ lastScroll=Date.now(); },{passive:true}));
+let _tt=null, _tLast=0, _tAct=0;
+function tThrottle(){ const w=(Date.now()-_tAct<2500?0:4000)-(Date.now()-_tLast); if(w<=0){ _tLast=Date.now(); softRender(); } else if(!_tt){ _tt=setTimeout(()=>{ _tt=null; _tLast=Date.now(); softRender(); },w); } }
 function softRender(){ if(isTyping()){ pending=true; return; } if(Date.now()-lastScroll<1200){ clearTimeout(rTimer); rTimer=setTimeout(softRender,700); return; } render(); }
 document.addEventListener('focusout',()=>{ setTimeout(()=>{ if(pending && !isTyping()){ pending=false; render(); } },150); });
 function render(){ pending=false; clearTimeout(rTimer); const y=window.scrollY; $app.style.minHeight=$app.offsetHeight+'px'; (MODE==='teacher'?renderTeacher:renderStudent)(); window.scrollTo(0,y); requestAnimationFrame(()=>{ $app.style.minHeight=''; if(Math.abs(window.scrollY-y)>2) window.scrollTo(0,y); }); keepScroll=false; }
@@ -915,9 +917,9 @@ function refQs(d){
 }
 function conceptChipsHTML(){ const u=usedConcepts(['r1','r2','r3'].map(k=>refDraft[k]||'').join(' ')); return `<b>💡 오늘 배운 개념어를 2개 이상 넣어 쓰세요</b> <span class="muted">(지금 ${u.length}개 사용)</span><div class="chips" style="margin-top:6px">${CONCEPTS.map(c=>`<span class="chip ${u.includes(c)?'sel':''}">${esc(c)}</span>`).join('')}</div>`; }
 function refLen(k){ return (refDraft[k]||'').replace(/\(\s*\)/g,'').trim().length; }
-let refDraft={ans:{},r1:'',r2:'',r3:''}, _rt=null;
+let refDraft={ans:{},r1:'',r2:'',r3:''}, _rt=null, lastDone=false, lastMetaSig='';
 function refDone(){ const r=REF&&S&&REF[S.id]; return !!(r&&!r.draft); }
-function saveRef(){ if(!S) return; S.ref=refDraft; saveS(); clearTimeout(_rt); _rt=setTimeout(pushRefDraft,1200); }
+function saveRef(){ if(!S) return; S.ref=refDraft; saveS(); clearTimeout(_rt); _rt=setTimeout(pushRefDraft,3000); }
 function pushRefDraft(){ if(!S||!ROOM||refDone()) return; const r=refDraft; if(!(r.r1||r.r2||r.r3||Object.keys(r.ans||{}).length)) return;
   Promise.resolve().then(()=>backend.set(`rooms/${ROOM}/reflect/${S.id}`,{name:`${S.num}번 ${S.sname}`,ans:r.ans||{},r1:r.r1||'',r2:r.r2||'',r3:r.r3||'',draft:true,at:Date.now()})).catch(()=>{}); }
 function refCheck(){ const blanks=CLOZE.flatMap((c,i)=>c.a.map((a,j)=>`k${i}_${j}`)); const qs=refQs(S.d); const items=[
@@ -1082,13 +1084,14 @@ function startStudent(){
     if(S && META.resetAt && META.resetAt>S.joinedAt){ try{localStorage.removeItem(skey());}catch(e){} S=null; studentView='main'; toast('선생님이 방을 초기화했어요. 처음부터 시작합니다.'); }
     if(META.phase!==prevPhase && S && S.submitted){ studentView = ({vote:'vote',citizen:'citizen',final:'final'})[META.phase]||'main'; }
     if(DBMODE==='live' && !['vote','citizen','final'].includes(META.phase)) studentView='main';
+    const sig=JSON.stringify([META.phase,META.event,META.resetAt,studentView]); if(studentView==='final'&&sig===lastMetaSig) return; lastMetaSig=sig;
     softRender();
   });
-  backend.on(`rooms/${ROOM}/nations`,n=>{ NATIONS=n||{}; if(studentView!=='main') softRender(); });
-  backend.on(`rooms/${ROOM}/citizen`,c=>{ CIT=c||{}; if(S&&S.submitted) softRender(); });
+  backend.on(`rooms/${ROOM}/nations`,n=>{ NATIONS=n||{}; if(studentView!=='main'&&studentView!=='final') softRender(); });
+  backend.on(`rooms/${ROOM}/citizen`,c=>{ CIT=c||{}; if(S&&S.submitted&&studentView!=='final') softRender(); });
   backend.on(`rooms/${ROOM}/progress`,pv=>{ PROG=pv||{}; });
-  backend.on(`rooms/${ROOM}/reflect`,rf=>{ REF=rf||{}; const sv=S&&REF[S.id]; if(sv&&sv.draft&&!(refDraft.r1||refDraft.r2||refDraft.r3)){ refDraft={ans:Object.assign({},sv.ans||{}),r1:sv.r1||'',r2:sv.r2||'',r3:sv.r3||''}; if(S){S.ref=refDraft; saveS();} if(studentView==='final') render(); return; } if(studentView==='final') softRender(); });
-  backend.on(`rooms/${ROOM}/votes`,v=>{ VOTES=v||{}; if(studentView==='vote'||studentView==='final') softRender(); });
+  backend.on(`rooms/${ROOM}/reflect`,rf=>{ REF=rf||{}; const sv=S&&REF[S.id]; if(sv&&sv.draft&&!(refDraft.r1||refDraft.r2||refDraft.r3)){ refDraft={ans:Object.assign({},sv.ans||{}),r1:sv.r1||'',r2:sv.r2||'',r3:sv.r3||''}; if(S){S.ref=refDraft; saveS();} if(studentView==='final') render(); return; } const dn=refDone(); if(studentView==='final'&&dn!==lastDone){ lastDone=dn; softRender(); } lastDone=dn; });
+  backend.on(`rooms/${ROOM}/votes`,v=>{ VOTES=v||{}; if(studentView==='vote') softRender(); });
   render();
   if(S && S.sname) pushProgress();
 }
@@ -1287,7 +1290,7 @@ const TACT = {
 let tStarted=false;
 function startTeacherData(){
   if(tStarted) return; tStarted=true;
-  backend.on(`rooms/${ROOM}`,v=>{ DATA=v||{}; if(!DATA.meta){ backend.update(`rooms/${ROOM}/meta`,{phase:'build',createdAt:Date.now()}); } softRender(); });
+  backend.on(`rooms/${ROOM}`,v=>{ DATA=v||{}; if(!DATA.meta){ backend.update(`rooms/${ROOM}/meta`,{phase:'build',createdAt:Date.now()}); } tThrottle(); });
 }
 function startTeacher(){
   if(!ROOM){ ROOM=newCode(); history.replaceState(null,'','?mode=teacher&room='+ROOM); }
@@ -1298,7 +1301,7 @@ function startTeacher(){
 /* =========================================================
    ⑧ 이벤트 연결 & 시작
    ========================================================= */
-document.addEventListener('click',e=>{
+document.addEventListener('click',e=>{ _tAct=Date.now();
   const t=e.target.closest('[data-act]');
   if(!t) return;
   if(t.classList.contains('overlay') && e.target!==t) return; // 모달 안쪽 클릭은 닫지 않음
