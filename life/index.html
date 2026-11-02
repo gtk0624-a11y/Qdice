@@ -235,7 +235,7 @@ const BE = [
 ];
 const BM = Object.fromEntries(BE.map(b=>[b.k,b]));
 const ELE = {
-  ride:{e:'🐘',t:'코끼리 타기 관광 계속 허가',d:'관광객이 몰려 마을 수입이 크게 늘어요.',eff:{money:300,pain:-20,will:-20,eco:-10,life:10}},
+  ride:{e:'🐘',t:'코끼리 타기 관광 계속 허가',d:'관광객이 몰려 마을 수입이 크게 늘어요. (하지만 코끼리는…)',eff:{money:300,pain:-20,will:-20,eco:-10,life:10}},
   watch:{e:'🔭',t:'타기는 금지, 관찰하는 생태 관광으로',d:'수입은 줄지만 코끼리가 자기 방식대로 살 수 있어요.',eff:{money:120,pain:8,will:10,eco:5,life:3}},
   ban:{e:'🌿',t:'관광 전면 금지 + 코끼리 보호 구역',d:'수입은 없고 관광업 주민들이 일자리를 잃어요.',eff:{money:0,pain:12,will:15,eco:15,life:-12}}
 };
@@ -256,9 +256,11 @@ const PC = [
   {k:'stT',c:'stray',e:'🚚',n:'유기 동물 마을 밖으로 내보내기',d:'민원이 줄고 거리가 깨끗해져요',cost:10,eff:{life:6,pain:-10,will:-10},trap:2},
   {k:'wi1',c:'wild',e:'🌉',n:'야생 동물 생태 통로',d:'찻길에 막힌 길을 다시 이어요',cost:80,eff:{eco:12,will:6}},
   {k:'wi2',c:'wild',e:'🚲',n:'탄소 줄이기 자전거길',d:'기후 변화로 고통받는 야생 동물을 위해',cost:60,eff:{eco:8,pain:2,life:3}},
+  {k:'wiG',c:'wild',e:'🔭',n:'멀리서 보는 생태 관광 안내소',d:'방해하지 않고 관찰만! 안내비 수입',cost:30,inc:50,eff:{eco:6,will:4,life:4}},
   {k:'wiT',c:'wild',e:'🦌',n:'야생 동물 먹이 주기 체험 카페',d:'관광객 인기 만점! 입장료 수입',cost:0,inc:70,eff:{life:6,will:-10,eco:-6},trap:1},
   {k:'fa1',c:'farm',e:'🐖',n:'동물 복지 축사 인증 지원',d:'가축이 움직이고 쉴 수 있는 축사',cost:80,eff:{pain:12,will:6,life:-2}},
   {k:'fa2',c:'farm',e:'🥗',n:'급식에 ‘고기 없는 날’ 선택 메뉴',d:'원하는 사람만 고르는 채식 메뉴',cost:30,eff:{pain:4,eco:4,life:-3}},
+  {k:'faG',c:'farm',e:'🥚',n:'동물 복지 달걀 직판장',d:'넓은 농장 달걀을 제값에! 판매 수입',cost:40,inc:50,eff:{pain:7,will:3,life:2}},
   {k:'faT',c:'farm',e:'🏭',n:'축사 두 배로 늘리기',d:'고기는 더 싸게, 수입은 쑥',cost:0,inc:90,eff:{life:6,pain:-12,eco:-8},trap:3},
   {k:'pl1',c:'plant',e:'📖',n:'반려 식물 돌봄 안내서',d:'식물마다 알맞은 빛·물·온도 안내',cost:20,eff:{will:5}},
   {k:'pl2',c:'plant',e:'📅',n:'‘물 준 날’ 달력 표시 캠페인',d:'물을 너무 자주 주지 않도록',cost:15,eff:{will:4}},
@@ -272,15 +274,31 @@ const PC = [
 ];
 const PM = Object.fromEntries(PC.map(p=>[p.k,p]));
 const MSG = [
-  {c:'pet',e:'🐕',w:'반려견 몽이',t:'재미 삼아 제가 싫어하는 개인기를 계속 시키지 마세요. 화가 난다고 소리치고 때리면 너무 무서워요.'},
-  {c:'plant',e:'🪴',w:'금전수',t:'매일 물을 주면 좋아할 줄 알았죠? 사실 뿌리가 썩어 가고 있어요. 저를 잘 알아봐 주세요.'},
-  {c:'stray',e:'🐶',w:'유기견 보리',t:'이사 가던 날, 저만 두고 갔어요. 보호소에서 매일 문만 바라봐요.'},
-  {c:'farm',e:'🐖',w:'농장 돼지',t:'몸을 돌릴 수도 없는 좁은 우리에서 평생을 살아요. 흙을 한 번 밟아 보고 싶어요.'},
-  {c:'wild',e:'🐻‍❄️',w:'북극곰',t:'얼음이 녹아 사냥할 곳이 없어요. 멀리 사는 여러분의 생활이 우리 집을 녹이고 있대요.'},
-  {c:'wildp',e:'🪷',w:'가시연꽃',t:'제가 사는 습지가 메워지고 있어요. 저는 이 습지가 아니면 살 수 없어요.'}
+  {c:'pet',e:'🐕',w:'반려견 몽이',t:'재미 삼아 제가 싫어하는 개인기를 계속 시키지 마세요. 화가 난다고 소리치고 때리면 너무 무서워요.',ok:'몽이가 꼬리를 흔들며 달려와요! 🐕💕',ng:'몽이가 집을 나가 돌아오지 않아요…'},
+  {c:'plant',e:'🪴',w:'금전수',t:'매일 물을 주면 좋아할 줄 알았죠? 사실 뿌리가 썩어 가고 있어요. 저를 잘 알아봐 주세요.',ok:'금전수가 새잎을 틔웠어요! 🌱',ng:'금전수 뿌리가 모두 썩어 버렸어요…',lose:'mj'},
+  {c:'stray',e:'🐶',w:'유기견 보리',t:'이사 가던 날, 저만 두고 갔어요. 보호소에서 매일 문만 바라봐요.',ok:'보리가 새 가족을 만났어요! 🏠',ng:'보리는 끝내 보호소를 나오지 못했어요…'},
+  {c:'farm',e:'🐖',w:'농장 돼지',t:'몸을 돌릴 수도 없는 좁은 우리에서 평생을 살아요. 흙을 한 번 밟아 보고 싶어요.',ok:'돼지가 태어나 처음으로 흙을 밟았어요! 🐖',ng:'돼지들은 여전히 좁은 우리에 갇혀 있어요…'},
+  {c:'wild',e:'🐻‍❄️',w:'북극곰',t:'얼음이 녹아 사냥할 곳이 없어요. 멀리 사는 여러분의 생활이 우리 집을 녹이고 있대요.',ok:'북극곰이 새끼와 함께 살아남았어요! 🐻‍❄️',ng:'북극곰의 마지막 얼음이 녹았어요…'},
+  {c:'wildp',e:'🪷',w:'가시연꽃',t:'제가 사는 습지가 메워지고 있어요. 저는 이 습지가 아니면 살 수 없어요.',ok:'가시연꽃이 습지 위로 꽃을 피웠어요! 🪷',ng:'습지와 함께 가시연꽃이 사라졌어요…',lose:'lo'}
 ];
-const START = {money:200,pain:50,will:50,eco:50,life:60};
-const MAXC = 3, DRIFT = 3, PEN = 6;
+const START = {money:200,pain:55,will:55,eco:55,life:60};
+const MAXC = 3, DRIFT = 4, PEN = 12, EFX = 1.5, LOSE = 35, SPILL = 3, TIMER = 120;
+/* 마을 생명이 기대는 지수 — 이 지수가 35 아래로 떨어지면 그 생명은 마을에서 사라짐 */
+const BLINK = {el:'will',ra:'pain',mo:'will',mj:'will',pi:'eco',be:'eco',ca:'pain',co:'eco',sa:'pain',lo:'eco'};
+const RARE = [
+  {k:'r1',e:'🏥',n:'생명 구조 병원',d:'다친 동물을 구조하고 치료하는 마을 병원',eff:{pain:20,will:10},rev:true},
+  {k:'r2',e:'🏞️',n:'국립 생태 보전 지역',d:'숲과 습지를 통째로 보호 구역으로',eff:{eco:20,will:10},rev:true},
+  {k:'r3',e:'🌍',n:'국제 생명 보호 협약',d:'국제기구와 함께 생명 보호를 약속',eff:{pain:10,will:10,eco:10},rev:true},
+  {k:'r4',e:'🧬',n:'멸종 위기종 복원 센터',d:'사라진 생명을 되살리는 연구소',eff:{eco:15,will:15},rev:true}
+];
+const EVS = {
+  heat:{e:'🔥',t:'폭염 경보',d:'생태 지수 −12. 단, 🚲자전거길이나 🌉생태 통로가 있는 마을은 막아 냅니다.',g:'eco',v:-12,guard:['wi1','wi2','r2']},
+  plague:{e:'🦠',t:'동물 전염병',d:'고통 지수 −12. 단, 🩺정기 검진·🐖복지 축사·🏥구조 병원이 있는 마을은 막아 냅니다.',g:'pain',v:-12,guard:['pet2','fa1','r1']},
+  flood:{e:'🌊',t:'큰 홍수',d:'주민 생활 −15. 단, 🪷보전 습지나 🏞️보전 지역이 있는 마을은 습지가 물을 머금어 막아 냅니다.',g:'life',v:-15,guard:['wp1','r2']},
+  invest:{e:'💼',t:'대기업 투자 제안',d:'수락하면 즉시 +250코인! 대신 마을에 🏭축사 두 배와 🏗️습지 매립이 함께 들어옵니다. 30초 안에 결정!',choice:true},
+  fest:{e:'🎉',t:'꿈결 대축제',d:'모든 마을 주민 생활 +10. 단, 🎪반려견 대회를 연 마을은 동물 학대 논란으로 고통 지수 −15.',g:'life',v:10}
+};
+const EVK = Object.keys(EVS);
 const OX = [
   {q:'모든 생명체는 단 한 번 주어진 삶을 살아가는 존재라는 점에서 소중하다.',a:'O',x:'교과서 179쪽'},
   {q:'슈바이처는 동물이 고통과 쾌락을 느끼기 때문에 도덕적으로 고려해야 한다고 주장하였다.',a:'X',x:'고통과 쾌락은 싱어, 슈바이처는 삶의 의지와 생명에 대한 외경'},
@@ -430,7 +448,7 @@ function vCompare(){ const t=myTeam()||{}; return `${sHeader()}<div class="card"
   <div class="row">${BE.filter(b=>regOf(t)[b.k]==='in').map(b=>`<span class="pill">${b.e} ${esc(b.n)}</span>`).join('')||'<span class="muted">아직 없어요</span>'}</div></div>`; }
 function vElephant(){
   const t=myTeam()||{}, W=t.eleWhy||{};
-  if(META.eleOK){ const o=ELE[t.ele]; return `${sHeader()}<div class="card">${say(o?`우리 마을은 <b>${o.e} ${esc(o.t)}</b>을(를) 선택했어요.`:'우리 마을은 선택하지 않았어요.',true)}${o?`<div class="rep"><b>📋 결과</b><div class="chips"><span>💰 ${sgn(o.eff.money)}</span>${[...GK,'life'].map(g=>`<span>${G[g].e} ${sgn(o.eff[g])}</span>`).join('')}</div></div>`:''}${gauges(t)}</div>`; }
+  if(META.eleOK){ const o=ELE[t.ele]; return `${sHeader()}<div class="card">${say(o?`우리 마을은 <b>${o.e} ${esc(o.t)}</b>을(를) 선택했어요.`:'우리 마을은 선택하지 않았어요.',true)}${t.ele==='ride'?`<div class="banner bad">💀 무리한 관광에 시달린 코끼리가 끝내 쓰러졌어요. 마을에서 🐘 코끼리가 사라졌습니다.</div>`:t.ele?`<div class="banner ok">🐘 코끼리가 마을에서 자기 방식대로 살아가요!</div>`:''}${o?`<div class="rep"><b>📋 결과</b><div class="chips"><span>💰 ${sgn(o.eff.money)}</span>${[...GK,'life'].map(g=>`<span>${G[g].e} ${sgn(o.eff[g])}</span>`).join('')}</div></div>`:''}${gauges(t)}</div>`; }
   return `${sHeader()}<div class="card">${say('🚨 긴급 사건! 마을에 <b>코끼리 타기 관광</b>을 열자는 제안이 들어왔어요. 어떻게 할까요?',true)}${eleArticle()}
   <div class="grid">${ELK.map(k=>{ const o=ELE[k]; return `<button class="opt ${t.ele===k?'sel':''}" data-act="pickEle" data-v="${k}"><div class="row"><span class="e">${o.e}</span><div><div class="t">${esc(o.t)}</div><div class="d">${esc(o.d)} · 💰 ${sgn(o.eff.money)}코인</div></div></div></button>`; }).join('')}</div>
   <h3>✍️ 세 렌즈로 판결 이유 쓰기 (교과서 182쪽 ❶)</h3>
@@ -446,22 +464,37 @@ function vClaim(){ const C=P.claim||{};
 function vVoice(){ return `${sHeader()}<div class="card">${say('2부 시작! 꿈결마을에 <b>생명 번역기</b>가 들어왔어요. 이제 생명들의 목소리가 직접 들려요. 목소리를 듣고 <b>공감</b>하고, <b>책임 정책</b>을 사고, <b>사회적 활동</b>에 참여해 마을을 키워요.',true)}
   <div class="msg"><span class="e">🐕</span><div><b>생명 번역기 첫 메시지 (교과서 184쪽)</b>“재미 삼아 제가 싫어하는 행동을 반복해서 시키지 마세요. 화가 나면 소리를 지르고 때리기도 했죠. 이제 저를 소중하게 대해 주세요.”</div></div>${keysHTML()}
   <div class="banner warn" style="margin-top:12px">⚠️ 정책 카드 중에는 <b>수입이 많고 주민이 좋아하지만 생명에게 해로운 카드</b>가 숨어 있어요. 책임 3원칙으로 걸러 내세요!</div></div>${gauges(myTeam())}`; }
+function cdHTML(big){ if(!META.deadline) return ''; return `<span class="cd pill" data-dl="${+META.deadline}" style="${big?'font-size:30px;padding:8px 20px;':'font-size:18px;'}font-weight:900;border-color:var(--bad);color:var(--bad)">⏱️ --</span>`; }
+function evHTML(y,big){ const k=(META.ev||{})['y'+y]; if(!k) return ''; const e=EVS[k]; return `<div class="news" style="${big?'font-size:20px':''}"><span class="e">${e.e}</span><div><b>돌발 사건: ${esc(e.t)}</b><div class="d">${esc(e.d)}</div></div></div>`; }
+function aucHTML(y,mine){ const r=rareOf(y), top=auctionTop();
+  return `<div class="concept" style="margin:0 0 12px"><div class="h">🔨 이번 해 경매 — 딱 한 마을만 가질 수 있어요!</div><div class="row"><span style="font-size:40px">${r.e}</span><div><b>${esc(r.n)}</b><div class="small">${esc(r.d)} · <b>사라진 생명 하나를 되살려요!</b></div></div></div>
+  <div style="margin-top:8px;font-size:18px;font-weight:900">현재 최고가: ${top?`${TM[top.k].e} ${esc(TM[top.k].n)} ${top.b}코인`:'아직 없음'}</div>
+  ${mine?`<div class="row" style="margin-top:8px"><span class="small">우리 입찰: <b>${+mine.bid||0}코인</b></span><button class="btn sm sand" data-act="bid" data-v="10">+10</button><button class="btn sm sand" data-act="bid" data-v="50">+50</button><button class="btn sm ghost" data-act="bid" data-v="0">입찰 취소</button></div><div class="small muted">결산 때 최고가 마을이 정책 비용을 내고 남은 돈으로 낙찰가를 냅니다. 돈이 모자라면 무효!</div>`:''}</div>`; }
+function spyS(){ const k=P.team, me=P.id; let h='';
+  if(META.spy&&META.spy[k]===me){ h+= (TEAMSD[k]||{}).caught ? `<div class="banner warn">🕵️ 정체가 들통났어요! 이제부터는 마을을 도와 생명을 지켜요.</div>` : `<div class="card" style="background:#1d1d2b;color:#f3f3f8;border-color:#1d1d2b"><b style="font-size:19px">🕵️ 비밀 임무 — 친구에게 화면을 보여 주지 마세요!</b><div style="margin-top:6px">너는 <b>생명 착취 회사의 스파이</b>야. 우리 마을이 <b>① 수입이 많은 함정 정책을 사거나 ② 생명 목소리를 외면하게</b> 그럴듯한 말로 설득해. 해마다 투표에서 들키지 않고 끝까지 남으면 스파이 승리!</div><div class="small" style="margin-top:6px;opacity:.8">팁: “돈이 있어야 나중에 더 많이 지킬 수 있어”, “주민도 행복해야지” 같은 말이 통할지도…</div></div>`; }
+  if(META.vote&&spyOf(k)&&!(META.spy[k]===me)){ const v=(P.votes||{})['v'+META.vote]; h+=`<div class="card" style="border-color:var(--bad)"><h3 style="margin-top:0">🗳️ 우리 마을의 스파이는 누구일까? (비밀 투표)</h3><p class="muted small">지난해 누가 생명을 해치는 쪽으로 몰아갔는지 떠올려 보세요. 맞히면 세 지수 +8, 틀리면 주민 생활 −8!</p><div class="row">${members(k).filter(p=>p.id!==me).map(p=>`<button class="btn ${v===p.id?'bad':'ghost'}" data-act="vote" data-v="${p.id}">${esc(p.num)}번 ${esc(p.nick)}</button>`).join('')}</div></div>`; }
+  else if(META.vote&&META.spy&&META.spy[k]===me&&spyOf(k)){ h+=`<div class="card" style="border-color:var(--bad)"><h3 style="margin-top:0">🗳️ 투표 중…</h3><p class="muted">친구들이 스파이를 찾고 있어요. 태연하게 행동하세요. 😏</p></div>`; }
+  return h; }
 function vYear(){
   const t=myTeam(); if(!t) return `${sHeader()}${waitCard('마을 정보를 불러오는 중이에요…')}`;
-  const y=year(), N=PN();
-  if(over()) return `${sHeader()}<div class="card center">${say('<b>모든 해가 끝났어요!</b> 선생님 화면에서 결과를 함께 봐요.',true)}</div>`;
+  const y=year(), N=PN(), L=META.last;
+  const splash=(L&&L.rep&&L.rep[P.team]&&P.seen!==L.at)?`<div class="overlay"><div class="modal">${repHTML(P.team,L.rep[P.team],true)}<div class="row" style="justify-content:flex-end;margin-top:12px"><button class="btn acc xl" data-act="seen" data-v="${L.at}">확인</button></div></div></div>`:'';
+  if(over()) return `${sHeader()}${spyS()}<div class="card center">${say('<b>모든 해가 끝났어요!</b> 선생님 화면에서 결과를 함께 봐요.',true)}${roster(t)}</div>${splash}`;
   const d=decFor(P.team), mi=msgsFor(y,N), own=owned(t), cost=d.cards.reduce((a,k)=>a+(PM[k]?PM[k].cost:0),0), left=(+t.money||0)-cost;
-  const L=META.last&&META.last.rep&&META.last.rep[P.team]?META.last:null; const r=L&&L.rep[P.team];
-  return `${sHeader()}<div class="card"><div class="row"><h2 style="margin:0">🏛️ ${y}년째 <span class="muted" style="font-size:16px">/ ${N}년</span></h2><span class="sp"></span><span class="pill">${CH[t.charter]?CH[t.charter].e+' '+esc(CH[t.charter].n):''}</span></div>
-  ${r?`<div class="rep" style="margin-top:10px"><b>📋 ${L.y}년째 결과</b><div class="chips">${r.bought.map(k=>`<span>${PM[k].e} ${esc(PM[k].n)}</span>`).join('')||'<span>구입 없음</span>'}${r.inc?`<span>💰 수입 +${r.inc}</span>`:''}${r.pen.map(c=>`<span>😢 ${CAT[c].n} 목소리를 외면함</span>`).join('')}</div></div>`:''}
-  <h3>📡 생명 번역기 — 이번 해의 목소리</h3>${mi.map(i=>{ const m=MSG[i]; return `<button class="msg ${+d.msg===i?'sel':''}" style="width:100%;text-align:left" data-act="dMsg" data-v="${i}"><span class="e">${m.e}</span><div><b>${esc(m.w)} <span class="muted small">(${CAT[m.c].n})</span></b>“${esc(m.t)}”</div></button>`; }).join('')}
-  <label class="lb">💗 고른 생명에게 공감 답장 쓰기 (10자 이상, 필수)</label><div class="muted small">문장 틀: 너는 ( ) 때문에 ( )했겠구나. 우리 마을은 ( )할게.</div><textarea class="field" style="min-height:70px" data-save="reply" maxlength="200">${esc(d.reply||'')}</textarea></div>
+  const evk=(META.ev||{})['y'+y], up=timeUp();
+  return `${sHeader()}${spyS()}<div class="card"><div class="row"><h2 style="margin:0">🏛️ ${y}년째 <span class="muted" style="font-size:16px">/ ${N}년</span></h2><span class="sp"></span>${cdHTML()}</div>
+  <div style="margin-top:8px">${roster(t)}<div class="muted small">🏡 우리 마을에 남은 생명 <b>${alive(t)}/10</b> — 지수가 ${LOSE} 아래로 떨어지면 그 지수에 기대어 사는 생명이 사라져요!</div></div>
+  ${up?`<div class="banner bad blink" style="margin-top:10px">⏰ 시간 종료! 결정을 바꿀 수 없어요.</div>`:''}
+  ${evHTML(y)}${evk==='invest'?`<div class="grid g2" style="margin-bottom:10px"><button class="opt ${d.invest===true?'sel':''}" data-act="dInv" data-v="1"><div class="e">💼</div><div class="t">투자 받기 (+250코인)</div></button><button class="opt ${d.invest===false?'sel':''}" data-act="dInv" data-v="0"><div class="e">🙅</div><div class="t">거절하기</div></button></div>`:''}
+  <h3>📡 생명 번역기 — 응답하지 않으면 이 생명은 떠나요!</h3>${mi.map(i=>{ const m=MSG[i]; return `<button class="msg ${+d.msg===i?'sel':''}" style="width:100%;text-align:left" data-act="dMsg" data-v="${i}"><span class="e">${m.e}</span><div><b>${esc(m.w)} <span class="muted small">(${CAT[m.c].n})</span></b>“${esc(m.t)}”</div></button>`; }).join('')}
+  <label class="lb">💗 고른 생명에게 공감 답장 (10자 이상, 필수)</label><div class="muted small">문장 틀: 너는 ( ) 때문에 ( )했겠구나. 우리 마을은 ( )할게.</div><textarea class="field" style="min-height:70px" data-save="reply" maxlength="200">${esc(d.reply||'')}</textarea></div>
+  ${aucHTML(y,d)}
   <div class="card"><h3 style="margin-top:0">${TM[P.team].e} 우리 마을</h3><div class="kv"><div class="box"><small>💰 예산</small><b>${fmt(t.money)}</b></div><div class="box"><small>🛒 고른 정책</small><b>${d.cards.length}/${MAXC}</b></div><div class="box"><small>💸 쓸 돈</small><b>${fmt(cost)}</b></div><div class="box"><small>남는 돈</small><b>${fmt(left)}</b></div></div>${gauges(t,true)}</div>
-  <div class="card"><h3 style="margin-top:0">🛒 책임 정책 시장 <span class="muted small">(1년에 ${MAXC}개까지 · 한 번 산 정책은 계속 유지)</span></h3>
-  <p class="muted small">카드에는 돈과 주민 생활 변화만 보여요. <b>생명에게 좋은지는 여러분이 판단</b>하세요!</p>
+  <div class="card"><h3 style="margin-top:0">🛒 책임 정책 시장 <span class="muted small">(1년에 ${MAXC}개까지 · 산 정책은 계속 유지)</span></h3>
+  <p class="muted small">카드에는 돈과 주민 생활 변화만 보여요. <b>생명에게 좋은지는 여러분이 판단</b>하세요! 해로운 정책은 <b>다른 마을의 생태계까지</b> 망가뜨려요.</p>
   ${CATK.map(c=>`<div class="shopcat"><h3>${CAT[c].e} ${CAT[c].n}</h3><div class="grid g3">${PC.filter(p=>p.c===c).map(p=>{ const o=own.includes(p.k), s=d.cards.includes(p.k); return `<button class="pcard ${s?'sel':''} ${o?'own':''}" data-act="dCard" data-v="${p.k}" ${o?'disabled':''}><div class="t">${p.e} ${esc(p.n)}</div><div class="d">${esc(p.d)}</div><div class="c">${o?'✅ 이미 있음':`💰 ${p.cost?'−'+p.cost:'0'}${p.inc?` · 수입 +${p.inc}`:''}${p.eff.life?` · 😊 ${sgn(p.eff.life)}`:''}`}</div></button>`; }).join('')}</div></div>`).join('')}
-  <p class="muted small">✋ 팀원 누구나 바꿀 수 있어요. 선생님이 <b>결산</b>을 누르는 순간의 결정이 적용돼요.${d.by?` (마지막 수정: ${esc(d.by)})`:''}</p></div>
-  <div class="navbar"><div class="in"><span class="muted small">${members(P.team).length}명의 주민</span><button class="btn ${d.ready?'ok':'acc'}" data-act="dReady">${d.ready?'✅ 결정 완료 (다시 누르면 취소)':'🏛️ 우리 마을 결정 완료'}</button></div></div>`;
+  <p class="muted small">✋ 팀원 누구나 바꿀 수 있어요. <b>시간 안에 ‘결정 완료’를 누르지 않으면 그해에는 아무것도 못 해요!</b>${d.by?` (마지막 수정: ${esc(d.by)})`:''}</p></div>
+  <div class="navbar"><div class="in">${cdHTML()||'<span></span>'}<button class="btn ${d.ready?'ok':'acc'}" data-act="dReady" ${up?'disabled':''}>${d.ready?'✅ 결정 완료 (다시 누르면 취소)':'🏛️ 우리 마을 결정 완료'}</button></div></div>${splash}`;
 }
 function vReflect(){
   const R=P.ref||{}, O=P.ox||{};
@@ -495,11 +528,17 @@ const SACT={
   pickEle(el){ backend.update(`${BASE()}/teams/${P.team}`,{ele:el.dataset.v,eleBy:P.nick}); },
   claimSubmit(){ const C=P.claim||{}; if(charLen(C.c)<10) return toast('주장을 10자 이상 써 주세요.'); if(charLen(C.r)<20) return toast('근거를 20자 이상 써 주세요.'); C.done=true; C.at=Date.now(); P.claim=C; saveP(true); render(); toast('✅ 제출했어요!'); },
   claimEdit(){ P.claim.done=false; saveP(true); render(); },
-  dMsg(el){ setDec({msg:+el.dataset.v,ready:false}); },
-  dCard(el){ const t=myTeam(); if(!t) return; const k=el.dataset.v, d=decFor(P.team); let cs=[...d.cards];
+  dMsg(el){ if(timeUp()) return toast('⏰ 시간이 끝났어요!'); setDec({msg:+el.dataset.v,ready:false}); },
+  dCard(el){ if(timeUp()) return toast('⏰ 시간이 끝났어요!'); const t=myTeam(); if(!t) return; const k=el.dataset.v, d=decFor(P.team); let cs=[...d.cards];
     if(cs.includes(k)) cs=cs.filter(x=>x!==k); else { if(cs.length>=MAXC) return toast(`1년에 ${MAXC}개까지 고를 수 있어요.`); const cost=cs.reduce((a,x)=>a+PM[x].cost,0)+PM[k].cost; if(cost>(+t.money||0)) return toast('예산이 부족해요.'); cs.push(k); }
     setDec({cards:cs,ready:false}); },
-  dReady(){ const d=decFor(P.team); if(!d.ready&&charLen(d.reply)<10) return toast('먼저 생명에게 공감 답장을 10자 이상 써 주세요. (칸 밖을 눌러 저장)'); setDec({ready:!d.ready}); if(!d.ready) toast('🏛️ 결정 완료! 선생님이 결산을 누르면 적용돼요.'); },
+  dReady(){ if(timeUp()) return toast('⏰ 시간이 끝났어요!'); const d=decFor(P.team); if(!d.ready&&charLen(d.reply)<10) return toast('먼저 생명에게 공감 답장을 10자 이상 써 주세요. (칸 밖을 눌러 저장)'); setDec({ready:!d.ready}); if(!d.ready) toast('🏛️ 결정 완료! 선생님이 결산을 누르면 적용돼요.'); },
+  dInv(el){ if(timeUp()) return toast('⏰ 시간이 끝났어요!'); setDec({invest:el.dataset.v==='1',ready:false}); },
+  bid(el){ if(timeUp()) return toast('⏰ 시간이 끝났어요!'); const t=myTeam()||{}, d=decFor(P.team), v=+el.dataset.v; if(!v) return setDec({bid:0,bidAt:0},false);
+    const top=auctionTop(), nb=Math.max(+d.bid||0, top?top.b:0)+v, cost=d.cards.reduce((a,k)=>a+PM[k].cost,0);
+    if(nb>(+t.money||0)-cost) return toast('남은 돈보다 많이 걸 수 없어요.'); setDec({bid:nb,bidAt:Date.now()}); toast(`🔨 ${nb}코인 입찰!`); },
+  seen(el){ P.seen=+el.dataset.v; saveP(); render(); },
+  vote(el){ P.votes=P.votes||{}; P.votes['v'+META.vote]=el.dataset.v; saveP(true); keepScroll=true; render(); toast('🗳️ 투표했어요 (다시 눌러 바꿀 수 있어요)'); },
   ox(el){ P.ox=P.ox||{}; P.ox[el.dataset.i]=el.dataset.v; saveP(); keepScroll=true; render(); },
   oxCheck(){ const O=P.ox||{}; if(OX.some((_,i)=>!O[i])) return toast('모든 문제에 답해 주세요.'); P.oxChecked=true; P.oxScore=OX.filter((o,i)=>O[i]===o.a).length; saveP(true); keepScroll=true; render(); },
   starter(el){ const k=el.dataset.k; P.ref=P.ref||{}; if(String(P.ref[k]||'').trim()) return toast('글이 비어 있을 때만 틀을 넣을 수 있어요.'); P.ref[k]=REFQ.find(q=>q.k===k).st; saveP(); keepScroll=true; render(); const t=$app.querySelector(`textarea[data-k="${k}"]`); if(t) t.focus(); },
@@ -518,7 +557,7 @@ const SSAVE={
 };
 
 /* ⑥ 결과 공개 */
-const ENDS=t=>{ const s=lifeScore(t), l=+t.life||0;
+const ENDS=t=>{ const s=alive(t)>=8?99:alive(t)>=5?50:0, l=+t.life||0;
   if(s>=62&&l>=40) return {e:'🌈',n:'더불어 사는 마을',c:'linear-gradient(135deg,#2f7d4e,#2e6a8e)',d:'생명도 주민도 함께 웃는 마을이 되었어요.'};
   if(s>=62) return {e:'🏚️',n:'주민이 떠나는 마을',c:'linear-gradient(135deg,#8a6d3b,#5c4a2a)',d:'생명은 지켰지만 주민들의 삶이 너무 힘들어졌어요. 조화는 어떻게 이룰까요?'};
   if(s>=45) return {e:'🌱',n:'아직 배우는 마을',c:'linear-gradient(135deg,#e39a1c,#b86b00)',d:'몇몇 생명의 목소리는 아직 외면받고 있어요.'};
@@ -529,13 +568,13 @@ function finalBody(rv,big){
   const nav=`<div class="row" style="margin-bottom:10px">${steps.map((s,i)=>`<span class="pill" style="${i===rv?'background:var(--sea);color:#fff;border-color:var(--sea)':''}">${s}</span>`).join('')}</div>`;
   if(rv===0){ const s=ks.map(k=>({n:TM[k].e+' '+TM[k].n,c:TM[k].c,vals:g.map(o=>lifeScore(o&&o[k]))}));
     return `${nav}${say('마을마다 생명 지수(헌장 가중치 반영)가 어떻게 변했을까요? 그래프가 꺾인 해에 무슨 결정을 했는지 떠올려 보세요.',big)}${lineChart(s,{ymax:100})}`; }
-  if(rv===1){ const a=ks.map(k=>({k,v:lifeScore(TEAMSD[k])})).sort((x,y)=>y.v-x.v), b=ks.map(k=>({k,v:+(TEAMSD[k]||{}).life||0})).sort((x,y)=>y.v-x.v);
+  if(rv===1){ const a=ks.map(k=>({k,v:alive(TEAMSD[k])*10})).sort((x,y)=>y.v-x.v), b=ks.map(k=>({k,v:+(TEAMSD[k]||{}).life||0})).sort((x,y)=>y.v-x.v);
     const bars=(L,c)=>`<div class="bars">${L.map((x,i)=>`<div class="bar"><div class="lbl"><span>${i+1}. ${TM[x.k].e} ${esc(TM[x.k].n)} <span class="muted small">${CH[(TEAMSD[x.k]||{}).charter]?CH[TEAMSD[x.k].charter].e:''}</span></span><span>${x.v}</span></div><div class="tr"><i style="width:${Math.max(2,x.v)}%;background:${c||TM[x.k].c}"></i></div></div>`).join('')}</div>`;
-    return `${nav}${say('<b>생명 지수 1등</b>과 <b>주민 생활 1등</b>이 같은 마을인가요? 둘 다 지키는 길은 무엇이었을까요?',big)}<div class="grid g2"><div><h3>🌱 생명 지수</h3>${bars(a)}</div><div><h3>😊 주민 생활</h3>${bars(b,G.life.c)}</div></div>`; }
-  if(rv===2){ return `${nav}<div class="reveal">🕵️ 시장에는 <u>돈이 되고 주민도 좋아하지만 생명을 해치는 카드</u>가 7장 숨어 있었습니다.</div>
-    <div class="grid g2" style="margin-top:12px">${ks.map(k=>{ const tr=toArr((TEAMSD[k]||{}).traps); return `<div class="card" style="margin:0"><div class="row"><b>${TM[k].e} ${esc(TM[k].n)}</b><span class="sp"></span><span class="pill">${tr.length}장</span></div>${tr.length?tr.map(x=>`<div class="small" style="margin-top:6px">${PM[x].e} <b>${esc(PM[x].n)}</b><br><span style="color:#9b2c2c">위반: ${esc(TRAP[PM[x].trap])}</span></div>`).join(''):'<div class="small" style="margin-top:6px;color:#11704f">✅ 함정 카드를 모두 걸러 냈어요!</div>'}</div>`; }).join('')}</div>
+    return `${nav}${say('<b>생명 지수 1등</b>과 <b>주민 생활 1등</b>이 같은 마을인가요? 둘 다 지키는 길은 무엇이었을까요?',big)}<div class="grid g2"><div><h3>🏡 남은 생명 (×10)</h3>${bars(a)}</div><div><h3>😊 주민 생활</h3>${bars(b,G.life.c)}</div></div>`; }
+  if(rv===2){ return `${nav}<div class="reveal">🕵️ 시장에는 <u>돈이 되고 주민도 좋아하지만 생명을 해치는 카드</u>가 7장 숨어 있었습니다. 그리고 마을마다 스파이가…</div>
+    <div class="grid g2" style="margin-top:12px">${ks.map(k=>{ const tr=toArr((TEAMSD[k]||{}).traps); return `<div class="card" style="margin:0"><div class="row"><b>${TM[k].e} ${esc(TM[k].n)}</b><span class="sp"></span><span class="pill">${tr.length}장</span></div>${tr.length?tr.map(x=>`<div class="small" style="margin-top:6px">${PM[x].e} <b>${esc(PM[x].n)}</b><br><span style="color:#9b2c2c">위반: ${esc(TRAP[PM[x].trap])}</span></div>`).join(''):'<div class="small" style="margin-top:6px;color:#11704f">✅ 함정 카드를 모두 걸러 냈어요!</div>'}${META.spy&&META.spy[k]?`<div class="small" style="margin-top:8px">🕵️ 스파이: <b>${esc((PLAYERS[META.spy[k]]||{}).nick||'?')}</b> — ${(TEAMSD[k]||{}).caught?'🎯 검거!':'😈 끝까지 숨었어요'}</div>`:''}</div>`; }).join('')}</div>
     <div class="concept" style="margin-top:14px"><div class="h">📘 생명체에 책임을 다하는 방법 (교과서 186쪽)</div>${Object.values(TRAP).map(esc).join('<br>')}</div>`; }
-  return `${nav}<div class="endgrid">${ks.map(k=>{ const t=TEAMSD[k]||{}, E=ENDS(t); return `<div class="ending" style="background:${E.c}"><div class="e">${E.e}</div><div style="font-weight:800">${TM[k].e} ${esc(TM[k].n)}</div><div class="n" style="font-size:24px">${E.n}</div><div style="font-size:15px;margin-top:6px">${E.d}</div><div style="font-size:14px;margin-top:6px">생명 ${lifeScore(t)} · 생활 ${Math.round(+t.life||0)}</div></div>`; }).join('')}</div>
+  return `${nav}<div class="endgrid">${ks.map(k=>{ const t=TEAMSD[k]||{}, E=ENDS(t); return `<div class="ending" style="background:${E.c}"><div class="e">${E.e}</div><div style="font-weight:800">${TM[k].e} ${esc(TM[k].n)}</div><div class="n" style="font-size:24px">${E.n}</div><div style="font-size:15px;margin-top:6px">${E.d}</div>${roster(t)}<div style="font-size:14px;margin-top:6px">남은 생명 ${alive(t)}/10 · 생활 ${Math.round(+t.life||0)}</div></div>`; }).join('')}</div>
   <div class="concept" style="margin-top:14px"><div class="h">🧭 오늘의 핵심 질문</div>① 우리 마을 헌장(싱어·슈바이처·생태계 구성원)은 어떤 생명을 잘 보았고, 어떤 생명을 놓쳤나요?<br>② 생명 번역기의 목소리에 공감한 것이 정책 선택을 어떻게 바꾸었나요?<br>③ 인간과 동식물이 더불어 조화롭게 산다는 것은 무엇일까요? (교과서 189쪽)</div>`;
 }
 
@@ -592,15 +631,30 @@ function tVoice(){ return `<div class="card"><h2>📡 2부 — 생명 번역기�
   <div class="msg"><span class="e">🐕</span><div><b>생명 번역기</b>“재미 삼아 제가 싫어하는 행동을 반복해서 시키지 마세요. 화가 나면 소리를 지르고 때리기도 했죠. 이제 저를 소중하게 대해 주세요.”</div></div>${keysHTML()}
   <div class="banner warn" style="margin-top:12px">🛒 매년 생명 목소리 2개가 도착합니다. 모둠은 ① 공감 답장 ② 책임 정책 최대 ${MAXC}개를 고릅니다. 목소리를 외면한 분야는 지수가 떨어지고, 시장에는 <b>함정 카드</b>가 숨어 있어요.</div>
   <div class="row" style="margin-top:16px;justify-content:flex-end"><button class="btn acc xl" data-act="startYears">🏛️ 1년째 시작 →</button></div></div>`; }
-function tYear(){ const y=year(), N=PN(), ks=keys(), ready=ks.filter(k=>decFor(k).ready).length;
-  if(over()) return `<div class="card center">${say('<b>모든 해가 끝났어요!</b> 결과를 공개합니다.',true)}${nextBtn('final','🎁 결과 공개 →')}</div>`;
-  return `<div class="grid" style="grid-template-columns:minmax(0,1fr) 320px;align-items:start"><div><div class="card"><h2 style="margin:0 0 10px">🏛️ ${y}년째 <span class="muted" style="font-size:17px">/ ${N}년</span></h2>
-  ${msgsFor(y,N).map(i=>{ const m=MSG[i]; return `<div class="msg"><span class="e">${m.e}</span><div><b>${esc(m.w)} · ${CAT[m.c].n}</b>“${esc(m.t)}”</div></div>`; }).join('')}</div>
-  <div class="card"><div class="row"><h3 style="margin:0">🏡 마을 결정 <span class="cnt">${ready}/${ks.length}</span></h3><span class="sp"></span><button class="btn acc xl" data-act="settle" ${T.busy?'disabled':''}>📊 ${y}년째 결산</button></div>
-  <p class="muted small">결정하지 않은 마을은 고른 정책만 적용됩니다. 목소리 분야의 좋은 정책이 없으면 그 지수가 −${PEN}, 매년 환경 악화로 세 지수 −${DRIFT}.</p>
-  <div class="tboard">${ks.map(k=>{ const t=TEAMSD[k]||{}, d=decFor(k); return `<div class="tcard ${d.ready?'ready':''}"><div class="hd"><span class="e">${TM[k].e}</span>${esc(TM[k].n)}<span class="sp"></span>${d.ready?'✅':'<span class="muted small blink">결정 중</span>'}</div><div class="m">💰 ${fmt(t.money)} · 정책 ${d.cards.length}개 · 답장 ${charLen(d.reply)>=10?'✅':'—'}</div>${gauges(t,true)}</div>`; }).join('')}</div></div></div>
-  <div><div class="card"><h3 style="margin-top:0">🌱 생명 지수 순위</h3>${ks.map(k=>({k,v:lifeScore(TEAMSD[k])})).sort((a,b)=>b.v-a.v).map((x,i)=>`<div class="row" style="padding:4px 0"><b>${i+1}</b> ${TM[x.k].e} ${esc(TM[x.k].n)}<span class="sp"></span><b>${x.v}</b></div>`).join('')}</div>
+function tYear(){ const y=year(), N=PN(), ks=keys(), ready=ks.filter(k=>decFor(k).ready).length, L=META.last;
+  const lastBoard=L&&L.rep?`<div class="card"><div class="row"><h2 style="margin:0">📢 ${L.y}년째 결과</h2><span class="sp"></span>${L.auc?`<span class="pill">🔨 낙찰: ${TM[L.auc.k].e} ${esc(TM[L.auc.k].n)} ${L.auc.b}코인</span>`:''}</div>
+    ${toArr(L.spills).length?`<div class="banner bad" style="margin-top:10px">🌫️ 생태계는 연결되어 있어요! ${toArr(L.spills).map(s=>`${TM[s.k].e}${esc(TM[s.k].n)}의 ${PM[s.x].e}${esc(PM[s.x].n)}`).join(', ')} 때문에 다른 모든 마을의 생태 지수가 떨어졌어요.</div>`:''}
+    <div class="endgrid" style="margin-top:10px">${ks.filter(k=>L.rep[k]).map(k=>repHTML(k,L.rep[k],false)).join('')}</div>${mafiaT()}</div>`:mafiaT(true);
+  if(over()) return `${lastBoard}<div class="card center">${say('<b>모든 해가 끝났어요!</b> 결과를 공개합니다.',true)}${nextBtn('final','🎁 결과 공개 →')}</div>`;
+  const evk=(META.ev||{})['y'+y];
+  return `${lastBoard}<div class="grid" style="grid-template-columns:minmax(0,1fr) 320px;align-items:start"><div><div class="card"><div class="row"><h2 style="margin:0">🏛️ ${y}년째 <span class="muted" style="font-size:17px">/ ${N}년</span></h2><span class="sp"></span>${cdHTML(true)}</div>
+  <div class="row" style="margin:10px 0">${evk?'':`<button class="btn sand" data-act="drawEv" ${T.spin?'disabled':''}>🎲 돌발 사건 뽑기</button>`}<button class="btn acc" data-act="timer">⏱️ ${META.deadline?'타이머 다시':'2분 타이머 시작'}</button><button class="btn ghost sm" data-act="timerOff">타이머 끄기</button></div>
+  ${T.spin?`<div class="news"><span class="e" id="spinE">🎲</span><div><b id="spinT">돌발 사건 뽑는 중…</b></div></div>`:evHTML(y,true)}
+  ${msgsFor(y,N).map(i=>{ const m=MSG[i]; return `<div class="msg"><span class="e">${m.e}</span><div><b>${esc(m.w)} · ${CAT[m.c].n}</b>“${esc(m.t)}”</div></div>`; }).join('')}
+  ${aucHTML(y,null)}</div>
+  <div class="card"><div class="row"><h3 style="margin:0">🏡 마을 결정 <span class="cnt">${ready}/${ks.length}</span></h3><span class="sp"></span><button class="btn bad xl" data-act="settle" ${T.busy||T.spin?'disabled':''}>📊 ${y}년째 결산</button></div>
+  <p class="muted small">타이머를 켠 해에는 ‘결정 완료’를 누르지 않은 마을은 아무것도 못 합니다. 응답하지 않은 생명은 떠나고(지수 −${PEN}), 함정 정책 1장마다 다른 모든 마을 생태 −${SPILL}, 매년 세 지수 −${DRIFT}.</p>
+  <div class="tboard">${ks.map(k=>{ const t=TEAMSD[k]||{}, d=decFor(k); return `<div class="tcard ${d.ready?'ready':''}"><div class="hd"><span class="e">${TM[k].e}</span>${esc(TM[k].n)}<span class="sp"></span>${d.ready?'✅':'<span class="muted small blink">결정 중</span>'}</div>${roster(t)}<div class="m">💰 ${fmt(t.money)} · 정책 ${d.cards.length}개 · 입찰 ${+d.bid||0} · 답장 ${charLen(d.reply)>=10?'✅':'—'}</div>${gauges(t,true)}</div>`; }).join('')}</div></div></div>
+  <div><div class="card"><h3 style="margin-top:0">🏆 남은 생명 순위</h3>${ks.map(k=>({k,a:alive(TEAMSD[k]),v:lifeScore(TEAMSD[k])})).sort((a,b)=>b.a-a.a||b.v-a.v).map((x,i)=>`<div class="row" style="padding:4px 0"><b>${i+1}</b> ${TM[x.k].e} ${esc(TM[x.k].n)}<span class="sp"></span><b>🏡 ${x.a}</b><span class="muted small">· ${x.v}</span></div>`).join('')}</div>
   <div class="card"><h3 style="margin-top:0">💗 공감 답장</h3>${ks.map(k=>{ const d=decFor(k); return d.reply?`<div class="small" style="margin-bottom:6px">${TM[k].e} ${esc(d.reply)}</div>`:''; }).join('')||'<p class="muted small">아직 없어요.</p>'}</div></div></div>`; }
+const spyOf=k=>META.spy&&META.spy[k]&&!(TEAMSD[k]||{}).caught?META.spy[k]:null;
+function mafiaT(compact){
+  if(!META.spyOn) return `<div class="card"><div class="row"><b>🕵️ 마피아 모드</b><span class="muted small">마을마다(3명 이상) 한 명을 몰래 ‘생명 착취 회사 스파이’로 정합니다.</span><span class="sp"></span><button class="btn sm sand" data-act="mafia">🕵️ 스파이 몰래 정하기</button></div></div>`;
+  const ks=keys(), vr=META.voteRes||{};
+  const body=`<div class="row" style="margin-top:12px"><b>🕵️ 마피아</b><span class="muted small">남은 스파이 ${ks.filter(spyOf).length}명</span><span class="sp"></span>${META.vote?`<span class="pill blink">🗳️ 투표 중 · ${plist().filter(p=>(p.votes||{})['v'+META.vote]).length}명 투표</span><button class="btn sm bad" data-act="voteClose">투표 마감·공개</button>`:`<button class="btn sm sand" data-act="voteOpen">🗳️ 스파이 투표 열기</button>`}</div>
+  ${Object.keys(vr).length&&!META.vote?`<div class="grid g3" style="margin-top:8px">${ks.filter(k=>vr[k]).map(k=>`<div class="banner ${vr[k].ok?'ok':'warn'}" style="margin:0">${TM[k].e} ${esc(TM[k].n)}: ${vr[k].ok?`🎯 스파이 ${esc(vr[k].name)} 검거! 세 지수 +8`:vr[k].name?`😱 ${esc(vr[k].name)}은(는) 스파이가 아니었어요! 주민 생활 −8`:'표가 갈려 아무도 지목 못 했어요'}</div>`).join('')}</div>`:''}`;
+  return compact?`<div class="card">${body}</div>`:body;
+}
 function tFinal(){ const rv=+META.rv||0; return `<div class="card">${finalBody(rv,true)}<div class="row" style="margin-top:16px;justify-content:space-between"><button class="btn ghost" data-act="rv" data-v="-1" ${rv<=0?'disabled':''}>← 이전</button>${rv<3?`<button class="btn acc xl" data-act="rv" data-v="1">다음 공개 →</button>`:`<button class="btn sand xl" data-act="setPhase" data-v="reflect">📝 OX·성찰 →</button>`}</div></div>`; }
 function tReflect(){ const ds=plist().filter(p=>p.ref&&p.ref.done), ox=plist().filter(p=>p.oxChecked);
   const wrong=OX.map((o,i)=>ox.filter(p=>(p.ox||{})[i]!==o.a).length);
@@ -635,23 +689,62 @@ function renderTeacher(){
 }
 const snap=()=>{ const o={}; keys().forEach(k=>{ const t=TEAMSD[k]||{}; o[k]={charter:t.charter||null,pain:+t.pain||0,will:+t.will||0,eco:+t.eco||0,life:+t.life||0}; }); return o; };
 function initTeams(){ const upd={'meta/started':Date.now()}; keys().forEach(k=>{ const old=TEAMSD[k]||{}; Object.entries(START).forEach(([a,v])=>{ if(old[a]==null) upd[`teams/${k}/${a}`]=v; }); }); return backend.update(BASE(),upd); }
+const rareOf=y=>RARE[(y-1)%RARE.length];
+function auctionTop(){ let best=null; keys().forEach(k=>{ const d=decFor(k), b=+d.bid||0; if(b>0&&(!best||b>best.b||(b===best.b&&(d.bidAt||0)<best.at))) best={k,b,at:d.bidAt||0}; }); return best; }
+const timeUp=()=>META.deadline&&Date.now()>+META.deadline+1500;
 function settleYear(){
-  const y=year(), N=PN(), mi=msgsFor(y,N), rep={}, upd={};
-  keys().forEach(k=>{
-    const t=Object.assign({},START,TEAMSD[k]||{}), d=decFor(k), own=owned(t), traps=toArr(t.traps), bought=[]; let money=+t.money||0, inc=0;
-    d.cards.filter(x=>PM[x]&&!own.includes(x)).forEach(x=>{ const p=PM[x]; if(p.cost>money) return; money-=p.cost; if(p.inc){ money+=p.inc; inc+=p.inc; } Object.entries(p.eff).forEach(([g,v])=>t[g]=(+t[g]||0)+v); bought.push(x); own.push(x); if(p.trap) traps.push(x); });
-    const pen=[]; mi.forEach(i=>{ const c=MSG[i].c; if(!own.some(x=>PM[x].c===c&&!PM[x].trap)){ pen.push(c); t[CAT[c].g]=(+t[CAT[c].g]||0)-PEN; } });
-    GK.forEach(g=>t[g]=(+t[g]||0)-DRIFT); [...GK,'life'].forEach(g=>t[g]=clampN(Math.round(t[g]),0,100));
-    const tax=60+Math.round(t.life); money+=tax;
-    Object.assign(upd,{[`teams/${k}/money`]:money,[`teams/${k}/owned`]:own,[`teams/${k}/traps`]:traps,[`teams/${k}/pain`]:t.pain,[`teams/${k}/will`]:t.will,[`teams/${k}/eco`]:t.eco,[`teams/${k}/life`]:t.life});
+  const y=year(), N=PN(), mi=msgsFor(y,N), rep={}, upd={}, ks=keys(), evk=(META.ev||{})['y'+y], ev=EVS[evk], rare=rareOf(y), top=auctionTop();
+  const S={}; const spills=[];
+  ks.forEach(k=>{
+    const t=Object.assign({},START,TEAMSD[k]||{}), d=decFor(k), own=owned(t), traps=toArr(t.traps), lost=toArr(t.lost), bought=[], before={pain:+t.pain,will:+t.will,eco:+t.eco,life:+t.life};
+    let money=+t.money||0, inc=0; const R={bought,inc:0,ok:[],ng:[],lostNew:[],rev:null,ev:null,auc:null,bankrupt:false,fest:false,timeout:false};
+    const add=(eff,m=EFX)=>Object.entries(eff).forEach(([g,v])=>t[g]=(+t[g]||0)+Math.round(v*m));
+    const late=META.deadline&&!d.ready; R.timeout=!!late;
+    if(!late){
+      d.cards.filter(x=>PM[x]&&!own.includes(x)).forEach(x=>{ const p=PM[x]; if(p.cost>money) return; money-=p.cost; if(p.inc){ money+=p.inc; inc+=p.inc; } add(p.eff); bought.push(x); own.push(x); if(p.trap){ traps.push(x); spills.push({k,x}); } });
+      if(ev&&ev.choice&&d.invest===true){ money+=250; inc+=250; ['faT','wpT'].forEach(x=>{ if(!own.includes(x)){ add(PM[x].eff); own.push(x); traps.push(x); spills.push({k,x}); bought.push(x); } }); R.ev={t:'💼 투자를 받아들였어요: +250코인, 대신 축사 확장·습지 매립이 들어왔어요',bad:true}; }
+      if(top&&top.k===k&&top.b<=money){ money-=top.b; add(rare.eff,1); own.push(rare.k); R.auc={won:true,b:top.b};
+        R.revive=true; }
+    }
+    R.inc=inc;
+    mi.forEach(i=>{ const m=MSG[i]; if(own.some(x=>PM[x]&&PM[x].c===m.c&&!PM[x].trap)) R.ok.push(i); else { R.ng.push(i); t[CAT[m.c].g]=(+t[CAT[m.c].g]||0)-PEN; if(m.lose&&!lost.includes(m.lose)){ lost.push(m.lose); R.msgLost=(R.msgLost||0)+1; } } });
+    if(ev&&!ev.choice){ if(evk==='fest'){ t.life+=10; if(own.includes('petT')){ t.pain-=15; R.ev={t:'🎉 축제가 열렸지만 🎪반려견 대회가 학대 논란! 고통 지수 −15',bad:true}; } else R.ev={t:'🎉 축제 덕분에 주민 생활 +10',bad:false}; }
+      else if(ev.guard.some(x=>own.includes(x))) R.ev={t:`${ev.e} ${ev.t}을(를) 막아 냈어요! 🛡️`,bad:false}; else { t[ev.g]+=ev.v; R.ev={t:`${ev.e} ${ev.t} 피해! ${G[ev.g].n} ${ev.v}`,bad:true}; } }
+    GK.forEach(g=>t[g]=(+t[g]||0)-DRIFT);
+    S[k]={t,money,own,traps,lost,R,before,d};
+  });
+  spills.forEach(s=>ks.forEach(k=>{ if(k!==s.k) S[k].t.eco-=SPILL; }));
+  ks.forEach(k=>{ const {t,own,traps,lost,R,before,d}=S[k]; let money=S[k].money;
+    [...GK,'life'].forEach(g=>t[g]=clampN(Math.round(t[g]),0,100));
+    BE.filter(b=>!lost.includes(b.k)&&t[BLINK[b.k]]<LOSE).sort((a,b)=>t[BLINK[a.k]]-t[BLINK[b.k]]).slice(0,Math.max(0,3-(R.msgLost||0))).forEach(b=>{ lost.push(b.k); R.lostNew.push(b.k); });
+    if(R.revive){ const back=lost.find(b=>b!=='el'&&!R.lostNew.includes(b))||lost.find(b=>!R.lostNew.includes(b)); if(back){ lost.splice(lost.indexOf(back),1); R.rev=back; } }
+    let tax=60+Math.round(t.life); if(t.life<20){ tax=0; R.bankrupt=true; } if(t.life>=80){ tax+=80; R.fest=true; } money+=tax; R.tax=tax;
+    R.spill=spills.filter(s=>s.k!==k).length*SPILL; R.myTraps=spills.filter(s=>s.k===k).map(s=>s.x);
+    R.delta=Object.fromEntries([...GK,'life'].map(g=>[g,t[g]-Math.round(before[g])]));
+    R.verdict=(R.lostNew.length+(R.msgLost||0)>=2||R.bankrupt||R.timeout)?'bad':(R.ng.length===0&&R.lostNew.length===0&&GK.every(g=>R.delta[g]>=0))?'great':'mid';
+    Object.assign(upd,{[`teams/${k}/money`]:money,[`teams/${k}/owned`]:own,[`teams/${k}/traps`]:traps,[`teams/${k}/lost`]:lost,[`teams/${k}/pain`]:t.pain,[`teams/${k}/will`]:t.will,[`teams/${k}/eco`]:t.eco,[`teams/${k}/life`]:t.life});
     if(d.reply) upd[`teams/${k}/replies/y${y}`]={msg:+d.msg||mi[0]||0,text:d.reply};
-    rep[k]={bought,inc,pen,tax};
-    TEAMSD[k]=Object.assign({},TEAMSD[k],{money,owned:own,traps,pain:t.pain,will:t.will,eco:t.eco,life:t.life});
+    rep[k]=R; TEAMSD[k]=Object.assign({},TEAMSD[k],{money,owned:own,traps,lost,pain:t.pain,will:t.will,eco:t.eco,life:t.life});
   });
   const h=toArr(HIST.g); h.push(snap());
-  Object.assign(upd,{'hist/g':h,'meta/round':y+1,'meta/last':{y,rep,at:Date.now()}});
+  Object.assign(upd,{'hist/g':h,'meta/round':y+1,'meta/deadline':null,'meta/last':{y,rep,ev:evk||null,spills,auc:top&&rep[top.k]&&rep[top.k].auc?{k:top.k,b:top.b,r:rare.k}:null,at:Date.now()}});
   return backend.update(BASE(),upd);
 }
+const VERD={great:{e:'🎉',t:'대성공!',c:'linear-gradient(135deg,#2f7d4e,#2e6a8e)'},mid:{e:'😐',t:'절반의 성공',c:'linear-gradient(135deg,#e39a1c,#b86b00)'},bad:{e:'💀',t:'위기!',c:'linear-gradient(135deg,#9b2c2c,#4a1515)'}};
+function repHTML(k,R,big){ const V=VERD[R.verdict]||VERD.mid, rk=R.auc?rareOf((META.last||{}).y||1):null;
+  const li=(s,bad)=>`<div style="font-size:${big?19:16}px;margin:4px 0;${bad?'color:#ffd6d6':''}">${s}</div>`;
+  return `<div class="ending" style="background:${V.c};text-align:left"><div class="row"><span style="font-size:${big?54:44}px">${V.e}</span><div><div style="font-weight:800">${TM[k].e} ${esc(TM[k].n)}</div><div class="n" style="font-size:${big?30:26}px;margin:0">${V.t}</div></div></div>
+  ${R.timeout?li('⏰ 시간 초과! 아무 정책도 펴지 못했어요',true):''}
+  ${R.ok.map(i=>li('💚 '+esc(MSG[i].ok))).join('')}${R.ng.map(i=>li('💀 '+esc(MSG[i].ng),true)).join('')}
+  ${R.lostNew.map(b=>li(`💀 ${BM[b].e} ${esc(BM[b].n)}이(가) 마을에서 사라졌어요`,true)).join('')}
+  ${R.rev?li(`✨ ${BM[R.rev].e} ${esc(BM[R.rev].n)}이(가) 마을로 돌아왔어요!`):''}
+  ${R.auc?li(`🔨 경매 낙찰! ${rk?rk.e+' '+esc(rk.n):''} (−${R.auc.b}코인)`):''}
+  ${R.ev?li(esc(R.ev.t),R.ev.bad):''}
+  ${R.spill?li(`🌫️ 다른 마을의 함정 정책 때문에 생태 지수 −${R.spill}`,true):''}
+  ${R.bankrupt?li('🏚️ 주민들이 떠나 세금이 한 푼도 걷히지 않았어요',true):''}${R.fest?li('🎊 주민 생활 최고! 보너스 +80코인'):''}
+  <div class="chips" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px">${[...GK,'life'].map(g=>`<span style="background:rgba(255,255,255,.2);border-radius:8px;padding:2px 9px;font-weight:800">${G[g].e} ${sgn(R.delta[g])}</span>`).join('')}<span style="background:rgba(255,255,255,.2);border-radius:8px;padding:2px 9px;font-weight:800">🏡 남은 생명 ${10-toArr((TEAMSD[k]||{}).lost).length}/10</span></div></div>`; }
+const alive=t=>10-toArr(t&&t.lost).length;
+const roster=t=>`<div style="font-size:26px;letter-spacing:2px;line-height:1.3">${BE.map(b=>toArr(t&&t.lost).includes(b.k)?`<span title="${esc(b.n)}" style="opacity:.25;filter:grayscale(1)">${b.e}</span>`:`<span title="${esc(b.n)}">${b.e}</span>`).join('')}</div>`;
 const TACT={
   login(){ if(T.pin===TEACHER_PIN){ T.authed=true; try{sessionStorage.setItem('life_t','1');}catch(e){} render(); } else toast('비밀번호가 다릅니다.'); },
   tab(el){ T.tab=el.dataset.v; render(); }, toggleBig(){ T.big=!T.big; render(); },
@@ -662,10 +755,25 @@ const TACT={
     backend.update(`${BASE()}/meta`,{phase:v}); },
   async eleSettle(){ if(META.eleOK) return; const ks=keys(), miss=ks.filter(k=>!ELE[(TEAMSD[k]||{}).ele]); if(miss.length&&!confirm(`${miss.map(k=>TM[k].n).join(', ')}이(가) 선택하지 않았어요. 선택 없이(변화 없음) 확정할까요?`)) return;
     if(!META.started) await initTeams(); const upd={'meta/eleOK':true};
-    ks.forEach(k=>{ const t=Object.assign({},START,TEAMSD[k]||{}), o=ELE[t.ele]; if(!o) return; upd[`teams/${k}/money`]=(+t.money||0)+o.eff.money; [...GK,'life'].forEach(g=>upd[`teams/${k}/${g}`]=clampN((+t[g]||0)+o.eff[g],0,100)); });
+    ks.forEach(k=>{ const t=Object.assign({},START,TEAMSD[k]||{}), o=ELE[t.ele]; if(!o) return; upd[`teams/${k}/money`]=(+t.money||0)+o.eff.money; if(t.ele==='ride') upd[`teams/${k}/lost`]=['el']; [...GK,'life'].forEach(g=>upd[`teams/${k}/${g}`]=clampN((+t[g]||0)+o.eff[g],0,100)); });
     await backend.update(BASE(),upd); toast('📢 결과를 반영했어요!'); },
   async startYears(){ if(!META.started) await initTeams(); if(!META.eleOK&&!confirm('코끼리 사건 결과를 아직 확정하지 않았어요. 그대로 2부를 시작할까요?')) return;
-    T.tab='run'; await backend.update(BASE(),{dec:null,'hist/g':[snap()],'meta/phase':'year','meta/round':1,'meta/last':null,'meta/yearsOn':true,'meta/rv':0}); },
+    T.tab='run'; await backend.update(BASE(),{dec:null,'hist/g':[snap()],'meta/phase':'year','meta/round':1,'meta/last':null,'meta/yearsOn':true,'meta/rv':0,'meta/ev':null,'meta/deadline':null,'meta/vote':null,'meta/voteRes':null}); },
+  drawEv(){ const y=year(), used=Object.values(META.ev||{}), pool=EVK.filter(k=>!used.includes(k)), pick=(pool.length?pool:EVK)[Math.floor(Math.random()*(pool.length||EVK.length))];
+    T.spin=true; render(); let n=0; const iv=setInterval(()=>{ const e=EVS[EVK[n++%EVK.length]]; const a=document.getElementById('spinE'), b=document.getElementById('spinT'); if(a){ a.textContent=e.e; b.textContent=e.t+'…'; } },120);
+    setTimeout(()=>{ clearInterval(iv); T.spin=false; backend.update(`${BASE()}/meta/ev`,{['y'+y]:pick}); },2200); },
+  timer(){ backend.update(`${BASE()}/meta`,{deadline:Date.now()+TIMER*1000}); },
+  timerOff(){ backend.update(`${BASE()}/meta`,{deadline:null}); },
+  mafia(){ const spy={}; keys().forEach(k=>{ const ms=members(k); if(ms.length>=3) spy[k]=ms[Math.floor(Math.random()*ms.length)].id; });
+    if(!Object.keys(spy).length) return toast('3명 이상인 마을이 없어요.'); if(!confirm(`${Object.keys(spy).length}개 마을에 스파이를 몰래 정할까요? 스파이 학생 태블릿에만 비밀 임무가 뜹니다.`)) return;
+    const upd={'meta/spy':spy,'meta/spyOn':true,'meta/voteRes':null}; keys().forEach(k=>upd[`teams/${k}/caught`]=null); backend.update(BASE(),upd); toast('🕵️ 스파이를 정했어요!'); },
+  voteOpen(){ backend.update(`${BASE()}/meta`,{vote:'y'+year()+'_'+Date.now().toString(36),voteRes:null}); },
+  voteClose(){ const vk='v'+META.vote, res={}, upd={'meta/vote':null};
+    keys().forEach(k=>{ const spy=spyOf(k); if(!spy) return; const c={}; members(k).forEach(p=>{ const v=(p.votes||{})[vk]; if(v) c[v]=(c[v]||0)+1; });
+      const arr=Object.entries(c).sort((a,b)=>b[1]-a[1]); const tgt=arr.length&&(arr.length===1||arr[0][1]>arr[1][1])?arr[0][0]:null; const nm=tgt&&PLAYERS[tgt]?PLAYERS[tgt].nick:'';
+      const t=TEAMSD[k]||{}; if(tgt===spy){ res[k]={ok:true,name:nm}; upd[`teams/${k}/caught`]=true; GK.forEach(g=>upd[`teams/${k}/${g}`]=clampN((+t[g]||0)+8,0,100)); }
+      else { res[k]={ok:false,name:nm}; if(tgt) upd[`teams/${k}/life`]=clampN((+t.life||0)-8,0,100); } });
+    upd['meta/voteRes']=res; backend.update(BASE(),upd); },
   async settle(){ if(T.busy||over()) return; T.busy=true; render(); try{ await settleYear(); toast(`📊 ${year()-1}년째 결산 완료!`); }catch(e){ console.error(e); toast('⚠️ 결산 실패: '+e.message); } T.busy=false; render(); },
   async restart2(){ if(!confirm('2부(책임 정책)를 처음부터 다시 할까요? 정책·예산이 코끼리 사건 직후로 돌아가지 않고, 정책 기록만 지워집니다.')) return; const upd={}; keys().forEach(k=>{ upd[`teams/${k}/owned`]=null; upd[`teams/${k}/traps`]=null; upd[`teams/${k}/replies`]=null; }); await backend.update(BASE(),upd); TACT.startYears(); },
   rv(el){ backend.update(`${BASE()}/meta`,{rv:clampN((+META.rv||0)+(+el.dataset.v),0,3)}); },
@@ -691,6 +799,9 @@ document.addEventListener('click',e=>{ const el=e.target.closest('[data-act]'); 
 document.addEventListener('input',e=>{ const el=e.target.closest('[data-bind]'); if(!el) return; const f=(MODE==='teacher'?TBIND:SBIND)[el.dataset.bind]; if(f) f(el.value,el); });
 document.addEventListener('change',e=>{ const el=e.target.closest('[data-save]'); if(!el||MODE==='teacher'||!P||!P.team) return; const f=SSAVE[el.dataset.save]; if(f) f(el.value,el); });
 document.addEventListener('keydown',e=>{ if(e.key!=='Enter') return; const el=e.target.closest('[data-bind]'); if(!el||el.tagName==='TEXTAREA') return; const a={room:'enterRoom',pin:'login',newLabel:'pickNew',openCode:'pickCode'}[el.dataset.bind]; if(a){ e.preventDefault(); (MODE==='teacher'?TACT:SACT)[a](); } });
+let wasUp=false;
+setInterval(()=>{ document.querySelectorAll('.cd').forEach(el=>{ const s=Math.max(0,Math.ceil((+el.dataset.dl-Date.now())/1000)); el.textContent=s>0?`⏱️ ${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`:'⏰ 시간 종료'; if(s<=10&&s>0) el.classList.add('blink'); });
+  const up=!!timeUp(); if(up!==wasUp){ wasUp=up; softRender(); } },250);
 (async function start(){
   await initBackend();
   const sub=()=>{
