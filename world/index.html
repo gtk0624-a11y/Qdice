@@ -645,29 +645,46 @@ async function claim(info){
     if(ex && ex.dev && ex.dev!==DEV){ ME=info.sid; view='locked'; claiming=false; render(); return; }
     const rec = ex ? {dev:DEV} : Object.assign({}, info, {dev:DEV, joinedAt:Date.now()});
     if(ex) await backend.update(`${WR()}/players/${info.sid}`, rec); else await backend.set(`${WR()}/players/${info.sid}`, rec);
-    ME = info.sid; ls.set(meKey(), ME); view='auto';
+    ME = info.sid; ls.set(meKey(), ME); ls.set(meKey()+'_at', String(Date.now())); view='auto';
   }catch(e){ toast('⚠️ 저장 실패: '+e.message); }
   claiming=false; render();
 }
+let cand=null; // 이 태블릿에 남아 있던 국가 만들기 나라(확인 전)
 function ensureMe(){
   if(!gotData || !gotSrc || claiming) return;
   const P = DATA.players || {};
-  if(ME && P[ME]){ if(P[ME].dev && P[ME].dev!==DEV){ view='locked'; } else if(view==='locked'){ view='auto'; } if(!P[ME].dev){ backend.update(`${WR()}/players/${ME}`,{dev:DEV}); } return; }
-  if(view==='find' || view==='quick') return;
+  if(ME && P[ME]){
+    const p=P[ME]; const myAt=+(ls.get(meKey()+'_at')||0);
+    if(p.dev===DEV){ if(view==='locked') view='auto'; return; }
+    if(p.dev){ // 다른 태블릿이 잡고 있음
+      if(view!=='locked'){ if(myAt){ ls.del(meKey()); ls.del(meKey()+'_at'); } view='locked'; }
+      if(!p.want){ backend.update(`${WR()}/players/${ME}`,{want:Date.now()}); }
+      return;
+    }
+    // 주인이 비어 있음(선생님이 잠금 해제)
+    if(view==='locked'){ claim(Object.assign({sid:ME})); return; }
+    if(p.kick && (!myAt || p.kick>myAt)){ ls.del(meKey()); ls.del(meKey()+'_at'); ME=null; view='find'; toast('선생님이 이 태블릿의 나라 연결을 풀었어요. 내 나라를 다시 골라 주세요.'); return; }
+    claim(Object.assign({sid:ME})); return;
+  }
+  if(view==='find' || view==='quick' || view==='confirm') return;
   // 1) 이 태블릿이 기억하는 세계 게임 신분
   const saved = ls.get(meKey());
   if(saved && P[saved]){ ME=saved; return; }
-  // 2) 이 태블릿에 저장된 국가 만들기 나라
+  // 2) 이 태블릿에 저장된 국가 만들기 나라 → 자동 입장하지 않고 본인 확인
   const S = nationLocal();
   if(S && S.id && S.d && S.d.name){
     const fb = SRCN[S.id];
-    const d = fb && fb.d ? fb.d : S.d;
-    claim(playerFrom(S.id, S.num, S.sname, d));
-    return;
+    const ex = P[S.id];
+    if(!(ex && ex.dev && ex.dev!==DEV)){ cand = playerFrom(S.id, S.num, S.sname, fb && fb.d ? fb.d : S.d); view='confirm'; return; }
   }
-  // 3) 저장된 정보가 사라졌지만 예전 기록이 있으면(재접속)
-  if(saved && SRCN[saved]){ const n=SRCN[saved]; claim(playerFrom(saved, n.num, n.sname, n.d)); return; }
   ME=null; view='find';
+}
+function vConfirm(){
+  if(!cand) return vFind();
+  return `${sHeader()}<div class="card center"><h2>이 태블릿에 저장된 나라가 있어요</h2>
+  <div class="hero" style="justify-content:center">${flagHTML(cand.flag,'lg')}<div style="text-align:left"><div class="muted">${esc(cand.num)}번 ${esc(cand.sname)}</div><h2 style="margin:2px 0">${esc(cand.name)}</h2></div></div>
+  <p><b>${esc(cand.num)}번 ${esc(cand.sname)}</b> 학생이 맞나요?</p>
+  <div class="row" style="justify-content:center"><button class="btn ghost" data-act="candNo">아니요, 내 나라 찾기</button><button class="btn acc" data-act="candYes">네, 제 나라예요</button></div></div>`;
 }
 function sHeader(){
   const p = ME && DATA.players && DATA.players[ME];
@@ -684,7 +701,7 @@ function vFind(){
   return `${sHeader()}<div class="card"><h2>🔎 내 나라를 찾지 못했어요</h2>
   <p>지난 시간과 다른 브라우저로 들어왔거나, 기록이 지워졌을 수 있어요. 아래 목록에서 <b>내가 만든 나라</b>를 눌러 주세요.</p>
   <div class="tip">⚠️ 친구 나라를 누르면 친구가 들어오지 못해요. 꼭 내 나라만 고르세요.</div>
-  ${list.length?`<div class="ngrid">${list.map(n=>{ const p=P[n.id]; const taken = p && p.dev && p.dev!==DEV; const sel=pickSid===n.id; return `<button class="ncard ${sel?'selc':''}" data-act="pick" data-v="${esc(n.id)}" ${taken?'disabled':''}><div class="nh">${flagHTML(norm(n.d).flag,'sm')}<div><div class="nn">${esc(norm(n.d).name||'이름 없는 나라')}</div><div class="ns">${esc(n.num)}번 ${esc(n.sname)}${taken?' · 🔒 이미 입장':''}</div></div></div></button>`; }).join('')}</div>
+  ${list.length?`<div class="ngrid">${list.map(n=>{ const p=P[n.id]; const taken = p && p.dev && p.dev!==DEV; const sel=pickSid===n.id; return `<button class="ncard ${sel?'selc':''}" data-act="pick" data-v="${esc(n.id)}" style="${taken?'opacity:.6':''}"><div class="nh">${flagHTML(norm(n.d).flag,'sm')}<div><div class="nn">${esc(norm(n.d).name||'이름 없는 나라')}</div><div class="ns">${esc(n.num)}번 ${esc(n.sname)}${taken?' · 🔒 다른 태블릿에서 사용 중':''}</div></div></div></button>`; }).join('')}</div>
   <div class="row" style="margin-top:14px"><span class="sp"></span><button class="btn acc" data-act="pickGo" ${pickSid?'':'disabled'}>이 나라로 입장</button></div>`:`<p class="muted">이 방에 선포된 나라가 아직 없어요.</p>`}
   </div>
   <div class="card"><h3 style="margin-top:0">🆕 지난 시간에 나라를 만들지 못했나요?</h3><p class="muted">국가 유형만 골라 30초 만에 새 나라를 만들 수 있어요.</p><button class="btn ghost" data-act="toQuick">새로 빠르게 만들기</button></div>`;
@@ -699,7 +716,7 @@ function vQuick(){
   <div class="row" style="margin-top:16px"><button class="btn ghost" data-act="toFind">← 목록으로</button><span class="sp"></span><button class="btn acc" data-act="quickGo">이 나라로 입장</button></div></div>`;
 }
 function vLocked(){
-  return `${sHeader()}<div class="card center"><h2>🔒 이 나라는 다른 태블릿에서 열려 있어요</h2><p>선생님께 <b>잠금 해제</b>를 부탁하세요. 해제되면 자동으로 들어가집니다.</p><button class="btn ghost" data-act="toFind">다른 나라 고르기</button></div>`;
+  return `${sHeader()}<div class="card center"><h2>🔒 이 나라는 다른 태블릿에서 열려 있어요</h2><p>선생님 화면에 <b>🙋 해제 요청</b>이 표시되었어요. 선생님께 <b>잠금 해제</b>를 부탁하세요.<br>해제되면 이 태블릿으로 자동으로 들어가집니다. (이 화면을 닫지 마세요)</p><button class="btn ghost" data-act="toFind">다른 나라 고르기</button></div>`;
 }
 function myRoundBlock(W, r){
   const c=r.c, me=W.P[ME]; const mine = DATA.ans && DATA.ans[c.id] && DATA.ans[c.id][ME];
@@ -817,6 +834,7 @@ function renderStudent(){
   ensureMe();
   if(view==='quick'){ $app.innerHTML = vQuick(); return; }
   if(view==='find'){ $app.innerHTML = vFind(); return; }
+  if(view==='confirm'){ $app.innerHTML = vConfirm(); return; }
   if(view==='locked'){ $app.innerHTML = vLocked(); return; }
   if(!ME || !DATA.players || !DATA.players[ME]){ $app.innerHTML = `${sHeader()}<div class="card center"><p class="blink">내 나라를 불러오는 중…</p></div>`; return; }
   const W = calc(); const ph = phaseOf();
@@ -835,8 +853,12 @@ const need = (cond,msg)=>{ if(!cond){ toast(msg); return false; } return true; }
 const sActs = {
   enterRoom(){ const c=cleanCode(tmpRoom); if(!need(c.length>=3,'방 코드를 확인해 주세요.')) return; const u=new URL(location.href); u.searchParams.set('room',c); location.href=u.toString(); },
   pick(ds){ pickSid=ds.v; keepScroll=true; render(); },
-  pickGo(){ const n=SRCN[pickSid]; if(!n) return; if(!confirm(`${n.num}번 ${n.sname}의 '${norm(n.d).name}'이(가) 내 나라가 맞나요?`)) return; view='auto'; claim(playerFrom(n.id, n.num, n.sname, n.d)); },
-  toQuick(){ view='quick'; render(); }, toFind(){ view='find'; ME=null; render(); },
+  pickGo(){ const n=SRCN[pickSid]; if(!n) return; if(!confirm(`${n.num}번 ${n.sname}의 '${norm(n.d).name}'이(가) 내 나라가 맞나요?`)) return; const ex=DATA.players&&DATA.players[n.id];
+    if(ex && ex.dev && ex.dev!==DEV){ ME=n.id; view='locked'; backend.update(`${WR()}/players/${n.id}`,{want:Date.now()}); render(); return; }
+    view='auto'; claim(playerFrom(n.id, n.num, n.sname, n.d)); },
+  candYes(){ if(!cand) return; const c=cand; cand=null; view='auto'; claim(c); },
+  candNo(){ cand=null; view='find'; ME=null; render(); },
+  toQuick(){ view='quick'; render(); }, toFind(){ view='find'; ME=null; cand=null; render(); },
   qtype(ds){ draft('quick').type=ds.v; keepScroll=true; render(); },
   quickGo(){ const q=draft('quick'); if(!need(q.num&&q.sname,'번호와 이름을 써 주세요.')||!need(q.name,'나라 이름을 써 주세요.')||!need(q.type,'나라 유형을 골라 주세요.')) return;
     const x=QUICK.find(z=>z.k===q.type); const sid='q'+Date.now().toString(36)+Math.random().toString(36).slice(2,5);
@@ -897,8 +919,8 @@ function tRun(W){
   const nSrc=Object.keys(SRCN||{}).length; const done=ids.filter(id=>A[id]).length;
   return `<div class="stat"><div class="box"><b>${nSrc}</b><small>1차시에 선포된 나라</small></div><div class="box"><b>${ids.length}</b><small>입장한 나라</small></div>${ph!=='lobby'?`<div class="box"><b>${done}/${ids.length}</b><small>${esc(pName(ph))} 제출</small></div>`:''}<div class="box"><b>${W.W}</b><small>세계 위기 지수</small></div></div>
   ${nSrc===0?`<div class="banner warn">⚠️ 방 ${esc(SRC)}에서 1차시 나라를 찾지 못했습니다. 방 코드가 맞는지 확인하세요. 학생 태블릿에 남은 나라로도 입장할 수 있습니다.</div>`:''}
-  <div class="card"><h3 style="margin-top:0">학생 현황 <small class="muted">(🔒 = 태블릿에 잠김 · 눌러서 잠금 해제)</small></h3>
-  <div class="plist">${ids.map(id=>{ const p=W.P[id]; return `<div class="pi ${A[id]?'done':''}">${flagHTML(p.flag,'sm')}<span><b>${esc(p.num)}번 ${esc(p.sname)}</b><small>${esc(p.name)}${p.quick?' · 빠른 생성':''}</small></span><span class="sp"></span>${A[id]?'✅':ph==='lobby'?'':'⏳'}${p.dev?`<button class="btn sm ghost" data-act="unlock" data-v="${esc(id)}" title="잠금 해제">🔒</button>`:''}<button class="btn sm ghost" data-act="delP" data-v="${esc(id)}" title="삭제">✕</button></div>`; }).join('')||'<p class="muted">아직 입장한 학생이 없습니다. 📱 학생 접속 QR을 띄워 주세요.</p>'}</div></div>`;
+  <div class="card"><h3 style="margin-top:0">학생 현황 <small class="muted">(🔒 = 태블릿에 잠김 · 눌러서 잠금 해제)</small> <button class="btn sm ghost" data-act="unlockAll">🔓 전체 잠금 해제</button></h3>
+  <div class="plist">${ids.map(id=>{ const p=W.P[id]; return `<div class="pi ${A[id]?'done':''}">${flagHTML(p.flag,'sm')}<span><b>${esc(p.num)}번 ${esc(p.sname)}</b><small>${esc(p.name)}${p.quick?' · 빠른 생성':''}</small></span><span class="sp"></span>${A[id]?'✅':ph==='lobby'?'':'⏳'}${p.want&&p.dev?`<button class="btn sm acc" data-act="unlock" data-v="${esc(id)}" title="학생이 잠금 해제를 요청했습니다">🙋 해제 요청</button>`:p.dev?`<button class="btn sm ghost" data-act="unlock" data-v="${esc(id)}" title="잠금 해제">🔒</button>`:''}<button class="btn sm ghost" data-act="delP" data-v="${esc(id)}" title="삭제">✕</button></div>`; }).join('')||'<p class="muted">아직 입장한 학생이 없습니다. 📱 학생 접속 QR을 띄워 주세요.</p>'}</div></div>`;
 }
 function tBoard(W){
   const revd = W.rounds.filter(r=>r.revealed);
@@ -989,7 +1011,8 @@ const tActs = {
   reveal(){ const ph=phaseOf(); backend.update(`${WR()}/meta/rev`,{[ph]:true}); if(ph!=='puzzle') tab='board'; },
   unreveal(){ const ph=phaseOf(); if(!confirm('결과 공개를 취소할까요?')) return; backend.remove(`${WR()}/meta/rev/${ph}`); },
   assign(){ if(!confirm('시민 배정을 다시 할까요? 이미 쓴 목소리는 남지만, 새 신분이 바뀔 수 있습니다.')) return; backend.update(`${WR()}/meta`,{assign:buildAssign()}); },
-  unlock(ds){ if(!confirm('이 나라의 태블릿 잠금을 풀까요? 다른 태블릿에서 이 나라로 들어갈 수 있게 됩니다.')) return; backend.update(`${WR()}/players/${ds.v}`,{dev:null}); },
+  unlock(ds){ if(!confirm('이 나라의 태블릿 잠금을 풀까요? 다른 태블릿에서 이 나라로 들어갈 수 있게 됩니다.')) return; backend.update(`${WR()}/players/${ds.v}`,{dev:null,want:null,kick:Date.now()}); toast('잠금을 풀었습니다. 기다리던 태블릿이 자동으로 들어갑니다.'); },
+  unlockAll(){ if(!confirm('모든 나라의 태블릿 잠금을 풀까요? 학생들이 다시 자기 나라를 골라야 할 수 있습니다.')) return; const now=Date.now(); const u={}; Object.keys(DATA.players||{}).forEach(id=>{ u[id+'/dev']=null; u[id+'/want']=null; u[id+'/kick']=now; }); backend.update(`${WR()}/players`,u); toast('전체 잠금을 풀었습니다.'); },
   delP(ds){ if(!confirm('이 학생을 세계 게임에서 뺄까요? (1차시 나라 기록은 그대로)')) return; backend.remove(`${WR()}/players/${ds.v}`); },
   qr(){ const url=studentURL(); const ov=document.createElement('div'); ov.className='overlay'; ov.innerHTML=`<div class="modal center"><h2>📱 학생 접속</h2><div class="qrbox" id="qrbox"></div><p class="url">${esc(url)}</p><p class="muted">지난 시간과 <b>같은 태블릿, 같은 브라우저</b>로 들어오면 자기 나라가 자동으로 뜹니다.</p><button class="btn" data-x="close">닫기</button></div>`; document.body.appendChild(ov); ov.addEventListener('click',e=>{ if(e.target===ov||e.target.dataset.x==='close') ov.remove(); }); try{ new QRCode(ov.querySelector('#qrbox'),{text:url,width:300,height:300}); }catch(e){ ov.querySelector('#qrbox').textContent='QR을 만들 수 없습니다. 위 주소를 알려 주세요.'; } },
   csv(){ csvDownload(); },
