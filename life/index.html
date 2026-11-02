@@ -1,0 +1,718 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>꿈결 생명 마을 — 누구를, 왜, 어떻게 지킬까</title>
+<link rel="icon" href="ggumsong.png">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+:root{
+  --bg:#f1f5ee; --paper:#ffffff; --ink:#12304a; --sub:#5a6b7d; --line:#d7e2ec;
+  --sea:#2f7d4e; --sea2:#e6f3ea; --deep:#1e4d33; --sand:#f6c453; --sand2:#fff5d6;
+  --ok:#1f9d7a; --warn:#e39a1c; --bad:#d64545; --soft:#eaf3f9;
+  --shadow:0 2px 0 rgba(18,48,74,.05),0 8px 24px rgba(18,48,74,.07);
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:Pretendard,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;font-size:17px;line-height:1.55;-webkit-tap-highlight-color:transparent}
+button{font-family:inherit;font-size:inherit;color:inherit;cursor:pointer}
+input,textarea{font-family:inherit;font-size:16px;color:var(--ink)}
+.wrap{max-width:860px;margin:0 auto;padding:16px 16px 120px}
+.twrap{max-width:1360px;margin:0 auto;padding:16px 16px 80px}
+.top{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.top h1{font-size:20px;margin:0;flex:1;min-width:180px;display:flex;align-items:center;gap:8px}
+.top h1 img{width:36px;height:36px;object-fit:contain}
+.pill{display:inline-flex;align-items:center;gap:6px;background:var(--paper);border:1.5px solid var(--line);border-radius:999px;padding:4px 12px;font-size:14px;font-weight:600}
+.pill.live{border-color:var(--ok);color:var(--ok)}
+.pill.demo{border-color:var(--warn);color:#a86b00}
+.card{background:var(--paper);border:1.5px solid var(--line);border-radius:18px;padding:20px;box-shadow:var(--shadow);margin-bottom:16px}
+h2{font-size:23px;margin:0 0 12px}
+h3{font-size:18px;margin:18px 0 8px}
+.muted{color:var(--sub);font-size:15px}
+.small{font-size:13.5px}
+.tip{background:#eaf6f2;border-left:5px solid var(--ok);border-radius:10px;padding:12px 14px;margin:0 0 14px;font-size:15.5px}
+.concept{background:var(--sand2);border:2px solid var(--sand);border-radius:14px;padding:14px 16px;margin:0 0 14px}
+.concept .h{font-weight:800;color:#7a5600;margin-bottom:4px}
+.grid{display:grid;gap:10px}
+.g2{grid-template-columns:repeat(2,1fr)} .g3{grid-template-columns:repeat(3,1fr)}
+@media (max-width:640px){.g3{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:440px){.g2,.g3{grid-template-columns:1fr}}
+.opt{background:#fff;border:2px solid var(--line);border-radius:14px;padding:12px;text-align:left;display:block;width:100%}
+.opt.sel{border-color:var(--sea);background:var(--sea2);box-shadow:0 0 0 3px rgba(47,125,78,.15)}
+.opt:disabled{opacity:.45;cursor:not-allowed}
+.opt .e{font-size:28px;line-height:1}
+.opt .t{font-weight:800;margin-top:4px}
+.opt .d{font-size:14px;color:var(--sub);margin-top:2px}
+.btn{border:none;border-radius:14px;padding:13px 20px;font-weight:700;background:var(--ink);color:#fff;font-size:17px}
+.btn:active{transform:translateY(1px)}
+.btn.acc{background:var(--sea)} .btn.sand{background:var(--sand);color:#3b2a00} .btn.ok{background:var(--ok)} .btn.bad{background:var(--bad)}
+.btn.ghost{background:transparent;border:2px solid var(--line);color:var(--ink)}
+.btn.sm{padding:8px 12px;font-size:14.5px;border-radius:10px}
+.btn.xl{padding:18px 28px;font-size:21px;border-radius:16px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.navbar{position:fixed;left:0;right:0;bottom:0;background:rgba(255,255,255,.96);border-top:1.5px solid var(--line);padding:12px 16px calc(12px + env(safe-area-inset-bottom));display:flex;justify-content:center;z-index:20}
+.navbar .in{max-width:860px;width:100%;display:flex;gap:10px;justify-content:space-between;align-items:center}
+.field{width:100%;border:2px solid var(--line);border-radius:12px;padding:12px 14px;background:#fff}
+.field:focus{outline:none;border-color:var(--sea)}
+textarea.field{min-height:96px;resize:vertical}
+label.lb{display:block;font-weight:800;margin:16px 0 6px}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.sp{flex:1}
+.center{text-align:center}
+.say{display:flex;gap:10px;align-items:flex-end;margin:0 0 14px}
+.say img{width:68px;height:68px;object-fit:contain;flex:none;animation:bob 2.6s ease-in-out infinite}
+.say .bub{background:#fff;border:2px solid var(--sea);border-radius:18px 18px 18px 4px;padding:10px 14px;font-size:15.5px;box-shadow:var(--shadow)}
+.say .bub b{color:var(--sea)}
+.say.big img{width:110px;height:110px}
+.say.big .bub{font-size:18px}
+@keyframes bob{50%{transform:translateY(-5px) rotate(-2deg)}}
+.hero{display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px}
+.hero img{width:150px;height:150px;object-fit:contain;animation:bob 2.6s ease-in-out infinite}
+.team{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:4px 13px;font-weight:800;color:#fff;font-size:15px}
+.tgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+@media (max-width:560px){.tgrid{grid-template-columns:repeat(2,1fr)}}
+.tbtn{border:3px solid transparent;border-radius:18px;padding:16px 10px;color:#fff;text-align:center;font-weight:800}
+.tbtn .e{font-size:40px;line-height:1.1}
+.tbtn.sel{border-color:var(--ink);box-shadow:0 0 0 4px rgba(18,48,74,.25)}
+.tbtn small{display:block;font-weight:600;opacity:.9}
+.stp{display:flex;align-items:center;gap:8px}
+.stp button{width:48px;height:48px;border-radius:14px;border:2px solid var(--line);background:#fff;font-size:24px;font-weight:800}
+.stp .v{min-width:36px;text-align:center;font-weight:900;font-size:26px}
+.boats{font-size:24px;letter-spacing:2px;line-height:1.2}
+.boats .off{opacity:.25}
+.species{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+@media (max-width:520px){.species{grid-template-columns:1fr}}
+.spc{background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:10px 12px}
+.spc .h{display:flex;align-items:center;gap:8px;font-weight:800}
+.spc .h .e{font-size:28px}
+.spc .lv{margin-left:auto;font-weight:800;border-radius:8px;padding:2px 9px;font-size:14px}
+.spc .tr{height:9px;background:#e7eef4;border-radius:5px;overflow:hidden;margin-top:8px}
+.spc .tr i{display:block;height:100%;transition:width .5s}
+.spc .nb{font-size:13px;color:var(--sub);margin-top:4px}
+.lv0{background:#e3f4ee;color:#11704f} .lv1{background:#e7f1fb;color:#1d5d93} .lv2{background:#fff2d9;color:#8a5a00} .lv3{background:#fde3e3;color:#a12a2a} .lv4{background:#f5d0d0;color:#7a1414} .lv5{background:#ddd;color:#444}
+.news{display:flex;gap:12px;align-items:flex-start;background:#fff8e6;border:2px solid var(--sand);border-radius:14px;padding:12px 14px;margin-bottom:10px}
+.news .e{font-size:34px;line-height:1}
+.news b{display:block;font-size:17px}
+.news .d{font-size:15px;color:#4d3b06}
+.news.kid{background:#eef3ff;border-color:#8ea3ef}
+.news.kid .d{color:#28356e}
+.kv{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+@media (max-width:560px){.kv{grid-template-columns:repeat(2,1fr)}}
+.kv .box{background:var(--soft);border-radius:12px;padding:8px 12px}
+.kv .box small{display:block;color:var(--sub);font-weight:700;font-size:13px}
+.kv .box b{font-size:22px}
+.rep{background:var(--sea2);border-radius:14px;padding:12px 14px;margin-bottom:12px}
+.rep .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.rep .chips span{background:#fff;border-radius:8px;padding:3px 9px;font-weight:700;font-size:14.5px}
+.toast{position:fixed;left:50%;top:18px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:12px 20px;border-radius:12px;z-index:100;font-weight:700;max-width:90vw;box-shadow:var(--shadow);animation:pop .2s}
+@keyframes pop{from{transform:translate(-50%,-10px);opacity:0}to{transform:translate(-50%,0);opacity:1}}
+.overlay{position:fixed;inset:0;background:rgba(10,30,50,.65);z-index:50;display:flex;align-items:center;justify-content:center;overflow:auto;padding:24px 16px}
+.modal{background:var(--paper);border-radius:20px;max-width:900px;width:100%;padding:26px;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.banner{border-radius:14px;padding:14px 16px;margin-bottom:14px;font-weight:700}
+.banner.ok{background:#e3f4ee;color:#11704f} .banner.warn{background:#fff3dc;color:#8a5a00} .banner.bad{background:#fde8e8;color:#9b2c2c} .banner.info{background:var(--sea2);color:var(--deep)}
+.chcard{background:#fff;border:2px solid var(--line);border-radius:16px;padding:14px;text-align:left;width:100%}
+.chcard.sel{border-color:var(--sea);background:var(--sea2);box-shadow:0 0 0 3px rgba(47,125,78,.15)}
+.chcard .hd{display:flex;gap:10px;align-items:center}
+.chcard .hd .e{font-size:34px}
+.chcard .nm{font-weight:900;font-size:18px;line-height:1.2}
+.chcard .sb{display:inline-block;background:var(--ink);color:#fff;border-radius:6px;padding:1px 8px;font-size:12.5px;font-weight:700;margin-top:2px}
+.chcard .qt{font-size:14.5px;color:#34485c;margin:8px 0;font-style:italic}
+.chcard ul{margin:4px 0 0;padding-left:18px;font-size:14.5px}
+.chcard .who{margin-top:8px;display:flex;gap:4px;flex-wrap:wrap}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0 14px}
+.tabs button{border:2px solid var(--line);background:var(--paper);border-radius:12px;padding:9px 14px;font-weight:700;font-size:15.5px}
+.tabs button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.phasebar{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.phasebar button{border:2px solid var(--line);background:#fff;border-radius:12px;padding:8px 12px;font-weight:700;font-size:15px}
+.phasebar button.on{background:var(--sea);color:#fff;border-color:var(--sea)}
+table.tb{width:100%;border-collapse:collapse;font-size:15px;background:#fff}
+table.tb td,table.tb th{border:1px solid var(--line);padding:7px 9px;text-align:left;vertical-align:middle}
+table.tb th{background:var(--soft)}
+table.tb td.n{text-align:right;font-variant-numeric:tabular-nums}
+.qrbox{display:flex;justify-content:center;padding:16px;background:#fff;border-radius:12px}
+.url{word-break:break-all;background:#fff;border:1.5px dashed var(--line);padding:10px;border-radius:10px;font-size:15px;font-weight:600}
+.code{font-size:56px;font-weight:900;letter-spacing:8px;color:var(--sea);line-height:1.1}
+.tboard{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+@media (max-width:900px){.tboard{grid-template-columns:repeat(2,1fr)}}
+.tcard{background:#fff;border:2px solid var(--line);border-radius:16px;padding:12px 14px}
+.tcard.ready{border-color:var(--ok);background:#f2fbf7}
+.tcard .hd{display:flex;align-items:center;gap:8px;font-weight:900;font-size:18px}
+.tcard .hd .e{font-size:26px}
+.tcard .m{font-size:13.5px;color:var(--sub)}
+.wall{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
+.wcard{background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:12px;text-align:left;width:100%;font-size:15px}
+.wcard small{display:block;color:var(--sub);font-weight:700;margin-bottom:4px}
+.spot{font-size:34px;font-weight:800;line-height:1.5;padding:10px;white-space:pre-wrap}
+.bars{display:grid;gap:8px}
+.bar .lbl{display:flex;justify-content:space-between;font-weight:700;font-size:15px;gap:8px}
+.bar .tr{height:26px;background:#e7eef4;border-radius:7px;overflow:hidden}
+.bar .tr i{display:block;height:100%;transition:width .6s}
+.ending{border-radius:20px;padding:26px;text-align:center;color:#fff}
+.ending .e{font-size:72px;line-height:1}
+.ending .n{font-size:32px;font-weight:900;margin-top:6px}
+.chart{width:100%;height:auto;background:#fff;border-radius:12px;border:1.5px solid var(--line)}
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:14px;font-weight:700;margin-top:6px}
+.legend i{display:inline-block;width:14px;height:14px;border-radius:4px;vertical-align:-2px;margin-right:4px}
+.reveal{font-size:30px;font-weight:900;line-height:1.4;color:var(--deep)}
+body.big .twrap{font-size:20px} body.big .spc .h{font-size:20px} body.big .news b{font-size:21px} body.big .news .d{font-size:18px} body.big .tcard .hd{font-size:21px}
+footer{text-align:center;color:var(--sub);font-size:12.5px;margin-top:30px;padding:0 16px 20px}
+.blink{animation:blink 1.2s infinite} @keyframes blink{50%{opacity:.45}}
+.cnt{display:inline-flex;align-items:center;justify-content:center;min-width:26px;height:26px;border-radius:13px;background:var(--sea);color:#fff;font-weight:800;font-size:14px;padding:0 8px}
+.msg{display:flex;gap:12px;align-items:flex-start;background:#fff;border:2.5px solid var(--sea);border-radius:18px 18px 18px 4px;padding:12px 14px;margin-bottom:10px}
+.msg .e{font-size:38px;line-height:1}
+.msg b{display:block;color:var(--deep)}
+.msg.sel{background:var(--sea2);box-shadow:0 0 0 3px rgba(47,125,78,.2)}
+.bcard{background:#fff;border:2px solid var(--line);border-radius:16px;padding:12px 14px}
+.bcard.in{border-color:var(--ok);background:#f2fbf6} .bcard.out{border-color:#c9d3dc;background:#f6f8fa} .bcard.hold{border-color:var(--warn);background:#fff8ec}
+.bcard .hd{display:flex;align-items:center;gap:8px;font-weight:900;font-size:18px}
+.bcard .hd .e{font-size:32px}
+.bcard .hint{font-size:14.5px;background:var(--sand2);border-radius:10px;padding:6px 10px;margin:8px 0}
+.seg{display:flex;gap:6px;margin:6px 0}
+.seg button{flex:1;border:2px solid var(--line);background:#fff;border-radius:10px;padding:8px 4px;font-weight:800;font-size:15px}
+.seg button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.warnln{font-size:13.5px;color:#8a5a00;font-weight:700}
+.shopcat h3{margin:14px 0 6px}
+.pcard{background:#fff;border:2px solid var(--line);border-radius:14px;padding:10px 12px;text-align:left;width:100%}
+.pcard.sel{border-color:var(--sea);background:var(--sea2);box-shadow:0 0 0 3px rgba(47,125,78,.15)}
+.pcard.own{opacity:.5}
+.pcard .t{font-weight:800}
+.pcard .d{font-size:13.5px;color:var(--sub)}
+.pcard .c{font-weight:800;font-size:14px;margin-top:4px}
+.gbar{margin:5px 0}
+.gbar .lbl{display:flex;justify-content:space-between;font-weight:800;font-size:14.5px}
+.gbar .tr{height:14px;background:#e7eef4;border-radius:7px;overflow:hidden}
+.gbar .tr i{display:block;height:100%;transition:width .6s}
+.mtx td,.mtx th{text-align:center!important}
+.endgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+@media (max-width:800px){.endgrid{grid-template-columns:1fr}}
+.oxrow{display:flex;gap:8px;align-items:center;background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:8px}
+.oxrow .q{flex:1}
+.oxrow button{width:54px;height:44px;border-radius:10px;border:2px solid var(--line);background:#fff;font-weight:900;font-size:20px}
+.oxrow button.on{background:var(--ink);color:#fff}
+.oxrow.right{border-color:var(--ok);background:#f2fbf6} .oxrow.wrong{border-color:var(--bad);background:#fdf0f0}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<footer>© 김정환 · M.A.D.T (Moral And Digital Teacher) · 캐릭터 ‘꿈송이’ © 김정환, 무단 사용 금지</footer>
+<script type="module">
+/* ① 설정 */
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyAPJAMUITr6w0H63Ze1L1eViCsuq3zXlbE",
+  authDomain: "nation-game-cf684.firebaseapp.com",
+  databaseURL: "https://nation-game-cf684-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "nation-game-cf684",
+  storageBucket: "nation-game-cf684.firebasestorage.app",
+  messagingSenderId: "947361689624",
+  appId: "1:947361689624:web:9f09cd27fbd2334ae0136d"
+};
+const TEACHER_PIN = '0624';
+const CHAR = 'ggumsong.png';
+
+/* ② 게임 데이터 (교과서 178~189쪽) */
+const G = {pain:{n:'고통 지수',e:'🧡',c:'#d9732b'}, will:{n:'삶의 의지 지수',e:'💙',c:'#2e6a8e'}, eco:{n:'생태 지수',e:'💚',c:'#2f7d4e'}, life:{n:'주민 생활',e:'😊',c:'#9b5de5'}};
+const GK=['pain','will','eco'];
+const CH = {
+  pain:{k:'pain', n:'고통 렌즈 마을', who:'싱어', e:'🧡', q:'쾌락과 고통을 느낄 수 있는 존재는 모두 도덕적으로 고려해야 한다.', ask:'이 생명은 쾌락과 고통을 느낄 수 있는가?', rule:'고통 지수가 마을 점수에 2배로 반영돼요.', lim:'생각해 볼 점: 고통을 느끼기 어려운 식물이나 생태계 전체는 고려 대상에서 빠질 수 있어요.'},
+  will:{k:'will', n:'삶의 의지 마을', who:'슈바이처', e:'💙', q:'살아가려는 의지를 지닌 모든 생명체에 외경(공경하고 두려워하는 마음)을 가져야 한다.', ask:'이 생명은 생명을 유지하고 살아가려는 의지를 지녔는가?', rule:'삶의 의지 지수가 마을 점수에 2배로 반영돼요.', lim:'생각해 볼 점: 모든 생명을 똑같이 고려하면 해충 방역처럼 생명을 해쳐야 하는 일상의 판단이 어려워져요.'},
+  eco:{k:'eco', n:'생태계 마을', who:'생태계의 구성원', e:'💚', q:'모든 생물은 생태계의 유지와 조화라는 측면에서 그 자체로 소중한 가치를 지닌다.', ask:'이 생명은 생태계의 유지와 조화에 한몫하는가?', rule:'생태 지수가 마을 점수에 2배로 반영돼요.', lim:'생각해 볼 점: 생태계 전체를 중시하다 보면 개별 생명이 겪는 고통을 놓칠 수 있어요.'}
+};
+const CHK=['pain','will','eco'];
+/* p: 고통(y/m/n), e: 생태 역할(s 큼/m 논쟁/w 작음) */
+const BE = [
+  {k:'el',e:'🐘',n:'코끼리',d:'관광객을 태우다 척추가 내려앉은 코끼리',p:'y',e2:'s',h:{pain:'아픔과 스트레스를 크게 느끼는 동물이에요.',will:'무리를 지어 수십 년을 살아가요.',eco:'숲의 밀도를 조절하고 씨앗을 퍼뜨리는 생태계의 핵심종이에요.'}},
+  {k:'ra',e:'🐁',n:'실험용 쥐',d:'신약의 안전성을 시험하는 실험실의 쥐',p:'y',e2:'w',h:{pain:'통증을 느끼는 포유류예요.',will:'좁은 우리에서도 살아가려 애써요.',eco:'실험실에서 태어나 자연 생태계와 떨어져 살아요.'}},
+  {k:'mo',e:'🦟',n:'모기',d:'병을 옮기지만 다른 동물의 먹이가 되는 곤충',p:'m',e2:'s',h:{pain:'곤충이 고통을 느끼는지는 과학자들 사이에서도 의견이 갈려요.',will:'알을 낳고 살아남으려 해요.',eco:'물고기·새·박쥐의 먹이가 되는 먹이 사슬의 한 고리예요.'}},
+  {k:'mj',e:'🪴',n:'금전수',d:'교실 창가의 반려 식물',p:'n',e2:'w',h:{pain:'신경이 없어 고통을 느낀다고 보기 어려워요.',will:'빛을 향해 잎을 뻗으며 살아가요.',eco:'화분 속에 있어 생태계에서의 역할은 작아요.'}},
+  {k:'pi',e:'🌲',n:'소나무',d:'수백 년을 사는 마을 뒷산의 나무',p:'n',e2:'s',h:{pain:'고통을 느낀다고 보기 어려워요.',will:'바위틈에서도 뿌리를 내리고 버텨요.',eco:'새와 곤충의 집이고 흙이 쓸려 내려가는 것을 막아요.'}},
+  {k:'be',e:'🐝',n:'꿀벌',d:'꽃가루를 옮겨 열매를 맺게 하는 곤충',p:'m',e2:'s',h:{pain:'아픔에 반응한다는 연구도 있지만 아직 의견이 갈려요.',will:'무리를 지키며 부지런히 살아가요.',eco:'꽃가루받이로 식물과 농사를 지탱해요.'}},
+  {k:'ca',e:'🐈',n:'길고양이',d:'학교 뒤편에 사는 고양이',p:'y',e2:'m',h:{pain:'아픔과 배고픔을 느끼는 동물이에요.',will:'추위와 위험 속에서도 살아가려 해요.',eco:'사람 곁에 사는 동물이에요. 새를 사냥해 생태계에 영향을 준다는 걱정도 있어요.'}},
+  {k:'co',e:'🪸',n:'산호',d:'바닷물 온도가 오르며 하얗게 죽어 가는 산호',p:'m',e2:'s',h:{pain:'동물이지만 뇌가 없어 고통을 느끼는지 분명하지 않아요.',will:'아주 오랜 세월에 걸쳐 자라며 살아가요.',eco:'수많은 바다 생물이 산호초에 기대어 살아요.'}},
+  {k:'sa',e:'🐟',n:'양식 연어',d:'좁은 가두리에서 대량으로 키우는 물고기',p:'y',e2:'w',h:{pain:'물고기도 통증을 느낀다는 연구가 많아요.',will:'물길을 거슬러 오르려는 본능을 지녔어요.',eco:'가두리에 갇혀 자연 생태계에서의 역할은 작아요.'}},
+  {k:'lo',e:'🪷',n:'가시연꽃',d:'습지 개발로 줄어드는 멸종 위기 식물',p:'n',e2:'s',h:{pain:'고통을 느낀다고 보기 어려워요.',will:'가시로 몸을 지키며 물 위로 꽃을 피워요.',eco:'습지 생태계를 이루는 멸종 위기 야생 식물이에요.'}}
+];
+const BM = Object.fromEntries(BE.map(b=>[b.k,b]));
+const ELE = {
+  ride:{e:'🐘',t:'코끼리 타기 관광 계속 허가',d:'관광객이 몰려 마을 수입이 크게 늘어요.',eff:{money:300,pain:-20,will:-20,eco:-10,life:10}},
+  watch:{e:'🔭',t:'타기는 금지, 관찰하는 생태 관광으로',d:'수입은 줄지만 코끼리가 자기 방식대로 살 수 있어요.',eff:{money:120,pain:8,will:10,eco:5,life:3}},
+  ban:{e:'🌿',t:'관광 전면 금지 + 코끼리 보호 구역',d:'수입은 없고 관광업 주민들이 일자리를 잃어요.',eff:{money:0,pain:12,will:15,eco:15,life:-12}}
+};
+const ELK=['ride','watch','ban'];
+const CAT = {pet:{n:'반려동물',e:'🐕',g:'pain'},stray:{n:'유기 동물',e:'🐶',g:'pain'},wild:{n:'야생 동물',e:'🐻‍❄️',g:'eco'},farm:{n:'경제 동물(가축)',e:'🐖',g:'pain'},plant:{n:'반려 식물',e:'🪴',g:'will'},wildp:{n:'야생 식물',e:'🪷',g:'eco'},social:{n:'사회적 활동 참여',e:'🤝',g:null}};
+const CATK=['pet','stray','wild','farm','plant','wildp','social'];
+const TRAP = {
+  1:'① 생명체를 수단으로 여겨서는 안 된다',
+  2:'② 생명체를 열악한 환경에 내버려 두거나 학대하지 않아야 한다',
+  3:'③ 필요 이상으로 생명체를 착취하거나 훼손하지 말아야 한다'
+};
+const PC = [
+  {k:'pet1',c:'pet',e:'🏷️',n:'반려동물 등록·인식표 지원',d:'잃어버려도 다시 찾을 수 있게',cost:40,eff:{pain:4,will:4,life:2}},
+  {k:'pet2',c:'pet',e:'🩺',n:'동물 병원 정기 검진 쿠폰',d:'반려동물의 건강을 주기적으로 확인',cost:70,eff:{pain:10,will:4}},
+  {k:'petT',c:'pet',e:'🎪',n:'재주 부리는 반려견 대회',d:'축제 인기 행사! 입장료 수입',cost:0,inc:60,eff:{life:8,pain:-8,will:-6},trap:1},
+  {k:'st1',c:'stray',e:'🏠',n:'유기 동물 입양 센터',d:'버려진 동물이 새 가족을 만나도록',cost:90,eff:{pain:12,will:8}},
+  {k:'st2',c:'stray',e:'📢',n:'‘사지 말고 입양하세요’ 캠페인',d:'주민들의 입양을 이끌어요',cost:30,eff:{pain:5,will:3}},
+  {k:'stT',c:'stray',e:'🚚',n:'유기 동물 마을 밖으로 내보내기',d:'민원이 줄고 거리가 깨끗해져요',cost:10,eff:{life:6,pain:-10,will:-10},trap:2},
+  {k:'wi1',c:'wild',e:'🌉',n:'야생 동물 생태 통로',d:'찻길에 막힌 길을 다시 이어요',cost:80,eff:{eco:12,will:6}},
+  {k:'wi2',c:'wild',e:'🚲',n:'탄소 줄이기 자전거길',d:'기후 변화로 고통받는 야생 동물을 위해',cost:60,eff:{eco:8,pain:2,life:3}},
+  {k:'wiT',c:'wild',e:'🦌',n:'야생 동물 먹이 주기 체험 카페',d:'관광객 인기 만점! 입장료 수입',cost:0,inc:70,eff:{life:6,will:-10,eco:-6},trap:1},
+  {k:'fa1',c:'farm',e:'🐖',n:'동물 복지 축사 인증 지원',d:'가축이 움직이고 쉴 수 있는 축사',cost:80,eff:{pain:12,will:6,life:-2}},
+  {k:'fa2',c:'farm',e:'🥗',n:'급식에 ‘고기 없는 날’ 선택 메뉴',d:'원하는 사람만 고르는 채식 메뉴',cost:30,eff:{pain:4,eco:4,life:-3}},
+  {k:'faT',c:'farm',e:'🏭',n:'축사 두 배로 늘리기',d:'고기는 더 싸게, 수입은 쑥',cost:0,inc:90,eff:{life:6,pain:-12,eco:-8},trap:3},
+  {k:'pl1',c:'plant',e:'📖',n:'반려 식물 돌봄 안내서',d:'식물마다 알맞은 빛·물·온도 안내',cost:20,eff:{will:5}},
+  {k:'pl2',c:'plant',e:'📅',n:'‘물 준 날’ 달력 표시 캠페인',d:'물을 너무 자주 주지 않도록',cost:15,eff:{will:4}},
+  {k:'plT',c:'plant',e:'🌸',n:'시든 화분은 버리고 새로 사기',d:'늘 싱싱한 꽃으로 마을 단장',cost:20,eff:{life:6,will:-8},trap:2},
+  {k:'wp1',c:'wildp',e:'🪷',n:'멸종 위기 식물 보전 습지',d:'가시연꽃이 사는 습지를 지켜요',cost:90,eff:{eco:14,will:6,life:-3}},
+  {k:'wp2',c:'wildp',e:'🗺️',n:'야생 식물 지도·홍보물 제작',d:'멸종 위기종을 알리는 홍보물',cost:25,eff:{eco:5,will:2}},
+  {k:'wpT',c:'wildp',e:'🏗️',n:'습지를 메워 주차장 짓기',d:'주차 걱정 끝! 상가 수입',cost:0,inc:80,eff:{life:10,eco:-15,will:-8},trap:3},
+  {k:'so1',c:'social',e:'🤝',n:'생명 존중 동아리 만들기',d:'학생·주민이 함께 활동해요',cost:30,eff:{pain:3,will:3,eco:3}},
+  {k:'so2',c:'social',e:'💝',n:'동물 보호 단체 후원·봉사',d:'후원과 기부, 봉사 활동',cost:50,eff:{pain:6,will:4}},
+  {k:'so3',c:'social',e:'🌏',n:'국제기구·비정부 단체와 협력',d:'국경을 넘는 생명 문제를 함께',cost:70,eff:{eco:8,pain:3,will:2}}
+];
+const PM = Object.fromEntries(PC.map(p=>[p.k,p]));
+const MSG = [
+  {c:'pet',e:'🐕',w:'반려견 몽이',t:'재미 삼아 제가 싫어하는 개인기를 계속 시키지 마세요. 화가 난다고 소리치고 때리면 너무 무서워요.'},
+  {c:'plant',e:'🪴',w:'금전수',t:'매일 물을 주면 좋아할 줄 알았죠? 사실 뿌리가 썩어 가고 있어요. 저를 잘 알아봐 주세요.'},
+  {c:'stray',e:'🐶',w:'유기견 보리',t:'이사 가던 날, 저만 두고 갔어요. 보호소에서 매일 문만 바라봐요.'},
+  {c:'farm',e:'🐖',w:'농장 돼지',t:'몸을 돌릴 수도 없는 좁은 우리에서 평생을 살아요. 흙을 한 번 밟아 보고 싶어요.'},
+  {c:'wild',e:'🐻‍❄️',w:'북극곰',t:'얼음이 녹아 사냥할 곳이 없어요. 멀리 사는 여러분의 생활이 우리 집을 녹이고 있대요.'},
+  {c:'wildp',e:'🪷',w:'가시연꽃',t:'제가 사는 습지가 메워지고 있어요. 저는 이 습지가 아니면 살 수 없어요.'}
+];
+const START = {money:200,pain:50,will:50,eco:50,life:60};
+const MAXC = 3, DRIFT = 3, PEN = 6;
+const OX = [
+  {q:'모든 생명체는 단 한 번 주어진 삶을 살아가는 존재라는 점에서 소중하다.',a:'O',x:'교과서 179쪽'},
+  {q:'슈바이처는 동물이 고통과 쾌락을 느끼기 때문에 도덕적으로 고려해야 한다고 주장하였다.',a:'X',x:'고통과 쾌락은 싱어, 슈바이처는 삶의 의지와 생명에 대한 외경'},
+  {q:'싱어는 모든 생명체가 생태계의 한 구성원이기 때문에 도덕적 고려를 해야 한다고 보았다.',a:'X',x:'싱어는 쾌락과 고통을 느끼는 존재를 도덕적 고려 대상으로 봄'},
+  {q:'생명체들이 겪는 고통과 위험에 공감하는 자세는 고통받는 생명체의 처지를 개선하는 데 도움을 줄 수 있다.',a:'O',x:'공감은 처지 개선의 출발점(185쪽)'},
+  {q:'생명체를 열악한 환경에 방치한다고 해서 문제가 되지는 않는다.',a:'X',x:'열악한 환경에 내버려 두거나 학대하지 않아야 함(186쪽)'},
+  {q:'생명체들이 처한 열악한 환경은 국가와 국제기구를 통해서만 개선될 수 있다.',a:'X',x:'개인의 동아리·봉사·후원 등 사회적 활동으로도 실천 가능(187쪽)'}
+];
+const REFQ = [
+  {k:'q1',e:'🧭',t:'우리 마을 헌장(렌즈)으로 판단했을 때 좋았던 점과 부족했던 점은 무엇인가요?',st:'우리 마을은 ( ) 렌즈를 골랐는데, 좋았던 점은'},
+  {k:'q2',e:'🌈',t:'인간과 동식물이 더불어 조화롭게 산다는 것은 무엇일까요? 문장을 완성해 보세요.',st:'인간과 동식물이 더불어 조화롭게 산다는 것은 '},
+  {k:'q3',e:'✅',t:'오늘 느낀 점과 앞으로 실천할 점을 써 보세요.',st:'오늘 나는 ( )을/를 느꼈고, 앞으로 '}
+];
+const CONCEPTS=['쾌락','고통','삶의 의지','생태계','구성원','싱어','슈바이처','외경','공감','책임','수단','방치','학대','착취','훼손','더불어','조화','배려','존중'];
+const TEAMS = [
+  {k:'t1',n:'해바라기 마을',e:'🌻',c:'#e76f51'},{k:'t2',n:'도토리 마을',e:'🌰',c:'#8d6e3f'},{k:'t3',n:'반딧불 마을',e:'✨',c:'#4361ee'},
+  {k:'t4',n:'조약돌 마을',e:'🪨',c:'#0e7490'},{k:'t5',n:'무지개 마을',e:'🌈',c:'#9b5de5'},{k:'t6',n:'은행나무 마을',e:'🍂',c:'#c08a00'}
+];
+const TM = Object.fromEntries(TEAMS.map(t=>[t.k,t]));
+const clampN=(v,a,b)=>Math.max(a,Math.min(b,v));
+function lifeScore(t){ if(!t) return 0; const w={pain:1,will:1,eco:1}; if(CH[t.charter]) w[t.charter]=2; const s=w.pain+w.will+w.eco; return Math.round(((+t.pain||0)*w.pain+(+t.will||0)*w.will+(+t.eco||0)*w.eco)/s); }
+function msgsFor(y,N){ const per=[]; const b=Math.floor(MSG.length/N), x=MSG.length%N; let i=0; for(let k=1;k<=N;k++){ const n=b+(k<=x?1:0); per.push([...Array(n)].map((_,j)=>i+j)); i+=n; } return per[y-1]||[]; }
+function regWarn(b,ch,v){
+  if(!ch||!v||v==='hold') return '';
+  if(ch==='pain'){ if(b.p==='n'&&v==='in') return '🤔 고통 렌즈로 보면 고통을 느끼기 어려운 생명이에요. 헌장과 맞나요?'; if(b.p==='y'&&v==='out') return '🤔 고통을 느끼는 생명인데 원 밖에 두었어요. 헌장과 맞나요?'; }
+  if(ch==='will'&&v==='out') return '🤔 삶의 의지 렌즈는 살아가려는 모든 생명을 고려해요. 헌장과 맞나요?';
+  if(ch==='eco'){ if(b.e2==='s'&&v==='out') return '🤔 생태계에서 큰 역할을 하는 생명인데 원 밖에 두었어요. 헌장과 맞나요?'; }
+  return '';
+}
+
+/* ③ 저장소 */
+const clean = o => o==null ? null : JSON.parse(JSON.stringify(o));
+let DBMODE='demo', backend=null;
+async function initBackend(){
+  if(FIREBASE_CONFIG && FIREBASE_CONFIG.apiKey && FIREBASE_CONFIG.databaseURL){
+    try{
+      const A = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js');
+      const D = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js');
+      const db = D.getDatabase(A.initializeApp(FIREBASE_CONFIG,'life'));
+      backend = { set:(p,v)=>D.set(D.ref(db,p),clean(v)), update:(p,v)=>D.update(D.ref(db,p),clean(v)), remove:p=>D.remove(D.ref(db,p)),
+        on:(p,cb)=>D.onValue(D.ref(db,p),s=>cb(s.val()),err=>toast('⚠️ 데이터베이스 연결 오류: '+err.message)) };
+      DBMODE='live'; return;
+    }catch(e){ console.error(e); toast('⚠️ Firebase 연결 실패 → 체험 모드로 실행합니다'); }
+  }
+  const KEY='life_demo_db'; const bc=('BroadcastChannel' in window)?new BroadcastChannel('lifegame'):null; const L=[];
+  const read=()=>{ try{ return JSON.parse(localStorage.getItem(KEY))||{}; }catch(e){ return {}; } };
+  const parts=p=>p.split('/').filter(Boolean);
+  const getAt=(t,p)=>parts(p).reduce((o,k)=>o==null?undefined:o[k],t);
+  const setAt=(t,p,v)=>{ const ks=parts(p); let o=t; for(let i=0;i<ks.length-1;i++){ if(typeof o[ks[i]]!=='object'||o[ks[i]]===null) o[ks[i]]={}; o=o[ks[i]]; } const last=ks[ks.length-1]; if(v==null) delete o[last]; else o[last]=clean(v); };
+  const fire=()=>{ const t=read(); L.forEach(l=>l.cb(clean(getAt(t,l.p))??null)); };
+  const write=t=>{ try{ localStorage.setItem(KEY,JSON.stringify(t)); }catch(e){} fire(); bc&&bc.postMessage(1); };
+  if(bc) bc.onmessage=fire; window.addEventListener('storage',e=>{ if(e.key===KEY) fire(); });
+  backend = { set:async(p,v)=>{ const t=read(); setAt(t,p,v); write(t); }, update:async(p,obj)=>{ const t=read(); for(const k in obj) setAt(t,p+'/'+k,obj[k]); write(t); },
+    remove:async p=>{ const t=read(); setAt(t,p,null); write(t); },
+    on:(p,cb)=>{ const l={p,cb}; L.push(l); setTimeout(()=>cb(clean(getAt(read(),p))??null),0); return ()=>{ const i=L.indexOf(l); if(i>=0) L.splice(i,1); }; } };
+}
+
+/* ④ 공통 도구 */
+const $app=document.getElementById('app');
+const qs=new URLSearchParams(location.search);
+const MODE=(/teacher/i.test(qs.get('mode')||'')||qs.has('teacher'))?'teacher':'student';
+let ROOM=(qs.get('room')||'').toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,8);
+const BASE=()=>`rooms/${ROOM}/life`;
+const INDEX='rooms/LFINDEX/list';
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let toastTimer=null;
+function toast(msg){ document.querySelectorAll('.toast').forEach(x=>x.remove()); const t=document.createElement('div'); t.className='toast'; t.textContent=msg; document.body.appendChild(t); clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.remove(),2600); }
+const say=(html,big)=>`<div class="say ${big?'big':''}"><img src="${CHAR}" alt="꿈송이"><div class="bub">${html}</div></div>`;
+const modeBadge=()=>DBMODE==='live'?`<span class="pill live">● 실시간 연동</span>`:`<span class="pill demo">● 체험 모드</span>`;
+const teamTag=k=>TM[k]?`<span class="team" style="background:${TM[k].c}">${TM[k].e} ${esc(TM[k].n)}</span>`:'';
+const toArr=v=>Array.isArray(v)?v.filter(x=>x!=null):(v&&typeof v==='object'?Object.keys(v).sort((a,b)=>a-b).map(k=>v[k]):[]);
+const fmt=n=>(Math.round(+n||0)).toLocaleString('ko-KR');
+const charLen=s=>String(s||'').replace(/\s/g,'').length;
+const sgn=n=>n>0?'+'+n:String(n);
+let META={},PLAYERS={},TEAMSD={},DECS={},HIST={};
+const phase=()=>META.phase||'lobby';
+const year=()=>+META.round||1;
+const PN=()=>clampN(+META.PN||3,2,4);
+const TN=()=>clampN(+META.TN||6,2,6);
+const keys=()=>TEAMS.slice(0,TN()).map(t=>t.k);
+const plist=()=>Object.values(PLAYERS||{}).filter(p=>p&&p.id&&p.nick).sort((a,b)=>(+a.num||999)-(+b.num||999)||(a.at||0)-(b.at||0));
+const members=k=>plist().filter(p=>p.team===k);
+const over=()=>year()>PN();
+const rkey=()=>`y${year()}`;
+const owned=t=>toArr(t&&t.owned);
+function decFor(k){ const d=DECS[k]; if(d&&d.r===rkey()) return Object.assign({cards:[],reply:'',msg:0,ready:false},d,{cards:toArr(d.cards)}); return {r:rkey(),cards:[],reply:'',msg:0,ready:false}; }
+const gbar=(g,v,small)=>`<div class="gbar"><div class="lbl"><span>${G[g].e} ${G[g].n}</span><span>${Math.round(+v||0)}</span></div><div class="tr" ${small?'style="height:10px"':''}><i style="width:${clampN(+v||0,0,100)}%;background:${G[g].c}"></i></div></div>`;
+const gauges=(t,small)=>[...GK,'life'].map(g=>gbar(g,t&&t[g],small)).join('');
+const regOf=t=>(t&&t.reg)||{};
+const inCount=t=>Object.values(regOf(t)).filter(v=>v==='in').length;
+function lineChart(series,opt={}){
+  const W=opt.w||720,H=opt.h||280,L=44,R=14,Tp=14,B=34; const n=Math.max(...series.map(s=>s.vals.length),2); const ymax=opt.ymax||100;
+  const x=i=>L+(W-L-R)*(i/(n-1)), y=v=>Tp+(H-Tp-B)*(1-Math.min(1,v/ymax)); let g='';
+  for(let i=0;i<=4;i++){ const v=ymax*i/4, yy=y(v); g+=`<line x1="${L}" x2="${W-R}" y1="${yy}" y2="${yy}" stroke="#e3eaf1"/><text x="${L-6}" y="${yy+4}" text-anchor="end" font-size="12" fill="#6b7c8d">${Math.round(v)}</text>`; }
+  for(let i=0;i<n;i++){ g+=`<text x="${x(i)}" y="${H-12}" text-anchor="middle" font-size="12" fill="#6b7c8d">${i===0?'시작':i+'년'}</text>`; }
+  series.forEach(s=>{ const pts=s.vals.map((v,i)=>`${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(' '); g+=`<polyline points="${pts}" fill="none" stroke="${s.c}" stroke-width="3.5" stroke-linejoin="round"/>`; s.vals.forEach((v,i)=>{ g+=`<circle cx="${x(i)}" cy="${y(v)}" r="3.6" fill="${s.c}"/>`; }); });
+  return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img">${g}</svg><div class="legend">${series.map(s=>`<span><i style="background:${s.c}"></i>${esc(s.n)}</span>`).join('')}</div>`;
+}
+let pending=false,keepScroll=false;
+function isTyping(){ const a=document.activeElement; return a&&$app.contains(a)&&(a.tagName==='TEXTAREA'||(a.tagName==='INPUT'&&!['button','range'].includes(a.type))); }
+function softRender(){ if(isTyping()){ pending=true; return; } keepScroll=true; render(); }
+document.addEventListener('focusout',()=>{ setTimeout(()=>{ if(pending&&!isTyping()){ pending=false; keepScroll=true; render(); } },150); });
+function render(){ pending=false; const y=window.scrollY; (MODE==='teacher'?renderTeacher:renderStudent)(); if(keepScroll) window.scrollTo(0,y); keepScroll=false; }
+
+const charterCard=(k,sel,act,who)=>{ const c=CH[k]; return `<button class="chcard ${sel?'sel':''}" ${act?`data-act="${act}" data-v="${k}"`:''}><div class="hd"><span class="e">${c.e}</span><div><div class="nm">${esc(c.n)}</div><span class="sb">${esc(c.who)}</span></div></div><div class="qt">“${esc(c.q)}”</div><ul><li>심사 질문: <b>${esc(c.ask)}</b></li><li>${esc(c.rule)}</li></ul><div class="small" style="margin-top:6px;color:#7a5600">💭 ${esc(c.lim)}</div>${who?`<div class="who">${who}</div>`:''}</button>`; };
+const eleArticle=()=>`<div class="news"><span class="e">📰</span><div><b>“관광객 태우다 척추 내려앉은 코끼리” (교과서 182쪽)</b><div class="d">코끼리 타기 체험은 동남아시아의 인기 관광 상품이다. 오랫동안 한꺼번에 많은 관광객을 태운 코끼리의 척추가 내려앉아 큰 고통을 겪고 있다. 동물 보호 단체들은 이 관광이 코끼리 고유의 삶의 의지를 존중하지 않는다고 비판했다. 아시아 코끼리는 서식지 파괴와 밀렵으로 멸종 위기이며, 숲의 밀도를 조절하고 씨앗을 퍼뜨리는 생태계의 핵심종이다. — 《연합뉴스》, 2023. 3. 12.</div></div></div>`;
+const keysHTML=()=>`<div class="grid g3"><div class="concept" style="margin:0"><div class="h">💗 공감하기</div>생명체가 겪는 고통과 위험에 공감하고 적극적으로 도와요. 공감은 처지를 개선하는 출발점이에요. (185쪽)</div><div class="concept" style="margin:0"><div class="h">🛡️ 책임 의식 지니기</div>${Object.values(TRAP).map(esc).join('<br>')} (186쪽)</div><div class="concept" style="margin:0"><div class="h">🤝 사회적 활동 참여</div>동아리·봉사·후원과 기부, 국제기구·비정부 단체 참여로 생명 존중을 실천해요. (187~188쪽)</div></div>`;
+
+/* ⑤ 학생 화면 */
+let P=null,tmpRoom='',ui={why:''};
+const SLOT=(qs.get('s')||'').replace(/[^0-9a-z]/gi,'').slice(0,6);
+const skey=()=>'life_s_'+ROOM+(SLOT?'_'+SLOT:'');
+function loadP(){ try{ return JSON.parse(localStorage.getItem(skey()))||null; }catch(e){ return null; } }
+let saveTimer=null;
+function saveP(now){ if(!P) return; try{ localStorage.setItem(skey(),JSON.stringify(P)); }catch(e){} clearTimeout(saveTimer); const w=()=>backend.set(`${BASE()}/players/${P.id}`,P).catch(e=>toast('⚠️ 저장 실패: '+e.message)); if(now) w(); else saveTimer=setTimeout(w,500); }
+const myTeam=()=>P&&P.team&&TEAMSD[P.team]?TEAMSD[P.team]:null;
+const newP=()=>({id:'p'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),at:Date.now()});
+function sHeader(){ return `<div class="top"><h1><img src="${CHAR}" alt="">꿈결 생명 마을</h1>${P&&P.team?teamTag(P.team):''}${DBMODE==='live'?`<span class="pill">방 ${esc(ROOM)}</span>`:''}${P&&P.nick?`<span class="pill">${esc(P.num)}번 ${esc(P.nick)}</span>`:''}${modeBadge()}</div>`; }
+const waitCard=msg=>`<div class="card center">${say(msg||'좋아요! 선생님이 다음 단계를 열 때까지 잠시 기다려 주세요. 😊')}</div>`;
+function vJoinRoom(){ return `${sHeader()}<div class="card center"><div class="hero"><img src="${CHAR}" alt="꿈송이"><h2>꿈결 생명 마을에 온 걸 환영해요!</h2></div><p class="muted">선생님 화면에 보이는 방 코드를 입력하세요.</p><input class="field" style="max-width:260px;text-align:center;font-size:24px;font-weight:800;letter-spacing:4px;text-transform:uppercase" data-bind="room" value="${esc(tmpRoom)}" maxlength="8"><div style="margin-top:14px"><button class="btn acc" data-act="enterRoom">입장하기</button></div></div>`; }
+function teamPicker(sel){ return `<div class="tgrid">${keys().map(k=>{ const t=TM[k]; return `<button class="tbtn ${sel===k?'sel':''}" style="background:${t.c}" data-act="pickTeam" data-v="${k}"><div class="e">${t.e}</div>${esc(t.n)}<small>주민 ${members(k).length}명</small></button>`; }).join('')}</div>`; }
+function vJoin(){ const d=P||{}; return `${sHeader()}<div class="card">${say('안녕! 나는 꿈결마을 촌장 <b>꿈송이</b>야. 오늘 너희는 사람과 여러 생명이 함께 사는 <b>새 마을</b>을 세우게 될 거야. 🌱',true)}
+  <label class="lb">번호</label><input class="field" style="max-width:140px" inputmode="numeric" data-bind="num" value="${esc(d.num||'')}" maxlength="3" placeholder="예: 7">
+  <label class="lb">이름</label><input class="field" style="max-width:260px" data-bind="nick" value="${esc(d.nick||'')}" maxlength="10" placeholder="이름">
+  <label class="lb">우리 모둠 마을 고르기</label>${teamPicker(d.team)}</div><div class="navbar"><div class="in"><span></span><button class="btn acc" data-act="join">입장하기 →</button></div></div>`; }
+function vLobby(){ return `${sHeader()}<div class="card">${say(`<b>${esc(TM[P.team].n)}</b>의 주민이 되었어요! 같은 모둠 친구들이 모두 같은 마을을 골랐는지 확인하세요.`)}<h3>🏡 우리 마을 주민</h3><div class="row">${members(P.team).map(p=>`<span class="pill">${esc(p.num)}번 ${esc(p.nick)}</span>`).join('')}</div><h3>다른 마을로 옮기기</h3>${teamPicker(P.team)}</div>${waitCard('선생님이 게임을 시작할 때까지 기다려 주세요.')}`; }
+function rulesHTML(){ return `<div class="concept"><div class="h">🌱 게임 방법</div><ol style="margin:4px 0 0;padding-left:20px">
+  <li><b>1부(34차시)</b> — 마을의 <b>헌장(도덕적 고려 기준)</b>을 정하고, 생명 10개를 우리 마을이 지켜야 할 <b>‘도덕적 고려 대상’</b>으로 등록할지 심사해요. 그리고 <b>코끼리 관광 사건</b>을 해결해요.</li>
+  <li><b>2부(35차시)</b> — <b>생명 번역기</b>로 생명들의 목소리를 듣고, 예산으로 <b>책임 정책</b>을 사서 마을을 키워요.</li>
+  <li>점수는 돈이 아니라 <b>🧡 고통 · 💙 삶의 의지 · 💚 생태 지수</b>예요. <b>😊 주민 생활</b>도 지켜야 해요.</li></ol></div>`; }
+function vIntro(){ return `${sHeader()}<div class="card">${say('꿈결마을 옆 빈 땅에 새 마을을 세우려고 해. 그런데 이 땅에는 사람만 사는 게 아니야. 코끼리, 고양이, 꿀벌, 소나무… 많은 생명이 함께 살고 있지. <b>우리는 누구를, 왜, 어떻게 지켜야 할까?</b>',true)}${rulesHTML()}<p class="muted">마을: ${teamTag(P.team)} · 선생님 화면을 함께 보세요.</p></div>`; }
+function vCharter(){ const t=myTeam()||{}; return `${sHeader()}<div class="card">${say('먼저 우리 마을의 <b>헌장</b>을 정하자. 교과서의 <b>도덕적으로 고려해야 하는 세 가지 이유</b> 중 하나야. 헌장은 게임 내내 <b>진짜 규칙</b>이 돼!',true)}
+  <p class="muted small">✋ 모둠이 함께 하나를 고르세요. (교과서 180~181쪽)</p><div class="grid g3">${CHK.map(k=>charterCard(k,t.charter===k,'pickCh')).join('')}</div>
+  <label class="lb">✍️ 우리 마을이 이 헌장을 고른 까닭 (10자 이상)</label><textarea class="field" data-bind="why" maxlength="200">${esc(ui.why||t.why||'')}</textarea>${t.why?`<p class="muted small">저장된 까닭: “${esc(t.why)}” — ${esc(t.whyBy||'')}</p>`:''}</div>
+  <div class="navbar"><div class="in"><span>${t.charter?`${CH[t.charter].e} <b>${esc(CH[t.charter].n)}</b>`:'<span class="muted">헌장을 골라 주세요</span>'}</span><button class="btn acc" data-act="whySave">까닭 저장</button></div></div>`; }
+function vRegister(){
+  const t=myTeam()||{}, ch=CH[t.charter], R=regOf(t), W=t.regWhy||{};
+  const done=Object.keys(R).length, ws=BE.filter(b=>charLen(W[b.k])>=5).length, hold=Object.values(R).filter(v=>v==='hold').length;
+  return `${sHeader()}<div class="card">${say(`우리 마을에 사는 생명 10개를 심사하자. ${ch?`우리는 <b>${ch.e} ${esc(ch.n)}</b>이니까, 내 느낌이 아니라 <b>“${esc(ch.ask)}”</b>라는 질문으로만 판정해!`:'헌장이 아직 없어요. 선생님께 말씀드려요.'}`,true)}
+  <div class="kv"><div class="box"><small>판정</small><b>${done}/10</b></div><div class="box"><small>⭕ 원 안</small><b>${inCount(t)}</b></div><div class="box"><small>⏸ 보류</small><b>${hold}/2</b></div><div class="box"><small>✍️ 근거 점수</small><b>${ws}점</b></div></div></div>
+  <div class="grid g2">${BE.map(b=>{ const v=R[b.k]||'', w=regWarn(b,t.charter,v); return `<div class="bcard ${v}"><div class="hd"><span class="e">${b.e}</span>${esc(b.n)}</div><div class="muted small">${esc(b.d)}</div>${ch?`<div class="hint">${ch.e} ${esc(b.h[t.charter])}</div>`:''}
+    <div class="seg"><button class="${v==='in'?'on':''}" data-act="reg" data-k="${b.k}" data-v="in">⭕ 원 안</button><button class="${v==='out'?'on':''}" data-act="reg" data-k="${b.k}" data-v="out">❌ 원 밖</button><button class="${v==='hold'?'on':''}" data-act="reg" data-k="${b.k}" data-v="hold">⏸ 보류</button></div>
+    ${w?`<div class="warnln">${w}</div>`:''}<input class="field" style="padding:9px 12px" data-save="regWhy" data-k="${b.k}" maxlength="120" placeholder="근거 한 문장 (예: ~하기 때문이다)" value="${esc(W[b.k]||'')}"></div>`; }).join('')}</div>
+  <p class="muted small">✋ 팀원 누구나 판정할 수 있어요. 근거는 칸 밖을 누르면 저장돼요. 근거 1개 = 1점.</p>`;
+}
+function vCompare(){ const t=myTeam()||{}; return `${sHeader()}<div class="card">${say(`우리 마을의 ‘도덕적 고려의 원’ 안에는 생명 <b>${inCount(t)}개</b>가 들어왔어요. 선생님 화면에서 다른 마을과 비교해 봐요. <b>원이 넓을수록 항상 좋은 걸까?</b>`,true)}
+  <div class="row">${BE.filter(b=>regOf(t)[b.k]==='in').map(b=>`<span class="pill">${b.e} ${esc(b.n)}</span>`).join('')||'<span class="muted">아직 없어요</span>'}</div></div>`; }
+function vElephant(){
+  const t=myTeam()||{}, W=t.eleWhy||{};
+  if(META.eleOK){ const o=ELE[t.ele]; return `${sHeader()}<div class="card">${say(o?`우리 마을은 <b>${o.e} ${esc(o.t)}</b>을(를) 선택했어요.`:'우리 마을은 선택하지 않았어요.',true)}${o?`<div class="rep"><b>📋 결과</b><div class="chips"><span>💰 ${sgn(o.eff.money)}</span>${[...GK,'life'].map(g=>`<span>${G[g].e} ${sgn(o.eff[g])}</span>`).join('')}</div></div>`:''}${gauges(t)}</div>`; }
+  return `${sHeader()}<div class="card">${say('🚨 긴급 사건! 마을에 <b>코끼리 타기 관광</b>을 열자는 제안이 들어왔어요. 어떻게 할까요?',true)}${eleArticle()}
+  <div class="grid">${ELK.map(k=>{ const o=ELE[k]; return `<button class="opt ${t.ele===k?'sel':''}" data-act="pickEle" data-v="${k}"><div class="row"><span class="e">${o.e}</span><div><div class="t">${esc(o.t)}</div><div class="d">${esc(o.d)} · 💰 ${sgn(o.eff.money)}코인</div></div></div></button>`; }).join('')}</div>
+  <h3>✍️ 세 렌즈로 판결 이유 쓰기 (교과서 182쪽 ❶)</h3>
+  ${[['pain','쾌락·고통'],['will','삶의 의지'],['eco','생태계 구성원']].map(([g,w])=>`<label class="lb">${G[g].e} ‘${w}’을(를) 넣어 쓰기</label><textarea class="field" style="min-height:70px" data-save="eleWhy" data-k="${g}" maxlength="200">${esc(W[g]||'')}</textarea>`).join('')}
+  <p class="muted small">✋ 칸 밖을 누르면 모둠 기록으로 저장돼요. 선생님이 결과를 공개하면 마을 지수가 바뀌어요.</p></div>`;
+}
+function vClaim(){ const C=P.claim||{};
+  if(C.done) return `${sHeader()}<div class="card">${say('제출 완료! 다음 시간에는 생명 번역기가 켜져요. 📡')}<div class="rep"><b>나만의 주장</b><div>${esc(C.c)}</div><b style="display:block;margin-top:6px">근거</b><div>${esc(C.r)}</div></div><button class="btn sm ghost" data-act="claimEdit">✏️ 고치기</button></div>`;
+  return `${sHeader()}<div class="card">${say('오늘 활동을 바탕으로 <b>생명체를 도덕적으로 고려해야 하는 나만의 주장</b>과 근거를 써 보자. (교과서 182쪽 ❷) 이건 모둠이 아니라 <b>나 혼자</b> 써요.',true)}
+  <label class="lb">💡 나만의 주장 (10자 이상)</label><div class="muted small">문장 틀: ( )을/를 지닌 생명체는 도덕적으로 고려해야 한다.</div><textarea class="field" style="min-height:70px" data-bind="claimC" maxlength="200">${esc(C.c||'')}</textarea>
+  <label class="lb">📌 근거 (20자 이상)</label><div class="muted small">문장 틀: 왜냐하면 인간 이외의 생명체도 …</div><textarea class="field" data-bind="claimR" maxlength="300">${esc(C.r||'')}</textarea></div>
+  <div class="navbar"><div class="in"><span></span><button class="btn acc" data-act="claimSubmit">제출하기</button></div></div>`; }
+function vVoice(){ return `${sHeader()}<div class="card">${say('2부 시작! 꿈결마을에 <b>생명 번역기</b>가 들어왔어요. 이제 생명들의 목소리가 직접 들려요. 목소리를 듣고 <b>공감</b>하고, <b>책임 정책</b>을 사고, <b>사회적 활동</b>에 참여해 마을을 키워요.',true)}
+  <div class="msg"><span class="e">🐕</span><div><b>생명 번역기 첫 메시지 (교과서 184쪽)</b>“재미 삼아 제가 싫어하는 행동을 반복해서 시키지 마세요. 화가 나면 소리를 지르고 때리기도 했죠. 이제 저를 소중하게 대해 주세요.”</div></div>${keysHTML()}
+  <div class="banner warn" style="margin-top:12px">⚠️ 정책 카드 중에는 <b>수입이 많고 주민이 좋아하지만 생명에게 해로운 카드</b>가 숨어 있어요. 책임 3원칙으로 걸러 내세요!</div></div>${gauges(myTeam())}`; }
+function vYear(){
+  const t=myTeam(); if(!t) return `${sHeader()}${waitCard('마을 정보를 불러오는 중이에요…')}`;
+  const y=year(), N=PN();
+  if(over()) return `${sHeader()}<div class="card center">${say('<b>모든 해가 끝났어요!</b> 선생님 화면에서 결과를 함께 봐요.',true)}</div>`;
+  const d=decFor(P.team), mi=msgsFor(y,N), own=owned(t), cost=d.cards.reduce((a,k)=>a+(PM[k]?PM[k].cost:0),0), left=(+t.money||0)-cost;
+  const L=META.last&&META.last.rep&&META.last.rep[P.team]?META.last:null; const r=L&&L.rep[P.team];
+  return `${sHeader()}<div class="card"><div class="row"><h2 style="margin:0">🏛️ ${y}년째 <span class="muted" style="font-size:16px">/ ${N}년</span></h2><span class="sp"></span><span class="pill">${CH[t.charter]?CH[t.charter].e+' '+esc(CH[t.charter].n):''}</span></div>
+  ${r?`<div class="rep" style="margin-top:10px"><b>📋 ${L.y}년째 결과</b><div class="chips">${r.bought.map(k=>`<span>${PM[k].e} ${esc(PM[k].n)}</span>`).join('')||'<span>구입 없음</span>'}${r.inc?`<span>💰 수입 +${r.inc}</span>`:''}${r.pen.map(c=>`<span>😢 ${CAT[c].n} 목소리를 외면함</span>`).join('')}</div></div>`:''}
+  <h3>📡 생명 번역기 — 이번 해의 목소리</h3>${mi.map(i=>{ const m=MSG[i]; return `<button class="msg ${+d.msg===i?'sel':''}" style="width:100%;text-align:left" data-act="dMsg" data-v="${i}"><span class="e">${m.e}</span><div><b>${esc(m.w)} <span class="muted small">(${CAT[m.c].n})</span></b>“${esc(m.t)}”</div></button>`; }).join('')}
+  <label class="lb">💗 고른 생명에게 공감 답장 쓰기 (10자 이상, 필수)</label><div class="muted small">문장 틀: 너는 ( ) 때문에 ( )했겠구나. 우리 마을은 ( )할게.</div><textarea class="field" style="min-height:70px" data-save="reply" maxlength="200">${esc(d.reply||'')}</textarea></div>
+  <div class="card"><h3 style="margin-top:0">${TM[P.team].e} 우리 마을</h3><div class="kv"><div class="box"><small>💰 예산</small><b>${fmt(t.money)}</b></div><div class="box"><small>🛒 고른 정책</small><b>${d.cards.length}/${MAXC}</b></div><div class="box"><small>💸 쓸 돈</small><b>${fmt(cost)}</b></div><div class="box"><small>남는 돈</small><b>${fmt(left)}</b></div></div>${gauges(t,true)}</div>
+  <div class="card"><h3 style="margin-top:0">🛒 책임 정책 시장 <span class="muted small">(1년에 ${MAXC}개까지 · 한 번 산 정책은 계속 유지)</span></h3>
+  <p class="muted small">카드에는 돈과 주민 생활 변화만 보여요. <b>생명에게 좋은지는 여러분이 판단</b>하세요!</p>
+  ${CATK.map(c=>`<div class="shopcat"><h3>${CAT[c].e} ${CAT[c].n}</h3><div class="grid g3">${PC.filter(p=>p.c===c).map(p=>{ const o=own.includes(p.k), s=d.cards.includes(p.k); return `<button class="pcard ${s?'sel':''} ${o?'own':''}" data-act="dCard" data-v="${p.k}" ${o?'disabled':''}><div class="t">${p.e} ${esc(p.n)}</div><div class="d">${esc(p.d)}</div><div class="c">${o?'✅ 이미 있음':`💰 ${p.cost?'−'+p.cost:'0'}${p.inc?` · 수입 +${p.inc}`:''}${p.eff.life?` · 😊 ${sgn(p.eff.life)}`:''}`}</div></button>`; }).join('')}</div></div>`).join('')}
+  <p class="muted small">✋ 팀원 누구나 바꿀 수 있어요. 선생님이 <b>결산</b>을 누르는 순간의 결정이 적용돼요.${d.by?` (마지막 수정: ${esc(d.by)})`:''}</p></div>
+  <div class="navbar"><div class="in"><span class="muted small">${members(P.team).length}명의 주민</span><button class="btn ${d.ready?'ok':'acc'}" data-act="dReady">${d.ready?'✅ 결정 완료 (다시 누르면 취소)':'🏛️ 우리 마을 결정 완료'}</button></div></div>`;
+}
+function vReflect(){
+  const R=P.ref||{}, O=P.ox||{};
+  if(R.done) return `${sHeader()}<div class="card">${say(`제출 완료! OX ${P.oxScore||0}/${OX.length}개 맞혔어요. 🌱`)}${REFQ.map(q=>`<div class="rep"><b>${q.e} ${esc(q.t)}</b><div>${esc(R[q.k])}</div></div>`).join('')}<button class="btn sm ghost" data-act="refEdit">✏️ 고치기</button></div>`;
+  const cc=CONCEPTS.filter(c=>REFQ.some(q=>String(R[q.k]||'').includes(c)));
+  return `${sHeader()}<div class="card">${say('마무리! 먼저 <b>OX 평가</b>를 풀고, 오늘 마을에서 겪은 일을 정리해 보자.',true)}
+  <h3>⭕❌ OX 평가</h3>${OX.map((o,i)=>{ const a=O[i], ck=P.oxChecked; return `<div class="oxrow ${ck&&a?(a===o.a?'right':'wrong'):''}"><div class="q">${i+1}. ${esc(o.q)}${ck&&a?`<div class="small" style="margin-top:4px"><b>정답 ${o.a}</b> — ${esc(o.x)}</div>`:''}</div><button class="${a==='O'?'on':''}" data-act="ox" data-i="${i}" data-v="O" ${ck?'disabled':''}>O</button><button class="${a==='X'?'on':''}" data-act="ox" data-i="${i}" data-v="X" ${ck?'disabled':''}>X</button></div>`; }).join('')}
+  ${P.oxChecked?`<div class="banner ok">✅ ${P.oxScore}/${OX.length}개 맞혔어요!</div>`:`<button class="btn sand" data-act="oxCheck">채점하기</button>`}
+  <h3>✍️ 성찰 (각 20자 이상)</h3>${REFQ.map(q=>`<label class="lb">${q.e} ${esc(q.t)}</label><div class="muted small" style="margin:-2px 0 6px">✍️ 문장 틀: ${esc(q.st)}… <button class="btn sm ghost" data-act="starter" data-k="${q.k}">틀 넣기</button></div><textarea class="field" data-bind="rf" data-k="${q.k}" maxlength="400">${esc(R[q.k]||'')}</textarea><div class="muted small" id="len_${q.k}" style="text-align:right">${charLen(R[q.k])}자 / 20자</div>`).join('')}
+  <p class="muted small" id="ccbox">사용한 개념어: ${cc.length?cc.map(c=>`<span class="pill">${esc(c)}</span>`).join(' '):'아직 없어요 (공감·책임·수단·방치·착취·더불어·조화…)'}</p></div>
+  <div class="navbar"><div class="in"><span></span><button class="btn acc" data-act="refSubmit">제출하기</button></div></div>`;
+}
+function renderStudent(){
+  if(!ROOM){ $app.innerHTML=`<div class="wrap">${vJoinRoom()}</div>`; return; }
+  if(!P||!P.joined||!P.nick||!P.team){ $app.innerHTML=`<div class="wrap">${vJoin()}</div>`; return; }
+  const ph=phase(); let h='';
+  if(ph==='lobby') h=vLobby(); else if(ph==='intro') h=vIntro(); else if(ph==='charter') h=vCharter(); else if(ph==='register') h=vRegister();
+  else if(ph==='compare') h=vCompare(); else if(ph==='elephant') h=vElephant(); else if(ph==='claim') h=vClaim(); else if(ph==='voice') h=vVoice();
+  else if(ph==='year') h=vYear(); else if(ph==='final') h=`${sHeader()}<div class="card">${finalBody(+META.rv||0,false)}</div>`; else if(ph==='reflect') h=vReflect();
+  else h=`${sHeader()}${waitCard('오늘 마을 이야기 끝! 수고했어요. 🌱')}`;
+  $app.innerHTML=`<div class="wrap">${h}</div>`;
+}
+function setDec(patch,quiet){ if(!P||!P.team) return; const d=Object.assign(decFor(P.team),patch,{r:rkey(),by:P.nick,at:Date.now()}); DECS[P.team]=d; if(!quiet){ keepScroll=true; render(); } backend.set(`${BASE()}/dec/${P.team}`,d).catch(e=>toast('⚠️ 저장 실패: '+e.message)); }
+const SACT={
+  enterRoom(){ const c=tmpRoom.toUpperCase().replace(/[^A-Z0-9]/g,''); if(c.length<3) return toast('방 코드를 확인해 주세요.'); location.search='?room='+c; },
+  pickTeam(el){ if(!P) P=newP(); P.team=el.dataset.v; if(P.joined) saveP(true); else { try{localStorage.setItem(skey(),JSON.stringify(P));}catch(e){} } keepScroll=true; render(); },
+  join(){ P=P||newP(); if(!P.num) return toast('번호를 입력해 주세요.'); if(!String(P.nick||'').trim()) return toast('이름을 입력해 주세요.'); if(!P.team) return toast('우리 모둠 마을을 골라 주세요.'); P.nick=P.nick.trim(); P.joined=true; P.epoch=META.created||null; saveP(true); render(); toast('🏡 '+TM[P.team].n+' 주민이 되었어요!'); },
+  pickCh(el){ backend.update(`${BASE()}/teams/${P.team}`,{charter:el.dataset.v,chBy:P.nick}); toast(CH[el.dataset.v].e+' '+CH[el.dataset.v].n+' 선택!'); },
+  whySave(){ const t=myTeam()||{}; if(!t.charter) return toast('먼저 헌장을 골라 주세요.'); const w=(ui.why||'').trim(); if(charLen(w)<10) return toast('까닭을 10자 이상 써 주세요.'); backend.update(`${BASE()}/teams/${P.team}`,{why:w,whyBy:P.nick}); ui.why=''; toast('✅ 까닭을 저장했어요.'); },
+  reg(el){ const t=myTeam()||{}, R=regOf(t), k=el.dataset.k, v=el.dataset.v; if(v==='hold'&&R[k]!=='hold'&&Object.values(R).filter(x=>x==='hold').length>=2) return toast('보류는 2장까지만 쓸 수 있어요.'); backend.set(`${BASE()}/teams/${P.team}/reg/${k}`,R[k]===v?null:v); },
+  pickEle(el){ backend.update(`${BASE()}/teams/${P.team}`,{ele:el.dataset.v,eleBy:P.nick}); },
+  claimSubmit(){ const C=P.claim||{}; if(charLen(C.c)<10) return toast('주장을 10자 이상 써 주세요.'); if(charLen(C.r)<20) return toast('근거를 20자 이상 써 주세요.'); C.done=true; C.at=Date.now(); P.claim=C; saveP(true); render(); toast('✅ 제출했어요!'); },
+  claimEdit(){ P.claim.done=false; saveP(true); render(); },
+  dMsg(el){ setDec({msg:+el.dataset.v,ready:false}); },
+  dCard(el){ const t=myTeam(); if(!t) return; const k=el.dataset.v, d=decFor(P.team); let cs=[...d.cards];
+    if(cs.includes(k)) cs=cs.filter(x=>x!==k); else { if(cs.length>=MAXC) return toast(`1년에 ${MAXC}개까지 고를 수 있어요.`); const cost=cs.reduce((a,x)=>a+PM[x].cost,0)+PM[k].cost; if(cost>(+t.money||0)) return toast('예산이 부족해요.'); cs.push(k); }
+    setDec({cards:cs,ready:false}); },
+  dReady(){ const d=decFor(P.team); if(!d.ready&&charLen(d.reply)<10) return toast('먼저 생명에게 공감 답장을 10자 이상 써 주세요. (칸 밖을 눌러 저장)'); setDec({ready:!d.ready}); if(!d.ready) toast('🏛️ 결정 완료! 선생님이 결산을 누르면 적용돼요.'); },
+  ox(el){ P.ox=P.ox||{}; P.ox[el.dataset.i]=el.dataset.v; saveP(); keepScroll=true; render(); },
+  oxCheck(){ const O=P.ox||{}; if(OX.some((_,i)=>!O[i])) return toast('모든 문제에 답해 주세요.'); P.oxChecked=true; P.oxScore=OX.filter((o,i)=>O[i]===o.a).length; saveP(true); keepScroll=true; render(); },
+  starter(el){ const k=el.dataset.k; P.ref=P.ref||{}; if(String(P.ref[k]||'').trim()) return toast('글이 비어 있을 때만 틀을 넣을 수 있어요.'); P.ref[k]=REFQ.find(q=>q.k===k).st; saveP(); keepScroll=true; render(); const t=$app.querySelector(`textarea[data-k="${k}"]`); if(t) t.focus(); },
+  refSubmit(){ if(!P.oxChecked) return toast('먼저 OX 평가를 채점해 주세요.'); const R=P.ref||{}; for(const q of REFQ){ if(charLen(R[q.k])<20) return toast(`${q.e} 질문에 20자 이상 써 주세요.`); } R.done=true; R.at=Date.now(); P.ref=R; saveP(true); render(); toast('✅ 제출했어요!'); },
+  refEdit(){ P.ref.done=false; saveP(true); render(); }
+};
+const SBIND={
+  room:v=>tmpRoom=v, num:v=>{ P=P||newP(); P.num=v.replace(/[^0-9]/g,'').slice(0,3); }, nick:v=>{ P=P||newP(); P.nick=v.slice(0,10); }, why:v=>ui.why=v,
+  claimC:v=>{ P.claim=P.claim||{}; P.claim.c=v; saveP(); }, claimR:v=>{ P.claim=P.claim||{}; P.claim.r=v; saveP(); },
+  rf:(v,el)=>{ P.ref=P.ref||{}; P.ref[el.dataset.k]=v; saveP(); const l=document.getElementById('len_'+el.dataset.k); if(l) l.textContent=charLen(v)+'자 / 20자'; const cc=CONCEPTS.filter(c=>REFQ.some(q=>String(P.ref[q.k]||'').includes(c))); const b=document.getElementById('ccbox'); if(b) b.innerHTML='사용한 개념어: '+(cc.length?cc.map(c=>`<span class="pill">${esc(c)}</span>`).join(' '):'아직 없어요'); }
+};
+const SSAVE={
+  regWhy:(v,el)=>backend.set(`${BASE()}/teams/${P.team}/regWhy/${el.dataset.k}`,v.trim().slice(0,120)||null),
+  eleWhy:(v,el)=>backend.set(`${BASE()}/teams/${P.team}/eleWhy/${el.dataset.k}`,v.trim().slice(0,200)||null),
+  reply:v=>setDec({reply:v.trim().slice(0,200),ready:false},true)
+};
+
+/* ⑥ 결과 공개 */
+const ENDS=t=>{ const s=lifeScore(t), l=+t.life||0;
+  if(s>=62&&l>=40) return {e:'🌈',n:'더불어 사는 마을',c:'linear-gradient(135deg,#2f7d4e,#2e6a8e)',d:'생명도 주민도 함께 웃는 마을이 되었어요.'};
+  if(s>=62) return {e:'🏚️',n:'주민이 떠나는 마을',c:'linear-gradient(135deg,#8a6d3b,#5c4a2a)',d:'생명은 지켰지만 주민들의 삶이 너무 힘들어졌어요. 조화는 어떻게 이룰까요?'};
+  if(s>=45) return {e:'🌱',n:'아직 배우는 마을',c:'linear-gradient(135deg,#e39a1c,#b86b00)',d:'몇몇 생명의 목소리는 아직 외면받고 있어요.'};
+  return {e:'🌫️',n:'조용해진 마을',c:'linear-gradient(135deg,#6b7c8d,#33424f)',d:'편리함을 얻었지만 생명들의 목소리가 사라졌어요.'}; };
+function finalBody(rv,big){
+  const ks=keys(), g=toArr(HIST.g);
+  const steps=['📈 생명 지수 변화','🏆 두 개의 순위','🕵️ 숨겨진 대가','🌅 우리 마을의 결말'];
+  const nav=`<div class="row" style="margin-bottom:10px">${steps.map((s,i)=>`<span class="pill" style="${i===rv?'background:var(--sea);color:#fff;border-color:var(--sea)':''}">${s}</span>`).join('')}</div>`;
+  if(rv===0){ const s=ks.map(k=>({n:TM[k].e+' '+TM[k].n,c:TM[k].c,vals:g.map(o=>lifeScore(o&&o[k]))}));
+    return `${nav}${say('마을마다 생명 지수(헌장 가중치 반영)가 어떻게 변했을까요? 그래프가 꺾인 해에 무슨 결정을 했는지 떠올려 보세요.',big)}${lineChart(s,{ymax:100})}`; }
+  if(rv===1){ const a=ks.map(k=>({k,v:lifeScore(TEAMSD[k])})).sort((x,y)=>y.v-x.v), b=ks.map(k=>({k,v:+(TEAMSD[k]||{}).life||0})).sort((x,y)=>y.v-x.v);
+    const bars=(L,c)=>`<div class="bars">${L.map((x,i)=>`<div class="bar"><div class="lbl"><span>${i+1}. ${TM[x.k].e} ${esc(TM[x.k].n)} <span class="muted small">${CH[(TEAMSD[x.k]||{}).charter]?CH[TEAMSD[x.k].charter].e:''}</span></span><span>${x.v}</span></div><div class="tr"><i style="width:${Math.max(2,x.v)}%;background:${c||TM[x.k].c}"></i></div></div>`).join('')}</div>`;
+    return `${nav}${say('<b>생명 지수 1등</b>과 <b>주민 생활 1등</b>이 같은 마을인가요? 둘 다 지키는 길은 무엇이었을까요?',big)}<div class="grid g2"><div><h3>🌱 생명 지수</h3>${bars(a)}</div><div><h3>😊 주민 생활</h3>${bars(b,G.life.c)}</div></div>`; }
+  if(rv===2){ return `${nav}<div class="reveal">🕵️ 시장에는 <u>돈이 되고 주민도 좋아하지만 생명을 해치는 카드</u>가 7장 숨어 있었습니다.</div>
+    <div class="grid g2" style="margin-top:12px">${ks.map(k=>{ const tr=toArr((TEAMSD[k]||{}).traps); return `<div class="card" style="margin:0"><div class="row"><b>${TM[k].e} ${esc(TM[k].n)}</b><span class="sp"></span><span class="pill">${tr.length}장</span></div>${tr.length?tr.map(x=>`<div class="small" style="margin-top:6px">${PM[x].e} <b>${esc(PM[x].n)}</b><br><span style="color:#9b2c2c">위반: ${esc(TRAP[PM[x].trap])}</span></div>`).join(''):'<div class="small" style="margin-top:6px;color:#11704f">✅ 함정 카드를 모두 걸러 냈어요!</div>'}</div>`; }).join('')}</div>
+    <div class="concept" style="margin-top:14px"><div class="h">📘 생명체에 책임을 다하는 방법 (교과서 186쪽)</div>${Object.values(TRAP).map(esc).join('<br>')}</div>`; }
+  return `${nav}<div class="endgrid">${ks.map(k=>{ const t=TEAMSD[k]||{}, E=ENDS(t); return `<div class="ending" style="background:${E.c}"><div class="e">${E.e}</div><div style="font-weight:800">${TM[k].e} ${esc(TM[k].n)}</div><div class="n" style="font-size:24px">${E.n}</div><div style="font-size:15px;margin-top:6px">${E.d}</div><div style="font-size:14px;margin-top:6px">생명 ${lifeScore(t)} · 생활 ${Math.round(+t.life||0)}</div></div>`; }).join('')}</div>
+  <div class="concept" style="margin-top:14px"><div class="h">🧭 오늘의 핵심 질문</div>① 우리 마을 헌장(싱어·슈바이처·생태계 구성원)은 어떤 생명을 잘 보았고, 어떤 생명을 놓쳤나요?<br>② 생명 번역기의 목소리에 공감한 것이 정책 선택을 어떻게 바꾸었나요?<br>③ 인간과 동식물이 더불어 조화롭게 산다는 것은 무엇일까요? (교과서 189쪽)</div>`;
+}
+
+/* ⑦ 교사 화면 */
+let T={tab:'run',authed:false,pin:'',newLabel:'',openCode:'',busy:false,spot:null,big:false};
+let ROOMLIST={}; try{ T.authed=sessionStorage.getItem('life_t')==='1'; }catch(e){}
+const roomLabel=c=>(ROOMLIST[c]&&ROOMLIST[c].label)||'';
+const newCode=()=>{ const A='ABCDEFGHJKMNPQRSTUVWXYZ23456789'; let s=''; for(let i=0;i<4;i++) s+=A[Math.floor(Math.random()*A.length)]; return s; };
+const studentURL=()=>location.origin+location.pathname+'?room='+ROOM;
+const PH=[{k:'lobby',n:'🚪 입장'},{k:'intro',n:'🏡 마을 탄생'},{k:'charter',n:'📜 헌장'},{k:'register',n:'🪪 주민 등록'},{k:'compare',n:'⭕ 원 비교'},{k:'elephant',n:'🐘 코끼리 사건'},{k:'claim',n:'✍️ 나만의 주장'},{k:'voice',n:'📡 2부 생명 번역기'},{k:'year',n:'🏛️ 책임 정책'},{k:'final',n:'🎁 결과 공개'},{k:'reflect',n:'📝 OX·성찰'},{k:'end',n:'🏁 끝'}];
+const wcard=(who,txt)=>`<button class="wcard" data-act="spot" data-v="${esc(txt)}" data-w="${esc(who)}"><small>${esc(who)}</small>${hlC(txt)}</button>`;
+function hlC(s){ let h=esc(s); CONCEPTS.forEach(c=>{ h=h.split(esc(c)).join(`<mark>${esc(c)}</mark>`); }); return h; }
+function vLogin(){ return `<div class="wrap"><div class="top"><h1><img src="${CHAR}" alt="">꿈결 생명 마을 · 교사</h1>${modeBadge()}</div><div class="card center">${say('교사 화면이에요. 비밀번호를 입력해 주세요.')}<input class="field" type="password" style="max-width:220px;text-align:center;font-size:22px" data-bind="pin" inputmode="numeric"><div style="margin-top:12px"><button class="btn acc" data-act="login">들어가기</button></div></div></div>`; }
+function vPicker(){ const rows=Object.entries(ROOMLIST).filter(([c,r])=>r&&/^[A-Z0-9]{3,8}$/.test(c)).sort((a,b)=>(b[1].at||0)-(a[1].at||0)); const d=t=>{ if(!t) return ''; const x=new Date(t); return `${x.getMonth()+1}/${x.getDate()} ${String(x.getHours()).padStart(2,'0')}:${String(x.getMinutes()).padStart(2,'0')}`; };
+  return `<div class="wrap"><div class="top"><h1><img src="${CHAR}" alt="">꿈결 생명 마을 · 교사</h1>${modeBadge()}</div><div class="card">${say('어느 반 수업을 할까요? <b>반마다 방을 하나씩</b> 만들어 주세요. 34차시에서 멈추고 35차시에 같은 방을 열면 이어서 진행돼요.')}
+  <h3>➕ 새 반 방 만들기</h3><div class="row"><input class="field" style="max-width:260px" maxlength="12" data-bind="newLabel" value="${esc(T.newLabel)}" placeholder="반 이름 (예: 2-3반)"><button class="btn acc" data-act="pickNew">새 방 만들기</button></div>
+  <h3>📂 만든 방</h3>${rows.length?`<table class="tb"><tr><th>반</th><th>방 코드</th><th>마지막 사용</th><th></th></tr>${rows.map(([c,r])=>`<tr><td><b>${esc(r.label||'(이름 없음)')}</b></td><td style="letter-spacing:2px;font-weight:800">${esc(c)}</td><td>${d(r.at)}</td><td><div class="row"><button class="btn sm acc" data-act="pickOpen" data-v="${esc(c)}">열기</button><button class="btn sm ghost" data-act="pickRemove" data-v="${esc(c)}">목록에서 빼기</button></div></td></tr>`).join('')}</table>`:'<p class="muted">아직 만든 방이 없어요.</p>'}
+  <h3>🔑 방 코드로 열기</h3><div class="row"><input class="field" style="max-width:200px;text-transform:uppercase;font-weight:800;letter-spacing:2px" maxlength="8" data-bind="openCode" value="${esc(T.openCode)}" placeholder="예: MAB3"><button class="btn ghost" data-act="pickCode">열기</button></div>
+  ${DBMODE!=='live'?'<div class="banner warn" style="margin-top:14px">⚠️ 체험 모드입니다. 같은 브라우저의 다른 탭에서만 학생 화면이 연동됩니다.</div>':''}</div></div>`; }
+function tHeader(){ return `<div class="top"><h1><img src="${CHAR}" alt="">꿈결 생명 마을 · 교사</h1><span class="pill">🏫 ${esc(roomLabel(ROOM)||'반 이름 없음')}</span><span class="pill" style="font-weight:900;letter-spacing:2px">방 ${esc(ROOM)}</span><span class="pill">👥 ${plist().length}명</span>${modeBadge()}<button class="btn sm ghost" data-act="toggleBig">${T.big?'🔎 보통 글씨':'🔍 큰 글씨'}</button><button class="btn sm ghost" data-act="goPicker">반 목록</button></div>
+  <div class="phasebar">${PH.map(p=>`<button class="${phase()===p.k?'on':''}" data-act="setPhase" data-v="${p.k}">${p.n}</button>`).join('')}</div>
+  <div class="tabs">${[['run','🖥️ 수업 화면'],['teams','🏡 마을 현황'],['answers','📝 학생 답'],['set','⚙️ 설정·링크']].map(([k,n])=>`<button class="${T.tab===k?'on':''}" data-act="tab" data-v="${k}">${n}</button>`).join('')}</div>`; }
+const nextBtn=(v,label)=>`<div class="row" style="margin-top:16px;justify-content:flex-end"><button class="btn acc xl" data-act="setPhase" data-v="${v}">${label}</button></div>`;
+function tLobby(){ return `<div class="grid g2"><div class="card center"><h2>📱 학생 입장</h2><div class="code">${esc(ROOM)}</div><div class="qrbox"><div id="qr"></div></div><div class="url" style="margin-top:10px">${esc(studentURL())}</div></div>
+  <div class="card">${say('모둠마다 <b>같은 마을</b>을 고르게 해 주세요.',true)}<div class="tboard">${keys().map(k=>{ const ms=members(k); return `<div class="tcard"><div class="hd"><span class="e">${TM[k].e}</span>${esc(TM[k].n)}<span class="sp"></span><span class="cnt">${ms.length}</span></div><div class="m">${ms.map(p=>esc(p.num+' '+p.nick)).join(', ')||'아직 없음'}</div></div>`; }).join('')}</div>${nextBtn('intro','🏡 마을 탄생 →')}</div></div>`; }
+function tIntro(){ return `<div class="card">${say('꿈결마을 옆 빈 땅에 새 마을을 세우려고 해요. 그런데 이 땅에는 사람만 사는 게 아니에요. <b>우리는 누구를, 왜, 어떻게 지켜야 할까요?</b>',true)}
+  <div class="news"><span class="e">🐄</span><div><b>옛사람들의 생명 존중 (교과서 178쪽)</b><div class="d">옛사람들은 먼 길을 가는 소에게 쇠짚신을 신기고, 추운 겨울 나무에 뜨개옷을 입혔어요. 왜 그랬을까요?</div></div></div>${rulesHTML()}
+  <div class="tip"><b>📘 생명의 소중함 (179쪽)</b> — 우리 주변의 생명체는 인간과 마찬가지로 단 한 번의 삶을 살아가는 소중한 존재이므로 존엄하게 여기고 소중하게 대해야 해요.</div>${nextBtn('charter','📜 헌장 정하기 →')}</div>`; }
+function tCharter(){ const who=k=>keys().filter(t=>(TEAMSD[t]||{}).charter===k).map(teamTag).join(''); const done=keys().filter(k=>(TEAMSD[k]||{}).charter).length;
+  return `<div class="card"><h2>📜 마을 헌장 — 도덕적으로 고려해야 하는 이유 <span class="cnt">${done}/${keys().length}</span></h2>${say('마을마다 교과서의 <b>세 가지 이유</b> 중 하나를 헌장으로 고릅니다. 헌장은 게임 내내 <b>진짜 규칙</b>이에요. 렌즈가 골고루 나뉘면 비교가 더 재미있어요.',true)}
+  <div class="grid g3">${CHK.map(k=>charterCard(k,false,null,who(k))).join('')}</div><h3>✍️ 마을별 까닭</h3><div class="wall">${keys().map(k=>{ const t=TEAMSD[k]||{}; return `<div class="wcard"><small>${TM[k].e} ${esc(TM[k].n)} · ${t.charter?CH[t.charter].e+' '+esc(CH[t.charter].n):'미선택'}</small>${esc(t.why||'(아직 없음)')}</div>`; }).join('')}</div>${nextBtn('register','🪪 주민 등록 심사 →')}</div>`; }
+function tRegister(){ return `<div class="card"><h2>🪪 주민 등록 심사 — 누가 ‘도덕적 고려의 원’ 안에 들어올까?</h2>${say('모둠은 <b>내 느낌이 아니라 헌장의 질문</b>으로만 판정해요. 판정마다 근거 한 문장을 쓰면 1점! 보류는 2장까지.',true)}
+  <div class="grid g3" style="grid-template-columns:repeat(5,1fr)">${BE.map(b=>`<div class="spc"><div class="h"><span class="e">${b.e}</span>${esc(b.n)}</div><div class="nb">${esc(b.d)}</div></div>`).join('')}</div>
+  <div class="tboard" style="margin-top:14px">${keys().map(k=>{ const t=TEAMSD[k]||{}, n=Object.keys(regOf(t)).length, w=BE.filter(b=>charLen((t.regWhy||{})[b.k])>=5).length; return `<div class="tcard ${n>=10?'ready':''}"><div class="hd"><span class="e">${TM[k].e}</span>${esc(TM[k].n)}<span class="sp"></span>${CH[t.charter]?CH[t.charter].e:''}</div><div class="m">판정 ${n}/10 · ⭕ ${inCount(t)} · ✍️ 근거 ${w}점</div></div>`; }).join('')}</div>${nextBtn('compare','⭕ 원 비교하기 →')}</div>`; }
+function tCompare(){ const ks=keys(); const ic=v=>v==='in'?'⭕':v==='out'?'❌':v==='hold'?'⏸':'·';
+  const split=BE.filter(b=>{ const vs=ks.map(k=>regOf(TEAMSD[k])[b.k]); return vs.includes('in')&&vs.includes('out'); });
+  return `<div class="card"><h2>⭕ 마을마다 다른 ‘도덕적 고려의 원’</h2>${say('같은 생명인데 마을마다 판정이 갈렸어요. <b>갈린 생명</b>을 골라 마을끼리 주장과 반박을 해 봅시다. (주장 1분 → 반박 1분 → 재반박 30초)',true)}
+  <table class="tb mtx"><tr><th>생명</th>${ks.map(k=>`<th>${TM[k].e}<br><span class="small">${CH[(TEAMSD[k]||{}).charter]?CH[TEAMSD[k].charter].e+' '+CH[TEAMSD[k].charter].who:''}</span></th>`).join('')}</tr>
+  ${BE.map(b=>`<tr style="${split.includes(b)?'background:#fff5d6':''}"><td style="text-align:left!important">${b.e} ${esc(b.n)}${split.includes(b)?' 🔥':''}</td>${ks.map(k=>`<td style="font-size:22px">${ic(regOf(TEAMSD[k])[b.k])}</td>`).join('')}</tr>`).join('')}
+  <tr><th>원 안</th>${ks.map(k=>`<th>${inCount(TEAMSD[k])}개</th>`).join('')}</tr></table>
+  <p class="muted small">🔥 = 마을마다 판정이 갈린 생명 · 아래에서 근거를 눌러 크게 보세요.</p>
+  ${split.slice(0,4).map(b=>`<h3>${b.e} ${esc(b.n)}</h3><div class="wall">${ks.filter(k=>(TEAMSD[k]||{}).regWhy&&TEAMSD[k].regWhy[b.k]).map(k=>wcard(`${TM[k].e} ${TM[k].n} · ${ic(regOf(TEAMSD[k])[b.k])}`,TEAMSD[k].regWhy[b.k])).join('')||'<p class="muted">근거가 아직 없어요.</p>'}</div>`).join('')}
+  <div class="concept" style="margin-top:14px"><div class="h">❓ 토론 질문</div>① 고통 렌즈 마을은 왜 식물을 원 밖에 두었을까요? ② 삶의 의지 렌즈로 보면 모기도 지켜야 할까요? ③ <b>원이 넓을수록 항상 더 좋은 걸까요?</b></div>
+  <div class="tip"><b>📘 인간 이외의 생명체를 도덕적으로 고려해야 하는 이유 (180~181쪽)</b><br>🧡 쾌락과 고통을 느낄 수 있기 때문 — 싱어 · 💙 생명을 유지하고 살아가려는 의지를 지녔기 때문 — 슈바이처(생명 외경) · 💚 생태계의 한 구성원이기 때문</div>${nextBtn('elephant','🐘 긴급 사건 →')}</div>`; }
+function tElephant(){ const ks=keys(); const cnt=ELK.map(o=>ks.filter(k=>(TEAMSD[k]||{}).ele===o).length);
+  return `<div class="card"><h2>🐘 긴급 사건 — 코끼리 타기 관광을 열까?</h2>${eleArticle()}
+  <div class="grid g3">${ELK.map((o,i)=>`<div class="opt"><div class="e">${ELE[o].e}</div><div class="t">${esc(ELE[o].t)}</div><div class="d">${esc(ELE[o].d)}</div><div style="margin-top:6px">${ks.filter(k=>(TEAMSD[k]||{}).ele===o).map(teamTag).join(' ')||'<span class="muted small">선택 없음</span>'}</div>${META.eleOK?`<div class="small" style="margin-top:6px">💰 ${sgn(ELE[o].eff.money)} · ${GK.map(g=>`${G[g].e}${sgn(ELE[o].eff[g])}`).join(' ')} · 😊${sgn(ELE[o].eff.life)}</div>`:`<div class="cnt" style="margin-top:6px">${cnt[i]}</div>`}</div>`).join('')}</div>
+  <h3>✍️ 마을별 판결 이유 (182쪽 ❶)</h3><div class="wall">${ks.flatMap(k=>{ const W=(TEAMSD[k]||{}).eleWhy||{}; return GK.filter(g=>W[g]).map(g=>wcard(`${TM[k].e} ${TM[k].n} · ${G[g].e}`,W[g])); }).join('')||'<p class="muted">아직 없어요.</p>'}</div>
+  ${META.eleOK?`<div class="banner ok" style="margin-top:12px">✅ 결과를 마을 지수에 반영했어요.</div>${nextBtn('claim','✍️ 나만의 주장 쓰기 →')}`:`<div class="row" style="margin-top:16px;justify-content:flex-end"><button class="btn sand xl" data-act="eleSettle">📢 결정 확정 · 결과 공개</button></div>`}</div>`; }
+function tClaim(){ const ds=plist().filter(p=>p.claim&&p.claim.done);
+  return `<div class="card"><h2>✍️ 나만의 주장 <span class="cnt">${ds.length}/${plist().length}</span></h2>${say('학생들이 각자 태블릿에 <b>생명체를 도덕적으로 고려해야 하는 나만의 주장과 근거</b>를 씁니다. (182쪽 ❷) 34차시는 여기까지! 다음 시간에 같은 방에서 <b>📡 2부</b>를 누르세요.',true)}
+  <div class="wall">${ds.map(p=>wcard(`${TM[p.team]?TM[p.team].e:''} ${p.num}번 ${p.nick}`,p.claim.c+'\n— '+p.claim.r)).join('')||'<p class="muted">아직 없어요.</p>'}</div>${nextBtn('voice','📡 2부 생명 번역기 →')}</div>`; }
+function tVoice(){ return `<div class="card"><h2>📡 2부 — 생명 번역기가 켜졌습니다</h2>${say('이제 생명들의 목소리가 들려요. 위 강아지는 생명 번역기로 우리에게 어떤 말을 전했을까요? (교과서 184쪽)',true)}
+  <div class="msg"><span class="e">🐕</span><div><b>생명 번역기</b>“재미 삼아 제가 싫어하는 행동을 반복해서 시키지 마세요. 화가 나면 소리를 지르고 때리기도 했죠. 이제 저를 소중하게 대해 주세요.”</div></div>${keysHTML()}
+  <div class="banner warn" style="margin-top:12px">🛒 매년 생명 목소리 2개가 도착합니다. 모둠은 ① 공감 답장 ② 책임 정책 최대 ${MAXC}개를 고릅니다. 목소리를 외면한 분야는 지수가 떨어지고, 시장에는 <b>함정 카드</b>가 숨어 있어요.</div>
+  <div class="row" style="margin-top:16px;justify-content:flex-end"><button class="btn acc xl" data-act="startYears">🏛️ 1년째 시작 →</button></div></div>`; }
+function tYear(){ const y=year(), N=PN(), ks=keys(), ready=ks.filter(k=>decFor(k).ready).length;
+  if(over()) return `<div class="card center">${say('<b>모든 해가 끝났어요!</b> 결과를 공개합니다.',true)}${nextBtn('final','🎁 결과 공개 →')}</div>`;
+  return `<div class="grid" style="grid-template-columns:minmax(0,1fr) 320px;align-items:start"><div><div class="card"><h2 style="margin:0 0 10px">🏛️ ${y}년째 <span class="muted" style="font-size:17px">/ ${N}년</span></h2>
+  ${msgsFor(y,N).map(i=>{ const m=MSG[i]; return `<div class="msg"><span class="e">${m.e}</span><div><b>${esc(m.w)} · ${CAT[m.c].n}</b>“${esc(m.t)}”</div></div>`; }).join('')}</div>
+  <div class="card"><div class="row"><h3 style="margin:0">🏡 마을 결정 <span class="cnt">${ready}/${ks.length}</span></h3><span class="sp"></span><button class="btn acc xl" data-act="settle" ${T.busy?'disabled':''}>📊 ${y}년째 결산</button></div>
+  <p class="muted small">결정하지 않은 마을은 고른 정책만 적용됩니다. 목소리 분야의 좋은 정책이 없으면 그 지수가 −${PEN}, 매년 환경 악화로 세 지수 −${DRIFT}.</p>
+  <div class="tboard">${ks.map(k=>{ const t=TEAMSD[k]||{}, d=decFor(k); return `<div class="tcard ${d.ready?'ready':''}"><div class="hd"><span class="e">${TM[k].e}</span>${esc(TM[k].n)}<span class="sp"></span>${d.ready?'✅':'<span class="muted small blink">결정 중</span>'}</div><div class="m">💰 ${fmt(t.money)} · 정책 ${d.cards.length}개 · 답장 ${charLen(d.reply)>=10?'✅':'—'}</div>${gauges(t,true)}</div>`; }).join('')}</div></div></div>
+  <div><div class="card"><h3 style="margin-top:0">🌱 생명 지수 순위</h3>${ks.map(k=>({k,v:lifeScore(TEAMSD[k])})).sort((a,b)=>b.v-a.v).map((x,i)=>`<div class="row" style="padding:4px 0"><b>${i+1}</b> ${TM[x.k].e} ${esc(TM[x.k].n)}<span class="sp"></span><b>${x.v}</b></div>`).join('')}</div>
+  <div class="card"><h3 style="margin-top:0">💗 공감 답장</h3>${ks.map(k=>{ const d=decFor(k); return d.reply?`<div class="small" style="margin-bottom:6px">${TM[k].e} ${esc(d.reply)}</div>`:''; }).join('')||'<p class="muted small">아직 없어요.</p>'}</div></div></div>`; }
+function tFinal(){ const rv=+META.rv||0; return `<div class="card">${finalBody(rv,true)}<div class="row" style="margin-top:16px;justify-content:space-between"><button class="btn ghost" data-act="rv" data-v="-1" ${rv<=0?'disabled':''}>← 이전</button>${rv<3?`<button class="btn acc xl" data-act="rv" data-v="1">다음 공개 →</button>`:`<button class="btn sand xl" data-act="setPhase" data-v="reflect">📝 OX·성찰 →</button>`}</div></div>`; }
+function tReflect(){ const ds=plist().filter(p=>p.ref&&p.ref.done), ox=plist().filter(p=>p.oxChecked);
+  const wrong=OX.map((o,i)=>ox.filter(p=>(p.ox||{})[i]!==o.a).length);
+  return `<div class="card"><h2>📝 OX·성찰 <span class="cnt">${ds.length}/${plist().length}</span></h2><h3>⭕❌ 문항별 오답 수 (채점 ${ox.length}명)</h3><div class="bars">${OX.map((o,i)=>`<div class="bar"><div class="lbl"><span>${i+1}. ${esc(o.q)} (${o.a})</span><span>${wrong[i]}명</span></div><div class="tr"><i style="width:${ox.length?100*wrong[i]/ox.length:0}%;background:var(--bad)"></i></div></div>`).join('')}</div>
+  ${REFQ.map(q=>`<h3>${q.e} ${esc(q.t)}</h3><div class="wall">${ds.map(p=>wcard(`${TM[p.team]?TM[p.team].e:''} ${p.num}번 ${p.nick}`,p.ref[q.k])).join('')||'<p class="muted">아직 없어요.</p>'}</div>`).join('')}${nextBtn('end','🏁 수업 끝')}</div>`; }
+function tTeams(){ return `<div class="card"><h2>🏡 마을 현황</h2><table class="tb"><tr><th>마을</th><th>주민</th><th>헌장</th><th>원 안</th><th>코끼리</th><th>💰</th>${[...GK,'life'].map(g=>`<th>${G[g].e}</th>`).join('')}<th>생명 지수</th><th>정책</th><th>함정</th></tr>
+  ${keys().map(k=>{ const t=TEAMSD[k]||{}; return `<tr><td>${teamTag(k)}</td><td class="small">${members(k).map(p=>esc(p.num+' '+p.nick)).join(', ')}</td><td>${CH[t.charter]?CH[t.charter].e+' '+esc(CH[t.charter].who):'—'}</td><td class="n">${inCount(t)}</td><td>${ELE[t.ele]?ELE[t.ele].e:'—'}</td><td class="n">${fmt(t.money)}</td>${[...GK,'life'].map(g=>`<td class="n">${Math.round(+t[g]||0)}</td>`).join('')}<td class="n"><b>${lifeScore(t)}</b></td><td class="small">${owned(t).map(x=>PM[x].e).join('')}</td><td class="small">${toArr(t.traps).map(x=>PM[x].e).join('')}</td></tr>`; }).join('')}</table>
+  <h3>👥 학생 (${plist().length}명)</h3><table class="tb"><tr><th>번호</th><th>이름</th><th>마을</th><th>주장</th><th>OX</th><th>성찰</th></tr>${plist().map(p=>`<tr><td>${esc(p.num)}</td><td>${esc(p.nick)}</td><td>${teamTag(p.team)}</td><td>${p.claim&&p.claim.done?'✅':''}</td><td>${p.oxChecked?p.oxScore+'/'+OX.length:''}</td><td>${p.ref&&p.ref.done?'✅':''}</td></tr>`).join('')}</table></div>`; }
+function tAnswers(){ const ks=keys();
+  return `<div class="card"><h2>📝 학생 답 모아 보기</h2><h3>📜 헌장 까닭</h3><table class="tb"><tr><th>마을</th><th>헌장</th><th>까닭</th></tr>${ks.map(k=>{ const t=TEAMSD[k]||{}; return `<tr><td>${teamTag(k)}</td><td>${CH[t.charter]?CH[t.charter].e+' '+esc(CH[t.charter].n):'—'}</td><td>${esc(t.why||'')}</td></tr>`; }).join('')}</table>
+  <h3>🪪 주민 등록 근거</h3><table class="tb"><tr><th>마을</th><th>근거</th></tr>${ks.map(k=>{ const t=TEAMSD[k]||{}, W=t.regWhy||{}; return `<tr><td>${teamTag(k)}</td><td class="small">${BE.filter(b=>W[b.k]).map(b=>`${b.e} ${regOf(t)[b.k]==='in'?'⭕':regOf(t)[b.k]==='out'?'❌':'⏸'} ${esc(W[b.k])}`).join('<br>')}</td></tr>`; }).join('')}</table>
+  <h3>🐘 코끼리 판결</h3><table class="tb"><tr><th>마을</th><th>선택</th>${GK.map(g=>`<th>${G[g].e}</th>`).join('')}</tr>${ks.map(k=>{ const t=TEAMSD[k]||{}, W=t.eleWhy||{}; return `<tr><td>${teamTag(k)}</td><td>${ELE[t.ele]?ELE[t.ele].e+' '+esc(ELE[t.ele].t):'—'}</td>${GK.map(g=>`<td class="small">${esc(W[g]||'')}</td>`).join('')}</tr>`; }).join('')}</table>
+  <h3>✍️ 나만의 주장</h3><table class="tb"><tr><th>학생</th><th>주장</th><th>근거</th></tr>${plist().filter(p=>p.claim&&p.claim.done).map(p=>`<tr><td>${esc(p.num)} ${esc(p.nick)}</td><td>${esc(p.claim.c)}</td><td>${esc(p.claim.r)}</td></tr>`).join('')}</table>
+  <h3>💗 공감 답장</h3><table class="tb"><tr><th>마을</th><th>답장</th></tr>${ks.map(k=>{ const R=(TEAMSD[k]||{}).replies||{}; return `<tr><td>${teamTag(k)}</td><td class="small">${Object.keys(R).sort().map(y=>`${esc(y)} ${MSG[R[y].msg]?MSG[R[y].msg].e:''} ${esc(R[y].text)}`).join('<br>')}</td></tr>`; }).join('')}</table>
+  <h3>📝 성찰</h3><table class="tb"><tr><th>학생</th><th>OX</th>${REFQ.map(q=>`<th>${q.e}</th>`).join('')}</tr>${plist().filter(p=>p.ref&&p.ref.done).map(p=>`<tr><td>${esc(p.num)} ${esc(p.nick)}</td><td>${p.oxScore||0}/${OX.length}</td>${REFQ.map(q=>`<td class="small">${hlC(p.ref[q.k])}</td>`).join('')}</tr>`).join('')}</table>
+  <div class="row" style="margin-top:12px"><button class="btn sm acc" data-act="csv">⬇️ 엑셀(CSV)로 내려받기</button></div></div>`; }
+function tSet(){ return `<div class="grid g2"><div class="card"><h2>📱 학생 링크</h2><div class="code">${esc(ROOM)}</div><div class="qrbox"><div id="qr"></div></div><div class="url" style="margin-top:10px">${esc(studentURL())}</div><div class="row" style="margin-top:10px"><button class="btn sm acc" data-act="copy">링크 복사</button></div>
+  <h3>🏫 반 이름</h3><div class="row"><input class="field" style="max-width:200px" id="lblIn" maxlength="12" value="${esc(roomLabel(ROOM))}"><button class="btn sm acc" data-act="rename">저장</button></div></div>
+  <div class="card"><h2>⚙️ 게임 설정</h2><label class="lb">마을(모둠) 수</label><div class="row">${[4,5,6].map(n=>`<button class="btn sm ${TN()===n?'acc':'ghost'}" data-act="setN" data-k="TN" data-v="${n}">${n}개</button>`).join('')}</div>
+  <label class="lb">2부 햇수</label><div class="row">${[2,3,4].map(n=>`<button class="btn sm ${PN()===n?'acc':'ghost'}" data-act="setN" data-k="PN" data-v="${n}">${n}년</button>`).join('')}</div>
+  <p class="muted small">권장: 2부 3년 (한 해 약 8분). 시간이 빠듯하면 2년(목소리가 한 해 3개씩).</p>
+  <h3>🔁 다시 하기</h3><div class="row"><button class="btn sm ghost" data-act="restart2">🏛️ 2부만 처음부터</button><button class="btn sm bad" data-act="reset">🗑️ 이 방 기록 모두 지우기</button></div></div></div>`; }
+function renderTeacher(){
+  document.body.classList.toggle('big',T.big);
+  if(!T.authed){ $app.innerHTML=vLogin(); return; } if(!ROOM){ $app.innerHTML=vPicker(); return; }
+  const ph=phase(); let body='';
+  if(T.tab==='teams') body=tTeams(); else if(T.tab==='answers') body=tAnswers(); else if(T.tab==='set') body=tSet();
+  else body=({lobby:tLobby,intro:tIntro,charter:tCharter,register:tRegister,compare:tCompare,elephant:tElephant,claim:tClaim,voice:tVoice,year:tYear,final:tFinal,reflect:tReflect}[ph]||(()=>`<div class="card center">${say('오늘 수업 끝! 수고하셨습니다. 🌱',true)}</div>`))();
+  const spot=T.spot?`<div class="overlay" data-act="spotClose"><div class="modal"><small class="muted">${esc(T.spot.w)}</small><div class="spot">${esc(T.spot.v)}</div><div class="row" style="justify-content:flex-end"><button class="btn acc" data-act="spotClose">닫기</button></div></div></div>`:'';
+  $app.innerHTML=`<div class="twrap">${tHeader()}${body}</div>${spot}`;
+  const q=document.getElementById('qr'); if(q&&window.QRCode){ q.innerHTML=''; new QRCode(q,{text:studentURL(),width:220,height:220}); }
+}
+const snap=()=>{ const o={}; keys().forEach(k=>{ const t=TEAMSD[k]||{}; o[k]={charter:t.charter||null,pain:+t.pain||0,will:+t.will||0,eco:+t.eco||0,life:+t.life||0}; }); return o; };
+function initTeams(){ const upd={'meta/started':Date.now()}; keys().forEach(k=>{ const old=TEAMSD[k]||{}; Object.entries(START).forEach(([a,v])=>{ if(old[a]==null) upd[`teams/${k}/${a}`]=v; }); }); return backend.update(BASE(),upd); }
+function settleYear(){
+  const y=year(), N=PN(), mi=msgsFor(y,N), rep={}, upd={};
+  keys().forEach(k=>{
+    const t=Object.assign({},START,TEAMSD[k]||{}), d=decFor(k), own=owned(t), traps=toArr(t.traps), bought=[]; let money=+t.money||0, inc=0;
+    d.cards.filter(x=>PM[x]&&!own.includes(x)).forEach(x=>{ const p=PM[x]; if(p.cost>money) return; money-=p.cost; if(p.inc){ money+=p.inc; inc+=p.inc; } Object.entries(p.eff).forEach(([g,v])=>t[g]=(+t[g]||0)+v); bought.push(x); own.push(x); if(p.trap) traps.push(x); });
+    const pen=[]; mi.forEach(i=>{ const c=MSG[i].c; if(!own.some(x=>PM[x].c===c&&!PM[x].trap)){ pen.push(c); t[CAT[c].g]=(+t[CAT[c].g]||0)-PEN; } });
+    GK.forEach(g=>t[g]=(+t[g]||0)-DRIFT); [...GK,'life'].forEach(g=>t[g]=clampN(Math.round(t[g]),0,100));
+    const tax=60+Math.round(t.life); money+=tax;
+    Object.assign(upd,{[`teams/${k}/money`]:money,[`teams/${k}/owned`]:own,[`teams/${k}/traps`]:traps,[`teams/${k}/pain`]:t.pain,[`teams/${k}/will`]:t.will,[`teams/${k}/eco`]:t.eco,[`teams/${k}/life`]:t.life});
+    if(d.reply) upd[`teams/${k}/replies/y${y}`]={msg:+d.msg||mi[0]||0,text:d.reply};
+    rep[k]={bought,inc,pen,tax};
+    TEAMSD[k]=Object.assign({},TEAMSD[k],{money,owned:own,traps,pain:t.pain,will:t.will,eco:t.eco,life:t.life});
+  });
+  const h=toArr(HIST.g); h.push(snap());
+  Object.assign(upd,{'hist/g':h,'meta/round':y+1,'meta/last':{y,rep,at:Date.now()}});
+  return backend.update(BASE(),upd);
+}
+const TACT={
+  login(){ if(T.pin===TEACHER_PIN){ T.authed=true; try{sessionStorage.setItem('life_t','1');}catch(e){} render(); } else toast('비밀번호가 다릅니다.'); },
+  tab(el){ T.tab=el.dataset.v; render(); }, toggleBig(){ T.big=!T.big; render(); },
+  async setPhase(el){ const v=el.dataset.v; T.tab='run';
+    if(['charter','register','compare','elephant'].includes(v)&&!META.started) await initTeams();
+    if(v==='register'){ const miss=keys().filter(k=>!(TEAMSD[k]||{}).charter); if(miss.length&&!confirm(`${miss.map(k=>TM[k].n).join(', ')}이(가) 헌장을 고르지 않았어요. 그대로 진행할까요? (헌장 없이 심사)`)) return; }
+    if(v==='year'&&!META.yearsOn) return TACT.startYears();
+    backend.update(`${BASE()}/meta`,{phase:v}); },
+  async eleSettle(){ if(META.eleOK) return; const ks=keys(), miss=ks.filter(k=>!ELE[(TEAMSD[k]||{}).ele]); if(miss.length&&!confirm(`${miss.map(k=>TM[k].n).join(', ')}이(가) 선택하지 않았어요. 선택 없이(변화 없음) 확정할까요?`)) return;
+    if(!META.started) await initTeams(); const upd={'meta/eleOK':true};
+    ks.forEach(k=>{ const t=Object.assign({},START,TEAMSD[k]||{}), o=ELE[t.ele]; if(!o) return; upd[`teams/${k}/money`]=(+t.money||0)+o.eff.money; [...GK,'life'].forEach(g=>upd[`teams/${k}/${g}`]=clampN((+t[g]||0)+o.eff[g],0,100)); });
+    await backend.update(BASE(),upd); toast('📢 결과를 반영했어요!'); },
+  async startYears(){ if(!META.started) await initTeams(); if(!META.eleOK&&!confirm('코끼리 사건 결과를 아직 확정하지 않았어요. 그대로 2부를 시작할까요?')) return;
+    T.tab='run'; await backend.update(BASE(),{dec:null,'hist/g':[snap()],'meta/phase':'year','meta/round':1,'meta/last':null,'meta/yearsOn':true,'meta/rv':0}); },
+  async settle(){ if(T.busy||over()) return; T.busy=true; render(); try{ await settleYear(); toast(`📊 ${year()-1}년째 결산 완료!`); }catch(e){ console.error(e); toast('⚠️ 결산 실패: '+e.message); } T.busy=false; render(); },
+  async restart2(){ if(!confirm('2부(책임 정책)를 처음부터 다시 할까요? 정책·예산이 코끼리 사건 직후로 돌아가지 않고, 정책 기록만 지워집니다.')) return; const upd={}; keys().forEach(k=>{ upd[`teams/${k}/owned`]=null; upd[`teams/${k}/traps`]=null; upd[`teams/${k}/replies`]=null; }); await backend.update(BASE(),upd); TACT.startYears(); },
+  rv(el){ backend.update(`${BASE()}/meta`,{rv:clampN((+META.rv||0)+(+el.dataset.v),0,3)}); },
+  spot(el){ T.spot={v:el.dataset.v,w:el.dataset.w}; render(); }, spotClose(el,ev){ if(ev&&ev.target!==el) return; T.spot=null; render(); },
+  setN(el){ backend.update(`${BASE()}/meta`,{[el.dataset.k]:+el.dataset.v}); },
+  copy(){ navigator.clipboard&&navigator.clipboard.writeText(studentURL()).then(()=>toast('📋 링크를 복사했어요.')); },
+  rename(){ const v=(document.getElementById('lblIn').value||'').trim().slice(0,12); backend.update(`${INDEX}/${ROOM}`,{label:v,at:Date.now()}); toast('🏫 반 이름을 저장했어요.'); },
+  reset(){ if(!confirm('이 방('+ROOM+')의 기록을 모두 지울까요? 되돌릴 수 없습니다.')) return; backend.remove(BASE()).then(()=>backend.set(`${BASE()}/meta`,{phase:'lobby',created:Date.now()})); toast('🗑️ 지웠어요.'); },
+  csv(){ const rows=[['번호','이름','마을','나만의 주장','근거','OX 점수',...REFQ.map(q=>q.t)]];
+    plist().forEach(p=>rows.push([p.num,p.nick,TM[p.team]?TM[p.team].n:'',p.claim&&p.claim.c||'',p.claim&&p.claim.r||'',p.oxChecked?p.oxScore:'',...REFQ.map(q=>p.ref&&p.ref[q.k]||'')]));
+    const s='﻿'+rows.map(r=>r.map(x=>'"'+String(x??'').replace(/"/g,'""')+'"').join(',')).join('\r\n'); const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([s],{type:'text/csv'})); a.download=`꿈결생명마을_${roomLabel(ROOM)||ROOM}.csv`; a.click(); },
+  goPicker(){ location.search='?mode=teacher'; },
+  async pickNew(){ const lb=T.newLabel.trim(); if(!lb) return toast('반 이름을 입력해 주세요. (예: 2-3반)'); const c=newCode(), now=Date.now(); await backend.set(`${INDEX}/${c}`,{label:lb,at:now,created:now}); location.search='?mode=teacher&room='+c; },
+  pickOpen(el){ location.search='?mode=teacher&room='+el.dataset.v; },
+  pickCode(){ const c=T.openCode.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,8); if(c.length<3) return toast('방 코드를 확인해 주세요.'); location.search='?mode=teacher&room='+c; },
+  pickRemove(el){ const c=el.dataset.v; if(!confirm(`${roomLabel(c)||c} 방을 목록에서 뺄까요? (기록은 지워지지 않습니다)`)) return; backend.remove(`${INDEX}/${c}`); }
+};
+const TBIND={pin:v=>T.pin=v,newLabel:v=>T.newLabel=v,openCode:v=>T.openCode=v};
+
+/* ⑧ 이벤트 · 시작 */
+document.addEventListener('error',e=>{ const t=e.target; if(t&&t.tagName==='IMG'&&t.src.indexOf(CHAR)>=0){ const sp=document.createElement('span'); sp.textContent='🌱'; sp.style.cssText='display:inline-flex;align-items:center;justify-content:center;font-size:40px;width:60px;flex:none'; t.replaceWith(sp); } },true);
+document.addEventListener('click',e=>{ const el=e.target.closest('[data-act]'); if(!el||el.disabled) return; const A=MODE==='teacher'?TACT:SACT; const f=A[el.dataset.act]; if(f) f(el,e); });
+document.addEventListener('input',e=>{ const el=e.target.closest('[data-bind]'); if(!el) return; const f=(MODE==='teacher'?TBIND:SBIND)[el.dataset.bind]; if(f) f(el.value,el); });
+document.addEventListener('change',e=>{ const el=e.target.closest('[data-save]'); if(!el||MODE==='teacher'||!P||!P.team) return; const f=SSAVE[el.dataset.save]; if(f) f(el.value,el); });
+document.addEventListener('keydown',e=>{ if(e.key!=='Enter') return; const el=e.target.closest('[data-bind]'); if(!el||el.tagName==='TEXTAREA') return; const a={room:'enterRoom',pin:'login',newLabel:'pickNew',openCode:'pickCode'}[el.dataset.bind]; if(a){ e.preventDefault(); (MODE==='teacher'?TACT:SACT)[a](); } });
+(async function start(){
+  await initBackend();
+  const sub=()=>{
+    backend.on(`${BASE()}/players`,v=>{ PLAYERS=v||{}; if(MODE==='student'&&P&&P.joined&&PLAYERS[P.id]==null&&P.epoch&&P.epoch===META.created) saveP(true); softRender(); });
+    backend.on(`${BASE()}/teams`,v=>{ TEAMSD=v||{}; softRender(); });
+    backend.on(`${BASE()}/dec`,v=>{ DECS=v||{}; softRender(); });
+    backend.on(`${BASE()}/hist`,v=>{ HIST=v||{}; softRender(); });
+  };
+  if(MODE==='teacher'){
+    backend.on(INDEX,v=>{ ROOMLIST=v||{}; softRender(); }); if(!ROOM){ render(); return; }
+    backend.update(`${INDEX}/${ROOM}`,{at:Date.now()}); let first=true;
+    backend.on(`${BASE()}/meta`,v=>{ META=v||{}; if(first&&!v) backend.set(`${BASE()}/meta`,{phase:'lobby',created:Date.now()}); first=false; softRender(); });
+    sub(); render(); return;
+  }
+  if(DBMODE!=='live'&&!ROOM) ROOM='SOLO'; if(!ROOM){ render(); return; }
+  P=loadP(); let lastPhase=null;
+  backend.on(`${BASE()}/meta`,v=>{ META=v||{};
+    if(P&&P.epoch&&META.created&&P.epoch!==META.created){ try{localStorage.removeItem(skey());}catch(e){} P=null; toast('선생님이 기록을 초기화했어요. 다시 입장해 주세요.'); render(); return; }
+    if(P&&P.joined&&!P.epoch&&META.created){ P.epoch=META.created; saveP(true); }
+    const ph=phase(); if(ph!==lastPhase){ if(lastPhase!==null) window.scrollTo(0,0); lastPhase=ph; render(); return; } softRender(); });
+  sub(); render();
+})();
+</script>
+</body>
+</html>
