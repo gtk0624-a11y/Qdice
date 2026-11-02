@@ -317,7 +317,15 @@ const TEAMS = [
   {k:'t1',n:'해바라기 마을',e:'🌻',c:'#e76f51'},{k:'t2',n:'도토리 마을',e:'🌰',c:'#8d6e3f'},{k:'t3',n:'반딧불 마을',e:'✨',c:'#4361ee'},
   {k:'t4',n:'조약돌 마을',e:'🪨',c:'#0e7490'},{k:'t5',n:'무지개 마을',e:'🌈',c:'#9b5de5'},{k:'t6',n:'은행나무 마을',e:'🍂',c:'#c08a00'}
 ];
+TEAMS.forEach(t=>t.n0=t.n);
 const TM = Object.fromEntries(TEAMS.map(t=>[t.k,t]));
+/* 교사가 편집하는 화면 문구 (설정·링크 탭 → ✏️ 화면 문구 편집) */
+const DEF = {title:'꿈결 생명 마을', sub:'도덕① Ⅳ. 자연과의 관계 · 34~35차시 (교과서 178~189쪽)', q:'인간 이외의 생명체를 왜, 그리고 어떻게 도덕적으로 고려해야 할까?',
+  story:'꿈결마을 옆 빈 땅에 새 마을을 세우려고 해요. 그런데 이 땅에는 사람만 사는 게 아니에요. 코끼리, 고양이, 꿀벌, 소나무… 많은 생명이 함께 살고 있지요. 우리는 누구를, 왜, 어떻게 지켜야 할까요?',
+  hello:'안녕! 나는 꿈결마을 촌장 꿈송이야. 오늘 너희는 사람과 여러 생명이 함께 사는 새 마을을 세우게 될 거야. 🌱', end:'오늘 마을 이야기 끝! 수고했어요. 🌱'};
+let CFG={};
+const cf=k=>{ const v=CFG&&CFG[k]; return (v==null||String(v).trim()==='')?DEF[k]:v; };
+function applyCfg(){ TEAMS.forEach(t=>{ const v=CFG&&CFG.teams&&CFG.teams[t.k]; t.n=(v&&String(v).trim())?String(v).trim():t.n0; }); document.title=cf('title'); }
 const clampN=(v,a,b)=>Math.max(a,Math.min(b,v));
 function lifeScore(t){ if(!t) return 0; const w={pain:1,will:1,eco:1}; if(CH[t.charter]) w[t.charter]=2; const s=w.pain+w.will+w.eco; return Math.round(((+t.pain||0)*w.pain+(+t.will||0)*w.will+(+t.eco||0)*w.eco)/s); }
 function msgsFor(y,N){ const per=[]; const b=Math.floor(MSG.length/N), x=MSG.length%N; let i=0; for(let k=1;k<=N;k++){ const n=b+(k<=x?1:0); per.push([...Array(n)].map((_,j)=>i+j)); i+=n; } return per[y-1]||[]; }
@@ -416,11 +424,11 @@ let saveTimer=null;
 function saveP(now){ if(!P) return; try{ localStorage.setItem(skey(),JSON.stringify(P)); }catch(e){} clearTimeout(saveTimer); const w=()=>backend.set(`${BASE()}/players/${P.id}`,P).catch(e=>toast('⚠️ 저장 실패: '+e.message)); if(now) w(); else saveTimer=setTimeout(w,500); }
 const myTeam=()=>P&&P.team&&TEAMSD[P.team]?TEAMSD[P.team]:null;
 const newP=()=>({id:'p'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),at:Date.now()});
-function sHeader(){ return `<div class="top"><h1><img src="${CHAR}" alt="">꿈결 생명 마을</h1>${P&&P.team?teamTag(P.team):''}${DBMODE==='live'?`<span class="pill">방 ${esc(ROOM)}</span>`:''}${P&&P.nick?`<span class="pill">${esc(P.num)}번 ${esc(P.nick)}</span>`:''}${modeBadge()}</div>`; }
+function sHeader(){ return `<div class="top"><h1><img src="${CHAR}" alt="">${esc(cf('title'))}</h1>${P&&P.team?teamTag(P.team):''}${DBMODE==='live'?`<span class="pill">방 ${esc(ROOM)}</span>`:''}${P&&P.nick?`<span class="pill">${esc(P.num)}번 ${esc(P.nick)}</span>`:''}${modeBadge()}</div>`; }
 const waitCard=msg=>`<div class="card center">${say(msg||'좋아요! 선생님이 다음 단계를 열 때까지 잠시 기다려 주세요. 😊')}</div>`;
-function vJoinRoom(){ return `${sHeader()}<div class="card center"><div class="hero"><img src="${CHAR}" alt="꿈송이"><h2>꿈결 생명 마을에 온 걸 환영해요!</h2></div><p class="muted">선생님 화면에 보이는 방 코드를 입력하세요.</p><input class="field" style="max-width:260px;text-align:center;font-size:24px;font-weight:800;letter-spacing:4px;text-transform:uppercase" data-bind="room" value="${esc(tmpRoom)}" maxlength="8"><div style="margin-top:14px"><button class="btn acc" data-act="enterRoom">입장하기</button></div></div>`; }
+function vJoinRoom(){ return `${sHeader()}<div class="card center"><div class="hero"><img src="${CHAR}" alt="꿈송이"><h2>${esc(cf('title'))}에 온 걸 환영해요!</h2><div class="muted small">${esc(cf('sub'))}</div></div><p class="muted">선생님 화면에 보이는 방 코드를 입력하세요.</p><input class="field" style="max-width:260px;text-align:center;font-size:24px;font-weight:800;letter-spacing:4px;text-transform:uppercase" data-bind="room" value="${esc(tmpRoom)}" maxlength="8"><div style="margin-top:14px"><button class="btn acc" data-act="enterRoom">입장하기</button></div></div>`; }
 function teamPicker(sel){ return `<div class="tgrid">${keys().map(k=>{ const t=TM[k]; return `<button class="tbtn ${sel===k?'sel':''}" style="background:${t.c}" data-act="pickTeam" data-v="${k}"><div class="e">${t.e}</div>${esc(t.n)}<small>주민 ${members(k).length}명</small></button>`; }).join('')}</div>`; }
-function vJoin(){ const d=P||{}; return `${sHeader()}<div class="card">${say('안녕! 나는 꿈결마을 촌장 <b>꿈송이</b>야. 오늘 너희는 사람과 여러 생명이 함께 사는 <b>새 마을</b>을 세우게 될 거야. 🌱',true)}
+function vJoin(){ const d=P||{}; return `${sHeader()}<div class="card">${say(esc(cf('hello')),true)}
   <label class="lb">번호</label><input class="field" style="max-width:140px" inputmode="numeric" data-bind="num" value="${esc(d.num||'')}" maxlength="3" placeholder="예: 7">
   <label class="lb">이름</label><input class="field" style="max-width:260px" data-bind="nick" value="${esc(d.nick||'')}" maxlength="10" placeholder="이름">
   <label class="lb">우리 모둠 마을 고르기</label>${teamPicker(d.team)}</div><div class="navbar"><div class="in"><span></span><button class="btn acc" data-act="join">입장하기 →</button></div></div>`; }
@@ -429,7 +437,7 @@ function rulesHTML(){ return `<div class="concept"><div class="h">🌱 게임 �
   <li><b>1부(34차시)</b> — 마을의 <b>헌장(도덕적 고려 기준)</b>을 정하고, 생명 10개를 우리 마을이 지켜야 할 <b>‘도덕적 고려 대상’</b>으로 등록할지 심사해요. 그리고 <b>코끼리 관광 사건</b>을 해결해요.</li>
   <li><b>2부(35차시)</b> — <b>생명 번역기</b>로 생명들의 목소리를 듣고, 예산으로 <b>책임 정책</b>을 사서 마을을 키워요.</li>
   <li>점수는 돈이 아니라 <b>🧡 고통 · 💙 삶의 의지 · 💚 생태 지수</b>예요. <b>😊 주민 생활</b>도 지켜야 해요.</li></ol></div>`; }
-function vIntro(){ return `${sHeader()}<div class="card">${say('꿈결마을 옆 빈 땅에 새 마을을 세우려고 해. 그런데 이 땅에는 사람만 사는 게 아니야. 코끼리, 고양이, 꿀벌, 소나무… 많은 생명이 함께 살고 있지. <b>우리는 누구를, 왜, 어떻게 지켜야 할까?</b>',true)}${rulesHTML()}<p class="muted">마을: ${teamTag(P.team)} · 선생님 화면을 함께 보세요.</p></div>`; }
+function vIntro(){ return `${sHeader()}<div class="card">${say(esc(cf('story')),true)+`<div class="concept"><div class="h">❓ 오늘의 질문</div><b>${esc(cf('q'))}</b><div class="small muted" style="margin-top:4px">${esc(cf('sub'))}</div></div>`}${rulesHTML()}<p class="muted">마을: ${teamTag(P.team)} · 선생님 화면을 함께 보세요.</p></div>`; }
 function vCharter(){ const t=myTeam()||{}; return `${sHeader()}<div class="card">${say('먼저 우리 마을의 <b>헌장</b>을 정하자. 교과서의 <b>도덕적으로 고려해야 하는 세 가지 이유</b> 중 하나야. 헌장은 게임 내내 <b>진짜 규칙</b>이 돼!',true)}
   <p class="muted small">✋ 모둠이 함께 하나를 고르세요. (교과서 180~181쪽)</p><div class="grid g3">${CHK.map(k=>charterCard(k,t.charter===k,'pickCh')).join('')}</div>
   <label class="lb">✍️ 우리 마을이 이 헌장을 고른 까닭 (10자 이상)</label><textarea class="field" data-bind="why" maxlength="200">${esc(ui.why||t.why||'')}</textarea>${t.why?`<p class="muted small">저장된 까닭: “${esc(t.why)}” — ${esc(t.whyBy||'')}</p>`:''}</div>
@@ -514,7 +522,7 @@ function renderStudent(){
   if(ph==='lobby') h=vLobby(); else if(ph==='intro') h=vIntro(); else if(ph==='charter') h=vCharter(); else if(ph==='register') h=vRegister();
   else if(ph==='compare') h=vCompare(); else if(ph==='elephant') h=vElephant(); else if(ph==='claim') h=vClaim(); else if(ph==='voice') h=vVoice();
   else if(ph==='year') h=vYear(); else if(ph==='final') h=`${sHeader()}<div class="card">${finalBody(+META.rv||0,false)}</div>`; else if(ph==='reflect') h=vReflect();
-  else h=`${sHeader()}${waitCard('오늘 마을 이야기 끝! 수고했어요. 🌱')}`;
+  else h=`${sHeader()}${waitCard(esc(cf('end')))}`;
   $app.innerHTML=`<div class="wrap">${h}</div>`;
 }
 function setDec(patch,quiet){ if(!P||!P.team) return; const d=Object.assign(decFor(P.team),patch,{r:rkey(),by:P.nick,at:Date.now()}); DECS[P.team]=d; if(!quiet){ keepScroll=true; render(); } backend.set(`${BASE()}/dec/${P.team}`,d).catch(e=>toast('⚠️ 저장 실패: '+e.message)); }
@@ -587,20 +595,20 @@ const studentURL=()=>location.origin+location.pathname+'?room='+ROOM;
 const PH=[{k:'lobby',n:'🚪 입장'},{k:'intro',n:'🏡 마을 탄생'},{k:'charter',n:'📜 헌장'},{k:'register',n:'🪪 주민 등록'},{k:'compare',n:'⭕ 원 비교'},{k:'elephant',n:'🐘 코끼리 사건'},{k:'claim',n:'✍️ 나만의 주장'},{k:'voice',n:'📡 2부 생명 번역기'},{k:'year',n:'🏛️ 책임 정책'},{k:'final',n:'🎁 결과 공개'},{k:'reflect',n:'📝 OX·성찰'},{k:'end',n:'🏁 끝'}];
 const wcard=(who,txt)=>`<button class="wcard" data-act="spot" data-v="${esc(txt)}" data-w="${esc(who)}"><small>${esc(who)}</small>${hlC(txt)}</button>`;
 function hlC(s){ let h=esc(s); CONCEPTS.forEach(c=>{ h=h.split(esc(c)).join(`<mark>${esc(c)}</mark>`); }); return h; }
-function vLogin(){ return `<div class="wrap"><div class="top"><h1><img src="${CHAR}" alt="">꿈결 생명 마을 · 교사</h1>${modeBadge()}</div><div class="card center">${say('교사 화면이에요. 비밀번호를 입력해 주세요.')}<input class="field" type="password" style="max-width:220px;text-align:center;font-size:22px" data-bind="pin" inputmode="numeric"><div style="margin-top:12px"><button class="btn acc" data-act="login">들어가기</button></div></div></div>`; }
+function vLogin(){ return `<div class="wrap"><div class="top"><h1><img src="${CHAR}" alt="">${esc(cf('title'))} · 교사</h1>${modeBadge()}</div><div class="card center">${say('교사 화면이에요. 비밀번호를 입력해 주세요.')}<input class="field" type="password" style="max-width:220px;text-align:center;font-size:22px" data-bind="pin" inputmode="numeric"><div style="margin-top:12px"><button class="btn acc" data-act="login">들어가기</button></div></div></div>`; }
 function vPicker(){ const rows=Object.entries(ROOMLIST).filter(([c,r])=>r&&/^[A-Z0-9]{3,8}$/.test(c)).sort((a,b)=>(b[1].at||0)-(a[1].at||0)); const d=t=>{ if(!t) return ''; const x=new Date(t); return `${x.getMonth()+1}/${x.getDate()} ${String(x.getHours()).padStart(2,'0')}:${String(x.getMinutes()).padStart(2,'0')}`; };
-  return `<div class="wrap"><div class="top"><h1><img src="${CHAR}" alt="">꿈결 생명 마을 · 교사</h1>${modeBadge()}</div><div class="card">${say('어느 반 수업을 할까요? <b>반마다 방을 하나씩</b> 만들어 주세요. 34차시에서 멈추고 35차시에 같은 방을 열면 이어서 진행돼요.')}
+  return `<div class="wrap"><div class="top"><h1><img src="${CHAR}" alt="">${esc(cf('title'))} · 교사</h1>${modeBadge()}</div><div class="card">${say('어느 반 수업을 할까요? <b>반마다 방을 하나씩</b> 만들어 주세요. 34차시에서 멈추고 35차시에 같은 방을 열면 이어서 진행돼요.')}
   <h3>➕ 새 반 방 만들기</h3><div class="row"><input class="field" style="max-width:260px" maxlength="12" data-bind="newLabel" value="${esc(T.newLabel)}" placeholder="반 이름 (예: 1-3반)"><button class="btn acc" data-act="pickNew">새 방 만들기</button></div>
   <h3>📂 만든 방</h3>${rows.length?`<table class="tb"><tr><th>반</th><th>방 코드</th><th>마지막 사용</th><th></th></tr>${rows.map(([c,r])=>`<tr><td><b>${esc(r.label||'(이름 없음)')}</b></td><td style="letter-spacing:2px;font-weight:800">${esc(c)}</td><td>${d(r.at)}</td><td><div class="row"><button class="btn sm acc" data-act="pickOpen" data-v="${esc(c)}">열기</button><button class="btn sm ghost" data-act="pickRemove" data-v="${esc(c)}">목록에서 빼기</button></div></td></tr>`).join('')}</table>`:'<p class="muted">아직 만든 방이 없어요.</p>'}
   <h3>🔑 방 코드로 열기</h3><div class="row"><input class="field" style="max-width:200px;text-transform:uppercase;font-weight:800;letter-spacing:2px" maxlength="8" data-bind="openCode" value="${esc(T.openCode)}" placeholder="예: MAB3"><button class="btn ghost" data-act="pickCode">열기</button></div>
   ${DBMODE!=='live'?'<div class="banner warn" style="margin-top:14px">⚠️ 체험 모드입니다. 같은 브라우저의 다른 탭에서만 학생 화면이 연동됩니다.</div>':''}</div></div>`; }
-function tHeader(){ return `<div class="top"><h1><img src="${CHAR}" alt="">꿈결 생명 마을 · 교사</h1><span class="pill">🏫 ${esc(roomLabel(ROOM)||'반 이름 없음')}</span><span class="pill" style="font-weight:900;letter-spacing:2px">방 ${esc(ROOM)}</span><span class="pill">👥 ${plist().length}명</span>${modeBadge()}<button class="btn sm ghost" data-act="toggleBig">${T.big?'🔎 보통 글씨':'🔍 큰 글씨'}</button><button class="btn sm ghost" data-act="goPicker">반 목록</button></div>
+function tHeader(){ return `<div class="top"><h1><img src="${CHAR}" alt="">${esc(cf('title'))} · 교사</h1><span class="pill">🏫 ${esc(roomLabel(ROOM)||'반 이름 없음')}</span><span class="pill" style="font-weight:900;letter-spacing:2px">방 ${esc(ROOM)}</span><span class="pill">👥 ${plist().length}명</span>${modeBadge()}<button class="btn sm ghost" data-act="toggleBig">${T.big?'🔎 보통 글씨':'🔍 큰 글씨'}</button><button class="btn sm ghost" data-act="goPicker">반 목록</button></div>
   <div class="phasebar">${PH.map(p=>`<button class="${phase()===p.k?'on':''}" data-act="setPhase" data-v="${p.k}">${p.n}</button>`).join('')}</div>
   <div class="tabs">${[['run','🖥️ 수업 화면'],['teams','🏡 마을 현황'],['answers','📝 학생 답'],['set','⚙️ 설정·링크']].map(([k,n])=>`<button class="${T.tab===k?'on':''}" data-act="tab" data-v="${k}">${n}</button>`).join('')}</div>`; }
 const nextBtn=(v,label)=>`<div class="row" style="margin-top:16px;justify-content:flex-end"><button class="btn acc xl" data-act="setPhase" data-v="${v}">${label}</button></div>`;
 function tLobby(){ return `<div class="grid g2"><div class="card center"><h2>📱 학생 입장</h2><div class="code">${esc(ROOM)}</div><div class="qrbox"><div id="qr"></div></div><div class="url" style="margin-top:10px">${esc(studentURL())}</div></div>
   <div class="card">${say('모둠마다 <b>같은 마을</b>을 고르게 해 주세요.',true)}<div class="tboard">${keys().map(k=>{ const ms=members(k); return `<div class="tcard"><div class="hd"><span class="e">${TM[k].e}</span>${esc(TM[k].n)}<span class="sp"></span><span class="cnt">${ms.length}</span></div><div class="m">${ms.map(p=>esc(p.num+' '+p.nick)).join(', ')||'아직 없음'}</div></div>`; }).join('')}</div>${nextBtn('intro','🏡 마을 탄생 →')}</div></div>`; }
-function tIntro(){ return `<div class="card">${say('꿈결마을 옆 빈 땅에 새 마을을 세우려고 해요. 그런데 이 땅에는 사람만 사는 게 아니에요. <b>우리는 누구를, 왜, 어떻게 지켜야 할까요?</b>',true)}
+function tIntro(){ return `<div class="card">${say(esc(cf('story')),true)+`<div class="concept"><div class="h">❓ 오늘의 질문</div><b style="font-size:24px">${esc(cf('q'))}</b><div class="small muted" style="margin-top:4px">${esc(cf('sub'))}</div></div>`}
   <div class="news"><span class="e">🐄</span><div><b>옛사람들의 생명 존중 (교과서 178쪽)</b><div class="d">옛사람들은 먼 길을 가는 소에게 쇠짚신을 신기고, 추운 겨울 나무에 뜨개옷을 입혔어요. 왜 그랬을까요?</div></div></div>${rulesHTML()}
   <div class="tip"><b>📘 생명의 소중함 (179쪽)</b> — 우리 주변의 생명체는 인간과 마찬가지로 단 한 번의 삶을 살아가는 소중한 존재이므로 존엄하게 여기고 소중하게 대해야 해요.</div>${nextBtn('charter','📜 헌장 정하기 →')}</div>`; }
 function tCharter(){ const who=k=>keys().filter(t=>(TEAMSD[t]||{}).charter===k).map(teamTag).join(''); const done=keys().filter(k=>(TEAMSD[k]||{}).charter).length;
@@ -676,7 +684,10 @@ function tSet(){ return `<div class="grid g2"><div class="card"><h2>📱 학생 
   <div class="card"><h2>⚙️ 게임 설정</h2><label class="lb">마을(모둠) 수</label><div class="row">${[4,5,6].map(n=>`<button class="btn sm ${TN()===n?'acc':'ghost'}" data-act="setN" data-k="TN" data-v="${n}">${n}개</button>`).join('')}</div>
   <label class="lb">2부 햇수</label><div class="row">${[2,3,4].map(n=>`<button class="btn sm ${PN()===n?'acc':'ghost'}" data-act="setN" data-k="PN" data-v="${n}">${n}년</button>`).join('')}</div>
   <p class="muted small">권장: 2부 3년 (한 해 약 8분). 시간이 빠듯하면 2년(목소리가 한 해 3개씩).</p>
-  <h3>🔁 다시 하기</h3><div class="row"><button class="btn sm ghost" data-act="restart2">🏛️ 2부만 처음부터</button><button class="btn sm bad" data-act="reset">🗑️ 이 방 기록 모두 지우기</button></div></div></div>`; }
+  <h3>🔁 다시 하기</h3><div class="row"><button class="btn sm ghost" data-act="restart2">🏛️ 2부만 처음부터</button><button class="btn sm bad" data-act="reset">🗑️ 이 방 기록 모두 지우기</button></div></div><div class="card" style="grid-column:1/-1"><h2>✏️ 화면 문구 편집</h2><p class="muted small">여기서 고친 문구는 <b>모든 반 방</b>의 교사·학생 화면에 바로 적용돼요. 비워 두면 기본 문구가 나와요.</p>
+  <label class="lb">게임 제목</label><input class="field" id="cf_title" maxlength="30" placeholder="${esc(DEF.title)}" value="${esc((CFG||{}).title||"")}"><label class="lb">부제 (학년·단원·차시·교과서 쪽)</label><input class="field" id="cf_sub" maxlength="80" placeholder="${esc(DEF.sub)}" value="${esc((CFG||{}).sub||"")}"><label class="lb">오늘의 질문</label><input class="field" id="cf_q" maxlength="120" placeholder="${esc(DEF.q)}" value="${esc((CFG||{}).q||"")}"><label class="lb">시작 이야기 (꿈송이)</label><textarea class="field" style="min-height:70px" id="cf_story" maxlength="400" placeholder="${esc(DEF.story)}">${esc((CFG||{}).story||"")}</textarea><label class="lb">입장 인사말 (꿈송이)</label><textarea class="field" style="min-height:70px" id="cf_hello" maxlength="200" placeholder="${esc(DEF.hello)}">${esc((CFG||{}).hello||"")}</textarea><label class="lb">수업 끝 인사</label><input class="field" id="cf_end" maxlength="100" placeholder="${esc(DEF.end)}" value="${esc((CFG||{}).end||"")}">
+  <label class="lb">마을(모둠) 이름</label><div class="grid g3">${TEAMS.map(t=>`<div class="row"><span style="font-size:24px">${t.e}</span><input class="field" style="flex:1" id="cf_t_${t.k}" maxlength="10" placeholder="${esc(t.n0)}" value="${esc(((CFG||{}).teams||{})[t.k]||'')}"></div>`).join('')}</div>
+  <div class="row" style="margin-top:14px"><button class="btn acc" data-act="cfgSave">💾 문구 저장</button><button class="btn ghost" data-act="cfgReset">기본 문구로 되돌리기</button></div></div></div>`; }
 function renderTeacher(){
   document.body.classList.toggle('big',T.big);
   if(!T.authed){ $app.innerHTML=vLogin(); return; } if(!ROOM){ $app.innerHTML=vPicker(); return; }
@@ -779,6 +790,8 @@ const TACT={
   rv(el){ backend.update(`${BASE()}/meta`,{rv:clampN((+META.rv||0)+(+el.dataset.v),0,3)}); },
   spot(el){ T.spot={v:el.dataset.v,w:el.dataset.w}; render(); }, spotClose(el,ev){ if(ev&&ev.target!==el) return; T.spot=null; render(); },
   setN(el){ backend.update(`${BASE()}/meta`,{[el.dataset.k]:+el.dataset.v}); },
+  cfgSave(){ const o={teams:{}}; ['title','sub','q','story','hello','end'].forEach(k=>{ const el=document.getElementById('cf_'+k); o[k]=el?el.value.trim():''; }); TEAMS.forEach(t=>{ const el=document.getElementById('cf_t_'+t.k); o.teams[t.k]=el?el.value.trim():''; }); backend.set('rooms/LFCFG',o).then(()=>toast('💾 문구를 저장했어요!')); },
+  cfgReset(){ if(!confirm('모든 문구를 기본값으로 되돌릴까요?')) return; backend.remove('rooms/LFCFG').then(()=>toast('기본 문구로 되돌렸어요.')); },
   copy(){ navigator.clipboard&&navigator.clipboard.writeText(studentURL()).then(()=>toast('📋 링크를 복사했어요.')); },
   rename(){ const v=(document.getElementById('lblIn').value||'').trim().slice(0,12); backend.update(`${INDEX}/${ROOM}`,{label:v,at:Date.now()}); toast('🏫 반 이름을 저장했어요.'); },
   reset(){ if(!confirm('이 방('+ROOM+')의 기록을 모두 지울까요? 되돌릴 수 없습니다.')) return; backend.remove(BASE()).then(()=>backend.set(`${BASE()}/meta`,{phase:'lobby',created:Date.now()})); toast('🗑️ 지웠어요.'); },
@@ -804,6 +817,7 @@ setInterval(()=>{ document.querySelectorAll('.cd').forEach(el=>{ const s=Math.ma
   const up=!!timeUp(); if(up!==wasUp){ wasUp=up; softRender(); } },250);
 (async function start(){
   await initBackend();
+  backend.on('rooms/LFCFG',v=>{ CFG=v||{}; applyCfg(); softRender(); });
   const sub=()=>{
     backend.on(`${BASE()}/players`,v=>{ PLAYERS=v||{}; if(MODE==='student'&&P&&P.joined&&PLAYERS[P.id]==null&&P.epoch&&P.epoch===META.created) saveP(true); softRender(); });
     backend.on(`${BASE()}/teams`,v=>{ TEAMSD=v||{}; softRender(); });
