@@ -277,6 +277,25 @@ select.field{appearance:auto}
 .poster.mine{border-color:var(--gold)}
 .heart{border:2px solid var(--line);background:#fff;border-radius:999px;padding:6px 12px;font-weight:800}
 .heart.on{border-color:#e63946;background:#ffecee;color:#c1121f}
+.awards{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:8px;margin:0 0 12px}
+.aw{display:flex;gap:10px;align-items:flex-start;border-radius:14px;padding:10px 12px;border:2px solid;text-align:left}
+.aw.good{background:#f2faf8;border-color:var(--ok)}.aw.bad{background:#fff6f6;border-color:var(--bad)}
+.aw .ae{font-size:28px;line-height:1}
+.lossbox{background:#5b1414;color:#fff;border-radius:14px;padding:12px 14px;margin:10px 0;font-weight:800;font-size:17px}
+.lossbox b{color:#ffd166;font-size:20px}
+.worst{color:var(--bad);font-weight:700}
+.shoprow{display:flex;gap:10px;align-items:center;padding:8px 0;border-bottom:1px dashed var(--line)}
+.shoprow .se{font-size:26px}.shoprow .sn{flex:1}
+.raid{background:#1f1b2e;color:#f3efe6;border-radius:14px;padding:12px 14px;margin:12px 0}
+.raid .muted{color:#c9cfdd}.raid.off{background:#f4f4f4;color:var(--sub);font-weight:600}
+.hb{height:14px;background:#efe8da;border-radius:7px;overflow:hidden;margin:4px 0}.hb i{display:block;height:100%;transition:width .5s}.hb.sm{height:9px}
+.hopecard{border:2px solid var(--accent2)}
+.hv{font-size:28px;font-weight:900;text-align:center;line-height:1.1}.hv small{display:block;font-size:13px}
+.teams{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px}
+.team{background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:8px 10px}.team .tn{font-weight:800;font-size:14px}.team .tn small{color:var(--sub);font-weight:600}.team .tv{font-weight:900}
+.teams.big .team .tn{font-size:18px}.teams.big .hb{height:22px}.teams.big .tv{font-size:24px}
+@media (max-width:640px){.teams{grid-template-columns:repeat(2,1fr)}}
+details.rescue{border:2px solid var(--bad);margin-bottom:16px}
 </style>
 </head>
 <body>
@@ -733,16 +752,16 @@ const MET = [
 const M0 = 40, RISE = 20;
 const OPTK = ['self','coop','take'];
 const OPTMETA = {
-  self:{n:'자국 보호',e:'🛡️',c:'#3a6ea5',cost:3,shield:0.35,m:4,p:70,eff:{safe:3,trust:-2},say:'우리 피해를 가장 확실히 막지만 예산이 많이 들고, 세계 위기는 조금 커집니다.'},
-  coop:{n:'국제 공동 대응',e:'🤝',c:'#2a9d8f',cost:2,shield:0.7,m:-3,p:55,eff:{trust:4},say:'낸 예산 2가 국제 기금이 됩니다. 반 전체의 연대가 강할수록 성공률과 효과가 커집니다.'},
+  self:{n:'자국 보호',e:'🛡️',c:'#3a6ea5',cost:6,shield:0.35,m:4,p:70,eff:{safe:3,trust:-2},say:'우리 피해를 가장 확실히 막지만 예산이 많이 들고, 세계 위기는 조금 커집니다.'},
+  coop:{n:'국제 공동 대응',e:'🤝',c:'#2a9d8f',cost:4,shield:0.7,m:-3,p:55,eff:{trust:4},say:'낸 예산 4가 국제 기금이 됩니다. 반 전체의 연대가 강할수록 성공률과 효과가 커집니다.'},
   take:{n:'기회 이용',e:'💰',c:'#d48a1a',cost:0,shield:1.2,m:10,p:75,eff:{eco:5,trust:-5},say:'당장 큰 이익! 하지만 피해국이 되면 그대로 맞고, 세계 위기를 크게 키웁니다. 실패하면 들통나 신뢰가 폭락합니다.'},
   none:{n:'대응 못 함',e:'⏳',c:'#9aa0a6',cost:0,shield:1.4,m:5,p:0,eff:{trust:-3},say:''}
 };
 const OUT = {great:{n:'대성공',e:'🌟',c:'ok',m:0.5},ok:{n:'성공',e:'✅',c:'ok',m:1},fail:{n:'실패',e:'💥',c:'bad',m:1.5},none:{n:'무대응',e:'⏳',c:'bad',m:1}};
 const OUTTXT = {
-  self:{great:'방어가 완벽했습니다! 안전 +4',fail:'방어 시설이 무너졌습니다! 예산 -2'},
-  coop:{great:'국제 공조가 빛났습니다! 예산 +2, 신뢰 +4',fail:'함께하던 나라들과 손발이 안 맞았습니다. 신뢰 -2'},
-  take:{great:'대박! 이익이 더 커졌습니다. 예산 +3',fail:'들통났습니다! 세계가 우리를 비난합니다. 신뢰 -8, 세계 위기 더 커짐'}
+  self:{great:'방어가 완벽했습니다! 안전 +4',fail:'방어 시설이 무너졌습니다! 예산 -4'},
+  coop:{great:'국제 공조가 빛났습니다! 예산 +4, 신뢰 +4',fail:'함께하던 나라들과 손발이 안 맞았습니다. 신뢰 -2'},
+  take:{great:'대박! 이익이 더 커졌습니다. 예산 +6',fail:'들통났습니다! 세계가 우리를 비난합니다. 신뢰 -8, 세계 위기 더 커짐'}
 };
 const CRISES = [
   {id:'grain',e:'🌾',t:'곡물 가격 폭등',meter:'hunger',spill:{conflict:6},src:'교과서 159쪽 · 빈곤과 기아',
@@ -784,7 +803,47 @@ const CRISES = [
    s:'배터리에 쓰이는 희귀 광물이 바닥나자 강대국들이 군대를 국경에 모으고 있습니다. 한 발의 총성이 세계 전쟁으로 번질 수 있는 순간입니다.',
    vict:{low:'safe'},dmg:{food:-3,coin:-4,ind:{safe:-16,eco:-8}},gain:{coin:7},
    opts:{self:'광물을 비축하고 군대를 국경에 배치한다.',coop:'광물을 공정하게 나누는 국제 협정과 재활용 기술 공유를 제안한다.',take:'광산 지역을 먼저 차지하려고 군대를 보낸다.'},
-   facts:['천연자원 확보는 분쟁의 주요 원인이다','자원을 공정하게 나누고 아껴 쓰는 것도 평화를 지키는 일이다']}
+   facts:['천연자원 확보는 분쟁의 주요 원인이다','자원을 공정하게 나누고 아껴 쓰는 것도 평화를 지키는 일이다']},
+  {id:'locust',e:'🦗',t:'메뚜기 떼의 습격',meter:'hunger',spill:{conflict:5},src:'교과서 159쪽 · 빈곤과 기아 (자연재해)',
+   s:'수천억 마리의 메뚜기 떼가 하늘을 뒤덮고 곡창 지대를 휩쓸었습니다. 한나절 만에 마을 전체의 1년 치 농사가 사라졌습니다.',
+   vict:{terr:['plain'],low:'welfare'},dmg:{food:-7,coin:-1,ind:{welfare:-12,eco:-6}},gain:{coin:5},
+   opts:{self:'국경을 막고 우리 밭에만 살충제를 뿌린다.',coop:'여러 나라가 방제 비행기와 식량을 함께 보낸다.',take:'남은 곡물을 사재기해 몇 배 값에 판다.'},
+   facts:['자연재해는 빈곤과 기아의 주요 원인이다','식량이 부족해지면 가장 가난한 사람들이 가장 먼저 굶는다']},
+  {id:'crash',e:'💸',t:'세계 금융 공황',meter:'hunger',spill:{conflict:6},src:'교과서 159쪽 · 빈곤 (불공정한 분배)',
+   s:'세계 주식 시장이 무너지며 은행과 기업이 줄줄이 문을 닫았습니다. 가난한 나라들은 빚을 갚지 못해 학교와 병원을 닫고 있습니다.',
+   vict:{low:'eco'},dmg:{food:-2,coin:-6,ind:{eco:-12,equal:-6}},gain:{coin:6},
+   opts:{self:'수입을 막고 우리 기업만 지원한다.',coop:'국제기구와 함께 가난한 나라의 빚을 줄여 주고 긴급 자금을 나눈다.',take:'무너진 다른 나라 기업을 헐값에 사들인다.'},
+   facts:['불공정한 분배는 빈곤의 원인이다','세계 경제는 연결되어 있어 한 나라의 위기가 모두에게 번진다']},
+  {id:'blockade',e:'🚢',t:'식량 수송로 봉쇄',meter:'hunger',spill:{conflict:8},src:'교과서 159쪽 · 빈곤과 기아 · 전쟁',
+   s:'분쟁으로 곡물을 실어 나르던 바닷길이 막혔습니다. 항구에서는 곡물이 썩어 가고, 바다 건너 마을에서는 빵값이 세 배로 올랐습니다.',
+   vict:{terr:['island'],low:'welfare'},dmg:{food:-7,coin:-1,ind:{welfare:-10}},gain:{coin:6},
+   opts:{self:'우리 화물선만 군함으로 호위한다.',coop:'국제 해상 통로를 함께 지키고 구호선을 보낸다.',take:'봉쇄를 틈타 우리 곡물을 몇 배 값에 판다.'},
+   facts:['전쟁은 식량 공급을 끊어 기아를 부른다','전 지구적 문제들은 서로 얽혀 있다']},
+  {id:'glacier',e:'🧊',t:'남극 빙하 붕괴',meter:'climate',spill:{hunger:6},src:'교과서 160쪽 · 기후 변화 (해수면 상승)',
+   s:'남극에서 서울보다 큰 빙하가 무너져 바다로 쏟아졌습니다. 해수면이 갑자기 올라 해안 도시와 강가 마을이 물에 잠기고 있습니다.',
+   vict:{terr:['island','river'],low:'safe'},dmg:{food:-3,coin:-4,ind:{safe:-16,welfare:-6}},gain:{coin:5},
+   opts:{self:'우리 해안에만 거대한 둑을 쌓는다.',coop:'모든 나라가 탄소 감축 목표를 높이고, 잠기는 나라의 주민을 함께 돕는다.',take:'얼음이 녹아 열린 북극 바닷길로 석유를 캐러 간다.'},
+   facts:['기후 변화의 결과: 해수면 상승, 환경 난민 발생','온실가스를 가장 적게 내뿜은 나라가 가장 먼저 피해를 입기도 한다']},
+  {id:'smog',e:'🏭',t:'국경을 넘는 미세먼지',meter:'climate',spill:{hunger:4},src:'교과서 160쪽 · 환경 오염',
+   s:'이웃 나라 공장 지대에서 날아온 미세먼지가 하늘을 뒤덮었습니다. 학교는 문을 닫고, 숨쉬기 힘든 어린이와 노인이 병원에 몰리고 있습니다.',
+   vict:{low:'welfare'},dmg:{food:-1,coin:-3,ind:{welfare:-12,safe:-6}},gain:{coin:5},
+   opts:{self:'공기 청정 돔을 짓고 우리 도시만 지킨다.',coop:'공장 배출 기준을 함께 정하고 서로 감시한다.',take:'규제가 없는 틈에 우리 공장을 더 돌린다.'},
+   facts:['환경 오염은 국경을 가리지 않는다','한 나라의 노력만으로는 해결할 수 없는 전 지구적 문제이다']},
+  {id:'nuclear',e:'☢️',t:'원자력 발전소 사고',meter:'climate',spill:{hunger:7},src:'교과서 160쪽 · 환경 오염과 미래 세대',
+   s:'지진으로 원자력 발전소가 폭발해 방사능이 바다와 하늘로 퍼지고 있습니다. 주변 나라 농산물과 수산물까지 팔리지 않게 되었습니다.',
+   vict:{terr:['river','island'],low:'safe'},dmg:{food:-5,coin:-3,ind:{safe:-12,welfare:-8}},gain:{coin:5},
+   opts:{self:'국경을 막고 피해 지역 물건 수입을 모두 끊는다.',coop:'전문가와 장비를 함께 보내 오염을 막고 피난민을 돕는다.',take:'“우리 것은 안전하다”며 농산물을 비싸게 판다.'},
+   facts:['환경 오염의 피해는 미래 세대에게까지 이어진다','위험을 함께 막는 것이 결국 우리를 지키는 길이다']},
+  {id:'cyber',e:'💻',t:'국제 사이버 공격',meter:'conflict',spill:{hunger:4},src:'교과서 159쪽 · 전쟁과 폭력 (새로운 위협)',peaceBan:true,
+   s:'정체불명의 해커 집단이 여러 나라의 병원·은행·전력망을 동시에 마비시켰습니다. 나라들은 서로를 범인으로 의심하며 군대를 움직이고 있습니다.',
+   vict:{low:'trust'},dmg:{food:-1,coin:-5,ind:{safe:-10,trust:-8}},gain:{coin:6},
+   opts:{self:'인터넷을 끊고 우리 망만 지킨다.',coop:'여러 나라가 해킹 정보를 나누고 함께 범인을 추적한다.',take:'혼란한 틈에 다른 나라 기술을 몰래 빼 온다.'},
+   facts:['서로를 믿지 못하면 작은 사건도 분쟁으로 번진다','국제 협력은 새로운 위협에도 필요하다']},
+  {id:'persecution',e:'👥',t:'소수 민족 박해',meter:'conflict',spill:{hunger:5},src:'교과서 159쪽 · 인종·민족·종교의 대립',
+   s:'한 나라의 정부가 종교와 민족이 다르다는 이유로 소수 민족을 마을에서 내쫓고 있습니다. 수십만 명이 국경을 넘어 도망치고 있습니다.',
+   vict:{low:'free'},dmg:{food:-3,coin:-3,ind:{free:-12,trust:-10}},gain:{coin:6},
+   opts:{self:'남의 나라 일이니 관여하지 않는다.',coop:'유엔과 함께 박해를 멈추라고 압박하고 피난민을 보호한다.',take:'박해하는 정부와 무역을 늘려 이익을 챙긴다.'},
+   facts:['인종·민족·종교의 대립은 분쟁의 원인이다','모든 사람은 인간이기 때문에 존엄하다 — 보편적 인권']}
 ];
 const DECK_REC = ['grain','storm','border','drought','refugee','resource'];
 const LOCAL = [
@@ -793,6 +852,8 @@ const LOCAL = [
   {id:'fire',e:'🔥',t:'대형 산불',bad:true,d:'숲과 농장이 불탔습니다. 탄소도 뿜어져 나왔습니다.',res:{food:-3},ind:{welfare:-4},met:{climate:2}},
   {id:'flu',e:'🤒',t:'지역 전염병',bad:true,d:'병원이 환자로 가득 찼습니다.',res:{coin:-2,food:-1},ind:{welfare:-6}},
   {id:'riot',e:'📢',t:'대규모 시위',bad:true,d:'생활고에 지친 시민들이 거리로 나왔습니다.',res:{coin:-1},ind:{trust:-8}},
+  {id:'cattle',e:'🐄',t:'가축 전염병',bad:true,d:'가축 전염병이 돌아 농장들이 문을 닫았습니다.',res:{food:-3},ind:{eco:-3}},
+  {id:'blackout',e:'🔌',t:'대정전',bad:true,d:'전력망이 멈춰 공장과 병원이 마비되었습니다.',res:{coin:-3},ind:{safe:-4}},
   {id:'harvest',e:'🌾',t:'대풍년',bad:false,d:'올해 농사가 대풍입니다! 남는 식량이 생겼어요.',res:{food:5},ind:{welfare:3}},
   {id:'tech',e:'💡',t:'기술 혁신',bad:false,d:'우리 기업이 획기적인 기술을 개발했습니다!',res:{coin:5},ind:{eco:5}},
   {id:'kpop',e:'🎤',t:'문화 열풍',bad:false,d:'우리 나라 문화가 세계적 인기를 얻었습니다!',res:{coin:3},ind:{trust:4}},
@@ -802,7 +863,8 @@ const MISSIONS = [
   {k:'fund',e:'💰',t:'국제 기금 100% 채우기',ok:R=>R.r>=1},
   {k:'aid',e:'📦',t:'도움이 필요한 모든 나라에 지원 도착시키기',ok:R=>R.cover>=1},
   {k:'notake',e:'🚫',t:'‘기회 이용’ 0개국 만들기',ok:R=>R.cnt.take===0},
-  {k:'coop',e:'🤝',t:'절반 넘는 나라가 ‘국제 공동 대응’ 선택하기',ok:R=>R.cnt.coop*2>R.N}
+  {k:'coop',e:'🤝',t:'절반 넘는 나라가 ‘국제 공동 대응’ 선택하기',ok:R=>R.cnt.coop*2>R.N},
+  {k:'noraid',e:'🕊️',t:'약탈 0건 + ‘기회 이용’ 1개국 이하',ok:R=>(R.raids||[]).length===0&&R.cnt.take<=1}
 ];
 const TIER = {
   win:{e:'🌈',n:'연대 승리',d:'세계가 하나로 뭉쳤습니다! 위기를 되돌리고 모든 나라가 보상을 받습니다.'},
@@ -810,11 +872,22 @@ const TIER = {
   fall:{e:'💥',n:'연대 붕괴',d:'각자도생! 위기가 폭발해 모든 나라가 함께 무너집니다. 기회를 이용한 나라도 예외가 아닙니다.'}
 };
 const TREATY = [
-  {k:'climate',e:'🌡️',n:'탄소 감축 협약',d:'가입국은 매 위기마다 예산 2를 내어 탄소를 줄입니다.',cost:{coin:2},eff:{eco:-2,trust:2},red:{climate:14}},
+  {k:'climate',e:'🌡️',n:'탄소 감축 협약',d:'가입국은 매 위기마다 예산 4를 내어 탄소를 줄입니다.',cost:{coin:2},eff:{eco:-2,trust:2},red:{climate:14}},
   {k:'food',e:'🍞',n:'식량 공동 비축 협약',d:'가입국은 매 위기마다 식량 2를 공동 창고에 넣고, 피해국에 나눠 줍니다.',cost:{food:2},eff:{trust:2},red:{hunger:12}},
   {k:'peace',e:'🕊️',n:'평화 협정',d:'가입국은 무기 판매·무력 사용을 하지 않기로 약속합니다. 어기면 신뢰가 크게 떨어지고 자동으로 쫓겨납니다.',cost:{},eff:{trust:2,safe:1},red:{conflict:12}},
-  {k:'refugee',e:'🏕️',n:'난민 분담 협약',d:'가입국은 난민을 나누어 받습니다. 예산 1과 복지 부담이 있지만 분쟁과 기아가 줄고, 분쟁 피해국의 피해가 줄어듭니다.',cost:{coin:1},eff:{welfare:-2,trust:3},red:{conflict:6,hunger:6}}
+  {k:'refugee',e:'🏕️',n:'난민 분담 협약',d:'가입국은 난민을 나누어 받습니다. 예산 2와 복지 부담이 있지만 분쟁과 기아가 줄고, 분쟁 피해국의 피해가 줄어듭니다.',cost:{coin:1},eff:{welfare:-2,trust:3},red:{conflict:6,hunger:6}}
 ];
+CRISES.forEach(c=>{ c.dmg.coin*=2; if(c.gain.coin) c.gain.coin*=2; });
+LOCAL.forEach(L=>{ if(L.res.coin) L.res.coin*=2; });
+TREATY.forEach(T=>{ if(T.cost.coin) T.cost.coin*=2; });
+const SHOP=[
+  {k:'food',e:'🍞',n:'식량 수입',cost:3,cap:5,d:'식량 +2 (기아 대비)'},
+  {k:'pr',e:'📢',n:'국제 홍보',cost:4,cap:3,d:'신뢰 +5 (주사위 성공률에 도움)'},
+  {k:'def',e:'🏰',n:'방어 시설',cost:6,max:2,d:'약탈 성공률 -15%, 피해국일 때 피해 -10% (영구)'},
+  {k:'farm',e:'🚜',n:'스마트 농업',cost:7,max:2,d:'다음 위기부터 매번 식량 +1 (영구)'}
+];
+const RAID_MAX=2, RAID_COST=3;
+const vq=(W,TT)=>TT.k==='peace'?W.violQuit:null;
 const DOOMS = {
   climate:{e:'🔥',t:'뜨거워진 행성',p:['기온 상승은 멈추지 않았습니다. 각 나라가 “우리 산업부터”를 외치는 사이, 남극의 빙하가 무너져 내렸습니다.','해수면이 1미터를 넘게 오르자 섬나라들이 지도에서 사라졌고, 곡창 지대는 사막이 되었습니다. 수억 명의 환경 난민이 살 곳을 찾아 떠돌았습니다.','2100년, 지구는 사람이 마음 놓고 살 수 있는 곳이 거의 남지 않은 행성이 되었습니다.']},
   hunger:{e:'🥀',t:'굶주림의 시대',p:['곡물과 백신을 먼저 차지하려는 경쟁 속에서 가난한 나라의 창고는 텅 비었습니다.','배고픔은 분노가 되었고, 분노는 폭동이 되었습니다. 무너진 나라들에서 쏟아져 나온 사람들이 국경으로 몰려들자, 부유한 나라들도 더는 안전하지 않았습니다.','“남의 일”이라고 여겼던 굶주림이 결국 모두의 식탁을 덮쳤습니다.']},
@@ -827,27 +900,60 @@ const REASONS = [
 ];
 /* ---------- 2차시 데이터 ---------- */
 const CITI = {
-  climate:{e:'🏝️',n:'라니',team:'라니 팀',who:'바닷물에 학교가 잠긴 섬나라의 15살',q:'할아버지가 고기 잡던 바다가 이제 우리 집 마당까지 와요.'},
-  hunger:{e:'🍫',n:'코피',team:'코피 팀',who:'학교 대신 카카오 농장에서 일하는 13살',q:'저도 친구들처럼 학교에 다니고 싶어요.'},
-  conflict:{e:'🎒',n:'아마드',team:'아마드 팀',who:'전쟁을 피해 국경을 넘은 14살 난민',q:'총소리가 없는 곳에서 잠들고 싶어요.'},
-  drought:{e:'🪣',n:'아이샤',team:'아이샤 팀',who:'물을 길으러 하루 4시간을 걷는 12살',q:'물 길으러 가지 않아도 되는 날이 오면 공부를 할 거예요.'}
+  climate:{e:'🌊',n:'바다 팀',who:'바닷물과 태풍, 뜨거워진 지구에 삶터를 잃는 아이들'},
+  hunger:{e:'🍞',n:'빵 팀',who:'가난과 굶주림 때문에 학교 대신 일터로 가는 아이들'},
+  conflict:{e:'🕊️',n:'평화 팀',who:'전쟁과 박해를 피해 고향을 떠난 아이들'},
+  drought:{e:'💧',n:'우물 팀',who:'물이 없어 하루를 물 긷기로 보내는 아이들'}
 };
+const PERS=[
+ {c:'climate',e:'🏝️',n:'라니',who:'바닷물에 학교가 잠긴 섬나라의 15살',q:'할아버지가 고기 잡던 바다가 이제 우리 집 마당까지 와요.'},
+ {c:'hunger',e:'🍫',n:'코피',who:'학교 대신 카카오 농장에서 일하는 13살',q:'저도 친구들처럼 학교에 다니고 싶어요.'},
+ {c:'conflict',e:'🎒',n:'아마드',who:'전쟁을 피해 국경을 넘은 14살 난민',q:'총소리가 없는 곳에서 잠들고 싶어요.'},
+ {c:'drought',e:'🪣',n:'아이샤',who:'물을 길으러 하루 4시간을 걷는 12살',q:'물 길으러 가지 않아도 되는 날이 오면 공부를 할 거예요.'},
+ {c:'climate',e:'🐻‍❄️',n:'아푸티',who:'얼음이 녹아 사냥길을 잃은 북극 마을의 14살',q:'얼음 위를 걷던 길이 이제는 물이 되었어요.'},
+ {c:'hunger',e:'🌾',n:'아미나',who:'곡물값이 올라 하루 한 끼만 먹는 12살',q:'저녁을 먹은 날이 언제였는지 기억나지 않아요.'},
+ {c:'conflict',e:'⛏️',n:'장',who:'분쟁 지역 광산에서 일하는 13살',q:'제가 캔 돌이 누군가의 휴대폰에 들어간대요.'},
+ {c:'drought',e:'🐫',n:'오마르',who:'가뭄으로 가축을 모두 잃은 유목민의 14살',q:'우리 가족의 재산은 모두 목이 말라 쓰러졌어요.'},
+ {c:'climate',e:'🌀',n:'레이',who:'슈퍼 태풍에 집을 잃은 해안 도시의 13살',q:'태풍이 지나간 뒤 우리 집은 사진 속에만 남았어요.'},
+ {c:'hunger',e:'🧵',n:'리나',who:'옷 공장에서 하루 12시간 일하는 15살',q:'제가 만든 옷을 입은 친구들은 어떤 학교에 다닐까요?'},
+ {c:'conflict',e:'🏚️',n:'마리아',who:'폭격으로 학교가 무너진 12살',q:'교실이 있던 자리에 이제 잡초만 자라요.'},
+ {c:'drought',e:'🌵',n:'니마',who:'사막이 된 농토를 떠나야 하는 13살',q:'할머니의 밭은 이제 모래밭이에요.'},
+ {c:'climate',e:'🔥',n:'소피아',who:'산불로 마을과 숲을 잃은 16살',q:'하늘이 주황색이던 그날을 잊을 수 없어요.'},
+ {c:'hunger',e:'💊',n:'파블로',who:'약값이 없어 아픈 동생을 돌보는 14살',q:'약 한 통이면 동생이 나을 수 있대요.'},
+ {c:'conflict',e:'🚤',n:'유수프',who:'작은 배로 바다를 건너온 15살',q:'같이 배에 탔던 친구는 도착하지 못했어요.'},
+ {c:'drought',e:'🚱',n:'수닐',who:'오염된 강물을 마시고 자주 아픈 12살',q:'깨끗한 물 한 잔이 제 소원이에요.'},
+ {c:'climate',e:'🏔️',n:'텐징',who:'빙하 호수가 넘쳐 마을이 쓸려 간 산골의 15살',q:'눈이 녹아 생긴 호수가 우리 마을을 삼켰어요.'},
+ {c:'hunger',e:'🐟',n:'응옥',who:'물고기가 사라져 빚만 남은 어촌의 13살',q:'아빠의 그물은 매일 텅 빈 채로 돌아와요.'},
+ {c:'conflict',e:'👥',n:'라힘',who:'믿는 종교 때문에 쫓겨난 소수 민족의 14살',q:'우리가 다르다는 이유만으로 집을 떠나야 했어요.'},
+ {c:'drought',e:'🌳',n:'와리',who:'숲이 사라져 비가 오지 않는 마을의 15살',q:'나무가 사라지자 비도 함께 사라졌어요.'}
+];
+function persOf(as){ if(as&&as.p!=null&&PERS[as.p]) return PERS[as.p]; const c=(as&&as.c)||'hunger'; return PERS.find(p=>p.c===c)||PERS[0]; }
+const TRIALS={
+  climate:[['🌊','바닷물이 또 집 안까지 들어왔다',-15],['🌀','태풍에 학교 지붕이 날아갔다',-20],['😷','산불 연기 때문에 숨쉬기가 힘들다',-12]],
+  hunger:[['🍚','쌀값이 또 올라 하루 한 끼만 먹게 되었다',-15],['💊','아픈 동생의 약값을 구하지 못했다',-20],['🏭','공장 일이 늘어 이번 주에도 학교에 못 갔다',-12]],
+  conflict:[['💥','밤새 폭격 소리에 한숨도 못 잤다',-15],['🚧','국경이 닫혀 가족과 헤어졌다',-20],['🗯️','새 동네에서 “난민은 나가라”는 말을 들었다',-12]],
+  drought:[['🪣','우물이 말라 더 먼 곳까지 걸어야 한다',-15],['🐐','마지막 염소가 목이 말라 쓰러졌다',-20],['🤒','흙탕물을 마시고 배탈이 났다',-12]]
+};
+const GOODT=[['🎁','국제 구호 단체의 구호품이 도착했다',12],['📚','난민 캠프에 임시 학교가 문을 열었다',10]];
+function trialOf(i,id,cat){ const h=hashStr(SRC+'|T|'+i+'|'+id); if(h%100<20) return GOODT[(h>>>8)%GOODT.length]; const L=TRIALS[cat]||TRIALS.hunger; return L[(h>>>8)%L.length]; }
+const HSTAT=h=>h>=70?{e:'🌟',n:'희망',c:'var(--ok)'}:h>=40?{e:'🙂',n:'버팀',c:'var(--blue)'}:h>=20?{e:'⚠️',n:'위험',c:'var(--warn)'}:{e:'🆘',n:'절망',c:'var(--bad)'};
+const EPI={good:'{n}에게 희망이 생겼습니다. 친구들의 응원과 구조 키트, 우리 반의 실천이 모여 {n}은(는) 다시 꿈을 꾸게 되었습니다.',mid:'{n}은(는) 겨우 버티고 있습니다. 조금만 더 관심이 모였다면 어땠을까요?',bad:'{n}은(는) 절망 속에 남겨졌습니다. 아무도 오지 않았습니다. 무관심이 만든 결말입니다.'};
 const NEEDS = ['식량','깨끗한 물','안전한 집','학교','병원·약','존중과 관심'];
 const DAY = [
   {id:'d1',time:'🌅 아침 7:50',t:'매점 앞',to:'hunger',s:'출출해서 초콜릿을 사려고 합니다. 일반 초콜릿은 1,000원, 공정 무역 초콜릿은 1,800원입니다.',
-   opts:[{t:'일반 초콜릿을 산다',p:0,r:'카카오 값은 그대로 낮게 유지되고, 코피는 오늘도 농장에 나갑니다.'},
-         {t:'800원을 더 내고 공정 무역 초콜릿을 산다',p:2,tag:'실천',r:'카카오 농부에게 정당한 값이 돌아갑니다. 이런 선택이 모이면 코피가 학교에 갈 수 있습니다.'},
+   opts:[{t:'일반 초콜릿을 산다',p:0,r:'카카오 값은 그대로 낮게 유지되고, 카카오 농장 아이들은 오늘도 농장에 나갑니다.'},
+         {t:'800원을 더 내고 공정 무역 초콜릿을 산다',p:2,tag:'실천',r:'카카오 농부에게 정당한 값이 돌아갑니다. 이런 선택이 모이면 농장 아이들이 학교에 갈 수 있습니다.'},
          {t:'오늘은 참고, 공정 무역이 무엇인지 찾아본다',p:1,tag:'관심',r:'관심은 실천의 첫걸음입니다. 다음 선택이 달라질 수 있어요.'}]},
   {id:'d2',time:'🚌 아침 8:10',t:'등굣길',to:'climate',s:'비가 조금 옵니다. 부모님이 차로 데려다주신다고 합니다. 학교까지는 버스로 15분입니다.',
-   opts:[{t:'편하게 차를 타고 간다',p:0,r:'한 번의 편리함이 쌓여 바다가 뜨거워집니다. 라니의 섬은 오늘도 조금 잠겼습니다.'},
+   opts:[{t:'편하게 차를 타고 간다',p:0,r:'한 번의 편리함이 쌓여 바다가 뜨거워집니다. 섬나라 아이들의 마을은 오늘도 조금 잠겼습니다.'},
          {t:'우산을 쓰고 버스를 탄다',p:2,tag:'실천',r:'탄소를 줄이는 작은 선택입니다. 반 전체가 1년 동안 하면 나무 수백 그루 몫이 됩니다.'},
          {t:'차를 타되, 가는 길에 친구도 태워 함께 간다',p:1,tag:'연대',r:'두 대가 갈 길을 한 대로! 함께하는 방법을 찾았습니다.'}]},
   {id:'d3',time:'🍱 점심 12:30',t:'급식실',to:'drought',s:'오늘 반찬이 별로입니다. 일단 많이 받아 두었다가 남길까요?',
-   opts:[{t:'받을 만큼 받고 남으면 버린다',p:0,r:'버려진 음식을 기르는 데 쓴 물과 땅도 함께 버려집니다. 아이샤는 오늘도 물을 길으러 4시간을 걷습니다.'},
+   opts:[{t:'받을 만큼 받고 남으면 버린다',p:0,r:'버려진 음식을 기르는 데 쓴 물과 땅도 함께 버려집니다. 물이 없는 마을 아이들은 오늘도 물을 길으러 4시간을 걷습니다.'},
          {t:'먹을 만큼만 받는다',p:2,tag:'실천',r:'음식물 쓰레기가 줄면 물과 에너지 낭비도 줄어듭니다.'},
          {t:'반 친구들에게 일주일 잔반 0 챌린지를 제안한다',p:3,tag:'연대',r:'혼자보다 함께하면 변화가 커집니다. 세계 시민은 다른 사람의 참여도 이끕니다.'}]},
   {id:'d4',time:'📱 쉬는 시간',t:'반 단톡방',to:'conflict',s:'“난민은 다 위험한 사람들이니까 받으면 안 된다”는 게시물이 돌고 있습니다. 좋아요가 계속 늘어납니다.',
-   opts:[{t:'웃겨서 좋아요를 누른다',p:-1,r:'편견은 퍼질수록 단단해집니다. 아마드 같은 아이들 앞의 국경이 더 높아집니다.'},
+   opts:[{t:'웃겨서 좋아요를 누른다',p:-1,r:'편견은 퍼질수록 단단해집니다. 난민 아이들 앞의 국경이 더 높아집니다.'},
          {t:'불편하지만 그냥 넘긴다',p:0,r:'침묵도 하나의 선택입니다. 혐오는 아무도 말리지 않을 때 커집니다.'},
          {t:'난민이 왜 생기는지 자료를 찾아 댓글로 공유한다',p:2,tag:'관심',r:'사실을 나누는 것은 편견을 줄이는 세계 시민의 행동입니다.'}]},
   {id:'d5',time:'🎮 방과 후',t:'용돈 5,000원',to:'drought',s:'갖고 싶던 게임 아이템이 5,000원입니다. 마침 “5,000원이면 아이 한 명이 한 달 동안 깨끗한 물을 마실 수 있다”는 국제 구호 단체 캠페인을 봤습니다.',
@@ -873,10 +979,10 @@ const SORTC = [
   {t:'유엔 평화 유지군이 분쟁 지역에서 활동한다',a:'world'},{t:'여러 나라가 함께 기후 협약을 맺는다',a:'world'},{t:'비정부 기구(NGO)가 국경을 넘어 구호 활동을 한다',a:'world'}
 ];
 const FATE = {
-  climate:{bad:'라니의 섬은 결국 사람이 살 수 없게 되었습니다. 라니는 “기후 난민”이라는 새 이름으로 낯선 나라에 도착했습니다.',mid:'몇몇의 노력은 있었지만 바닷물은 계속 차오릅니다. 라니의 가족은 섬을 떠날지 고민하고 있습니다.',good:'여러분 반의 선택과 캠페인이 모여 섬나라를 돕는 기후 기금이 생겼습니다. 라니의 학교는 높은 언덕 위에 다시 지어졌습니다.'},
-  hunger:{bad:'카카오 값은 그대로였고, 이제 코피의 동생까지 농장에 나가게 되었습니다.',mid:'공정 무역 초콜릿을 찾는 사람이 조금 늘었지만, 코피는 아직 학교와 농장 사이를 오갑니다.',good:'공정 무역 초콜릿을 찾는 사람이 크게 늘어 농부들이 정당한 값을 받게 되었습니다. 코피의 마을에 학교가 다시 열렸습니다.'},
-  conflict:{bad:'혐오의 목소리가 커지자 국경은 더 굳게 닫혔습니다. 아마드는 아직 캠프의 천막에서 잠듭니다.',mid:'아마드를 반기는 사람도, 꺼리는 사람도 있습니다. 아마드는 받아 줄 나라를 기다리고 있습니다.',good:'편견에 맞선 목소리와 캠페인이 모여 난민을 받아들이자는 여론이 커졌습니다. 아마드는 새 학교에서 첫 친구를 사귀었습니다.'},
-  drought:{bad:'버려진 음식과 함께 물도 버려졌습니다. 아이샤는 오늘도 물동이를 이고 먼 길을 걷습니다.',mid:'모인 기부금으로 이웃 마을에 우물이 생겼지만, 아이샤의 마을은 아직 차례를 기다립니다.',good:'여러분 반의 모금과 캠페인 덕분에 아이샤의 마을에 우물이 생겼습니다. 아이샤는 이제 그 시간에 학교에 갑니다.'}
+  climate:{bad:'섬과 해안 마을들은 결국 사람이 살 수 없게 되었습니다. 바다 팀 친구들은 “기후 난민”이라는 새 이름으로 낯선 나라에 도착했습니다.',mid:'몇몇의 노력은 있었지만 바닷물은 계속 차오릅니다. 바다 팀 친구들의 가족은 고향을 떠날지 고민하고 있습니다.',good:'여러분 반의 선택과 캠페인이 모여 기후 기금이 생겼습니다. 바다 팀 친구들의 학교는 높은 언덕 위에 다시 지어졌습니다.'},
+  hunger:{bad:'값싼 물건 뒤의 가난은 그대로였고, 빵 팀 친구들의 동생들까지 일터로 나가게 되었습니다.',mid:'공정 무역 제품을 찾는 사람이 조금 늘었지만, 빵 팀 친구들은 아직 학교와 일터 사이를 오갑니다.',good:'공정 무역을 찾는 사람이 크게 늘어 농부와 노동자들이 정당한 값을 받게 되었습니다. 빵 팀 친구들의 마을에 학교가 다시 열렸습니다.'},
+  conflict:{bad:'혐오의 목소리가 커지자 국경은 더 굳게 닫혔습니다. 평화 팀 친구들은 아직 캠프의 천막에서 잠듭니다.',mid:'반기는 사람도, 꺼리는 사람도 있습니다. 평화 팀 친구들은 받아 줄 나라를 기다리고 있습니다.',good:'편견에 맞선 목소리와 캠페인이 모여 난민을 받아들이자는 여론이 커졌습니다. 평화 팀 친구들은 새 학교에서 첫 친구를 사귀었습니다.'},
+  drought:{bad:'버려진 음식과 함께 물도 버려졌습니다. 우물 팀 친구들은 오늘도 물동이를 이고 먼 길을 걷습니다.',mid:'모인 기부금으로 이웃 마을에 우물이 생겼지만, 우물 팀 친구들의 마을은 아직 차례를 기다립니다.',good:'여러분 반의 모금과 캠페인 덕분에 마을에 우물이 생겼습니다. 우물 팀 친구들은 이제 그 시간에 학교에 갑니다.'}
 };
 const CHECK = [
   '지구 공동체의 일원으로서 나의 위치를 알고 있다.',
@@ -928,14 +1034,16 @@ const metOf = k => MET.find(m=>m.k===k);
 const doomMin = M => Math.max(0, Math.ceil((100-Math.max(...MET.map(m=>M[m.k])))/5));
 function addInd(v,eff,mul=1){ if(!eff) return; for(const k in eff) v[k]=(+v[k]||0)+Math.round(eff[k]*mul); }
 function addRes(s,g,mul=1){ if(!g) return; if(g.coin) s.coin+=Math.round(g.coin*mul); if(g.food) s.food+=Math.round(g.food*mul); }
-function startRes(p){ const b=p.base; return {coin:8+Math.round((+b.eco||40)/10), food:6+Math.round((+b.welfare||40)/20)+(p.terr==='plain'?2:0)}; }
-function isSigner(t,id,k,violOut){
-  if(!t || !t.signs || !t.signs[id]) return false;
-  const sg=t.signs[id]; if((+sg.r||0)>k) return false;
-  const q=t.quit && t.quit[id]; if(q && (+q.r||0)<=k && (+q.r||0)>=(+sg.r||0)) return false;
-  if(violOut && violOut[id]!=null && violOut[id]<=k) return false;
-  return true;
+function startRes(p){ const b=p.base; return {coin:16+Math.round((+b.eco||40)/5), food:6+Math.round((+b.welfare||40)/20)+(p.terr==='plain'?2:0)}; }
+/* 협약 가입 여부: log/{나라}/r{위기번호} = {in:true|false} — 가입·탈퇴는 다음 위기부터 적용 */
+function memAt(t,id,k){
+  if(!t) return false;
+  const lg=t.log&&t.log[id];
+  if(lg){ let best=-1,inn=false; for(const key in lg){ const e=lg[key]; const rr=+String(key).replace(/^r/,''); if(e&&rr<=k&&rr>best){ best=rr; inn=!!e.in; } } if(best>=0) return inn; }
+  if(!t.signs||!t.signs[id]) return false; const sg=t.signs[id]; if((+sg.r||0)>k) return false;
+  const q=t.quit&&t.quit[id]; if(q && (+q.r||0)<=k && (+q.r||0)>=(+sg.r||0)) return false; return true;
 }
+function isSigner(t,id,k,violOut){ if(!memAt(t,id,k)) return false; if(violOut && violOut[id]!=null && violOut[id]<=k) return false; return true; }
 function pickVictims(c,P,ids,S,k){
   const N=ids.length; if(!N) return [];
   const want=Math.max(1,Math.ceil(N*0.3)), cap=Math.max(1,Math.ceil(N*0.5));
@@ -946,35 +1054,44 @@ function pickVictims(c,P,ids,S,k){
   while(set.length<want && rest.length) set.push(rest.shift());
   return set;
 }
-function localOf(k,id){ const h=hashStr(SRC+'|L|'+k+'|'+id); if(h%100>=40) return null; return LOCAL[(h>>>8)%LOCAL.length]; }
-function rollOf(k,id){ return hashStr(SRC+'|D|'+k+'|'+id)%100+1; }
-function solCalc(N,cnt,r,cover,trMax){ if(!N) return 0; return clamp(0.35*cnt.coop/N+0.30*r+0.25*cover+0.10*trMax-0.30*cnt.take/N,0,1); }
+function localOf(k,id){ const h=hashStr(SRC+'|L|'+k+'|'+id); if(h%100>=45) return null; return LOCAL[(h>>>8)%LOCAL.length]; }
+function rollOf(k,id,tag='D'){ return hashStr(SRC+'|'+tag+'|'+k+'|'+id)%100+1; }
+function solCalc(N,cnt,r,cover,trMax,raids=0){ if(!N) return 0; return clamp(0.35*cnt.coop/N+0.30*r+0.25*cover+0.10*trMax-0.30*cnt.take/N-0.5*raids/N,0,1); }
 const tierOf = sol => sol>=0.7?'win':sol>=0.4?'hold':'fall';
+function raidEligible(P,ids){ const arr=[...ids].sort((a,b)=>((+P[b].base.safe||0)-(+P[a].base.safe||0))||(hashStr(a)-hashStr(b))); return new Set(arr.slice(0,Math.max(1,Math.ceil(ids.length/4)))); }
+function raidChance(att,def,defSelf){ return clamp(Math.round(55+((+att.v.safe||0)-(+def.v.safe||0))/2-(defSelf?20:0)-15*(def.def||0)),15,85); }
 let _cache=null, _cacheKey='';
 function calc(){
-  const key=JSON.stringify([SRC,DATA.players,DATA.meta&&DATA.meta.cr,DATA.meta&&DATA.meta.rev,DATA.act,DATA.gift,DATA.treaty,DATA.req]);
+  const meta=DATA.meta||{};
+  const key=JSON.stringify([SRC,DATA.players,meta.cr,meta.rev,meta.noRaid,DATA.act,DATA.gift,DATA.treaty,DATA.req]);
   if(_cache && key===_cacheKey) return _cache;
   const P=DATA.players||{}; const ids=Object.keys(P).filter(id=>P[id]&&P[id].base).sort();
-  const N=ids.length; const meta=DATA.meta||{}; const cr=vals(meta.cr).filter(x=>crisisOf(x));
+  const N=ids.length; const cr=vals(meta.cr).filter(x=>crisisOf(x));
   const rev=Math.min(+meta.rev||0, cr.length);
-  const S={}; ids.forEach(id=>{ const r=startRes(P[id]); S[id]={v:Object.assign({},P[id].base),coin:r.coin,food:r.food,gave:0,got:0,giftsN:0,rescue:0,vict:[],fam:0,take:0,coop:0,self:0,none:0,fund:0,viol:0,great:0,fail:0}; });
+  const S={}; ids.forEach(id=>{ const r=startRes(P[id]); S[id]={v:Object.assign({},P[id].base),coin:r.coin,food:r.food,gave:0,got:0,giftsN:0,rescue:0,vict:[],fam:0,take:0,coop:0,self:0,none:0,fund:0,viol:0,great:0,fail:0,def:0,farm:0,raids:0,raidOK:0,raided:0,harm:0,lost:0,quitN:0}; });
   const M={climate:M0,hunger:M0,conflict:M0};
   const T=DATA.treaty||{}; const violQuit={};
-  const G=Math.max(4,N*2);
-  const rounds=[]; let doom=null, openR=null, streak=0;
+  const G=Math.max(8,N*4);
+  const RE=raidEligible(P,ids); const raidOn=!meta.noRaid;
+  const rounds=[]; let doom=null, openR=null, streak=0; let carry={climate:0,hunger:0,conflict:0};
   for(let k=0;k<cr.length;k++){
     const c=crisisOf(cr[k]);
-    if(k>0) ids.forEach(id=>{ const s=S[id]; s.coin+=3+Math.floor(clamp(s.v.eco)/20); s.food+=2+(P[id].terr==='plain'?1:0); });
+    const lost={}; ids.forEach(id=>lost[id]={coin:0,food:0});
+    const chg=(id,coin,food)=>{ const s=S[id]; if(coin){ s.coin+=coin; if(coin<0) lost[id].coin-=coin; } if(food){ s.food+=food; if(food<0) lost[id].food-=food; } };
+    if(k>0) ids.forEach(id=>{ const s=S[id]; s.coin+=6+Math.floor(clamp(s.v.eco)/10); s.food+=2+(P[id].terr==='plain'?1:0)+(s.farm||0); });
     const loc={}; const locMet={climate:0,hunger:0,conflict:0};
-    ids.forEach(id=>{ const L=localOf(k,id); if(!L) return; loc[id]=L; addRes(S[id],L.res); addInd(S[id].v,L.ind); if(L.met) for(const m in L.met) locMet[m]+=L.met[m]; });
+    ids.forEach(id=>{ const L=localOf(k,id); if(!L) return; loc[id]=L; chg(id,L.res.coin||0,L.res.food||0); addInd(S[id].v,L.ind); if(L.met) for(const m in L.met) locMet[m]+=L.met[m]; });
     const start={}; ids.forEach(id=>start[id]={coin:S[id].coin,food:S[id].food,v:Object.assign({},S[id].v)});
     const vict=pickVictims(c,P,ids,S,k);
     const mission=MISSIONS[k%MISSIONS.length];
-    const R={k,c,start,vict,loc,mission,Mb:Object.assign({},M),G,N};
+    const R={k,c,start,vict,loc,mission,Mb:Object.assign({},M),G,N,raidOn,lost,raids:[],quitters:[]};
     if(k>=rev || doom){ R.open=true; openR=R; rounds.push(R); break; }
     const A=(DATA.act&&DATA.act[k])||{};
+    const raidValid=id=>{ const a=A[id]; return !!(raidOn&&a&&a.raid&&RE.has(id)&&S[id].raids<RAID_MAX&&S[a.raid]&&a.raid!==id); };
+    const quitters=[];
+    if(k>0) TREATY.forEach(TT=>{ const t=T[TT.k]; if(!t) return; ids.forEach(id=>{ if(memAt(t,id,k-1)&&!memAt(t,id,k)){ chg(id,-5,0); S[id].v.trust-=6; S[id].quitN++; quitters.push({id,TT}); } }); });
     const viol=[];
-    if(c.peaceBan && T.peace) ids.forEach(id=>{ const a=A[id]; if(a&&a.opt==='take'&&isSigner(T.peace,id,k,violQuit)){ viol.push(id); violQuit[id]=k; S[id].v.trust-=10; S[id].viol++; } });
+    if(T.peace) ids.forEach(id=>{ const a=A[id]; if(!a) return; const bad=(c.peaceBan&&a.opt==='take')||raidValid(id); if(bad&&isSigner(T.peace,id,k,violQuit)){ viol.push(id); violQuit[id]=k; S[id].v.trust-=10; S[id].viol++; S[id].harm+=5; } });
     let pool=0; const tr=[];
     TREATY.forEach(TT=>{ const t=T[TT.k]; if(!t) return; const sg=ids.filter(id=>isSigner(t,id,k,TT.k==='peace'?violQuit:null)); if(!sg.length){ tr.push({TT,sg,ratio:0,red:{}}); return; }
       sg.forEach(id=>{ const s=S[id]; for(const r in TT.cost){ const x=Math.max(0,Math.min(TT.cost[r],s[r])); s[r]-=x; if(TT.k==='food') pool+=x; } addInd(s.v,TT.eff); });
@@ -985,87 +1102,120 @@ function calc(){
     let fund=0, msum=0; const cnt={self:0,coop:0,take:0,none:0}; const act={};
     ids.forEach(id=>{ const s=S[id]; const a=A[id]||{}; const o=OPTK.includes(a.opt)?a.opt:'none'; const om=OPTMETA[o];
       cnt[o]++; s[o]++; const cost=Math.max(0,Math.min(om.cost,s.coin)); s.coin-=cost;
-      if(o==='take') addRes(s,c.gain); addInd(s.v,om.eff); if(o==='coop') fund+=cost;
+      if(o==='take'){ addRes(s,c.gain); s.harm+=om.m; }
+      const buys={}; const b=a.buy||{};
+      SHOP.forEach(it=>{ let n=Math.max(0,Math.floor(+b[it.k]||0)); n=Math.min(n,it.cap||5); if(it.max) n=Math.min(n,it.max-(s[it.k]||0)); while(n>0&&s.coin>=it.cost){ s.coin-=it.cost; n--; buys[it.k]=(buys[it.k]||0)+1; if(it.k==='food') s.food+=2; else if(it.k==='pr') s.v.trust+=5; else s[it.k]=(s[it.k]||0)+1; } });
+      addInd(s.v,om.eff); if(o==='coop') fund+=cost;
       const f=Math.max(0,Math.min(Math.floor(+a.fund||0),s.coin)); s.coin-=f; fund+=f; s.fund+=f+(o==='coop'?cost:0);
-      msum+=om.m; act[id]={o,f,cost,reason:a.reason||''}; });
+      msum+=om.m; act[id]={o,f,cost,reason:a.reason||'',buys,raid:null}; });
+    const raids=[];
+    ids.forEach(id=>{ if(!raidValid(id)) return; const a=A[id]; const s=S[id]; if(s.coin<RAID_COST) return; s.coin-=RAID_COST; s.raids++;
+      const tg=S[a.raid]; const p=raidChance(s,tg,act[a.raid]&&act[a.raid].o==='self'); const roll=rollOf(k,id,'R'); const ok=roll<=p; let coin=0,food=0;
+      if(ok){ coin=Math.min(10,Math.floor(Math.max(0,tg.coin)*0.35)); food=Math.min(3,Math.max(0,tg.food)); chg(a.raid,-coin,-food); s.coin+=coin; s.food+=food; s.raidOK++; tg.raided++; s.v.trust-=12; tg.v.trust-=3; tg.v.safe-=6; s.harm+=6+coin; }
+      else { chg(id,-3,0); s.v.trust-=8; s.harm+=3; }
+      act[id].raid=a.raid; raids.push({from:id,to:a.raid,ok,coin,food,p,roll}); });
     const GF=(DATA.gift&&DATA.gift[k])||{}; const gl=[]; const gotAid={};
     const RQ=(DATA.req&&DATA.req[k])||{};
+    const raidedSet=new Set(raids.filter(x=>x.ok).map(x=>x.to));
+    const needy=ids.filter(id=>vict.includes(id)||(loc[id]&&loc[id].bad)||RQ[id]||raidedSet.has(id));
     Object.keys(GF).sort().forEach(from=>{ if(!S[from]) return; const g=GF[from]||{}; Object.keys(g).sort().forEach(to=>{ if(!S[to]||to===from) return; const x=g[to]||{};
       const coin=Math.max(0,Math.min(Math.floor(+x.coin||0),S[from].coin)); const food=Math.max(0,Math.min(Math.floor(+x.food||0),S[from].food)); if(!coin&&!food) return;
       S[from].coin-=coin; S[from].food-=food; S[to].coin+=coin; S[to].food+=food; S[from].gave+=coin+food; S[from].giftsN++; S[to].got+=coin+food; gotAid[to]=true;
-      S[from].v.trust+=2; S[to].v.trust+=1; if(RQ[to]||vict.includes(to)) S[from].rescue++; gl.push({from,to,coin,food,msg:x.msg||''}); }); });
+      S[from].v.trust+=2; S[to].v.trust+=1; if(needy.includes(to)) S[from].rescue++; gl.push({from,to,coin,food,msg:x.msg||''}); }); });
     const r=Math.min(1,fund/G);
-    const needy=ids.filter(id=>vict.includes(id)||(loc[id]&&loc[id].bad)||RQ[id]);
     const cover=needy.length?needy.filter(id=>gotAid[id]).length/needy.length:1;
-    const sol=solCalc(N,cnt,r,cover,trMax); const tier=tierOf(sol);
+    const sol=solCalc(N,cnt,r,cover,trMax,raids.length); const tier=tierOf(sol);
     streak = tier==='win' ? streak+1 : 0;
     const dice={};
     ids.forEach(id=>{ const o=act[id].o; if(o==='none'){ dice[id]={roll:0,p:0,g:0,out:'none'}; return; }
       const tv=S[id].v.trust; let p=OPTMETA[o].p+(o==='coop'?Math.round(35*sol):0)+(tv>=65?10:tv<35?-10:0); p=clamp(p,10,95);
       const g=o==='coop'?10+Math.round(20*sol):8; const roll=rollOf(k,id); const out=roll<=g?'great':roll<=p?'ok':'fail';
       dice[id]={roll,p,g,out}; const s=S[id];
-      if(out==='great'){ s.great++; if(o==='coop'){ s.coin+=2; s.v.trust+=4; } else if(o==='self') s.v.safe+=4; else s.coin+=3; }
-      if(out==='fail'){ s.fail++; if(o==='coop') s.v.trust-=2; else if(o==='self') s.coin-=2; else { s.v.trust-=8; msum+=4; } } });
-    const dM={climate:0,hunger:0,conflict:0};
+      if(out==='great'){ s.great++; if(o==='coop'){ s.coin+=4; s.v.trust+=4; } else if(o==='self') s.v.safe+=4; else s.coin+=6; }
+      if(out==='fail'){ s.fail++; if(o==='coop') s.v.trust-=2; else if(o==='self') chg(id,-4,0); else { s.v.trust-=8; msum+=4; s.harm+=4; } } });
+    const dM={climate:0,hunger:0,conflict:0}; for(const m in carry) dM[m]+=carry[m]; carry={climate:0,hunger:0,conflict:0};
     const am=Math.round(N?msum/N:0);
     if(tier==='win'){ dM[c.meter]+=-15-(streak>=2?5:0)+Math.min(0,am); for(const m in dM) if(m!==c.meter) dM[m]-=4; }
     else if(tier==='hold'){ dM[c.meter]+=Math.round(RISE*(1-r)*0.7)+am; for(const m in c.spill) dM[m]+=Math.round(c.spill[m]*0.5); }
-    else { dM[c.meter]+=Math.round(RISE*1.3)+am; for(const m in c.spill) dM[m]+=Math.round(c.spill[m]*1.5); }
+    else { dM[c.meter]+=Math.round(RISE*1.3)+am; for(const m in c.spill) dM[m]+=Math.round(c.spill[m]*1.5); carry[c.meter]=5; }
     tr.forEach(x=>{ for(const m in x.red) dM[m]-=x.red[m]; });
     for(const m in locMet) dM[m]+=locMet[m];
+    dM.conflict+=raids.reduce((x,q)=>x+(q.ok?6:3),0);
+    const chain=1+Math.max(0,R.Mb[c.meter]-60)/80;
     const dmg={};
-    vict.forEach(id=>{ const s=S[id]; const o=act[id].o; let sh=OPTMETA[o].shield*OUT[dice[id].out].m*(1-0.5*sol); if(refugeeOn && c.meter==='conflict') sh*=0.6;
+    vict.forEach(id=>{ const s=S[id]; const o=act[id].o; let sh=OPTMETA[o].shield*OUT[dice[id].out].m*(1-0.5*sol)*chain*(1-0.1*(s.def||0)); if(refugeeOn && c.meter==='conflict') sh*=0.6;
       const d={coin:Math.round(c.dmg.coin*sh),food:Math.round(c.dmg.food*sh),ind:{}}; for(const kk in c.dmg.ind) d.ind[kk]=Math.round(c.dmg.ind[kk]*sh);
-      s.coin+=d.coin; s.food+=d.food; addInd(s.v,d.ind); s.vict.push(k); d.sh=sh; dmg[id]=d; });
+      chg(id,d.coin,d.food); addInd(s.v,d.ind); s.vict.push(k); d.sh=sh; dmg[id]=d; });
     const shock = tier==='hold' ? 2 : 0; if(shock) ids.forEach(id=>{ if(!vict.includes(id)) S[id].v.eco-=shock; });
     const reward = tier==='win' ? (streak>=2?2:1) : 0;
-    if(reward) ids.forEach(id=>{ const s=S[id]; s.coin+=3*reward; s.food+=2*reward; s.v.trust+=3; });
-    if(tier==='fall') ids.forEach(id=>{ const s=S[id]; s.coin-=3; s.food-=2; s.v.eco-=5; s.v.trust-=3; });
+    if(reward) ids.forEach(id=>{ const s=S[id]; s.coin+=6*reward; s.food+=2*reward; s.v.trust+=3; });
+    if(tier==='fall') ids.forEach(id=>{ chg(id,-6,-2); S[id].v.eco-=5; S[id].v.trust-=3; });
     let share=0; if(pool>0 && vict.length){ share=Math.floor(pool/vict.length); vict.forEach(id=>S[id].food+=share); }
-    const missionOK=mission.ok({r,cover,cnt,N});
-    if(missionOK){ ids.forEach(id=>S[id].coin+=2); for(const m in dM) dM[m]-=5; }
+    const missionOK=mission.ok({r,cover,cnt,N,raids});
+    if(missionOK){ ids.forEach(id=>S[id].coin+=4); for(const m in dM) dM[m]-=5; }
     const famine={}; let famN=0;
     ids.forEach(id=>{ const s=S[id]; if(s.food<0){ const d=-s.food; s.v.welfare-=4*d; s.v.trust-=3*d; s.food=0; s.fam++; famN++; famine[id]=d; }
       if(s.coin<0){ s.v.eco-=3*(-s.coin); s.coin=0; } for(const kk in s.v) s.v[kk]=clamp(Math.round(s.v[kk])); });
     dM.hunger+=Math.min(12,famN*3);
     for(const m in M) M[m]=clamp(M[m]+dM[m]);
+    ids.forEach(id=>S[id].lost+=lost[id].coin+lost[id].food);
     const after={}; ids.forEach(id=>after[id]={coin:S[id].coin,food:S[id].food,v:Object.assign({},S[id].v)});
-    Object.assign(R,{fund,r,cnt,act,gl,tr,viol,dmg,famine,famN,dM,shock,share,pool,after,needy,cover,sol,tier,streak,dice,missionOK,reward,Ma:Object.assign({},M)});
+    Object.assign(R,{fund,r,cnt,act,gl,tr,viol,dmg,famine,famN,dM,shock,share,pool,after,needy,cover,sol,tier,streak,dice,missionOK,reward,raids,quitters,chain,Ma:Object.assign({},M)});
     rounds.push(R);
     const mx=MET.reduce((a,m)=>M[m.k]>M[a]?m.k:a,'climate');
     if(M[mx]>=100){ doom={k,m:mx}; break; }
   }
   const done=rounds.filter(R=>!R.open);
-  const out={P,ids,N,S,M,rounds,done,rev,cr,doom,openR,G,T,violQuit};
+  const out={P,ids,N,S,M,rounds,done,rev,cr,doom,openR,G,T,violQuit,RE};
   _cache=out; _cacheKey=key; return out;
 }
 function liveSol(W){
-  const R=W.openR; if(!R) return null; const A=(DATA.act&&DATA.act[R.k])||{}; const cnt={self:0,coop:0,take:0,none:0}; let fund=0;
-  W.ids.forEach(id=>{ const a=A[id]; if(!a){ cnt.none++; return; } cnt[a.opt]=(cnt[a.opt]||0)+1; fund+=(a.opt==='coop'?2:0)+Math.floor(+a.fund||0); });
+  const R=W.openR; if(!R) return null; const A=(DATA.act&&DATA.act[R.k])||{}; const cnt={self:0,coop:0,take:0,none:0}; let fund=0, raids=0;
+  W.ids.forEach(id=>{ const a=A[id]; if(!a){ cnt.none++; return; } cnt[a.opt]=(cnt[a.opt]||0)+1; fund+=(a.opt==='coop'?OPTMETA.coop.cost:0)+Math.floor(+a.fund||0); if(R.raidOn&&a.raid&&W.RE.has(id)&&W.S[id].raids<RAID_MAX) raids++; });
   const GF=(DATA.gift&&DATA.gift[R.k])||{}; const got={}; Object.values(GF).forEach(g=>Object.entries(g||{}).forEach(([to,x])=>{ if(x&&((+x.coin||0)+(+x.food||0)>0)) got[to]=true; }));
   const RQ=(DATA.req&&DATA.req[R.k])||{};
   const needy=W.ids.filter(id=>R.vict.includes(id)||(R.loc[id]&&R.loc[id].bad)||RQ[id]);
   const cover=needy.length?needy.filter(id=>got[id]).length/needy.length:1;
-  const trMax=Math.max(0,...TREATY.map(TT=>{ const t=W.T[TT.k]; if(!t) return 0; return W.N?W.ids.filter(id=>isSigner(t,id,R.k,TT.k==='peace'?W.violQuit:null)).length/W.N:0; }));
+  const trMax=Math.max(0,...TREATY.map(TT=>{ const t=W.T[TT.k]; if(!t) return 0; return W.N?W.ids.filter(id=>isSigner(t,id,R.k,vq(W,TT))).length/W.N:0; }));
   const r=Math.min(1,fund/W.G);
-  return {sol:solCalc(W.N,cnt,r,cover,trMax),fund,r,cover,cnt,needy,got,sub:W.N-cnt.none};
+  return {sol:solCalc(W.N,cnt,r,cover,trMax,raids),fund,r,cover,cnt,needy,got,sub:W.N-cnt.none,raids};
 }
+const rawNm=(W,id)=>W.P[id]?W.P[id].name:'?';
+function awardsRound(W,R){
+  const out=[]; if(!R||R.open) return out; const ids=W.ids;
+  const give=id=>R.gl.filter(g=>g.from===id).reduce((x,g)=>x+g.coin+g.food,0)+(R.act[id]?R.act[id].f+(R.act[id].o==='coop'?R.act[id].cost:0):0);
+  const best=[...ids].sort((a,b)=>give(b)-give(a)); if(best.length&&give(best[0])>0) out.push({e:'🤝',t:'연대 MVP',ids:[best[0]],d:`기금과 지원으로 ${give(best[0])}만큼 세계에 내놓았습니다`,g:1});
+  const resc=ids.filter(id=>R.gl.some(g=>g.from===id&&R.needy.includes(g.to))); if(resc.length) out.push({e:'🆘',t:'구조 영웅',ids:resc,d:'도움이 필요한 나라에 손을 내밀었습니다',g:1});
+  const great=ids.filter(id=>R.dice[id]&&R.dice[id].out==='great'); if(great.length) out.push({e:'🌟',t:'대성공',ids:great,d:'대응 주사위 대성공!',g:1});
+  const takers=ids.filter(id=>R.act[id]&&R.act[id].o==='take'); if(takers.length) out.push({e:'😈',t:'피해 유발국',ids:takers,d:`위기를 기회로 이용해 세계 위기를 한 나라당 +${OPTMETA.take.m}씩 키웠습니다`,g:0});
+  R.raids.forEach(q=>out.push(q.ok?{e:'🏴‍☠️',t:'약탈국',ids:[q.from],d:`${rawNm(W,q.to)}에서 💰${q.coin} 🍞${q.food}을 빼앗았습니다`,g:0}:{e:'🤡',t:'약탈 실패',ids:[q.from],d:`${rawNm(W,q.to)}을 약탈하려다 실패해 망신을 당했습니다`,g:0}));
+  const free=ids.filter(id=>R.act[id]&&(R.act[id].o==='self'||R.act[id].o==='none')&&!(R.act[id].f>0)&&!R.gl.some(g=>g.from===id)); if(free.length&&R.tier!=='fall') out.push({e:'🐟',t:'무임승차',ids:free,d:'기금도 지원도 없이 다른 나라의 연대 덕을 보았습니다',g:0});
+  const left=R.needy.filter(id=>!R.gl.some(g=>g.to===id)); if(left.length) out.push({e:'💔',t:'외면당한 나라',ids:left,d:'도움이 필요했지만 아무도 돕지 않았습니다',g:0});
+  const fails=ids.filter(id=>R.dice[id]&&R.dice[id].out==='fail'); if(fails.length) out.push({e:'💥',t:'대응 실패',ids:fails,d:'주사위가 배신했습니다',g:0});
+  if(R.viol.length) out.push({e:'⚠️',t:'약속 파기',ids:R.viol,d:'평화 협정을 어겨 쫓겨났습니다',g:0});
+  if(R.quitters.length) out.push({e:'🚪',t:'협약 탈퇴',ids:[...new Set(R.quitters.map(q=>q.id))],d:'협약을 떠나며 위약금 💰5를 냈습니다',g:0});
+  const big=[...ids].sort((a,b)=>(R.lost[b].coin+R.lost[b].food)-(R.lost[a].coin+R.lost[a].food))[0]; if(big&&R.lost[big].coin+R.lost[big].food>0) out.push({e:'😢',t:'최대 피해국',ids:[big],d:`💰${R.lost[big].coin} 🍞${R.lost[big].food}을 잃었습니다`,g:0});
+  return out;
+}
+function awardsHTML(W,R){ const L=awardsRound(W,R); if(!L.length) return ''; return `<div class="awards">${L.map(a=>`<div class="aw ${a.g?'good':'bad'}"><div class="ae">${a.e}</div><div><b>${a.t}</b> — ${a.ids.map(id=>nm(W,id)).join(', ')}<br><small>${esc(a.d)}</small></div></div>`).join('')}</div>`; }
 function endingKind(W){ if(W.doom) return 'doom'; const mx=Math.max(...MET.map(m=>W.M[m.k])); return mx<50?'good':mx<75?'mid':'edge'; }
-function treatyDue(W,id,k){ const due={coin:0,food:0}; TREATY.forEach(TT=>{ const t=W.T[TT.k]; if(t && isSigner(t,id,k,TT.k==='peace'?W.violQuit:null)) for(const r in TT.cost) due[r]+=TT.cost[r]; }); return due; }
+function treatyDue(W,id,k){ const due={coin:0,food:0}; TREATY.forEach(TT=>{ const t=W.T[TT.k]; if(t && isSigner(t,id,k,vq(W,TT))) for(const r in TT.cost) due[r]+=TT.cost[r]; }); return due; }
 function myGifts(k,id){ const g=(DATA.gift&&DATA.gift[k]&&DATA.gift[k][id])||{}; return Object.entries(g).filter(([to,x])=>x&&((+x.coin||0)+(+x.food||0)>0)); }
-function stats1(W,id){ const s=W.S[id]||{}; return {take:s.take||0,coop:s.coop||0,self:s.self||0,none:s.none||0,fund:s.fund||0,gave:s.gave||0,giftsN:s.giftsN||0,got:s.got||0,vict:(s.vict||[]).length,viol:s.viol||0,rescue:s.rescue||0,great:s.great||0}; }
-function honor(W,id){ const s=stats1(W,id); return s.giftsN*3+s.fund+s.coop*2+s.rescue*2-s.take*3-s.viol*5; }
+function stats1(W,id){ const s=W.S[id]||{}; const g=k=>s[k]||0; return {take:g('take'),coop:g('coop'),self:g('self'),none:g('none'),fund:g('fund'),gave:g('gave'),giftsN:g('giftsN'),got:g('got'),vict:(s.vict||[]).length,viol:g('viol'),rescue:g('rescue'),great:g('great'),raids:g('raids'),raidOK:g('raidOK'),raided:g('raided'),harm:g('harm'),lost:g('lost'),quitN:g('quitN')}; }
+function honor(W,id){ const s=stats1(W,id); return s.giftsN*3+Math.round(s.fund/2)+s.coop*2+s.rescue*2-s.take*3-s.viol*5-s.raidOK*5-s.quitN*2; }
 function badgesOf(W,id){
   const s=stats1(W,id), out=[]; const n=W.done.length;
-  if(n>=3 && s.take===0) out.push(['🕊️ 평화의 수호자',1]);
+  if(n>=3 && s.take===0 && s.raids===0) out.push(['🕊️ 평화의 수호자',1]);
   if(s.giftsN>=3) out.push(['🤝 연대의 손',1]);
   if(s.rescue>=1) out.push(['🆘 구조대',1]);
-  if(s.fund>=8) out.push(['🌍 기금 수호자',1]);
+  if(s.fund>=16) out.push(['🌍 기금 수호자',1]);
   if(Object.values(W.T).some(t=>t&&t.by===id)) out.push(['📜 협약 설계자',1]);
   if(s.great>=2) out.push(['🍀 행운의 정상',1]);
   if(n>=3 && s.coop===n) out.push(['💎 끝까지 함께',1]);
   if(s.take>=3) out.push(['💰 장사꾼',0]);
+  if(s.raidOK) out.push(['🏴‍☠️ 해적 국가',0]);
   if(s.viol) out.push(['⚠️ 약속 파기',0]);
+  if(s.quitN) out.push(['🚪 탈퇴의 달인',0]);
   return out;
 }
 
@@ -1140,7 +1290,8 @@ function metersHTML(M,prev,big=false){
   <div class="dm">셋 중 하나라도 100이 되면 지구가 멸망합니다.</div></div>`;
 }
 function optLine(c,o){ const om=OPTMETA[o]; const g=o==='take'?Object.entries(c.gain).map(([k,v])=>(k==='coin'?'예산':'식량')+' +'+v).join(', '):'';
-  return `<div class="ofx">${om.cost?`비용 <b>예산 ${om.cost}</b> · `:'비용 없음 · '}${g?`얻는 것 <b>${g}</b> · `:''}피해국이면 피해 <b>${Math.round(om.shield*100)}%</b> · 기본 성공률 <b>${om.p}%</b>${o==='coop'?'<b>+연대</b>':''} · 세계 위기 <b>${om.m>0?'+':''}${om.m}</b><br>${esc(om.say)}</div>`; }
+  const wc=Math.round(-c.dmg.coin*om.shield*OUT.fail.m)+(o==='self'?4:0), wf=Math.round(-c.dmg.food*om.shield*OUT.fail.m);
+  return `<div class="ofx">${om.cost?`비용 <b>예산 ${om.cost}</b> · `:'비용 없음 · '}${g?`얻는 것 <b>${g}</b> · `:''}기본 성공률 <b>${om.p}%</b>${o==='coop'?'<b>+연대</b>':''} · 세계 위기 <b>${om.m>0?'+':''}${om.m}</b><br><span class="worst">😱 최악(피해국+실패): 💰-${wc} 🍞-${wf}${o==='take'?' · 들통나면 신뢰 -13':''}</span><br>${esc(om.say)}</div>`; }
 function oTag(o){ const om=OPTMETA[o]||OPTMETA.none; return `<span class="otag" style="background:${om.c}">${om.e} ${om.n}</span>`; }
 function shareBars(cnt,tot,keys=['coop','self','take','none']){ return keys.filter(k=>k!=='none'||cnt.none).map(k=>{ const om=OPTMETA[k]; const n=cnt[k]||0, p=tot?Math.round(n/tot*100):0; return `<div class="obar"><div class="lbl"><span>${om.e} ${om.n}</span><span>${n}곳 · ${p}%</span></div><div class="tr"><i style="width:${p}%;background:${om.c}"></i></div></div>`; }).join(''); }
 const nm = (W,id) => W.P[id] ? esc(W.P[id].name) : '?';
@@ -1156,7 +1307,8 @@ function feedHTML(W,limit=6){
   const R=W.openR; if(!R) return ''; const k=R.k; const ev=[];
   Object.entries((DATA.req&&DATA.req[k])||{}).forEach(([id,x])=>{ if(x&&W.P[id]) ev.push([x.at||0,`🆘 <b>${nm(W,id)}</b> ${x.need==='food'?'식량':'예산'} ${x.amt} 요청: “${esc(x.msg)}”`]); });
   Object.entries((DATA.gift&&DATA.gift[k])||{}).forEach(([f,g])=>Object.entries(g||{}).forEach(([t,x])=>{ if(x&&W.P[f]&&W.P[t]) ev.push([x.at||0,`📦 <b>${nm(W,f)}</b> → ${nm(W,t)} ${x.coin?'💰'+x.coin:''}${x.food?' 🍞'+x.food:''}${x.msg?` “${esc(x.msg)}”`:''}`]); }));
-  TREATY.forEach(TT=>{ const t=W.T[TT.k]; if(!t) return; Object.entries(t.signs||{}).forEach(([id,s])=>{ if(W.P[id]&&s&&(+s.r||0)===W.rev) ev.push([s.at||0,`📜 <b>${nm(W,id)}</b> ${TT.n} 가입`]); }); Object.entries(t.quit||{}).forEach(([id,s])=>{ if(W.P[id]&&s&&(+s.r||0)===W.rev) ev.push([s.at||0,`🚪 <b>${nm(W,id)}</b> ${TT.n} 탈퇴`]); }); });
+  TREATY.forEach(TT=>{ const t=W.T[TT.k]; if(!t||!t.log) return; Object.entries(t.log).forEach(([id,lg])=>{ const e=lg&&lg['r'+W.cr.length]; if(e&&W.P[id]) ev.push([e.at||0,e.in?`📜 <b>${nm(W,id)}</b> ${TT.n} 가입`:`🚪 <b>${nm(W,id)}</b> ${TT.n} 탈퇴!`]); }); });
+  const rp=Object.values((DATA.act&&DATA.act[k])||{}).filter(a=>a&&a.raid).length; if(rp&&R.raidOn) ev.push([9e15,`🏴‍☠️ <b>어딘가에서 군대가 움직이고 있습니다…</b> (약탈 계획 ${rp}건)`]);
   Object.entries((DATA.act&&DATA.act[k])||{}).forEach(([id,a])=>{ if(a&&W.P[id]) ev.push([a.at||0,`✅ <b>${nm(W,id)}</b> 결정 완료`]); });
   ev.sort((a,b)=>b[0]-a[0]);
   return `<div class="feed"><div>📡 <b>세계 속보</b></div>${ev.slice(0,limit).map(e=>`<div>${e[1]}</div>`).join('')||'<div>아직 소식이 없습니다…</div>'}</div>`;
@@ -1170,6 +1322,7 @@ function xpOf(id){
   if(D.sort&&D.sort[id]) x+=10+(+D.sort[id].ok||0);
   if(D.camp&&D.camp[id]) x+=15;
   x+=Math.min(3,Object.keys((D.vote&&D.vote[id])||{}).length)*2;
+  x+=Math.min(3,Object.keys((D.kit&&D.kit[id])||{}).length)*3;
   if(D.check&&D.check[id]) x+=10;
   if(D.plan&&D.plan[id]) x+=15;
   if(D.ox&&D.ox[id]){ const o=D.ox[id]; x+=10+OXQ.filter((q,i)=>o.a&&o.a[i]===q.a).length*2; }
@@ -1272,43 +1425,61 @@ function vLobby(W){
     <div class="opt"><div class="e">🚨</div><div class="t">세계 위기 + 🎲 돌발 사건</div><div class="d">모두에게 닥치는 위기에, 나라마다 다른 돌발 사건(지진·금융 위기·대풍년·자원 발견…)이 겹칩니다.</div></div>
     <div class="opt"><div class="e">🛡️🤝💰</div><div class="t">대응 + 🎲 대응 주사위</div><div class="d">자국 보호 · 국제 공동 대응 · 기회 이용. 결과는 주사위로! 대성공·성공·실패</div></div>
     <div class="opt"><div class="e">🤝</div><div class="t">연대 지수</div><div class="d">70 이상이면 🌈 연대 승리(모두 보상), 40 아래면 💥 연대 붕괴(모두 함께 무너짐)</div></div>
-    <div class="opt"><div class="e">🎯</div><div class="t">연대 미션</div><div class="d">위기마다 반 전체 미션! 성공하면 모두 예산 +2, 멸망 시계를 되돌립니다.</div></div>
+    <div class="opt"><div class="e">🎯</div><div class="t">연대 미션</div><div class="d">위기마다 반 전체 미션! 성공하면 모두 예산 +4, 멸망 시계를 되돌립니다.</div></div>
     <div class="opt"><div class="e">🎁</div><div class="t">지원하기 · 지원 요청</div><div class="d">어려운 나라를 도우면 연대 지수가 오르고 🆘 구조대 훈장을 받아요.</div></div>
-    <div class="opt"><div class="e">🏛️</div><div class="t">정상회담</div><div class="d">협약을 제안·가입하세요. 몰래 탈퇴할 수도 있지만…</div></div>
+    <div class="opt"><div class="e">🏛️</div><div class="t">정상회담</div><div class="d">협약을 제안·가입하세요. 가입·탈퇴는 다음 위기부터, 탈퇴하면 위약금 💰5!</div></div>
+    <div class="opt"><div class="e">🛒</div><div class="t">국가 투자</div><div class="d">남는 예산으로 식량 수입·방어 시설·스마트 농업·국제 홍보에 투자하세요.</div></div>
+    <div class="opt"><div class="e">🏴‍☠️</div><div class="t">약탈</div><div class="d">군사력이 가장 강한 몇 나라만 게임 전체에서 2번! 성공하면 남의 예산을 빼앗지만, 대가가 큽니다.</div></div>
   </div>
   <div class="tip" style="margin-top:14px">⚠️ <b>기후 위기 · 빈곤·기아 · 전쟁·분쟁</b> 중 하나라도 100이 되면 <b>지구는 멸망</b>합니다. 우리 나라만 부자가 되어도 지구가 멸망하면 모두 지는 것입니다.</div>
   <p class="muted blink center">선생님 신호를 기다려 주세요…</p></div>`;
 }
+function memNow(W,t,TT,id){ const k=W.openR?W.openR.k:W.cr.length-1; return k>=0&&isSigner(t,id,k,vq(W,TT)); }
 function summitHTML(W){
   if(!(DATA.meta&&DATA.meta.summit)) return '';
-  const k=W.rev; const N=W.N;
-  return `<div class="card summit"><h2>🏛️ 지구 정상회담 개최 중</h2><p class="muted">협약을 제안하거나 가입하세요. 가입국이 <b>전체의 1/3 이상</b>이어야 제대로 효과가 납니다. 협약 가입은 연대 지수도 올립니다.</p>
+  const kn=W.cr.length; const N=W.N;
+  return `<div class="card summit"><h2>🏛️ 지구 정상회담 개최 중</h2><p class="muted">협약을 제안하거나 가입하세요. 가입국이 <b>전체의 1/3 이상</b>이어야 제대로 효과가 납니다. <b>가입·탈퇴는 다음 위기부터</b> 적용되고, 탈퇴하면 <b>위약금 💰5 · 신뢰 -6</b>을 냅니다.</p>
   ${TREATY.map(TT=>{ const t=W.T[TT.k]; const d=draft('t_'+TT.k);
     if(!t) return `<div class="treaty"><h4>${TT.e} ${TT.n} <small class="muted">아직 아무도 제안하지 않음</small></h4><div class="muted">${esc(TT.d)}</div>
       <input class="field" style="margin-top:8px" data-bind="t_${TT.k}.why" value="${esc(d.why||'')}" placeholder="제안 연설 한 줄: 왜 이 협약이 필요한가요?" maxlength="80"><div class="row" style="margin-top:8px"><span class="sp"></span><button class="btn sm teal" data-act="propose" data-v="${TT.k}">📜 이 협약 제안하기</button></div></div>`;
-    const sg=W.ids.filter(id=>isSigner(t,id,k,TT.k==='peace'?W.violQuit:null)); const mine=sg.includes(ME); const ratio=N?sg.length/N:0;
-    return `<div class="treaty ${mine?'on':''}"><h4>${TT.e} ${TT.n} ${mine?'<span class="otag" style="background:var(--ok)">가입 중</span>':''}</h4><div class="muted">${esc(TT.d)}</div>
+    const sg=W.ids.filter(id=>isSigner(t,id,kn,vq(W,TT))); const nx=sg.includes(ME), now=memNow(W,t,TT,ME); const ratio=N?sg.length/N:0;
+    const tag=nx?(now?'<span class="otag" style="background:var(--ok)">가입 중</span>':'<span class="otag" style="background:var(--blue)">다음 위기부터 가입</span>'):(now?'<span class="otag" style="background:var(--warn)">다음 위기부터 탈퇴</span>':'');
+    return `<div class="treaty ${nx?'on':''}"><h4>${TT.e} ${TT.n} ${tag}</h4><div class="muted">${esc(TT.d)}</div>
     <p style="margin:8px 0">🗣️ <b>${nm(W,t.by)}</b>의 제안: “${esc(t.why||'')}”</p>
-    <div class="row"><b>가입 ${sg.length}/${N}국 (${Math.round(ratio*100)}%)</b><span class="muted">${ratio>=1/3?'✅ 효과 발휘':'⚠️ 1/3이 안 되어 효과가 약함'}</span><span class="sp"></span>
-    ${mine?`<button class="btn sm ghost" data-act="quit" data-v="${TT.k}">탈퇴하기</button>`:`<button class="btn sm teal" data-act="sign" data-v="${TT.k}">✍️ 가입하기</button>`}</div>
+    <div class="row"><b>다음 위기 가입 ${sg.length}/${N}국 (${Math.round(ratio*100)}%)</b><span class="muted">${ratio>=1/3?'✅ 효과 발휘':'⚠️ 1/3이 안 되어 효과가 약함'}</span><span class="sp"></span>
+    ${nx?`<button class="btn sm ghost" data-act="quit" data-v="${TT.k}">탈퇴하기</button>`:`<button class="btn sm teal" data-act="sign" data-v="${TT.k}">✍️ 가입하기</button>`}</div>
     <div class="muted" style="font-size:13px;margin-top:6px">가입국: ${sg.map(id=>nm(W,id)).join(', ')||'없음'}</div></div>`; }).join('')}</div>`;
 }
-function myTreatiesLine(W){ const k=W.rev; const L=TREATY.filter(TT=>{ const t=W.T[TT.k]; return t&&isSigner(t,ME,k,TT.k==='peace'?W.violQuit:null); }); if(!L.length) return '';
-  return `<div class="tip">📜 가입한 협약: ${L.map(TT=>`${TT.e} ${TT.n}`).join(', ')}${(DATA.meta&&DATA.meta.summit)?'':` <button class="btn sm ghost" data-act="quitAny">협약 탈퇴하기</button>`}</div>`; }
+function myTreatiesLine(W){ const kn=W.cr.length; const L=TREATY.filter(TT=>W.T[TT.k]&&isSigner(W.T[TT.k],ME,kn,vq(W,TT))); if(!L.length) return '';
+  return `<div class="tip">📜 가입한 협약(다음 위기 기준): ${L.map(TT=>`${TT.e} ${TT.n}`).join(', ')}${(DATA.meta&&DATA.meta.summit)?'':` <button class="btn sm ghost" data-act="quitAny">협약 탈퇴하기</button>`}</div>`; }
 function budgetLeft(W,R,a){
   const st=R.start[ME]; const due=treatyDue(W,ME,R.k); const om=OPTMETA[a.opt||'none'];
   const gifts=myGifts(R.k,ME); const gc=gifts.reduce((s,[,x])=>s+(+x.coin||0),0), gf=gifts.reduce((s,[,x])=>s+(+x.food||0),0);
   const gain=(a.opt==='take'?R.c.gain:{});
-  return {coin:st.coin-due.coin-om.cost-(Math.floor(+a.fund||0))-gc+(gain.coin||0), food:st.food-due.food-gf+(gain.food||0), due, gc, gf};
+  let shop=0, sfood=0; SHOP.forEach(it=>{ const n=Math.max(0,Math.floor(+a['b_'+it.k]||0)); shop+=n*it.cost; if(it.k==='food') sfood+=2*n; });
+  const rc=a.raid?RAID_COST:0;
+  return {coin:st.coin-due.coin-om.cost-(Math.floor(+a.fund||0))-gc-shop-rc+(gain.coin||0), food:st.food-due.food-gf+(gain.food||0)+sfood, due, gc, gf, shop, rc};
+}
+function shopHTML(W,R,d){ const s=W.S[ME]; return SHOP.map(it=>{ const own=it.max?(s[it.k]||0):null; const v=+d['b_'+it.k]||0; const capped=(it.max&&own+v>=it.max)||v>=(it.cap||5); return `<div class="shoprow"><span class="se">${it.e}</span><div class="sn"><b>${it.n}</b> <span class="pill">💰${it.cost}</span><br><small class="muted">${esc(it.d)}${it.max?` · 보유 ${own}/${it.max}`:''}</small></div><div class="stp"><button data-act="step" data-k="a${R.k}.b_${it.k}" data-d="-1">−</button><span class="v">${v}</span><button data-act="step" data-k="a${R.k}.b_${it.k}" data-d="1" ${capped?'disabled':''}>＋</button></div></div>`; }).join(''); }
+function raidBlock(W,R,d){
+  if(!R.raidOn) return '';
+  const me=W.S[ME]; const left=RAID_MAX-(me.raids||0);
+  if(!W.RE.has(ME)) return `<div class="raid off">🏴‍☠️ 약탈은 군사력(안전 지표)이 가장 강한 몇 나라만 할 수 있어요. 우리 나라는 해당하지 않아요. 대신 ‘방어 시설’로 약탈에 대비하세요!</div>`;
+  if(left<=0) return `<div class="raid off">🏴‍☠️ 약탈 기회를 모두 썼어요.</div>`;
+  const peace=W.T.peace&&isSigner(W.T.peace,ME,R.k,W.violQuit);
+  return `<div class="raid"><h3 style="margin-top:0">④ 🏴‍☠️ 약탈 <small class="muted">— 남은 기회 ${left}번 · 작전비 💰${RAID_COST}</small></h3>
+  <p class="muted">우리 나라는 군사 강국이라 다른 나라의 예산과 식량을 빼앗을 수 있습니다. 성공하면 💰최대 10 · 🍞최대 3을 가져오지만 <b>신뢰 -12, 전쟁·분쟁 위기 +6, 연대 지수 크게 하락</b>. 실패하면 💰3을 더 잃고 신뢰 -8. 결과 공개 때 온 세계에 이름이 공개됩니다.${peace?' <b style="color:#ff8a8a">⚠️ 평화 협정 가입국입니다! 약탈하면 협정 위반으로 쫓겨납니다.</b>':''}</p>
+  <select class="field" data-bind="a${R.k}.raid"><option value="">— 약탈하지 않는다 —</option>${W.ids.filter(id=>id!==ME).map(id=>`<option value="${esc(id)}" ${d.raid===id?'selected':''}>${nm(W,id)} (예상 성공률 ${raidChance(me,W.S[id],false)}% · 💰${R.start[id].coin})</option>`).join('')}</select>
+  <div class="muted" style="font-size:13px;margin-top:6px">상대가 ‘자국 보호’를 고르면 성공률 -20%, 방어 시설 1개당 -15%</div></div>`;
 }
 function localHTML(L,mine=true){ if(!L) return ''; return `<div class="local ${L.bad?'bad':'good'}"><b>🎲 돌발 사건 — ${L.e} ${esc(L.t)}</b>${mine?' (우리 나라)':''}<br>${esc(L.d)} <small class="muted">${L.res.coin?`예산 ${L.res.coin>0?'+':''}${L.res.coin} `:''}${L.res.food?`식량 ${L.res.food>0?'+':''}${L.res.food}`:''}</small>${L.bad?'<br><small>도움이 필요하면 지원 요청을 올리세요. 이 나라를 도우면 연대 지수가 올라요.</small>':'<br><small>여유가 생겼어요! 어려운 나라를 도울 기회입니다.</small>'}</div>`; }
-function missionHTML(R,done=false){ const m=R.mission; if(done) return `<div class="mission ${R.missionOK?'ok':'no'}">🎯 연대 미션: ${m.e} ${esc(m.t)} — ${R.missionOK?'🎉 성공! 모든 나라 예산 +2, 멸망 시계 되감기':'❌ 실패'}</div>`;
-  return `<div class="mission">🎯 이번 연대 미션: ${m.e} ${esc(m.t)}<br><small>성공하면 모든 나라 예산 +2, 세 위기 모두 -5!</small></div>`; }
+function missionHTML(R,done=false){ const m=R.mission; if(done) return `<div class="mission ${R.missionOK?'ok':'no'}">🎯 연대 미션: ${m.e} ${esc(m.t)} — ${R.missionOK?'🎉 성공! 모든 나라 예산 +4, 멸망 시계 되감기':'❌ 실패'}</div>`;
+  return `<div class="mission">🎯 이번 연대 미션: ${m.e} ${esc(m.t)}<br><small>성공하면 모든 나라 예산 +4, 세 위기 모두 -5!</small></div>`; }
 function vRoundOpen(W){
   const R=W.openR, c=R.c, k=R.k, st=R.start[ME];
   const saved=DATA.act&&DATA.act[k]&&DATA.act[k][ME];
   const isV=R.vict.includes(ME);
-  const d=draft('a'+k); if(saved && !editing[k] && d._loaded!==saved.at){ Object.assign(d,{opt:saved.opt,fund:saved.fund||0,reason:saved.reason||'',_loaded:saved.at}); }
+  const d=draft('a'+k); if(saved && !editing[k] && d._loaded!==saved.at){ Object.assign(d,{opt:saved.opt,fund:saved.fund||0,reason:saved.reason||'',raid:saved.raid||'',_loaded:saved.at},Object.fromEntries(SHOP.map(it=>['b_'+it.k,(saved.buy&&saved.buy[it.k])||0]))); }
   const left=budgetLeft(W,R,d);
   const reqs=(DATA.req&&DATA.req[k])||{};
   const gifts=myGifts(k,ME); const gd=draft('g'+k);
@@ -1323,7 +1494,7 @@ function vRoundOpen(W){
   const solBox=`${solHTML(ls2.sol,'🤝 연대 지수 (지금 예상)')}${fundBar(ls2.fund,W.G,'🌍 국제 기금 (지금까지)')}${feedHTML(W)}`;
   if(saved && !editing[k]){
     return `${top}<div class="card">${scene}${missionHTML(R)}${localHTML(R.loc[ME])}${victLine}${head}
-    <div class="banner ok">✅ 결정 제출 완료 — ${oTag(saved.opt)} · 기금 ${saved.fund||0} <button class="btn sm ghost" data-act="editAct" data-v="${k}">수정하기</button></div>
+    <div class="banner ok">✅ 결정 제출 완료 — ${oTag(saved.opt)} · 기금 ${saved.fund||0}${saved.raid?' · 🏴‍☠️ 약탈 계획':''} <button class="btn sm ghost" data-act="editAct" data-v="${k}">수정하기</button></div>
     <p class="muted">결과 공개 전까지 수정할 수 있어요. 연대 지수를 올리려면? 👉 어려운 나라를 돕고, 협약에 가입하고, 친구들을 설득하세요!</p>${solBox}</div>
     ${giftBlock(W,R,reqs,gifts,gd,others,recvd,left)}${myTreatiesLine(W)}`;
   }
@@ -1332,9 +1503,12 @@ function vRoundOpen(W){
   <div class="grid">${shuffled(OPTK,ME+'|'+k).map(o=>`<button class="opt bigopt ${d.opt===o?'sel':''}" data-act="aopt" data-k="${k}" data-v="${o}"><span class="lt">${OPTMETA[o].e}</span><span><b>${OPTMETA[o].n}</b><br>${esc(c.opts[o])}${optLine(c,o)}</span></button>`).join('')}</div>
   <h3>② 국제 기금에 더 내기 <small class="muted">(선택)</small></h3>
   <div class="row"><div class="stp"><button data-act="step" data-k="a${k}.fund" data-d="-1">−</button><span class="v">${d.fund||0}</span><button data-act="step" data-k="a${k}.fund" data-d="1">＋</button></div><span class="muted">기금이 많이 모이면 연대 지수가 올라갑니다.</span></div>
+  <h3>③ 🛒 국가 투자 <small class="muted">(선택) — 남는 예산으로 나라를 강하게!</small></h3>
+  ${shopHTML(W,R,d)}
+  ${raidBlock(W,R,d)}
   ${solBox}
   <div class="banner ${left.coin<0||left.food<0?'bad':'warn'}">결정하고 남는 자원: 💰 ${left.coin} · 🍞 ${left.food}${left.due.coin||left.due.food?` <small>(협약 분담금 💰${left.due.coin} 🍞${left.due.food} 포함)</small>`:''}${left.coin<0||left.food<0?' — 자원이 모자라요!':''}<br><small>※ 위기 뒤 식량이 0보다 모자라면 기아가 발생해 복지·신뢰가 크게 떨어집니다. 💥 연대 붕괴 때는 모든 나라가 예산 -3, 식량 -2를 잃습니다.</small></div>
-  <label class="lb">③ 왜 이렇게 결정했나요?</label><textarea class="field" data-bind="a${k}.reason" placeholder="누구를 위해, 무엇을 지키려고 이렇게 결정했나요?">${esc(d.reason||'')}</textarea>
+  <label class="lb">⑤ 왜 이렇게 결정했나요?</label><textarea class="field" data-bind="a${k}.reason" placeholder="누구를 위해, 무엇을 지키려고 이렇게 결정했나요?">${esc(d.reason||'')}</textarea>
   <div class="row" style="margin-top:12px">${saved?`<button class="btn ghost" data-act="cancelEdit" data-v="${k}">수정 취소</button>`:''}<span class="sp"></span><button class="btn acc" data-act="actSubmit" data-k="${k}">결정 제출</button></div></div>
   ${giftBlock(W,R,reqs,gifts,gd,others,recvd,left)}${myTreatiesLine(W)}`;
 }
@@ -1371,6 +1545,11 @@ function roundResultHTML(W,R,forMe=true){
     <p>나의 대응: ${oTag(a.o)}${a.f?` · 기금 추가 ${a.f}`:''}</p>
     ${a.o!=='none'?`<div class="banner ${dc.out==='fail'?'bad':'ok'}">🎲 대응 주사위 ${dc.roll} (성공 ${dc.p} 이하 · 대성공 ${dc.g} 이하) → ${o.e} ${o.n}${OUTTXT[a.o]&&OUTTXT[a.o][dc.out]?' — '+OUTTXT[a.o][dc.out]:''}</div>`:'<div class="banner bad">⏳ 결정을 내지 못해 무방비로 위기를 맞았습니다.</div>'}
     ${R.loc[id]?localHTML(R.loc[id]):''}
+    ${R.raids.filter(q=>q.to===id).map(q=>`<div class="banner bad">🏴‍☠️ ${nm(W,q.from)}이(가) 우리를 약탈하려 했습니다 — ${q.ok?`약탈당했습니다! 💰-${q.coin} 🍞-${q.food}`:'막아 냈습니다!'}</div>`).join('')}
+    ${R.raids.filter(q=>q.from===id).map(q=>`<div class="banner ${q.ok?'warn':'bad'}">🏴‍☠️ ${nm(W,q.to)} 약탈 ${q.ok?`성공 — 💰+${q.coin} 🍞+${q.food} (신뢰 -12)`:'실패 — 💰-3, 신뢰 -8'} (🎲 ${q.roll} / 성공 ${q.p} 이하)</div>`).join('')}
+    ${R.quitters.some(q=>q.id===id)?'<div class="banner bad">🚪 협약 탈퇴 위약금 💰-5, 신뢰 -6</div>':''}
+    ${(R.lost[id].coin+R.lost[id].food)?`<div class="lossbox">😢 이번 위기에 우리가 잃은 것 <b>💰${R.lost[id].coin} 🍞${R.lost[id].food}</b>${R.tier!=='win'?'<br><small>세계가 연대에 성공했다면 이만큼 잃지 않았을 수도 있습니다.</small>':''}</div>`:''}
+    ${(()=>{ const b=a.buys||{}; const L=SHOP.filter(it=>b[it.k]); return L.length?`<p class="muted">🛒 투자: ${L.map(it=>`${it.e}${it.n}×${b[it.k]}`).join(', ')}</p>`:''; })()}
     ${dm?`<div class="banner bad">⚠️ 피해국이었습니다 — 피해 ${Math.round(dm.sh*100)}% (💰${dm.coin} 🍞${dm.food})</div>`:''}
     ${R.viol.includes(id)?`<div class="banner bad">🕊️ 평화 협정을 어겼습니다! 신뢰 -10, 협정에서 쫓겨났습니다.</div>`:''}
     ${fam?`<div class="banner bad">🥀 식량이 ${fam}만큼 모자라 기아가 발생했습니다. 복지와 신뢰가 크게 떨어졌습니다.</div>`:''}
@@ -1379,7 +1558,7 @@ function roundResultHTML(W,R,forMe=true){
     <div class="row">${resHTML(af.coin,af.food)}<span class="muted">← 위기 시작 💰${b.coin} 🍞${b.food}</span></div>
     <h3>우리 나라 지표</h3>${barsHTML(af.v,false,b.v)}</div>`;
   }
-  return `${tierHTML(R)}<div class="card">${missionHTML(R,true)}
+  return `${tierHTML(R)}${awardsHTML(W,R)}<div class="card">${missionHTML(R,true)}
   ${fundBar(R.fund,R.G,'🌍 모인 국제 기금')}
   <h3>정상들의 선택 (${W.N}개국)</h3>${shareBars(R.cnt,W.N)}
   <div class="kv"><div><b>${Math.round(R.cover*100)}%</b><small>도움 필요한 나라에 지원 도착</small></div><div><b>${R.gl.length}건</b><small>오간 지원</small></div><div><b>${Object.values(R.dice).filter(x=>x.out==='great').length}</b><small>🌟 대성공</small></div><div><b>${Object.values(R.dice).filter(x=>x.out==='fail').length}</b><small>💥 실패</small></div>${R.famN?`<div><b>${R.famN}</b><small>🥀 기아 발생</small></div>`:''}</div>
@@ -1397,17 +1576,19 @@ function vCrisis(W){
 }
 let revealShown={};
 function afterRender(){
-  if(MODE!=='student' || !ME || phaseOf()!=='crisis') return;
+  if(MODE!=='student' || !ME) return; if((PHASES.find(x=>x.k===phaseOf())||{}).ch===2){ trialOverlay(); return; } if(phaseOf()!=='crisis') return;
   let W; try{ W=calc(); }catch(e){ return; } const last=W.done[W.done.length-1]; if(!last || !last.act[ME]) return;
   const key='earth_rv_'+SRC+(SLOT?'_'+SLOT:'')+'_'+last.k+'_'+(DATA.meta&&DATA.meta.rvAt||0);
   if(revealShown[key] || ls.get(key)) return; revealShown[key]=1; ls.set(key,'1');
   const dc=last.dice[ME], a=last.act[ME], t=TIER[last.tier]; const o=OUT[dc.out];
+  const myAw=awardsRound(W,last).filter(x=>x.ids.includes(ME)); const l1=last.lost[ME]; const rd=last.raids.filter(q=>q.to===ME&&q.ok);
+  const extraRv=`${rd.map(q=>`<div class="banner bad" style="margin-top:10px">🏴‍☠️ ${esc(rawNm(W,q.from))}이(가) 우리를 약탈했습니다! 💰-${q.coin} 🍞-${q.food}</div>`).join('')}${(l1.coin+l1.food)?`<div class="lossbox">😢 이번에 잃은 것 💰${l1.coin} 🍞${l1.food}</div>`:''}${myAw.map(x=>`<div class="aw ${x.g?'good':'bad'}" style="margin-top:6px"><div class="ae">${x.e}</div><div><b>${x.t}</b><br><small>${esc(x.d)}</small></div></div>`).join('')}`;
   const ov=document.createElement('div'); ov.className='reveal';
-  ov.innerHTML=`<div class="box"><div class="muted">${last.c.e} ${esc(last.c.t)} · 우리 나라 대응: ${OPTMETA[a.o].e} ${OPTMETA[a.o].n}</div><div class="dice" id="dnum">🎲</div><div class="out" id="dout"></div><div id="dtier" style="opacity:0;transition:opacity .4s"><div class="tier ${last.tier}" style="margin:10px 0 0"><h2>${t.e} ${t.n}</h2><div>연대 지수 ${Math.round(last.sol*100)}</div></div></div><p class="muted">화면을 누르면 닫힙니다</p></div>`;
+  ov.innerHTML=`<div class="box"><div class="muted">${last.c.e} ${esc(last.c.t)} · 우리 나라 대응: ${OPTMETA[a.o].e} ${OPTMETA[a.o].n}</div><div class="dice" id="dnum">🎲</div><div class="out" id="dout"></div><div id="dtier" style="opacity:0;transition:opacity .4s"><div class="tier ${last.tier}" style="margin:10px 0 0"><h2>${t.e} ${t.n}</h2><div>연대 지수 ${Math.round(last.sol*100)}</div></div>${extraRv}</div><p class="muted">화면을 누르면 닫힙니다</p></div>`;
   document.body.appendChild(ov); ov.addEventListener('click',()=>ov.remove());
   const dn=ov.querySelector('#dnum'); let n=0;
   const it=setInterval(()=>{ n++; dn.textContent= a.o==='none'?'⏳':String(1+Math.floor(Math.random()*100)); if(n>14){ clearInterval(it); dn.textContent=a.o==='none'?'⏳':String(dc.roll); const od=ov.querySelector('#dout'); od.innerHTML=`${o.e} ${o.n}`; od.style.color=dc.out==='fail'||dc.out==='none'?'var(--bad)':'var(--ok)'; setTimeout(()=>{ const x=ov.querySelector('#dtier'); if(x) x.style.opacity=1; },600); } },70);
-  setTimeout(()=>{ if(ov.isConnected) ov.remove(); },7000);
+  setTimeout(()=>{ if(ov.isConnected) ov.remove(); },9000);
 }
 function endingHTML1(W){
   const kd=endingKind(W); const st=W.done;
@@ -1422,16 +1603,15 @@ function endingHTML1(W){
   else box=`<div class="ending"><div class="muted">${st.length}번의 위기를 지나</div><h2>⚠️ 벼랑 끝의 지구</h2><p>멸망은 피했지만 지구 멸망 시계는 자정 직전입니다. 위기 하나만 더 오면 무너질 수 있습니다.</p></div>`;
   return `${box}${metersHTML(W.M)}
   <div class="card"><h3 style="margin-top:0">📊 우리 반 정상들의 기록</h3>
-  <div class="kv"><div><b>🌈 ${wins} / 💥 ${falls}</b><small>연대 승리 / 붕괴</small></div><div><b>🎯 ${mis}/${st.length}</b><small>연대 미션 성공</small></div><div><b>${Math.round(tot.coop/all*100)}%</b><small>🤝 공동 대응</small></div><div><b>${Math.round(tot.self/all*100)}%</b><small>🛡️ 자국 보호</small></div><div><b>${Math.round(tot.take/all*100)}%</b><small>💰 기회 이용</small></div><div><b>${giftN}건</b><small>📦 오간 지원</small></div><div><b>${famSum}번</b><small>🥀 기아 발생</small></div></div></div>`;
+  <div class="kv"><div><b>🌈 ${wins} / 💥 ${falls}</b><small>연대 승리 / 붕괴</small></div><div><b>🎯 ${mis}/${st.length}</b><small>연대 미션 성공</small></div><div><b>${Math.round(tot.coop/all*100)}%</b><small>🤝 공동 대응</small></div><div><b>${Math.round(tot.self/all*100)}%</b><small>🛡️ 자국 보호</small></div><div><b>${Math.round(tot.take/all*100)}%</b><small>💰 기회 이용</small></div><div><b>${giftN}건</b><small>📦 오간 지원</small></div><div><b>${st.reduce((x,R)=>x+R.raids.length,0)}건</b><small>🏴‍☠️ 약탈</small></div><div><b>${famSum}번</b><small>🥀 기아 발생</small></div></div></div>`;
 }
 function rankHTML(W){
   if(!W.ids.length) return '';
-  const rich=[...W.ids].sort((a,b)=>(W.S[b].coin+W.S[b].food)-(W.S[a].coin+W.S[a].food)).slice(0,3);
-  const hon=[...W.ids].sort((a,b)=>honor(W,b)-honor(W,a)).slice(0,3);
+  const top=(f,flt=()=>true)=>[...W.ids].filter(flt).sort((a,b)=>f(b)-f(a)).slice(0,3);
   const row=(id,i,v)=>`<div class="rank"><div class="no">${['🥇','🥈','🥉'][i]}</div><div>${flagHTML(W.P[id].flag,'sm')} <b>${nm(W,id)}</b><br><small class="muted">${v}</small><br>${badgesOf(W,id).map(([b,g])=>`<span class="badge ${g?'':'neg'}">${b}</span>`).join('')}</div></div>`;
-  return `<div class="grid g2"><div class="card"><h3 style="margin-top:0">💰 부자 순위</h3>${rich.map((id,i)=>row(id,i,`💰${W.S[id].coin} 🍞${W.S[id].food}`)).join('')}</div>
-  <div class="card"><h3 style="margin-top:0">🏅 존경 순위 (연대 점수)</h3>${hon.map((id,i)=>row(id,i,`연대 점수 ${honor(W,id)}`)).join('')}</div></div>
-  <div class="card"><p style="margin:0"><b>질문:</b> 두 순위는 같은가요, 다른가요? 지구가 멸망했다면 가장 많은 자원은 어떤 의미가 있을까요?</p></div>`;
+  const card=(t,L,f)=>`<div class="card"><h3 style="margin-top:0">${t}</h3>${L.map((id,i)=>row(id,i,f(id))).join('')||'<p class="muted">없음</p>'}</div>`;
+  return `<div class="grid g2">${card('💰 부자 순위',top(id=>W.S[id].coin+W.S[id].food),id=>`💰${W.S[id].coin} 🍞${W.S[id].food}`)}${card('🏅 존경 순위 (연대 점수)',top(id=>honor(W,id)),id=>`연대 점수 ${honor(W,id)}`)}${card('😈 세계에 피해를 준 순위',top(id=>W.S[id].harm,id=>W.S[id].harm>0),id=>`피해 유발 ${W.S[id].harm} (기회 이용 ${W.S[id].take}번 · 약탈 성공 ${W.S[id].raidOK}번)`)}${card('😢 가장 큰 피해를 입은 나라',top(id=>W.S[id].lost,id=>W.S[id].lost>0),id=>`잃은 자원 ${W.S[id].lost} · 약탈당함 ${W.S[id].raided}번 · 피해국 ${W.S[id].vict.length}번`)}</div>
+  <div class="card"><p style="margin:0"><b>질문:</b> 부자 순위와 존경 순위는 같은가요? 세계에 피해를 준 나라와 피해를 입은 나라는 서로 달랐나요? 지구가 멸망했다면 가장 많은 자원은 어떤 의미가 있을까요?</p></div>`;
 }
 function vEnd1(W){
   const s=stats1(W,ME), p=W.P[ME], cur=W.S[ME];
@@ -1454,12 +1634,50 @@ function buildAssign(){
   const W=calc(); const ids=W.ids; if(!ids.length) return {};
   const sorted=[...ids].sort((a,b)=>(meanV(W.S[a].v)-meanV(W.S[b].v))||(hashStr(a)-hashStr(b)));
   const T=sorted.slice(0,Math.max(1,Math.min(ids.length,Math.ceil(ids.length/3))));
-  const out={}; const keys=Object.keys(CITI);
+  const out={}; const keys=Object.keys(CITI); const used={};
   [...ids].sort((a,b)=>(+W.P[a].num||999)-(+W.P[b].num||999)).forEach((id,j)=>{
     let t=T[j%T.length]; if(t===id && ids.length>1) t=T.length>1?T[(j+1)%T.length]:sorted.find(x=>x!==id);
-    out[id]={t, c: keys[j%keys.length]};
+    const c=keys[j%keys.length]; const pool=PERS.map((p,i)=>[p,i]).filter(([p])=>p.c===c); const u=used[c]||0; used[c]=u+1;
+    out[id]={t,c,p:pool[u%pool.length][1]};
   });
   return out;
+}
+function hopeParts(W,id){
+  const as=((DATA.meta&&DATA.meta.assign)||{})[id]; if(!as||!W.S[as.t]) return null;
+  const per=persOf(as); const cat=per.c; const ns=W.S[as.t]; const parts=[];
+  parts.push(['🏠 처음 형편 (내가 사는 나라의 상태)',clamp(20+Math.round(meanV(ns.v)/2)-3*(ns.vict||[]).length,15,60)]);
+  if(DATA.voice&&DATA.voice[id]) parts.push(['📣 SOS가 세상에 전해짐',5]);
+  const ch=Object.values(DATA.cheer||{}).filter(x=>x&&x[id]).length; if(ch) parts.push([`💌 받은 응원 ${ch}개`,6*ch]);
+  const kt=Object.values(DATA.kit||{}).filter(x=>x&&x[id]).length; if(kt) parts.push([`🧰 받은 구조 키트 ${kt}개`,10*kt]);
+  const nT=+(DATA.meta&&DATA.meta.trials)||0; for(let i=0;i<nT;i++){ const t=trialOf(i,id,cat); parts.push([`${t[0]} ${t[1]}`,t[2]]); }
+  if(DATA.meta&&DATA.meta.fateRev){ const f=fateOf(cat); const tb=Math.round((f.ratio-0.35)*30); if(tb) parts.push([`🌍 우리 반의 실천 (${CITI[cat].n})`,tb]); }
+  if(DATA.link&&DATA.link[id]) parts.push(['🔗 연결 고리를 밝혀냄',5]);
+  if(DATA.sort&&DATA.sort[id]) parts.push(['🗂️ 해결 방법을 배움',(+DATA.sort[id].ok>=7)?5:2]);
+  return {per,cat,parts,hope:clamp(parts.reduce((x,p)=>x+p[1],0),0,100)};
+}
+function teamStats(W){ const T={}; Object.keys(CITI).forEach(k=>T[k]={n:0,sum:0,danger:0}); W.ids.forEach(id=>{ const h=hopeParts(W,id); if(!h||!T[h.cat]) return; const t=T[h.cat]; t.n++; t.sum+=h.hope; if(h.hope<40) t.danger++; }); return T; }
+function teamBoardHTML(W,big=false){ const T=teamStats(W); return `<div class="teams ${big?'big':''}">${Object.entries(CITI).map(([k,c])=>{ const t=T[k]; const a=t.n?Math.round(t.sum/t.n):0; const s=HSTAT(a); return `<div class="team"><div class="tn">${c.e} ${esc(c.n)} <small>${t.n}명${t.danger?` · ⚠️${t.danger}`:''}</small></div><div class="hb"><i style="width:${a}%;background:${s.c}"></i></div><div class="tv">${s.e} ${a}</div></div>`; }).join('')}</div>`; }
+function rescueHTML(W){
+  const L=W.ids.map(id=>[id,hopeParts(W,id)]).filter(([id,h])=>h&&id!==ME&&h.hope<40).sort((a,b)=>a[1].hope-b[1].hope);
+  const mine=(DATA.kit&&DATA.kit[ME])||{}; const left=3-Object.keys(mine).length;
+  return `<details class="card rescue" ${L.length&&left>0?'open':''}><summary>🆘 구조 센터 — 위험한 시민 ${L.length}명 · 내 구조 키트 ${left}/3</summary>
+  <p class="muted" style="margin:6px 0">구조 키트 1개 = 그 친구의 희망 +10. 절망에 빠지기 전에 구해 주세요! (보낼 때마다 +3XP)</p>
+  ${L.map(([id,h])=>{ const s=HSTAT(h.hope); const sent=!!mine[id]; return `<div class="req"><span style="font-size:28px">${h.per.e}</span><div class="rt"><b>${esc(h.per.n)}</b> <small class="muted">${esc(h.per.who)}</small><div class="hb sm"><i style="width:${h.hope}%;background:${s.c}"></i></div><small>${s.e} ${s.n} · 희망 ${h.hope}</small></div><button class="btn sm ${sent?'ghost':'acc'}" data-act="kit" data-v="${esc(id)}" ${!sent&&left<=0?'disabled':''}>${sent?'✅ 보냄 (취소)':'🧰 구조 키트'}</button></div>`; }).join('')||'<p class="muted">지금은 위험한 시민이 없어요. 🎉</p>'}</details>`;
+}
+function ch2Top(W){ const h=hopeParts(W,ME); if(!h) return ''; const s=HSTAT(h.hope);
+  return `<div class="card hopecard"><div class="row"><span style="font-size:34px">${h.per.e}</span><div style="flex:1;min-width:180px"><b>나는 ${esc(h.per.n)}</b> <small class="muted">${esc(h.per.who)} · ${CITI[h.cat].e} ${esc(CITI[h.cat].n)}</small><div class="hb"><i style="width:${h.hope}%;background:${s.c}"></i></div></div><div class="hv" style="color:${s.c}">${s.e} ${h.hope}<small>${s.n}</small></div></div>
+  <details><summary>내 희망은 왜 이만큼일까?</summary><ul class="rlist">${h.parts.map(p=>`<li><b class="${p[1]>=0?'okc':'noc'}">${p[1]>0?'+':''}${p[1]}</b>${esc(p[0])}</li>`).join('')}</ul></details>
+  ${teamBoardHTML(W)}</div>${rescueHTML(W)}`; }
+function epilogueHTML(W,id){ const h=hopeParts(W,id); if(!h) return ''; const lv=h.hope>=60?'good':h.hope>=30?'mid':'bad'; const s=HSTAT(h.hope); return `<div class="ending ${lv==='good'?'good':lv==='mid'?'mid':''}"><div class="muted">${esc(h.per.n)}의 결말 · 희망 ${h.hope}</div><h2>${h.per.e} ${s.e} ${lv==='good'?'희망 엔딩':lv==='mid'?'버팀 엔딩':'절망 엔딩'}</h2><p>${esc(EPI[lv].replace(/\{n\}/g,h.per.n))}</p></div>`; }
+let trShown={};
+function trialOverlay(){
+  let W; try{ W=calc(); }catch(e){ return; } const nT=+(DATA.meta&&DATA.meta.trials)||0; if(!nT) return; const h=hopeParts(W,ME); if(!h) return;
+  const i=nT-1; const key='earth_tr_'+SRC+(SLOT?'_'+SLOT:'')+'_'+i+'_'+(DATA.meta.trAt||0);
+  if(trShown[key]||ls.get(key)) return; trShown[key]=1; ls.set(key,'1');
+  const t=trialOf(i,ME,h.cat); const good=t[2]>0; const s=HSTAT(h.hope);
+  const ov=document.createElement('div'); ov.className='reveal';
+  ov.innerHTML=`<div class="box" style="border:4px solid ${good?'var(--ok)':'var(--bad)'}"><div class="muted">${good?'🎁 행운 카드':'🌩️ 시련 카드'} · ${esc(h.per.n)}</div><div class="dice">${t[0]}</div><div class="out" style="color:${good?'var(--ok)':'var(--bad)'}">희망 ${good?'+':''}${t[2]}</div><p style="font-size:19px;font-weight:700">${esc(t[1])}</p><p>지금 희망: <b>${h.hope}</b> ${s.e} ${s.n}</p>${!good&&h.hope<40?'<p class="muted">위험해요! 친구들의 응원과 구조 키트가 필요합니다.</p>':''}<p class="muted">화면을 누르면 닫힙니다</p></div>`;
+  document.body.appendChild(ov); ov.addEventListener('click',()=>ov.remove()); setTimeout(()=>{ if(ov.isConnected) ov.remove(); },8000);
 }
 function personaStory(W,t){
   const hits=W.done.filter(R=>R.vict.includes(t)||(R.loc[t]&&R.loc[t].bad));
@@ -1471,22 +1689,25 @@ function myAs(){ return DATA.meta&&DATA.meta.assign&&DATA.meta.assign[ME]; }
 function vAssign(W){
   const as=myAs();
   if(!as || !W.P[as.t]) return `<div class="card center"><h2>🙋 시민 배정을 기다리는 중</h2><p class="muted">선생님이 배정하면 새 신분이 나타납니다.</p></div>`;
-  const t=W.P[as.t], per=CITI[as.c]||CITI.hunger, now=W.S[as.t];
+  const t=W.P[as.t], per=persOf(as), team=CITI[per.c], now=W.S[as.t];
   const mine=DATA.voice&&DATA.voice[ME]; const d=draft('voice');
   const myCh=(DATA.cheer&&DATA.cheer[ME])||{}; const nCh=Object.keys(myCh).length;
   const recv=Object.values(DATA.cheer||{}).filter(x=>x&&x[ME]).length;
+  const asAll=(DATA.meta&&DATA.meta.assign)||{};
   const others=Object.entries(DATA.voice||{}).filter(([id])=>id!==ME&&W.P[id]);
-  return `<div class="card"><div class="scene"><span class="tag">🙋 신분 변경 · ${per.e} ${esc(per.team)}</span><h2 style="margin:4px 0 8px">당신은 이제 정상이 아닙니다</h2><p style="margin:0">지난 시간 위기를 지나 형편이 가장 어려워진 나라, <b>${esc(t.name)}</b>${as.t===ME?' (바로 우리 나라!)':''}에 사는 한 사람입니다.</p></div>
-  <div class="hero">${flagHTML(t.flag,'lg')}<div class="persona" style="flex:1;min-width:240px"><span class="av">${per.e}</span><div><div class="who">나의 새 신분</div><b>${esc(per.n)} — ${esc(per.who)}</b><div class="q">“${esc(per.q)}”</div></div></div></div>
-  <h3>이 나라에 일어난 일</h3>${personaStory(W,as.t)}
-  ${barsHTML(now.v,false,t.base)}<div class="row" style="margin-top:8px">${resHTML(now.coin,now.food)}</div></div>
-  <div class="card"><h3 style="margin-top:0">🎯 미션 1 · SOS 편지 <small class="muted">+10XP</small></h3>
-  ${mine?`<p>${esc(per.n)}에게 가장 필요했던 것: <b>${esc(mine.need)}</b></p><p class="quote">${esc(mine.text)}</p><div class="banner ok">✅ 보냄 · 받은 응원 💌 ${recv}개</div>`:
+  const h=hopeParts(W,ME); const s=HSTAT(h?h.hope:0);
+  return `<div class="card"><div class="scene"><span class="tag">🙋 신분 변경 · ${team.e} ${esc(team.n)}</span><h2 style="margin:4px 0 8px">당신은 이제 정상이 아닙니다</h2><p style="margin:0">지난 시간 위기를 지나 형편이 가장 어려워진 나라, <b>${esc(t.name)}</b>${as.t===ME?' (바로 우리 나라!)':''}에 사는 한 아이입니다. <b>희망 게이지가 바닥나면 절망 엔딩</b>을 맞습니다. 친구들의 응원과 구조 키트, 우리 반의 실천만이 당신을 살립니다.</p></div>
+  <div class="hero">${flagHTML(t.flag,'lg')}<div class="persona" style="flex:1;min-width:240px"><span class="av">${per.e}</span><div><div class="who">나의 새 이름</div><b>${esc(per.n)} — ${esc(per.who)}</b><div class="q">“${esc(per.q)}”</div></div></div></div>
+  ${h?`<div class="row" style="margin-top:12px"><b>💗 희망 게이지</b><div class="hb" style="flex:1;min-width:160px"><i style="width:${h.hope}%;background:${s.c}"></i></div><b style="color:${s.c}">${s.e} ${h.hope} ${s.n}</b></div>`:''}
+  <h3>이 나라에 일어난 일</h3>${personaStory(W,as.t)}<div class="row" style="margin-top:8px">${resHTML(now.coin,now.food)}</div></div>
+  <div class="card"><h3 style="margin-top:0">🎯 미션 1 · SOS 편지 <small class="muted">+10XP · 희망 +5</small></h3>
+  ${mine?`<p>${esc(per.n)}에게 가장 필요했던 것: <b>${esc(mine.need)}</b></p><p class="quote">${esc(mine.text)}</p><div class="banner ok">✅ 보냄 · 받은 응원 💌 ${recv}개 (응원 1개 = 희망 +6)</div>`:
   `<label class="lb" style="margin-top:0">${esc(per.n)}에게 가장 필요했던 것은?</label><div class="chips">${NEEDS.map(n=>`<button class="chip ${d.need===n?'sel':''}" data-act="vneed" data-v="${esc(n)}">${esc(n)}</button>`).join('')}</div>
   <label class="lb">${esc(per.n)}이(가) 되어, 지난 시간 결정을 내린 정상들에게 SOS 편지를 쓰세요</label><textarea class="field" data-bind="voice.text" placeholder="정상 여러분, 저는 ${esc(per.n)}입니다. ...">${esc(d.text||'')}</textarea>
   <div class="row" style="margin-top:12px"><span class="sp"></span><button class="btn acc" data-act="voiceGo">SOS 보내기</button></div>`}</div>
-  ${mine?`<div class="card"><h3 style="margin-top:0">🎯 미션 2 · 응원 릴레이 💌 <small class="muted">친구 3명에게 응원 · +2XP씩</small></h3><p class="muted">친구들의 SOS 편지를 읽고, 가장 마음이 움직인 편지 3개에 응원을 보내세요. (${nCh}/3)</p>
-  <div class="vwall">${shuffled(others,ME+'cheer').map(([id,v])=>{ const p=CITI[v.c]||CITI.hunger; const on=!!myCh[id]; const cnt=Object.values(DATA.cheer||{}).filter(x=>x&&x[id]).length; return `<div class="vcard"><div class="vh">${p.e} ${esc(p.n)} · 필요: ${esc(v.need)}</div><p>${esc(v.text)}</p><button class="heart ${on?'on':''}" data-act="cheer" data-v="${esc(id)}" ${!on&&nCh>=3?'disabled':''}>💌 ${cnt}</button></div>`; }).join('')||'<p class="muted">아직 다른 편지가 없어요.</p>'}</div></div>`:''}`;
+  ${mine?`<div class="card"><h3 style="margin-top:0">🎯 미션 2 · 응원 릴레이 💌 <small class="muted">친구 3명 · 응원 1개 = 그 친구 희망 +6 · +2XP씩</small></h3><p class="muted">친구들의 SOS 편지를 읽고, 가장 마음이 움직인 편지 3개에 응원을 보내세요. (${nCh}/3)</p>
+  <div class="vwall">${shuffled(others,ME+'cheer').map(([id,v])=>{ const p=persOf(asAll[id]); const on=!!myCh[id]; const cnt=Object.values(DATA.cheer||{}).filter(x=>x&&x[id]).length; return `<div class="vcard"><div class="vh">${p.e} ${esc(p.n)} · 필요: ${esc(v.need)}</div><p>${esc(v.text)}</p><button class="heart ${on?'on':''}" data-act="cheer" data-v="${esc(id)}" ${!on&&nCh>=3?'disabled':''}>💌 ${cnt}</button></div>`; }).join('')||'<p class="muted">아직 다른 편지가 없어요.</p>'}</div></div>
+  <div class="card">${teamBoardHTML(W)}</div>${rescueHTML(W)}`:''}`;
 }
 function dayAgg(){ const L=Object.values(DATA.day||{}).filter(x=>x&&x.c); return DAY.map((q,i)=>{ const cnt=q.opts.map(()=>0); L.forEach(x=>{ const v=x.c[i]; if(v!=null&&cnt[v]!=null) cnt[v]++; }); return {q,cnt,n:L.length}; }); }
 function campSupport(key){ const C=DATA.camp||{}; const V=DATA.vote||{}; const posters=Object.entries(C).filter(([id,x])=>x&&x.to===key); let likes=0; posters.forEach(([id])=>{ likes+=Object.values(V).filter(v=>v&&v[id]).length; }); return {posters:posters.length,likes}; }
@@ -1498,7 +1719,7 @@ function fateOf(key){
   const ratio=clamp(0.55*dayR+0.35*campR+Math.min(0.1,linkN*0.03),0,1);
   return {lvl:ratio>=0.6?'good':ratio>=0.35?'mid':'bad',ratio,cs};
 }
-function fatesHTML(){ return `<div class="card"><h2>🌍 우리 반의 선택이 모이면</h2><p class="muted">세계 시민의 하루 선택 + 캠페인 지지 + 연결 탐정 결과가 모여 네 사람의 운명이 정해집니다.</p>${Object.entries(CITI).map(([k,p])=>{ const f=fateOf(k); return `<div class="fate ${f.lvl}"><span class="av">${p.e}</span><div><b>${esc(p.n)}</b> <small class="muted">${esc(p.who)} · 반 실천 지수 ${Math.round(f.ratio*100)}% · 캠페인 지지 ❤️${f.cs.likes}</small><div>${esc(FATE[k][f.lvl])}</div></div></div>`; }).join('')}</div>`; }
+function fatesHTML(){ return `<div class="card"><h2>🌍 우리 반의 선택이 모이면</h2><p class="muted">세계 시민의 하루 선택 + 캠페인 지지 + 연결 탐정 결과가 모여 네 팀의 운명이 정해지고, 팀원 모두의 희망이 바뀝니다.</p>${Object.entries(CITI).map(([k,p])=>{ const f=fateOf(k); return `<div class="fate ${f.lvl}"><span class="av">${p.e}</span><div><b>${esc(p.n)}</b> <small class="muted">${esc(p.who)} · 반 실천 지수 ${Math.round(f.ratio*100)}% · 캠페인 지지 ❤️${f.cs.likes}</small><div>${esc(FATE[k][f.lvl])}</div></div></div>`; }).join('')}</div>`; }
 function dayResultHTML(){
   const ag=dayAgg();
   return `${fatesHTML()}<div class="card"><h3 style="margin-top:0">장면별 우리 반 선택</h3>${ag.map(a=>`<div class="rbox"><b>${a.q.time} ${esc(a.q.t)}</b>${a.q.opts.map((o,i)=>{ const p=a.n?Math.round(a.cnt[i]/a.n*100):0; return `<div class="obar"><div class="lbl"><span>${esc(o.t)}</span><span>${a.cnt[i]}명 · ${p}%</span></div><div class="tr"><i style="width:${p}%;background:${o.p>=2?'var(--ok)':o.p>0?'var(--warn)':'#9aa0a6'}"></i></div></div>`; }).join('')}</div>`).join('')}
@@ -1512,7 +1733,7 @@ function vDay(){
     const tags={}; mine.c.forEach((v,i)=>{ const t=DAY[i].opts[v]&&DAY[i].opts[v].tag; if(t) tags[t]=(tags[t]||0)+1; });
     return `<div class="card"><h2>🌅 나의 세계 시민 하루</h2><p>세계 시민 발자국 <b>${pts}점</b> / ${DAYMAX}점 ${Object.keys(tags).length?'· '+Object.entries(tags).map(([t,n])=>`${t} ${n}번`).join(' · '):''}</p>
     <ul class="rlist">${DAY.map((q,i)=>{ const o=q.opts[mine.c[i]]; return `<li><b>${q.time}</b>${esc(o?o.t:'')}<br><small class="muted">${esc(o?o.r:'')}</small></li>`; }).join('')}</ul></div>
-    ${revd?dayResultHTML():`<div class="card center"><p class="muted blink">반 친구들의 선택이 모이면 선생님이 결과를 공개합니다. 라니·코피·아마드·아이샤의 이야기는 어떻게 될까요?</p></div>`}`;
+    ${revd?dayResultHTML():`<div class="card center"><p class="muted blink">반 친구들의 선택이 모이면 선생님이 결과를 공개합니다. 네 팀 친구들의 희망은 어떻게 될까요?</p></div>`}`;
   }
   if(d.i>=DAY.length){ return `<div class="card center"><h2>하루가 끝났습니다</h2><p>오늘 나의 선택을 제출할까요?</p><div class="row" style="justify-content:center"><button class="btn ghost" data-act="dayBack">처음부터 다시</button><button class="btn acc" data-act="dayGo">제출하기</button></div></div>`; }
   const q=DAY[d.i]; const ch=d.c[d.i]; const per=CITI[q.to];
@@ -1527,8 +1748,8 @@ function vLink(){
   const mine=DATA.link&&DATA.link[ME]; const d=draft('link'); d.order=d.order||[];
   if(mine){ const L=LINKS.find(x=>x.k===mine.item)||LINKS[0]; const per=CITI[L.to];
     return `<div class="card"><h2>🔗 연결 탐정 — ${L.e} ${esc(L.n)} 추적 완료</h2><div class="banner ${mine.ok===4?'ok':'warn'}">4개 중 ${mine.ok}개를 맞는 자리에 놓았어요.${mine.ok===4?' 🎉 완벽한 추리! +5XP':''}</div>
-    <h3>정답: 나에게서 ${esc(per.n)}에게로</h3><ol class="chain">${L.chain.map(x=>`<li>${esc(x)}</li>`).join('')}</ol>
-    <div class="fate"><span class="av">${per.e}</span><div><b>${esc(per.n)}</b> · ${esc(per.who)}<br>이 고리 끝에 ${esc(per.n)}이(가) 있었습니다.</div></div>
+    <h3>정답: 나에게서 ${per.e} ${esc(per.n)} 친구들에게로</h3><ol class="chain">${L.chain.map(x=>`<li>${esc(x)}</li>`).join('')}</ol>
+    <div class="fate"><span class="av">${per.e}</span><div><b>${esc(per.n)}</b> · ${esc(per.who)}<br>이 고리 끝에 ${esc(PERS.filter(p=>p.c===L.to).map(p=>p.n).join(', '))} 같은 친구들이 있었습니다.</div></div>
     <h3>✂️ 내가 이 고리를 끊는 방법</h3><p class="quote">${esc(mine.cut)}</p></div>`; }
   const L=LINKS.find(x=>x.k===d.item);
   if(!L) return `<div class="card"><h2>🔗 연결 탐정</h2><p>내 주변의 물건 하나를 골라, 그 물건이 지구 반대편의 누구와 연결되어 있는지 추적하세요. <small class="muted">+10XP, 완벽하면 +5XP</small></p>
@@ -1556,7 +1777,7 @@ function vCampaign(W){
   const likes=id=>Object.values(DATA.vote||{}).filter(v=>v&&v[id]).length;
   const posters=Object.entries(DATA.camp||{}).filter(([id,x])=>x&&W.P[id]);
   const revd=DATA.meta&&DATA.meta.fateRev;
-  return `<div class="card"><h2>📣 세계 시민 캠페인</h2><p>내가 맡은 인물(${CITI[myKey].e} ${esc(CITI[myKey].n)})이나 다른 인물을 돕는 캠페인 포스터를 만드세요. 지지(❤️)를 많이 받을수록 그 인물의 운명이 바뀝니다! <small class="muted">+15XP</small></p>
+  return `<div class="card"><h2>📣 세계 시민 캠페인</h2><p>내 팀(${CITI[myKey].e} ${esc(CITI[myKey].n)})이나 다른 팀을 돕는 캠페인 포스터를 만드세요. 지지(❤️)를 많이 받을수록 그 팀 친구들의 운명과 희망이 바뀝니다! <small class="muted">+15XP</small></p>
   ${mine?`<div class="poster mine"><div class="muted">${CITI[mine.to].e} ${esc(CITI[mine.to].n)}을(를) 위한 캠페인 · ❤️ ${likes(ME)}</div><div class="sl">“${esc(mine.slogan)}”</div><div class="tg">${esc(mine.tag)}</div><p><b>함께 해요:</b> ${esc(mine.act)}</p><small class="muted">${esc(mine.lv)}</small></div>`:
   `<label class="lb">누구를 돕는 캠페인인가요?</label><div class="chips">${Object.entries(CITI).map(([k,p])=>`<button class="chip ${d.to===k?'sel':''}" data-act="cto" data-v="${k}">${p.e} ${esc(p.n)}</button>`).join('')}</div>
   <label class="lb">슬로건 (30자 이내)</label><input class="field" data-bind="camp.slogan" value="${esc(d.slogan||'')}" maxlength="30" placeholder="예: 내 폰이 오래 갈수록 아마드의 고향은 평화로워진다">
@@ -1597,14 +1818,14 @@ function vPledge(){
   <label class="lb">다시 정상이 된다면, 나는 ___ 하겠다</label><textarea class="field" data-bind="plan.again" placeholder="예: 우리 나라가 피해국이 아니어도 국제 기금에 먼저 내겠다. 왜냐하면 ...">${esc(d.again||'')}</textarea>
   <div class="row" style="margin-top:12px"><span class="sp"></span><button class="btn acc" data-act="planGo">서약하기</button></div></div>`;
 }
-function vWrap(){
+function vWrap(W){
   const mine=DATA.ox&&DATA.ox[ME]; const x=xpOf(ME);
-  if(mine){ return `<div class="card"><h2>✅ 정리하기</h2>${OXQ.map((q,i)=>`<div class="oxr"><span>${i+1}. ${esc(q.q)}</span><b class="${mine.a[i]===q.a?'okc':'noc'}">${mine.a[i]} ${mine.a[i]===q.a?'⭕ 정답':'❌ 정답은 '+q.a}</b></div>`).join('')}<h3>느낀 점</h3><p class="quote">${esc(mine.feel)}</p>
+  if(mine){ return `${epilogueHTML(W,ME)}<div class="card"><h2>✅ 정리하기</h2>${OXQ.map((q,i)=>`<div class="oxr"><span>${i+1}. ${esc(q.q)}</span><b class="${mine.a[i]===q.a?'okc':'noc'}">${mine.a[i]} ${mine.a[i]===q.a?'⭕ 정답':'❌ 정답은 '+q.a}</b></div>`).join('')}<h3>느낀 점</h3><p class="quote">${esc(mine.feel)}</p>
     <div class="tier win"><div>오늘의 세계 시민 등급</div><h2>${xpLv(x).n}</h2><div>${x} XP · 수고했어요, ${esc((DATA.players[ME]||{}).sname||'')}!</div></div></div>`; }
   const d=draft('ox'); d.a=d.a||[];
   return `<div class="card"><h2>✅ 정리하기</h2>${OXQ.map((q,i)=>`<div class="oxr"><span>${i+1}. ${esc(q.q)}</span><span class="seg">${['O','X'].map(v=>`<button class="${d.a[i]===v?'on':''}" data-act="ox" data-i="${i}" data-v="${v}">${v}</button>`).join('')}</span></div>`).join('')}
   <label class="lb">두 시간을 마치며 느낀 점</label><textarea class="field" data-bind="ox.feel" placeholder="정상이었을 때와 시민이었을 때, 무엇이 달랐나요?">${esc(d.feel||'')}</textarea>
-  <div class="row" style="margin-top:12px"><span class="sp"></span><button class="btn acc" data-act="oxGo">제출</button></div></div>`;
+  <div class="row" style="margin-top:12px"><span class="sp"></span><button class="btn acc" data-act="oxGo">제출하고 결말 보기</button></div></div>`;
 }
 function renderStudent(){
   if(!SRC){ $app.innerHTML=`<div class="wrap">${vRoom()}</div>`; return; }
@@ -1617,7 +1838,8 @@ function renderStudent(){
     const W=calc(); const ph=phaseOf(); let b='';
     if(ph==='lobby') b=vLobby(W); else if(ph==='crisis') b=vCrisis(W); else if(ph==='end1') b=vEnd1(W);
     else if(ph==='assign') b=vAssign(W); else if(ph==='day') b=vDay(); else if(ph==='link') b=vLink(); else if(ph==='sort') b=vSort(); else if(ph==='campaign') b=vCampaign(W);
-    else if(ph==='mirror') b=vMirror(W); else if(ph==='pledge') b=vPledge(); else if(ph==='wrap') b=vWrap();
+    else if(ph==='mirror') b=vMirror(W); else if(ph==='pledge') b=vPledge(); else if(ph==='wrap') b=vWrap(W);
+    if((PHASES.find(p=>p.k===ph)||{}).ch===2 && ph!=='assign') b=ch2Top(W)+b;
     body=sHeader()+`<div class="stepname">${(PHASES.find(p=>p.k===ph)||{}).e||''} ${esc(pName(ph))}</div>`+b;
   }
   $app.innerHTML=`<div class="wrap">${body}</div>`;
@@ -1638,13 +1860,14 @@ const sActs = {
     const x=QUICK.find(z=>z.k===q.type); const sid='q'+Date.now().toString(36)+Math.random().toString(36).slice(2,5);
     view='auto'; claim({sid,num:String(q.num),sname:String(q.sname),name:String(q.name).slice(0,30),flag:{c1:'#3a86ff',c2:'#f4a261',sym:TYPES[q.type].e},terr:q.terr,gov:'',base:Object.assign({},x.v),btype:q.type,quick:true}); },
   aopt(ds){ draft('a'+ds.k).opt=ds.v; render(); },
-  step(ds){ const [a,b]=ds.k.split('.'); const d=draft(a); const mn=b==='amt'?1:0, mx=b==='amt'?6:30; d[b]=Math.max(mn,Math.min(mx,(+d[b]||(b==='amt'?2:0))+(+ds.d))); render(); },
+  step(ds){ const [a,b]=ds.k.split('.'); const d=draft(a); const mn=b==='amt'?1:0, mx=b==='amt'?10:b.startsWith('b_')?5:30; d[b]=Math.max(mn,Math.min(mx,(+d[b]||(b==='amt'?2:0))+(+ds.d))); render(); },
   editAct(ds){ editing[ds.v]=true; render(); }, cancelEdit(ds){ editing[ds.v]=false; delete draft('a'+ds.v)._loaded; render(); },
   async actSubmit(ds){ const k=+ds.k; const W=calc(); const R=W.openR; if(!R||R.k!==k) return toast('이미 결과가 공개된 위기예요.'); const d=draft('a'+k);
     if(!need(d.opt,'우리 나라의 대응을 골라 주세요.')||!need(lenOK(d.reason,5),'결정한 이유를 5글자 이상 써 주세요.')) return;
     const left=budgetLeft(W,R,d); if(!need(left.coin>=0,'예산이 모자라요. 기금이나 지원을 줄여 주세요.')) return;
     if(left.food<0 && !confirm('식량이 모자라 기아가 생길 수 있어요. 그래도 제출할까요?')) return;
-    await backend.set(`${ER()}/act/${k}/${ME}`,{opt:d.opt,fund:Math.floor(+d.fund||0),reason:String(d.reason).trim(),at:Date.now()}); editing[k]=false; toast('✅ 결정을 제출했어요'); render(); },
+    if(d.raid && !confirm(`정말 ${rawNm(W,d.raid)}을(를) 약탈할까요? 결과 공개 때 온 세계에 공개됩니다.`)) return;
+    await backend.set(`${ER()}/act/${k}/${ME}`,{opt:d.opt,fund:Math.floor(+d.fund||0),buy:Object.fromEntries(SHOP.map(it=>[it.k,Math.floor(+d['b_'+it.k]||0)])),raid:d.raid||null,reason:String(d.reason).trim(),at:Date.now()}); editing[k]=false; toast('✅ 결정을 제출했어요'); render(); },
   rneed(ds){ draft('r'+ds.k).need=ds.v; render(); },
   async reqGo(ds){ const d=draft('r'+ds.k); if(!need(lenOK(d.msg,4),'세계에 보낼 메시지를 써 주세요.')) return; await backend.set(`${ER()}/req/${ds.k}/${ME}`,{need:d.need==='coin'?'coin':'food',amt:d.amt||2,msg:String(d.msg).trim(),at:Date.now()}); toast('🙏 지원 요청을 올렸어요'); },
   async reqDel(ds){ await backend.remove(`${ER()}/req/${ds.k}/${ME}`); },
@@ -1657,16 +1880,17 @@ const sActs = {
     await backend.set(`${ER()}/gift/${k}/${ME}/${g.to}`,{coin:+g.coin||0,food:+g.food||0,msg:String(g.msg||'').trim().slice(0,60),at:Date.now()}); toast('📦 지원을 보냈어요 (결과 공개 때 도착)'); dr['g'+k]={}; render(); },
   async giftDel(ds){ await backend.remove(`${ER()}/gift/${ds.k}/${ME}/${ds.v}`); },
   async propose(ds){ const W=calc(); if(W.T[ds.v]) return toast('이미 다른 나라가 제안했어요. 가입하기를 눌러 주세요.'); const d=draft('t_'+ds.v); if(!need(lenOK(d.why,5),'제안 연설을 한 줄 써 주세요.')) return;
-    await backend.set(`${ER()}/treaty/${ds.v}`,{by:ME,why:String(d.why).trim().slice(0,80),at:Date.now(),signs:{[ME]:{r:W.rev,at:Date.now()}}}); toast('📜 협약을 제안했어요! 다른 나라들을 설득해 보세요.'); },
+    await backend.set(`${ER()}/treaty/${ds.v}`,{by:ME,why:String(d.why).trim().slice(0,80),at:Date.now(),log:{[ME]:{['r'+W.cr.length]:{in:true,at:Date.now()}}}}); toast('📜 협약을 제안했어요! 다음 위기부터 적용됩니다. 다른 나라들을 설득해 보세요.'); },
   async sign(ds){ const W=calc(); if(!W.T[ds.v]) return; if(W.violQuit[ME]!=null && ds.v==='peace') return toast('평화 협정을 어겨서 다시 가입할 수 없어요.');
-    await backend.set(`${ER()}/treaty/${ds.v}/signs/${ME}`,{r:W.rev,at:Date.now()}); await backend.remove(`${ER()}/treaty/${ds.v}/quit/${ME}`); toast('✍️ 협약에 가입했어요'); },
-  async quit(ds){ if(!confirm('정말 탈퇴할까요? 분담금은 안 내지만, 협약의 효과와 연대 지수가 약해집니다.')) return; const W=calc(); await backend.set(`${ER()}/treaty/${ds.v}/quit/${ME}`,{r:W.rev,at:Date.now()}); toast('협약에서 탈퇴했어요'); },
-  quitAny(){ const W=calc(); const L=TREATY.filter(TT=>W.T[TT.k]&&isSigner(W.T[TT.k],ME,W.rev,TT.k==='peace'?W.violQuit:null)); if(!L.length) return; const pick=L.length===1?L[0]:L[Math.max(0,Math.min(L.length-1,(+prompt(L.map((x,i)=>`${i+1}. ${x.n}`).join('\n')+'\n탈퇴할 협약 번호를 쓰세요','1')||1)-1))]; sActs.quit({v:pick.k}); },
+    await backend.set(`${ER()}/treaty/${ds.v}/log/${ME}/r${W.cr.length}`,{in:true,at:Date.now()}); toast('✍️ 가입했어요 (다음 위기부터 적용)'); },
+  async quit(ds){ if(!confirm('정말 탈퇴할까요? 다음 위기부터 분담금을 내지 않지만, 위약금 💰5와 신뢰 -6을 잃고 협약 효과와 연대 지수가 약해집니다.')) return; const W=calc(); await backend.set(`${ER()}/treaty/${ds.v}/log/${ME}/r${W.cr.length}`,{in:false,at:Date.now()}); toast('협약에서 탈퇴했어요 (다음 위기부터)'); },
+  quitAny(){ const W=calc(); const L=TREATY.filter(TT=>W.T[TT.k]&&isSigner(W.T[TT.k],ME,W.cr.length,vq(W,TT))); if(!L.length) return; const pick=L.length===1?L[0]:L[Math.max(0,Math.min(L.length-1,(+prompt(L.map((x,i)=>`${i+1}. ${x.n}`).join('\n')+'\n탈퇴할 협약 번호를 쓰세요','1')||1)-1))]; sActs.quit({v:pick.k}); },
   async refl1Go(){ const d=draft('refl1'); if(!need(lenOK(d.why,10)&&lenOK(d.me,10),'두 질문에 10글자 이상 써 주세요.')) return; await backend.set(`${ER()}/refl1/${ME}`,{why:d.why.trim(),me:d.me.trim(),at:Date.now()}); },
   vneed(ds){ draft('voice').need=ds.v; render(); },
   async voiceGo(){ const d=draft('voice'); if(!need(d.need,'가장 필요했던 것을 골라 주세요.')||!need(lenOK(d.text,10),'10글자 이상 써 주세요.')) return; const as=myAs();
     await backend.set(`${ER()}/voice/${ME}`,{need:d.need,text:d.text.trim(),t:as.t,c:as.c,at:Date.now()}); toast('📣 SOS 편지를 보냈어요 +10XP'); },
   async cheer(ds){ const on=DATA.cheer&&DATA.cheer[ME]&&DATA.cheer[ME][ds.v]; if(on) await backend.remove(`${ER()}/cheer/${ME}/${ds.v}`); else { if(Object.keys((DATA.cheer&&DATA.cheer[ME])||{}).length>=3) return toast('응원은 3개까지예요.'); await backend.set(`${ER()}/cheer/${ME}/${ds.v}`,true); toast('💌 응원을 보냈어요'); } },
+  async kit(ds){ const mine=(DATA.kit&&DATA.kit[ME])||{}; if(mine[ds.v]){ await backend.remove(`${ER()}/kit/${ME}/${ds.v}`); return; } if(ds.v===ME) return; if(Object.keys(mine).length>=3) return toast('구조 키트는 3개까지예요.'); await backend.set(`${ER()}/kit/${ME}/${ds.v}`,Date.now()); toast('🧰 구조 키트를 보냈어요! 그 친구의 희망 +10'); },
   dpick(ds){ const d=draft('day'); d.c=d.c||[]; d.c[d.i]=+ds.v; render(); },
   dnext(){ const d=draft('day'); d.i++; render(); window.scrollTo(0,0); },
   dayBack(){ dr.day={c:[],i:0}; render(); },
@@ -1714,7 +1938,7 @@ function tHeader(){ return `<div class="top"><h1>🌍 지구 정상회담 · 교
 function phaseBar(){
   const ph=phaseOf();
   const g=ch=>PHASES.filter(p=>p.ch===ch).map(p=>`<button class="${ph===p.k?'on':''}" data-act="phase" data-v="${p.k}">${p.e} ${esc(p.n)}</button>`).join('');
-  return `<div class="card pbar"><div class="pg"><b>1차시 · 정상</b><div class="tabs">${g(1)}</div></div><div class="pg"><b>2차시 · 시민</b><div class="tabs">${g(2)}</div></div><div class="muted" style="font-size:13px">2차시 45분 추천: 시민이 되다 → 세계 시민의 하루 → 캠페인 → 실천 서약 (시간이 남으면 연결 탐정·실천 분류·거울·정리 추가)</div></div>`;
+  return `<div class="card pbar"><div class="pg"><b>1차시 · 정상</b><div class="tabs">${g(1)}</div></div><div class="pg"><b>2차시 · 시민</b><div class="tabs">${g(2)}</div></div><div class="muted" style="font-size:13px">2차시 45분 추천: 시민이 되다 → 🌩️시련 → 세계 시민의 하루 → 🌩️시련 → 캠페인 → 실천 서약 → 정리(결말) · 시련 카드는 [🎮 진행]에서 3번까지</div></div>`;
 }
 function crisisControl(W){
   const ph=phaseOf(); if(ph!=='crisis') return '';
@@ -1725,11 +1949,12 @@ function crisisControl(W){
     const L=liveSol(W);
     html+=`<div class="scene" style="margin-top:12px"><span class="tag">${R.c.e} ${R.k+1}번째 위기 진행 중</span><h2 style="margin:4px 0">${esc(R.c.t)}</h2><div class="muted">피해국: ${R.vict.map(id=>who(W,id)).join(', ')} · 돌발 사건: ${Object.entries(R.loc).map(([id,x])=>`${who(W,id)} ${x.e}`).join(', ')||'없음'}</div></div>
     ${missionHTML(R)}
-    <div class="stat"><div class="box"><b>${L.sub}/${W.N}</b><small>결정 제출</small></div><div class="box"><b>${L.fund}/${W.G}</b><small>국제 기금</small></div><div class="box"><b>${Math.round(L.sol*100)}</b><small>연대 지수(예상)</small></div><div class="box"><b>${Math.round(L.cover*100)}%</b><small>필요국 지원 도착</small></div></div>
+    <div class="stat"><div class="box"><b>${L.sub}/${W.N}</b><small>결정 제출</small></div><div class="box"><b>${L.fund}/${W.G}</b><small>국제 기금</small></div><div class="box"><b>${Math.round(L.sol*100)}</b><small>연대 지수(예상)</small></div><div class="box"><b>${Math.round(L.cover*100)}%</b><small>필요국 지원 도착</small></div><div class="box"><b>${L.raids}</b><small>🏴‍☠️ 약탈 계획</small></div></div>
     <div class="row"><button class="btn acc" data-act="reveal">📢 결과 공개 (주사위!)</button><button class="btn ghost sm" data-act="addMin">⏱ +1분</button><button class="btn ghost sm" data-act="cancelCrisis">위기 취소</button><span class="muted">제출하지 않은 나라는 ‘대응 못 함’으로 처리됩니다.</span></div>`;
   } else {
     const left=CRISES.filter(c=>!W.cr.includes(c.id)); const rec=DECK_REC.filter(id=>!W.cr.includes(id))[0];
-    html+=`<div class="row" style="margin-top:12px"><b>제한 시간</b><div class="seg">${[2,3,4,5,0].map(x=>`<button class="${tmin===x?'on':''}" data-act="tmin" data-v="${x}">${x?x+'분':'없음'}</button>`).join('')}</div></div>
+    html+=`<div class="row" style="margin-top:12px"><button class="btn acc" data-act="randCrisis">🎲 무작위 위기 발생</button><button class="btn sm ghost" data-act="raidToggle">🏴‍☠️ 약탈 ${m.noRaid?'금지됨 (누르면 허용)':'허용 중 (누르면 금지)'}</button><span class="muted">약탈 가능 국가: ${[...W.RE].map(id=>who(W,id)).join(', ')||'없음'}</span></div>
+    <div class="row" style="margin-top:12px"><b>제한 시간</b><div class="seg">${[2,3,4,5,0].map(x=>`<button class="${tmin===x?'on':''}" data-act="tmin" data-v="${x}">${x?x+'분':'없음'}</button>`).join('')}</div></div>
     <p class="muted">다음 위기를 고르세요. 추천 순서: ${DECK_REC.map((id,i)=>`${i+1}.${crisisOf(id).e}`).join(' ')} (45분 수업이면 3~4개, 2차시 연속이면 6개)</p>
     <div class="grid g4">${left.map(c=>`<button class="opt ${c.id===rec?'sel':''}" data-act="newCrisis" data-v="${c.id}"><div class="e">${c.e}</div><div class="t">${esc(c.t)}</div><div class="d">${metOf(c.meter).e} ${metOf(c.meter).n}${c.id===rec?' · 추천':''}</div></button>`).join('')||'<p class="muted">모든 위기를 사용했습니다.</p>'}</div>
     <div class="row" style="margin-top:10px">${W.rev>0?`<button class="btn ghost sm" data-act="unreveal">↩ 마지막 공개 취소</button>`:''}<span class="sp"></span>${W.rev>0?`<button class="btn teal" data-act="phase" data-v="end1">🏁 위기 끝내고 결말 보기</button>`:''}</div>`;
@@ -1741,14 +1966,16 @@ function tRun(W){
   const ans = ph==='crisis'&&W.openR ? ((DATA.act&&DATA.act[W.openR.k])||{}) : ph==='end1'?DATA.refl1 : ph==='assign'?DATA.voice : ph==='day'?DATA.day : ph==='link'?DATA.link : ph==='sort'?DATA.sort : ph==='campaign'?DATA.camp : ph==='mirror'?DATA.check : ph==='pledge'?DATA.plan : ph==='wrap'?DATA.ox : null;
   const A=ans||{}; const ids=[...W.ids].sort((a,b)=>(+W.P[a].num||999)-(+W.P[b].num||999));
   let extra='';
-  if(ph==='assign') extra=`<div class="card"><button class="btn ghost" data-act="assign">🔀 시민 다시 배정</button> <span class="muted">형편이 가장 어려운 나라의 시민으로, 네 인물 팀(라니·코피·아마드·아이샤)에 고르게 배정됩니다.</span></div>`;
+  if(ph==='assign') extra=`<div class="card"><button class="btn ghost" data-act="assign">🔀 시민 다시 배정</button> <span class="muted">형편이 가장 어려운 나라의 시민으로, 네 팀(바다·빵·평화·우물)에 고르게, 20명의 서로 다른 인물로 배정됩니다.</span></div>`;
   if(['day','link','sort','campaign'].includes(ph)) extra=`<div class="card"><div class="row"><b>네 인물의 운명 공개</b><span class="muted">하루 선택·캠페인 지지·연결 탐정이 모두 반영됩니다</span><span class="sp"></span><button class="btn ${DATA.meta&&DATA.meta.fateRev?'ghost':'acc'}" data-act="fateRev">${DATA.meta&&DATA.meta.fateRev?'공개 취소':'📢 우리 반 결과 공개'}</button></div></div>`;
   const ch2=(PHASES.find(x=>x.k===ph)||{}).ch===2;
+  if(ch2 && DATA.meta && DATA.meta.assign){ const nT=+(DATA.meta.trials)||0; const hs=W.ids.map(id=>hopeParts(W,id)).filter(Boolean); const dn=hs.filter(h=>h.hope<40).length, dd=hs.filter(h=>h.hope<20).length;
+    extra=`<div class="card"><div class="row"><h3 style="margin:0">🌩️ 시련 카드</h3><span class="muted">모든 시민에게 무작위 시련(가끔 행운)이 닥칩니다. 희망이 떨어진 친구를 반 친구들이 구조 키트로 구해야 해요.</span><span class="sp"></span><button class="btn acc" data-act="trial" ${nT>=3?'disabled':''}>🌩️ 시련 발동 (${nT}/3)</button>${nT?`<button class="btn sm ghost" data-act="trialUndo">↩ 취소</button>`:''}</div>${teamBoardHTML(W,true)}<p class="muted" style="margin-bottom:0">⚠️ 위험(희망 40 미만) ${dn}명 · 🆘 절망(20 미만) ${dd}명</p></div>`+extra; }
   return `${crisisControl(W)}${extra}
   <div class="stat"><div class="box"><b>${nSrc}</b><small>국가 만들기에서 선포된 나라</small></div><div class="box"><b>${W.N}</b><small>입장한 나라</small></div>${ans?`<div class="box"><b>${ids.filter(id=>A[id]).length}/${W.N}</b><small>${esc(pName(ph))} 제출</small></div>`:''}</div>
   ${nSrc===0?`<div class="banner warn">⚠️ 방 ${esc(SRC)}에서 국가 만들기 나라를 찾지 못했습니다. 방 코드를 확인하세요. 학생들은 ‘새로 빠르게 만들기’로 들어올 수 있습니다.</div>`:''}
   <div class="card"><h3 style="margin-top:0">학생 현황 <small class="muted">(🔒 태블릿에 잠김 · 🙋 해제 요청)</small> <button class="btn sm ghost" data-act="unlockAll">🔓 전체 잠금 해제</button></h3>
-  <div class="plist">${ids.map(id=>{ const p=W.P[id]; const s=W.S[id]; return `<div class="pi ${A[id]?'done':''}">${flagHTML(p.flag,'sm')}<span><b>${esc(p.num)}번 ${esc(p.sname)}</b><small>${esc(p.name)} · ${ch2?`${xpOf(id)}XP`:`💰${s.coin} 🍞${s.food}`}${p.quick?' · 빠른 생성':''}</small></span><span class="sp"></span>${ans?(A[id]?'✅':'⏳'):''}${p.want&&p.dev?`<button class="btn sm acc" data-act="unlock" data-v="${esc(id)}">🙋 해제 요청</button>`:p.dev?`<button class="btn sm ghost" data-act="unlock" data-v="${esc(id)}" title="잠금 해제">🔒</button>`:''}<button class="btn sm ghost" data-act="delP" data-v="${esc(id)}" title="빼기">✕</button></div>`; }).join('')||'<p class="muted">아직 입장한 학생이 없습니다. 📱 학생 접속 QR을 띄워 주세요.</p>'}</div></div>`;
+  <div class="plist">${ids.map(id=>{ const p=W.P[id]; const s=W.S[id]; return `<div class="pi ${A[id]?'done':''}">${flagHTML(p.flag,'sm')}<span><b>${esc(p.num)}번 ${esc(p.sname)}</b><small>${esc(p.name)} · ${ch2?`${xpOf(id)}XP${(h=>h?` · ${h.per.e}희망 ${h.hope}`:'')(hopeParts(W,id))}`:`💰${s.coin} 🍞${s.food}`}${p.quick?' · 빠른 생성':''}</small></span><span class="sp"></span>${ans?(A[id]?'✅':'⏳'):''}${p.want&&p.dev?`<button class="btn sm acc" data-act="unlock" data-v="${esc(id)}">🙋 해제 요청</button>`:p.dev?`<button class="btn sm ghost" data-act="unlock" data-v="${esc(id)}" title="잠금 해제">🔒</button>`:''}<button class="btn sm ghost" data-act="delP" data-v="${esc(id)}" title="빼기">✕</button></div>`; }).join('')||'<p class="muted">아직 입장한 학생이 없습니다. 📱 학생 접속 QR을 띄워 주세요.</p>'}</div></div>`;
 }
 function tBoard(W){
   const R=W.openR, last=W.done[W.done.length-1];
@@ -1759,7 +1986,7 @@ function tBoard(W){
   <div>${R?feedHTML(W,10):''}<div class="card"><h3 style="margin-top:0">나라 현황</h3><div class="ngrid">${W.ids.map(id=>{ const p=W.P[id]; const st=R?R.start[id]:{coin:W.S[id].coin,food:W.S[id].food,v:W.S[id].v}; const v=R&&R.vict.includes(id); const lc=R&&R.loc[id]; const dc=!R&&last&&last.dice[id]; return `<div class="nmini ${v?'v':''}">${flagHTML(p.flag,'sm')}<div><b>${who(W,id)}</b>${v?' <span class="vtag">피해국</span>':''}${lc?` ${lc.e}`:''}${dc?` ${OUT[dc.out].e}`:''}<small>💰${st.coin} 🍞${st.food} · 평균 ${meanV(st.v)}</small></div></div>`; }).join('')}</div></div></div></div>`;
 }
 function roundBoard(W,R){
-  return `${tierHTML(R)}<div class="card">${missionHTML(R,true)}${fundBar(R.fund,R.G,'🌍 모인 국제 기금')}${shareBars(R.cnt,W.N)}
+  return `${tierHTML(R)}${awardsHTML(W,R)}<div class="card">${missionHTML(R,true)}${fundBar(R.fund,R.G,'🌍 모인 국제 기금')}${shareBars(R.cnt,W.N)}
   <div class="kv"><div><b>${Math.round(R.cover*100)}%</b><small>필요국 지원 도착</small></div><div><b>${R.gl.length}</b><small>📦 지원</small></div><div><b>${Object.values(R.dice).filter(x=>x.out==='great').length}</b><small>🌟 대성공</small></div><div><b>${Object.values(R.dice).filter(x=>x.out==='fail').length}</b><small>💥 실패</small></div>${R.famN?`<div><b>${R.famN}</b><small>🥀 기아</small></div>`:''}${R.viol.length?`<div><b>${R.viol.length}</b><small>🕊️ 협정 위반</small></div>`:''}</div>
   ${R.tr.filter(x=>x.sg.length).map(x=>`<div class="muted">${x.TT.e} ${x.TT.n} 가입 ${x.sg.length}국 → ${Object.entries(x.red).map(([m,v])=>`${metOf(m).n} -${v}`).join(', ')}</div>`).join('')}
   <details><summary>발문</summary><ul><li>연대 지수가 ${R.tier==='win'?'높았던':'낮았던'} 이유는 무엇일까?</li><li>‘기회 이용’을 고른 나라는 정말 이익을 보았을까? 연대가 무너졌을 때 그 나라도 피해를 입었을까?</li><li>${esc(R.c.facts[0])}</li></ul></details></div>`;
@@ -1769,8 +1996,8 @@ function tSummit(W){
   const reqs=R?Object.entries((DATA.req&&DATA.req[R.k])||{}).filter(([id])=>W.P[id]):[];
   return `<div class="card summit"><div class="row"><h2 style="margin:0">🏛️ 협약 현황 ${DATA.meta&&DATA.meta.summit?'<span class="otag" style="background:var(--blue)">정상회담 진행 중</span>':''}</h2><span class="sp"></span><button class="btn ${DATA.meta&&DATA.meta.summit?'acc':'ghost'}" data-act="summit">🏛️ 정상회담 ${DATA.meta&&DATA.meta.summit?'닫기':'열기'}</button></div>
   ${TREATY.map(TT=>{ const t=W.T[TT.k]; if(!t) return `<div class="treaty"><h4>${TT.e} ${TT.n}</h4><div class="muted">아직 제안 없음 · ${esc(TT.d)}</div></div>`;
-    const sg=W.ids.filter(id=>isSigner(t,id,k,TT.k==='peace'?W.violQuit:null)); const q=Object.keys(t.quit||{}).filter(id=>!sg.includes(id)&&W.P[id]); const ratio=W.N?sg.length/W.N:0;
-    return `<div class="treaty ${ratio>=1/3?'on':''}"><h4>${TT.e} ${TT.n} — 가입 ${sg.length}/${W.N} (${Math.round(ratio*100)}%) ${ratio>=1/3?'✅':'⚠️ 효과 약함'}</h4><p>🗣️ ${who(W,t.by)}: “${esc(t.why)}”</p><div class="muted">가입: ${sg.map(id=>who(W,id)).join(', ')||'없음'}</div>${q.length?`<div class="muted">탈퇴·위반: ${q.map(id=>who(W,id)).join(', ')}</div>`:''}</div>`; }).join('')}
+    const kn=W.cr.length; const sg=W.ids.filter(id=>isSigner(t,id,kn,vq(W,TT))); const q=W.ids.filter(id=>!sg.includes(id)&&kn>0&&memAt(t,id,kn-1)); const ratio=W.N?sg.length/W.N:0;
+    return `<div class="treaty ${ratio>=1/3?'on':''}"><h4>${TT.e} ${TT.n} — 다음 위기 가입 ${sg.length}/${W.N} (${Math.round(ratio*100)}%) ${ratio>=1/3?'✅':'⚠️ 효과 약함'}</h4><p>🗣️ ${who(W,t.by)}: “${esc(t.why)}”</p><div class="muted">가입: ${sg.map(id=>who(W,id)).join(', ')||'없음'}</div>${q.length?`<div class="muted">탈퇴·위반: ${q.map(id=>who(W,id)).join(', ')}</div>`:''}</div>`; }).join('')}
   <details open><summary>정상회담 발문</summary><ul><li>협약에 가입하지 않고 효과만 누리는 나라(무임승차)가 있다면 공정할까?</li><li>가입국이 1/3을 넘지 못하면 효과가 약해집니다. 다른 나라를 어떻게 설득할까?</li><li>약속을 지키게 하려면 무엇이 필요할까? (국제기구, 신뢰, 감시)</li></ul></details></div>
   ${feedHTML(W,15)}${reqs.length?`<div class="card"><h3 style="margin-top:0">🙏 지원 요청 (${reqs.length})</h3>${reqs.map(([id,x])=>`<div class="req"><div class="rt"><b>${who(W,id)}</b> ${x.need==='food'?'🍞':'💰'}${x.amt} — “${esc(x.msg)}”</div></div>`).join('')}</div>`:''}`;
 }
@@ -1787,7 +2014,7 @@ function tVoice(W){
   const needs={}; V.forEach(([,v])=>{ needs[v.need]=(needs[v.need]||0)+1; });
   const ch=id=>Object.values(DATA.cheer||{}).filter(x=>x&&x[id]).length;
   return `<div class="card"><h3 style="margin-top:0">📣 SOS 편지 (${V.length})</h3>${Object.keys(needs).length?`<p>가장 필요했던 것: ${Object.entries(needs).sort((a,b)=>b[1]-a[1]).map(([n,c])=>`<b>${esc(n)}</b> ${c}명`).join(' · ')}</p>`:''}
-  <div class="vwall">${V.sort((a,b)=>ch(b[0])-ch(a[0])).map(([id,v])=>{ const p=CITI[v.c]||CITI.hunger; return `<div class="vcard"><div class="vh">${p.e} ${esc(p.n)} · ${W.P[v.t]?esc(W.P[v.t].name):''} · 💌${ch(id)}</div><p>${esc(v.text)}</p><small class="muted">필요: ${esc(v.need)}${showNames?' · '+who(W,id):''}</small></div>`; }).join('')||'<p class="muted">아직 없음</p>'}</div></div>`;
+  <div class="vwall">${V.sort((a,b)=>ch(b[0])-ch(a[0])).map(([id,v])=>{ const p=persOf(((DATA.meta&&DATA.meta.assign)||{})[id]); return `<div class="vcard"><div class="vh">${p.e} ${esc(p.n)} · ${W.P[v.t]?esc(W.P[v.t].name):''} · 💌${ch(id)}</div><p>${esc(v.text)}</p><small class="muted">필요: ${esc(v.need)}${showNames?' · '+who(W,id):''}</small></div>`; }).join('')||'<p class="muted">아직 없음</p>'}</div></div>`;
 }
 function tMission(W){
   const LK=Object.entries(DATA.link||{}).filter(([id])=>W.P[id]); const SO=Object.entries(DATA.sort||{}).filter(([id])=>W.P[id]);
@@ -1815,7 +2042,7 @@ function tPledge(W){
 function tWrap(W){
   const L=Object.entries(DATA.ox||{}).filter(([id])=>W.P[id]); const ok=OXQ.map((x,i)=>L.filter(([,v])=>v.a&&v.a[i]===x.a).length);
   const top=[...W.ids].sort((a,b)=>xpOf(b)-xpOf(a)).slice(0,5);
-  return `<div class="card"><h3 style="margin-top:0">🏆 세계 시민 XP 상위</h3>${top.map((id,i)=>`<div class="rank"><div class="no">${i+1}</div><div><b>${who(W,id)}</b><br><small class="muted">${xpLv(xpOf(id)).n} · ${xpOf(id)}XP</small></div></div>`).join('')}</div>
+  return `<div class="card"><h3 style="margin-top:0">🌍 팀별 희망</h3>${teamBoardHTML(W,true)}</div><div class="card"><h3 style="margin-top:0">🏆 세계 시민 XP 상위</h3>${top.map((id,i)=>`<div class="rank"><div class="no">${i+1}</div><div><b>${who(W,id)}</b><br><small class="muted">${xpLv(xpOf(id)).n} · ${xpOf(id)}XP</small></div></div>`).join('')}</div>
   <div class="card"><h3 style="margin-top:0">✅ OX · 느낀 점 (${L.length}명)</h3>${OXQ.map((x,i)=>`<div class="oxr"><span>${i+1}. ${esc(x.q)} <b>(${x.a})</b></span><b>정답 ${ok[i]}/${L.length}</b></div>`).join('')}<ul class="rlist">${L.map(([id,v])=>`<li>${showNames?`<b>${who(W,id)}</b>`:''}${esc(v.feel)}</li>`).join('')}</ul></div>`;
 }
 function tRecord(){
@@ -1840,16 +2067,16 @@ function csvDownload(){
   const W=calc(); const q=s=>'"'+String(s??'').replace(/"/g,'""').replace(/\r?\n/g,' ')+'"';
   const head=['번호','이름','나라','처음 유형','처음 평균','지금 평균','남은 예산','남은 식량'];
   W.done.forEach(R=>head.push(`${R.k+1}.${R.c.t} 대응`,`${R.k+1} 주사위`,`${R.k+1} 기금`,`${R.k+1} 이유`));
-  head.push('공동 대응 수','자국 보호 수','기회 이용 수','기금 합계','보낸 지원','받은 지원','구조','피해국 횟수','협약 위반','가입 협약','훈장','연대 점수','결말 이유','나의 영향·다시 한다면','시민 인물','시민 나라','가장 필요했던 것','SOS 편지','받은 응원',...DAY.map(d=>d.time+' '+d.t),'하루 점수','연결 탐정 물건','연결 정답(4)','고리 끊기','실천 분류 정답','캠페인 대상','슬로건','해시태그','캠페인 행동','받은 지지',...CHECK.map((x,i)=>`체크${i+1}`),'세계 시민의 뜻','기념일','실천 차원','할 일','실천 이유','다시 정상이 된다면','OX 정답','느낀 점','XP','등급');
+  head.push('공동 대응 수','자국 보호 수','기회 이용 수','기금 합계','보낸 지원','받은 지원','구조','피해국 횟수','협약 위반','약탈 시도','약탈 성공','약탈당함','피해 유발 점수','잃은 자원','가입 협약','훈장','연대 점수','결말 이유','나의 영향·다시 한다면','시민 인물','시민 나라','가장 필요했던 것','SOS 편지','받은 응원','희망',...DAY.map(d=>d.time+' '+d.t),'하루 점수','연결 탐정 물건','연결 정답(4)','고리 끊기','실천 분류 정답','캠페인 대상','슬로건','해시태그','캠페인 행동','받은 지지',...CHECK.map((x,i)=>`체크${i+1}`),'세계 시민의 뜻','기념일','실천 차원','할 일','실천 이유','다시 정상이 된다면','OX 정답','느낀 점','XP','등급');
   const rows=[head.map(q).join(',')]; const as=(DATA.meta&&DATA.meta.assign)||{};
   [...W.ids].sort((a,b)=>(+W.P[a].num||999)-(+W.P[b].num||999)).forEach(id=>{
     const p=W.P[id], s=W.S[id]; const r=[p.num,p.sname,p.name,(TYPES[p.btype]||{}).n,meanV(p.base),meanV(s.v),s.coin,s.food];
     W.done.forEach(R=>{ const a=R.act[id]; const dc=R.dice[id]; r.push(a?OPTMETA[a.o].n:'',dc?`${dc.roll} ${OUT[dc.out].n}`:'',a?a.f:'',a?a.reason:''); });
-    const st=stats1(W,id); r.push(st.coop,st.self,st.take,st.fund,st.gave,st.got,st.rescue,st.vict,st.viol);
-    r.push(TREATY.filter(TT=>W.T[TT.k]&&W.T[TT.k].signs&&W.T[TT.k].signs[id]).map(TT=>TT.n+(W.T[TT.k].quit&&W.T[TT.k].quit[id]?'(탈퇴)':'')).join('/'));
+    const st=stats1(W,id); r.push(st.coop,st.self,st.take,st.fund,st.gave,st.got,st.rescue,st.vict,st.viol,st.raids,st.raidOK,st.raided,st.harm,st.lost);
+    r.push(TREATY.filter(TT=>W.T[TT.k]&&isSigner(W.T[TT.k],id,W.cr.length,vq(W,TT))).map(TT=>TT.n).join('/'));
     r.push(badgesOf(W,id).map(x=>x[0]).join(' '),honor(W,id));
     const rf=(DATA.refl1||{})[id]; r.push(rf?rf.why:'',rf?rf.me:'');
-    const a=as[id]; const v=(DATA.voice||{})[id]; r.push(a?(CITI[a.c]||{}).n:'',a&&W.P[a.t]?W.P[a.t].name:'',v?v.need:'',v?v.text:'',Object.values(DATA.cheer||{}).filter(x=>x&&x[id]).length);
+    const a=as[id]; const v=(DATA.voice||{})[id]; r.push(a?persOf(a).n:'',a&&W.P[a.t]?W.P[a.t].name:'',v?v.need:'',v?v.text:'',Object.values(DATA.cheer||{}).filter(x=>x&&x[id]).length,(hopeParts(W,id)||{}).hope??'');
     const dy=(DATA.day||{})[id]; DAY.forEach((d,i)=>r.push(dy&&d.opts[dy.c[i]]?d.opts[dy.c[i]].t:'')); r.push(dy?dy.c.reduce((a2,vv,i)=>a2+(DAY[i].opts[vv]?DAY[i].opts[vv].p:0),0):'');
     const lk=(DATA.link||{})[id]; r.push(lk?(LINKS.find(l=>l.k===lk.item)||{}).n:'',lk?lk.ok:'',lk?lk.cut:'');
     const so=(DATA.sort||{})[id]; r.push(so?so.ok+'/'+SORTC.length:'');
@@ -1873,6 +2100,10 @@ const tActs = {
     if(v==='assign' && !(DATA.meta&&DATA.meta.assign)) upd.assign=buildAssign();
     backend.update(`${ER()}/meta`,upd); tab={end1:'end',assign:'voice',link:'mission',sort:'mission',campaign:'mission',mirror:'mirror',pledge:'pledge',wrap:'wrap'}[v]||'run'; render(); },
   tmin(ds){ tmin=+ds.v; render(); },
+  randCrisis(){ const W=calc(); if(W.openR) return toast('진행 중인 위기의 결과를 먼저 공개하세요.'); const left=CRISES.filter(c=>!W.cr.includes(c.id)); if(!left.length) return toast('모든 위기를 사용했습니다.'); tActs.newCrisis({v:left[Math.floor(Math.random()*left.length)].id}); },
+  raidToggle(){ backend.update(`${ER()}/meta`,{noRaid:!(DATA.meta&&DATA.meta.noRaid)}); },
+  trial(){ const n=+(DATA.meta&&DATA.meta.trials)||0; if(n>=3) return; if(!confirm(`🌩️ ${n+1}번째 시련 카드를 모든 시민에게 보낼까요?`)) return; backend.update(`${ER()}/meta`,{trials:n+1,trAt:Date.now()}); toast('🌩️ 시련이 닥쳤습니다! 학생 화면에 시련 카드가 뜹니다.'); },
+  trialUndo(){ const n=+(DATA.meta&&DATA.meta.trials)||0; if(!n) return; if(!confirm('마지막 시련을 취소할까요?')) return; backend.update(`${ER()}/meta`,{trials:n-1}); },
   newCrisis(ds){ const W=calc(); if(W.openR) return toast('진행 중인 위기의 결과를 먼저 공개하세요.'); const c=crisisOf(ds.v); if(!confirm(`'${c.e} ${c.t}' 위기를 발생시킬까요?${tmin?` (제한 시간 ${tmin}분)`:''}`)) return;
     backend.update(`${ER()}/meta`,{cr:[...W.cr,ds.v],rev:W.rev,dl:tmin?Date.now()+tmin*60000:null}); },
   addMin(){ const dl=+(DATA.meta&&DATA.meta.dl)||0; backend.update(`${ER()}/meta`,{dl:Math.max(dl,Date.now())+60000}); },
