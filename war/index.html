@@ -1,0 +1,1389 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>연합과 배신</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+:root{
+  --bg:#f5f1e8; --paper:#fffdf8; --ink:#1f2a44; --sub:#5b6478; --line:#e4dccb;
+  --accent:#e4572e; --accent2:#2a9d8f; --gold:#f4a261; --blue:#3a6ea5; --soft:#fbefe0;
+  --ok:#2a9d8f; --warn:#e9a23b; --bad:#d64545; --shadow:0 2px 0 rgba(31,42,68,.08),0 8px 24px rgba(31,42,68,.06);
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:Pretendard,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;font-size:17px;line-height:1.55;-webkit-tap-highlight-color:transparent}
+button{font-family:inherit;font-size:inherit;color:inherit;cursor:pointer}
+input,textarea{font-family:inherit;font-size:16px;color:var(--ink)}
+.wrap{max-width:860px;margin:0 auto;padding:16px 16px 120px}
+.twrap{max-width:1280px;margin:0 auto;padding:16px 16px 80px}
+.top{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.top h1{font-size:20px;margin:0;flex:1;min-width:180px}
+.pill{display:inline-flex;align-items:center;gap:6px;background:var(--paper);border:1.5px solid var(--line);border-radius:999px;padding:4px 12px;font-size:14px;font-weight:600}
+.pill.live{border-color:var(--ok);color:var(--ok)}
+.pill.demo{border-color:var(--warn);color:#a86b00}
+.card{background:var(--paper);border:1.5px solid var(--line);border-radius:18px;padding:20px;box-shadow:var(--shadow);margin-bottom:16px}
+h2{font-size:23px;margin:0 0 12px}
+h3{font-size:18px;margin:18px 0 8px}
+.muted{color:var(--sub);font-size:15px}
+.tip{background:#eef6f5;border-left:5px solid var(--accent2);border-radius:10px;padding:12px 14px;margin:0 0 16px;font-size:15.5px}
+.tip b{color:#1d6f65}
+.steps{display:flex;gap:4px;margin:0 0 14px}
+.steps div{flex:1;height:8px;border-radius:4px;background:var(--line)}
+.steps div.on{background:var(--accent)}
+.steps div.done{background:var(--accent2)}
+.stepname{font-size:14px;color:var(--sub);margin-bottom:6px;font-weight:600}
+.grid{display:grid;gap:10px}
+.g2{grid-template-columns:repeat(2,1fr)}
+.g3{grid-template-columns:repeat(3,1fr)}
+.g4{grid-template-columns:repeat(4,1fr)}
+@media (max-width:640px){.g3,.g4{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:420px){.g2{grid-template-columns:1fr}}
+.opt{background:#fff;border:2px solid var(--line);border-radius:14px;padding:12px;text-align:left;transition:.12s;display:block;width:100%}
+.opt:hover{border-color:#cdbf9f}
+.opt.sel{border-color:var(--accent);background:#fff4ef;box-shadow:0 0 0 3px rgba(228,87,46,.15)}
+.opt .e{font-size:28px;line-height:1}
+.opt .t{font-weight:700;margin-top:4px}
+.opt .d{font-size:14px;color:var(--sub);margin-top:2px}
+.opt .pc{font-size:13px;margin-top:6px}
+.bigopt{display:flex;gap:12px;align-items:flex-start;padding:14px 16px;font-size:16.5px}
+.bigopt .lt{flex:none;width:30px;height:30px;border-radius:50%;background:var(--ink);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800}
+.bigopt.sel .lt{background:var(--accent)}
+.btn{border:none;border-radius:14px;padding:13px 20px;font-weight:700;background:var(--ink);color:#fff;font-size:17px}
+.btn:active{transform:translateY(1px)}
+.btn.acc{background:var(--accent)}
+.btn.teal{background:var(--accent2)}
+.btn.ghost{background:transparent;border:2px solid var(--line);color:var(--ink)}
+.btn.sm{padding:8px 12px;font-size:14.5px;border-radius:10px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.navbar{position:fixed;left:0;right:0;bottom:0;background:rgba(255,253,248,.96);border-top:1.5px solid var(--line);padding:12px 16px calc(12px + env(safe-area-inset-bottom));display:flex;justify-content:center;gap:10px;z-index:20}
+.navbar .in{max-width:860px;width:100%;display:flex;gap:10px;justify-content:space-between}
+.field{width:100%;border:2px solid var(--line);border-radius:12px;padding:12px 14px;background:#fff}
+.field:focus{outline:none;border-color:var(--accent2)}
+textarea.field{min-height:84px;resize:vertical}
+label.lb{display:block;font-weight:700;margin:14px 0 6px}
+.flag{display:inline-flex;width:84px;height:56px;border-radius:8px;overflow:hidden;position:relative;border:2px solid rgba(0,0,0,.15);flex:none}
+.flag i{flex:1}
+.flag span{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:26px;text-shadow:0 1px 2px rgba(0,0,0,.25)}
+.flag.sm{width:42px;height:28px;border-radius:5px}
+.flag.sm span{font-size:14px}
+.flag.lg{width:150px;height:100px;border-radius:12px}
+.flag.lg span{font-size:48px}
+.sw{display:flex;gap:8px;flex-wrap:wrap}
+.sw button{width:38px;height:38px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 1.5px var(--line)}
+.sw button.sel{box-shadow:0 0 0 3px var(--ink)}
+.sym button{width:46px;height:46px;border-radius:12px;background:#fff;border:2px solid var(--line);font-size:24px}
+.sym button.sel{border-color:var(--accent);background:#fff4ef}
+.brow{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px dashed var(--line)}
+.brow .nm{flex:1}
+.brow .nm b{display:block}
+.brow .nm small{color:var(--sub)}
+.stp{display:flex;align-items:center;gap:8px}
+.stp button{width:42px;height:42px;border-radius:12px;border:2px solid var(--line);background:#fff;font-size:22px;font-weight:800}
+.stp .v{min-width:30px;text-align:center;font-weight:800;font-size:20px}
+.dots{display:flex;gap:3px;flex-wrap:wrap;max-width:140px}
+.dots i{width:9px;height:9px;border-radius:50%;background:var(--accent2)}
+.remain{position:sticky;top:0;background:var(--ink);color:#fff;border-radius:12px;padding:10px 14px;font-weight:700;display:flex;justify-content:space-between;z-index:5;margin-bottom:8px}
+.remain.zero{background:var(--accent2)}
+.remain.over{background:var(--bad)}
+.bars{display:grid;gap:7px}
+.bar{display:grid;grid-template-columns:78px 1fr 34px;align-items:center;gap:8px;font-size:14.5px;font-weight:600}
+.bar .tr{height:14px;background:#efe8da;border-radius:7px;overflow:hidden}
+.bar .tr i{display:block;height:100%;border-radius:7px;transition:width .4s}
+.bar .n{text-align:right;font-variant-numeric:tabular-nums}
+.bars.mini .bar{grid-template-columns:44px 1fr 26px;font-size:12px;gap:5px}
+.bars.mini .bar .tr{height:8px}
+.scene{background:var(--soft);border-radius:14px;padding:16px;margin-bottom:14px}
+.scene .tag{display:inline-block;background:var(--ink);color:#fff;border-radius:8px;padding:3px 10px;font-size:13.5px;font-weight:700;margin-bottom:8px}
+.scene .src{font-size:13px;color:var(--sub);margin-top:6px}
+.persona{background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:12px;display:flex;gap:10px;align-items:flex-start}
+.persona .av{font-size:32px;line-height:1}
+.persona .face{font-size:22px}
+.persona .q{font-size:14.5px}
+.persona .who{font-size:13px;color:var(--sub);font-weight:700}
+.typebadge{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:5px 14px;font-weight:800;color:#fff;font-size:15px}
+.hero{display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+.law{background:#fff;border:2px solid var(--ink);border-radius:12px;padding:14px 16px;font-family:"Nanum Myeongjo",serif}
+.law p{margin:4px 0}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:2px solid var(--line);background:#fff;border-radius:999px;padding:8px 14px;font-weight:700;font-size:15px}
+.chip.sel{border-color:var(--accent2);background:#e8f5f3;color:#1d6f65}
+.toast{position:fixed;left:50%;top:18px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:12px 20px;border-radius:12px;z-index:100;font-weight:700;max-width:90vw;box-shadow:var(--shadow);animation:pop .2s}
+@keyframes pop{from{transform:translate(-50%,-10px);opacity:0}to{transform:translate(-50%,0);opacity:1}}
+.overlay{position:fixed;inset:0;background:rgba(20,26,40,.6);z-index:50;display:flex;align-items:flex-start;justify-content:center;overflow:auto;padding:24px 16px}
+.modal{background:var(--paper);border-radius:20px;max-width:760px;width:100%;padding:22px;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.modal.alert{border:4px solid var(--bad)}
+.blink{animation:blink 1.2s infinite}
+@keyframes blink{50%{opacity:.5}}
+.banner{border-radius:14px;padding:14px 16px;margin-bottom:14px;font-weight:700}
+.banner.ok{background:#e3f4f1;color:#16655b}
+.banner.warn{background:#fff3dc;color:#8a5a00}
+.banner.bad{background:#fde8e8;color:#9b2c2c}
+.center{text-align:center}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.sp{flex:1}
+/* teacher */
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0 16px}
+.tabs button{border:2px solid var(--line);background:var(--paper);border-radius:12px;padding:9px 14px;font-weight:700;font-size:15.5px}
+.tabs button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.seg{display:inline-flex;border:2px solid var(--ink);border-radius:12px;overflow:hidden}
+.seg button{border:none;background:#fff;padding:9px 14px;font-weight:700;font-size:15px}
+.seg button.on{background:var(--ink);color:#fff}
+.ngrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+.ncard{background:#fff;border:1.5px solid var(--line);border-radius:16px;padding:14px;text-align:left;width:100%}
+.ncard:hover{border-color:var(--accent)}
+.ncard .nh{display:flex;gap:10px;align-items:center;margin-bottom:8px}
+.ncard .nn{font-weight:800;font-size:17px;line-height:1.25}
+.ncard .ns{font-size:13px;color:var(--sub)}
+.ncard .a1{font-size:13.5px;color:var(--sub);margin:6px 0 8px;font-style:italic}
+.stat{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.stat .box{background:var(--paper);border:1.5px solid var(--line);border-radius:14px;padding:10px 16px;min-width:110px}
+.stat .box b{font-size:26px;display:block;line-height:1.1}
+.stat .box small{color:var(--sub);font-weight:600}
+.obar{display:grid;grid-template-columns:1fr;gap:4px;margin:8px 0}
+.obar .lbl{display:flex;justify-content:space-between;font-size:15px;font-weight:600;gap:8px}
+.obar .tr{height:22px;background:#efe8da;border-radius:6px;overflow:hidden}
+.obar .tr i{display:block;height:100%}
+.rlist{margin:6px 0 4px 0;padding:0;list-style:none;font-size:14.5px}
+.rlist li{padding:6px 10px;background:#fff;border:1px solid var(--line);border-radius:8px;margin-bottom:5px}
+.rlist li b{color:var(--sub);font-weight:700;margin-right:6px}
+.prog{display:flex;flex-wrap:wrap;gap:6px}
+.prog span{font-size:13px;border-radius:8px;padding:3px 9px;background:#fff;border:1.5px solid var(--line);font-weight:600}
+.prog span.done{background:#e3f4f1;border-color:var(--ok);color:#16655b}
+.concept table{width:100%;border-collapse:collapse;font-size:15.5px}
+.concept td,.concept th{border:1px solid var(--line);padding:9px 10px;vertical-align:top;text-align:left}
+.concept th{background:var(--soft);width:22%}
+.rank{display:flex;gap:12px;align-items:center;padding:12px;background:#fff;border:1.5px solid var(--line);border-radius:14px;margin-bottom:10px}
+.rank .no{font-size:26px;font-weight:900;width:36px;text-align:center}
+.qrbox{display:flex;justify-content:center;padding:16px;background:#fff;border-radius:12px}
+.url{word-break:break-all;background:#fff;border:1.5px dashed var(--line);padding:10px;border-radius:10px;font-size:15px;font-weight:600}
+footer{text-align:center;color:var(--sub);font-size:12.5px;margin-top:30px}
+/* world */
+.up{color:#16855b;font-weight:800;margin-left:3px;font-size:12px}.dn{color:var(--bad);font-weight:800;margin-left:3px;font-size:12px}
+.bar{grid-template-columns:78px 1fr 58px}.bars.mini .bar{grid-template-columns:44px 1fr 26px}
+.gauge{background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:12px 14px;margin:10px 0}
+.gauge .gl{display:flex;justify-content:space-between;margin-bottom:6px}
+.gauge .gt{position:relative;height:18px;background:#efe8da;border-radius:9px;overflow:hidden}
+.gauge .gt i{display:block;height:100%;transition:width .5s}.gauge .gt em{position:absolute;top:0;bottom:0;width:2px;background:var(--ink)}
+.reason{background:#fff8e6;border:2px solid var(--gold);border-radius:14px;padding:14px 16px;margin:14px 0 4px}
+.reason .rn{font-size:19px;font-weight:800;margin:4px 0}
+.quote{background:#fff;border-left:5px solid var(--accent2);border-radius:8px;padding:10px 14px}
+.chain{padding-left:22px}.chain li{margin:4px 0;font-weight:600}
+.pz{display:flex;gap:10px;align-items:center;font-weight:600}.pzn{flex:none;width:30px;height:30px;border-radius:50%;background:var(--line);display:flex;align-items:center;justify-content:center;font-weight:800}
+.pz.sel .pzn{background:var(--accent);color:#fff}
+.oxr,.ckr{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-bottom:1px dashed var(--line);flex-wrap:wrap}
+.okc{color:#16855b}.noc{color:var(--bad)}
+.ckr .seg button{min-width:42px}
+.mirror{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0}.mirror>div{background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:14px;text-align:center}
+.mirror .big{font-size:28px;font-weight:900;margin-top:6px}
+.pcard{background:#fff;border:1.5px solid var(--line);border-left:6px solid var(--accent2);border-radius:12px;padding:12px 14px}
+.pcard p{margin:6px 0}.pd{font-weight:800}.ps{display:inline-block;font-size:13px;background:#e8f5f3;color:#1d6f65;border-radius:999px;padding:2px 10px;font-weight:700}
+.vwall{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
+.vcard{background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:12px 14px}.vcard p{margin:6px 0}.vh{font-size:13.5px;font-weight:700;color:var(--sub)}
+.plist{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:8px}.pi .btn.sm{padding:5px 8px}.pi b{white-space:nowrap}
+.pi{display:flex;align-items:center;gap:8px;background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:8px 10px}
+.pi.done{border-color:var(--ok);background:#f2faf8}.pi span small{display:block;color:var(--sub);font-size:12.5px}
+.pbar .pg{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.pbar .pg .tabs{margin:6px 0}
+.rbox{padding:8px 0;border-bottom:1px dashed var(--line)}
+.obh{border-left:6px solid;padding:4px 10px;font-weight:800;background:#fff;border-radius:6px;margin-bottom:6px}
+.ncard.selc{border-color:var(--accent);box-shadow:0 0 0 3px rgba(228,87,46,.18)}.ncard:disabled{opacity:.45}
+details{margin-top:12px;background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:10px 14px}summary{font-weight:700;cursor:pointer}
+@media (max-width:520px){.mirror{grid-template-columns:1fr}}
+/* ===== 지구 정상회담 ===== */
+.doom{background:#141a2b;color:#f3efe6;border-radius:16px;padding:14px 16px;margin-bottom:14px}
+.doom.amber{box-shadow:0 0 0 3px #e9a23b inset}
+.doom.red{box-shadow:0 0 0 3px #d64545 inset;animation:dpulse 1.6s infinite}
+@keyframes dpulse{50%{box-shadow:0 0 0 7px #d64545 inset}}
+.doom .clock{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap;font-size:15px;margin-bottom:8px}
+.doom .clock b{font-size:20px;color:#ffd166}
+.mrow{display:grid;grid-template-columns:112px 1fr 70px;gap:8px;align-items:center;font-weight:700;font-size:15px;margin:6px 0}
+.mrow .tr{height:16px;background:#2c3550;border-radius:8px;overflow:hidden}
+.mrow .tr i{display:block;height:100%;transition:width .6s}
+.mrow b{text-align:right;font-variant-numeric:tabular-nums}
+.doom .up{color:#7ee2b8}.doom .dn{color:#ff8a8a}
+.doom .dm{color:#b9c0d4;font-size:12.5px}
+.board .mrow{grid-template-columns:150px 1fr 96px;font-size:20px}.board .mrow .tr{height:26px}.board .clock{font-size:19px}.board .clock b{font-size:28px}
+.res{display:inline-flex;gap:12px;font-weight:800;background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:6px 12px;font-size:16px}
+.vtag{display:inline-block;background:var(--bad);color:#fff;border-radius:8px;padding:2px 8px;font-size:12.5px;font-weight:800;vertical-align:middle}
+.otag{display:inline-block;border-radius:8px;padding:2px 8px;font-size:12.5px;font-weight:800;color:#fff;vertical-align:middle}
+.ofx{font-size:13.5px;color:var(--sub);margin-top:6px;line-height:1.5}
+.ofx b{color:var(--ink)}
+.req{display:flex;gap:10px;align-items:center;background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:8px;flex-wrap:wrap}
+.req.mine{border-color:var(--gold);background:#fffaf0}
+.req .rt{flex:1;min-width:180px}
+.gift{background:#f2faf8;border:1.5px solid var(--ok);border-radius:12px;padding:10px 12px;margin-bottom:8px}
+.treaty{background:#fff;border:2px solid var(--line);border-radius:14px;padding:14px;margin-bottom:10px}
+.treaty.on{border-color:var(--accent2);background:#f4fbf9}
+.treaty h4{margin:0 0 4px;font-size:17px}
+.summit{border:3px solid var(--blue);background:#f2f6fc}
+.ending{background:#141a2b;color:#f3efe6;border-radius:18px;padding:24px;margin-bottom:16px}
+.ending.good{background:linear-gradient(135deg,#1d5f75,#2a9d8f)}
+.ending.mid{background:linear-gradient(135deg,#6b4e1a,#b07a1e)}
+.ending h2{font-size:28px;margin:6px 0 12px}
+.ending p{margin:8px 0;line-height:1.7}
+.ending .muted{color:#c9cfdd}
+.step{display:flex;gap:6px;margin:0 0 10px}
+.step i{flex:1;height:7px;border-radius:4px;background:var(--line)}
+.step i.on{background:var(--accent)}.step i.done{background:var(--accent2)}
+.fate{display:flex;gap:12px;align-items:flex-start;background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:10px}
+.fate .av{font-size:36px;line-height:1}
+.fate.good{border-color:var(--ok)}.fate.bad{border-color:var(--bad)}
+.kv{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;margin:10px 0}
+.kv div{background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:8px 12px}
+.kv b{display:block;font-size:22px}
+.kv small{color:var(--sub);font-weight:600}
+select.field{appearance:auto}
+.nmini{display:flex;align-items:center;gap:8px;background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:8px 10px}
+.nmini.v{border-color:var(--bad);background:#fff6f6}
+.nmini small{color:var(--sub);display:block;font-size:12.5px}
+.livefund{background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:10px 14px;margin:10px 0}
+.livefund .tr{height:18px;background:#efe8da;border-radius:9px;overflow:hidden;position:relative}
+.livefund .tr i{display:block;height:100%;background:var(--accent2);transition:width .4s}
+.sol{border-radius:14px;padding:12px 14px;margin:10px 0;border:2px solid var(--line);background:#fff}
+.sol .tr{height:22px;border-radius:11px;overflow:hidden;position:relative;background:linear-gradient(90deg,#fde8e8 0 40%,#fff3dc 40% 70%,#e3f4f1 70% 100%)}
+.sol .tr i{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,#d64545,#e9a23b,#2a9d8f);transition:width .5s;border-radius:11px}
+.sol .tr em{position:absolute;top:0;bottom:0;width:2px;background:rgba(31,42,68,.5)}
+.sol .lab{display:flex;justify-content:space-between;font-size:12.5px;color:var(--sub);margin-top:4px}
+.tier{border-radius:16px;padding:16px;margin-bottom:12px;text-align:center;color:#fff}
+.tier h2{margin:4px 0;font-size:26px}
+.tier.win{background:linear-gradient(135deg,#1d6f65,#3a86ff)}
+.tier.hold{background:linear-gradient(135deg,#8a5a00,#e9a23b)}
+.tier.fall{background:linear-gradient(135deg,#5b1414,#d64545)}
+.local{border-radius:14px;padding:12px 14px;margin:10px 0;border:2px dashed}
+.local.bad{border-color:var(--bad);background:#fff6f6}.local.good{border-color:var(--ok);background:#f2faf8}
+.mission{background:#fff8e6;border:2px solid var(--gold);border-radius:14px;padding:10px 14px;margin:10px 0;font-weight:700}
+.mission.ok{background:#e3f4f1;border-color:var(--ok)}.mission.no{background:#f4f4f4;border-color:#c9c9c9;color:var(--sub)}
+.timer{display:inline-flex;align-items:center;gap:6px;background:var(--ink);color:#fff;border-radius:12px;padding:6px 14px;font-weight:900;font-size:20px;font-variant-numeric:tabular-nums}
+.timer.warn{background:var(--warn)}.timer.over{background:var(--bad);animation:blink 1s infinite}
+.feed{background:#141a2b;color:#e9edf7;border-radius:14px;padding:10px 14px;margin:10px 0;font-size:14.5px}
+.feed div{padding:3px 0;border-bottom:1px solid #2c3550}.feed div:last-child{border:none}
+.feed b{color:#ffd166}
+.badge{display:inline-block;background:#fff;border:2px solid var(--gold);border-radius:999px;padding:3px 10px;font-weight:800;font-size:13.5px;margin:2px}
+.badge.neg{border-color:#9aa0a6;color:#5b6478}
+.xp{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(90deg,#2a9d8f,#3a86ff);color:#fff;border-radius:999px;padding:4px 12px;font-weight:800;font-size:14px}
+.reveal{position:fixed;inset:0;background:rgba(10,14,26,.88);z-index:80;display:flex;align-items:center;justify-content:center;padding:20px}
+.reveal .box{background:var(--paper);border-radius:22px;max-width:520px;width:100%;padding:26px;text-align:center}
+.reveal .dice{font-size:72px;font-weight:900;font-variant-numeric:tabular-nums;margin:6px 0}
+.reveal .out{font-size:28px;font-weight:900;margin:6px 0}
+.pz2{display:flex;gap:10px;align-items:center;font-weight:600}
+.pz2 .n{flex:none;width:30px;height:30px;border-radius:50%;background:var(--line);display:flex;align-items:center;justify-content:center;font-weight:800}
+.pz2.sel .n{background:var(--accent);color:#fff}
+.srow{display:flex;gap:8px;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px dashed var(--line);flex-wrap:wrap}
+.poster{background:#fff;border:2px solid var(--line);border-radius:16px;padding:14px;position:relative}
+.poster .sl{font-size:19px;font-weight:900;line-height:1.35;margin:6px 0}
+.poster .tg{color:var(--blue);font-weight:800}
+.poster.mine{border-color:var(--gold)}
+.heart{border:2px solid var(--line);background:#fff;border-radius:999px;padding:6px 12px;font-weight:800}
+.heart.on{border-color:#e63946;background:#ffecee;color:#c1121f}
+.awards{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:8px;margin:0 0 12px}
+.aw{display:flex;gap:10px;align-items:flex-start;border-radius:14px;padding:10px 12px;border:2px solid;text-align:left}
+.aw.good{background:#f2faf8;border-color:var(--ok)}.aw.bad{background:#fff6f6;border-color:var(--bad)}
+.aw .ae{font-size:28px;line-height:1}
+.lossbox{background:#5b1414;color:#fff;border-radius:14px;padding:12px 14px;margin:10px 0;font-weight:800;font-size:17px}
+.lossbox b{color:#ffd166;font-size:20px}
+.worst{color:var(--bad);font-weight:700}
+.shoprow{display:flex;gap:10px;align-items:center;padding:8px 0;border-bottom:1px dashed var(--line)}
+.shoprow .se{font-size:26px}.shoprow .sn{flex:1}
+.raid{background:#1f1b2e;color:#f3efe6;border-radius:14px;padding:12px 14px;margin:12px 0}
+.raid .muted{color:#c9cfdd}.raid.off{background:#f4f4f4;color:var(--sub);font-weight:600}
+.hb{height:14px;background:#efe8da;border-radius:7px;overflow:hidden;margin:4px 0}.hb i{display:block;height:100%;transition:width .5s}.hb.sm{height:9px}
+.hopecard{border:2px solid var(--accent2)}
+.hv{font-size:28px;font-weight:900;text-align:center;line-height:1.1}.hv small{display:block;font-size:13px}
+.teams{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px}
+.team{background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:8px 10px}.team .tn{font-weight:800;font-size:14px}.team .tn small{color:var(--sub);font-weight:600}.team .tv{font-weight:900}
+.teams.big .team .tn{font-size:18px}.teams.big .hb{height:22px}.teams.big .tv{font-size:24px}
+@media (max-width:640px){.teams{grid-template-columns:repeat(2,1fr)}}
+details.rescue{border:2px solid var(--bad);margin-bottom:16px}
+/* ===== 연합과 배신 ===== */
+.map{display:grid;gap:6px;margin:6px 0 14px}
+.cell{border-radius:12px;padding:8px 8px 8px 10px;min-height:86px;border:3px solid rgba(0,0,0,.06);position:relative;font-size:13px;line-height:1.35;color:#1f2a44;background:#fff;overflow:hidden}
+.cell .cn{font-weight:900;font-size:14px;margin-bottom:2px;padding-right:18px;word-break:keep-all}
+.cell .cn .flag.sm{width:26px;height:18px;vertical-align:middle}
+.cell .flag.sm span{font-size:10px}
+.cell.me{border-color:#111;box-shadow:0 0 0 2px #fff inset}
+.cell.ally{border-color:var(--ok)}
+.cell.adj{outline:3px dashed var(--accent);outline-offset:-7px}
+.cell.occ{background-image:repeating-linear-gradient(45deg,rgba(0,0,0,.07) 0 6px,transparent 6px 12px)}
+.cell .ic{position:absolute;top:5px;right:7px;font-size:15px}
+.map.big .cell{min-height:118px;font-size:16px}.map.big .cell .cn{font-size:18px}
+.statbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:12px 16px}
+.resist{background:#1f1b2e;color:#f3efe6;border-color:#1f1b2e}
+.resist .muted{color:#c9cfdd}
+.resist .btn.ghost{color:#f3efe6;border-color:#c9cfdd}.resist .opt{color:var(--ink)}
+.trow{display:flex;gap:10px;align-items:center;padding:9px 0;border-bottom:1px dashed var(--line);flex-wrap:wrap}
+.trow .tn{flex:1;min-width:170px}
+.msg{background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:8px 12px;margin-bottom:6px}
+.msg.in{border-left:6px solid var(--blue)}.msg.out{border-left:6px solid #b9c0d4}
+.news{background:#141a2b;color:#e9edf7;border-radius:14px;padding:12px 16px;margin-bottom:14px}
+.news div{padding:5px 0;border-bottom:1px solid #2c3550;font-size:15px}.news div:last-child{border:none}
+.news .mine{color:#ffd166;font-weight:800}
+.flowcard{border-radius:18px;padding:18px;margin-bottom:14px;background:linear-gradient(135deg,#3a2a5c,#7b3fe4);color:#fff}
+.flowcard h2{margin:4px 0 6px;font-size:24px}
+.btl{background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:8px}
+.btl.win{border-left:6px solid var(--ok)}.btl.lose{border-left:6px solid var(--bad)}
+.vs{font-weight:900;font-variant-numeric:tabular-nums}
+.small{font-size:13px}
+.stp.mini button{width:36px;height:36px;font-size:18px}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<footer id="foot">© 김정환 · M.A.D.T (Moral And Digital Teacher)</footer>
+<script type="module">
+/* =========================================================
+   ① 설정 — 국가 만들기와 같은 Firebase
+   ========================================================= */
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyAPJAMUITr6w0H63Ze1L1eViCsuq3zXlbE",
+  authDomain: "nation-game-cf684.firebaseapp.com",
+  databaseURL: "https://nation-game-cf684-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "nation-game-cf684",
+  storageBucket: "nation-game-cf684.firebasestorage.app",
+  messagingSenderId: "947361689624",
+  appId: "1:947361689624:web:9f09cd27fbd2334ae0136d"
+};
+const TEACHER_PIN = '0624';
+const qs = new URLSearchParams(location.search);
+const FORCE_DEMO = qs.has('demo');
+
+/* =========================================================
+   ② 국가 만들기 계산 (국가 만들기 프로그램과 똑같은 코드)
+   ========================================================= */
+const IND = [
+  {k:'safe',n:'안전',e:'🛡️',c:'#3a6ea5'},
+  {k:'free',n:'자유',e:'🕊️',c:'#8e6cc4'},
+  {k:'equal',n:'평등',e:'⚖️',c:'#e4572e'},
+  {k:'welfare',n:'복지',e:'🤲',c:'#2a9d8f'},
+  {k:'eco',n:'경제',e:'💰',c:'#e9a23b'},
+  {k:'trust',n:'신뢰',e:'🤝',c:'#d16ba5'}
+];
+const TERR = [
+  {k:'island',n:'바다 위 섬나라',e:'🏝️',d:'무역이 활발하지만 태풍에 약해요',eff:{eco:5,safe:-3}},
+  {k:'plain',n:'넓은 평야',e:'🌾',d:'식량이 풍부하고 살기 좋아요',eff:{eco:3,welfare:3}},
+  {k:'mount',n:'높은 산악 지대',e:'⛰️',d:'방어엔 유리, 교통은 불편해요',eff:{safe:5,eco:-2}},
+  {k:'river',n:'큰 강이 흐르는 땅',e:'🏞️',d:'산업이 발달하지만 홍수가 잦아요',eff:{eco:5,safe:-4}}
+];
+const POP = [
+  {k:'s',n:'작은 나라',e:'🏡',d:'국민 100만 명 · 서로 잘 아는 공동체',eff:{trust:5,eco:-3}},
+  {k:'m',n:'중간 나라',e:'🏘️',d:'국민 3천만 명',eff:{}},
+  {k:'l',n:'큰 나라',e:'🏙️',d:'국민 2억 명 · 시장은 크지만 의견 모으기 어려움',eff:{eco:5,trust:-5}}
+];
+const GOV = [
+  {k:'demo',n:'민주 공화국',e:'🗳️',d:'주권이 국민에게 있고, 국민이 선거로 대표를 뽑아요.',pro:'시민의 자유와 참여 보장',con:'결정이 느릴 수 있음',eff:{free:10,trust:10}},
+  {k:'const',n:'입헌 군주국',e:'👑',d:'왕이 있지만 헌법과 의회가 실제로 나라를 운영해요.',pro:'전통과 안정',con:'왕실 유지 비용',eff:{free:6,trust:5,safe:3,eco:-2}},
+  {k:'elite',n:'소수 엘리트 통치',e:'🎩',d:'똑똑하거나 부유한 소수가 나라 일을 결정해요.',pro:'빠르고 전문적인 결정',con:'소수의 이익만 챙길 위험',eff:{eco:10,equal:-15,trust:-5}},
+  {k:'dict',n:'1인 독재',e:'🗿',d:'지도자 한 명이 모든 권력을 가져요.',pro:'명령이 빠르고 질서정연',con:'권력 남용을 막을 수 없음',eff:{safe:10,eco:3,free:-20,trust:-15}},
+  {k:'abs',n:'절대 왕정',e:'🏰',d:'왕이 법 위에서 모든 권력을 가지고, 왕위는 자식에게 물려줘요.',pro:'전통과 빠른 결정',con:'시민의 권리가 왕의 뜻에 달려 있음',eff:{safe:6,free:-16,trust:-10,equal:-6}}
+];
+const TAX = [
+  {k:'low',n:'세금 적게',e:'🪙',pts:10,d:'국민 부담 ↓ · 국가 예산 10칸',eff:{eco:8,free:4}},
+  {k:'mid',n:'세금 보통',e:'💵',pts:15,d:'국가 예산 15칸',eff:{}},
+  {k:'high',n:'세금 많이',e:'💰',pts:20,d:'국민 부담 ↑ · 국가 예산 20칸',eff:{eco:-8,free:-4,trust:-3}}
+];
+const BUDGET = [
+  {k:'def',n:'국방·치안',e:'🛡️',role:'생명과 안전 보호',per:{safe:3,free:-0.5},zero:{safe:-12}},
+  {k:'dis',n:'재난·환경',e:'🌊',role:'생명과 안전 보호',per:{safe:2,welfare:1},zero:{safe:-6}},
+  {k:'med',n:'의료·보건',e:'🏥',role:'생명·안전 + 인간다운 삶',per:{welfare:2,safe:1},zero:{welfare:-6,safe:-4}},
+  {k:'wel',n:'복지(노인·장애·빈곤)',e:'🤲',role:'인간다운 삶 보장',per:{welfare:3,equal:2},zero:{welfare:-10,equal:-5}},
+  {k:'edu',n:'교육',e:'📚',role:'인간다운 삶 보장',per:{equal:1.5,eco:1.5,trust:1},zero:{equal:-5,eco:-5}},
+  {k:'job',n:'경제·일자리',e:'🏭',role:'인간다운 삶 보장',per:{eco:3,equal:-0.5},zero:{eco:-10}}
+];
+const CARDS = [
+  {id:'c1',tag:'안전·편리 ↔ 사생활',t:'스마트 인증서 하나로!',src:'교과서 144쪽 생각 열기',
+   s:'정부가 시민의 모든 정보를 직접 관리하는 시스템을 만들자고 합니다. 스마트 인증서 하나로 신분 확인과 결제가 모두 되고, 주민등록증·여권·현금은 사용이 중지됩니다.',
+   opts:[
+    {t:'도입한다. 모든 정보를 국가가 통합 관리한다.',eff:{safe:8,eco:6,free:-15,trust:-5}},
+    {t:'원하는 사람만 쓰게 하고, 개인정보 보호법을 강하게 만든다.',eff:{eco:3,free:3,trust:5}},
+    {t:'도입하지 않는다.',eff:{free:8,eco:-3}}]},
+  {id:'c2',tag:'공공의 안전 ↔ 사생활',t:'거리마다 얼굴 인식 CCTV',src:'교과서 146쪽 쟁점 ①',
+   s:'범죄를 막기 위해 전국 거리에 얼굴 인식 CCTV를 설치하자는 의견이 나왔습니다. 누가 언제 어디에 있었는지 국가가 모두 알 수 있게 됩니다.',
+   opts:[
+    {t:'전국에 설치하고 실시간으로 추적한다.',eff:{safe:15,free:-15}},
+    {t:'범죄가 잦은 곳에만 설치하고, 영상은 30일 뒤 삭제한다.',eff:{safe:7,free:-3,trust:3}},
+    {t:'설치하지 않는다.',eff:{safe:-8,free:8}}]},
+  {id:'c3',tag:'공공 질서 ↔ 개인의 자유',t:'껌 씹으면 벌금 40만 원?',src:'교과서 148쪽 스스로 탐구하기',
+   s:'이웃 나라는 쓰레기 투기 200만 원, 껌 씹기 40만 원, 침 뱉기 40만 원, 화장실 물 안 내리기 100만 원의 벌금을 매겨 아주 깨끗합니다. 우리나라도 따라 할까요?',
+   opts:[
+    {t:'그대로 따라 한다. 깨끗하고 안전한 나라가 우선!',eff:{safe:6,free:-12,trust:-4}},
+    {t:'남에게 피해를 주는 행동에만 적당한 벌금을 매긴다.',eff:{safe:3,free:2,trust:3}},
+    {t:'벌금 대신 캠페인과 교육으로 해결한다.',eff:{free:8,safe:-4,trust:2}}]},
+  {id:'c4',tag:'불평등 해소 ↔ 재산권',t:'부자에게 세금을 더?',src:'교과서 147쪽 쟁점 ②',
+   s:'상위 1% 부자가 나라 전체 재산의 절반을 가지고 있습니다. 가난한 시민을 돕기 위해 부자에게 세금을 더 걷자는 주장과, 열심히 번 재산을 빼앗는 것이라는 주장이 맞섭니다.',
+   opts:[
+    {t:'상위 1%의 재산에 높은 세금(부유세)을 매겨 복지에 쓴다.',eff:{equal:15,welfare:5,eco:-8,free:-5}},
+    {t:'소득이 많을수록 조금씩 더 내게 한다(누진세 강화).',eff:{equal:8,welfare:2,eco:-3}},
+    {t:'모두 같은 비율로 낸다. 재산은 개인의 것!',eff:{eco:8,free:3,equal:-12}}]},
+  {id:'c5',tag:'사회 안정 ↔ 자유와 평등',t:'태어날 때 직업이 정해진다면',src:'교과서 145쪽 《멋진 신세계》',
+   s:'AI가 아기의 능력을 분석해 다섯 계급으로 나누고 평생 직업을 정해 주면, 실업자가 0%가 되고 사회가 안정된다고 합니다.',
+   opts:[
+    {t:'도입한다. 모두 일자리가 있고 질서가 생긴다.',eff:{eco:10,safe:5,free:-25,equal:-15,trust:-5}},
+    {t:'AI는 진로를 추천만 하고, 선택은 개인이 한다.',eff:{free:3,eco:3,trust:3}},
+    {t:'국가는 진로에 전혀 관여하지 않는다.',eff:{free:6,equal:-3}}]},
+  {id:'c6',tag:'국가의 역할 ① 생명과 안전',t:'비만 오면 잠기는 마을',src:'교과서 152쪽',
+   s:'“이 마을은 비만 오면 침수가 되는데, 이제 나는 어찌해야 하나.” 해마다 같은 마을이 물에 잠기고 있습니다.',
+   opts:[
+    {t:'큰 예산을 들여 배수 시설·제방을 짓고 이주도 지원한다.',eff:{safe:12,welfare:5,eco:-8}},
+    {t:'피해가 날 때마다 재난 지원금을 준다.',eff:{welfare:5,safe:2,eco:-4}},
+    {t:'각자 보험을 들어 스스로 대비하게 한다.',eff:{eco:5,safe:-10,equal:-5}}]},
+  {id:'c7',tag:'국가의 역할 ② 인간다운 삶',t:'홀로 지내는 어르신',src:'교과서 152쪽',
+   s:'“어휴, 가족도 없이 혼자 계셔서 쓰러지신 줄도 몰랐어요.” 홀로 사는 어르신이 늘고 있습니다.',
+   opts:[
+    {t:'국가 돌봄 매니저가 정기 방문하고 응급 호출기를 준다.',eff:{welfare:12,equal:5,eco:-6}},
+    {t:'이웃·자원봉사자와 어르신을 연결하도록 국가가 지원한다.',eff:{welfare:7,trust:8,eco:-2}},
+    {t:'가족이나 본인이 책임진다.',eff:{eco:4,welfare:-12,equal:-4}}]},
+  {id:'c8',tag:'법 준수 ↔ 시민 불복종',t:'정부 비판 금지법',src:'교과서 147쪽 쟁점 ③',
+   s:'의회가 ‘정부를 비판하는 SNS 글 금지법’을 통과시켰습니다. 시민들이 일부러 비판 글을 올리고 평화 시위를 하며 “처벌도 받겠다”고 합니다.',
+   opts:[
+    {t:'법은 법이다. 강하게 단속하고 처벌한다.',eff:{safe:5,free:-15,trust:-15}},
+    {t:'처벌은 하되, 법을 고칠지 공청회를 연다.',eff:{free:5,trust:8}},
+    {t:'법을 즉시 없애고, 시민과 소통하는 창구를 만든다.',eff:{free:12,trust:12,safe:-3}}]}
+];
+const KIND = {crisis:'🚨 위기', ops:'🏛️ 국가 운영', opp:'🌟 기회'};
+const EVENTS = [
+  {id:'flood',kind:'crisis',e:'🌧️',t:'대홍수 발생!',s:'기록적인 폭우로 강가 마을 3곳이 물에 잠겼습니다. 이재민 2만 명이 생겼어요. 우리 나라는 어떻게 대응할까요?',
+   prep:[['dis',1]],prepName:'재난·환경 예산',base:{safe:-12,welfare:-6,eco:-6},
+   opts:[
+    {t:'국가 긴급 예산 투입 — 임시 주택과 생활비를 지원한다.',eff:{welfare:6,safe:6,eco:-8}},
+    {t:'국가는 장비를 지원하고, 시민 자원봉사단을 모집해 함께 복구한다. (태안 사례처럼)',eff:{safe:5,trust:10,eco:-3}},
+    {t:'각 지역이 알아서 복구하게 맡긴다.',eff:{eco:3,safe:-10,trust:-10}}]},
+  {id:'virus',kind:'crisis',e:'🦠',t:'감염병 유행!',s:'전파력이 강한 새 감염병이 빠르게 퍼지고 있습니다.',
+   prep:[['med',1]],prepName:'의료·보건 예산',base:{safe:-10,welfare:-8,eco:-6},
+   opts:[
+    {t:'모든 국민에게 위치 추적 앱을 의무로 깔게 하고 확진자 동선을 공개한다.',eff:{safe:12,free:-15,trust:-3}},
+    {t:'검사·치료를 무료로 지원하고, 개인정보는 최소한만 공개한다.',eff:{safe:6,welfare:5,eco:-6}},
+    {t:'개인이 알아서 조심하도록 안내만 한다.',eff:{free:5,safe:-12,welfare:-5}}]},
+  {id:'quake',kind:'crisis',e:'🌋',t:'강한 지진 발생!',s:'규모 6.8의 강한 지진이 도시를 덮쳤습니다. 건물이 무너지고 도로가 끊겼어요.',
+   prep:[['dis',1],['def',0.5]],prepName:'재난·환경 + 국방·치안(절반)',base:{safe:-14,eco:-8,welfare:-4},
+   opts:[
+    {t:'군대와 경찰을 총동원해 구조하고, 위험 지역은 강제로 대피시킨다.',eff:{safe:8,free:-5,eco:-4}},
+    {t:'구조는 국가가, 복구는 국가와 시민 봉사단이 함께 한다.',eff:{safe:5,trust:8,eco:-3}},
+    {t:'피해 주민에게 돈을 나눠 주고 스스로 복구하게 한다.',eff:{welfare:4,eco:-6,safe:-2}}]},
+  {id:'border',kind:'crisis',e:'⚔️',t:'이웃 나라의 국경 도발!',s:'이웃 나라 군대가 국경 근처에서 훈련을 하며, 우리 땅 일부가 자기 땅이라고 주장합니다.',
+   prep:[['def',1]],prepName:'국방·치안 예산',base:{safe:-14,eco:-4,trust:-4},
+   opts:[
+    {t:'군대를 국경에 대규모로 배치해 맞대응한다.',eff:{safe:8,eco:-8,free:-3}},
+    {t:'외교관을 보내 대화로 풀고, 국제기구에 도움을 요청한다.',eff:{safe:4,trust:4,eco:-1}},
+    {t:'충돌을 피하려고 그 땅을 양보한다.',eff:{safe:-6,trust:-8,eco:2}}]},
+  {id:'cyber',kind:'crisis',e:'💻',t:'국가 전산망 해킹!',s:'해커들이 국가 전산망을 공격해 은행·병원·학교 시스템이 멈췄습니다.',
+   prep:[['def',0.5],['edu',0.5]],prepName:'국방·치안(절반) + 교육(절반)',base:{safe:-8,eco:-8,trust:-4},
+   opts:[
+    {t:'모든 국민의 인터넷 사용을 국가가 실시간으로 감시한다.',eff:{safe:8,free:-15,trust:-4}},
+    {t:'보안 전문가를 채용하고, 중요한 자료를 백업하는 체계를 만든다.',eff:{safe:6,eco:-4}},
+    {t:'각 기업과 기관이 알아서 복구하게 한다.',eff:{eco:2,safe:-6,trust:-4}}]},
+  {id:'crisis',kind:'ops',e:'📉',t:'경제 위기!',s:'세계 경제가 흔들리며 실업자가 크게 늘었습니다. 가게들이 문을 닫고 있어요.',
+   prep:[['job',1],['edu',0.5]],prepName:'경제·일자리 + 교육(절반)',base:{eco:-12,welfare:-6,equal:-4},
+   opts:[
+    {t:'세금을 올려 실업자에게 기본 생활비를 지원한다.',eff:{welfare:10,equal:5,eco:-5,free:-3}},
+    {t:'기업 세금을 깎아 일자리를 늘리게 한다.',eff:{eco:10,equal:-6}},
+    {t:'국가가 공공 일자리를 만들고 직업 훈련을 제공한다.',eff:{eco:4,welfare:4,trust:4}}]},
+  {id:'aging',kind:'ops',e:'👴',t:'고령화 시대!',s:'노인 인구가 빠르게 늘어 일할 사람은 줄고, 돌봄과 연금에 드는 돈은 늘고 있습니다.',
+   prep:[['wel',1],['med',0.5]],prepName:'복지 + 의료·보건(절반)',base:{welfare:-8,eco:-6},
+   opts:[
+    {t:'세금을 올려 연금과 돌봄 서비스를 늘린다.',eff:{welfare:10,eco:-6,free:-2}},
+    {t:'정년을 늘리고 어르신 일자리를 만든다.',eff:{eco:4,welfare:4,trust:2}},
+    {t:'어르신 부양은 가족이 책임진다.',eff:{eco:3,welfare:-8,equal:-4}}]},
+  {id:'protest',kind:'ops',e:'📢',t:'대규모 평화 시위!',s:'‘청소년 밤 10시 이후 외출 금지법’에 반대하는 시민들이 법을 어기고 밤에 모여 평화 시위를 하고 있습니다. 처벌도 받겠다고 밝혔어요.',
+   prep:[],prepName:'',base:{safe:-4,trust:-6},
+   opts:[
+    {t:'경찰을 투입해 강제 해산하고 주동자를 엄하게 처벌한다.',eff:{safe:4,free:-12,trust:-12}},
+    {t:'법은 지키게 하되, 시위대 대표와 공개 토론회를 연다.',eff:{trust:8,free:3}},
+    {t:'법이 부당했음을 인정하고 즉시 폐지한다.',eff:{free:10,trust:6,safe:-3}}]},
+  {id:'talent',kind:'opp',e:'🎓',t:'인재들이 자라났다!',s:'그동안 길러 낸 학생들이 과학자·의사·예술가로 자라나 나라 곳곳에서 활약하기 시작했습니다.',
+   prep:[['edu',1]],prepName:'교육 예산',base:{eco:10,trust:4,equal:4},
+   opts:[
+    {t:'뛰어난 인재에게 집중 지원해 세계 최고로 키운다.',eff:{eco:8,equal:-5}},
+    {t:'모든 학생이 재능을 찾도록 무료 교육을 더 넓힌다.',eff:{equal:6,welfare:3,eco:2}},
+    {t:'인재들이 해외에서 경험을 쌓도록 유학을 지원한다.',eff:{eco:3,free:3,trust:-2}}]},
+  {id:'invest',kind:'opp',e:'🚀',t:'신산업 투자 기회!',s:'AI·반도체 같은 새로운 산업이 떠오르고 있습니다. 지금 투자하면 나라가 크게 부유해질 수 있어요.',
+   prep:[['job',1]],prepName:'경제·일자리 예산',base:{eco:12,safe:2},
+   opts:[
+    {t:'복지 예산까지 끌어와 국가가 대규모로 투자한다.',eff:{eco:12,welfare:-6,equal:-3}},
+    {t:'기업과 함께 투자하고, 생긴 일자리를 지역에 고루 나눈다.',eff:{eco:6,equal:4}},
+    {t:'실패할 수 있으니 투자하지 않는다.',eff:{eco:-3,welfare:2}}]},
+  {id:'resource',kind:'opp',e:'💎',t:'귀한 자원 발견!',s:'우리 땅에서 귀한 광물(희토류)이 대량으로 발견되었습니다! 캐낼 기술과 산업이 있어야 이익을 볼 수 있어요.',
+   prep:[['job',0.5],['edu',0.5]],prepName:'경제·일자리(절반) + 교육(절반)',base:{eco:10},
+   opts:[
+    {t:'외국 기업에 채굴권을 팔아 빨리 돈을 번다.',eff:{eco:8,safe:-3,trust:-3}},
+    {t:'국가가 직접 개발하고, 수익을 국민 복지에 쓴다.',eff:{eco:4,welfare:5,equal:3}},
+    {t:'환경 파괴를 막기 위해 개발을 미룬다.',eff:{trust:3,welfare:2,eco:-2}}]},
+  {id:'defense',kind:'opp',e:'🛰️',t:'국방 기술 개발 성공!',s:'국방 연구소가 새로운 첨단 드론 기술 개발에 성공했습니다.',
+   prep:[['def',1]],prepName:'국방·치안 예산',base:{safe:10,eco:4},
+   opts:[
+    {t:'다른 나라에 수출해 큰돈을 번다.',eff:{eco:8,trust:-4}},
+    {t:'재난 구조·농업 등 민간에도 기술을 개방한다.',eff:{safe:4,eco:4,welfare:3}},
+    {t:'기술을 비밀로 하고 국방에만 쓴다.',eff:{safe:7,free:-2}}]},
+  {id:'culture',kind:'opp',e:'🎤',t:'우리 문화가 세계적 인기!',s:'우리나라의 음악과 드라마가 세계적으로 큰 인기를 얻고 있습니다!',
+   prep:[['edu',1]],prepName:'교육(문화·예술) 예산',base:{eco:6,trust:6},
+   opts:[
+    {t:'관광·문화 산업에 집중 투자해 돈을 번다.',eff:{eco:8,equal:-2}},
+    {t:'예술인 지원과 문화 교육을 모든 지역에 넓힌다.',eff:{trust:5,equal:3,welfare:2}},
+    {t:'국가는 간섭하지 않고 민간에 맡긴다.',eff:{free:4,eco:3}}]}
+];
+const LV_CRISIS=[{min:6,n:'철저한 대비',m:0.2,c:'ok',d:'평소에 꾸준히 투자한 덕분에 피해가 80% 줄었어요!'},{min:3,n:'대비됨',m:0.5,c:'ok',d:'준비가 되어 있어 피해가 절반으로 줄었어요.'},{min:1,n:'대비 부족',m:1,c:'warn',d:'준비가 부족해 피해를 그대로 입었어요.'},{min:0,n:'무방비',m:2,c:'bad',d:'준비가 전혀 없어 피해가 2배로 커졌어요!'}];
+const LV_OPP=[{min:6,n:'최고 수준 투자',m:2,c:'ok',d:'꾸준한 투자가 큰 열매를 맺었어요! (효과 2배)'},{min:3,n:'충분한 투자',m:1,c:'ok',d:'투자한 만큼 성과를 거뒀어요.'},{min:1,n:'투자 부족',m:0.5,c:'warn',d:'투자가 적어 효과가 절반에 그쳤어요.'},{min:0,n:'투자 없음',m:0,c:'bad',d:'투자가 없어 이 기회를 살리지 못했어요.'}];
+function eventImpact(d,e,v){
+  const b=norm(d).budget;
+  const dd=norm(d).con.duties; let dpts=0; const dnotes=[];
+  dd.forEach(k=>{ const fx=DUTY_FX[k]; if(fx&&fx.prep&&fx.prep[e.id]){ dpts+=fx.prep[e.id]; dnotes.push({c:'ok',t:`${fx.note} 덕분에 ${e.kind==='opp'?'투자':'대비'} +${fx.prep[e.id]}칸`}); } });
+  const pts=(e.prep||[]).reduce((a,p)=>a+(+b[p[0]]||0)*p[1],0)+dpts;
+  const LV=e.kind==='opp'?LV_OPP:LV_CRISIS;
+  const lv=(e.prep&&e.prep.length)?LV.find(x=>pts>=x.min):{n:'신뢰가 좌우',m:1,c:'warn',d:'이 사건은 예산보다 시민의 신뢰가 결과를 좌우해요.'};
+  let m=lv.m*EVENT_POWER; const notes=[...dnotes];
+  const tr=Math.round(Math.max(0,Math.min(100,v?v.trust:50)));
+  if(e.kind!=='opp'){
+    if(tr>=65){ m*=0.7; notes.push({c:'ok',t:`🤝 시민 신뢰 ${tr}점 — 시민들이 정부와 힘을 모아 피해가 더 줄었어요.`}); }
+    else if(tr<35){ m*=1.3; notes.push({c:'bad',t:`😠 시민 신뢰 ${tr}점 — 시민들이 정부를 믿지 않아 혼란이 더 커졌어요.`}); }
+  } else if(tr>=65 && m>0){ m*=1.2; notes.push({c:'ok',t:`🤝 시민 신뢰 ${tr}점 — 시민들의 참여로 효과가 더 커졌어요.`}); }
+  if(dd.includes('tax') && m>0){ m*= e.kind==='opp'?1.1:0.85; notes.push({c:'ok',t:'🧾 시민들의 성실한 납세로 생긴 재정 여유가 '+(e.kind==='opp'?'효과를 키웠어요.':'피해를 줄였어요.')}); }
+  if(dd.includes('bal') && DUTY_FX.bal.ids.includes(e.id)){ m*=0.8; notes.push({c:'ok',t:'⚖️ 공익과 사익을 조화시키는 시민들 덕분에 갈등이 줄었어요.'}); }
+  const scaled={}; for(const k in e.base){ const x=Math.round(e.base[k]*m); if(x) scaled[k]=x; }
+  return {pts,lv,m,notes,scaled};
+}
+
+const OUTCOME={great:{n:'대성공',e:'🌟',c:'ok',m:1.5,bonus:{trust:6,eco:5},d:'대응이 완벽하게 맞아떨어졌어요! 효과가 1.5배로 커지고 보너스까지 받았어요.'},ok:{n:'성공',e:'✅',c:'ok',m:1,bonus:{},d:'대응이 계획대로 진행됐어요.'},fail:{n:'실패',e:'💥',c:'bad',m:0.3,bonus:{trust:-8,eco:-6},d:'대응이 엇나갔어요! 효과는 거의 없고, 피해는 1.5배로 커지고, 신뢰와 경제까지 떨어졌어요.'}};
+function successRate(d,e,v,nOpts){
+  const imp=eventImpact(d,e,v);
+  const base={'철저한 대비':85,'대비됨':70,'대비 부족':50,'무방비':30,'최고 수준 투자':85,'충분한 투자':70,'투자 부족':50,'투자 없음':30,'신뢰가 좌우':55}[imp.lv.n]??50;
+  let p=base; const tr=v?v.trust:50; if(tr>=65)p+=10; else if(tr<35)p-=15; if(nOpts>=2)p+=10;
+  return Math.max(10,Math.min(95,p));
+}
+function evApply(e,imp,r){
+  const out=OUTCOME[r.out||'ok']; const ops=(r.opts||[r.opt]).filter(i=>e.opts[i]); const res={}; const put=(k,x)=>{ res[k]=(res[k]||0)+x; };
+  for(const k in imp.scaled){ const x=imp.scaled[k]; const mul= x<0 ? (r.out==='fail'?1.5:r.out==='great'?0.5:1) : (r.out==='fail'?0.5:r.out==='great'?1.5:1); put(k,Math.round(x*mul)); }
+  for(const i of ops){ const eff=e.opts[i].eff; for(const k in eff){ const x=eff[k]; put(k, x>0?Math.round(x*out.m):x); } }
+  for(const k in out.bonus) put(k,out.bonus[k]);
+  if(ops.length>=2){ put('eco',-4); if(r.out!=='fail'){ put('trust',3); put('welfare',3); } }
+  for(const k in res) if(!res[k]) delete res[k];
+  return res;
+}
+function evTxt(e,r){ const ops=(r.opts||[r.opt]).filter(i=>e.opts[i]); const o=OUTCOME[r.out||'ok']; return ops.map(i=>'ABC'[i]+'. '+e.opts[i].t).join(' + ')+(r.out?` (${o.e} ${o.n}${r.roll?' · 🎲'+r.roll:''})`:''); }
+function fmtEff(o){ return IND.filter(i=>o&&o[i.k]).map(i=>`${i.n} ${o[i.k]>0?'+':''}${o[i.k]}`).join(' · '); }
+const DUTIES = [
+  {k:'army',n:'🪖 국방의 의무'},{k:'work',n:'🛠️ 근로의 의무'},{k:'study',n:'📖 교육의 의무'},
+  {k:'tax',n:'🧾 납세의 의무'},{k:'join',n:'🙋 공동체 일에 참여'},{k:'bal',n:'⚖️ 공익과 사익의 조화'}
+];
+const PERSONAS = [
+  {n:'홀로 사는 어르신',e:'👵',w:{welfare:.6,safe:.4},q:['돌봐 주는 사람이 있어 외롭지 않아요.','그럭저럭 지내지만 아프면 걱정이에요.','쓰러져도 아무도 모를까 봐 무서워요…']},
+  {n:'강가 마을 주민',e:'🧑‍🌾',w:{safe:.6,trust:.4},q:['비가 와도 이제 안심이에요!','대책이 조금 더 필요해요.','비만 오면 또 잠길까 봐 잠을 못 자요.']},
+  {n:'중학생',e:'🧑‍🎓',w:{free:.4,equal:.3,trust:.3},q:['내 꿈을 내가 정할 수 있어 좋아요!','하고 싶은 말을 다 하긴 어려워요.','내 삶을 내가 선택할 수 없어요…']},
+  {n:'가게 사장님',e:'🧑‍🍳',w:{eco:.6,free:.4},q:['장사가 잘되고 마음도 편해요.','세금이랑 규제가 조금 부담돼요.','가게 문을 닫아야 할 것 같아요…']},
+  {n:'장애가 있는 시민',e:'🧑‍🦽',w:{equal:.5,welfare:.5},q:['차별 없이 함께 살 수 있어요.','아직 불편한 곳이 많아요.','이 나라에 내 자리는 없는 것 같아요.']},
+  {n:'시민 기자',e:'📰',w:{free:.5,trust:.5},q:['정부를 자유롭게 비판할 수 있어요!','기사 쓸 때 눈치가 보여요.','진실을 쓰면 잡혀갈까 두려워요.']}
+];
+const TYPES = {
+  control:{n:'통제 국가',e:'🔒',c:'#5c6370',d:'질서와 안전을 위해 국가가 시민의 삶을 강하게 통제하는 나라입니다. 겉으로는 안정적이지만, 《멋진 신세계》처럼 시민이 스스로 삶을 선택하기 어렵습니다.',q:'안전과 질서를 위해 자유를 어디까지 포기할 수 있을까?'},
+  welfare:{n:'복지 국가',e:'🏥',c:'#2a9d8f',d:'국가가 세금을 거둬 모든 시민의 인간다운 삶을 적극적으로 보장하는 나라입니다.',q:'복지를 위한 세금 부담과 개인의 재산권은 어떻게 조화시킬까?'},
+  night:{n:'최소 국가(야경 국가)',e:'🌙',c:'#3a4a7a',d:'국가는 치안·국방처럼 생명과 안전을 지키는 최소한의 일만 하고, 나머지는 개인에게 맡기는 나라입니다.',q:'스스로 살아가기 어려운 시민은 누가 도와야 할까?'},
+  market:{n:'시장 중심 국가',e:'📈',c:'#d48a1a',d:'경제 성장과 개인의 경쟁을 가장 중요하게 여기는 나라입니다. 부유하지만 시민 사이의 격차가 클 수 있습니다.',q:'경제 성장의 열매는 누구에게 돌아가고 있을까?'},
+  civic:{n:'시민 참여 국가',e:'🤝',c:'#c2508f',d:'국가와 시민이 활발히 소통·협력하고, 시민의 자유와 참여가 살아 있는 나라입니다.',q:'시민이 권리만 누리고 의무를 다하지 않는다면 어떻게 될까?'},
+  balance:{n:'균형 국가',e:'⚖️',c:'#3a6ea5',d:'안전·자유·평등·복지·경제·신뢰가 고르게 갖춰진 나라입니다.',q:'모든 것을 조금씩 갖춘 나라가 정말 최선일까? 놓친 시민은 없을까?'},
+  shaky:{n:'흔들리는 국가',e:'🌪️',c:'#d64545',d:'몇몇 영역에서 시민의 불만이 큰 나라입니다. 어떤 국가의 역할이 부족했는지 살펴보세요.',q:'우리 나라에서 가장 불행한 시민은 누구이고, 왜일까?'}
+};
+const COLORS = ['#e63946','#f4a261','#f1c40f','#2a9d8f','#3a86ff','#1d3557','#8e6cc4','#ffffff','#111111','#6a994e'];
+const SYMS = ['⭐','🌙','☀️','🦅','🐉','🌳','⛰️','🌊','🔥','🌸','🦁','📚','🕊️','⚡','🍀','🐯'];
+const STEPNAMES = ['입장','국가 탄생','주권·이념','세금·예산','정책 결정','헌법','선포'];
+
+const EVENT_POWER = 1.5;
+const RIGHTS = [
+  {k:'vote',n:'🗳️ 참정권',d:'선거로 대표를 뽑고 나라 일에 참여할 권리',ok:(v,d)=>['demo','const'].includes(d.gov),why:'선거로 지도자를 바꿀 수 없는 정치 체제예요.'},
+  {k:'free',n:'🕊️ 자유권',d:'생각을 말하고 원하는 삶을 선택할 권리',ok:v=>v.free>=50,why:'자유 지표가 50점보다 낮아요.'},
+  {k:'social',n:'🏥 사회권',d:'교육·의료·복지로 인간다운 삶을 누릴 권리',ok:v=>v.welfare>=55,why:'복지 지표가 55점보다 낮아요.'},
+  {k:'equal',n:'⚖️ 평등권',d:'성별·재산·출신으로 차별받지 않을 권리',ok:v=>v.equal>=50,why:'평등 지표가 50점보다 낮아요.'},
+  {k:'claim',n:'📮 청구권',d:'억울한 일이 있으면 재판·청원을 요구할 권리',ok:(v,d)=>v.trust>=45&&!(d.choices.c8&&d.choices.c8.opt===0),why:'정부 비판을 처벌했거나 시민 신뢰가 낮아요.'},
+  {k:'prop',n:'🏠 재산권',d:'자기 재산을 가지고 지킬 권리',ok:(v,d)=>!['commun','social'].includes(d.ideo)&&!(d.choices.c4&&d.choices.c4.opt===0),why:'사유재산을 크게 제한하는 이념이나 부유세를 택했어요.'}
+];
+const RESCUE = [
+  {s:'IMF 구제금융',t:'국제기구(IMF)에서 긴급 구제금융을 받는다. 대신 복지를 줄이라는 조건이 붙는다.',eff:{eco:22,welfare:-10,free:-4}},
+  {s:'금 모으기 운동',t:'‘금 모으기 운동’처럼 시민들에게 함께 위기를 이겨 내자고 호소한다.',note:'시민 신뢰가 40점 이상이면 성공! 낮으면 시민들이 외면해요.',eff:v=>v.trust>=40?{eco:16,trust:12}:{eco:5,trust:-5}},
+  {s:'대규모 긴축',t:'공무원과 복지 예산을 크게 줄이고, 나라의 회사(공기업)를 판다.',eff:{eco:18,welfare:-14,equal:-8,trust:-6}}
+];
+const CLOZE = [
+  {q:'국가는 일정한 ___와 그곳에 사는 ___으로 구성된, ___을 가진 집단이다.',a:['영토','국민','주권']},
+  {q:'시민은 국가의 구성원으로서 ___와 ___를 가진 사람이다.',a:['권리','의무']},
+  {q:'국가의 역할은 시민의 ___을 보호하고, ___을 보장하는 것이다.',a:['생명과 안전','인간다운 삶']},
+  {q:'국민의 4대 의무는 국방·근로·교육·___의 의무이다.',a:['납세']},
+  {q:'CCTV 설치처럼 공공의 안전과 개인의 ___ 보호가 부딪칠 수 있다.',a:['사생활']},
+  {q:'정의롭지 못한 법을 바꾸려고 비폭력적으로 법을 어기는 행동을 ___이라고 한다.',a:['시민 불복종']},
+  {q:'바람직한 국가와 시민은 ___과 상호 존중의 관계를 맺는다.',a:['소통과 협력']}
+];
+const BANK_EXTRA = ['군대','재산','경쟁','복종','혁명','세금 감면','권력'];
+const CLOZE_WORDS = [...new Set(CLOZE.flatMap(c=>c.a).concat(BANK_EXTRA))].sort((a,b)=>a.localeCompare(b,'ko'));
+const REFQ = [
+  {k:'r1',t:'🏛️ 지도자로서 가장 잘한 결정과 아쉬운 결정은? 그 결과 시민의 삶은 어떻게 달라졌나요?',p:'예: 재난 예산을 넣어서 홍수 피해를 줄였지만, 세금을 너무 적게 걷어서…'},
+  {k:'r2',t:'🤝 국가가 시민에게, 시민이 국가에게 해야 할 일은 무엇일까요?',p:'예: 국가는 … 을 지켜 주고, 시민은 … 을 해야 한다.'},
+  {k:'r3',t:'🌱 오늘 수업을 통해 느낀 점과 앞으로 실천할 점은?',p:'예: 앞으로 나는 …'}
+];
+const GRADE_C = {S:'#7b3fe4',A:'#2a9d8f',B:'#3a6ea5',C:'#d48a1a',D:'#d64545'};
+function votesFor(id){ const src = MODE==='teacher' ? ((typeof DATA!=='undefined'&&DATA.votes)||{}) : ((typeof VOTES!=='undefined'&&VOTES)||{}); return Object.values(src).filter(v=>v&&v.to===id).length; }
+function rightsHTML(st){
+  if(!st||!st.rights||!st.rights.length) return '';
+  return `<h3>✅ 헌법 약속 점검표</h3><ul class="rlist">${st.rights.map(x=>{ const R=RIGHTS.find(r=>r.k===x.k); return R?`<li><b>${x.ok?'✅ 지킴':'❌ 어김'} · ${esc(R.n)}</b>${esc(R.d)}${x.ok?' — 약속을 지켜 시민 신뢰 +4':' — '+esc(R.why)+' 시민 신뢰 −8'}</li>`:''; }).join('')}</ul>`;
+}
+function report(d,cits,votes){
+  d=norm(d); const st={}; const v=computeInd(d,null,st); const r=relation(d,cits);
+  const avg=Math.round(IND.reduce((a,i)=>a+v[i.k],0)/IND.length);
+  const kept=(st.rights||[]).filter(x=>x.ok).length, broken=(st.rights||[]).length-kept;
+  const lg=[]; computeInd(d,lg); const crises=lg.filter(x=>x.e.kind!=='opp'), opps=lg.filter(x=>x.e.kind==='opp');
+  const ps=PERSONAS.map(p=>personaScore(p,v)); const badges=[];
+  if(r.q==='both') badges.push({e:'🤝',n:'상생 공동체',d:'국가와 시민이 서로를 채워 줬어요'});
+  if(v.eco>=75&&v.safe>=65) badges.push({e:'💎',n:'부강한 나라',d:'경제와 안전을 모두 지켰어요'});
+  if(Math.min(...ps)>=60) badges.push({e:'😊',n:'모두가 행복한 나라',d:'시민 6명 모두 60점 이상'});
+  if(crises.length && crises.every(x=>x.imp.lv.c==='ok')) badges.push({e:'🛡️',n:'위기 극복 마스터',d:'모든 위기를 대비된 상태로 맞았어요'});
+  if(opps.length && opps.every(x=>x.imp.lv.c==='ok')) badges.push({e:'🚀',n:'기회를 잡은 나라',d:'투자로 기회를 살렸어요'});
+  if((st.rights||[]).length && broken===0) badges.push({e:'📜',n:'약속을 지킨 헌법',d:'헌법의 기본권 약속을 모두 지켰어요'});
+  if(st.bankrupt && st.rescued && v.eco>=35) badges.push({e:'🔥',n:'파산 극복',d:'국가 파산을 딛고 다시 일어섰어요'});
+  if((votes||0)>=2) badges.push({e:'🗳️',n:'살고 싶은 나라',d:`친구 ${votes}명이 살고 싶다고 했어요`});
+  let score=avg+(r.q==='both'?6:0)+kept*2-broken*3+badges.length*2-(st.bankrupt?10:0);
+  score=Math.max(0,Math.min(100,Math.round(score)));
+  const grade=score>=75?'S':score>=65?'A':score>=55?'B':score>=45?'C':'D';
+  return {v,st,r,avg,score,grade,badges,kept,broken};
+}
+function clozeHTML(c,ci,mine){
+  const seg=c.q.split('___');
+  return `<div class="scene" style="margin-bottom:10px;line-height:2.3">${ci+1}. ${seg.map((s,j)=>esc(s)+(j<seg.length-1?blankHTML(ci,j,c.a[j],mine):'')).join('')}</div>`;
+}
+function blankHTML(ci,j,ans,mine){
+  const k=`k${ci}_${j}`;
+  if(mine){ const v=(mine.ans||{})[k]||''; const ok=v===ans; return `<b style="padding:2px 8px;border-radius:6px;background:${ok?'#e3f4f1':'#fde8e8'}">${ok?'✅':'❌'} ${esc(v||'(빈칸)')}${ok?'':' → '+esc(ans)}</b>`; }
+  const v=refDraft.ans[k]||'';
+  return `<select class="field" style="display:inline-block;width:auto;padding:6px 8px;margin:0 4px" data-bind="cloze" data-k="${k}"><option value="">고르기 ▾</option>${CLOZE_WORDS.map(w=>`<option ${w===v?'selected':''}>${esc(w)}</option>`).join('')}</select>`;
+}
+
+const IDEO = [
+  {k:'market',n:'자유시장 자본주의',e:'🏪',d:'개인의 재산과 자유로운 경쟁을 중시하고, 국가는 시장에 적게 개입해요.',pro:'경제 활력, 선택의 자유',con:'빈부 격차가 커질 수 있음',eff:{eco:8,free:6,equal:-8,welfare:-4}},
+  {k:'neolib',n:'신자유주의',e:'✂️',d:'작은 정부: 세금과 규제를 줄이고, 공기업을 민간에 넘겨요.',pro:'기업 성장, 정부 비용 절감',con:'공공 서비스가 약해지고 불평등이 커질 수 있음',eff:{eco:10,free:4,equal:-10,welfare:-6,trust:-2}},
+  {k:'mixed',n:'혼합 경제',e:'⚖️',d:'시장경제를 기본으로 하되, 필요할 때 국가가 개입해요. 오늘날 대부분의 나라가 이 방식이에요.',pro:'시장과 국가의 균형',con:'뚜렷한 방향이 없다는 비판',eff:{eco:3,welfare:3,equal:3}},
+  {k:'socdem',n:'복지국가(사회민주주의)',e:'🏥',d:'시장경제에 높은 세금을 더해, 교육·의료·복지를 국가가 넓게 책임져요.',pro:'평등하고 안정된 삶',con:'세금 부담, 성장 둔화 우려',eff:{welfare:10,equal:8,eco:-4,free:-2}},
+  {k:'social',n:'사회주의',e:'🏭',d:'주요 산업과 토지를 국가(사회)가 소유하고, 계획을 세워 생산하고 나눠요.',pro:'평등, 기본 생활 보장',con:'효율과 개인의 선택이 줄어들 수 있음',eff:{equal:12,welfare:6,eco:-8,free:-6}},
+  {k:'commun',n:'공산주의',e:'⚒️',d:'사유재산을 없애고 모두 함께 생산해 필요에 따라 나누는 사회를 꿈꿔요. 다만 역사 속 공산주의 국가들은 대부분 한 정당이 모든 권력을 가진 독재로 운영되었어요.',pro:'완전한 평등을 꿈꿈',con:'개인의 자유와 재산이 크게 제한됨, 생산 의욕 저하',eff:{equal:16,welfare:4,eco:-12,free:-12,trust:-4}}
+];
+const DUTY_BASE = {army:{safe:2},work:{eco:2},study:{equal:1,eco:1},tax:{welfare:2},join:{trust:4},bal:{equal:3}};
+const DUTY_FX = {
+  army:{prep:{border:2,cyber:2,defense:2},note:'🪖 국방의 의무를 다하는 시민들'},
+  work:{prep:{invest:2,crisis:2,resource:1},note:'🛠️ 성실히 일하는 시민들'},
+  study:{prep:{talent:2,culture:2,resource:1,cyber:1},note:'📖 배움을 게을리하지 않는 시민들'},
+  join:{prep:{flood:2,quake:2,virus:1},note:'🙋 공동체 일에 나서는 시민들'},
+  tax:{note:'🧾 성실한 납세'},
+  bal:{ids:['protest','aging','crisis'],note:'⚖️ 공익과 사익을 조화시키는 시민들'}
+};
+const CIT_CARDS = [
+  {id:'tax',e:'🧾',t:'세금 고지서가 도착했어요',s:'정부가 올해 세금을 내라고 합니다.',opts:[{t:'성실하게 세금을 낸다.',s:4,c:2},{t:'내긴 하지만, 세금이 어디에 쓰이는지 공개하라고 청원한다.',s:2,c:5},{t:'세금이 부당하다며 내지 않는다.',s:-6,c:1}]},
+  {id:'help',e:'🤝',t:'시민 봉사단 모집',s:'재난 복구와 이웃 돌봄을 위한 시민 봉사단을 모집합니다.',opts:[{t:'직접 봉사에 참여한다.',s:4,c:6},{t:'시간이 없어 기부만 한다.',s:2,c:2},{t:'내 일이 아니니 관심 없다.',s:-3,c:-6}]},
+  {id:'rule',e:'📜',t:'이 나라의 정치에 대해',s:'이 나라의 정치 방식과 정책을 보고, 시민으로서 어떻게 행동할까요?',opts:[{t:'정부를 믿고 따른다.',s:4,c:-2},{t:'바꿀 점을 투표·청원·토론으로 요구한다.',s:2,c:6},{t:'부당하다고 생각해 평화 시위로 저항한다.',s:-4,c:5}]}
+];
+const QUAD = {
+  both:{n:'상생 공동체',e:'🤝',c:'#2a9d8f',d:'국가는 시민을 지키고, 시민은 국가를 함께 꾸려 가요. 서로 채워 주는 관계예요.'},
+  state:{n:'국가만 강한 나라',e:'🔒',c:'#5c6370',d:'국가는 힘이 있지만 시민은 수동적이에요. 국가가 잘못된 길로 가도 막을 사람이 없어요.'},
+  citizen:{n:'시민만 애쓰는 나라',e:'🌪️',c:'#d48a1a',d:'시민들은 적극적이지만 국가가 제 역할을 못 해요. 시민이 국가의 빈자리를 메우느라 지쳐 가요.'},
+  weak:{n:'무너지는 나라',e:'🏚️',c:'#d64545',d:'국가도 시민도 힘이 약해요. 위기가 오면 누구도 지켜 주지 못해요.'}
+};
+function citsFor(id){ const src = MODE==='teacher' ? ((typeof DATA!=='undefined'&&DATA.citizen)||{}) : ((typeof CIT!=='undefined'&&CIT)||{}); return Object.values(src).filter(r=>r&&r.to===id); }
+function relation(d,cits){
+  const v=computeInd(d);
+  let S=(v.safe+v.welfare+v.eco)/3, C=(v.trust+v.free)/2, ds=0, dc=0;
+  const cs=(cits||[]).filter(r=>r&&r.a);
+  cs.forEach(r=>CIT_CARDS.forEach(cc=>{ const o=cc.opts[r.a[cc.id]]; if(o){ ds+=o.s; dc+=o.c; } }));
+  if(cs.length){ S+=ds/cs.length; C+=dc/cs.length; }
+  S=Math.round(Math.max(0,Math.min(100,S))); C=Math.round(Math.max(0,Math.min(100,C)));
+  const q = S>=55&&C>=55?'both':S>=55?'state':C>=55?'citizen':'weak';
+  return {S,C,q,v,n:cs.length};
+}
+function mapSVG(pts,size=240,labels=false){
+  const P=28, W=size, I=W-P-10, X=c=>P+c/100*I, Y=s=>8+(1-s/100)*I, t=X(55), u=Y(55), fs=size>400?14:11;
+  return `<svg viewBox="0 0 ${W} ${W}" width="${W}" height="${W}" style="max-width:100%;height:auto;background:#fff;border-radius:12px;border:1.5px solid var(--line)" role="img" aria-label="국가와 시민의 관계 지도">
+  <rect x="${t}" y="8" width="${P+I-t}" height="${u-8}" fill="#2a9d8f" opacity=".14"/><rect x="${P}" y="8" width="${t-P}" height="${u-8}" fill="#5c6370" opacity=".10"/>
+  <rect x="${t}" y="${u}" width="${P+I-t}" height="${8+I-u}" fill="#e9a23b" opacity=".14"/><rect x="${P}" y="${u}" width="${t-P}" height="${8+I-u}" fill="#d64545" opacity=".10"/>
+  <text x="${P+I-4}" y="${8+fs+4}" text-anchor="end" font-size="${fs}" fill="#1d6f65" font-weight="700">🤝 상생 공동체</text><text x="${P+4}" y="${8+fs+4}" font-size="${fs}" fill="#444" font-weight="700">🔒 국가만 강함</text>
+  <text x="${P+I-4}" y="${8+I-6}" text-anchor="end" font-size="${fs}" fill="#8a5a00" font-weight="700">🌪️ 시민만 애씀</text><text x="${P+4}" y="${8+I-6}" font-size="${fs}" fill="#9b2c2c" font-weight="700">🏚️ 무너지는 나라</text>
+  <text x="${P+I/2}" y="${W-4}" text-anchor="middle" font-size="${fs}" fill="#5b6478">시민의 힘 →</text><text x="13" y="${8+I/2}" text-anchor="middle" font-size="${fs}" fill="#5b6478" transform="rotate(-90 13 ${8+I/2})">국가의 힘 →</text>
+  ${pts.map(p=>`<circle cx="${X(p.x)}" cy="${Y(p.y)}" r="${p.me?8:6}" fill="${p.me?'#e4572e':'#1f2a44'}" stroke="#fff" stroke-width="2"/>${labels?`<text x="${X(p.x)+9}" y="${Y(p.y)+4}" font-size="${fs-1}" fill="#1f2a44">${esc(p.label)}</text>`:''}`).join('')}</svg>`;
+}
+function relBlock(d,cits){
+  const r=relation(d,cits), q=QUAD[r.q];
+  return `<h3>🧭 국가와 시민의 관계 지도</h3><div class="row" style="align-items:flex-start;gap:16px"><div style="flex:none;width:240px;max-width:100%">${mapSVG([{x:r.C,y:r.S,label:norm(d).name,me:true}],240)}</div><div class="sp" style="min-width:220px"><span class="typebadge" style="background:${q.c}">${q.e} ${esc(q.n)}</span><p>${esc(q.d)}</p><div class="muted">🏛️ <b>국가의 힘 ${r.S}점</b> — 국가가 시민에게 해 준 것 (안전·복지·경제)<br>🙋 <b>시민의 힘 ${r.C}점</b> — 시민이 국가를 함께 꾸리는 힘 (신뢰·자유${r.n?' + 친구 시민 '+r.n+'명의 행동':''})</div></div></div>${citsHTML(cits)}`;
+}
+function citsHTML(cits){
+  const cs=(cits||[]).filter(r=>r&&r.a); if(!cs.length) return '';
+  return `<h3>🧑‍🤝‍🧑 우리 나라에 살아 본 시민의 반응</h3><ul class="rlist">${cs.map(c=>`<li><b>${esc(c.fromName||'시민')}</b>${CIT_CARDS.map(cc=>{const o=cc.opts[c.a[cc.id]]; return o?`${cc.e} ${esc(o.t)}`:'';}).filter(Boolean).join('<br>')}${c.review?`<br>🗨️ “${esc(c.review)}”`:''}</li>`).join('')}</ul>`;
+}
+function endingHTML(d,cits){
+  d=norm(d); const r=relation(d,cits), nm=d.name||'우리 나라';
+  const sc=PERSONAS.map(p=>({p,s:personaScore(p,r.v)})).sort((a,b)=>b.s-a.s), best=sc[0], worst=sc[sc.length-1];
+  const say=x=>x.p.q[x.s>=65?0:x.s>=45?1:2];
+  const rv=(cits||[]).find(c=>c&&c.review);
+  const T={
+    both:`10년 뒤, ${nm}에 큰 재난이 닥쳤을 때 정부가 장비와 예산을 보내자 시민 수만 명이 봉사하러 모였습니다. ${best.p.n}은(는) “${say(best)}”라고 말합니다. 국가와 시민이 서로를 믿기에 ${nm}은(는) 위기 때마다 더 단단해졌습니다.`,
+    state:`10년 뒤, ${nm}의 거리는 질서정연합니다. 하지만 시민들은 정부가 정한 대로만 움직입니다. ${worst.p.n}은(는) 조용히 “${say(worst)}”라고 털어놓습니다. 정부가 실수를 해도 바로잡아 줄 시민의 목소리가 약합니다.`,
+    citizen:`10년 뒤, ${nm}의 시민들은 서로 돕고 목소리를 높이지만, 정부는 안전과 삶을 제대로 책임지지 못합니다. ${worst.p.n}은(는) “${say(worst)}”라고 말합니다. 시민들이 묻습니다. “국가는 지금 무엇을 하고 있나요?”`,
+    weak:`10년 뒤, ${nm}에는 위기가 올 때마다 혼란이 이어집니다. 정부도 시민도 서로를 믿지 못합니다. ${worst.p.n}의 한마디: “${say(worst)}” 이 나라를 다시 세우려면 무엇부터 바꿔야 할까요?`};
+  return `<h3>📖 10년 후, ${esc(nm)}</h3><div class="scene" style="font-size:16.5px;line-height:1.75">${esc(T[r.q])}${rv?`<br><br>🗨️ 이 나라에 살아 본 친구: “${esc(rv.review)}”`:''}</div>`;
+}
+
+/* =========================================================
+   ③ 계산
+   ========================================================= */
+const byK = (arr,k)=>arr.find(x=>x.k===k);
+function norm(d){
+  d = d||{};
+  return {
+    name:d.name||'', flag:Object.assign({c1:'#e63946',c2:'#1d3557',sym:'⭐'},d.flag||{}),
+    terr:d.terr||null, ideo:d.ideo||null, pop:d.pop||null, gov:d.gov||null, tax:d.tax||null,
+    budget:d.budget||{}, choices:d.choices||{}, events:d.events||{}, rescue:d.rescue||null,
+    con:{a1:(d.con&&d.con.a1)||'',a2:(d.con&&d.con.a2)||'',duties:Object.values((d.con&&d.con.duties)||[]),rights:Object.values((d.con&&d.con.rights)||[])}
+  };
+}
+function computeInd(d,log,st){
+  d = norm(d);
+  const v={safe:40,free:40,equal:40,welfare:40,eco:40,trust:40};
+  const add=eff=>{ if(!eff) return; for(const k in eff) v[k]+=eff[k]; };
+  add(byK(TERR,d.terr)?.eff); add(byK(POP,d.pop)?.eff); add(byK(GOV,d.gov)?.eff); add(byK(TAX,d.tax)?.eff); add(byK(IDEO,d.ideo)?.eff); for(const k of d.con.duties) add(DUTY_BASE[k]);
+  if(d.tax){
+    for(const b of BUDGET){
+      const p = +d.budget[b.k]||0;
+      if(p===0) add(b.zero); else for(const k in b.per) v[k]+=b.per[k]*p;
+    }
+  }
+  for(const c of CARDS){ const ch=d.choices[c.id]; if(ch && ch.opt!=null && c.opts[ch.opt]) add(c.opts[ch.opt].eff); }
+  const evs=EVENTS.filter(e=>{ const r=d.events[e.id]; return r && ((r.opts&&Object.values(r.opts).length)||(r.opt!=null&&e.opts[r.opt])); }).sort((a,b)=>(d.events[a.id].at||0)-(d.events[b.id].at||0));
+  for(const e of evs){ const r=Object.assign({},d.events[e.id]); if(r.opts) r.opts=Object.values(r.opts); const imp=eventImpact(d,e,v); const delta=evApply(e,imp,r); add(delta);
+    if(log) log.push({e,imp,opt:(r.opts||[r.opt])[0],out:r.out||'ok',roll:r.roll,delta}); }
+  const rk=[]; const vv={}; for(const k in v) vv[k]=Math.max(0,Math.min(100,v[k]));
+  for(const r of d.con.rights){ const RR=RIGHTS.find(x=>x.k===r); if(!RR) continue; const ok=!!RR.ok(vv,d); rk.push({k:r,ok}); v.trust+= ok?4:-8; }
+  let bankrupt=false, warn=false;
+  if(d.tax && v.eco<=20){ bankrupt=true; v.welfare-=15; v.trust-=15; v.equal-=8; v.safe-=5; const RS=d.rescue&&RESCUE[d.rescue.opt]; if(RS) add(typeof RS.eff==='function'?RS.eff(v):RS.eff); }
+  else if(d.tax && v.eco<=30) warn=true;
+  for(const k in v) v[k]=Math.max(0,Math.min(100,Math.round(v[k])));
+  if(st){ st.rights=rk; st.bankrupt=bankrupt; st.warn=warn; st.rescued=!!(bankrupt&&d.rescue); }
+  return v;
+}
+function nationType(v,d){
+  d=norm(d);
+  if(v.free<35 && (v.safe>=55 || d.gov==='dict')) return 'control';
+  if(v.welfare>=65 && v.equal>=60) return 'welfare';
+  if(v.safe>=55 && v.welfare<45 && v.equal<50) return 'night';
+  if(v.eco>=65 && v.equal<45) return 'market';
+  if(v.trust>=70 && v.free>=65) return 'civic';
+  if(Math.min(...Object.values(v))>=50) return 'balance';
+  return 'shaky';
+}
+function personaScore(p,v){ let s=0; for(const k in p.w) s+=v[k]*p.w[k]; return Math.round(s); }
+function budgetUsed(d){ return BUDGET.reduce((a,b)=>a+(+norm(d).budget[b.k]||0),0); }
+
+/* =========================================================
+   ③ 게임 데이터
+   ========================================================= */
+const QUICK = [
+  {k:'control',v:{safe:70,free:25,equal:40,welfare:40,eco:55,trust:30}},
+  {k:'welfare',v:{safe:55,free:55,equal:65,welfare:70,eco:40,trust:55}},
+  {k:'night',v:{safe:65,free:60,equal:40,welfare:35,eco:55,trust:45}},
+  {k:'market',v:{safe:50,free:60,equal:35,welfare:40,eco:72,trust:45}},
+  {k:'civic',v:{safe:50,free:70,equal:55,welfare:50,eco:45,trust:72}},
+  {k:'balance',v:{safe:55,free:55,equal:55,welfare:55,eco:55,trust:55}}
+];
+const QTERR = [{k:'island',n:'🏝️ 섬나라'},{k:'plain',n:'🌾 평야'},{k:'mount',n:'⛰️ 산악'},{k:'river',n:'🏞️ 강가'}];
+const FLOW = [
+  {id:'spark',e:'🔫',t:'사라예보의 총성',d:'한 발의 총성이 세계를 뒤흔듭니다. 모든 나라가 군대를 동원합니다. 모든 나라 병력 +3, 전쟁 시계 +15',fx:{army:3,clock:15}},
+  {id:'flu',e:'🦠',t:'전쟁터의 독감',d:'참호 속으로 독감이 번졌습니다. 모든 나라 병력 -20%',fx:{armyPct:-0.2}},
+  {id:'crash',e:'📉',t:'대공황',d:'세계 경제가 무너졌습니다. 이번 턴 수입이 절반으로 줄어듭니다.',fx:{incomeMul:0.5}},
+  {id:'revolt',e:'✊',t:'혁명의 물결',d:'점령지마다 저항의 불길이 타오릅니다. 모든 레지스탕스 저항력 +3, 이번 턴 봉기 성공률 +15%',fx:{res:3,riseBonus:15}},
+  {id:'league',e:'🕊️',t:'국제 연맹 창설',d:'평화를 위한 국제기구가 생겼습니다. 이번 턴 공격 1건마다 금 3을 내야 하고, 전쟁 시계 -15',fx:{atkTax:3,clock:-15}},
+  {id:'weapon',e:'💣',t:'신무기 개발',d:'두 나라가 신무기 개발에 성공했습니다! 그 나라들은 이번 턴 공격력 +40%',fx:{weapon:2}},
+  {id:'famine',e:'🌾',t:'대흉년',d:'흉년으로 군량이 모자랍니다. 모든 나라 금 -4, 병력 10% 탈영',fx:{gold:-4,armyPct:-0.1}},
+  {id:'oil',e:'🛢️',t:'석유 쟁탈전',d:'자원이 무기가 되었습니다. 이번 턴 점령지 1곳당 금 +3, 점령지가 없는 나라는 금 -2',fx:{oil:true}},
+  {id:'truce',e:'🏳️',t:'크리스마스 휴전',d:'이번 턴은 모든 공격이 금지됩니다. 외교와 정비의 시간! 전쟁 시계 -5',fx:{noAtk:true,clock:-5}},
+  {id:'prop',e:'📻',t:'선전전',d:'가짜 뉴스가 판칩니다. 이번 턴 배신당한 나라는 분노한 국민 덕분에 방어력 +50%',fx:{prop:true}},
+  {id:'decol',e:'🏴',t:'독립의 물결',d:'‘자치 허용’ 점령지 가운데 저항력 6 이상인 곳은 평화적으로 독립합니다.',fx:{decol:true}},
+  {id:'nuke',e:'☢️',t:'핵무기 등장',d:'최악의 무기가 등장했습니다. 전쟁 시계 +20. 시계가 100이 되면 모두가 패배합니다.',fx:{clock:20}},
+  {id:'summit',e:'🌐',t:'평화 회담',d:'모든 나라 대표가 한자리에 모였습니다. 전쟁 시계 -10, 동맹이 있는 나라는 금 +3',fx:{clock:-10,allyGold:3}}
+];
+const POL = {force:{n:'강압 통치',e:'⛓️',inc:5,res:2,d:'금 +5, 대신 저항력이 빨리 쌓이고 봉기 성공률 +5%'},auto:{n:'자치 허용',e:'🤲',inc:2,res:-1,d:'금 +2, 저항이 잦아들고 ‘독립의 물결’ 때 평화적으로 독립할 수 있음'}};
+const RACT = {grow:{e:'🌱',n:'지하 조직 키우기',d:'저항력 +2'},sab:{e:'💥',n:'사보타주',d:'저항력 3을 써서 점령국 병력 -3 또는 금 -6'},rise:{e:'✊',n:'봉기',d:'성공하면 독립! 실패하면 저항력이 절반으로'}};
+const PHASES = [{k:'lobby',n:'입장',e:'🚪'},{k:'diplo',n:'외교',e:'🤝'},{k:'order',n:'명령',e:'⚔️'},{k:'result',n:'결과',e:'📰'},{k:'end',n:'종전',e:'🏁'}];
+const WREFQ = ['동맹을 배신하거나 배신당했을 때 어떤 마음이었나요? 그 선택은 옳았을까요?','점령한 나라(또는 점령당한 우리 나라)는 어떻게 다스려졌나요? 강압과 자치 중 무엇이 더 오래 갔나요?','실제 역사에서 세계대전 같은 비극을 막으려면 무엇이 필요할까요?'];
+
+/* =========================================================
+   ④ 계산 — 모든 결과는 기록을 처음부터 다시 계산합니다
+   ========================================================= */
+const clamp = (x,a=0,b=100)=>Math.max(a,Math.min(b,x));
+const vals = o => o ? (Array.isArray(o) ? o.filter(x=>x!=null) : Object.keys(o).map(k=>o[k])) : [];
+function hashStr(s){ let h=2166136261; for(const ch of String(s)){ h^=ch.charCodeAt(0); h=Math.imul(h,16777619); } h^=h>>>13; h=Math.imul(h,0x5bd1e995); h^=h>>>15; return h>>>0; }
+const pairKey=(a,b)=>a<b?a+'__'+b:b+'__'+a;
+function flowOf(k){ const id=DATA.meta&&DATA.meta.flow&&DATA.meta.flow['t'+k]; return FLOW.find(f=>f.id===id)||null; }
+function rollOf(k,tag){ return hashStr(SRC+'|'+tag+'|'+k)%100+1; }
+function layout(ids){
+  const fixed=(DATA.meta&&DATA.meta.order)?vals(DATA.meta.order).filter(id=>ids.includes(id)):[];
+  const rest=ids.filter(id=>!fixed.includes(id)).sort((a,b)=>hashStr(SRC+a)-hashStr(SRC+b));
+  const all=[...fixed,...rest]; const cols=Math.max(2,Math.ceil(Math.sqrt(all.length)));
+  const pos={}; all.forEach((id,i)=>pos[id]={r:Math.floor(i/cols),c:i%cols}); return {all,cols,pos};
+}
+const adjOf=(L,t)=>{ const p=L.pos[t]; if(!p) return []; return L.all.filter(x=>x!==t&&Math.abs(L.pos[x].r-p.r)<=1&&Math.abs(L.pos[x].c-p.c)<=1); };
+const START=p=>({army:8+Math.round((+p.base.safe||40)/10),gold:10+Math.round((+p.base.eco||40)/10)});
+const est=a=>{ const b=Math.floor(a/5)*5; return `${b}~${b+4}`; };
+let _c=null,_ck='';
+function calc(){
+  const meta=DATA.meta||{};
+  const key=JSON.stringify([SRC,DATA.players,meta.order,meta.flow,meta.rev,meta.turn,meta.phase,DATA.ord,DATA.gift,DATA.ally]);
+  if(_c&&key===_ck) return _c;
+  const P=DATA.players||{}; const ids=Object.keys(P).filter(id=>P[id]&&P[id].base).sort();
+  const L=layout(ids);
+  const S={}; ids.forEach(id=>{ const st=START(P[id]); S[id]={army:st.army,gold:st.gold,fallen:false,res:0,betray:0,betrayed:0,liber:0,rise:0,riseFail:0,defWin:0,atkWin:0,conq:0,lostHome:0,sab:0}; });
+  const owner={}; ids.forEach(id=>owner[id]=id);
+  const pol={}; const betrayTurn={};
+  const nmR=id=>P[id]?P[id].name:'?';
+  const allyRec=(a,b)=>DATA.ally&&DATA.ally[pairKey(a,b)];
+  const active=(a,b,k)=>{ if(a===b) return false; const r=allyRec(a,b); if(!r) return false; const since=+r.since||0; if(since>k) return false; if(r.end!=null&&+r.end<=k) return false; const bt=betrayTurn[pairKey(a,b)]; if(bt!=null&&bt>=since&&bt<k) return false; return true; };
+  const realm=id=>ids.filter(t=>owner[t]===id);
+  const alive=()=>ids.filter(id=>!S[id].fallen);
+  const freeT=(t,why,R)=>{ const s=S[t]; owner[t]=t; s.fallen=false; s.army=Math.max(3,Math.ceil(s.res*0.8)+2); s.gold=4; s.res=0; delete pol[t]; R.frees.push({t,why}); };
+  let clock=0, doom=null; const reports=[];
+  const phase=meta.phase||'lobby'; const rev=Math.max(0,+meta.rev||0);
+  const openK=(phase==='diplo'||phase==='order')?Math.max(rev,+meta.turn||0):null;
+  const lastK=openK!=null?openK:rev-1;
+  let openState=null;
+  for(let k=0;k<=lastK;k++){
+    const fl=flowOf(k); const fx=fl?fl.fx:{};
+    const R={k,fl,battles:[],rises:[],sabs:[],gifts:[],falls:[],frees:[],news:[],clock0:clock,weapon:[]};
+    const news=(e,txt,who=[])=>R.news.push({e,txt,ids:who});
+    if(fl) news(fl.e,`세계사의 흐름 — ${fl.t}`);
+    const AL=alive();
+    if(fx.army) AL.forEach(id=>S[id].army+=fx.army);
+    if(fx.armyPct) AL.forEach(id=>S[id].army=Math.max(0,Math.round(S[id].army*(1+fx.armyPct))));
+    if(fx.gold) AL.forEach(id=>S[id].gold=Math.max(0,S[id].gold+fx.gold));
+    if(fx.res) ids.forEach(id=>{ if(S[id].fallen) S[id].res+=fx.res; });
+    if(fx.clock) clock=clamp(clock+fx.clock);
+    if(fx.allyGold) AL.forEach(id=>{ if(ids.some(x=>active(id,x,k))) S[id].gold+=fx.allyGold; });
+    if(fx.weapon){ R.weapon=[...AL].sort((a,b)=>hashStr(SRC+'W'+k+a)-hashStr(SRC+'W'+k+b)).slice(0,fx.weapon); R.weapon.forEach(id=>news('💣',`${nmR(id)}이(가) 신무기 개발에 성공했습니다!`,[id])); }
+    if(fx.decol) ids.forEach(t=>{ if(owner[t]!==t&&S[t].fallen&&pol[t]==='auto'&&S[t].res>=6){ const o=owner[t]; freeT(t,'평화적 독립',R); news('🏴',`${nmR(t)}이(가) ${nmR(o)}로부터 평화적으로 독립했습니다!`,[t,o]); } });
+    const war=clock>=50; const mul=(fx.incomeMul||1)*(war?0.8:1);
+    if(k>0) alive().forEach(id=>{ const s=S[id]; let g=6+Math.floor((+P[id].base.eco||40)/10); const occ=realm(id).filter(t=>t!==id); occ.forEach(t=>g+=POL[pol[t]||'force'].inc); if(fx.oil) g+=occ.length?occ.length*3:-2; s.gold=Math.max(0,s.gold+Math.round(g*mul)); });
+    if(k===openK && k>=rev){ openState={k,fl,war,clock,R}; break; }
+    // ---- 지원금 ----
+    const GF=(DATA.gift&&DATA.gift['t'+k])||{};
+    Object.keys(GF).sort().forEach(from=>{ if(!S[from]||S[from].fallen) return; Object.keys(GF[from]||{}).sort().forEach(to=>{ if(!S[to]||to===from) return; const amt=Math.max(0,Math.min(Math.floor(+GF[from][to]||0),S[from].gold)); if(!amt) return; S[from].gold-=amt; if(S[to].fallen){ S[to].res+=Math.floor(amt/3); R.gifts.push({from,to,amt,res:true}); } else { S[to].gold+=amt; R.gifts.push({from,to,amt}); } }); });
+    // ---- 명령 ----
+    const OR=(DATA.ord&&DATA.ord['t'+k])||{}; const plan={};
+    alive().forEach(id=>{ const s=S[id]; const o=OR[id]||{};
+      const rec=Math.max(0,Math.min(Math.floor(+o.rec||0),10,Math.floor(s.gold/2))); s.gold-=rec*2; s.army+=rec;
+      if(o.pol) for(const t in o.pol){ if(owner[t]===id&&t!==id&&POL[o.pol[t]]) pol[t]=o.pol[t]; }
+      const adj=new Set(); realm(id).forEach(t=>adjOf(L,t).forEach(x=>{ if(owner[x]!==id) adj.add(x); }));
+      let budget=s.army; const atk=[], sup=[];
+      if(!fx.noAtk) Object.keys(o.atk||{}).sort().forEach(t=>{ const x=o.atk[t]||{}; let n=Math.max(0,Math.floor(+x.n||0)); if(!n||!adj.has(t)||!S[t]) return; if(fx.atkTax){ if(s.gold<fx.atkTax) return; s.gold-=fx.atkTax; } n=Math.min(n,budget); if(!n) return; budget-=n; atk.push({t,n,lib:!!x.lib}); });
+      Object.keys(o.sup||{}).sort().forEach(a=>{ let n=Math.max(0,Math.floor(+o.sup[a]||0)); if(!n||!S[a]||S[a].fallen||!active(id,a,k)) return; n=Math.min(n,budget); if(!n) return; budget-=n; sup.push({a,n}); });
+      plan[id]={atk,sup,def:budget,rec};
+    });
+    const supIn={}; Object.values(plan).forEach(p=>p.sup.forEach(x=>supIn[x.a]=(supIn[x.a]||0)+x.n));
+    // ---- 레지스탕스 ----
+    const riseList=[];
+    ids.forEach(id=>{ const s=S[id]; if(!s.fallen) return; const o=OR[id]||{}; const occ=owner[id];
+      if(o.res==='grow') s.res+=2;
+      else if(o.res==='sab'&&s.res>=3&&plan[occ]){ s.res-=3; const kind=o.sabK==='gold'?'gold':'army'; if(kind==='gold') S[occ].gold=Math.max(0,S[occ].gold-6); else { const cut=Math.min(3,plan[occ].def); plan[occ].def-=cut; S[occ].army-=cut; } s.sab++; R.sabs.push({id,occ,kind}); news('💥',`${nmR(id)} 레지스탕스의 사보타주! ${nmR(occ)}의 ${kind==='gold'?'금고가 털렸습니다 (금 -6)':'무기고가 폭파되었습니다 (병력 -3)'}`,[id,occ]); }
+      else if(o.res==='rise') riseList.push(id);
+    });
+    // ---- 전투 ----
+    const byT={}; Object.entries(plan).forEach(([id,p])=>p.atk.forEach(a=>(byT[a.t]=byT[a.t]||[]).push({id,n:a.n,lib:a.lib})));
+    const snap=Object.assign({},owner); const loss={}; const changes=[];
+    Object.keys(byT).sort().forEach(t=>{
+      const A=byT[t]; const O=snap[t]; const home=(O===t); const dl0=plan[O]?plan[O].def:0;
+      const bet=A.filter(a=>active(a.id,O,k)).map(a=>a.id);
+      let def=dl0*(home?1.3:0.6)+(supIn[O]||0)+(home?2:0);
+      const terr=P[t].terr; if(terr==='mount') def*=1.2; else if(terr==='island') def*=1.1;
+      if(bet.length&&fx.prop) def*=1.5;
+      const atkP=A.reduce((x,a)=>x+a.n*(1+(R.weapon.includes(a.id)?0.4:0)+(war?0.1:0)),0);
+      const AP=Math.round(atkP*(0.75+(rollOf(k,'A'+t)%51)/100)*10)/10, DP=Math.round(def*(0.85+(rollOf(k,'D'+t)%31)/100)*10)/10;
+      const ok=AP>DP; const tot=A.reduce((x,a)=>x+a.n,0);
+      const aL=Math.round(tot*(ok?0.3:0.6)); A.forEach(a=>loss[a.id]=(loss[a.id]||0)+Math.round(aL*a.n/tot));
+      if(plan[O]){ const d=Math.min(plan[O].def,Math.round(plan[O].def*(ok?0.5:0.2))); plan[O].def-=d; loss[O]=(loss[O]||0)+d; }
+      bet.forEach(b=>{ S[b].betray++; S[O].betrayed++; betrayTurn[pairKey(b,O)]=k; clock=clamp(clock+5); news('🗡️',`속보! ${nmR(b)}이(가) 동맹 ${nmR(O)}의 뒤통수를 쳤다! 동맹은 깨졌습니다.`,[b,O]); });
+      let lead=null, lib=false;
+      if(ok){ lead=[...A].sort((x,y)=>y.n-x.n||(x.id<y.id?-1:1))[0].id; lib=!home&&!!A.find(a=>a.id===lead).lib; changes.push({t,from:O,to:lib?t:lead,lead,home,lib}); A.forEach(a=>S[a.id].atkWin++); }
+      else { S[O].defWin++; news('🛡️',`${nmR(O)}이(가) ${A.map(a=>nmR(a.id)).join('·')}의 공격을 막아 냈습니다! (${AP} 대 ${DP})`,[O,...A.map(a=>a.id)]); }
+      R.battles.push({t,O,A:A.map(a=>({id:a.id,n:a.n})),AP,DP,ok,home,lib,bet,lead});
+      clock=clamp(clock+2);
+    });
+    ids.forEach(id=>{ if(loss[id]) S[id].army=Math.max(0,S[id].army-loss[id]); });
+    changes.forEach(ch=>{ if(owner[ch.t]!==ch.from||S[ch.lead].fallen) return;
+      if(ch.lib){ freeT(ch.t,'해방',R); S[ch.lead].liber++; news('🕊️',`${nmR(ch.lead)}이(가) ${nmR(ch.from)}에게 점령당했던 ${nmR(ch.t)}을(를) 해방시켰습니다!`,[ch.lead,ch.t,ch.from]); return; }
+      owner[ch.t]=ch.to; S[ch.to].conq++; if(ch.t!==ch.to) pol[ch.t]=pol[ch.t]||'force';
+      if(ch.home){ const O=ch.from, so=S[O]; const loot=Math.floor(so.gold/2); S[ch.to].gold+=loot+3;
+        so.fallen=true; so.lostHome++; so.res=1+Math.floor((+P[O].base.trust||40)/25)+Math.floor((+P[O].base.free||40)/30)+Math.floor(so.army/5); so.army=0; so.gold=0;
+        R.falls.push(O); news('🏴',`${nmR(O)}의 수도가 ${nmR(ch.to)}에게 함락되었습니다! ${nmR(O)}은(는) 레지스탕스가 되어 저항을 시작합니다.`,[O,ch.to]);
+        ids.forEach(t2=>{ if(t2!==O&&owner[t2]===O){ freeT(t2,'점령국 붕괴',R); news('🎉',`${nmR(O)}의 붕괴로 ${nmR(t2)}이(가) 독립을 되찾았습니다!`,[t2]); } });
+      } else { S[ch.to].gold+=3; news('⚔️',`${nmR(ch.to)}이(가) ${nmR(ch.from)}이 점령하던 ${nmR(ch.t)}을(를) 빼앗았습니다.`,[ch.to,ch.from,ch.t]); }
+    });
+    // ---- 봉기 ----
+    riseList.forEach(id=>{ const s=S[id]; if(!s.fallen) return; const occ=owner[id]; if(occ===id) return;
+      const g=plan[occ]?plan[occ].def:0; const ch=clamp(Math.round(10+s.res*4+(fx.riseBonus||0)-g*0.8+(pol[id]==='force'?5:0)),10,85); const roll=rollOf(k,'U'+id); const ok=roll<=ch;
+      if(ok){ s.rise++; freeT(id,'봉기 성공',R); news('✊',`${nmR(id)} 레지스탕스가 봉기에 성공해 ${nmR(occ)}로부터 독립했습니다!`,[id,occ]); }
+      else { s.riseFail++; s.res=Math.floor(s.res/2); news('🔥',`${nmR(id)}의 봉기가 ${nmR(occ)}에게 진압되었습니다.`,[id,occ]); }
+      R.rises.push({id,occ,ch,roll,ok}); });
+    // ---- 저항력 성장 · 전쟁 시계 ----
+    ids.forEach(id=>{ const s=S[id]; if(!s.fallen||R.falls.includes(id)) return; s.res=Math.max(0,s.res+1+((+P[id].base.trust||0)>=60?1:0)+((+P[id].base.free||0)>=60?1:0)+POL[pol[id]||'force'].res); });
+    const force=ids.filter(t=>owner[t]!==t&&(pol[t]||'force')==='force').length;
+    clock=clamp(clock+force-(R.battles.length?0:5));
+    R.clock1=clock; R.snap={}; ids.forEach(id=>R.snap[id]={army:S[id].army,gold:S[id].gold,res:S[id].res,fallen:S[id].fallen,own:realm(id).length});
+    reports.push(R);
+    if(clock>=100){ doom={k}; break; }
+  }
+  const curK=openK!=null?openK:rev;
+  const W={P,ids,L,S,owner,pol,clock,reports,doom,openK,openState,curK,rev,phase,
+    ally:(a,b)=>active(a,b,curK), realm, alive:alive(),
+    targets:id=>{ const s=new Set(); realm(id).forEach(t=>adjOf(L,t).forEach(x=>{ if(owner[x]!==id) s.add(x); })); return [...s]; },
+    flowNow:openState?openState.fl:null};
+  _c=W; _ck=key; return W;
+}
+function scoreOf(W,id){ const s=W.S[id]; const own=W.realm(id).length; const allies=W.ids.filter(x=>W.ally(id,x)).length;
+  return own*10+s.army+Math.floor(s.gold/2)+(W.owner[id]===id?10:0)+s.liber*8+s.rise*10+allies*3-s.betray*5; }
+function blocs(W){ const seen=new Set(), out=[]; W.ids.forEach(id=>{ if(seen.has(id)||W.S[id].fallen) return; const comp=[]; const st=[id]; seen.add(id); while(st.length){ const x=st.pop(); comp.push(x); W.ids.forEach(y=>{ if(!seen.has(y)&&!W.S[y].fallen&&W.ally(x,y)){ seen.add(y); st.push(y); } }); } if(comp.length>1) out.push({m:comp,terr:comp.reduce((a,x)=>a+W.realm(x).length,0)}); }); return out.sort((a,b)=>b.terr-a.terr); }
+function awardsOf(W){
+  const ids=W.ids; if(!ids.length) return []; const S=W.S; const out=[];
+  const top=(f,min=1)=>{ const m=Math.max(...ids.map(f)); return m>=min?ids.filter(id=>f(id)===m):[]; };
+  const add=(e,t,L,d)=>{ if(L.length) out.push({e,t,L,d}); };
+  add('👑','최강대국',top(id=>W.realm(id).length,2),'가장 넓은 영토를 차지했습니다');
+  add('🗡️','최고의 배신자',top(id=>S[id].betray),'동맹의 뒤통수를 가장 많이 쳤습니다');
+  add('😭','배신의 아이콘',top(id=>S[id].betrayed),'동맹에게 가장 많이 배신당했습니다');
+  add('🤝','의리의 동맹',top(id=>S[id].betray===0?ids.filter(x=>W.ally(id,x)).length:0),'끝까지 배신 없이 동맹을 지켰습니다');
+  add('✊','독립 영웅',top(id=>S[id].rise),'봉기에 성공해 나라를 되찾았습니다');
+  add('🕊️','해방자',top(id=>S[id].liber),'점령당한 나라를 해방시켰습니다');
+  add('🛡️','철벽 수비',top(id=>S[id].defWin),'공격을 가장 많이 막아 냈습니다');
+  add('💥','그림자 저항군',top(id=>S[id].sab),'사보타주로 점령국을 괴롭혔습니다');
+  return out;
+}
+
+/* =========================================================
+   ⑤ 저장소
+   ========================================================= */
+const clean = o => o==null ? null : JSON.parse(JSON.stringify(o));
+let DBMODE='demo', backend=null;
+async function initBackend(){
+  if(!FORCE_DEMO && FIREBASE_CONFIG && FIREBASE_CONFIG.apiKey && FIREBASE_CONFIG.databaseURL){
+    try{
+      const A = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js');
+      const D = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js');
+      const db = D.getDatabase(A.initializeApp(FIREBASE_CONFIG));
+      backend = {
+        set:(p,v)=>D.set(D.ref(db,p),clean(v)),
+        update:(p,v)=>D.update(D.ref(db,p),clean(v)),
+        remove:p=>D.remove(D.ref(db,p)),
+        on:(p,cb)=>D.onValue(D.ref(db,p),s=>cb(s.val()),err=>toast('⚠️ 데이터베이스 연결 오류: '+err.message))
+      };
+      DBMODE='live'; return;
+    }catch(e){ console.error(e); toast('⚠️ 인터넷 연결 실패 → 체험 모드로 실행합니다'); }
+  }
+  const KEY='natgame_demo_db';
+  const bc = ('BroadcastChannel' in window) ? new BroadcastChannel('natgame') : null;
+  const L=[];
+  const read=()=>{ try{ return JSON.parse(localStorage.getItem(KEY))||{}; }catch(e){ return {}; } };
+  const parts=p=>p.split('/').filter(Boolean);
+  const getAt=(t,p)=>parts(p).reduce((o,k)=>o==null?undefined:o[k],t);
+  const setAt=(t,p,v)=>{ const ks=parts(p); let o=t; for(let i=0;i<ks.length-1;i++){ if(typeof o[ks[i]]!=='object'||o[ks[i]]===null) o[ks[i]]={}; o=o[ks[i]]; } const last=ks[ks.length-1]; if(v==null) delete o[last]; else o[last]=clean(v); };
+  const fire=()=>{ const t=read(); L.forEach(l=>l.cb(clean(getAt(t,l.p))??null)); };
+  const write=t=>{ try{ localStorage.setItem(KEY,JSON.stringify(t)); }catch(e){} fire(); bc&&bc.postMessage(1); };
+  if(bc) bc.onmessage=fire;
+  window.addEventListener('storage',e=>{ if(e.key===KEY) fire(); });
+  backend = {
+    set:async(p,v)=>{ const t=read(); setAt(t,p,v); write(t); },
+    update:async(p,obj)=>{ const t=read(); for(const k in obj) setAt(t,p+'/'+k,obj[k]); write(t); },
+    remove:async p=>{ const t=read(); setAt(t,p,null); write(t); },
+    on:(p,cb)=>{ const l={p,cb}; L.push(l); setTimeout(()=>cb(clean(getAt(read(),p))??null),0); return ()=>{ const i=L.indexOf(l); if(i>=0) L.splice(i,1); }; }
+  };
+}
+
+/* =========================================================
+   ⑥ 공통 화면 도구
+   ========================================================= */
+const $app = document.getElementById('app');
+const MODE = (/teacher/i.test(qs.get('mode')||'') || qs.has('teacher')) ? 'teacher' : 'student';
+const SLOT = (qs.get('s')||'').replace(/[^0-9a-z]/gi,'').slice(0,6);
+const cleanCode = s => String(s||'').replace(/\*/g,'').toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,8);
+let SRC = cleanCode(qs.get('room'));
+const ER = () => `rooms/X${SRC}`;
+const esc = s => String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let toastTimer=null;
+function toast(msg){ document.querySelectorAll('.toast').forEach(x=>x.remove()); const t=document.createElement('div'); t.className='toast'; t.textContent=msg; document.body.appendChild(t); clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.remove(),2800); }
+function flagHTML(f,size=''){ f=Object.assign({c1:'#e63946',c2:'#1d3557',sym:'⭐'},f||{}); return `<span class="flag ${size}"><i style="background:${esc(f.c1)}"></i><i style="background:${esc(f.c2)}"></i><span>${esc(f.sym)}</span></span>`; }
+function barsHTML(v){ return `<div class="bars">${IND.map(i=>`<div class="bar"><span>${i.e} ${i.n}</span><span class="tr"><i style="width:${clamp(v[i.k])}%;background:${i.c}"></i></span><span class="n">${v[i.k]}</span></div>`).join('')}</div>`; }
+function typeBadge(tk){ const t=TYPES[tk]||TYPES.balance; return `<span class="typebadge" style="background:${t.c}">${t.e} ${esc(t.n)}</span>`; }
+const modeBadge = () => DBMODE==='live' ? `<span class="pill live">● 실시간 연동</span>` : `<span class="pill demo">● 체험 모드</span>`;
+const ls = {get(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }, set(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }, del(k){ try{ localStorage.removeItem(k); }catch(e){} }};
+let pending=false;
+function isTyping(){ const a=document.activeElement; return a && $app.contains(a) && (a.tagName==='TEXTAREA' || (a.tagName==='INPUT' && a.type!=='button') || a.tagName==='SELECT'); }
+function softRender(){ if(isTyping()){ pending=true; return; } render(); }
+document.addEventListener('focusout',()=>{ setTimeout(()=>{ if(pending && !isTyping()){ pending=false; render(); } },150); });
+function render(){ pending=false; const y=window.scrollY; $app.style.minHeight=$app.offsetHeight+'px'; (MODE==='teacher'?renderTeacher:renderStudent)(); window.scrollTo(0,y); requestAnimationFrame(()=>{ $app.style.minHeight=''; }); tick(); afterRender(); }
+const phaseOf = () => (DATA.meta && DATA.meta.phase) || 'lobby';
+const pName = k => (PHASES.find(p=>p.k===k)||{}).n || k;
+const nm = (W,id) => W.P[id] ? esc(W.P[id].name) : '?';
+const hexA=(c,a)=>/^#[0-9a-f]{6}$/i.test(c)?c+Math.round(a*255).toString(16).padStart(2,'0'):'#eeeeee';
+function timerHTML(){ const dl=+(DATA.meta&&DATA.meta.dl)||0; if(!dl) return ''; return `<span class="timer" data-dl="${dl}">⏱ --:--</span>`; }
+function tick(){ const now=Date.now(); document.querySelectorAll('[data-dl]').forEach(el=>{ const s=Math.ceil((+el.dataset.dl-now)/1000); if(s<=0){ el.textContent='⏰ 시간 종료!'; el.className='timer over'; } else { el.textContent='⏱ '+Math.floor(s/60)+':'+String(s%60).padStart(2,'0'); el.className='timer'+(s<=30?' warn':''); } }); }
+setInterval(tick,1000);
+function clockHTML(W,big=false){ const c=W.clock; const lab=c>=100?'☢️ 공멸':c>=80?'핵전쟁 직전':c>=50?'🔥 세계대전 발발':c>=25?'긴장 고조':'평화'; const min=Math.max(0,Math.ceil((100-c)/5));
+  return `<div class="doom ${c>=80?'red':c>=50?'amber':''} ${big?'board':''}"><div class="clock"><span>🕛 전쟁 시계 · <b style="color:#fff">${lab}</b></span><b>${min===0?'자정 — 공멸':'자정까지 '+min+'분'}</b></div><div class="mrow"><span>⚔️ 전쟁 위기</span><span class="tr"><i style="width:${c}%;background:${c>=80?'#d64545':c>=50?'#e9a23b':'#3a86ff'}"></i></span><b>${c}</b></div><div class="dm">전투·배신·강압 통치가 시계를 앞당기고, 평화로운 턴·평화 회담이 되돌립니다. 50이 넘으면 세계대전(공격력 +10%, 수입 -20%), 100이 되면 모두 패배합니다.</div></div>`; }
+function mapHTML(W,big=false){
+  const L=W.L; const me=MODE==='student'?ME:null; const tg=me&&W.S[me]&&!W.S[me].fallen?new Set(W.targets(me)):new Set();
+  return `<div class="map ${big?'big':''}" style="grid-template-columns:repeat(${L.cols},minmax(0,1fr))">${L.all.map(t=>{ const p=W.P[t]; const o=W.owner[t]; const op=W.P[o]; const occ=o!==t; const ally=me&&o!==me&&W.ally(me,o); const showN=MODE==='teacher'||o===me||ally;
+    return `<div class="cell ${me&&o===me?'me':''} ${ally?'ally':''} ${tg.has(t)?'adj':''} ${occ?'occ':''}" style="background-color:${hexA((op.flag&&op.flag.c1)||'#999999',.25)}"><span class="ic">${occ?'⛓️':'👑'}</span><div class="cn">${flagHTML(p.flag,'sm')} ${esc(p.name)}</div>${occ?`<div>${flagHTML(op.flag,'sm')} <b>${esc(op.name)}</b> 점령</div><div class="small">✊ 저항력 ${W.S[t].res}</div>`:`<div>⚔️ ${showN?W.S[o].army:est(W.S[o].army)}${me&&o===me?' (우리)':ally?' 🤝':''}</div>`}${MODE==='teacher'&&big?'':(t===me&&occ?'<div class="small"><b>내 고향</b></div>':'')}</div>`; }).join('')}</div>`;
+}
+function newsHTML(W,R,mineOnly=false){ if(!R) return ''; const L=R.news.filter(n=>!mineOnly||n.ids.includes(ME)); return `<div class="news"><div>📰 <b>${R.k+1}턴 전쟁 속보</b> · 전쟁 시계 ${R.clock0} → ${R.clock1}</div>${L.map(n=>`<div class="${MODE==='student'&&n.ids.includes(ME)?'mine':''}">${n.e} ${esc(n.txt)}</div>`).join('')||'<div>조용한 한 턴이었습니다…</div>'}</div>`; }
+function battlesHTML(W,R){ if(!R||!R.battles.length) return ''; return `<div class="card"><h3 style="margin-top:0">⚔️ ${R.k+1}턴 전투 기록</h3>${R.battles.map(b=>`<div class="btl ${b.ok?'win':'lose'}"><b>${nm(W,b.t)}</b> ${b.home?'(수도)':'(점령지)'} — 공격: ${b.A.map(a=>`${nm(W,a.id)} ${a.n}`).join(' + ')} vs 방어: ${nm(W,b.O)}<br><span class="vs">🎲 공격력 ${b.AP} 대 방어력 ${b.DP}</span> → ${b.ok?(b.lib?'🕊️ 해방!':b.home?'🏴 수도 함락!':'⚔️ 점령!'):'🛡️ 방어 성공'}${b.bet.length?` <span class="vtag">🗡️ 배신</span>`:''}</div>`).join('')}${R.rises.map(r=>`<div class="btl ${r.ok?'win':'lose'}">✊ ${nm(W,r.id)} 봉기 (성공률 ${r.ch}%, 🎲 ${r.roll}) → ${r.ok?'독립 성공!':'진압당함'}</div>`).join('')}</div>`; }
+
+/* =========================================================
+   ⑦ 학생 화면
+   ========================================================= */
+let DATA = {}, SRCN = {}, gotData=false, gotSrc=false;
+let ME=null, view='auto', claiming=false, tmpRoom='', pickSid=null, cand=null, editing={};
+const DEV = (()=>{ const k='wargame_dev'+(SLOT?'_'+SLOT:''); let d=ls.get(k); if(!d){ d='d'+Date.now().toString(36)+Math.random().toString(36).slice(2,7); ls.set(k,d); } return d; })();
+const meKey = () => 'wargame_me_'+SRC+(SLOT?'_'+SLOT:'');
+function nationLocal(){ try{ const x=JSON.parse(ls.get('natgame_s_'+SRC+(SLOT?'_'+SLOT:''))); if(x && x.d){ x.d=norm(x.d); return x; } }catch(e){} return null; }
+let dr = {};
+function draft(k){ if(!dr[k]) dr[k]={}; return dr[k]; }
+function playerFrom(sid,num,sname,d){ d=norm(d); const v=computeInd(d); return {sid,num:String(num||''),sname:String(sname||''),name:d.name||'이름 없는 나라',flag:d.flag,terr:d.terr||'',gov:d.gov||'',base:v,btype:nationType(v,d),quick:false}; }
+async function claim(info){
+  if(claiming) return; claiming=true;
+  try{
+    const ex = DATA.players && DATA.players[info.sid];
+    if(ex && ex.dev && ex.dev!==DEV){ ME=info.sid; view='locked'; claiming=false; render(); return; }
+    const rec = ex ? {dev:DEV,want:null} : Object.assign({}, info, {dev:DEV, joinedAt:Date.now()});
+    if(ex) await backend.update(`${ER()}/players/${info.sid}`, rec); else await backend.set(`${ER()}/players/${info.sid}`, rec);
+    ME=info.sid; ls.set(meKey(),ME); ls.set(meKey()+'_at',String(Date.now())); view='auto';
+  }catch(e){ toast('⚠️ 저장 실패: '+e.message); }
+  claiming=false; render();
+}
+function ensureMe(){
+  if(!gotData || !gotSrc || claiming) return;
+  const P = DATA.players || {};
+  if(ME && P[ME]){
+    const p=P[ME]; const myAt=+(ls.get(meKey()+'_at')||0);
+    if(p.dev===DEV){ if(view==='locked') view='auto'; return; }
+    if(p.dev){ if(view!=='locked'){ if(myAt){ ls.del(meKey()); ls.del(meKey()+'_at'); } view='locked'; } if(!p.want) backend.update(`${ER()}/players/${ME}`,{want:Date.now()}); return; }
+    if(view==='locked'){ claim({sid:ME}); return; }
+    if(p.kick && (!myAt || p.kick>myAt)){ ls.del(meKey()); ls.del(meKey()+'_at'); ME=null; view='find'; toast('선생님이 이 태블릿의 나라 연결을 풀었어요. 내 나라를 다시 골라 주세요.'); return; }
+    claim({sid:ME}); return;
+  }
+  if(view==='find' || view==='quick' || view==='confirm') return;
+  const saved = ls.get(meKey());
+  if(saved && P[saved]){ ME=saved; return; }
+  const S = nationLocal();
+  if(S && S.id && S.d && S.d.name){
+    const fb=SRCN[S.id], ex=P[S.id];
+    if(!(ex && ex.dev && ex.dev!==DEV)){ cand=playerFrom(S.id,S.num,S.sname,fb&&fb.d?fb.d:S.d); view='confirm'; return; }
+  }
+  ME=null; view='find';
+}
+function vRoom(){
+  return `${sHeader()}<div class="card center"><h2>방 코드를 입력하세요</h2><p class="muted">국가 만들기 때 쓴 방 코드 (예: K7PM)</p>
+  <input class="field" style="max-width:260px;text-align:center;font-size:24px;font-weight:800;letter-spacing:4px;text-transform:uppercase" data-bind="room" value="${esc(tmpRoom)}" maxlength="8">
+  <div style="margin-top:14px"><button class="btn acc" data-act="enterRoom">입장하기</button></div></div>`;
+}
+function vConfirm(){
+  if(!cand) return vFind();
+  return `${sHeader()}<div class="card center"><h2>이 태블릿에 저장된 나라가 있어요</h2>
+  <div class="hero" style="justify-content:center">${flagHTML(cand.flag,'lg')}<div style="text-align:left"><div class="muted">${esc(cand.num)}번 ${esc(cand.sname)}</div><h2 style="margin:2px 0">${esc(cand.name)}</h2></div></div>
+  <p><b>${esc(cand.num)}번 ${esc(cand.sname)}</b> 학생이 맞나요?</p>
+  <div class="row" style="justify-content:center"><button class="btn ghost" data-act="candNo">아니요, 내 나라 찾기</button><button class="btn acc" data-act="candYes">네, 제 나라예요</button></div></div>`;
+}
+function vFind(){
+  const P = DATA.players || {};
+  const list = Object.values(SRCN||{}).filter(n=>n && n.d && n.id).sort((a,b)=>(+a.num||999)-(+b.num||999));
+  return `${sHeader()}<div class="card"><h2>🔎 내 나라를 골라 주세요</h2>
+  <p>국가 만들기 시간에 <b>내가 만든 나라</b>를 누르세요.</p>
+  <div class="tip">⚠️ 친구 나라를 누르면 친구가 들어오지 못해요. 🔒 표시된 나라가 내 나라라면 눌러서 선생님께 해제를 요청하세요.</div>
+  ${list.length?`<div class="ngrid">${list.map(n=>{ const p=P[n.id]; const taken=p&&p.dev&&p.dev!==DEV; return `<button class="ncard ${pickSid===n.id?'selc':''}" data-act="pick" data-v="${esc(n.id)}" style="${taken?'opacity:.6':''}"><div class="nh">${flagHTML(norm(n.d).flag,'sm')}<div><div class="nn">${esc(norm(n.d).name||'이름 없는 나라')}</div><div class="ns">${esc(n.num)}번 ${esc(n.sname)}${taken?' · 🔒 다른 태블릿에서 사용 중':''}</div></div></div></button>`; }).join('')}</div>
+  <div class="row" style="margin-top:14px"><span class="sp"></span><button class="btn acc" data-act="pickGo" ${pickSid?'':'disabled'}>이 나라로 입장</button></div>`:`<p class="muted">이 방에 선포된 나라가 없어요. 아래에서 새로 만들어 주세요.</p>`}
+  </div>
+  <div class="card"><h3 style="margin-top:0">🆕 나라가 없나요?</h3><p class="muted">지난 시간에 없었거나 이 방에서 처음 해 보는 경우, 1분 만에 새 나라를 만들 수 있어요.</p><button class="btn ghost" data-act="toQuick">새로 빠르게 만들기</button></div>`;
+}
+function vQuick(){
+  const q=draft('quick');
+  return `${sHeader()}<div class="card"><h2>🆕 새로 빠르게 만들기</h2>
+  <div class="grid g2"><div><label class="lb">번호</label><input class="field" inputmode="numeric" data-bind="quick.num" value="${esc(q.num||'')}" placeholder="예: 7"></div><div><label class="lb">이름</label><input class="field" data-bind="quick.sname" value="${esc(q.sname||'')}" placeholder="예: 김도덕"></div></div>
+  <label class="lb">나라 이름</label><input class="field" data-bind="quick.name" value="${esc(q.name||'')}" placeholder="예: 평화 공화국">
+  <label class="lb">어디에 있는 나라인가요?</label><div class="chips">${QTERR.map(t=>`<button class="chip ${q.terr===t.k?'sel':''}" data-act="qterr" data-v="${t.k}">${t.n}</button>`).join('')}</div>
+  <label class="lb">어떤 나라인가요?</label>
+  <div class="grid g3">${QUICK.map(x=>{ const t=TYPES[x.k]; return `<button class="opt ${q.type===x.k?'sel':''}" data-act="qtype" data-v="${x.k}"><div class="e">${t.e}</div><div class="t">${esc(t.n)}</div><div class="d">${esc(t.d.split('.')[0])}.</div></button>`; }).join('')}</div>
+  <div class="row" style="margin-top:16px"><button class="btn ghost" data-act="toFind">← 목록으로</button><span class="sp"></span><button class="btn acc" data-act="quickGo">이 나라로 입장</button></div></div>`;
+}
+function vLocked(){
+  return `${sHeader()}<div class="card center"><h2>🔒 이 나라는 다른 태블릿에서 열려 있어요</h2><p>선생님 화면에 <b>🙋 해제 요청</b>이 표시되었어요. 선생님께 <b>잠금 해제</b>를 부탁하세요.<br>해제되면 이 태블릿으로 자동으로 들어가집니다. (이 화면을 닫지 마세요)</p><button class="btn ghost" data-act="toFind">다른 나라 고르기</button></div>`;
+}
+function sHeader(){
+  const p = ME && DATA.players && DATA.players[ME];
+  return `<div class="top"><h1>⚔️ 연합과 배신</h1>${p?`${flagHTML(p.flag,'sm')} <b>${esc(p.name)}</b><span class="pill">${esc(p.num)}번 ${esc(p.sname)}</span>`:''}${SRC?`<span class="pill">방 ${esc(SRC)}</span>`:''}${modeBadge()}</div>`;
+}
+function myBar(W){
+  const s=W.S[ME]; const al=W.ids.filter(x=>x!==ME&&W.ally(ME,x));
+  if(s.fallen){ const occ=W.owner[ME]; const pl=POL[W.pol[ME]||'force']; return `<div class="card statbar resist">✊ <b>레지스탕스</b> · 우리 땅은 ${flagHTML(W.P[occ].flag,'sm')} <b>${nm(W,occ)}</b>에게 점령됨 · 저항력 <b>${s.res}</b> · 점령 방식 ${pl.e} ${pl.n}</div>`; }
+  return `<div class="card statbar"><span class="res">⚔️ 병력 ${s.army} · 💰 금 ${s.gold} · 🗺️ 영토 ${W.realm(ME).length}</span><span>${al.length?`🤝 동맹: ${al.map(x=>`<b>${nm(W,x)}</b>`).join(', ')}`:'🤝 동맹 없음'}</span>${W.openState&&W.openState.war?'<span class="otag" style="background:var(--bad)">🔥 세계대전 중</span>':''}</div>`;
+}
+function flowCard(fl,k){ if(!fl) return ''; return `<div class="flowcard"><div>🌍 ${k+1}턴 · 세계사의 흐름</div><h2>${fl.e} ${esc(fl.t)}</h2><div>${esc(fl.d)}</div></div>`; }
+function vLobby(W){
+  const p=W.P[ME];
+  return `<div class="card"><div class="hero">${flagHTML(p.flag,'lg')}<div><div class="muted">${esc(p.num)}번 ${esc(p.sname)}의 나라</div><h2 style="margin:2px 0 8px">${esc(p.name)}</h2>${typeBadge(p.btype)}<div style="margin-top:8px"><span class="res">⚔️ 병력 ${W.S[ME].army} · 💰 금 ${W.S[ME].gold}</span></div></div></div>
+  <p class="muted">병력은 ‘안전’, 금은 ‘경제’, 점령당했을 때의 저항력은 ‘신뢰’와 ‘자유’ 지표에서 나옵니다. 국가 만들기 때 만든 나라의 모습이 전쟁에서도 힘이 됩니다.</p></div>
+  <div class="card"><h2>⚔️ 연합과 배신 — 규칙</h2>
+  <div class="grid g2">
+    <div class="opt"><div class="e">🤝</div><div class="t">1. 외교 시간</div><div class="d">비밀 쪽지를 보내고, 동맹을 맺고, 지원금을 보내세요. 동맹은 공개되지만 쪽지는 받는 나라만 봅니다.</div></div>
+    <div class="opt"><div class="e">⚔️</div><div class="t">2. 명령 시간</div><div class="d">징병하고, 이웃 영토를 공격하거나, 동맹에 지원군을 보내세요. 남은 병력이 수도를 지킵니다. 모두 동시에 비밀로 제출!</div></div>
+    <div class="opt"><div class="e">🗡️</div><div class="t">배신</div><div class="d">동맹을 공격하면 배신! 온 세계에 속보가 뜨고 점수 -5. 먼저 ‘동맹 파기 통보’를 하면 배신이 아니지만 상대가 알게 됩니다.</div></div>
+    <div class="opt"><div class="e">✊</div><div class="t">수도가 함락되면</div><div class="d">탈락하지 않고 레지스탕스가 됩니다. 지하 조직을 키우고, 사보타주를 하고, 봉기해서 독립을 되찾으세요!</div></div>
+    <div class="opt"><div class="e">🌍</div><div class="t">세계사의 흐름</div><div class="d">매 턴 대공황·독감·신무기·휴전 같은 사건이 판을 뒤흔듭니다.</div></div>
+    <div class="opt"><div class="e">☢️</div><div class="t">전쟁 시계</div><div class="d">전쟁이 격해질수록 시계가 자정에 다가갑니다. 100이 되면 모든 나라가 패배합니다.</div></div>
+  </div>
+  <div class="tip" style="margin-top:14px">🤝 배신과 정복은 <b>게임 안에서만!</b> 쪽지는 선생님도 볼 수 있어요. 놀림·욕설은 바로 퇴장입니다.</div></div>
+  <h3>🗺️ 세계 지도</h3>${mapHTML(W)}<p class="muted blink center">선생님 신호를 기다려 주세요…</p>`;
+}
+function diploHTML(W,open=true){
+  const props=Object.keys((DATA.prop&&DATA.prop[ME])||{}).filter(f=>W.P[f]&&!W.ally(ME,f)&&!W.S[f].fallen);
+  const al=W.ids.filter(x=>x!==ME&&W.ally(ME,x)); const others=W.ids.filter(x=>x!==ME); const d=draft('dip'); const fallen=W.S[ME].fallen; const k=W.openK;
+  const M=Object.values(DATA.msg||{}).filter(m=>m&&(m.to===ME||m.from===ME)&&W.P[m.from]&&W.P[m.to]).sort((a,b)=>(b.at||0)-(a.at||0)).slice(0,15);
+  const myG=k!=null?Object.entries((DATA.gift&&DATA.gift['t'+k]&&DATA.gift['t'+k][ME])||{}).filter(([to,a])=>+a>0):[];
+  const inner=`${fallen?'':`<div class="card"><h3 style="margin-top:0">🤝 동맹</h3>
+   ${al.length?al.map(x=>`<div class="trow">${flagHTML(W.P[x].flag,'sm')}<div class="tn"><b>${nm(W,x)}</b> <span class="otag" style="background:var(--ok)">동맹</span><br><small class="muted">동맹을 공격하면 배신! ‘파기 통보’를 먼저 하면 배신은 아니지만 상대가 알게 됩니다.</small></div><button class="btn sm ghost" data-act="breakAlly" data-v="${esc(x)}">📜 동맹 파기 통보</button></div>`).join(''):'<p class="muted">아직 동맹이 없어요. 동맹국끼리는 서로 지원군을 보낼 수 있어요.</p>'}
+   ${props.length?`<h4>📨 받은 동맹 제안</h4>${props.map(f=>`<div class="trow">${flagHTML(W.P[f].flag,'sm')}<div class="tn"><b>${nm(W,f)}</b>이(가) 동맹을 제안했습니다</div><button class="btn sm teal" data-act="acceptAlly" data-v="${esc(f)}">수락</button><button class="btn sm ghost" data-act="declineAlly" data-v="${esc(f)}">거절</button></div>`).join('')}`:''}
+   <div class="row" style="margin-top:10px"><select class="field" style="flex:1;min-width:180px" data-bind="dip.allyTo"><option value="">— 동맹을 제안할 나라 —</option>${others.filter(x=>!W.ally(ME,x)&&!W.S[x].fallen).map(x=>`<option value="${esc(x)}" ${d.allyTo===x?'selected':''}>${nm(W,x)}${DATA.prop&&DATA.prop[x]&&DATA.prop[x][ME]?' (제안 보냄)':''}</option>`).join('')}</select><button class="btn sm acc" data-act="proposeAlly">🤝 동맹 제안</button></div></div>`}
+  <div class="card"><h3 style="margin-top:0">✉️ 비밀 쪽지</h3><p class="muted small">받는 나라만 볼 수 있어요. (선생님은 모든 쪽지를 볼 수 있어요 · 놀림·욕설 금지)</p>
+   <div class="row"><select class="field" style="flex:1;min-width:180px" data-bind="dip.to"><option value="">— 받을 나라 —</option>${al.length?`<option value="__ALLIES" ${d.to==='__ALLIES'?'selected':''}>🤝 동맹 전체</option>`:''}${others.map(x=>`<option value="${esc(x)}" ${d.to===x?'selected':''}>${nm(W,x)}${W.S[x].fallen?' ✊레지스탕스':''}</option>`).join('')}</select></div>
+   <textarea class="field" style="margin-top:8px;min-height:60px" data-bind="dip.text" maxlength="100" placeholder="예: 다음 턴에 함께 ○○를 공격하자. 대신 우리는 서로 공격하지 않기!">${esc(d.text||'')}</textarea>
+   <div class="row" style="margin-top:8px"><span class="sp"></span><button class="btn sm acc" data-act="sendMsg">📨 보내기</button></div>
+   ${M.map(m=>`<div class="msg ${m.to===ME?'in':'out'}"><small class="muted">${m.to===ME?`📥 ${nm(W,m.from)} → 나`:`📤 나 → ${nm(W,m.to)}`} · ${(+m.k||0)+1}턴</small><div>${esc(m.text)}</div></div>`).join('')}</div>
+  ${!fallen&&k!=null?`<div class="card"><h3 style="margin-top:0">💰 지원금 보내기</h3><p class="muted small">이번 턴 결과 공개 때 도착합니다. ✊레지스탕스에게 보내면 금 3 = 저항력 1</p>
+   <div class="row"><select class="field" style="flex:1;min-width:160px" data-bind="dip.gTo"><option value="">— 받을 나라 —</option>${others.map(x=>`<option value="${esc(x)}" ${d.gTo===x?'selected':''}>${nm(W,x)}${W.S[x].fallen?' ✊레지스탕스':''}</option>`).join('')}</select><div class="stp mini"><button data-act="step" data-k="dip.gAmt" data-d="-1">−</button><span class="v">${+d.gAmt||0}</span><button data-act="step" data-k="dip.gAmt" data-d="1">＋</button></div><button class="btn sm acc" data-act="sendGift">보내기</button></div>
+   ${myG.map(([to,a])=>`<div class="gift">→ <b>${nm(W,to)}</b> 💰${a} <button class="btn sm ghost" data-act="giftDel" data-v="${esc(to)}">취소</button></div>`).join('')}</div>`:''}`;
+  return open?inner:`<details class="card"><summary><b>🤝 외교 · ✉️ 쪽지 · 💰 지원금</b> (명령 시간에도 쓸 수 있어요)</summary>${inner}</details>`;
+}
+function ordDraft(k){ const d=draft('o'+k); const saved=DATA.ord&&DATA.ord['t'+k]&&DATA.ord['t'+k][ME];
+  if(saved&&!editing[k]&&d._at!==saved.at){ for(const key of Object.keys(d)) delete d[key]; d._at=saved.at; d.rec=saved.rec||0; Object.entries(saved.atk||{}).forEach(([t,x])=>{ d['a_'+t]=x.n||0; d['l_'+t]=!!x.lib; }); Object.entries(saved.sup||{}).forEach(([a,n])=>d['s_'+a]=n); Object.entries(saved.pol||{}).forEach(([t,v])=>d['p_'+t]=v); d.res=saved.res; d.sabK=saved.sabK; }
+  return {d,saved}; }
+function ordersHTML(W){
+  const k=W.openK; const s=W.S[ME]; const {d,saved}=ordDraft(k); const fx=(W.flowNow&&W.flowNow.fx)||{};
+  const rec=Math.min(+d.rec||0,10,Math.floor(s.gold/2)); const army=s.army+rec;
+  const tg=W.targets(ME); const al=W.ids.filter(x=>x!==ME&&W.ally(ME,x)&&!W.S[x].fallen); const occ=W.realm(ME).filter(t=>t!==ME);
+  const atkN=fx.noAtk?0:tg.reduce((x,t)=>x+(+d['a_'+t]||0),0); const supN=al.reduce((x,a)=>x+(+d['s_'+a]||0),0); const left=army-atkN-supN;
+  const atkCnt=fx.noAtk?0:tg.filter(t=>+d['a_'+t]>0).length; const goldLeft=s.gold-rec*2-(fx.atkTax?fx.atkTax*atkCnt:0);
+  if(saved&&!editing[k]){ return `<div class="card"><h3 style="margin-top:0">✅ 명령 제출 완료</h3><p>🪖 징병 ${saved.rec||0} · ⚔️ 공격 ${Object.entries(saved.atk||{}).map(([t,x])=>`${nm(W,t)} ${x.n}${x.lib?'(해방)':''}`).join(', ')||'없음'} · 🛡️ 지원군 ${Object.entries(saved.sup||{}).map(([a,n])=>`${nm(W,a)} ${n}`).join(', ')||'없음'}</p><p class="muted">결과 공개 전까지 수정할 수 있어요. 남은 시간에 쪽지로 작전을 짜세요!</p><button class="btn ghost" data-act="editOrd" data-v="${k}">수정하기</button></div>`; }
+  const stp=(key,v,dis)=>`<div class="stp mini"><button data-act="step" data-k="o${k}.${key}" data-d="-1">−</button><span class="v">${v}</span><button data-act="step" data-k="o${k}.${key}" data-d="1" ${dis?'disabled':''}>＋</button><button data-act="step" data-k="o${k}.${key}" data-d="5" ${dis?'disabled':''}>+5</button></div>`;
+  return `<div class="card"><h3 style="margin-top:0">⚔️ ${k+1}턴 명령</h3>
+  <h4>① 🪖 징병 <small class="muted">— 금 2 = 병력 1 (한 턴 최대 10)</small></h4>
+  <div class="trow"><div class="tn">지금 병력 <b>${s.army}</b> → <b>${army}</b></div>${stp('rec',rec,rec>=10||(rec+1)*2>s.gold)}</div>
+  <h4>② ⚔️ 공격 <small class="muted">— 우리 영토와 붙어 있는 곳만 공격할 수 있어요</small></h4>
+  ${fx.noAtk?'<div class="banner warn">🏳️ 이번 턴은 휴전! 공격할 수 없습니다.</div>':tg.length?tg.map(t=>{ const o=W.owner[t]; const ally=W.ally(ME,o); const occT=o!==t; const v=+d['a_'+t]||0; return `<div class="trow">${flagHTML(W.P[t].flag,'sm')}<div class="tn"><b>${nm(W,t)}</b> ${occT?`<small>(${nm(W,o)} 점령지)</small>`:'<small>(수도)</small>'}<br><small class="muted">방어 병력 약 ${ally?W.S[o].army:est(W.S[o].army)} · ${W.P[t].terr==='mount'?'⛰️ 산악 방어 +20%':W.P[t].terr==='island'?'🏝️ 섬 방어 +10%':''}</small>${ally?'<br><b style="color:var(--bad)">⚠️ 동맹국입니다! 공격하면 배신!</b>':''}</div>${occT&&!ally?`<button class="chip ${d['l_'+t]?'sel':''}" data-act="libT" data-k="${k}" data-v="${esc(t)}">🕊️ 해방 작전</button>`:''}${stp('a_'+t,v,left<=0)}</div>`; }).join(''):'<p class="muted">공격할 수 있는 이웃이 없어요.</p>'}
+  ${fx.atkTax?`<p class="muted">🕊️ 국제 연맹: 공격 1건마다 금 ${fx.atkTax}</p>`:''}
+  ${al.length?`<h4>③ 🛡️ 동맹 지원군 <small class="muted">— 보낸 병력만큼 동맹의 방어력이 오릅니다</small></h4>${al.map(a=>`<div class="trow">${flagHTML(W.P[a].flag,'sm')}<div class="tn"><b>${nm(W,a)}</b></div>${stp('s_'+a,+d['s_'+a]||0,left<=0)}</div>`).join('')}`:''}
+  ${occ.length?`<h4>④ ⛓️ 점령지 다스리기</h4>${occ.map(t=>{ const cur=d['p_'+t]||W.pol[t]||'force'; return `<div class="trow">${flagHTML(W.P[t].flag,'sm')}<div class="tn"><b>${nm(W,t)}</b> <small class="muted">저항력 ${W.S[t].res}</small></div>${Object.entries(POL).map(([pk,pv])=>`<button class="chip ${cur===pk?'sel':''}" data-act="polT" data-k="${k}" data-v="${esc(t)}" data-p="${pk}" title="${esc(pv.d)}">${pv.e} ${pv.n}</button>`).join('')}</div>`; }).join('')}<p class="muted small">⛓️ 강압 통치: ${POL.force.d}<br>🤲 자치 허용: ${POL.auto.d}</p>`:''}
+  <div class="banner ${left<0||goldLeft<0?'bad':'ok'}" style="margin-top:12px">🏰 수도 방어에 남는 병력 <b>${left}</b> (수도 방어력 ×1.3) · 💰 남는 금 ${goldLeft}${left<0?' — 병력이 모자라요!':''}</div>
+  <div class="row"><span class="sp"></span><button class="btn acc" data-act="ordGo" data-k="${k}">명령 제출</button></div></div>`;
+}
+function resistHTML(W){
+  const k=W.openK; const s=W.S[ME]; const {d,saved}=ordDraft(k); const occ=W.owner[ME]; const fx=(W.flowNow&&W.flowNow.fx)||{};
+  const ch=clamp(Math.round(10+s.res*4+(fx.riseBonus||0)-(W.S[occ].army/2)*0.8+((W.pol[ME]||'force')==='force'?5:0)),10,85);
+  if(saved&&!editing[k]) return `<div class="card resist"><h3 style="margin-top:0">✅ 레지스탕스 작전 제출 완료</h3><p>${RACT[saved.res]?`${RACT[saved.res].e} ${RACT[saved.res].n}`:'작전 없음'}</p><button class="btn ghost" data-act="editOrd" data-v="${k}">수정하기</button></div>`;
+  return `<div class="card resist"><h3 style="margin-top:0">✊ 레지스탕스 작전 (${k+1}턴)</h3><p>저항력 <b>${s.res}</b> · 점령국 ${nm(W,occ)} (병력 약 ${est(W.S[occ].army)})</p>
+  <div class="grid">${Object.entries(RACT).map(([rk,r])=>`<button class="opt ${d.res===rk?'sel':''}" data-act="resA" data-k="${k}" data-v="${rk}" ${rk==='sab'&&s.res<3?'disabled':''}><b>${r.e} ${r.n}</b><div class="d">${r.d}${rk==='rise'?` · 예상 성공률 약 ${ch}%`:''}</div></button>`).join('')}</div>
+  ${d.res==='sab'?`<div class="row" style="margin-top:8px"><b>사보타주 목표</b><button class="chip ${d.sabK!=='gold'?'sel':''}" data-act="sabK" data-k="${k}" data-v="army">💣 무기고 (병력 -3)</button><button class="chip ${d.sabK==='gold'?'sel':''}" data-act="sabK" data-k="${k}" data-v="gold">💰 금고 (금 -6)</button></div>`:''}
+  <p class="muted small">다른 나라가 보내 주는 지원금(금 3 = 저항력 1)도 큰 힘이 됩니다. 쪽지로 도움을 요청하세요! 점령국이 수도를 잃으면 우리도 자동으로 해방됩니다.</p>
+  <div class="row"><span class="sp"></span><button class="btn acc" data-act="ordGo" data-k="${k}">작전 제출</button></div></div>`;
+}
+function myRank(W){ const L=[...W.ids].sort((a,b)=>scoreOf(W,b)-scoreOf(W,a)); return L.indexOf(ME)+1; }
+function finalHTML(W,me){
+  const L=[...W.ids].sort((a,b)=>scoreOf(W,b)-scoreOf(W,a)); const B=blocs(W); const A=awardsOf(W);
+  const doom=W.doom||W.clock>=100;
+  return `${doom?`<div class="ending"><div class="muted">☢️ 전쟁 시계 자정</div><h2>3차 세계대전 — 모두 패배</h2><p>마지막 전쟁에서 핵무기가 사용되었습니다. 영토도, 금도, 동맹도 의미가 없어졌습니다. 이긴 나라는 없습니다.</p></div>`:`<div class="ending good"><div class="muted">${W.rev}턴의 전쟁 끝에</div><h2>🏁 종전 선언</h2><p>총성이 멎었습니다. 이제 지도 위에 남은 것을 돌아볼 시간입니다.</p></div>`}
+  ${me?`<div class="card center"><h2>${flagHTML(W.P[ME].flag)} ${nm(W,ME)} — ${myRank(W)}위 · ${scoreOf(W,ME)}점</h2><p>${W.S[ME].fallen?'✊ 끝까지 레지스탕스로 싸웠습니다':`🗺️ 영토 ${W.realm(ME).length} · ⚔️ 병력 ${W.S[ME].army} · 💰 ${W.S[ME].gold}`} · 🗡️ 배신 ${W.S[ME].betray} · 🕊️ 해방 ${W.S[ME].liber} · ✊ 봉기 성공 ${W.S[ME].rise}</p></div>`:''}
+  <div class="card"><h3 style="margin-top:0">🏅 시상</h3><div class="awards">${A.map(a=>`<div class="aw good"><div class="ae">${a.e}</div><div><b>${a.t}</b> — ${a.L.map(id=>nm(W,id)).join(', ')}<br><small>${esc(a.d)}</small></div></div>`).join('')||'<p class="muted">없음</p>'}</div></div>
+  ${B.length?`<div class="card"><h3 style="margin-top:0">🤝 마지막까지 남은 동맹</h3>${B.map((b,i)=>`<div class="trow"><b>${i===0?'🥇':'·'}</b><div class="tn">${b.m.map(id=>nm(W,id)).join(' + ')}</div><b>영토 ${b.terr}</b></div>`).join('')}</div>`:''}
+  <div class="card"><h3 style="margin-top:0">📊 최종 순위 <small class="muted">(영토×10 + 병력 + 금/2 + 수도 보유 10 + 해방×8 + 봉기 성공×10 + 동맹×3 − 배신×5)</small></h3>${L.map((id,i)=>`<div class="trow"><b style="width:30px">${i+1}</b>${flagHTML(W.P[id].flag,'sm')}<div class="tn"><b>${nm(W,id)}</b>${MODE==='teacher'?` <small class="muted">${esc(W.P[id].num)}번 ${esc(W.P[id].sname)}</small>`:''}${W.S[id].fallen?' ✊':''}</div><b>${scoreOf(W,id)}점</b></div>`).join('')}</div>`;
+}
+function vEnd(W){
+  const mine=DATA.refl&&DATA.refl[ME]; const d=draft('refl');
+  return `${finalHTML(W,true)}${mapHTML(W)}
+  ${mine?`<div class="card"><h3 style="margin-top:0">✍️ 나의 돌아보기</h3>${WREFQ.map((q,i)=>`<p><b>${esc(q)}</b><br>${esc(mine['a'+i]||'')}</p>`).join('')}<div class="banner ok">✅ 제출 완료</div></div>`:
+  `<div class="card"><h3 style="margin-top:0">✍️ 돌아보기</h3>${WREFQ.map((q,i)=>`<label class="lb">${i+1}. ${esc(q)}</label><textarea class="field" data-bind="refl.a${i}">${esc(d['a'+i]||'')}</textarea>`).join('')}<div class="row" style="margin-top:12px"><span class="sp"></span><button class="btn acc" data-act="reflGo">제출</button></div></div>`}
+  <div class="tip">🤝 게임 속 배신과 정복은 여기서 끝! 오늘 나를 공격한 친구에게 “좋은 게임이었어” 한마디 해 주세요.</div>`;
+}
+function renderStudent(){
+  let body='';
+  if(!SRC) body=vRoom();
+  else if(!gotData||!gotSrc) body=`${sHeader()}<div class="card center"><p class="blink">불러오는 중…</p></div>`;
+  else { ensureMe();
+    if(view==='quick') body=vQuick(); else if(view==='find') body=vFind(); else if(view==='confirm') body=vConfirm(); else if(view==='locked') body=vLocked();
+    else if(!ME||!DATA.players||!DATA.players[ME]||!calc().S[ME]) body=`${sHeader()}<div class="card center"><p class="blink">내 나라를 불러오는 중…</p></div>`;
+    else { const W=calc(); const ph=phaseOf(); let b='';
+      const last=W.reports[W.reports.length-1];
+      if(ph==='lobby') b=vLobby(W);
+      else if(ph==='diplo') b=`${myBar(W)}${flowCard(W.flowNow,W.openK)}<div class="row"><h2 style="margin:0">🤝 ${W.openK+1}턴 · 외교 시간</h2><span class="sp"></span>${timerHTML()}</div><p class="muted">쪽지로 작전을 짜고 동맹을 맺으세요. 곧 명령 시간이 시작됩니다.</p>${clockHTML(W)}${mapHTML(W)}${diploHTML(W)}${last?newsHTML(W,last):''}`;
+      else if(ph==='order') b=`${myBar(W)}<div class="row"><h2 style="margin:0">⚔️ ${W.openK+1}턴 · 명령 시간</h2><span class="sp"></span>${timerHTML()}</div>${W.flowNow?`<div class="tip">${W.flowNow.e} 이번 턴 흐름: <b>${esc(W.flowNow.t)}</b> — ${esc(W.flowNow.d)}</div>`:''}${clockHTML(W)}${mapHTML(W)}${W.S[ME].fallen?resistHTML(W):ordersHTML(W)}${diploHTML(W,false)}`;
+      else if(ph==='result') b=`${myBar(W)}${W.doom?`<div class="ending"><h2>☢️ 전쟁 시계 자정!</h2><p>핵무기가 사용되었습니다. 선생님이 결말을 보여 줄 때까지 기다려 주세요.</p></div>`:''}${newsHTML(W,last)}${clockHTML(W)}${mapHTML(W)}${battlesHTML(W,last)}<p class="muted center blink">다음 턴을 기다리는 중… 쪽지는 계속 보낼 수 있어요.</p>${diploHTML(W,false)}`;
+      else if(ph==='end') b=vEnd(W);
+      body=sHeader()+`<div class="stepname">${(PHASES.find(p=>p.k===ph)||{}).e||''} ${esc(pName(ph))}</div>`+b; }
+  }
+  $app.innerHTML=`<div class="wrap">${body}</div>`;
+}
+let shownOv={};
+function afterRender(){
+  if(MODE!=='student'||!ME||!DATA.players||!DATA.players[ME]) return; let W; try{ W=calc(); }catch(e){ return; } const ph=phaseOf();
+  const show=(key,html)=>{ if(shownOv[key]||ls.get(key)) return; shownOv[key]=1; ls.set(key,'1'); const ov=document.createElement('div'); ov.className='reveal'; ov.innerHTML=`<div class="box">${html}<p class="muted">화면을 누르면 닫힙니다</p></div>`; document.body.appendChild(ov); ov.addEventListener('click',()=>ov.remove()); setTimeout(()=>{ if(ov.isConnected) ov.remove(); },9000); };
+  const base='war_ov_'+SRC+(SLOT?'_'+SLOT:'')+'_'+(DATA.meta.startAt||0)+'_';
+  if(ph==='diplo'&&W.flowNow) show(base+'f'+W.openK,`<div class="muted">${W.openK+1}턴 · 세계사의 흐름</div><div class="dice">${W.flowNow.e}</div><div class="out">${esc(W.flowNow.t)}</div><p style="font-size:17px">${esc(W.flowNow.d)}</p>`);
+  if(ph==='result'){ const R=W.reports[W.reports.length-1]; if(!R) return; const L=R.news.filter(n=>n.ids.includes(ME)); const fell=R.falls.includes(ME), freed=R.frees.some(f=>f.t===ME);
+    show(base+'r'+R.k+'_'+(DATA.meta.rvAt||0),`<div class="muted">📰 ${R.k+1}턴 결과</div><div class="dice">${fell?'🏴':freed?'🎉':L.some(n=>n.e==='🗡️')?'🗡️':L.length?'⚔️':'🕊️'}</div><div class="out" style="color:${fell?'var(--bad)':'var(--ink)'}">${fell?'수도 함락! 레지스탕스가 되었습니다':freed?'독립을 되찾았습니다!':'우리 나라 소식'}</div>${L.map(n=>`<p style="text-align:left">${n.e} ${esc(n.txt)}</p>`).join('')||'<p>이번 턴 우리 나라는 조용했습니다.</p>'}<p>전쟁 시계 ${R.clock0} → <b>${R.clock1}</b></p>`); }
+}
+const need=(cond,msg)=>{ if(!cond){ toast(msg); return false; } return true; };
+const lenOK=(s,n)=>String(s||'').trim().length>=n;
+const sActs = {
+  enterRoom(){ const c=cleanCode(tmpRoom); if(!need(c.length>=3,'방 코드를 확인해 주세요.')) return; const u=new URL(location.href); u.searchParams.set('room',c); location.href=u.toString(); },
+  pick(ds){ pickSid=ds.v; render(); },
+  pickGo(){ const n=SRCN[pickSid]; if(!n) return; if(!confirm(`${n.num}번 ${n.sname}의 '${norm(n.d).name}'이(가) 내 나라가 맞나요?`)) return; const ex=DATA.players&&DATA.players[n.id];
+    if(ex && ex.dev && ex.dev!==DEV){ ME=n.id; view='locked'; backend.update(`${ER()}/players/${n.id}`,{want:Date.now()}); render(); return; }
+    view='auto'; claim(playerFrom(n.id,n.num,n.sname,n.d)); },
+  candYes(){ if(!cand) return; const c=cand; cand=null; view='auto'; claim(c); },
+  candNo(){ cand=null; ME=null; view='find'; render(); },
+  toQuick(){ view='quick'; render(); }, toFind(){ view='find'; ME=null; cand=null; render(); },
+  qtype(ds){ draft('quick').type=ds.v; render(); }, qterr(ds){ draft('quick').terr=ds.v; render(); },
+  quickGo(){ const q=draft('quick'); if(!need(q.num&&q.sname,'번호와 이름을 써 주세요.')||!need(q.name,'나라 이름을 써 주세요.')||!need(q.terr,'나라의 위치를 골라 주세요.')||!need(q.type,'나라 유형을 골라 주세요.')) return;
+    const x=QUICK.find(z=>z.k===q.type); const sid='q'+Date.now().toString(36)+Math.random().toString(36).slice(2,5); const cs=['#e63946','#3a86ff','#2a9d8f','#f4a261','#8e6cc4','#f1c40f','#6a994e','#d16ba5'];
+    view='auto'; claim({sid,num:String(q.num),sname:String(q.sname),name:String(q.name).slice(0,30),flag:{c1:cs[hashStr(sid)%cs.length],c2:'#1d3557',sym:TYPES[q.type].e},terr:q.terr,gov:'',base:Object.assign({},x.v),btype:q.type,quick:true}); },
+  step(ds){ const i=ds.k.indexOf('.'); const d=draft(ds.k.slice(0,i)); const b=ds.k.slice(i+1); const mx=b==='rec'?10:99; d[b]=Math.max(0,Math.min(mx,(+d[b]||0)+(+ds.d))); render(); },
+  async proposeAlly(){ const W=calc(); const to=draft('dip').allyTo; if(!need(to&&W.P[to],'동맹을 제안할 나라를 골라 주세요.')) return; if(DATA.prop&&DATA.prop[ME]&&DATA.prop[ME][to]) return sActs.acceptAlly({v:to}); await backend.set(`${ER()}/prop/${to}/${ME}`,{at:Date.now()}); toast('🤝 동맹을 제안했어요. 상대가 수락하면 동맹이 됩니다.'); },
+  async acceptAlly(ds){ const W=calc(); const a=ME,b=ds.v; await backend.set(`${ER()}/ally/${pairKey(a,b)}`,{a,b,since:W.curK,end:null,at:Date.now()}); await backend.remove(`${ER()}/prop/${ME}/${b}`); await backend.remove(`${ER()}/prop/${b}/${ME}`); toast('🤝 동맹이 맺어졌습니다!'); },
+  async declineAlly(ds){ await backend.remove(`${ER()}/prop/${ME}/${ds.v}`); },
+  async breakAlly(ds){ const W=calc(); if(!confirm(`${rawN(W,ds.v)}과(와)의 동맹을 파기한다고 통보할까요? 상대에게 바로 알려집니다.`)) return; await backend.update(`${ER()}/ally/${pairKey(ME,ds.v)}`,{end:W.curK,by:ME}); await sendMsgRaw(ds.v,`📜 [자동 통보] ${rawN(W,ME)}이(가) 동맹 파기를 통보했습니다.`); toast('📜 동맹 파기를 통보했어요.'); },
+  async sendMsg(){ const W=calc(); const d=draft('dip'); if(!need(d.to,'받을 나라를 골라 주세요.')||!need(lenOK(d.text,2),'쪽지 내용을 써 주세요.')) return; const tos=d.to==='__ALLIES'?W.ids.filter(x=>x!==ME&&W.ally(ME,x)):[d.to]; for(const to of tos) await sendMsgRaw(to,String(d.text).trim().slice(0,100)); d.text=''; toast('📨 쪽지를 보냈어요'); render(); },
+  async sendGift(){ const W=calc(); const k=W.openK; if(k==null) return; const d=draft('dip'); const amt=+d.gAmt||0; if(!need(d.gTo&&W.P[d.gTo],'받을 나라를 골라 주세요.')||!need(amt>0,'보낼 금을 정해 주세요.')) return; const cur=(DATA.gift&&DATA.gift['t'+k]&&DATA.gift['t'+k][ME])||{}; const sent=Object.entries(cur).filter(([to])=>to!==d.gTo).reduce((x,[,a])=>x+(+a||0),0); if(!need(sent+amt<=W.S[ME].gold,'금이 모자라요.')) return; await backend.set(`${ER()}/gift/t${k}/${ME}/${d.gTo}`,amt); d.gAmt=0; toast('💰 지원금을 보냈어요 (결과 공개 때 도착)'); },
+  async giftDel(ds){ const W=calc(); await backend.remove(`${ER()}/gift/t${W.openK}/${ME}/${ds.v}`); },
+  libT(ds){ const d=draft('o'+ds.k); d['l_'+ds.v]=!d['l_'+ds.v]; render(); },
+  polT(ds){ draft('o'+ds.k)['p_'+ds.v]=ds.p; render(); },
+  resA(ds){ draft('o'+ds.k).res=ds.v; render(); }, sabK(ds){ draft('o'+ds.k).sabK=ds.v; render(); },
+  editOrd(ds){ editing[ds.v]=true; render(); },
+  async ordGo(ds){ const W=calc(); const k=+ds.k; if(W.openK!==k||phaseOf()!=='order') return toast('지금은 명령을 낼 수 없어요.'); const d=draft('o'+k); const s=W.S[ME];
+    let rec={};
+    if(s.fallen){ if(!need(d.res,'작전을 골라 주세요.')) return; rec={res:d.res,sabK:d.sabK||'army'}; }
+    else { const r=Math.min(+d.rec||0,10,Math.floor(s.gold/2)); const army=s.army+r; const tg=W.targets(ME); const atk={}; tg.forEach(t=>{ const n=+d['a_'+t]||0; if(n>0) atk[t]={n,lib:!!d['l_'+t]}; }); const sup={}; W.ids.forEach(a=>{ const n=+d['s_'+a]||0; if(n>0&&W.ally(ME,a)) sup[a]=n; }); const pol={}; W.realm(ME).forEach(t=>{ if(t!==ME&&d['p_'+t]) pol[t]=d['p_'+t]; });
+      const used=Object.values(atk).reduce((x,a)=>x+a.n,0)+Object.values(sup).reduce((x,n)=>x+n,0); if(!need(used<=army,'병력이 모자라요. 공격·지원군을 줄여 주세요.')) return;
+      const bet=Object.keys(atk).filter(t=>W.ally(ME,W.owner[t])); if(bet.length&&!confirm(`⚠️ ${bet.map(t=>rawN(W,W.owner[t])).join(', ')}은(는) 동맹국입니다! 정말 배신하고 공격할까요?`)) return;
+      rec={rec:r,atk,sup,pol}; }
+    rec.at=Date.now(); await backend.set(`${ER()}/ord/t${k}/${ME}`,rec); editing[k]=false; toast('✅ 명령을 제출했어요'); render(); },
+  async reflGo(){ const d=draft('refl'); if(!need(WREFQ.every((q,i)=>lenOK(d['a'+i],5)),'세 질문에 5글자 이상 써 주세요.')) return; await backend.set(`${ER()}/refl/${ME}`,{a0:d.a0.trim(),a1:d.a1.trim(),a2:d.a2.trim(),at:Date.now()}); }
+};
+const rawN=(W,id)=>W.P[id]?W.P[id].name:'?';
+async function sendMsgRaw(to,text){ const W=calc(); const id=Date.now().toString(36)+Math.random().toString(36).slice(2,6); await backend.set(`${ER()}/msg/${id}`,{from:ME,to,text,k:W.curK,at:Date.now()}); }
+let lastSig=null;
+function startStudent(){
+  if(!SRC){ render(); return; }
+  ME = ls.get(meKey()) || null;
+  backend.on(ER(), v=>{ DATA=v||{}; gotData=true; const m=DATA.meta||{}; const sig=(m.phase||'lobby')+'|'+(+m.turn||0)+'|'+(+m.rev||0);
+    if(lastSig && sig!==lastSig){ const ph=m.phase||'lobby'; toast(ph==='diplo'?`🤝 ${(+m.turn||0)+1}턴 외교 시간!`:ph==='order'?'⚔️ 명령 시간입니다!':ph==='result'?'📰 전투 결과가 공개되었습니다':ph==='end'?'🏁 종전!':'📢 단계가 바뀌었습니다'); lastSig=sig; render(); window.scrollTo(0,0); return; }
+    lastSig=sig; softRender(); });
+  backend.on(`rooms/${SRC}/nations`, v=>{ SRCN=v||{}; gotSrc=true; softRender(); });
+}
+
+/* =========================================================
+   ⑧ 교사 화면
+   ========================================================= */
+let tab='run', showNames=false, ttmp='', tmin=3;
+const pinOK = () => { try{ return sessionStorage.getItem('wargame_pin')===TEACHER_PIN; }catch(e){ return false; } };
+function who(W,id){ const p=W.P[id]; if(!p) return '?'; return showNames ? `${esc(p.num)}번 ${esc(p.sname)} (${esc(p.name)})` : esc(p.name); }
+function studentURL(){ const u=new URL('./', location.href); u.search=''; u.searchParams.set('room',SRC); return u.toString(); }
+function tHeader(){ return `<div class="top"><h1>⚔️ 연합과 배신 · 교사</h1>${SRC?`<span class="pill">방 ${esc(SRC)}</span>`:''}${modeBadge()}<button class="btn sm ghost" data-act="names">${showNames?'🙈 이름 숨기기':'👀 이름 보기'}</button><button class="btn sm ghost" data-act="qr">📱 학생 접속 QR</button></div>`; }
+function flowPicker(){ const nf=DATA.meta&&DATA.meta.nextFlow; return `<h3>🌍 다음 턴 ‘세계사의 흐름’ 카드 <small class="muted">(선택 사항)</small></h3><div class="row" style="margin-bottom:8px"><button class="btn sm ${!nf?'acc':'ghost'}" data-act="pickFlow" data-v="">흐름 없음</button><button class="btn sm ghost" data-act="randFlow">🎲 무작위</button>${nf?`<span class="pill">선택: ${(FLOW.find(f=>f.id===nf)||{}).e} ${esc((FLOW.find(f=>f.id===nf)||{}).t||'')}</span>`:''}</div><div class="grid g4">${FLOW.map(f=>`<button class="opt ${nf===f.id?'sel':''}" data-act="pickFlow" data-v="${f.id}"><div class="e">${f.e}</div><div class="t">${esc(f.t)}</div><div class="d small">${esc(f.d)}</div></button>`).join('')}</div>`; }
+function tRun(W){
+  const ph=phaseOf(); const k=W.openK; const nSrc=Object.keys(SRCN||{}).length;
+  const O=k!=null?((DATA.ord&&DATA.ord['t'+k])||{}):{}; const sub=W.ids.filter(id=>O[id]).length;
+  let ctl='';
+  if(ph==='lobby') ctl=`<p>학생들이 모두 입장하면 게임을 시작하세요. 시작하는 순간 지도 배치가 고정됩니다. (입장 ${W.ids.length}명)</p>${flowPicker()}<div class="row" style="margin-top:12px"><span class="sp"></span><button class="btn acc" data-act="startGame">🗺️ 게임 시작 (1턴 외교)</button></div>`;
+  else if(ph==='diplo') ctl=`<div class="row"><h2 style="margin:0">🤝 ${k+1}턴 · 외교 시간</h2><span class="sp"></span>${timerHTML()}</div><p class="muted">학생들이 쪽지·동맹·지원금을 주고받습니다. 2~3분 뒤 명령 시간으로 넘기세요.</p><div class="row"><b>명령 제한 시간</b><div class="seg">${[2,3,4,0].map(x=>`<button class="${tmin===x?'on':''}" data-act="tmin" data-v="${x}">${x?x+'분':'없음'}</button>`).join('')}</div><span class="sp"></span><button class="btn acc" data-act="toOrder">⚔️ 명령 시간 시작</button></div>`;
+  else if(ph==='order') ctl=`<div class="row"><h2 style="margin:0">⚔️ ${k+1}턴 · 명령 시간</h2><span class="sp"></span>${timerHTML()}</div><div class="stat"><div class="box"><b>${sub}/${W.ids.length}</b><small>명령 제출</small></div><div class="box"><b>${W.clock}</b><small>전쟁 시계</small></div></div><div class="row"><button class="btn ghost sm" data-act="addMin">⏱ +1분</button><button class="btn ghost sm" data-act="backDiplo">↩ 외교로</button><span class="sp"></span><button class="btn acc" data-act="reveal">📢 전투 결과 공개</button></div><p class="muted small">제출하지 않은 나라는 공격하지 않고 모든 병력으로 수도를 지킵니다.</p>`;
+  else if(ph==='result') ctl=`<div class="row"><h2 style="margin:0">📰 ${W.rev}턴 결과</h2><span class="sp"></span><button class="btn ghost sm" data-act="unreveal">↩ 공개 취소</button></div>${W.doom?'<div class="banner bad">☢️ 전쟁 시계가 자정에 도달했습니다! [🏁 종전 선언]으로 공멸 결말을 보여 주세요.</div>':''}${flowPicker()}<div class="row" style="margin-top:12px"><button class="btn ghost" data-act="endWar">🏁 종전 선언</button><span class="sp"></span>${W.doom?'':`<button class="btn acc" data-act="nextTurn">▶ ${W.rev+1}턴 시작</button>`}</div>`;
+  else if(ph==='end') ctl=`<div class="row"><h2 style="margin:0">🏁 종전</h2><span class="sp"></span><button class="btn ghost sm" data-act="backResult">↩ 전쟁으로 돌아가기</button></div><p class="muted">[🏆 순위·결말] 탭을 TV에 띄워 주세요.</p>`;
+  return `<div class="card">${ctl}</div>
+  ${nSrc===0?`<div class="banner warn">⚠️ 방 ${esc(SRC)}에서 국가 만들기 나라를 찾지 못했습니다. 방 코드를 확인하세요. 학생들은 ‘새로 빠르게 만들기’로 들어올 수 있습니다.</div>`:''}
+  <div class="card"><h3 style="margin-top:0">학생 현황 (${W.ids.length}) <button class="btn sm ghost" data-act="unlockAll">🔓 전체 잠금 해제</button></h3>
+  <div class="plist">${[...W.ids].sort((a,b)=>(+W.P[a].num||999)-(+W.P[b].num||999)).map(id=>{ const p=W.P[id]; const s=W.S[id]; return `<div class="pi ${O[id]?'done':''}">${flagHTML(p.flag,'sm')}<span><b>${esc(p.num)}번 ${esc(p.sname)}</b><small>${esc(p.name)} · ${s.fallen?`✊ 저항력 ${s.res}`:`⚔️${s.army} 💰${s.gold} 🗺️${W.realm(id).length}`}</small></span><span class="sp"></span>${k!=null&&ph==='order'?(O[id]?'✅':'⏳'):''}${p.want&&p.dev?`<button class="btn sm acc" data-act="unlock" data-v="${esc(id)}">🙋 해제 요청</button>`:p.dev?`<button class="btn sm ghost" data-act="unlock" data-v="${esc(id)}">🔒</button>`:''}<button class="btn sm ghost" data-act="delP" data-v="${esc(id)}">✕</button></div>`; }).join('')||'<p class="muted">아직 입장한 학생이 없습니다. 📱 학생 접속 QR을 띄워 주세요.</p>'}</div></div>`;
+}
+function tBoard(W){
+  const last=W.reports[W.reports.length-1]; const B=blocs(W);
+  return `${W.flowNow?flowCard(W.flowNow,W.openK):''}${clockHTML(W,true)}${mapHTML(W,true)}
+  <div class="grid g2"><div>${last?newsHTML(W,last):''}</div><div class="card"><h3 style="margin-top:0">🤝 동맹 현황</h3>${B.map(b=>`<div class="trow"><div class="tn">${b.m.map(id=>who(W,id)).join(' + ')}</div><b>영토 ${b.terr}</b></div>`).join('')||'<p class="muted">동맹이 없습니다.</p>'}
+  <h3>✊ 레지스탕스</h3>${W.ids.filter(id=>W.S[id].fallen).map(id=>`<div class="trow"><div class="tn">${who(W,id)} <small class="muted">← ${who(W,W.owner[id])} 점령</small></div><b>저항력 ${W.S[id].res}</b></div>`).join('')||'<p class="muted">없음</p>'}</div></div>`;
+}
+function tNews(W){ return W.reports.slice().reverse().map(R=>`${newsHTML(W,R)}${battlesHTML(W,R)}`).join('')||'<div class="card"><p class="muted">아직 결과가 없습니다.</p></div>'; }
+function tMsgs(W){ const M=Object.values(DATA.msg||{}).filter(m=>m&&W.P[m.from]&&W.P[m.to]).sort((a,b)=>(b.at||0)-(a.at||0));
+  return `<div class="card"><h3 style="margin-top:0">✉️ 쪽지 감시 (${M.length}) <small class="muted">학생들은 서로의 쪽지를 볼 수 없습니다</small></h3>${M.map(m=>`<div class="msg"><small class="muted">${(+m.k||0)+1}턴 · ${who(W,m.from)} → ${who(W,m.to)}</small><div>${esc(m.text)}</div></div>`).join('')||'<p class="muted">아직 쪽지가 없습니다.</p>'}</div>`; }
+function tEnd(W){ const R=Object.entries(DATA.refl||{}).filter(([id])=>W.P[id]);
+  return `${finalHTML(W,false)}<div class="card"><h3 style="margin-top:0">✍️ 돌아보기 (${R.length})</h3>${WREFQ.map((q,i)=>`<h4>${i+1}. ${esc(q)}</h4><ul class="rlist">${R.map(([id,x])=>`<li>${showNames?`<b>${who(W,id)}</b>`:''}${esc(x['a'+i]||'')}</li>`).join('')||'<li>아직 없음</li>'}</ul>`).join('')}
+  <details open><summary>정리 발문</summary><ul><li>배신한 나라는 정말 이득을 보았을까요? 배신당한 나라는 무엇을 잃었나요?</li><li>강압 통치와 자치 허용 중 어느 쪽 점령지가 더 오래 유지되었나요? (국가와 시민 단원의 ‘정당성’)</li><li>전쟁 시계를 되돌린 것은 무엇이었나요? 실제 세계에서 그 역할을 하는 것은?</li></ul></details></div>`; }
+function tRecord(){ return `<div class="card"><h3 style="margin-top:0">📥 기록 내려받기</h3><p>학생별 최종 영토·병력·금·배신·해방·봉기·점수·돌아보기가 엑셀(CSV)로 나옵니다.</p><button class="btn teal" data-act="csv">엑셀(CSV) 내려받기</button></div>
+  <div class="card"><h3 style="margin-top:0">🗑️ 초기화</h3><p class="muted">이 방(X${esc(SRC)})의 전쟁 기록만 지웁니다. 국가 만들기 기록은 그대로 남습니다.</p><button class="btn ghost" data-act="reset">이 방 초기화</button></div>
+  <div class="card"><h3 style="margin-top:0">다른 반으로</h3><button class="btn ghost" data-act="changeRoom">방 코드 바꾸기</button></div>`; }
+function renderTeacher(){
+  let body;
+  if(!pinOK()) body=`${tHeader()}<div class="card center"><h2>🔐 교사 비밀번호</h2><input class="field" type="password" style="max-width:220px;text-align:center;font-size:22px" data-bind="pin" inputmode="numeric"><div style="margin-top:12px"><button class="btn acc" data-act="pin">확인</button></div></div>`;
+  else if(!SRC) body=`${tHeader()}<div class="card center"><h2>국가 만들기 방 코드를 입력하세요</h2><p class="muted">국가 만들기 교사 화면 주소 끝의 room= 뒤 글자 (예: K7PM)<br>시험해 보려면 아무 코드나 넣으세요 (예: TEST1)</p><input class="field" style="max-width:260px;text-align:center;font-size:24px;font-weight:800;letter-spacing:4px;text-transform:uppercase" data-bind="troom" value="${esc(ttmp)}" maxlength="8"><div style="margin-top:14px"><button class="btn acc" data-act="setRoom">이 반 불러오기</button></div></div>`;
+  else if(!gotData||!gotSrc) body=`${tHeader()}<div class="card center"><p class="blink">불러오는 중…</p></div>`;
+  else { const W=calc();
+    const TABS=[['run','🎮 진행'],['board','🗺️ 지도 (TV)'],['news','📰 속보·전투'],['msgs','✉️ 쪽지 감시'],['end','🏆 순위·결말'],['rec','📥 기록']];
+    const b=tab==='run'?tRun(W):tab==='board'?tBoard(W):tab==='news'?tNews(W):tab==='msgs'?tMsgs(W):tab==='end'?tEnd(W):tRecord();
+    body=`${tHeader()}<div class="tabs">${TABS.map(([k,n])=>`<button class="${tab===k?'on':''}" data-act="tab" data-v="${k}">${n}</button>`).join('')}</div>${b}`; }
+  $app.innerHTML=`<div class="twrap">${body}</div>`;
+}
+function csvDownload(){ const W=calc(); const q=s=>'"'+String(s??'').replace(/"/g,'""').replace(/\r?\n/g,' ')+'"';
+  const head=['번호','이름','나라','순위','점수','영토','병력','금','레지스탕스','저항력','배신','배신당함','해방','봉기 성공','봉기 실패','사보타주','방어 성공','공격 성공',...WREFQ.map((x,i)=>`돌아보기${i+1}`)];
+  const L=[...W.ids].sort((a,b)=>scoreOf(W,b)-scoreOf(W,a)); const rows=[head.map(q).join(',')];
+  [...W.ids].sort((a,b)=>(+W.P[a].num||999)-(+W.P[b].num||999)).forEach(id=>{ const p=W.P[id], s=W.S[id], rf=(DATA.refl||{})[id]||{};
+    rows.push([p.num,p.sname,p.name,L.indexOf(id)+1,scoreOf(W,id),W.realm(id).length,s.army,s.gold,s.fallen?'예':'',s.res,s.betray,s.betrayed,s.liber,s.rise,s.riseFail,s.sab,s.defWin,s.atkWin,rf.a0,rf.a1,rf.a2].map(q).join(',')); });
+  const blob=new Blob(['﻿'+rows.join('\r\n')],{type:'text/csv;charset=utf-8'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`연합과배신_${SRC}_${new Date().toISOString().slice(0,10)}.csv`; document.body.appendChild(a); a.click(); setTimeout(()=>a.remove(),500); }
+const tActs = {
+  pin(){ if(String(dr.pin||'')===TEACHER_PIN){ try{ sessionStorage.setItem('wargame_pin',TEACHER_PIN); }catch(e){} startTeacherData(); render(); } else toast('비밀번호가 틀렸습니다.'); },
+  setRoom(){ const c=cleanCode(ttmp); if(c.length<3){ toast('방 코드를 확인해 주세요.'); return; } const u=new URL(location.href); u.searchParams.set('room',c); history.replaceState(null,'',u.toString()); SRC=c; startTeacherData(); render(); },
+  changeRoom(){ const u=new URL(location.href); u.searchParams.delete('room'); location.href=u.toString(); },
+  tab(ds){ tab=ds.v; render(); window.scrollTo(0,0); }, names(){ showNames=!showNames; render(); }, tmin(ds){ tmin=+ds.v; render(); },
+  pickFlow(ds){ backend.update(`${ER()}/meta`,{nextFlow:ds.v||null}); },
+  randFlow(){ backend.update(`${ER()}/meta`,{nextFlow:FLOW[Math.floor(Math.random()*FLOW.length)].id}); },
+  startGame(){ const W=calc(); if(W.ids.length<2) return toast('최소 2개 나라가 있어야 합니다.'); if(!confirm(`${W.ids.length}개 나라로 전쟁을 시작할까요? 지도 배치가 고정됩니다.`)) return; const nf=DATA.meta&&DATA.meta.nextFlow||null; backend.update(`${ER()}/meta`,{phase:'diplo',turn:0,rev:0,order:W.L.all,flow:nf?{t0:nf}:null,nextFlow:null,startAt:Date.now(),dl:null}); tab='board'; render(); },
+  toOrder(){ backend.update(`${ER()}/meta`,{phase:'order',dl:tmin?Date.now()+tmin*60000:null}); },
+  backDiplo(){ backend.update(`${ER()}/meta`,{phase:'diplo',dl:null}); },
+  addMin(){ const dl=+(DATA.meta&&DATA.meta.dl)||0; backend.update(`${ER()}/meta`,{dl:Math.max(dl,Date.now())+60000}); },
+  reveal(){ const W=calc(); const k=W.openK; const O=(DATA.ord&&DATA.ord['t'+k])||{}; const miss=W.ids.filter(id=>!O[id]).length; if(miss&&!confirm(`${miss}개 나라가 아직 명령을 내지 않았습니다. 그대로 공개할까요?`)) return; backend.update(`${ER()}/meta`,{phase:'result',rev:k+1,dl:null,rvAt:Date.now()}); tab='board'; render(); },
+  unreveal(){ const W=calc(); if(!confirm('마지막 턴 결과 공개를 취소할까요? 학생들이 명령을 다시 고칠 수 있습니다.')) return; backend.update(`${ER()}/meta`,{phase:'order',rev:Math.max(0,W.rev-1),turn:Math.max(0,W.rev-1)}); },
+  nextTurn(){ const W=calc(); const nt=W.rev; const nf=DATA.meta&&DATA.meta.nextFlow||null; const upd={phase:'diplo',turn:nt,nextFlow:null,dl:null}; upd['flow/t'+nt]=nf; backend.update(`${ER()}/meta`,upd); tab='board'; render(); },
+  endWar(){ if(!confirm('종전을 선언할까요? 학생 화면에 최종 순위와 돌아보기가 나타납니다.')) return; backend.update(`${ER()}/meta`,{phase:'end'}); tab='end'; render(); },
+  backResult(){ backend.update(`${ER()}/meta`,{phase:'result'}); },
+  unlock(ds){ backend.update(`${ER()}/players/${ds.v}`,{dev:null,want:null,kick:Date.now()}); toast('잠금을 풀었습니다.'); },
+  unlockAll(){ if(!confirm('모든 나라의 태블릿 잠금을 풀까요?')) return; const now=Date.now(); const u={}; Object.keys(DATA.players||{}).forEach(id=>{ u[id+'/dev']=null; u[id+'/want']=null; u[id+'/kick']=now; }); backend.update(`${ER()}/players`,u); },
+  delP(ds){ if(!confirm('이 학생을 게임에서 뺄까요? (국가 만들기 기록은 그대로)')) return; backend.remove(`${ER()}/players/${ds.v}`); },
+  qr(){ const url=studentURL(); const ov=document.createElement('div'); ov.className='overlay'; ov.innerHTML=`<div class="modal center"><h2>📱 학생 접속</h2><div class="qrbox" id="qrbox"></div><p class="url">${esc(url)}</p><button class="btn" data-x="close">닫기</button></div>`; document.body.appendChild(ov); ov.addEventListener('click',e=>{ if(e.target===ov||e.target.dataset.x==='close') ov.remove(); }); try{ new QRCode(ov.querySelector('#qrbox'),{text:url,width:300,height:300}); }catch(e){ ov.querySelector('#qrbox').textContent='QR을 만들 수 없습니다. 위 주소를 알려 주세요.'; } },
+  csv(){ csvDownload(); },
+  reset(){ if(!confirm(`방 X${SRC}의 모든 전쟁 기록을 지울까요? 되돌릴 수 없습니다.`)) return; backend.set(ER(),{meta:{phase:'lobby',src:SRC,resetAt:Date.now()}}); toast('초기화했습니다.'); }
+};
+let tStarted=false, tT=null;
+function startTeacherData(){
+  if(tStarted || !SRC || !pinOK()) return; tStarted=true;
+  backend.on(ER(), v=>{ DATA=v||{}; gotData=true; if(!DATA.meta){ backend.update(`${ER()}/meta`,{phase:'lobby',src:SRC,createdAt:Date.now()}); } clearTimeout(tT); tT=setTimeout(softRender,250); });
+  backend.on(`rooms/${SRC}/nations`, v=>{ SRCN=v||{}; gotSrc=true; softRender(); });
+}
+
+/* =========================================================
+   ⑨ 이벤트 연결 · 시작
+   ========================================================= */
+$app.addEventListener('click', e=>{
+  const b=e.target.closest('[data-act]'); if(!b || b.disabled) return;
+  const acts = MODE==='teacher' ? tActs : sActs; const f=acts[b.dataset.act]; if(f) f(b.dataset);
+});
+function onBind(e){
+  const el=e.target; const k=el.dataset.bind; if(!k) return;
+  if(k==='room') tmpRoom=el.value; else if(k==='troom') ttmp=el.value; else if(k==='pin') dr.pin=el.value;
+  else { const i=k.indexOf('.'); draft(k.slice(0,i))[k.slice(i+1)]=el.value; }
+}
+$app.addEventListener('input', onBind);
+$app.addEventListener('change', e=>{ onBind(e); if(e.target.tagName==='SELECT'){ e.target.blur(); render(); } });
+$app.addEventListener('keydown', e=>{ if(e.key==='Enter' && e.target.tagName==='INPUT'){ const k=e.target.dataset.bind; if(k==='room') sActs.enterRoom(); else if(k==='troom') tActs.setRoom(); else if(k==='pin') tActs.pin(); } });
+if(FORCE_DEMO) window.__war={calc:()=>calc()};
+(async function(){
+  await initBackend();
+  if(MODE==='teacher'){ startTeacherData(); render(); }
+  else { startStudent(); render(); }
+})();
+</script>
+</body>
+</html>
