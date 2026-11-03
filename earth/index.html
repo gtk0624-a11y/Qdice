@@ -895,6 +895,7 @@ const LOCAL = [
   {id:'kpop',e:'🎤',t:'문화 열풍',bad:false,d:'우리 나라 문화가 세계적 인기를 얻었습니다!',res:{coin:3},ind:{trust:4}},
   {id:'mine',e:'⛏️',t:'자원 발견',bad:false,d:'땅속에서 귀한 자원이 발견되었습니다!',res:{coin:6},ind:{eco:3}}
 ];
+const MISSIONS_V1 = 5; /* 이전 방(meta.mv 없음)은 앞의 5개만 예전 순서대로 */
 const MISSIONS = [
   {k:'fund',e:'💰',t:'국제 기금 100% 채우기',ok:R=>R.r>=1},
   {k:'aid',e:'📦',t:'도움이 필요한 모든 나라에 지원 도착시키기',ok:R=>R.cover>=1},
@@ -1081,6 +1082,10 @@ function memAt(t,id,k){
   const q=t.quit&&t.quit[id]; if(q && (+q.r||0)<=k && (+q.r||0)>=(+sg.r||0)) return false; return true;
 }
 /* 설득 기록: 가입 기록의 by = 설득한 나라 */
+/* 설득 증거: 가입 전에 (가) 발언대에서 발언했거나 (나) 그 나라에 비밀 쪽지를 보낸 나라만 인정 */
+function persEvidence(by,id,at){ const sp=DATA.spoke&&DATA.spoke[by]; if(sp&&+sp<=at) return 'speech'; const M=DATA.msg||{}; for(const key in M){ const m=M[key]; if(m&&m.from===by&&m.to===id&&(+m.at||0)<=at) return 'note'; } return null; }
+function persEntry(t,id,k){ const lg=t&&t.log&&t.log[id]; if(!lg) return null; let best=-1,e0=null,kk=null; for(const key in lg){ const e=lg[key]; const rr=+String(key).replace(/^r/,''); if(e&&rr<=k&&rr>best){ best=rr; e0=e; kk=key; } } return e0&&e0.in&&e0.by?{by:e0.by,at:+e0.at||0,key:kk,ban:!!e0.ban}:null; }
+const PERS_CAP=3; /* 한 위기에 한 나라가 받을 수 있는 설득 보상 최대 */
 function persBy(t,id,k){ const lg=t&&t.log&&t.log[id]; if(!lg) return null; let best=-1,by=null; for(const key in lg){ const e=lg[key]; const rr=+String(key).replace(/^r/,''); if(e&&rr<=k&&rr>best){ best=rr; by=e.in?(e.by||null):null; } } return by; }
 function isSigner(t,id,k,violOut){ if(!memAt(t,id,k)) return false; if(violOut && violOut[id]!=null && violOut[id]<=k) return false; return true; }
 function pickVictims(c,P,ids,S,k){
@@ -1102,7 +1107,7 @@ function raidChance(att,def,defSelf){ return clamp(Math.round(55+((+att.v.safe||
 let _cache=null, _cacheKey='';
 function calc(){
   const meta=DATA.meta||{};
-  const key=JSON.stringify([SRC,DATA.players,meta.cr,meta.rev,meta.noRaid,DATA.act,DATA.gift,DATA.treaty,DATA.req]);
+  const key=JSON.stringify([SRC,DATA.players,meta.cr,meta.rev,meta.noRaid,meta.mv,DATA.act,DATA.gift,DATA.treaty,DATA.req,DATA.spoke,DATA.msg]);
   if(_cache && key===_cacheKey) return _cache;
   const P=DATA.players||{}; const ids=Object.keys(P).filter(id=>P[id]&&P[id].base).sort();
   const N=ids.length; const cr=vals(meta.cr).filter(x=>crisisOf(x));
@@ -1122,7 +1127,7 @@ function calc(){
     ids.forEach(id=>{ const L=localOf(k,id); if(!L) return; loc[id]=L; chg(id,L.res.coin||0,L.res.food||0); addInd(S[id].v,L.ind); if(L.met) for(const m in L.met) locMet[m]+=L.met[m]; });
     const start={}; ids.forEach(id=>start[id]={coin:S[id].coin,food:S[id].food,v:Object.assign({},S[id].v)});
     const vict=pickVictims(c,P,ids,S,k);
-    const mission=MISSIONS[k%MISSIONS.length];
+    const mission=(+meta.mv>=2)?MISSIONS[[0,5,1,2,3,4][k%6]]:MISSIONS[k%MISSIONS_V1];
     const R={k,c,start,vict,loc,mission,Mb:Object.assign({},M),G,N,raidOn,lost,raids:[],quitters:[]};
     if(k>=rev || doom){ R.open=true; openR=R; rounds.push(R); break; }
     const A=(DATA.act&&DATA.act[k])||{};
@@ -1130,7 +1135,14 @@ function calc(){
     const quitters=[];
     if(k>0) TREATY.forEach(TT=>{ const t=T[TT.k]; if(!t) return; ids.forEach(id=>{ if(memAt(t,id,k-1)&&!memAt(t,id,k)){ chg(id,-5,0); S[id].v.trust-=6; S[id].quitN++; quitters.push({id,TT}); } }); });
     const pers=[];
-    TREATY.forEach(TT=>{ const t=T[TT.k]; if(!t||!t.log) return; const vo=TT.k==='peace'?violQuit:null; ids.forEach(id=>{ if((k>0&&memAt(t,id,k-1))||!isSigner(t,id,k,vo)) return; const by=persBy(t,id,k); if(!by||by===id||!S[by]||!isSigner(t,by,k,vo)) return; const pk=TT.k+'|'+id; if(persDone[pk]) return; persDone[pk]=1; S[by].coin+=2; S[by].v.trust+=3; S[by].pers++; pers.push({by,id,TT}); }); });
+    const persN={};
+    TREATY.forEach(TT=>{ const t=T[TT.k]; if(!t||!t.log) return; const vo=TT.k==='peace'?violQuit:null; ids.forEach(id=>{ if((k>0&&memAt(t,id,k-1))||!isSigner(t,id,k,vo)) return; const pe=persEntry(t,id,k); if(!pe||pe.ban) return; const by=pe.by; if(by===id||!S[by]||!isSigner(t,by,k,vo)) return;
+      const pk=TT.k+'|'+id; if(persDone[pk]) return;                 // 같은 협약에서 한 나라는 한 번만
+      if(persDone['p|'+by+'>'+id]||persDone['p|'+id+'>'+by]) return; // 같은 짝은 게임 전체에서 한 번 · 서로 주고받기 금지
+      if((persN[by]||0)>=PERS_CAP) return;                           // 한 위기에 최대 3번
+      const ev=persEvidence(by,id,pe.at); if(!ev) return;             // 발언·쪽지 증거가 있어야 인정
+      persDone[pk]=1; persDone['p|'+by+'>'+id]=1; persN[by]=(persN[by]||0)+1;
+      S[by].coin+=2; S[by].v.trust+=3; S[by].pers++; pers.push({by,id,TT,ev}); }); });
     R.pers=pers;
     const viol=[];
     if(T.peace) ids.forEach(id=>{ const a=A[id]; if(!a) return; const bad=(c.peaceBan&&a.opt==='take')||raidValid(id); if(bad&&isSigner(T.peace,id,k,violQuit)){ viol.push(id); violQuit[id]=k; S[id].v.trust-=10; S[id].viol++; S[id].harm+=5; } });
@@ -1491,8 +1503,8 @@ function summitHTML(W){
     return `<div class="treaty ${nx?'on':''}"><h4>${TT.e} ${TT.n} ${tag}</h4><div class="muted">${esc(TT.d)}</div>
     <p style="margin:8px 0">🗣️ <b>${nm(W,t.by)}</b>의 제안: “${esc(t.why||'')}”</p>
     <div class="row"><b>다음 위기 가입 ${sg.length}/${N}국 (${Math.round(ratio*100)}%)</b><span class="muted">${ratio>=1/3?'✅ 효과 발휘':'⚠️ 1/3이 안 되어 효과가 약함'}</span><span class="sp"></span>
-    ${nx?`<button class="btn sm ghost" data-act="quit" data-v="${TT.k}">탈퇴하기</button>`:`<select class="field" style="width:auto;padding:6px 8px" data-bind="t_${TT.k}.by"><option value="">🗣️ 누구의 설득으로?</option>${sg.filter(x=>x!==ME).map(x=>`<option value="${esc(x)}" ${d.by===x?'selected':''}>${nm(W,x)}</option>`).join('')}<option value="__self" ${d.by==='__self'?'selected':''}>스스로 결정</option></select><button class="btn sm teal" data-act="sign" data-v="${TT.k}">✍️ 가입하기</button>`}</div>
-    ${!nx&&sg.length?`<div class="persline">💡 가입할 때 나를 설득한 나라를 고르면, 그 나라가 <b>예산 +2 · 신뢰 +3</b>을 받고 🗣️ 설득왕 후보가 됩니다.</div>`:''}
+    ${nx?`<button class="btn sm ghost" data-act="quit" data-v="${TT.k}">탈퇴하기</button>`:`<select class="field" style="width:auto;padding:6px 8px" data-bind="t_${TT.k}.by"><option value="">🗣️ 누구의 설득으로?</option>${sg.filter(x=>x!==ME&&persEvidence(x,ME,Date.now())).map(x=>`<option value="${esc(x)}" ${d.by===x?'selected':''}>${nm(W,x)} ${persEvidence(x,ME,Date.now())==='speech'?'🎤':'✉️'}</option>`).join('')}<option value="__self" ${d.by==='__self'?'selected':''}>스스로 결정</option></select><button class="btn sm teal" data-act="sign" data-v="${TT.k}">✍️ 가입하기</button>`}</div>
+    ${!nx&&sg.length?`<div class="persline">💡 나를 설득한 나라를 고르면 그 나라가 <b>예산 +2 · 신뢰 +3</b>을 받습니다. 단, <b>🎤 발언대에서 발언했거나 ✉️ 나에게 쪽지를 보낸 나라</b>만 고를 수 있고, 서로 주고받기·같은 짝 반복은 인정되지 않아요.</div>`:''}
     ${(()=>{ const pl=sg.filter(id=>!(kn>0&&memAt(t,id,kn-1))).map(id=>[id,persBy(t,id,kn)]).filter(([id,b])=>b&&b!==id&&W.P[b]); return pl.length?`<div class="persline">🗣️ 이번 정상회담 설득: ${pl.map(([id,b])=>`${nm(W,b)} → ${nm(W,id)}`).join(', ')}</div>`:''; })()}
     <div class="muted" style="font-size:13px;margin-top:6px">가입국: ${sg.map(id=>nm(W,id)).join(', ')||'없음'}</div></div>`; }).join('')}</div>${MODE==='student'?dipHTML(W):''}`;
 }
@@ -1514,16 +1526,16 @@ function inMsgs(W){ return Object.values(DATA.msg||{}).filter(m=>m&&m.to===ME&&(
 function seenKey(){ return 'earth_seen_'+SRC+(SLOT?'_'+SLOT:''); }
 function unreadN(W){ const s=+ls.get(seenKey())||0; return inMsgs(W).filter(m=>(m.at||0)>s).length; }
 function dipHTML(W){
-  const d=draft('dip'); const tb=d.tab||'chat'; const off=!!(DATA.meta&&DATA.meta.chatOff); const un=unreadN(W);
+  const d=draft('dip'); const tb=d.tab||'chat'; const spk=!!speakNow(); const off=!!(DATA.meta&&DATA.meta.chatOff)||spk; const un=unreadN(W);
   if(tb==='note') setTimeout(()=>{ ls.set(seenKey(),String(Date.now())); },0);
   let body='';
   if(tb==='chat'){
     const C=Object.entries(DATA.chat||{}).map(([k,m])=>m).filter(m=>m&&(W.P[m.from]||m.from===TCH)).sort((a,b)=>(b.at||0)-(a.at||0)).slice(0,25);
-    body=`${off?'<div class="banner warn">🔒 선생님이 전체 채팅을 잠갔어요. 비밀 쪽지는 쓸 수 있어요.</div>':`<div class="sendrow"><input class="field" data-bind="dip.chat" value="${esc(d.chat||'')}" maxlength="80" placeholder="모든 정상에게 한마디 (예: 탄소 협약 가입하실 분!)"><button class="btn sm acc" data-act="chatGo">보내기</button></div>`}
+    body=`${spk?'<div class="banner warn">🎤 발언 중에는 채팅과 쪽지가 잠겨요. 발언을 잘 들어 주세요!</div>':off?'<div class="banner warn">🔒 선생님이 전체 채팅을 잠갔어요. 비밀 쪽지는 쓸 수 있어요.</div>':`<div class="sendrow"><input class="field" data-bind="dip.chat" value="${esc(d.chat||'')}" maxlength="80" placeholder="모든 정상에게 한마디 (예: 탄소 협약 가입하실 분!)"><button class="btn sm acc" data-act="chatGo">보내기</button></div>`}
     <div class="chatlist" style="margin-top:8px">${C.map(m=>`<div class="msg ${m.from===TCH?'tch':m.from===ME?'me':''}"><small>${whoMsg(W,m.from)}${m.from===ME?' (나)':''} · ${new Date(m.at||0).toTimeString().slice(0,5)}</small><div>${esc(m.text)}</div></div>`).join('')||'<p class="muted">아직 채팅이 없어요. 먼저 말을 걸어 보세요!</p>'}</div>`;
   } else {
     const M=Object.values(DATA.msg||{}).filter(m=>m&&(m.to===ME||m.from===ME)&&(W.P[m.from]||m.from===TCH)&&(W.P[m.to])).sort((a,b)=>(b.at||0)-(a.at||0)).slice(0,25);
-    body=`<div class="sendrow"><select class="field" style="flex:0 0 auto;width:auto" data-bind="dip.to"><option value="">받을 나라</option>${W.ids.filter(x=>x!==ME).map(x=>`<option value="${esc(x)}" ${d.to===x?'selected':''}>${nm(W,x)}</option>`).join('')}</select><input class="field" data-bind="dip.note" value="${esc(d.note||'')}" maxlength="100" placeholder="비밀 제안 (예: 우리 둘이 같이 가입하면 1/3이 넘어요)"><button class="btn sm acc" data-act="noteGo">📨</button></div>
+    body=`${spk?'<div class="banner warn">🎤 발언 중에는 채팅과 쪽지가 잠겨요. 발언을 잘 들어 주세요!</div>':`<div class="sendrow"><select class="field" style="flex:0 0 auto;width:auto" data-bind="dip.to"><option value="">받을 나라</option>${W.ids.filter(x=>x!==ME).map(x=>`<option value="${esc(x)}" ${d.to===x?'selected':''}>${nm(W,x)}</option>`).join('')}</select><input class="field" data-bind="dip.note" value="${esc(d.note||'')}" maxlength="100" placeholder="비밀 제안 (예: 우리 둘이 같이 가입하면 1/3이 넘어요)"><button class="btn sm acc" data-act="noteGo">📨</button></div>`}
     <div class="chatlist" style="margin-top:8px">${M.map(m=>`<div class="msg ${m.to===ME?'in':'out'}"><small>${m.to===ME?`📥 ${whoMsg(W,m.from)} → 나`:`📤 나 → ${nm(W,m.to)}`} · ${new Date(m.at||0).toTimeString().slice(0,5)}</small><div>${esc(m.text)}</div>${m.to===ME&&m.from!==TCH?`<button class="btn sm ghost" style="margin-top:4px" data-act="replyTo" data-v="${esc(m.from)}">↩ 답장</button>`:''}</div>`).join('')||'<p class="muted">아직 쪽지가 없어요. 받는 나라만 볼 수 있어요.</p>'}</div>`;
   }
   return `<div class="card dip" id="dip"><h3 style="margin:0">💬 외교 채널</h3><div class="dtabs"><button class="${tb==='chat'?'on':''}" data-act="dipTab" data-v="chat">🌐 전체 채팅</button><button class="${tb==='note'?'on':''}" data-act="dipTab" data-v="note">✉️ 비밀 쪽지${un&&tb!=='note'?`<span class="nb">${un}</span>`:''}</button></div>${body}
@@ -1993,16 +2005,16 @@ const sActs = {
   async propose(ds){ const W=calc(); if(W.T[ds.v]) return toast('이미 다른 나라가 제안했어요. 가입하기를 눌러 주세요.'); const d=draft('t_'+ds.v); if(!need(lenOK(d.why,5),'제안 연설을 한 줄 써 주세요.')) return;
     await backend.set(`${ER()}/treaty/${ds.v}`,{by:ME,why:String(d.why).trim().slice(0,80),at:Date.now(),log:{[ME]:{['r'+W.cr.length]:{in:true,at:Date.now()}}}}); toast('📜 협약을 제안했어요! 다음 위기부터 적용됩니다. 다른 나라들을 설득해 보세요.'); },
   async sign(ds){ const W=calc(); if(!W.T[ds.v]) return; if(W.violQuit[ME]!=null && ds.v==='peace') return toast('평화 협정을 어겨서 다시 가입할 수 없어요.');
-    const d=draft('t_'+ds.v); const t=W.T[ds.v]; const TT=TREATY.find(x=>x.k===ds.v); const by=(d.by&&d.by!=='__self'&&d.by!==ME&&W.P[d.by]&&isSigner(t,d.by,W.cr.length,vq(W,TT)))?d.by:null;
+    const d=draft('t_'+ds.v); const t=W.T[ds.v]; const TT=TREATY.find(x=>x.k===ds.v); const by=(d.by&&d.by!=='__self'&&d.by!==ME&&W.P[d.by]&&isSigner(t,d.by,W.cr.length,vq(W,TT))&&persEvidence(d.by,ME,Date.now()))?d.by:null;
     await backend.set(`${ER()}/treaty/${ds.v}/log/${ME}/r${W.cr.length}`,{in:true,by,at:Date.now()}); toast(by?`✍️ 가입했어요! ${rawNm(W,by)}의 설득이 기록되었습니다 (다음 위기부터 적용)`:'✍️ 가입했어요 (다음 위기부터 적용)'); },
   async quit(ds){ if(!confirm('정말 탈퇴할까요? 다음 위기부터 분담금을 내지 않지만, 위약금 💰5와 신뢰 -6을 잃고 협약 효과와 연대 지수가 약해집니다.')) return; const W=calc(); await backend.set(`${ER()}/treaty/${ds.v}/log/${ME}/r${W.cr.length}`,{in:false,at:Date.now()}); toast('협약에서 탈퇴했어요 (다음 위기부터)'); },
   async hand(){ const on=DATA.hand&&DATA.hand[ME]; if(on) await backend.remove(`${ER()}/hand/${ME}`); else { await backend.set(`${ER()}/hand/${ME}`,Date.now()); toast('🙋 발언을 신청했어요. 선생님이 순서를 정해 줍니다.'); } },
   dipTab(ds){ draft('dip').tab=ds.v; render(); },
   toDip(){ const el=document.getElementById('dip'); if(el) el.scrollIntoView({behavior:'smooth',block:'start'}); },
   replyTo(ds){ const d=draft('dip'); d.tab='note'; d.to=ds.v; render(); setTimeout(()=>{ const el=document.querySelector('[data-bind="dip.note"]'); if(el){ el.scrollIntoView({block:'center'}); el.focus(); } },60); },
-  async chatGo(){ if(DATA.meta&&DATA.meta.chatOff) return toast('🔒 채팅이 잠겨 있어요.'); const d=draft('dip'); const t=String(d.chat||'').trim(); if(!need(t.length>=1,'내용을 써 주세요.')) return; if(Date.now()-chatAt<4000) return toast('조금만 천천히! 4초에 한 번 보낼 수 있어요.'); chatAt=Date.now();
+  async chatGo(){ if(speakNow()) return toast('🎤 발언 중에는 잠겨요.'); if(DATA.meta&&DATA.meta.chatOff) return toast('🔒 채팅이 잠겨 있어요.'); const d=draft('dip'); const t=String(d.chat||'').trim(); if(!need(t.length>=1,'내용을 써 주세요.')) return; if(Date.now()-chatAt<4000) return toast('조금만 천천히! 4초에 한 번 보낼 수 있어요.'); chatAt=Date.now();
     await backend.set(`${ER()}/chat/${Date.now().toString(36)+Math.random().toString(36).slice(2,6)}`,{from:ME,text:t.slice(0,80),at:Date.now()}); d.chat=''; render(); setTimeout(()=>{ const el=document.querySelector('[data-bind="dip.chat"]'); if(el) el.focus(); },30); },
-  async noteGo(){ const W=calc(); const d=draft('dip'); if(!need(d.to&&W.P[d.to],'받을 나라를 골라 주세요.')||!need(String(d.note||'').trim().length>=1,'쪽지 내용을 써 주세요.')) return; if(Date.now()-chatAt<3000) return toast('조금만 천천히!'); chatAt=Date.now();
+  async noteGo(){ if(speakNow()) return toast('🎤 발언 중에는 잠겨요.'); const W=calc(); const d=draft('dip'); if(!need(d.to&&W.P[d.to],'받을 나라를 골라 주세요.')||!need(String(d.note||'').trim().length>=1,'쪽지 내용을 써 주세요.')) return; if(Date.now()-chatAt<3000) return toast('조금만 천천히!'); chatAt=Date.now();
     await backend.set(`${ER()}/msg/${Date.now().toString(36)+Math.random().toString(36).slice(2,6)}`,{from:ME,to:d.to,text:String(d.note).trim().slice(0,100),k:W.cr.length,at:Date.now()}); d.note=''; toast(`📨 ${rawNm(W,d.to)}에게 비밀 쪽지를 보냈어요`); render(); },
   quitAny(){ const W=calc(); const L=TREATY.filter(TT=>W.T[TT.k]&&isSigner(W.T[TT.k],ME,W.cr.length,vq(W,TT))); if(!L.length) return; const pick=L.length===1?L[0]:L[Math.max(0,Math.min(L.length-1,(+prompt(L.map((x,i)=>`${i+1}. ${x.n}`).join('\n')+'\n탈퇴할 협약 번호를 쓰세요','1')||1)-1))]; sActs.quit({v:pick.k}); },
   async refl1Go(){ const d=draft('refl1'); if(!need(lenOK(d.why,10)&&lenOK(d.me,10),'두 질문에 10글자 이상 써 주세요.')) return; await backend.set(`${ER()}/refl1/${ME}`,{why:d.why.trim(),me:d.me.trim(),at:Date.now()}); },
@@ -2126,7 +2138,7 @@ function tChat(W){
   const C=Object.entries(DATA.chat||{}).filter(([k,m])=>m&&(W.P[m.from]||m.from===TCH)).sort((a,b)=>(b[1].at||0)-(a[1].at||0));
   const M=Object.entries(DATA.msg||{}).filter(([k,m])=>m&&(W.P[m.from]||m.from===TCH)&&W.P[m.to]).sort((a,b)=>(b[1].at||0)-(a[1].at||0));
   const tm=m=>new Date(m.at||0).toTimeString().slice(0,5);
-  return `<div class="grid g2"><div class="card"><div class="row"><h3 style="margin:0">🌐 전체 채팅 (${C.length})</h3><span class="sp"></span><button class="btn sm ${off?'acc':'ghost'}" data-act="chatLock">${off?'🔓 채팅 열기':'🔒 채팅 잠그기'}</button></div>
+  return `<div class="grid g2"><div class="card"><div class="row"><h3 style="margin:0">🌐 전체 채팅 (${C.length})</h3><span class="sp"></span><button class="btn sm ${off?'acc':'ghost'}" data-act="chatLock">${off?'🔓 채팅 열기':'🔒 채팅 잠그기'}</button></div>${speakNow()?'<div class="banner warn" style="margin-top:8px">🎤 발언대가 진행 중이라 학생 채팅·쪽지가 자동으로 잠겨 있습니다.</div>':''}
   <div class="sendrow" style="margin:10px 0"><input class="field" data-bind="tchat.text" value="${esc(d.text||'')}" maxlength="100" placeholder="📢 선생님 공지 (모든 학생 채팅에 노란색으로)"><button class="btn sm acc" data-act="tChatGo">공지</button></div>
   <div class="chatlist" style="max-height:600px">${C.map(([k,m])=>`<div class="msg ${m.from===TCH?'tch':''}"><button class="btn sm ghost x" data-act="chatDel" data-v="${esc(k)}">삭제</button><small>${m.from===TCH?'📢 선생님':who(W,m.from)} · ${tm(m)}</small><div>${esc(m.text)}</div></div>`).join('')||'<p class="muted">아직 없음</p>'}</div>
   ${C.length?`<div class="row" style="margin-top:8px"><span class="sp"></span><button class="btn sm ghost" data-act="chatClear">채팅 모두 지우기</button></div>`:''}</div>
@@ -2140,7 +2152,7 @@ function tSummit(W){
   ${TREATY.map(TT=>{ const t=W.T[TT.k]; if(!t) return `<div class="treaty"><h4>${TT.e} ${TT.n}</h4><div class="muted">아직 제안 없음 · ${esc(TT.d)}</div></div>`;
     const kn=W.cr.length; const sg=W.ids.filter(id=>isSigner(t,id,kn,vq(W,TT))); const q=W.ids.filter(id=>!sg.includes(id)&&kn>0&&memAt(t,id,kn-1)); const ratio=W.N?sg.length/W.N:0;
     const pl=sg.filter(id=>!(kn>0&&memAt(t,id,kn-1))).map(id=>[id,persBy(t,id,kn)]).filter(([id,b])=>b&&b!==id&&W.P[b]);
-    return `<div class="treaty ${ratio>=1/3?'on':''}"><h4>${TT.e} ${TT.n} — 다음 위기 가입 ${sg.length}/${W.N} (${Math.round(ratio*100)}%) ${ratio>=1/3?'✅':'⚠️ 효과 약함'}</h4><p>🗣️ ${who(W,t.by)}: “${esc(t.why)}”</p><div class="muted">가입: ${sg.map(id=>who(W,id)).join(', ')||'없음'}</div>${q.length?`<div class="muted">탈퇴·위반: ${q.map(id=>who(W,id)).join(', ')}</div>`:''}${pl.length?`<div class="persline">🗣️ 설득: ${pl.map(([id,b])=>`${who(W,b)} → ${who(W,id)}`).join(', ')}</div>`:''}</div>`; }).join('')}
+    return `<div class="treaty ${ratio>=1/3?'on':''}"><h4>${TT.e} ${TT.n} — 다음 위기 가입 ${sg.length}/${W.N} (${Math.round(ratio*100)}%) ${ratio>=1/3?'✅':'⚠️ 효과 약함'}</h4><p>🗣️ ${who(W,t.by)}: “${esc(t.why)}”</p><div class="muted">가입: ${sg.map(id=>who(W,id)).join(', ')||'없음'}</div>${q.length?`<div class="muted">탈퇴·위반: ${q.map(id=>who(W,id)).join(', ')}</div>`:''}${pl.length?`<div class="persline">🗣️ 설득: ${pl.map(([id,b])=>{ const pe=persEntry(t,id,kn); const ev=pe&&persEvidence(b,id,pe.at); return `${who(W,b)} → ${who(W,id)} ${pe&&pe.ban?'<s>취소됨</s>':ev?(ev==='speech'?'🎤':'✉️'):'(증거 없음·불인정)'} ${pe&&!pe.ban?`<button class="btn sm ghost" data-act="persBan" data-v="${esc(TT.k)}|${esc(id)}|${esc(pe.key)}">취소</button>`:''}`; }).join(' · ')}</div>`:''}</div>`; }).join('')}
   <details open><summary>정상회담 발문</summary><ul><li>협약에 가입하지 않고 효과만 누리는 나라(무임승차)가 있다면 공정할까?</li><li>가입국이 1/3을 넘지 못하면 효과가 약해집니다. 다른 나라를 어떻게 설득할까?</li><li>약속을 지키게 하려면 무엇이 필요할까? (국제기구, 신뢰, 감시)</li></ul></details></div>
   ${feedHTML(W,15)}${reqs.length?`<div class="card"><h3 style="margin-top:0">🙏 지원 요청 (${reqs.length})</h3>${reqs.map(([id,x])=>`<div class="req"><div class="rt"><b>${who(W,id)}</b> ${x.need==='food'?'🍞':'💰'}${x.amt} — “${esc(x.msg)}”</div></div>`).join('')}</div>`:''}`;
 }
@@ -2248,7 +2260,7 @@ const tActs = {
   trial(){ const n=+(DATA.meta&&DATA.meta.trials)||0; if(n>=3) return; if(!confirm(`🌩️ ${n+1}번째 시련 카드를 모든 시민에게 보낼까요?`)) return; backend.update(`${ER()}/meta`,{trials:n+1,trAt:Date.now()}); toast('🌩️ 시련이 닥쳤습니다! 학생 화면에 시련 카드가 뜹니다.'); },
   trialUndo(){ const n=+(DATA.meta&&DATA.meta.trials)||0; if(!n) return; if(!confirm('마지막 시련을 취소할까요?')) return; backend.update(`${ER()}/meta`,{trials:n-1}); },
   newCrisis(ds){ const W=calc(); if(W.openR) return toast('진행 중인 위기의 결과를 먼저 공개하세요.'); const c=crisisOf(ds.v); if(!ds.noconf && !confirm(`'${c.e} ${c.t}' 위기를 발생시킬까요?${tmin?` (제한 시간 ${tmin}분)`:''}`)) return;
-    const k=W.cr.length; backend.update(`${ER()}/meta`,{cr:[...W.cr,ds.v],rev:W.rev,dl:tmin?Date.now()+tmin*60000+6000:null}); tab='board';
+    const k=W.cr.length; backend.update(`${ER()}/meta`,{...(k===0&&!(DATA.meta&&DATA.meta.mv)?{mv:2}:{}),cr:[...W.cr,ds.v],rev:W.rev,dl:tmin?Date.now()+tmin*60000+6000:null}); tab='board';
     crisisShow(c,{k,teacher:true,name:id=>{ const W2=calc(); return showNames&&W2.P[id]?`${W2.P[id].num}번 ${W2.P[id].name}`:rawNm(W2,id); },getV:async()=>{ for(let i=0;i<40;i++){ const W2=calc(); if(W2.openR&&W2.openR.k===k) return W2.openR.vict; await new Promise(r=>setTimeout(r,100)); } return []; }}); },
   addMin(){ const dl=+(DATA.meta&&DATA.meta.dl)||0; backend.update(`${ER()}/meta`,{dl:Math.max(dl,Date.now())+60000}); },
   cancelCrisis(){ const W=calc(); if(!W.openR) return; if(!confirm('진행 중인 위기를 취소할까요? 이 위기에 제출한 결정·지원·요청이 지워집니다.')) return; const k=W.openR.k;
@@ -2260,9 +2272,10 @@ const tActs = {
   summit(){ const on=!(DATA.meta&&DATA.meta.summit); backend.update(`${ER()}/meta`,on?{summit:on}:{summit:on,speak:null}); if(on){ tab='summit'; toast('🏛️ 정상회담을 열었습니다. 학생 화면에 협약 창이 나타납니다.'); } render(); },
   speakStart(ds){ const W=calc(); const hands=Object.entries(DATA.hand||{}).filter(([id])=>W.P[id]).sort((a,b)=>a[1]-b[1]).map(([id])=>id);
     const order=ds.v==='hand'?hands:shuffled(W.ids,'sp'+Date.now()); if(!order.length) return toast('발언할 나라가 없습니다.');
-    backend.update(`${ER()}/meta`,{speak:{order,i:0,dl:Date.now()+30000}}); backend.remove(`${ER()}/hand`); },
-  speakNext(){ const sp=speakNow(); if(!sp) return; const i=sp.i+1; backend.update(`${ER()}/meta`,{speak:i<sp.order.length?{order:sp.order,i,dl:Date.now()+30000}:null}); },
+    backend.update(`${ER()}/meta`,{speak:{order,i:0,dl:Date.now()+30000}}); backend.remove(`${ER()}/hand`); backend.update(`${ER()}/spoke`,{[order[0]]:Date.now()}); },
+  speakNext(){ const sp=speakNow(); if(!sp) return; const i=sp.i+1; backend.update(`${ER()}/meta`,{speak:i<sp.order.length?{order:sp.order,i,dl:Date.now()+30000}:null}); if(i<sp.order.length) backend.update(`${ER()}/spoke`,{[sp.order[i]]:Date.now()}); },
   speakMore(){ const sp=speakNow(); if(!sp) return; backend.update(`${ER()}/meta`,{speak:{order:sp.order,i:sp.i,dl:Math.max(+sp.dl||0,Date.now())+30000}}); },
+  persBan(ds){ const [tk,id,key]=ds.v.split('|'); if(!confirm('이 설득을 짜고 친 것으로 보고 취소할까요? 보상이 사라집니다.')) return; backend.update(`${ER()}/treaty/${tk}/log/${id}/${key}`,{ban:true}); },
   speakEnd(){ backend.update(`${ER()}/meta`,{speak:null}); },
   chatLock(){ backend.update(`${ER()}/meta`,{chatOff:!(DATA.meta&&DATA.meta.chatOff)}); },
   chatDel(ds){ backend.remove(`${ER()}/chat/${ds.v}`); },
@@ -2276,12 +2289,12 @@ const tActs = {
   delP(ds){ if(!confirm('이 학생을 지구 정상회담에서 뺄까요? (국가 만들기 기록은 그대로)')) return; backend.remove(`${ER()}/players/${ds.v}`); },
   qr(){ const url=studentURL(); const ov=document.createElement('div'); ov.className='overlay'; ov.innerHTML=`<div class="modal center"><h2>📱 학생 접속</h2><div class="qrbox" id="qrbox"></div><p class="url">${esc(url)}</p><p class="muted">지난 시간과 같은 태블릿이면 “○번 ○○ 학생이 맞나요?”가 먼저 뜹니다. 아니면 목록에서 자기 나라를 고릅니다.</p><button class="btn" data-x="close">닫기</button></div>`; document.body.appendChild(ov); ov.addEventListener('click',e=>{ if(e.target===ov||e.target.dataset.x==='close') ov.remove(); }); try{ new QRCode(ov.querySelector('#qrbox'),{text:url,width:300,height:300}); }catch(e){ ov.querySelector('#qrbox').textContent='QR을 만들 수 없습니다. 위 주소를 알려 주세요.'; } },
   csv(){ csvDownload(); },
-  reset(){ if(!confirm(`방 E${SRC}의 모든 기록을 지울까요? 되돌릴 수 없습니다.\n(국가 만들기 기록은 지워지지 않습니다)`)) return; backend.set(ER(),{meta:{phase:'lobby',src:SRC,resetAt:Date.now()}}); toast('초기화했습니다.'); }
+  reset(){ if(!confirm(`방 E${SRC}의 모든 기록을 지울까요? 되돌릴 수 없습니다.\n(국가 만들기 기록은 지워지지 않습니다)`)) return; backend.set(ER(),{meta:{phase:'lobby',src:SRC,mv:2,resetAt:Date.now()}}); toast('초기화했습니다.'); }
 };
 let tStarted=false, tT=null;
 function startTeacherData(){
   if(tStarted || !SRC || !pinOK()) return; tStarted=true;
-  backend.on(ER(), v=>{ DATA=v||{}; gotData=true; if(!DATA.meta){ backend.update(`${ER()}/meta`,{phase:'lobby',src:SRC,createdAt:Date.now()}); } clearTimeout(tT); tT=setTimeout(softRender,250); });
+  backend.on(ER(), v=>{ DATA=v||{}; gotData=true; if(!DATA.meta){ backend.update(`${ER()}/meta`,{phase:'lobby',src:SRC,mv:2,createdAt:Date.now()}); } clearTimeout(tT); tT=setTimeout(softRender,250); });
   backend.on(`rooms/${SRC}/nations`, v=>{ SRCN=v||{}; gotSrc=true; softRender(); });
 }
 
