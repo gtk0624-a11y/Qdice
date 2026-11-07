@@ -445,7 +445,7 @@ function viewJoin(){
   if(!metaLoaded) return `<div class="wrap"><div class="card">불러오는 중…</div></div>`;
   if(!META.grade) return `<div class="wrap"><div class="card"><h2>방을 찾을 수 없어요</h2><p>방 코드 <b>${esc(ROOM)}</b>가 맞는지 선생님께 확인하세요.</p><button class="btn" data-act="goHome0">방 코드 다시 넣기</button></div></div>`;
   return `<div class="wrap"><div class="card" style="text-align:center"><div style="font-size:46px">🌱</div><h2 style="font-size:24px">한 번뿐인 인생</h2>
-  <p class="muted">${grade()===1?'도덕① · 7살부터 19살까지':'도덕② · 20살부터 80살까지'} · ${esc(META.klass||'')} ${DBMODE==='live'?'':'<span class="pill bad">체험 모드</span>'}</p>
+  <p class="muted">${grade()===1?'도덕① · 14살부터 19살까지':'도덕② · 20살부터 80살까지'} · ${esc(META.klass||'')} ${DBMODE==='live'?'':'<span class="pill bad">체험 모드</span>'}</p>
   <p style="font-size:15px">시간은 늘 모자라고, 위기는 예고 없이 온다.<br>옳은 선택도 실패할 수 있다. 그래도 넘어진 만큼 강해진다.<br><b>당신은 어떤 인생을 살 것인가?</b></p></div>
   <div class="card"><label class="lb">번호</label><input class="inp" id="numIn" type="number" inputmode="numeric" min="1" max="40" placeholder="예: 7" value="${esc(joinDraft.num)}">
   <label class="lb">인생 속 인물 이름 <span class="muted">(진짜 이름 말고, 내가 살아 볼 인물의 이름)</span></label><input class="inp" id="cnameIn" maxlength="8" placeholder="예: 한별" value="${esc(joinDraft.cname)}">
@@ -462,7 +462,7 @@ function rollBirth(){ return { place:pick(BIRTH_PLACES), trait:pick(BIRTH_TRAITS
 function viewBirth(){
   if(!birthDraft) birthDraft=rollBirth();
   const tAb=G.TRAIT_AB[birthDraft.trait]||'공감';
-  return `<div class="wrap"><div class="card" style="text-align:center"><div style="font-size:50px">${grade()===1?'👶':'🧑'}</div>
+  return `<div class="wrap"><div class="card" style="text-align:center"><div style="font-size:50px">${grade()===1?'🧒':'🧑'}</div>
   <h2>${esc(S.cname)}의 인생 카드</h2>
   <p style="font-size:19px"><b>${esc(birthDraft.place)}</b>에서 태어난<br><b>${esc(birthDraft.trait)}</b> 사람, ${esc(S.cname)}.</p>
   <p class="muted">타고난 기질 → ${G.ABIL_E[tAb]} <b>${tAb} +1</b> ${grade()===2?'· 스무 살 출발: 모든 능력치 ${G.G2_START_AB||3}':''}</p>
@@ -866,7 +866,7 @@ function renderTeacher(){
 }
 let setupDraft={grade:1,klass:''};
 function viewSetup(){ return `<div class="wrap"><div class="card"><h2>🌱 새 방 만들기</h2><p class="muted">한 반에 방 하나. 방 코드: <b>${esc(ROOM)}</b></p>
-  <label class="lb">학년(교과서)</label><div class="row"><button class="btn ${setupDraft.grade===1?'':'ghost'}" data-act="sg" data-v="1">도덕① (1학년 · 7~19살)</button><button class="btn ${setupDraft.grade===2?'':'ghost'}" data-act="sg" data-v="2">도덕② (2학년 · 20~80살)</button></div>
+  <label class="lb">학년(교과서)</label><div class="row"><button class="btn ${setupDraft.grade===1?'':'ghost'}" data-act="sg" data-v="1">도덕① (1학년 · 14~19살)</button><button class="btn ${setupDraft.grade===2?'':'ghost'}" data-act="sg" data-v="2">도덕② (2학년 · 20~80살)</button></div>
   <label class="lb">반 이름 (파일 이름에 들어가요)</label><input class="inp" id="klassIn" placeholder="예: 1-3" value="${esc(setupDraft.klass)}"><div style="margin-top:12px"><button class="btn full" data-act="createRoom">방 만들기</button></div></div></div>`; }
 function tProg(){
   const g=+META.grade, L=UG(g), open=+(META.open||1), SS=studs(); const gu=unitById(gameUnit());
