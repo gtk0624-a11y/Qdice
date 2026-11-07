@@ -160,6 +160,8 @@ const FIREBASE_CONFIG = {
 };
 const TEACHER_PIN = '0624';
 const CSET = 'default';
+const TITLE0 = '한 번뿐인 인생';   // 기본 게임 이름 (교사 편집에서 바꾸면 rooms/OLCONTENT/default/title 에 저장)
+let TITLE = TITLE0;
 const P_CONTENT = 'rooms/OLCONTENT/'+CSET;
 const P_SAVE = 'rooms/OLSAVE';
 const MINI_MIN = 60;
@@ -279,7 +281,7 @@ function safeRender(){
   render();
 }
 document.addEventListener('focusout',()=>{ setTimeout(()=>{ if(renderPending){ renderPending=false; safeRender(); } },150); });
-const foot=`<div class="foot">© 김정환 · M.A.D.T (Moral And Digital Teacher) · 한 번뿐인 인생</div>`;
+function footH(){ return `<div class="foot">© 김정환 · M.A.D.T (Moral And Digital Teacher) · ${esc(TITLE)}</div>`; }
 
 /* =====================================================================
    ⑤ 게임 엔진
@@ -438,13 +440,13 @@ function renderStudent(){
     if(META.pause && META.pause.u) h+=viewPause();
     else { const f = (fateRes && FATEIN[fateRes.key]) ? {key:fateRes.key, f:fateById(FATEIN[fateRes.key].card)} : pendingFate(); if(f && f.f) h+=viewFate(f); else { makePerkOffer(); if(S.perkOffer) h+=viewPerk(); } }
   }
-  app.innerHTML=h+foot; bindLive(); startTimer();
+  app.innerHTML=h+footH(); bindLive(); startTimer();
 }
-function viewNoRoom(){ return `<div class="wrap"><div class="card"><h2>🌱 한 번뿐인 인생</h2><p>선생님이 알려 준 <b>방 코드</b>를 입력하세요.</p><input class="inp" id="roomIn" placeholder="예: OLAB12" maxlength="10" style="text-transform:uppercase"><div style="margin-top:10px"><button class="btn full" data-act="goRoom">들어가기</button></div></div></div>`; }
+function viewNoRoom(){ return `<div class="wrap"><div class="card"><h2>🌱 ${esc(TITLE)}</h2><p>선생님이 알려 준 <b>방 코드</b>를 입력하세요.</p><input class="inp" id="roomIn" placeholder="예: OLAB12" maxlength="10" style="text-transform:uppercase"><div style="margin-top:10px"><button class="btn full" data-act="goRoom">들어가기</button></div></div></div>`; }
 function viewJoin(){
   if(!metaLoaded) return `<div class="wrap"><div class="card">불러오는 중…</div></div>`;
   if(!META.grade) return `<div class="wrap"><div class="card"><h2>방을 찾을 수 없어요</h2><p>방 코드 <b>${esc(ROOM)}</b>가 맞는지 선생님께 확인하세요.</p><button class="btn" data-act="goHome0">방 코드 다시 넣기</button></div></div>`;
-  return `<div class="wrap"><div class="card" style="text-align:center"><div style="font-size:46px">🌱</div><h2 style="font-size:24px">한 번뿐인 인생</h2>
+  return `<div class="wrap"><div class="card" style="text-align:center"><div style="font-size:46px">🌱</div><h2 style="font-size:24px">${esc(TITLE)}</h2>
   <p class="muted">${grade()===1?'도덕① · 14살부터 19살까지':'도덕② · 20살부터 80살까지'} · ${esc(META.klass||'')} ${DBMODE==='live'?'':'<span class="pill bad">체험 모드</span>'}</p>
   <p style="font-size:15px">시간은 늘 모자라고, 위기는 예고 없이 온다.<br>옳은 선택도 실패할 수 있다. 그래도 넘어진 만큼 강해진다.<br><b>당신은 어떤 인생을 살 것인가?</b></p></div>
   <div class="card"><label class="lb">번호</label><input class="inp" id="numIn" type="number" inputmode="numeric" min="1" max="40" placeholder="예: 7" value="${esc(joinDraft.num)}">
@@ -846,12 +848,12 @@ function gameUnit(){ const L=UG(+META.grade).slice(0,Math.max(1,+(META.open||1))
   const SS=studs(); let best=null, bn=0; L.forEach(u=>{ const n=SS.filter(s=>{ const st=(s.u||{})[u.id]; return st && st.ph!=='done'; }).length; if(n>bn){ bn=n; best=u.id; } });
   if(best) return best; let last=null; L.forEach(u=>{ if(SS.some(s=>(s.u||{})[u.id])) last=u.id; }); return last || L[0].id; }
 function renderTeacher(){
-  if(!tAuthed){ app.innerHTML=`<div class="wrap"><div class="card" style="max-width:420px;margin:60px auto;text-align:center"><h2>🔒 교사 화면</h2><input class="inp" id="pinIn" type="password" inputmode="numeric" placeholder="비밀번호" value="${esc(pinDraft)}"><div style="margin-top:10px"><button class="btn full" data-act="pin">들어가기</button></div></div></div>`+foot; return; }
+  if(!tAuthed){ app.innerHTML=`<div class="wrap"><div class="card" style="max-width:420px;margin:60px auto;text-align:center"><h2>🔒 교사 화면</h2><input class="inp" id="pinIn" type="password" inputmode="numeric" placeholder="비밀번호" value="${esc(pinDraft)}"><div style="margin-top:10px"><button class="btn full" data-act="pin">들어가기</button></div></div></div>`+footH(); return; }
   if(!metaLoaded){ app.innerHTML=`<div class="wrap"><div class="card">불러오는 중…</div></div>`; return; }
-  if(!META.grade){ app.innerHTML=viewSetup()+foot; return; }
+  if(!META.grade){ app.innerHTML=viewSetup()+footH(); return; }
   const g=+META.grade, di=delInfo();
   const tabs=[['prog','🎛️ 진행·게임'],['stu','👥 학생 현황'],['pause','⏸ 갈림길'],['wr','📚 글 모아보기'],['edit','✏️ 내용 편집'],['keep','🗂️ 보관·삭제']];
-  let h=`<div class="twrap"><div class="top"><h1>🌱 한 번뿐인 인생 · 교사 <small>도덕${g===1?'①':'②'} · ${esc(META.klass||'')} · 방 ${esc(ROOM)} ${DBMODE==='live'?'<span class="pill on">● 실시간 연동</span>':'<span class="pill bad">체험 모드</span>'}</small></h1>
+  let h=`<div class="twrap"><div class="top"><h1>🌱 ${esc(TITLE)} · 교사 <small>도덕${g===1?'①':'②'} · ${esc(META.klass||'')} · 방 ${esc(ROOM)} ${DBMODE==='live'?'<span class="pill on">● 실시간 연동</span>':'<span class="pill bad">체험 모드</span>'}</small></h1>
   <button class="btn sm" data-act="qr">📱 학생 접속 QR</button><button class="btn sm line" data-act="copyLink">🔗 학생 링크 복사</button><button class="btn sm ghost" data-act="newRoom">➕ 새 방(다른 반)</button></div>
   ${di&&di.left<=7?`<div class="banner">🗑️ ${di.left>0?di.left+'일 뒤':'오늘'} 하이러닝 업로드가 끝난 학생 글이 자동 삭제됩니다. 필요하면 지금 ZIP으로 받아 두세요.</div>`:''}
   ${META.pause&&META.pause.u?`<div class="banner" style="background:var(--warm2);color:var(--warm)">⏸ 학생 화면이 갈림길로 멈춰 있습니다. <button class="btn sm warm" data-act="tt" data-v="pause">갈림길 관리</button></div>`:''}
@@ -860,7 +862,7 @@ function renderTeacher(){
   h+='</div>';
   if(showQR) h+=`<div class="ovl" data-act="qrClose"><div class="box" style="text-align:center"><h2>📱 학생 접속</h2><div class="qr" id="qr"></div><p style="font-size:20px;word-break:break-all"><b>${esc(studentURL())}</b></p><p>방 코드 <b style="font-size:26px">${esc(ROOM)}</b></p><button class="btn" data-act="qrClose">닫기</button></div></div>`;
   if(tModal) h+=tModalHTML();
-  app.innerHTML=h+foot;
+  app.innerHTML=h+footH();
   if(showQR){ const el=document.getElementById('qr'); if(el&&window.QRCode) new QRCode(el,{text:studentURL(),width:300,height:300}); }
   bindEditor();
 }
@@ -1051,8 +1053,9 @@ function choiceFields(base,c,opt){
 }
 function tEdit(){
   const g=+META.grade, L=UG(g);
-  const modeBar=`<div class="row"><select class="inp" style="width:auto" data-tin="edMode"><option value="unit" ${edMode==='unit'?'selected':''}>📘 단원 내용 편집</option><option value="fate" ${edMode==='fate'?'selected':''}>🃏 운명 카드 편집</option></select></div>`;
+  const modeBar=`<div class="row"><select class="inp" style="width:auto" data-tin="edMode"><option value="unit" ${edMode==='unit'?'selected':''}>📘 단원 내용 편집</option><option value="fate" ${edMode==='fate'?'selected':''}>🃏 운명 카드 편집</option><option value="title" ${edMode==='title'?'selected':''}>🏷️ 게임 이름 바꾸기</option></select></div>`;
   if(edMode==='fate') return tEditFate(modeBar);
+  if(edMode==='title') return tEditTitle(modeBar);
   if(!ED || !L.some(u=>u.id===ED.uid)) ED={uid:L[0].id,d:clone(L[0]),dirty:false};
   const d=ED.d; const nChose=studs().filter(s=>(((s.u||{})[ED.uid]||{}).ev)).length;
   return `<div class="card ed"><div class="row" style="justify-content:space-between"><h2 style="margin:0">✏️ 내용 편집</h2>${modeBar}
@@ -1073,6 +1076,13 @@ function tEdit(){
   <div class="grid2"><div>${fIn('rafts.need','개념어 최소 개수',{type:'num'})}</div><div>${fIn('rafts.min','최소 글자 수',{type:'num'})}</div></div>${fIn('rafts.cond','스스로 확인하기 조건 (한 줄에 하나)',{type:'lines',area:true})}${fImg('rafts.img','과제 자료 이미지')}</fieldset>
   <fieldset><legend>🃏 사상가 카드</legend>${fIn('sage.n','사상가 이름')}${fIn('sage.s','핵심 생각 (내 말로 요약)',{area:true})}</fieldset>
   <div class="row"><button class="btn ok" data-act="edSave">💾 저장 (모든 반 반영)</button></div></div>`;
+}
+function tEditTitle(modeBar){
+  return `<div class="card ed"><div class="row" style="justify-content:space-between"><h2 style="margin:0">🏷️ 게임 이름 바꾸기</h2>${modeBar}</div>
+  <p class="muted">여기서 바꾼 이름은 <b>모든 반·모든 학생 화면</b>(첫 화면, 교사 화면 맨 위, 맨 아래 줄, 브라우저 탭)에 바로 바뀝니다. 사이트 주소(…/onelife/)는 그대로라서 이미 나눠 준 링크·QR은 계속 쓸 수 있습니다.</p>
+  <label class="lb">지금 이름</label><div style="font-size:20px;font-weight:700;margin-bottom:10px">🌱 ${esc(TITLE)}</div>
+  <label class="lb">새 이름 (1~20자)</label><input class="inp" id="titleIn" maxlength="20" value="${esc(TITLE)}">
+  <div class="row" style="margin-top:10px"><button class="btn warm" data-act="titleSave">💾 이름 저장</button><button class="btn line" data-act="titleRevert">↩️ 처음 이름(${esc(TITLE0)})으로</button></div></div>`;
 }
 function tEditFate(modeBar){
   if(!FDRAFT) FDRAFT=clone(FATE);
@@ -1101,6 +1111,8 @@ Object.assign(TA,{
   fAddC(){ const f=FDRAFT.find(x=>x.id===((FED&&FED.id)||FDRAFT[0].id)); f.c.push({t:'새 선택',r:'결과'}); render(); },
   fDelC(ds){ const f=FDRAFT.find(x=>x.id===((FED&&FED.id)||FDRAFT[0].id)); f.c.splice(+ds.v,1); render(); },
   async fSave(){ const arr=clone(FDRAFT).map(f=>{ f.g=+f.g||0; (f.c||[]).forEach(c=>{ if(c.chk&&!c.chk.s) delete c.chk; }); return f; }); await backend.set(P_CONTENT+'/fate',arr); toast('💾 운명 카드를 저장했습니다.'); },
+  async titleSave(){ const el=document.getElementById('titleIn'); const v=((el&&el.value)||'').replace(/\s+/g,' ').trim(); if(!v) return toast('이름을 입력하세요.'); if(v.length>20) return toast('20자 이하로 써 주세요.'); await backend.set(P_CONTENT+'/title',{name:v,at:Date.now()}); TITLE=v; applyTitle(); render(); toast('💾 게임 이름을 「'+v+'」(으)로 바꿨습니다.'); },
+  async titleRevert(){ if(!confirm('게임 이름을 「'+TITLE0+'」(으)로 되돌릴까요?')) return; await backend.remove(P_CONTENT+'/title'); TITLE=TITLE0; applyTitle(); render(); toast('↩️ 처음 이름으로 되돌렸습니다.'); },
   async fRevert(){ if(!confirm('운명 카드를 처음 상태로 되돌릴까요?')) return; await backend.remove(P_CONTENT+'/fate'); FDRAFT=null; setTimeout(render,300); }
 });
 
@@ -1112,10 +1124,12 @@ document.addEventListener('click',e=>{
 });
 document.addEventListener('keydown',e=>{ if(e.key==='Enter' && e.target.id==='pinIn') TA.pin(); });
 
+function applyTitle(){ document.title=TITLE+' — 도덕 인생 시뮬레이션'; }
 /* ---------- ⑨ 시작 ---------- */
 (async function(){
   await initBackend();
   backend.on(P_CONTENT+'/units',v=>{ OVR=v||{}; rebuildUnits(); if(ED&&!ED.dirty&&unitById(ED.uid)) ED.d=clone(unitById(ED.uid)); safeRender(); });
+  backend.on(P_CONTENT+'/title',v=>{ TITLE=(v&&v.name)||TITLE0; applyTitle(); safeRender(); });
   backend.on(P_CONTENT+'/fate',v=>{ FATEOVR=v||null; rebuildUnits(); if(!(FDRAFT&&FDRAFT.dirty)) FDRAFT=null; safeRender(); });
   if(MODE==='teacher'){ if(tAuthed) startTeacherData(); else if(!ROOM){ ROOM='OL'+newCode(4); history.replaceState(null,'','?mode=teacher&room='+ROOM); } render(); }
   else startStudent();
