@@ -1,0 +1,256 @@
+/* =====================================================================
+   딜시 — 교사 화면 (teacher.js)
+   © 김정환 · M.A.D.T (Moral And Digital Teacher)
+   탭: 🎛️ 진행 · 📊 현황판 · 📝 판결문·점수 · 🗂️ 포트폴리오 · 🔎 관찰 기록 · 📈 시범 지표 · 💬 피드백 · ⚙️ 설정
+   ===================================================================== */
+let TTAB = 'run', STU = {}, SCORES = {}, FB = null, TAUTH = false, roomListening = null, SETSUB = 'th';
+const T = {};
+window.T = T;
+const studentList = () => Object.values(STU || {}).filter(s => s && s.sid).sort((a, b) => a.num - b.num);
+const tRooms = () => lsGet('dilsi_trooms') || [];
+
+function bootTeacher() {
+  TAUTH = sessionStorage.getItem('dilsi_t') === '1';
+  if (TAUTH && ROOM) listenRoom();
+  render();
+}
+function listenRoom() {
+  if (roomListening === ROOM) return; roomListening = ROOM;
+  backend.on(roomPath(ROOM), v => { const d = v || {}; META = d.meta || {}; STU = d.students || {}; SCORES = d.score || {}; metaLoaded = true; safeRender(); });
+}
+T.login = () => { if ((document.getElementById('tpin').value || '') !== TEACHER_PIN) return toast('비밀번호가 틀렸어요.'); sessionStorage.setItem('dilsi_t', '1'); TAUTH = true; if (ROOM) listenRoom(); render(); };
+T.create = async () => {
+  const name = (document.getElementById('rname').value || '').trim() || '새 반'; const code = newCode(5);
+  const firstUnit = (UNITS.find(u => u.ready && unitOn(u.id)) || UNITS[0]).id;
+  await backend.set(roomPath(code) + '/meta', { name, unit: firstUnit, tension: 'normal', status: 'wait', reveal: false, askName: false, gate: 99, hiddenTh: 80, pfPts: 10, mode: 'solo', created: Date.now() });
+  const L = tRooms().filter(r => r.code !== code); L.unshift({ code, name, t: Date.now() }); lsSet('dilsi_trooms', L.slice(0, 30));
+  T.open(code);
+};
+T.open = code => { code = (code || '').toUpperCase().replace(/[^A-Z0-9]/g, ''); if (!code) return; history.replaceState(null, '', '?mode=teacher&room=' + code); ROOM = code; roomListening = null; metaLoaded = false; listenRoom(); render(); };
+T.forget = code => { lsSet('dilsi_trooms', tRooms().filter(r => r.code !== code)); render(); };
+T.rooms = () => { history.replaceState(null, '', '?mode=teacher'); ROOM = ''; render(); };
+T.tab = t => { TTAB = t; if (t === 'fb' && FB === null) { FB = {}; backend.on(P_FB, v => { FB = v || {}; safeRender(); }); } render(); };
+T.meta = (k, v) => backend.update(roomPath(ROOM) + '/meta', { [k]: v }).catch(e => toast('저장 실패: ' + e.message));
+T.status = s => { T.meta('status', s); toast({ play: '▶ 시작했어요', pause: '⏸ 학생 화면을 멈췄어요', end: '⏹ 수업을 마쳤어요', wait: '대기 상태' }[s]); };
+T.reset = sid => { const s = STU[sid]; if (!confirm((s ? s.num + '번' : sid) + ' 학생 기록을 모두 지울까요? (되돌릴 수 없음)')) return; backend.remove(roomPath(ROOM) + '/students/' + sid); backend.remove(roomPath(ROOM) + '/score/' + sid); toast('지웠어요.'); };
+T.resetRun = sid => { const s = STU[sid], u = META.unit; if (!s || !s.runs || !s.runs[u]) return; if (!confirm(s.num + '번 학생의 이번 단원 기록만 지우고 처음부터 하게 할까요?')) return; backend.remove(roomPath(ROOM) + '/students/' + sid + '/runs/' + u); toast('이번 단원만 초기화했어요. 학생이 새로고침하면 처음부터 시작해요.'); };
+T.score = (sid, el) => { const v = el.value.trim(); backend.update(roomPath(ROOM) + '/score/' + sid, { hl: v === '' ? null : +v }); };
+T.memo = (sid, el) => backend.update(roomPath(ROOM) + '/score/' + sid, { memo: el.value.slice(0, 300) });
+T.conf = (sid, k) => { const cur = ((SCORES[sid] || {}).conf || {})[k]; const nx = cur === undefined || cur === null ? true : cur === true ? false : null; backend.update(roomPath(ROOM) + '/score/' + sid + '/conf', { [k]: nx }); };
+T.copy = sid => { const s = STU[sid], r = s && s.runs && s.runs[META.unit]; copyText((r && r.verdict && r.verdict.text) || ''); };
+
+function runOf(s) { return s && s.runs ? s.runs[META.unit] : null; }
+function stepName(run, U) {
+  if (!run) return '시작 전';
+  const m = { story: '이야기', evidence: '증거', council: '회의', write: '논증 중', rebut: '재반박', result: '결과', elim: '탈락 지명', twist: '반전', rescue: '🚨 위기', pick: '재상 선택', verdict: '판결문 작성', done: '✅ 제출' };
+  return (['pick', 'verdict', 'done'].includes(run.step) ? '' : '장면' + (run.sc + 1) + ' ') + (m[run.step] || run.step);
+}
+function critFinal(s, U) { const r = runOf(s), a = critOf(r, U), o = ((SCORES[s.sid] || {}).conf) || {}; const f = {}; CRIT.forEach(([k]) => f[k] = (o[k] === true || o[k] === false) ? o[k] : a[k]); return { a, o, f }; }
+function pfScore(f) { const P = +(META.pfPts || 10); if (!f.sub) return 0; const n = CRIT.filter(([k]) => f[k]).length; return n >= 4 ? P : n >= 2 ? Math.round(P / 2 * 10) / 10 : Math.round(P / 4 * 10) / 10; }
+
+/* ---------- 화면 ---------- */
+function renderTeacher() {
+  if (!TAUTH) { app.innerHTML = `<div class="wrap"><div class="top"><h1><span class="logo">딜</span>${TITLE} 교사 화면</h1></div><div class="card"><h2>🔐 교사 비밀번호</h2><input id="tpin" type="password" class="inp" inputmode="numeric" onkeydown="if(event.key==='Enter')T.login()"><button class="btn full" style="margin-top:10px" onclick="T.login()">들어가기</button></div>${footH()}</div>`; return; }
+  if (!ROOM) {
+    app.innerHTML = `<div class="wrap"><div class="top"><h1><span class="logo">딜</span>${TITLE} 교사 화면<small>${SUBTITLE}</small></h1></div>
+    <div class="card"><h2>➕ 새 반 만들기</h2><input id="rname" class="inp" placeholder="예: 3학년 2반 윤리와 사상"><button class="btn full" style="margin-top:8px" onclick="T.create()">방 만들기</button></div>
+    <div class="card"><h2>📂 내 반</h2>${tRooms().length ? tRooms().map(r => `<div class="row" style="border-top:1px solid var(--line);padding:8px 0"><b style="flex:1">${esc(r.name)} <span class="pill main">${esc(r.code)}</span></b><button class="btn sm" onclick="T.open('${r.code}')">열기</button><button class="btn sm ghost" onclick="T.forget('${r.code}')">목록에서 빼기</button></div>`).join('') : '<p class="muted">아직 없어요.</p>'}
+      <div class="row" style="margin-top:10px"><input id="ocode" class="inp" style="flex:1" placeholder="다른 기기에서 만든 방 코드"><button class="btn line" onclick="T.open(document.getElementById('ocode').value)">코드로 열기</button></div></div>
+    <div class="card"><button class="btn ghost" onclick="TTAB='set';ROOM='__SET__';render()">⚙️ 공통 설정만 열기</button></div>${footH()}</div>${fbButton()}`; return;
+  }
+  if (ROOM === '__SET__') { app.innerHTML = `<div class="twrap"><div class="top"><h1><span class="logo">딜</span>⚙️ 공통 설정</h1><button class="btn ghost sm" onclick="T.rooms()">← 반 목록</button></div>${settingsH()}${footH()}</div>`; return; }
+  if (!metaLoaded) { app.innerHTML = `<div class="wrap"><div class="card">불러오는 중…</div></div>`; return; }
+  if (!META.created) { app.innerHTML = `<div class="wrap"><div class="card"><h2>방 ${esc(ROOM)}을(를) 찾을 수 없어요</h2><button class="btn ghost" onclick="T.rooms()">← 반 목록</button></div></div>`; return; }
+  const U = unitById(META.unit) || UNITS[0], L = studentList();
+  const tabs = [['run', '🎛️ 진행'], ['board', '📊 현황판'], ['verdict', '📝 판결문·점수'], ['pf', '🗂️ 포트폴리오'], ['obs', '🔎 관찰 기록'], ['kpi', '📈 시범 지표'], ['fb', '💬 피드백'], ['set', '⚙️ 설정']];
+  let body = '';
+  try {
+    body = TTAB === 'run' ? runTabH(U, L) : TTAB === 'board' ? boardH(U, L) : TTAB === 'verdict' ? verdictTabH(U, L) : TTAB === 'pf' ? pfH(U, L) : TTAB === 'obs' ? obsH(U, L) : TTAB === 'kpi' ? kpiH(U, L) : TTAB === 'fb' ? fbH() : settingsH();
+  } catch (e) { console.error(e); body = `<div class="banner">화면 오류: ${esc(e.message)}</div>`; }
+  app.innerHTML = `<div class="twrap"><div class="top"><h1><span class="logo">딜</span>${esc(META.name)} <small>방 ${esc(ROOM)} · ${esc(U.title)} · ${esc(TN(META.tension).n)}</small></h1>
+    <span class="pill ${META.status === 'play' ? 'ok' : META.status === 'pause' ? 'gold' : ''}">${{ play: '▶ 진행 중', pause: '⏸ 멈춤', end: '⏹ 끝', wait: '대기' }[META.status] || '대기'}</span>${META.reveal ? '<span class="pill main">📣 결과 공개 중</span>' : ''}
+    <button class="btn ghost sm" onclick="T.rooms()">← 반 목록</button></div>
+    <div class="tabs">${tabs.map(([k, n]) => `<button class="tab ${TTAB === k ? 'on' : ''}" onclick="T.tab('${k}')">${n}</button>`).join('')}</div>${body}${footH()}</div>${fbButton()}`;
+  if (TTAB === 'run') drawQR();
+}
+function studentURL() { return location.origin + location.pathname + '?room=' + ROOM; }
+function drawQR() { const el = document.getElementById('qrbox'); if (!el || !window.QRCode) return; el.innerHTML = ''; new QRCode(el, { text: studentURL(), width: 180, height: 180 }); }
+
+function runTabH(U, L) {
+  const subj = [...new Set(UNITS.map(u => u.subject))];
+  const done = L.filter(s => { const r = runOf(s); return r && r.step === 'done'; }).length, started = L.filter(s => runOf(s)).length;
+  return `<div class="grid2"><div class="card"><h2>📲 학생 입장</h2><div class="bigcode">${esc(ROOM)}</div><div class="qr" id="qrbox"></div>
+      <div class="row"><input class="inp" style="flex:1;font-size:13px" readonly value="${esc(studentURL())}"><button class="btn sm" onclick="copyText('${esc(studentURL())}')">링크 복사</button></div>
+      <p class="muted small">접속 ${L.length}명 · 시작 ${started}명 · 제출 ${done}명 ${DBMODE === 'demo' ? '<br><b style="color:var(--bad)">⚠️ 체험 모드: 이 기기 안에서만 연동됩니다.</b>' : ''}</p></div>
+    <div class="card"><h2>🎛️ 수업 진행</h2>
+      <div class="row"><button class="btn ok" onclick="T.status('play')">▶ 시작</button><button class="btn gold" onclick="T.status('pause')">⏸ 일시정지</button><button class="btn bad" onclick="T.status('end')">⏹ 수업 끝</button></div>
+      <label class="lb">🚪 진도 잠금 (반 전체 속도 맞추기)</label>
+      <select class="inp" onchange="T.meta('gate',+this.value)">${[...U.scenes.map((s, i) => [i + 1, '장면 ' + (i + 1) + '까지만 열기']), [U.scenes.length + 1 || 99, '판결문까지 열기'], [99, '잠금 없음 (각자 속도)']].map(([v, n]) => `<option value="${v}" ${+META.gate === v ? 'selected' : ''}>${n}</option>`).join('')}</select>
+      <label class="lb">📣 결과 공개</label>
+      <div class="row"><button class="btn ${META.reveal ? 'ghost' : 'jade'}" onclick="T.meta('reveal',${!META.reveal})">${META.reveal ? '공개 취소' : '📣 엔딩·점수 공개'}</button><span class="muted small">판결문 점수를 넣은 뒤 누르세요. 숨겨진 엔딩 기준</span><input class="inp" style="width:80px" type="number" value="${esc(META.hiddenTh || 80)}" onchange="T.meta('hiddenTh',+this.value)"><span class="muted small">점 이상</span></div>
+    </div></div>
+    <div class="card"><h2>📚 단원 고르기</h2><p class="muted small">완성된 단원만 고를 수 있어요. 단원을 바꿔도 학생의 다른 단원 기록은 남아 있습니다.</p>
+      ${subj.map(sj => `<h3>${esc(sj)}</h3><div class="row">${UNITS.filter(u => u.subject === sj).map(u => { const on = u.ready && unitOn(u.id);
+        return `<button class="btn sm ${META.unit === u.id ? '' : 'line'}" ${on ? '' : 'disabled'} onclick="T.meta('unit','${u.id}')" title="${esc(u.logline)}">${esc(u.title)}${u.ready ? (reviewed(u.id) ? '' : ' · 미검수') : ' · 준비 중'}${u.sensitive ? ' ⚠️' : ''}</button>`; }).join('')}</div>`).join('')}
+      <p class="muted small">⚠️ = 민감한 주제(생명·사형 등). 수업 전에 학생 상황을 살펴 주세요.</p></div>
+    <div class="grid2"><div class="card"><h2>🌶️ 긴장감 강도</h2>${['mild', 'normal', 'spicy'].map(k => { const t = TN(k); return `<label class="row" style="margin:6px 0;cursor:pointer"><input type="radio" name="tn" ${META.tension === k ? 'checked' : ''} onchange="T.meta('tension','${k}')"><b>${esc(t.n)}</b><span class="muted small">제한 시간 ${t.timer ? t.timer + '초' : '없음'} · 증거 ${t.peek}장 · 구제 ${t.rescue} · 힌트 ${t.hint}${t.fall ? ' · 폐위 있음' : ''}</span></label>`; }).join('')}
+      <p class="muted small">구제·힌트 카드 수는 학생이 [시작]을 누를 때 정해집니다. 세부 값은 ⚙️ 설정에서 바꿉니다.</p></div>
+    <div class="card"><h2>👥 진행 방식</h2>
+      <label class="row" style="cursor:pointer"><input type="radio" checked> <b>개인</b> <span class="muted small">각자 태블릿으로</span></label>
+      <label class="row muted"><input type="radio" disabled> 모둠 <span class="pill">2단계에서 열림</span></label>
+      <label class="row muted"><input type="radio" disabled> 학급 전체 <span class="pill">2단계에서 열림</span></label>
+      <label class="row" style="margin-top:10px;cursor:pointer"><input type="checkbox" ${META.askName ? 'checked' : ''} onchange="T.meta('askName',this.checked)"> 이름도 받기 <span class="muted small">(끄면 번호만 받음 — 시범 운영은 끄기 권장)</span></label>
+      <label class="lb">포트폴리오 만점(판결문 1편당)</label><input class="inp" style="width:100px" type="number" value="${esc(META.pfPts || 10)}" onchange="T.meta('pfPts',+this.value)">
+    </div></div>`;
+}
+function boardH(U, L) {
+  if (!L.length) return `<div class="card muted">아직 들어온 학생이 없어요.</div>`;
+  const gk = gaugeKeys(U), lk = lifeKey(U);
+  return `<div class="card"><div class="row"><h2 style="flex:1;margin:0">📊 실시간 현황판 — ${esc(U.title)}</h2><span class="muted small">빨간 줄 = ${esc(U.gauges[lk].n)} 20 이하 / 폐위</span></div>
+  <div class="scroll" style="margin-top:8px"><table class="st"><tr><th>번호</th><th>이름</th><th>진행</th>${gk.map(k => `<th>${U.gauges[k].e}${esc(U.gauges[k].n)}</th>`).join('')}${U.scenes.map((s, i) => `<th>장면${i + 1}</th>`).join('')}<th>탈락</th><th>재상</th><th>판결문</th><th>붙여넣기</th><th>카드</th><th></th></tr>
+  ${L.map(s => { const r = runOf(s); if (!r) return `<tr><td>${s.num}</td><td>${esc(s.name)}</td><td>시작 전</td><td colspan="${gk.length + U.scenes.length + 6}"></td><td><button class="btn sm ghost" onclick="T.reset('${s.sid}')">삭제</button></td></tr>`;
+    const warn = r.fallen || (r.g[lk] <= 20 && r.step !== 'done');
+    return `<tr class="${warn ? 'warn' : ''}"><td>${s.num}</td><td>${esc(s.name)}</td><td>${r.fallen ? '🥀 폐위 · ' : ''}${esc(stepName(r, U))}</td>${gk.map(k => `<td>${r.g[k]}</td>`).join('')}
+      ${U.scenes.map(sc => { const st = r.scenes[sc.id] || {}; return `<td>${st.adopt ? esc(TH(st.adopt).name) + ' ' + (st.level ? ({ a: '🏆', b: '✅', c: '⚠️', x: '⏰' })[st.level] : '') + (st.rebutOk === true ? '🛡️' : st.rebutOk === false ? '💢' : '') : '-'}</td>`; }).join('')}
+      <td>${r.elim.map(id => esc(TH(id).name)).join(',') || '-'}</td><td>${r.chief ? esc(TH(r.chief).name) : '-'}</td>
+      <td>${nz(r.verdict.text).length}자${r.verdict.submittedAt ? ' ✅' : ''}</td><td>${r.paste ? `<b style="color:var(--bad)">${r.paste}회</b>` : '0'}</td>
+      <td>${r.hintUsed ? '💡' : ''}${r.rescued ? '❤️‍🩹' + r.rescued : ''}</td>
+      <td><button class="btn sm line" onclick="T.view('${s.sid}')">보기</button> <button class="btn sm ghost" onclick="T.resetRun('${s.sid}')">단원 초기화</button></td></tr>`; }).join('')}
+  </table></div><p class="muted small">🏆 대성공 ✅ 성공 ⚠️ 흔들림 ⏰ 시간 초과 · 🛡️ 재반박 성공 💢 실패 · 💡 힌트 사용 ❤️‍🩹 구제 카드 사용</p></div>`;
+}
+T.view = sid => {
+  const s = STU[sid], U = unitById(META.unit), r = runOf(s); if (!s || !r) return;
+  const d = document.createElement('div'); d.className = 'ovl'; d.onclick = e => { if (e.target === d) d.remove(); };
+  d.innerHTML = `<div class="box"><div class="row"><h2 style="flex:1">${s.num}번 ${esc(s.name)} — ${esc(U.title)}</h2><button class="btn ghost sm" onclick="this.closest('.ovl').remove()">닫기</button></div>
+    ${U.scenes.map((sc, i) => { const st = r.scenes[sc.id] || {}; if (!st.adopt) return ''; return `<h3>장면${i + 1} ${esc(sc.title)} — ${esc(TH(st.adopt).name)} ${st.level ? LV[st.level] ? LV[st.level].t : '⏰ 시간 초과' : ''}</h3>
+      <div class="small muted">연 증거: ${(st.opened || []).length}장 ${st.elim ? '· 탈락: ' + esc(TH(st.elim).name) : ''}</div><div class="wbox">${esc(st.line || '(없음)')}</div>${st.rebut ? `<div class="small" style="margin-top:4px">↳ 재반박(${st.rebutOk ? '성공' : '실패'}, ${st.tries || 0}회): ${esc(st.rebut)}</div>` : ''}`; }).join('')}
+    <h3>판결문 ${r.chief ? '(재상: ' + esc(TH(r.chief).name) + ')' : ''} ${r.fallen ? '— 폐위 회고록' : ''}</h3><div class="wbox">${esc(r.verdict.text || '(아직 없음)')}</div>
+    <p class="small muted">시작 ${fmtTime(r.startedAt)} · 제출 ${fmtTime(r.verdict.submittedAt)} · 붙여넣기 ${r.verdict.paste || 0}회(${r.verdict.pasteChars || 0}자) · 작성 기록 ${(r.verdict.log || []).map(x => x.len).join('→')}</p></div>`;
+  document.body.appendChild(d);
+};
+function verdictTabH(U, L) {
+  const subs = L.filter(s => { const r = runOf(s); return r && r.verdict && nz(r.verdict.text).length; });
+  return `<div class="card"><div class="row"><h2 style="flex:1;margin:0">📝 판결문 모아보기 · 하이러닝 점수</h2>
+    <button class="btn sm" onclick="T.dlTxt()">💾 전체 TXT</button><button class="btn sm line" onclick="T.dlCsv()">💾 CSV(엑셀)</button><button class="btn sm ghost" onclick="T.copyAll()">📋 전체 복사</button></div>
+    <p class="muted small">① 판결문을 내려받아 하이러닝에 올려 채점 → ② 아래 칸에 점수를 넣고 → ③ 🎛️ 진행에서 [📣 엔딩·점수 공개]. 하이러닝 점수는 참고용이며 최종 판단은 선생님이 합니다.</p></div>
+    ${subs.length ? subs.map(s => { const r = runOf(s), sc = SCORES[s.sid] || {}, kw = kwHits(r.verdict.text, r.fallen ? allUnitKw(U) : TH(r.chief).kw);
+      return `<div class="card"><div class="row"><b style="flex:1">${s.num}번 ${esc(s.name)} ${r.verdict.submittedAt ? '<span class="pill ok">제출</span>' : '<span class="pill">작성 중</span>'} ${r.fallen ? '<span class="pill bad">폐위 회고록</span>' : r.chief ? '<span class="pill main">재상 ' + esc(TH(r.chief).name) + '</span>' : ''}</b>
+        <span class="small muted">${nz(r.verdict.text).length}자 · 개념어 ${kw.length}(${esc(kw.join(', '))}) · 붙여넣기 ${r.verdict.paste || 0}회</span><button class="btn sm ghost" onclick="T.copy('${s.sid}')">복사</button></div>
+        <div class="wbox" style="margin-top:6px;max-height:220px;overflow:auto">${esc(r.verdict.text)}</div>
+        <div class="row" style="margin-top:6px"><span class="small"><b>판결문 점수</b></span><input class="inp" style="width:90px" type="number" value="${sc.hl == null ? '' : esc(sc.hl)}" onchange="T.score('${s.sid}',this)"><input class="inp" style="flex:1" placeholder="학생에게 보일 한마디 (선택)" value="${esc(sc.memo || '')}" onchange="T.memo('${s.sid}',this)"></div></div>`; }).join('') : '<div class="card muted">아직 판결문이 없어요.</div>'}`;
+}
+function vRows() { const U = unitById(META.unit); return studentList().map(s => ({ s, r: runOf(s), U })).filter(x => x.r && x.r.verdict && nz(x.r.verdict.text).length); }
+T.dlTxt = () => { const U = unitById(META.unit); const txt = vRows().map(({ s, r }) => `■ ${s.num}번${s.name ? ' ' + s.name : ''} (${r.fallen ? '폐위 회고록' : '재상: ' + TH(r.chief).name})\n${r.verdict.text}\n`).join('\n'); downloadText(`딜시_${META.name}_${U.title}_판결문.txt`, txt); };
+T.copyAll = () => copyText(vRows().map(({ s, r }) => `■ ${s.num}번${s.name ? ' ' + s.name : ''}\n${r.verdict.text}\n`).join('\n'));
+T.dlCsv = () => { const U = unitById(META.unit); const head = ['번호', '이름', '재상', '폐위', '글자수', '개념어', '붙여넣기', '제출시각', '판결문점수', '판결문'];
+  const rows = vRows().map(({ s, r }) => { const sc = SCORES[s.sid] || {}; return [s.num, s.name, r.chief ? TH(r.chief).name : '', r.fallen ? 'O' : '', nz(r.verdict.text).length, kwHits(r.verdict.text, allUnitKw(U)).join(' '), r.verdict.paste || 0, fmtTime(r.verdict.submittedAt), sc.hl == null ? '' : sc.hl, r.verdict.text]; });
+  downloadText(`딜시_${META.name}_${U.title}_판결문.csv`, [head, ...rows].map(r => r.map(csvCell).join(',')).join('\n'), 'text/csv'); };
+
+function pfH(U, L) {
+  const P = +(META.pfPts || 10);
+  return `<div class="card"><div class="row"><h2 style="flex:1;margin:0">🗂️ 포트폴리오 집계 — ${esc(U.title)}</h2><button class="btn sm" onclick="T.dlPf()">💾 CSV(엑셀)</button></div>
+    <p class="muted small">기준 4개(제출·분량·개념어·반론)는 자동 확인입니다. 칸을 누르면 <b>선생님 판단</b>으로 바뀝니다(✓→✗→자동). 점수: 4개 ${P}점 · 2~3개 ${P / 2}점 · 제출만 ${P / 4}점 · 미제출 0점 (만점은 🎛️ 진행에서 변경)</p>
+    <div class="scroll"><table class="st"><tr><th>번호</th><th>이름</th>${CRIT.map(([k, n]) => `<th>${n}</th>`).join('')}<th>충족</th><th>점수</th></tr>
+    ${L.map(s => { const { a, o, f } = critFinal(s, U), n = CRIT.filter(([k]) => f[k]).length;
+      return `<tr><td>${s.num}</td><td>${esc(s.name)}</td>${CRIT.map(([k]) => { const ov = o[k] === true || o[k] === false; return `<td class="toggle ${f[k] ? 'on' : 'off'} ${ov ? 'ovr' : ''}" onclick="T.conf('${s.sid}','${k}')" title="${ov ? '선생님 판단 (자동: ' + (a[k] ? '✓' : '✗') + ')' : '자동 확인'}">${f[k] ? '✓' : '✗'}${ov ? '*' : ''}</td>`; }).join('')}<td>${f.sub ? n : 0}</td><td><b>${pfScore(f)}</b></td></tr>`; }).join('')}
+    </table></div><p class="muted small">* = 선생님이 직접 바꾼 칸. 분량 기준 ${JUDGE().verdictMin}자, 반론 = "그러나·하지만·반면…" 같은 말 또는 떨어뜨린 책사 이름이 있는지.</p></div>`;
+}
+T.dlPf = () => { const U = unitById(META.unit); const rows = studentList().map(s => { const { f } = critFinal(s, U); return [s.num, s.name, ...CRIT.map(([k]) => f[k] ? 'O' : 'X'), pfScore(f)]; });
+  downloadText(`딜시_${META.name}_${U.title}_포트폴리오.csv`, [['번호', '이름', ...CRIT.map(c => c[1]), '점수'], ...rows].map(r => r.map(csvCell).join(',')).join('\n'), 'text/csv'); };
+
+function obsText(s, U) {
+  const r = runOf(s); if (!r) return '아직 시작하지 않음';
+  const parts = U.scenes.map((sc, i) => { const st = r.scenes[sc.id] || {}; if (!st.adopt) return null; return `장면${i + 1}(${sc.title}): ${TH(st.adopt).name} 채택${st.level ? '·' + (LV[st.level] ? LV[st.level].t.replace(/^\S+\s/, '') : '시간 초과') : ''}${st.rebutOk === true ? '·재반박 성공' : st.rebutOk === false ? '·재반박 실패' : ''}${st.elim ? '·' + TH(st.elim).name + ' 탈락' : ''}`; }).filter(Boolean);
+  const kws = []; U.scenes.forEach(sc => { const st = r.scenes[sc.id] || {}; if (st.chk) kws.push(...st.chk.kw); }); kws.push(...kwHits((r.verdict || {}).text, allUnitKw(U)));
+  const bd = Object.entries(r.bd || {}).filter(([k, v]) => v).map(([k, v]) => k + '+' + v).join(', ');
+  return [`경로: ${parts.join(' → ') || '-'}`, `최종 재상: ${r.chief ? TH(r.chief).name : r.fallen ? '(폐위)' : '-'}`, `사용한 개념어: ${[...new Set(kws)].join(', ') || '-'}`, `신념 변화: ${bd || '-'}`, `판결문: ${nz((r.verdict || {}).text).length}자, 붙여넣기 ${(r.verdict || {}).paste || 0}회, 구제 카드 ${r.rescued || 0}회, 힌트 ${r.hintUsed ? '사용' : '안 씀'}`].join('\n');
+}
+function obsH(U, L) {
+  return `<div class="card"><h2>🔎 관찰 기록 요약 — ${esc(U.title)}</h2><p class="muted small">세특을 쓰실 때 참고할 <b>근거 자료</b>입니다. 문장은 선생님이 직접 관찰한 내용으로 쓰셔야 합니다. (자동 문장 생성 기능은 일부러 넣지 않았습니다.)</p>
+    <button class="btn sm line" onclick="copyText(studentList().map(s=>s.num+'번 '+(s.name||'')+'\\n'+obsText(s,unitById(META.unit))).join('\\n\\n'))">📋 전체 복사</button></div>
+    ${L.map(s => `<div class="card"><div class="row"><b style="flex:1">${s.num}번 ${esc(s.name)}</b><button class="btn sm ghost" onclick="copyText(obsText(STU['${s.sid}'],unitById(META.unit)))">복사</button></div><div class="wbox small">${esc(obsText(s, U))}</div></div>`).join('') || '<div class="card muted">아직 학생이 없어요.</div>'}`;
+}
+function kpiH(U, L) {
+  const R = L.map(s => runOf(s)).filter(Boolean), done = R.filter(r => r.verdict.submittedAt);
+  const sc = []; R.forEach(r => U.scenes.forEach(s => { const st = r.scenes[s.id]; if (st && st.level) sc.push(st); }));
+  const kwRate = sc.length ? Math.round(sc.filter(st => st.chk && st.chk.kw.length).length / sc.length * 100) : 0;
+  const rb = sc.filter(st => st.rebutOk === true || st.rebutOk === false), rbRate = rb.length ? Math.round(rb.filter(st => st.rebutOk).length / rb.length * 100) : 0;
+  const avgLen = done.length ? Math.round(done.reduce((a, r) => a + nz(r.verdict.text).length, 0) / done.length) : 0;
+  const mins = done.map(r => (r.verdict.submittedAt - r.startedAt) / 60000).filter(x => x > 0 && x < 600), avgMin = mins.length ? Math.round(mins.reduce((a, b) => a + b, 0) / mins.length) : 0;
+  const lv = { a: 0, b: 0, c: 0, x: 0 }; sc.forEach(st => lv[st.level] = (lv[st.level] || 0) + 1);
+  const endC = {}; done.forEach(r => { const e = endingOf(r, U, SCORES[Object.keys(STU).find(k => STU[k] && runOf(STU[k]) === r)] || null, !!META.reveal); endC[e.t] = (endC[e.t] || 0) + 1; });
+  const dist = U.scenes.map((s, i) => { const c = {}; R.forEach(r => { const a = r.adopt[s.id]; if (a) c[a] = (c[a] || 0) + 1; }); return `<div class="small"><b>장면${i + 1}</b> ${Object.entries(c).map(([k, v]) => esc(TH(k).name) + ' ' + v).join(' · ') || '-'}</div>`; }).join('');
+  const el = {}; R.forEach(r => r.elim.forEach(t => el[t] = (el[t] || 0) + 1));
+  return `<div class="card"><h2>📈 시범 지표 — ${esc(U.title)}</h2><p class="muted small">재미·학습 효과·서논술 능력을 확인하기 위한 수치입니다. 수업연구대회·수업나눔 근거 자료로 쓸 수 있습니다.</p>
+    <div class="kpi"><div><b>${L.length}</b>접속</div><div><b>${R.length ? Math.round(done.length / R.length * 100) : 0}%</b>완주율 (${done.length}/${R.length})</div><div><b>${avgMin}분</b>평균 소요 시간</div><div><b>${kwRate}%</b>한 줄 논증 개념어 사용</div><div><b>${rbRate}%</b>재반박 성공</div><div><b>${avgLen}자</b>평균 판결문 길이</div></div></div>
+    <div class="grid2"><div class="card"><h3 style="margin-top:0">한 줄 논증 판정</h3><p>🏆 대성공 ${lv.a} · ✅ 성공 ${lv.b} · ⚠️ 흔들림 ${lv.c} · ⏰ 시간 초과 ${lv.x}</p><h3>채택 분포</h3>${dist}<h3>탈락 분포</h3><p class="small">${Object.entries(el).map(([k, v]) => esc(TH(k).name) + ' ' + v).join(' · ') || '-'}</p></div>
+    <div class="card"><h3 style="margin-top:0">엔딩 분포 ${META.reveal ? '' : '<span class="muted small">(공개 전 — 숨겨진 엔딩 제외)</span>'}</h3>${Object.entries(endC).map(([k, v]) => `<div>${esc(k)}: <b>${v}</b></div>`).join('') || '-'}
+    <h3>참고</h3><p class="small muted">같은 학생의 판결문 점수 변화(첫 단원 → 세 번째 단원)는 단원을 여러 개 진행한 뒤 📝 판결문·점수 CSV를 모아 비교하세요.</p></div></div>`;
+}
+function fbH() {
+  const list = Object.entries(FB || {}).sort((a, b) => (b[1].t || 0) - (a[1].t || 0));
+  return `<div class="card"><div class="row"><h2 style="flex:1;margin:0">💬 피드백 (${list.length})</h2><button class="btn sm line" onclick="T.dlFb()">💾 CSV</button></div><p class="muted small">모든 반과 시범 운영 선생님들이 보낸 의견이 모입니다.</p>
+    ${list.map(([id, f]) => `<div style="border-top:1px solid var(--line);padding:8px 0"><div class="small muted">${fmtTime(f.t)} · 방 ${esc(f.room || '-')} · ${esc(f.who)} · ${esc(f.where)}</div><div class="row"><div style="flex:1">${esc(f.text)}</div><button class="btn sm ghost" onclick="if(confirm('지울까요?'))backend.remove(P_FB+'/${id}')">지우기</button></div></div>`).join('') || '<p class="muted">아직 없어요.</p>'}</div>`;
+}
+T.dlFb = () => { const rows = Object.values(FB || {}).map(f => [fmtTime(f.t), f.room, f.who, f.where, f.text]); downloadText('딜시_피드백.csv', [['시각', '방', '보낸 사람', '화면', '내용'], ...rows].map(r => r.map(csvCell).join(',')).join('\n'), 'text/csv'); };
+
+/* ---------- ⚙️ 설정 (모든 반 공통: rooms/DSCONTENT/default) ---------- */
+function settingsH() {
+  const subs = [['th', '① 사상가 관리'], ['judge', '③ 논술·판정 기준'], ['tn', '⑨ 긴장감'], ['unit', '단원 관리'], ['rec', '⑦ 학생 기록']];
+  const b = SETSUB === 'th' ? setThH() : SETSUB === 'judge' ? setJudgeH() : SETSUB === 'tn' ? setTnH() : SETSUB === 'unit' ? setUnitH() : setRecH();
+  return `<div class="note">⚙️ 여기서 바꾼 내용은 <b>모든 반에 함께</b> 적용되고, content.js 파일보다 우선합니다.</div>
+    <div class="tabs">${subs.map(([k, n]) => `<button class="tab ${SETSUB === k ? 'on' : ''}" onclick="SETSUB='${k}';render()">${n}</button>`).join('')}</div><div class="ed">${b}</div>`;
+}
+function setThH() {
+  const U = unitById(META.unit) || UNITS[0]; const ids = Object.keys(window.THINKERS || {}); const first = (U.thinkers || []);
+  const order = [...first, ...ids.filter(i => !first.includes(i))];
+  return `<p class="muted small">사상가 이미지(정사각형으로 잘려 작게 저장), 이름·소개·대사, <b>자동 판정용 개념어</b>를 고칩니다. 현대 사상가는 사진 대신 일러스트·캐릭터를 쓰세요(저작권).</p>
+    ${order.map(id => { const t = TH(id), base = window.THINKERS[id]; return `<fieldset><legend>${esc(t.name)} <span class="muted small">${esc(t.school)}${first.includes(id) ? ' · 이번 단원' : ''}</span></legend>
+      <div class="row" style="align-items:flex-start">${avatar(id, 88)}<div style="flex:1;min-width:240px">
+        <div class="row"><label class="btn sm line" style="cursor:pointer">🖼️ 이미지 올리기<input type="file" accept="image/*" style="display:none" onchange="T.img('${id}',this)"></label>${(CONTENT.thImg || {})[id] ? `<button class="btn sm ghost" onclick="T.imgReset('${id}')">기본 그림으로</button>` : ''}</div>
+        <label class="lb">이름</label><input class="inp" id="tn_${id}" value="${esc(t.name)}">
+        <label class="lb">한 줄 소개</label><input class="inp" id="ti_${id}" value="${esc(t.intro)}">
+        <label class="lb">대표 말</label><input class="inp" id="tq_${id}" value="${esc(t.quote || '')}">
+        <label class="lb">개념어 (쉼표로 구분)</label><input class="inp" id="tk_${id}" value="${esc((t.kw || []).join(', '))}">
+        <div class="row" style="margin-top:8px"><button class="btn sm" onclick="T.saveTh('${id}')">저장</button>${(CONTENT.th || {})[id] ? `<button class="btn sm ghost" onclick="T.resetTh('${id}')">파일 기본값으로</button>` : ''}<span class="muted small">기본 개념어: ${esc((base.kw || []).join(', '))}</span></div>
+      </div></div></fieldset>`; }).join('')}`;
+}
+T.saveTh = id => { const g = k => document.getElementById(k + '_' + id).value.trim(); const v = { name: g('tn'), intro: g('ti'), quote: g('tq'), kw: g('tk').split(/[,，]/).map(x => x.trim()).filter(Boolean) };
+  backend.set(P_CONTENT + '/th/' + id, v).then(() => toast('💾 저장했어요.')); };
+T.resetTh = id => { if (confirm('이 사상가를 content.js 기본값으로 되돌릴까요?')) backend.remove(P_CONTENT + '/th/' + id); };
+T.img = async (id, inp) => { const f = inp.files && inp.files[0]; if (!f) return; try { const d = await compressImage(f, 256, 60000); IMG[id] = d; await backend.set(P_CONTENT + '/img/' + id, { d }); await backend.set(P_CONTENT + '/thImg/' + id, true); toast('🖼️ 올렸어요.'); } catch (e) { toast('이미지를 읽을 수 없어요.'); } };
+T.imgReset = id => { delete IMG[id]; backend.remove(P_CONTENT + '/img/' + id); backend.remove(P_CONTENT + '/thImg/' + id); };
+function setJudgeH() {
+  const J = JUDGE(), F = [['lineMin', '한 줄 논증 최소 글자'], ['lineKw', '한 줄 논증 개념어 수'], ['rebutMin', '재반박 최소 글자'], ['verdictMin', '판결문 최소 글자'], ['verdictKw', '판결문 개념어 수']];
+  return `<fieldset><legend>숫자 기준</legend><div class="vals">${F.map(([k, n]) => `<label>${n}<input type="number" id="j_${k}" value="${J[k]}"></label>`).join('')}</div></fieldset>
+    <fieldset><legend>근거 표지어 (한 줄 논증·재반박 판정)</legend><input class="inp" id="j_markers" value="${esc(J.markers.join(', '))}"></fieldset>
+    <fieldset><legend>반론 표지어 (포트폴리오 '반론' 판정)</legend><input class="inp" id="j_counter" value="${esc(J.counter.join(', '))}"></fieldset>
+    <div class="row"><button class="btn" onclick="T.saveJudge()">저장</button><button class="btn ghost" onclick="if(confirm('기본값으로?'))backend.remove(P_CONTENT+'/judge')">기본값으로</button></div>
+    <p class="muted small">한 줄 논증 판정: ① 글자 수 ② 채택한 사상가의 개념어 ③ 근거 표지어 — 3개 모두 = 🏆 대성공, 2개 = ✅ 성공, 1개 이하 = ⚠️ 흔들림. 1글자 개념어(인·예·법·도)는 낱말로 따로 쓰였을 때만 인정합니다.</p>`;
+}
+T.saveJudge = () => { const n = k => +document.getElementById('j_' + k).value || 0, l = k => document.getElementById('j_' + k).value.split(/[,，]/).map(x => x.trim()).filter(Boolean);
+  backend.set(P_CONTENT + '/judge', { lineMin: n('lineMin'), lineKw: n('lineKw'), rebutMin: n('rebutMin'), verdictMin: n('verdictMin'), verdictKw: n('verdictKw'), markers: l('markers'), counter: l('counter') }).then(() => toast('💾 저장했어요.')); };
+function setTnH() {
+  const F = [['timer', '제한 시간(초, 0=끔)'], ['peek', '증거 카드 수'], ['ev', '돌발 사건 확률(0~1)'], ['evBad', '나쁜 사건 비율(0~1)'], ['loss', '손실 배수'], ['rebut', '재반박 기회'], ['rescue', '구제 카드'], ['hint', '힌트 카드']];
+  return ['mild', 'normal', 'spicy'].map(k => { const t = TN(k); return `<fieldset><legend>${esc(t.n)}</legend><div class="vals">${F.map(([f, n]) => `<label>${n}<input type="number" step="any" id="tn_${k}_${f}" value="${t[f]}"></label>`).join('')}
+      <label>반 분포 공개<select id="tn_${k}_dist"><option value="1" ${t.dist ? 'selected' : ''}>공개</option><option value="0" ${t.dist ? '' : 'selected'}>숨김</option></select></label>
+      <label>민심 0이면 폐위<select id="tn_${k}_fall"><option value="1" ${t.fall ? 'selected' : ''}>폐위</option><option value="0" ${t.fall ? '' : 'selected'}>계속</option></select></label></div>
+      <div class="row" style="margin-top:6px"><button class="btn sm" onclick="T.saveTn('${k}')">저장</button><button class="btn sm ghost" onclick="backend.remove(P_CONTENT+'/tn/${k}')">기본값으로</button></div></fieldset>`; }).join('');
+}
+T.saveTn = k => { const g = f => document.getElementById('tn_' + k + '_' + f).value; const v = { n: TN(k).n };
+  ['timer', 'peek', 'ev', 'evBad', 'loss', 'rebut', 'rescue', 'hint'].forEach(f => v[f] = +g(f) || 0); v.dist = g('dist') === '1'; v.fall = g('fall') === '1';
+  backend.set(P_CONTENT + '/tn/' + k, v).then(() => toast('💾 저장했어요.')); };
+function setUnitH() {
+  return `<p class="muted small">끈 단원은 단원 고르기에서 보이지 않습니다. 사상가 대사·개념어를 교과서와 대조한 뒤 [검수 완료]를 눌러 주세요(검수 전에는 '미검수' 표시).</p>
+    <div class="scroll"><table class="st"><tr><th>과목</th><th>단원</th><th>장르</th><th>상태</th><th>사용</th><th>검수</th></tr>
+    ${UNITS.map(u => `<tr><td>${esc(u.subject)}</td><td class="l"><b>${esc(u.title)}</b>${u.sensitive ? ' ⚠️' : ''}<div class="small muted">${esc(u.area)} · ${esc(u.logline)}</div></td><td>${esc(u.genre)}</td><td>${u.ready ? '<span class="pill ok">완성</span>' : '<span class="pill">준비 중</span>'}</td>
+      <td><button class="btn sm ${unitOn(u.id) ? 'ok' : 'ghost'}" onclick="backend.set(P_CONTENT+'/off/${u.id}',${unitOn(u.id) ? 'true' : 'null'})">${unitOn(u.id) ? '켜짐' : '꺼짐'}</button></td>
+      <td>${u.ready ? `<button class="btn sm ${reviewed(u.id) ? 'jade' : 'line'}" onclick="backend.set(P_CONTENT+'/reviewed/${u.id}',${reviewed(u.id) ? 'null' : 'true'})">${reviewed(u.id) ? '✓ 검수 완료' : '검수 완료로'}</button>` : '-'}</td></tr>`).join('')}</table></div>`;
+}
+function setRecH() {
+  return `<fieldset><legend>이 반 학생 기록 삭제 (개인정보)</legend><p class="small">시범 운영·학기가 끝나면 학생 기록(글 포함)을 지워 주세요. 지우기 전에 📝 판결문·점수와 🗂️ 포트폴리오에서 CSV를 내려받아 두세요.</p>
+    ${ROOM && ROOM !== '__SET__' ? `<button class="btn bad" onclick="T.wipe()">🗑️ ${esc(META.name || ROOM)} 학생 기록 모두 삭제</button>` : '<p class="muted">반을 연 상태에서 쓸 수 있어요.</p>'}</fieldset>
+    <fieldset><legend>이름 받기</legend><p class="small">🎛️ 진행 탭의 [이름도 받기]에서 반마다 정합니다. 시범 운영은 번호만 받는 것을 권합니다.</p></fieldset>`;
+}
+T.wipe = () => { if (!confirm('이 반 학생 기록과 점수를 모두 지웁니다. 되돌릴 수 없어요. 계속할까요?')) return; if (prompt('확인을 위해 방 코드(' + ROOM + ')를 입력하세요.') !== ROOM) return toast('코드가 달라 취소했어요.');
+  backend.remove(roomPath(ROOM) + '/students'); backend.remove(roomPath(ROOM) + '/score'); toast('🗑️ 지웠어요.'); };
