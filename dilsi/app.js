@@ -235,7 +235,7 @@ function safeRender() {
   render();
 }
 document.addEventListener('focusout', () => { setTimeout(() => { if (renderPending) { renderPending = false; safeRender(); } }, 150); });
-const footH = () => `<div class="foot">© 김정환 · M.A.D.T (Moral And Digital Teacher) · ${TITLE} ${SUBTITLE}${DBMODE === 'demo' ? ' · 체험 모드(이 기기에만 저장)' : ''}</div>`;
+const footH = () => `<div class="foot">© 김정환 · M.A.D.T (Moral And Digital Teacher) · 딜시 Dilemma Simulation${DBMODE === 'demo' ? ' · 체험 모드(이 기기에만 저장)' : ''}</div>`;
 
 const sKey = () => 'dilsi_S_' + ROOM + '_' + (S ? S.sid : '');
 let saveTimer = null;

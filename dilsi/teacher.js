@@ -50,7 +50,7 @@ function pfScore(f) { const P = +(META.pfPts || 10); if (!f.sub) return 0; const
 
 /* ---------- 화면 ---------- */
 function renderTeacher() {
-  if (!TAUTH) { app.innerHTML = `<div class="wrap"><div class="top"><h1>${brandLogo()}${brandTitle()} 교사 화면</h1></div>${coversH()}<div class="card"><h2>🔐 교사 비밀번호</h2><input id="tpin" type="password" class="inp" inputmode="numeric" onkeydown="if(event.key==='Enter')T.login()"><button class="btn full" style="margin-top:10px" onclick="T.login()">들어가기</button></div>${footH()}</div>`; return; }
+  if (!TAUTH) { app.innerHTML = `<div class="wrap"><div class="top"><h1>${brandLogo()}${brandTitle()} 교사 화면</h1></div><div class="card"><h2>🔐 교사 비밀번호</h2><input id="tpin" type="password" class="inp" inputmode="numeric" onkeydown="if(event.key==='Enter')T.login()"><button class="btn full" style="margin-top:10px" onclick="T.login()">들어가기</button></div>${coversH('big')}${footH()}</div>`; return; }
   if (!ROOM) {
     app.innerHTML = `<div class="wrap"><div class="top"><h1>${brandLogo()}${brandTitle()} 교사 화면<small>${brandSub()}</small></h1></div>
     ${coversH()}<div class="card"><h2>➕ 새 반 만들기</h2><input id="rname" class="inp" placeholder="예: 3학년 2반 윤리와 사상"><button class="btn full" style="margin-top:8px" onclick="T.create()">방 만들기</button></div>
@@ -328,9 +328,9 @@ T.saveStd = id => backend.set(P_CONTENT + '/std/' + id, document.getElementById(
 const COVERS = [['ethics', '윤리와 사상'], ['modern', '현대사회와 윤리']], COVER = {}, COVERREQ = {};
 function coverImg(k) { if ((CONTENT.coverOn || {})[k] && !COVER[k] && !COVERREQ[k]) { COVERREQ[k] = 1; getImg('cover', k).then(v => { if (v && v.d) { COVER[k] = v.d; render(); } }).catch(() => { }); } return COVER[k] || ''; }
 const COVER_FILE = { ethics: 'img/cover_ethics.jpg', modern: 'img/cover_modern.jpg' };   // 기본 표지(사이트 파일) — 설정에서 올리면 그 그림이 우선
-function coversH() {
+function coversH(size) {
   const on = COVERS;
-  return `<div class="covers">${on.map(([k, n]) => { const d = ((CONTENT.coverOn || {})[k] && coverImg(k)) || COVER_FILE[k]; return `<div class="cov">${d ? `<img src="${d}" alt="${esc(n)}">` : '<div class="muted small" style="padding:40px 0">불러오는 중…</div>'}<b>${esc(n)}</b></div>`; }).join('')}</div>`;
+  return `<div class="covers ${size || ''}">${on.map(([k, n]) => { const d = ((CONTENT.coverOn || {})[k] && coverImg(k)) || COVER_FILE[k]; return `<div class="cov">${d ? `<img src="${d}" alt="${esc(n)}">` : '<div class="muted small" style="padding:40px 0">불러오는 중…</div>'}<b>${esc(n)}</b></div>`; }).join('')}</div>`;
 }
 T.cover = async (k, inp) => { const f = inp.files && inp.files[0]; if (!f) return; try { const d = await compressWide(f); COVER[k] = d; await backend.set(P_IMG + '/cover/' + k, { d }); await backend.set(P_CONTENT + '/coverOn/' + k, true); toast('📚 표지를 올렸어요.'); } catch (e) { toast('그림을 읽지 못했어요.'); } };
 T.coverReset = k => { delete COVER[k]; backend.remove(P_IMG + '/cover/' + k); backend.remove(P_CONTENT + '/coverOn/' + k); };
