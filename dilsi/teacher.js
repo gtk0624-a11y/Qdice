@@ -50,7 +50,7 @@ function pfScore(f) { const P = +(META.pfPts || 10); if (!f.sub) return 0; const
 
 /* ---------- 화면 ---------- */
 function renderTeacher() {
-  if (!TAUTH) { app.innerHTML = `<div class="wrap"><div class="top"><h1>${brandLogo()}${brandTitle()} 교사 화면</h1></div><div class="card"><h2>🔐 교사 비밀번호</h2><input id="tpin" type="password" class="inp" inputmode="numeric" onkeydown="if(event.key==='Enter')T.login()"><button class="btn full" style="margin-top:10px" onclick="T.login()">들어가기</button></div>${footH()}</div>`; return; }
+  if (!TAUTH) { app.innerHTML = `<div class="wrap"><div class="top"><h1>${brandLogo()}${brandTitle()} 교사 화면</h1></div>${coversH()}<div class="card"><h2>🔐 교사 비밀번호</h2><input id="tpin" type="password" class="inp" inputmode="numeric" onkeydown="if(event.key==='Enter')T.login()"><button class="btn full" style="margin-top:10px" onclick="T.login()">들어가기</button></div>${footH()}</div>`; return; }
   if (!ROOM) {
     app.innerHTML = `<div class="wrap"><div class="top"><h1>${brandLogo()}${brandTitle()} 교사 화면<small>${brandSub()}</small></h1></div>
     ${coversH()}<div class="card"><h2>➕ 새 반 만들기</h2><input id="rname" class="inp" placeholder="예: 3학년 2반 윤리와 사상"><button class="btn full" style="margin-top:8px" onclick="T.create()">방 만들기</button></div>
@@ -347,7 +347,7 @@ function setBrandH() {
     <p class="muted small">저장하면 모든 반 교사 화면에 바로 적용됩니다. 체크하면 학생 화면 위쪽에도 보입니다.</p></fieldset>
   <fieldset><legend>📚 교사 첫 화면 교과서 표지</legend>
     <div class="row">${COVERS.map(([k, n]) => { const on = (CONTENT.coverOn || {})[k], d = on ? coverImg(k) : ''; return `<div style="border:1px solid var(--line);border-radius:10px;padding:8px;min-width:180px;text-align:center"><b class="small">${esc(n)}</b><div style="margin:6px 0">${d ? `<img src="${d}" style="max-height:120px;border-radius:6px">` : '<span class="muted small">없음</span>'}</div><label class="btn sm line" style="cursor:pointer">🖼️ 올리기<input type="file" accept="image/*" style="display:none" onchange="T.cover('${k}',this)"></label>${on ? ` <button class="btn sm ghost" onclick="T.coverReset('${k}')">지우기</button>` : ''}</div>`; }).join('')}</div>
-    <p class="muted small">반 목록이 있는 교사 첫 화면에만 보입니다(학생 화면에는 안 나옴). 선생님이 직접 찍은 교과서 사진을 올려 주세요.</p></fieldset>`;
+    <p class="muted small">교사 비밀번호 화면과 반 목록 화면에 보입니다(학생 화면에는 안 나옴). 선생님이 직접 찍은 교과서 사진을 올려 주세요.</p></fieldset>`;
 }
 T.saveBrand = () => { const g = id => document.getElementById(id); const v = Object.assign({}, BR(), { title: g('br_title').value.trim(), sub: g('br_sub').value.trim(), all: g('br_all').checked });
   backend.set(P_CONTENT + '/brand', v).then(() => { toast('💾 저장했어요.'); setDocTitle(); }); };
