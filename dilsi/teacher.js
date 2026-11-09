@@ -7,7 +7,8 @@ let TTAB = 'run', STU = {}, SCORES = {}, FB = null, TAUTH = false, roomListening
 const T = {};
 window.T = T;
 const studentList = () => Object.values(STU || {}).filter(s => s && s.sid).sort((a, b) => a.num - b.num);
-const tRooms = () => lsGet('dilsi_trooms') || [];
+const tRoomsAll = () => lsGet('dilsi_trooms') || [];
+const tRooms = () => tRoomsAll().filter(r => (r.space || 'default') === SPACE);   // 지금 공간의 반만
 
 function bootTeacher() {
   TAUTH = sessionStorage.getItem('dilsi_t') === '1';
@@ -18,16 +19,30 @@ function listenRoom() {
   if (roomListening === ROOM) return; roomListening = ROOM;
   backend.on(roomPath(ROOM), v => { const d = v || {}; META = d.meta || {}; STU = d.students || {}; SCORES = d.score || {}; metaLoaded = true; safeRender(); });
 }
-T.login = () => { if ((document.getElementById('tpin').value || '') !== TEACHER_PIN) return toast('비밀번호가 틀렸어요.'); sessionStorage.setItem('dilsi_t', '1'); TAUTH = true; if (ROOM) listenRoom(); render(); };
+async function pinHash(sp, pin) { try { const b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode('dilsi|' + sp + '|' + pin)); return Array.from(new Uint8Array(b)).map(x => x.toString(16).padStart(2, '0')).join(''); } catch (e) { return 'p' + sp + pin; } }
+T.login = async () => {
+  const pin = document.getElementById('tpin').value || '', sp = cleanSpace((document.getElementById('tspace') || {}).value);
+  if (sp === 'default') { if (pin !== TEACHER_PIN) return toast('비밀번호가 틀렸어요.'); }
+  else {
+    if (pin.length < 4) return toast('비밀번호는 4자 이상으로 해 주세요.');
+    const h = await pinHash(sp, pin), saved = await backend.get('rooms/DSSPACE/' + sp + '/pin').catch(() => null);
+    if (!saved) { if (!confirm('「' + sp + '」 공간이 아직 없습니다.\n새로 만들까요? 지금 넣은 비밀번호가 이 공간의 비밀번호가 됩니다.')) return; await backend.set('rooms/DSSPACE/' + sp, { pin: h, created: Date.now() }); toast('🏫 새 공간을 만들었어요.'); }
+    else if (saved !== h) return toast('비밀번호가 틀렸어요.');
+  }
+  sessionStorage.setItem('dilsi_t', '1'); const changed = sp !== SPACE; localStorage.setItem('dilsi_space', sp);
+  if (changed) { location.reload(); return; }
+  TAUTH = true; if (ROOM) listenRoom(); render();
+};
+T.logout = () => { sessionStorage.removeItem('dilsi_t'); TAUTH = false; history.replaceState(null, '', '?mode=teacher'); ROOM = ''; render(); };
 T.create = async () => {
   const name = (document.getElementById('rname').value || '').trim() || '새 반'; const code = newCode(5);
   const firstUnit = (UNITS.find(u => u.ready && unitOn(u.id)) || UNITS[0]).id;
-  await backend.set(roomPath(code) + '/meta', { name, unit: firstUnit, tension: 'normal', status: 'wait', reveal: false, askName: false, gate: 99, hiddenTh: 80, pfPts: 10, mode: 'solo', created: Date.now() });
-  const L = tRooms().filter(r => r.code !== code); L.unshift({ code, name, t: Date.now() }); lsSet('dilsi_trooms', L.slice(0, 30));
+  await backend.set(roomPath(code) + '/meta', { space: SPACE, name, unit: firstUnit, tension: 'normal', status: 'wait', reveal: false, askName: false, gate: 99, hiddenTh: 80, pfPts: 10, mode: 'solo', created: Date.now() });
+  const L = tRoomsAll().filter(r => r.code !== code); L.unshift({ code, name, space: SPACE, t: Date.now() }); lsSet('dilsi_trooms', L.slice(0, 60));
   T.open(code);
 };
 T.open = code => { code = (code || '').toUpperCase().replace(/[^A-Z0-9]/g, ''); if (!code) return; history.replaceState(null, '', '?mode=teacher&room=' + code); ROOM = code; roomListening = null; metaLoaded = false; listenRoom(); render(); };
-T.forget = code => { lsSet('dilsi_trooms', tRooms().filter(r => r.code !== code)); render(); };
+T.forget = code => { lsSet('dilsi_trooms', tRoomsAll().filter(r => r.code !== code)); render(); };
 T.rooms = () => { history.replaceState(null, '', '?mode=teacher'); ROOM = ''; render(); };
 T.tab = t => { TTAB = t; if (t === 'fb' && FB === null) { FB = {}; backend.on(P_FB, v => { FB = v || {}; safeRender(); }); } render(); };
 T.meta = (k, v) => backend.update(roomPath(ROOM) + '/meta', { [k]: v }).catch(e => toast('저장 실패: ' + e.message));
@@ -50,9 +65,14 @@ function pfScore(f) { const P = +(META.pfPts || 10); if (!f.sub) return 0; const
 
 /* ---------- 화면 ---------- */
 function renderTeacher() {
-  if (!TAUTH) { app.innerHTML = `<div class="wrap"><div class="top"><h1>${brandLogo()}${brandTitle()} 교사 화면</h1></div><div class="card"><h2>🔐 교사 비밀번호</h2><input id="tpin" type="password" class="inp" inputmode="numeric" onkeydown="if(event.key==='Enter')T.login()"><button class="btn full" style="margin-top:10px" onclick="T.login()">들어가기</button></div>${coversH('big')}${footH()}</div>`; return; }
+  if (!TAUTH) { app.innerHTML = `<div class="wrap"><div class="top"><h1>${brandLogo()}${brandTitle()} 교사 화면</h1></div><div class="card"><h2>🔐 교사 들어가기</h2>
+    <label class="lb">선생님 공간 이름 <span class="muted small">(영문·숫자. 학교·선생님마다 사상가 정리·수업 자료·교과서 표지를 따로 씁니다)</span></label>
+    <input id="tspace" class="inp" placeholder="예: dodi, hanbitgo (처음이면 새로 만들어짐)" value="${SPACE === 'default' ? '' : esc(SPACE)}" autocapitalize="off">
+    <label class="lb">비밀번호</label><input id="tpin" type="password" class="inp" onkeydown="if(event.key==='Enter')T.login()">
+    <button class="btn full" style="margin-top:10px" onclick="T.login()">들어가기</button>
+    <p class="muted small" style="margin:8px 0 0">처음 오신 선생님: 공간 이름과 비밀번호(4자 이상)를 정해 넣으면 내 공간이 만들어집니다. 같은 이름·비밀번호로 다시 들어오세요.</p></div>${coversH('big')}${footH()}</div>`; return; }
   if (!ROOM) {
-    app.innerHTML = `<div class="wrap"><div class="top"><h1>${brandLogo()}${brandTitle()} 교사 화면<small>${brandSub()}</small></h1></div>
+    app.innerHTML = `<div class="wrap"><div class="top"><h1>${brandLogo()}${brandTitle()} 교사 화면<small>${brandSub()}</small></h1><span class="pill">🏫 공간: ${esc(SPACE === 'default' ? '기본' : SPACE)}</span><button class="btn ghost sm" onclick="T.logout()">나가기</button></div>
     ${coversH()}<div class="card"><h2>➕ 새 반 만들기</h2><input id="rname" class="inp" placeholder="예: 3학년 2반 윤리와 사상"><button class="btn full" style="margin-top:8px" onclick="T.create()">방 만들기</button></div>
     <div class="card"><h2>📂 내 반</h2>${tRooms().length ? tRooms().map(r => `<div class="row" style="border-top:1px solid var(--line);padding:8px 0"><b style="flex:1">${esc(r.name)} <span class="pill main">${esc(r.code)}</span></b><button class="btn sm" onclick="T.open('${r.code}')">열기</button><button class="btn sm ghost" onclick="T.forget('${r.code}')">목록에서 빼기</button></div>`).join('') : '<p class="muted">아직 없어요.</p>'}
       <div class="row" style="margin-top:10px"><input id="ocode" class="inp" style="flex:1" placeholder="다른 기기에서 만든 방 코드"><button class="btn line" onclick="T.open(document.getElementById('ocode').value)">코드로 열기</button></div></div>
@@ -254,7 +274,7 @@ T.dlFb = () => { const rows = Object.values(FB || {}).map(f => [fmtTime(f.t), f.
 function settingsH() {
   const subs = [['brand', '🏷️ 이름·로고'], ['th', '① 사상가·도감'], ['lesson', '📖 수업 자료'], ['judge', '③ 논술·판정 기준'], ['tn', '⑨ 긴장감'], ['unit', '단원 관리'], ['rec', '⑦ 학생 기록']];
   const b = SETSUB === 'brand' ? setBrandH() : SETSUB === 'th' ? setThH() : SETSUB === 'lesson' ? setLessonH() : SETSUB === 'judge' ? setJudgeH() : SETSUB === 'tn' ? setTnH() : SETSUB === 'unit' ? setUnitH() : setRecH();
-  return `<div class="note">⚙️ 여기서 바꾼 내용은 <b>모든 반에 함께</b> 적용되고, content.js 파일보다 우선합니다.</div>
+  return `<div class="note">⚙️ 여기서 바꾼 내용은 <b>🏫 ${esc(SPACE === 'default' ? '기본' : SPACE)} 공간의 모든 반에 함께</b> 적용되고(다른 선생님 공간에는 영향 없음), content.js 파일보다 우선합니다.</div>
     <div class="tabs">${subs.map(([k, n]) => `<button class="tab ${SETSUB === k ? 'on' : ''}" onclick="SETSUB='${k}';render()">${n}</button>`).join('')}</div><div class="ed">${b}</div>`;
 }
 function setThH() {
@@ -328,9 +348,10 @@ T.saveStd = id => backend.set(P_CONTENT + '/std/' + id, document.getElementById(
 const COVERS = [['ethics', '윤리와 사상'], ['modern', '현대사회와 윤리']], COVER = {}, COVERREQ = {};
 function coverImg(k) { if ((CONTENT.coverOn || {})[k] && !COVER[k] && !COVERREQ[k]) { COVERREQ[k] = 1; getImg('cover', k).then(v => { if (v && v.d) { COVER[k] = v.d; render(); } }).catch(() => { }); } return COVER[k] || ''; }
 const COVER_FILE = { ethics: 'img/cover_ethics.jpg', modern: 'img/cover_modern.jpg' };   // 기본 표지(사이트 파일) — 설정에서 올리면 그 그림이 우선
+function coverName(k, n0) { return ((BR().cl || {})[k]) || n0; }
 function coversH(size) {
-  const on = COVERS;
-  return `<div class="covers ${size || ''}">${on.map(([k, n]) => { const d = ((CONTENT.coverOn || {})[k] && coverImg(k)) || COVER_FILE[k]; return `<div class="cov">${d ? `<img src="${d}" alt="${esc(n)}">` : '<div class="muted small" style="padding:40px 0">불러오는 중…</div>'}<b>${esc(n)}</b></div>`; }).join('')}</div>`;
+  const on = COVERS.filter(([k]) => (CONTENT.coverOn || {})[k] || SPACE === 'default'); if (!on.length) return '';
+  return `<div class="covers ${size || ''}">${on.map(([k, n0]) => { const n = coverName(k, n0), d = ((CONTENT.coverOn || {})[k] && coverImg(k)) || (SPACE === 'default' ? COVER_FILE[k] : ''); return `<div class="cov">${d ? `<img src="${d}" alt="${esc(n)}">` : '<div class="muted small" style="padding:40px 0">불러오는 중…</div>'}<b>${esc(n)}</b></div>`; }).join('')}</div>`;
 }
 T.cover = async (k, inp) => { const f = inp.files && inp.files[0]; if (!f) return; try { const d = await compressWide(f); COVER[k] = d; await backend.set(P_IMG + '/cover/' + k, { d }); await backend.set(P_CONTENT + '/coverOn/' + k, true); toast('📚 표지를 올렸어요.'); } catch (e) { toast('그림을 읽지 못했어요.'); } };
 T.coverReset = k => { delete COVER[k]; backend.remove(P_IMG + '/cover/' + k); backend.remove(P_CONTENT + '/coverOn/' + k); };
@@ -347,10 +368,11 @@ function setBrandH() {
     <div class="row" style="margin-top:10px"><button class="btn sm" onclick="T.saveBrand()">저장</button><button class="btn sm ghost" onclick="T.brandReset()">처음 이름(딜시)으로</button></div>
     <p class="muted small">저장하면 모든 반 교사 화면에 바로 적용됩니다. 체크하면 학생 화면 위쪽에도 보입니다.</p></fieldset>
   <fieldset><legend>📚 교사 첫 화면 교과서 표지</legend>
-    <div class="row">${COVERS.map(([k, n]) => { const on = (CONTENT.coverOn || {})[k], d = (on && coverImg(k)) || COVER_FILE[k]; return `<div style="border:1px solid var(--line);border-radius:10px;padding:8px;min-width:180px;text-align:center"><b class="small">${esc(n)}</b><div style="margin:6px 0">${d ? `<img src="${d}" style="max-height:120px;border-radius:6px">` : '<span class="muted small">없음</span>'}</div><label class="btn sm line" style="cursor:pointer">🖼️ 올리기<input type="file" accept="image/*" style="display:none" onchange="T.cover('${k}',this)"></label>${on ? ` <button class="btn sm ghost" onclick="T.coverReset('${k}')">지우기</button>` : ''}</div>`; }).join('')}</div>
-    <p class="muted small">교사 비밀번호 화면과 반 목록 화면에 보입니다(학생 화면에는 안 나옴). 기본 표지가 들어 있고, 다른 그림을 올리면 그 그림으로 바뀝니다. [지우기]를 누르면 기본 표지로 돌아갑니다.</p></fieldset>`;
+    <div class="row">${COVERS.map(([k, n]) => { const on = (CONTENT.coverOn || {})[k], d = (on && coverImg(k)) || (SPACE === 'default' ? COVER_FILE[k] : ''); return `<div style="border:1px solid var(--line);border-radius:10px;padding:8px;min-width:180px;text-align:center"><b class="small">${esc(n)}</b><input id="cl_${k}" class="inp" style="margin-top:4px;font-size:13px" value="${esc(coverName(k, n))}" placeholder="표지 아래 글씨"><div style="margin:6px 0">${d ? `<img src="${d}" style="max-height:120px;border-radius:6px">` : '<span class="muted small">없음</span>'}</div><label class="btn sm line" style="cursor:pointer">🖼️ 올리기<input type="file" accept="image/*" style="display:none" onchange="T.cover('${k}',this)"></label>${on ? ` <button class="btn sm ghost" onclick="T.coverReset('${k}')">지우기</button>` : ''}</div>`; }).join('')}</div>
+    <p class="muted small">교사 들어가기 화면과 반 목록 화면에 보입니다(학생 화면에는 안 나옴). 우리 학교 교과서 표지를 올리고, 표지 아래 글씨(예: 윤리와 사상 · 천재교육)를 고친 뒤 위의 [저장]을 누르세요. 맨 아래 저작권 표시는 바꿀 수 없습니다.</p>
+    <div class="row" style="margin-top:6px"><button class="btn sm" onclick="T.saveBrand()">표지 글씨 저장</button></div></fieldset>`;
 }
-T.saveBrand = () => { const g = id => document.getElementById(id); const v = Object.assign({}, BR(), { title: g('br_title').value.trim(), sub: g('br_sub').value.trim(), all: g('br_all').checked });
+T.saveBrand = () => { const g = id => document.getElementById(id); const cl = {}; COVERS.forEach(([k]) => { const e = g('cl_' + k); if (e && e.value.trim()) cl[k] = e.value.trim(); }); const v = Object.assign({}, BR(), { title: g('br_title').value.trim(), sub: g('br_sub').value.trim(), all: g('br_all').checked, cl });
   backend.set(P_CONTENT + '/brand', v).then(() => { toast('💾 저장했어요.'); setDocTitle(); }); };
 T.brandLogo = async inp => { const f = inp.files && inp.files[0]; if (!f) return; try { const d = await compressSquare(f, 160); await backend.set(P_CONTENT + '/brand', Object.assign({}, BR(), { logo: d })); toast('🖼️ 로고를 올렸어요.'); } catch (e) { toast('그림을 읽지 못했어요. 다른 그림으로 해 보세요.'); } };
 T.brandLogoReset = () => { const v = Object.assign({}, BR()); delete v.logo; backend.set(P_CONTENT + '/brand', v); };

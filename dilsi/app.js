@@ -19,8 +19,11 @@ const FIREBASE_CONFIG = {
 const TEACHER_PIN = '0624';
 const TITLE = '딜시';
 const SUBTITLE = '딜레마 시뮬레이션';
-const P_CONTENT = 'rooms/DSCONTENT/default';
-const P_IMG = 'rooms/DSIMG/default';          // 큰 그림(배경·학습지·교과서 표지)은 따로 — 학생이 필요할 때만 받음
+/* 선생님 공간: 학교·선생님마다 설정(사상가·수업 자료·표지·이름)을 따로 씀. 기본 공간 'default' = 도디쌤 */
+let SPACE = 'default', P_CONTENT = 'rooms/DSCONTENT/default', P_IMG = 'rooms/DSIMG/default';
+function cleanSpace(s) { return String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 20) || 'default'; }
+function setSpace(s) { SPACE = cleanSpace(s); P_CONTENT = 'rooms/DSCONTENT/' + SPACE; P_IMG = 'rooms/DSIMG/' + SPACE; }
+// P_IMG: 큰 그림(배경·학습지·교과서 표지)은 따로 — 학생이 필요할 때만 받음
 function getImg(kind, key) { return backend.get(P_IMG + '/' + kind + '/' + key).then(v => v || backend.get(P_CONTENT + '/' + kind + '/' + key)); }   // 교사 설정(사상가·판정·긴장감·단원) — 모든 반 공통
 const P_FB = 'rooms/DSFEEDBACK';                // 피드백 보내기
 const roomPath = c => 'rooms/DS_' + c;          // 반마다: meta, students, score
@@ -1011,6 +1014,8 @@ function listenScore() { if (S && MODE === 'student') backend.on(roomPath(ROOM) 
 async function boot() {
   app.innerHTML = `<div class="wrap"><div class="card">불러오는 중…</div></div>`;
   await initBackend();
+  if (MODE === 'teacher') setSpace(localStorage.getItem('dilsi_space') || 'default');
+  else if (ROOM) { const m0 = await backend.get(roomPath(ROOM) + '/meta').catch(() => null); setSpace((m0 && m0.space) || 'default'); }
   backend.on(P_CONTENT, v => { CONTENT = v || {}; if (MODE === 'teacher' || (BR().all)) setDocTitle(); safeRender(); });
   if (MODE === 'teacher') return bootTeacher();
   if (!ROOM) { metaLoaded = true; return render(); }
