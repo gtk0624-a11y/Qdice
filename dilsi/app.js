@@ -97,7 +97,8 @@ let CONTENT = {};                      // rooms/DSCONTENT/default
 const UNITS = window.UNITS || [];
 const BELIEFS = window.BELIEFS || [];
 const BK = BELIEFS.map(b => b.k);
-function TH(id) { const b = (window.THINKERS || {})[id] || { name: id, kw: [], b: {}, hz: '?', col: '#888' }; return Object.assign({ id }, b, ((CONTENT.th || {})[id]) || {}); }
+const THIRD = { name: '제3의 길', school: '나의 해결책', hz: '我', col: '#c8962d', kw: [], b: {}, intro: '어느 책사도 따르지 않고, 군주가 직접 세운 해결책' };
+function TH(id) { if (id === 'third') return Object.assign({ id }, THIRD); const b = (window.THINKERS || {})[id] || { name: id, kw: [], b: {}, hz: '?', col: '#888' }; return Object.assign({ id }, b, ((CONTENT.th || {})[id]) || {}); }
 function JUDGE() { return Object.assign({}, window.JUDGE0, CONTENT.judge || {}); }
 function TN(key) { const k = window.TENSION[key] ? key : 'normal'; return Object.assign({ key: k }, window.TENSION[k], ((CONTENT.tn || {})[k]) || {}); }
 const unitById = id => UNITS.find(u => u.id === id);
@@ -164,16 +165,51 @@ function kwHits(text, words) {
   return [...new Set(out)];
 }
 const mkHits = (text, list) => (list || []).filter(m => nz(text).includes(nz(m)));
-function judgeLine(text, thId) {
-  const J = JUDGE(), len = nz(text).length, kw = kwHits(text, TH(thId).kw), mk = mkHits(text, J.markers);
-  const c = [len >= J.lineMin, kw.length >= J.lineKw, mk.length > 0]; const n = c.filter(Boolean).length;
-  return { len, kw, mk, c, level: n === 3 ? 'a' : n === 2 ? 'b' : 'c' };
+/* 한 줄 논증 판정 — ① 분량 ② 개념어 ③ 근거 표지어 ④ 상황·증거
+   ④가 없으면(지금 상황과 상관없는 말) 무조건 ⚠️흔들림. 나머지 3개 모두 = 🏆, 2개 = ✅, 그 이하 = ⚠️
+   제3의 길: 개념어가 서로 다른 사상가 2명 이상에게서 나와야 함, 분량 +15자 */
+const LINE_THIRD_PLUS = 15;
+function judgeLine(text, thId, U, sc, st) {
+  const J = JUDGE(), len = nz(text).length, mk = mkHits(text, J.markers);
+  const ctx = mkHits(text, sc.sit || []);
+  const ev = (sc.evidence || []).filter(e => (st.opened || []).includes(e.id) && mkHits(text, e.key || []).length).map(e => e.id);
+  let kw, kwOk, thUsed = [];
+  if (thId === 'third') {
+    const ids = U.thinkers; kw = [];
+    ids.forEach(id => { const h = kwHits(text, TH(id).kw); if (h.length) { thUsed.push(id); kw.push(...h); } });
+    kw = [...new Set(kw)]; kwOk = thUsed.length >= 2;
+  } else { kw = kwHits(text, TH(thId).kw); kwOk = kw.length >= J.lineKw; if (kw.length) thUsed = [thId]; }
+  const lenOk = len >= J.lineMin + (thId === 'third' ? LINE_THIRD_PLUS : 0), ctxOk = ctx.length > 0 || ev.length > 0;
+  const c = [lenOk, kwOk, mk.length > 0, ctxOk], n = c.slice(0, 3).filter(Boolean).length;
+  const level = !ctxOk ? 'c' : n === 3 ? 'a' : n === 2 ? 'b' : 'c';
+  const opt = thId === 'third' ? sc.third : (sc.options.find(o => o.th === thId) || {});
+  const cost = mkHits(text, opt.cost || []);
+  const weak = !ctxOk ? 'ctx' : !kwOk ? 'kw' : !mk.length ? 'why' : !cost.length ? 'cost' : 'base';
+  return { len, kw, mk, ctx, ev, cost, c, level, weak, thUsed };
 }
-const LV = { a: { t: '🏆 대성공', cls: 'a', d: '사상가 카드가 완전히 발동했습니다!' }, b: { t: '✅ 성공', cls: 'b', d: '해결책이 실행되었습니다.' }, c: { t: '⚠️ 흔들림', cls: 'c', d: '근거가 약해 해결책이 절반만 힘을 냈습니다.' } };
+const LV = { a: { t: '🏆 대성공', cls: 'a', d: '논증이 완벽했습니다. 해결책이 온전히 힘을 냅니다!' }, b: { t: '✅ 성공', cls: 'b', d: '해결책이 실행됩니다.' }, c: { t: '⚠️ 흔들림', cls: 'c', d: '논증이 약해 해결책이 절반만 힘을 냅니다.' }, x: { t: '⏰ 결단하지 못함', cls: 'c', d: '' } };
+const WEAK = {
+  ctx: { t: '상황', d: '지금 운나라의 상황(또는 열어 본 증거)과 연결해서 답하세요.', rb: '그 말씀이 지금 이 상황과 무슨 관계입니까? 눈앞의 문제는 어디 갔습니까?' },
+  kw: { t: '개념', d: '사상가의 개념어를 넣어, 그 사상에서 나온 해결책임을 밝히세요.' },
+  why: { t: '근거', d: '"왜냐하면·따라서·그래서"로 이유를 설명하세요.' },
+  cost: { t: '대가', d: '이 해결책 때문에 생길 손해·반발을 어떻게 감당할지 쓰세요.' },
+  base: { t: '반대 사상', d: '반대 사상가의 비판에 "그러나…"로 맞서고, 개념어로 답하세요.' }
+};
+const COST_ANSWER = ['감수', '대신', '대비', '보완', '책임', '줄이', '막', '나누'];
 function allUnitKw(U) { const a = []; (U.thinkers || []).forEach(id => a.push(...(TH(id).kw || []))); return a; }
-function judgeRebut(text, U) {
+function judgeRebut(text, U, weak, sc, st) {
   const J = JUDGE(), len = nz(text).length, mk = mkHits(text, J.markers), kw = kwHits(text, allUnitKw(U));
-  return { len, mk, kw, ok: len >= J.rebutMin && (mk.length > 0 || kw.length > 0) };
+  if (!weak) return { len, mk, kw, ok: len >= J.rebutMin && (mk.length > 0 || kw.length > 0) };
+  const opt = st.adopt === 'third' ? sc.third : (sc.options.find(o => o.th === st.adopt) || {});
+  const own = st.adopt === 'third' ? kw : kwHits(text, TH(st.adopt).kw);
+  const need = {
+    ctx: mkHits(text, sc.sit || []).length > 0 || (sc.evidence || []).some(e => (st.opened || []).includes(e.id) && mkHits(text, e.key || []).length),
+    kw: own.length > 0,
+    why: mk.length > 0,
+    cost: mkHits(text, (opt.cost || []).concat(COST_ANSWER)).length > 0,
+    base: mk.length > 0 && (kw.length > 0 || mkHits(text, J.counter).length > 0)
+  }[weak];
+  return { len, mk, kw, ok: len >= J.rebutMin && !!need };
 }
 /* 포트폴리오 기준 4가지 (자동 확인) */
 function critOf(run, U) {
@@ -248,7 +284,8 @@ function cond(run, c) {
 function endingOf(run, U, score, reveal) {
   let e = (U.endings || []).find(x => cond(run, x.if)) || { e: '🏯', t: '끝', d: '' };
   const H = U.hidden;
-  if (H && reveal && !run.fallen && !run.hintUsed && score && score.hl != null && +score.hl >= +(META.hiddenTh || 80)
+  const byScore = score && score.hl != null && +score.hl >= +(META.hiddenTh || 80), byThird = (run.thirdOk || 0) >= 2;
+  if (H && reveal && !run.fallen && !run.hintUsed && (byScore || byThird)
     && H.words.some(w => nz((run.verdict || {}).text).includes(nz(w)))) e = Object.assign({ hidden: true }, H);
   return e;
 }
@@ -260,6 +297,10 @@ function checkLife(run, U, nextStep) {
 }
 function sceneOf(U, run) { return U.scenes[run.sc]; }
 function scState(run, sc) { if (!run.scenes[sc.id]) run.scenes[sc.id] = { opened: [] }; return run.scenes[sc.id]; }
+function duelPair(sc, run) { const p = ((sc.duel || {}).pairs || []).find(([a, b]) => !run.elim.includes(a) && !run.elim.includes(b)); return p || sc.options.map(o => o.th).filter(t => !run.elim.includes(t)).slice(0, 2); }
+function choosable(sc, run) { return sc.mode === 'duel' ? duelPair(sc, run) : sc.options.map(o => o.th).filter(t => !run.elim.includes(t)); }
+function peekN(run, sc) { const T = TN(run.tn); return sc.urgent ? Math.min(T.peek, sc.urgent.peek) : T.peek; }
+function timerSec(sc) { const T = TN(META.tension); if (sc.urgent) return T.timer > 0 ? Math.min(T.timer, sc.urgent.timer) : Math.round(sc.urgent.timer * 1.5); return T.timer; }
 function gateOK(i) { const g = META.gate == null ? 99 : +META.gate; return i + 1 <= g; }   // i: 0부터 (장면 번호-1), 판결문은 scenes.length
 
 /* 장면에 들어갈 때 한 번: 씨앗(지난 선택의 대가) + 무작위 사건 */
@@ -305,8 +346,8 @@ A.start = () => {
 };
 A.toEvidence = () => { const run = curRun(); run.step = 'evidence'; saveS(); render(); };
 A.peek = id => {
-  const run = curRun(), U = curUnit(), sc = sceneOf(U, run), st = scState(run, sc), T = TN(run.tn);
-  if (st.opened.includes(id)) return; if (st.opened.length >= T.peek) return toast('더 열 시간이 없습니다!');
+  const run = curRun(), U = curUnit(), sc = sceneOf(U, run), st = scState(run, sc);
+  if (st.opened.includes(id)) return; if (st.opened.length >= peekN(run, sc)) return toast('더 열 시간이 없습니다!');
   st.opened.push(id); saveS(); render();
 };
 A.toCouncil = () => { const run = curRun(), U = curUnit(); sceneOf(U, run).options.forEach(o => dexMeet(o.th)); run.step = 'council'; saveS(); render(); };
@@ -314,9 +355,10 @@ let SEL = null;
 A.sel = th => { SEL = th; render(); };
 A.adopt = () => {
   const run = curRun(), U = curUnit(), sc = sceneOf(U, run), st = scState(run, sc);
-  if (!SEL) return toast('책사를 한 명 고르세요.');
-  st.adopt = SEL; run.adopt[sc.id] = SEL; SEL = null; run.step = 'write';
-  const T = TN(META.tension); if (T.timer > 0) st.deadline = Date.now() + T.timer * 1000;
+  if (!SEL) return toast('하나를 고르세요.');
+  if (SEL !== 'third' && !choosable(sc, run).includes(SEL)) return toast('고를 수 없는 책사입니다.');
+  st.adopt = SEL; run.adopt[sc.id] = SEL; SEL = null; run.step = 'write'; run.gv = clone(run.g);   // 결과는 장면 끝에 공개
+  const sec = timerSec(sc); if (sec > 0) st.deadline = Date.now() + sec * 1000;
   saveS(true); render(); window.scrollTo(0, 0);
 };
 A.hint = () => {
@@ -342,18 +384,25 @@ A.paste = (field, ev) => {
 A.submitLine = timeout => {
   const run = curRun(), U = curUnit(); if (!run || run.step !== 'write') return;
   const sc = sceneOf(U, run), st = scState(run, sc), el = document.getElementById('f_line');
-  const text = (el ? el.value : st.d_line || '').trim(); const opt = sc.options.find(o => o.th === st.adopt);
+  const text = (el ? el.value : st.d_line || '').trim(); const third = st.adopt === 'third';
+  const opt = third ? sc.third : sc.options.find(o => o.th === st.adopt);
   if (!timeout && nz(text).length < 5) return toast('한 줄 논증을 써 주세요.');
   st.line = text; st.timedOut = !!timeout; st.lineAt = Date.now();
+  const add = (d, x) => Object.entries(x).forEach(([k, v]) => d[k] = (d[k] || 0) + v);
   if (timeout && nz(text).length < 10) {          // 시간 안에 결단하지 못함
     st.level = 'x'; st.chk = null; st.fxd = applyFx(run, U, { [lifeKey(U)]: -15 });
   } else {
-    const j = judgeLine(text, st.adopt); st.chk = { len: j.len, kw: j.kw, mk: j.mk, c: j.c }; st.level = j.level;
-    const pos = j.level === 'c' ? 0.5 : 1; const d = applyFx(run, U, opt.fx, { pos });
-    if (j.level === 'a') { const b = applyFx(run, U, { [lifeKey(U)]: 3 }); Object.entries(b).forEach(([k, v]) => d[k] = (d[k] || 0) + v); }
-    if (j.level === 'c') { const b = applyFx(run, U, { [lifeKey(U)]: -5 }); Object.entries(b).forEach(([k, v]) => d[k] = (d[k] || 0) + v); }
-    st.fxd = d; (opt.flags || []).forEach(f => run.flags[f] = 1);
-    addBeliefs(run, st.adopt, j.level === 'a' ? 2 : 1); dexMeet(st.adopt); S.dex[st.adopt].used++; if (j.level === 'a') S.dex[st.adopt].mastered = true;
+    const j = judgeLine(text, st.adopt, U, sc, st);
+    st.chk = { len: j.len, kw: j.kw, mk: j.mk, ctx: j.ctx, ev: j.ev, cost: j.cost, c: j.c }; st.level = j.level; st.weak = j.weak; st.thUsed = j.thUsed;
+    const d = third ? applyFx(run, U, opt.fx[j.level]) : applyFx(run, U, opt.fx, { pos: j.level === 'c' ? 0.5 : 1 });
+    if (j.level === 'a') add(d, applyFx(run, U, { [lifeKey(U)]: 3 }));
+    if (j.level === 'c') add(d, applyFx(run, U, { [lifeKey(U)]: -5 }));
+    st.fxd = d;
+    st.evFx = {}; j.ev.forEach(id => { const e = sc.evidence.find(x => x.id === id); if (e && e.bonus) add(st.evFx, applyFx(run, U, e.bonus)); });   // 증거 인용 보너스
+    if (!third || j.level !== 'c') (opt.flags || []).forEach(f => run.flags[f] = 1);
+    if (third && j.level === 'a') run.thirdOk = (run.thirdOk || 0) + 1;
+    const users = third ? j.thUsed : [st.adopt];
+    users.forEach(id => { addBeliefs(run, id, j.level === 'a' ? 2 : 1); dexMeet(id); S.dex[id].used++; if (j.level === 'a') S.dex[id].mastered = true; });
   }
   st.tries = 0; checkLife(run, U, st.level === 'x' ? 'result' : 'rebut'); saveS(true); render(); window.scrollTo(0, 0);
 };
@@ -362,9 +411,9 @@ A.submitRebut = skip => {
   const el = document.getElementById('f_rebut'); const text = (el ? el.value : '').trim();
   if (skip) { st.rebutOk = false; st.rebut = ''; st.rebutFx = applyFx(run, U, { [lifeKey(U)]: -6 }); checkLife(run, U, 'result'); saveS(true); render(); return; }
   if (nz(text).length < 5) return toast('재반박을 써 주세요.');
-  const j = judgeRebut(text, U); st.tries = (st.tries || 0) + 1; st.rebut = text; st.rebutChk = { len: j.len, mk: j.mk, kw: j.kw };
-  if (j.ok) { st.rebutOk = true; st.rebutFx = applyFx(run, U, { [lifeKey(U)]: 3 }); addBeliefs(run, st.adopt, 1); run.step = 'result'; }
-  else if (st.tries < T.rebut) { toast('🧓 "그것으로는 저를 설득할 수 없습니다." — 근거(왜냐하면·그러나…)나 개념어를 넣어 다시 써 보세요. (남은 기회 ' + (T.rebut - st.tries) + '번)', 4500); saveS(); render(); return; }
+  const j = judgeRebut(text, U, st.weak || 'base', sc, st); st.tries = (st.tries || 0) + 1; st.rebut = text; st.rebutChk = { len: j.len, mk: j.mk, kw: j.kw };
+  if (j.ok) { st.rebutOk = true; st.rebutFx = applyFx(run, U, { [lifeKey(U)]: 3 }); (st.adopt === 'third' ? (st.thUsed || []) : [st.adopt]).forEach(id => addBeliefs(run, id, 1)); run.step = 'result'; }
+  else if (st.tries < T.rebut) { const W = WEAK[st.weak || 'base']; toast('🧓 "그것으로는 저를 설득할 수 없습니다." — 노린 약점은 [' + W.t + ']입니다. ' + W.d + ' (' + JUDGE().rebutMin + '자 이상, 남은 기회 ' + (T.rebut - st.tries) + '번)', 5500); saveS(); render(); return; }
   else { st.rebutOk = false; st.rebutFx = applyFx(run, U, { [lifeKey(U)]: -6 }); }
   checkLife(run, U, 'result'); saveS(true); render(); window.scrollTo(0, 0);
 };
@@ -435,8 +484,10 @@ function startTick() {
 
 /* ---------- ⑦ 학생 화면 ---------- */
 function gaugesH(U, run) {
-  return `<div class="gauges">${gaugeKeys(U).map(k => { const d = U.gauges[k], v = run.g[k]; const c = v < 25 ? 'lo' : v < 50 ? 'mid' : 'hi';
-    return `<div class="gg ${d.life ? 'life' : ''} ${d.life && v <= 20 ? 'danger' : ''}"><div class="h"><span>${d.e} ${esc(d.n)}${d.life ? ' <span class="small" style="color:var(--main)">생명</span>' : ''}</span><span>${v}</span></div><div class="gbar"><i class="${c}" style="width:${v}%"></i></div></div>`; }).join('')}</div>`;
+  const hide = ['write', 'rebut'].includes(run.step) && run.gv;   // 결정 직후에는 숫자를 숨김 → 장면 끝에 공개
+  const G = hide ? run.gv : run.g;
+  return `<div class="gauges">${gaugeKeys(U).map(k => { const d = U.gauges[k], v = G[k]; const c = v < 25 ? 'lo' : v < 50 ? 'mid' : 'hi';
+    return `<div class="gg ${d.life ? 'life' : ''} ${d.life && v <= 20 ? 'danger' : ''}"><div class="h"><span>${d.e} ${esc(d.n)}${d.life ? ' <span class="small" style="color:var(--main)">생명</span>' : ''}</span><span>${hide ? v + ' → ❔' : v}</span></div><div class="gbar"><i class="${c}" style="width:${v}%"></i></div></div>`; }).join('')}</div>`;
 }
 function stepsH(U, run) {
   const names = U.scenes.map((s, i) => `장면${i + 1}`).concat(['판결문']);
@@ -500,18 +551,19 @@ function gameH() {
   return h;
 }
 function introH(U) {
-  const play = META.status === 'play';
+  const play = META.status === 'play', life = esc(U.gauges[lifeKey(U)].n);
   return `${sceneArt('open')}<div class="card"><div class="muted small">${esc(U.subject)} · ${esc(U.area)} · ${esc(U.genre)}</div><h2 style="font-size:24px">${esc(U.title)}</h2>
     <p><b>나의 역할:</b> ${esc(U.role)}</p>
     <div class="stage">${U.opening.map(p => `<p>${esc(p)}</p>`).join('')}</div>
-    <div class="rival"><div class="ic">${U.rival.e}</div><div><b>${esc(U.rival.name)}</b><br><span class="small">${esc(U.rival.desc)} 당신이 해결책을 고를 때마다 반박해 올 것입니다.</span></div></div>
-    <h3>규칙</h3>
+    <div class="rival"><div class="ic">${U.rival.e}</div><div><b>${esc(U.rival.name)}</b><br><span class="small">${esc(U.rival.desc)} 당신의 글을 읽고, <b>가장 약한 곳</b>을 찔러 올 것입니다.</span></div></div>
+    <h3>규칙 — 당신이 쓴 글이 나라의 운명을 바꿉니다</h3>
     <ul class="small" style="margin:0;padding-left:20px">
-      <li>장면마다 <b>증거 카드</b>를 몇 장만 열 수 있습니다. 다 볼 시간은 없습니다.</li>
-      <li>책사 한 명의 해결책을 <b>채택</b>하고, <b>한 줄 논증</b>으로 이유를 씁니다. 사상가의 <b>개념어</b>와 <b>근거(왜냐하면·따라서…)</b>를 넣어야 카드가 제대로 발동합니다.</li>
-      <li>${esc(U.rival.name)}의 반박에 <b>재반박</b>하세요. 실패하면 ${esc(U.gauges[lifeKey(U)].n)}이 떨어집니다.</li>
-      <li>채택하지 않은 책사 중 한 명을 <b>떨어뜨립니다</b>. 떨어진 책사는 돌아오지 않고, 그 대가가 나중에 돌아올 수 있습니다.</li>
-      <li>${esc(U.gauges[lifeKey(U)].n)}이 0이 되면 위험합니다. 마지막에는 <b>판결문</b>을 씁니다.</li>
+      <li><b>증거 카드</b>는 몇 장만 열 수 있습니다. 연 증거의 내용을 글에 <b>인용</b>하면 보너스가 붙습니다.</li>
+      <li>책사의 해결책을 채택하거나, <b>✍️ 제3의 길</b>(두 사상가의 개념을 섞은 나만의 해결책)을 직접 쓸 수 있습니다. 제3의 길은 성공하면 크게, 실패하면 크게 흔들립니다.</li>
+      <li><b>한 줄 논증</b>은 ① 분량 ② 사상가 개념어 ③ 근거(왜냐하면·따라서…) ④ <b>지금 상황과 연결</b>으로 판정됩니다. 상황과 상관없는 말은 개념어를 써도 흔들립니다.</li>
+      <li>${esc(U.rival.name)}은(는) 당신 글에서 <b>빠진 것</b>(개념·근거·대가·반대 사상)을 노려 반박합니다. 그 약점을 메우는 재반박을 쓰세요.</li>
+      <li>결과 숫자는 <b>장면이 끝날 때</b> 한꺼번에 공개됩니다. 떨어뜨린 책사, 내린 결정은 나중에 돌아옵니다.</li>
+      <li>${life}이 0이 되면 위험합니다. 마지막에는 <b>판결문</b>을 씁니다.</li>
     </ul>
     <div style="margin-top:14px">${play ? `<button class="btn full big" onclick="A.start()">▶ 시작하기</button>` : `<div class="note">⏳ 선생님이 시작하면 버튼이 열립니다.</div>`}</div></div>`;
 }
@@ -519,70 +571,104 @@ function storyH(U, run, sc) {
   const st = scState(run, sc);
   const seeds = (st.seeds || []).map(s => `<div class="seed">${esc(sc.seeds[s.i].text)}<br>${fxHTML(U, s.d)}</div>`).join('');
   const ev = st.event ? U.events[st.event.i] : null;
-  return `${sceneArt(sc.bg)}<div class="stage"><div class="ttl">장면 ${run.sc + 1} · ${esc(sc.title)}</div>${sc.story.map(p => `<p>${esc(p)}</p>`).join('')}</div>
+  return `${sceneArt(sc.bg)}<div class="stage"><div class="ttl">장면 ${run.sc + 1} · ${esc(sc.title)}${sc.mode === 'duel' ? ' <span class="pill gold">⚔️ 맞대결</span>' : ''}${sc.urgent ? ' <span class="pill bad">🚨 긴급</span>' : ''}</div>${sc.story.map(p => `<p>${esc(p)}</p>`).join('')}</div>
     ${st.decay ? `<div class="event">${esc(U.decay.text)}<br>${fxHTML(U, st.decay)}</div>` : ''}${seeds}${ev ? `<div class="event ${ev.good ? 'good' : ''}">🎲 돌발 사건: ${esc(ev.t)}<br>${fxHTML(U, st.event.d)}</div>` : ''}
     <button class="btn full big" style="margin-top:12px" onclick="A.toEvidence()">🔍 증거 살펴보기</button>`;
 }
 function evBody(run, e) { return e.alt && cond(run, e.alt.if) ? e.alt.body : e.body; }
 function evidenceH(U, run, sc) {
-  const st = scState(run, sc), T = TN(run.tn), left = T.peek - st.opened.length;
-  return `<div class="card"><h2>🔍 증거 카드</h2><p class="muted">시간이 없습니다. <b>${T.peek}장</b>만 열 수 있습니다. (남은 기회 ${Math.max(0, left)}장)</p>
+  const st = scState(run, sc), P = peekN(run, sc), left = P - st.opened.length;
+  return `<div class="card"><h2>🔍 증거 카드</h2><p class="muted">${sc.urgent ? '🚨 긴급 상황! ' : '시간이 없습니다. '}<b>${P}장</b>만 열 수 있습니다. (남은 기회 ${Math.max(0, left)}장) — 연 증거를 글에 인용하면 보너스!</p>
     <div class="evs">${sc.evidence.map(e => st.opened.includes(e.id)
       ? `<div class="evc"><b>${esc(e.t)}</b>${esc(evBody(run, e))}</div>`
       : `<button class="evc back ${left <= 0 ? 'lock' : ''}" ${left <= 0 ? 'disabled' : ''} onclick="A.peek('${e.id}')"><div style="font-size:30px">❓</div>${left <= 0 ? '열 수 없음' : '눌러서 열기'}</button>`).join('')}</div>
-    <button class="btn full big" style="margin-top:12px" onclick="A.toCouncil()">🏯 책사 회의 시작</button></div>`;
+    <button class="btn full big" style="margin-top:12px" onclick="A.toCouncil()">${sc.mode === 'duel' ? '⚔️ 맞대결 보기' : '🏯 책사 회의 시작'}</button></div>`;
+}
+function thirdCard(sc) {
+  return `<button class="thc ${SEL === 'third' ? 'sel' : ''}" style="border-style:dashed;border-color:var(--gold)" onclick="A.sel('third')">${avatar('third', 64)}<div><span class="nm">✍️ 제3의 길</span><span class="sc">나의 해결책</span>
+    <div class="pl">어느 책사도 따르지 않고, <b>두 사상가의 개념을 섞어</b> 직접 해결책을 씁니다. <span class="pill gold">고위험·고보상</span></div><div class="small muted">${esc(sc.third.hintPair || '')}</div></div></button>`;
 }
 function councilH(U, run, sc) {
-  return `<div class="card"><h2>🏯 책사 회의 — ${esc(sc.title)}</h2><p class="muted">한 명의 해결책을 채택하세요. <b>되돌릴 수 없습니다.</b></p>
+  const btn = `<button class="btn full big" style="margin-top:8px" ${SEL ? '' : 'disabled'} onclick="A.adopt()">📜 ${SEL === 'third' ? '제3의 길로 간다' : '이 해결책 채택'} (되돌릴 수 없음)</button>`;
+  if (sc.mode === 'duel') {
+    const [a, b] = duelPair(sc, run), oa = sc.options.find(o => o.th === a), ob = sc.options.find(o => o.th === b), ta = TH(a), tb = TH(b);
+    const say = (id, t, txt) => `<div class="thc" style="cursor:default;background:#fffdf8">${avatar(id, 52)}<div><span class="nm">${esc(TH(id).name)}</span><div class="pl">"${esc(txt)}"</div></div></div>`;
+    return `<div class="card"><h2>⚔️ 맞대결 — ${esc(ta.name)} vs ${esc(tb.name)}</h2><p class="muted">두 책사가 정면으로 부딪칩니다. 끝까지 듣고, 누구의 손을 들어줄지 판정하세요.</p>
+      <h3>1라운드 — 주장</h3>${say(a, ta, oa.duel.claim)}${say(b, tb, ob.duel.claim)}
+      <h3>2라운드 — 공격</h3>${say(a, ta, oa.duel.vs[b] || '')}${say(b, tb, ob.duel.vs[a] || '')}
+      <h3>판정</h3>
+      ${[[a, oa], [b, ob]].map(([id, o]) => `<button class="thc ${SEL === id ? 'sel' : ''}" onclick="A.sel('${id}')">${avatar(id, 56)}<div><span class="nm">${esc(TH(id).name)}의 승리</span><div class="pl small">채택: "${esc(o.plan)}"</div></div></button>`).join('')}
+      ${thirdCard(sc)}${btn}</div>`;
+  }
+  return `<div class="card"><h2>🏯 책사 회의 — ${esc(sc.title)}</h2><p class="muted">한 명의 해결책을 채택하거나 제3의 길을 고르세요. <b>되돌릴 수 없습니다.</b>${sc.urgent ? ' 🚨 고르면 바로 시간이 흐릅니다.' : ''}</p>
     ${sc.options.map(o => { const t = TH(o.th), out = run.elim.includes(o.th);
       return `<button class="thc ${SEL === o.th ? 'sel' : ''}" ${out ? 'disabled' : ''} onclick="A.sel('${o.th}')">${avatar(o.th, 64)}<div><span class="nm">${esc(t.name)}</span><span class="sc">${esc(t.school)}</span>
       ${out ? `<div class="pl"><b>❌ 오디션에서 떨어졌습니다.</b> 이 자리는 비어 있습니다.</div>` : `<div class="pl">"${esc(o.plan)}"</div>`}</div></button>`; }).join('')}
-    <button class="btn full big" style="margin-top:8px" ${SEL ? '' : 'disabled'} onclick="A.adopt()">📜 이 해결책 채택 (되돌릴 수 없음)</button></div>`;
+    ${thirdCard(sc)}${btn}</div>`;
 }
 function writeH(U, run, sc) {
-  const st = scState(run, sc), t = TH(st.adopt), opt = sc.options.find(o => o.th === st.adopt), J = JUDGE();
-  return `<div class="card"><div class="row"><h2 style="flex:1;margin:0">✍️ 한 줄 논증</h2>${st.deadline ? (() => { const l = Math.max(0, Math.ceil((st.deadline - Date.now()) / 1000)); return `<div id="tmr" class="timer${l > 30 ? ' calm' : ''}">⏳ ${Math.floor(l / 60)}:${String(l % 60).padStart(2, '0')}</div>`; })() : ''}</div>
-    <div class="thc sel" style="cursor:default">${avatar(st.adopt, 56)}<div><span class="nm">${esc(t.name)}의 해결책을 채택</span><div class="pl">"${esc(opt.plan)}"</div></div></div>
-    <p>왜 이 해결책을 택했는지 <b>군주로서</b> 한두 문장으로 밝히세요.</p>
-    <div class="chk"><span>📏 ${J.lineMin}자 이상</span><span>🔑 ${esc(t.name)}의 개념어 ${J.lineKw}개 이상</span><span>🔗 근거 표지어 (왜냐하면·따라서·그러나…)</span></div>
-    ${st.hint ? `<div class="note">💡 ${esc(t.name)}의 개념어: ${esc((t.kw || []).join(', '))}</div>` : ''}
-    <textarea id="f_line" class="inp" placeholder="예) 나는 ○○의 해결책을 택한다. 왜냐하면 …" oninput="A.draft('line',this)" onpaste="A.paste('line',event)">${esc(st.d_line || '')}</textarea>
+  const st = scState(run, sc), third = st.adopt === 'third', t = TH(st.adopt), J = JUDGE();
+  const opt = third ? null : sc.options.find(o => o.th === st.adopt);
+  const opened = (sc.evidence || []).filter(e => st.opened.includes(e.id));
+  const kwNames = third ? choosable(sc, run).concat(sc.options.map(o => o.th)).filter((v, i, a) => a.indexOf(v) === i) : [st.adopt];
+  return `<div class="card"><div class="row"><h2 style="flex:1;margin:0">✍️ ${sc.mode === 'duel' ? '판정문' : third ? '나의 해결책' : '한 줄 논증'}</h2>${st.deadline ? (() => { const l = Math.max(0, Math.ceil((st.deadline - Date.now()) / 1000)); return `<div id="tmr" class="timer${l > 30 ? ' calm' : ''}">⏳ ${Math.floor(l / 60)}:${String(l % 60).padStart(2, '0')}</div>`; })() : ''}</div>
+    ${third ? `<div class="thc sel" style="cursor:default">${avatar('third', 56)}<div><span class="nm">✍️ 제3의 길</span><div class="pl">무엇을 할지, 왜 그것이 옳은지 쓰세요. <b>서로 다른 두 사상가의 개념어</b>를 함께 써야 성공합니다.</div><div class="small muted">${esc(sc.third.hintPair || '')}</div></div></div>`
+      : `<div class="thc sel" style="cursor:default">${avatar(st.adopt, 56)}<div><span class="nm">${sc.mode === 'duel' ? esc(t.name) + '의 승리로 판정' : esc(t.name) + '의 해결책을 채택'}</span><div class="pl">"${esc(opt.plan)}"</div></div></div>`}
+    <p>${sc.mode === 'duel' && !third ? '왜 이 책사가 이겼는지, 상대의 공격은 왜 틀렸는지' : '왜 이 해결책이 옳은지'} <b>군주로서</b> 밝히세요.</p>
+    <div class="chk"><span>📏 ${J.lineMin + (third ? LINE_THIRD_PLUS : 0)}자 이상</span><span>🔑 ${third ? '두 사상가의 개념어' : esc(t.name) + '의 개념어'}</span><span>🔗 근거 (왜냐하면·따라서…)</span><span>📍 상황·증거 (${esc((sc.sit || []).slice(0, 4).join('·'))}…)</span></div>
+    ${opened.length ? `<details><summary class="small"><b>📎 내가 연 증거 (인용하면 보너스)</b></summary>${opened.map(e => `<div class="small" style="margin:4px 0"><b>${esc(e.t)}</b> ${esc(evBody(run, e))}</div>`).join('')}</details>` : ''}
+    ${st.hint ? `<div class="note">💡 개념어 — ${kwNames.map(id => `<b>${esc(TH(id).name)}</b>: ${esc((TH(id).kw || []).join(', '))}`).join(' / ')}</div>` : ''}
+    <textarea id="f_line" class="inp" placeholder="예) 나는 ○○을 택한다. 왜냐하면 지금 ○○ 상황에서 …" oninput="A.draft('line',this)" onpaste="A.paste('line',event)">${esc(st.d_line || '')}</textarea>
     <div class="cnt" id="cnt_line">${nz(st.d_line).length}자</div>
     <div class="row" style="margin-top:8px">${!st.hint && run.hintLeft > 0 ? `<button class="btn ghost" onclick="A.hint()">💡 힌트 카드 쓰기</button>` : ''}<span class="sp"></span><button class="btn big" onclick="A.submitLine(false)">결단하기 ⚔️</button></div></div>`;
 }
-function chkH(chk, J, name) {
+function chkH(chk, J) {
   if (!chk) return '';
-  return `<div class="chk"><span class="${chk.c[0] ? 'y' : 'n'}">📏 ${chk.len}자</span><span class="${chk.c[1] ? 'y' : 'n'}">🔑 개념어 ${chk.kw.length ? esc(chk.kw.join(', ')) : '없음'}</span><span class="${chk.c[2] ? 'y' : 'n'}">🔗 근거 ${chk.mk.length ? esc(chk.mk.join(', ')) : '없음'}</span></div>`;
+  const c = chk.c;
+  return `<div class="chk"><span class="${c[0] ? 'y' : 'n'}">📏 ${chk.len}자</span><span class="${c[1] ? 'y' : 'n'}">🔑 개념어 ${chk.kw.length ? esc(chk.kw.join(', ')) : '없음'}</span><span class="${c[2] ? 'y' : 'n'}">🔗 근거 ${chk.mk.length ? esc(chk.mk.join(', ')) : '없음'}</span><span class="${c[3] ? 'y' : 'n'}">📍 상황 ${(chk.ctx || []).length ? esc(chk.ctx.slice(0, 3).join(', ')) : '없음'}${(chk.ev || []).length ? ' · 📎증거 인용 ' + chk.ev.length : ''}</span></div>`;
+}
+function rebutText(sc, st) {
+  const o = st.adopt === 'third' ? sc.third : sc.options.find(x => x.th === st.adopt);
+  const w = st.weak || 'base';
+  return (o.rb && o.rb[w]) || (w === 'ctx' ? WEAK.ctx.rb : (o.rb && o.rb.base) || o.rebut || '');
 }
 function rebutH(U, run, sc) {
-  const st = scState(run, sc), opt = sc.options.find(o => o.th === st.adopt), L = LV[st.level], T = TN(run.tn), J = JUDGE();
-  const weak = st.level === 'c' ? '근거도 부족한 말씀이시군요. ' : '';
+  const st = scState(run, sc), L = LV[st.level], T = TN(run.tn), J = JUDGE(), W = WEAK[st.weak || 'base'];
   return `<div class="card"><div class="lvl ${L.cls}">${L.t}</div><p style="text-align:center" class="muted">${L.d}</p>${chkH(st.chk, J)}
-    <div style="text-align:center">${fxHTML(U, st.fxd)}</div></div>
-    <div class="rival"><div class="ic">${U.rival.e}</div><div><b>${esc(U.rival.name)}의 반박</b><br>"${esc(weak + opt.rebut)}"</div></div>
-    <div class="card"><h2>🛡️ 재반박</h2><p class="muted">이 반박에 답하세요. ${J.rebutMin}자 이상, 근거 표지어나 사상가 개념어가 있어야 설득됩니다. (기회 ${T.rebut - (st.tries || 0)}번)</p>
+    <p style="text-align:center" class="small">📜 나라에 어떤 일이 일어났는지는 <b>장면이 끝날 때</b> 공개됩니다.</p></div>
+    <div class="rival"><div class="ic">${U.rival.e}</div><div><b>${esc(U.rival.name)}의 반박</b> <span class="pill bad">🎯 노린 약점: ${W.t}</span><br>"${esc(rebutText(sc, st))}"</div></div>
+    <div class="card"><h2>🛡️ 재반박</h2><p class="muted"><b>${W.d}</b> (${J.rebutMin}자 이상 · 기회 ${T.rebut - (st.tries || 0)}번)</p>
     <textarea id="f_rebut" class="inp" placeholder="그러나 … 왜냐하면 …" oninput="A.draft('rebut',this)" onpaste="A.paste('rebut',event)">${esc(st.d_rebut || '')}</textarea>
     <div class="cnt" id="cnt_rebut">${nz(st.d_rebut).length}자</div>
     <div class="row" style="margin-top:8px"><button class="btn ghost" onclick="if(confirm('반박하지 않으면 ${esc(U.gauges[lifeKey(U)].n)}이 떨어집니다. 넘어갈까요?'))A.submitRebut(true)">말없이 넘어가기</button><span class="sp"></span><button class="btn big" onclick="A.submitRebut(false)">재반박하기 🛡️</button></div></div>`;
 }
 function distH(U, run, sc) {
   if (!TN(run.tn).dist) return '';
-  if (!CLASS || CLASS.for !== sc.id) return `<div class="card"><button class="btn line full" onclick="A.loadDist()">📊 우리 반은 누구를 채택했을까? (보기)</button></div>`;
+  if (!CLASS || CLASS.for !== sc.id) return `<div class="card"><button class="btn line full" onclick="A.loadDist()">📊 우리 반은 어떤 길을 택했을까? (보기)</button></div>`;
   const cnt = {}; let n = 0; Object.values(CLASS.data || {}).forEach(s => { const r = s && s.runs && s.runs[U.id]; const a = r && r.adopt && r.adopt[sc.id]; if (a) { cnt[a] = (cnt[a] || 0) + 1; n++; } });
   const mine = run.adopt[sc.id]; const top = Object.entries(cnt).sort((a, b) => b[1] - a[1])[0];
-  return `<div class="card"><h3 style="margin-top:0">📊 우리 반의 선택 (지금까지 ${n}명)</h3><div class="dist">${sc.options.map(o => `<div class="b ${o.th === mine ? 'me' : ''}"><div class="l">${esc(TH(o.th).name)}${o.th === mine ? ' (나)' : ''}</div><div class="g"><i style="width:${n ? Math.round((cnt[o.th] || 0) / n * 100) : 0}%"></i></div><div class="n">${cnt[o.th] || 0}</div></div>`).join('')}</div>
+  const ids = sc.options.map(o => o.th).concat(['third']);
+  return `<div class="card"><h3 style="margin-top:0">📊 우리 반의 선택 (지금까지 ${n}명)</h3><div class="dist">${ids.map(id => `<div class="b ${id === mine ? 'me' : ''}"><div class="l">${esc(TH(id).name)}${id === mine ? ' (나)' : ''}</div><div class="g"><i style="width:${n ? Math.round((cnt[id] || 0) / n * 100) : 0}%"></i></div><div class="n">${cnt[id] || 0}</div></div>`).join('')}</div>
     ${top && mine && top[0] !== mine ? `<div class="note">⚡ 당신은 반 다수(${esc(TH(top[0]).name)})와 <b>다른 길</b>을 택했습니다. 판결문에서 그 이유를 밝혀 보세요.</div>` : ''}
     <button class="btn sm ghost" onclick="A.loadDist()">새로고침</button></div>`;
 }
 function resultH(U, run, sc) {
   const st = scState(run, sc);
   if (st.level === 'x') return `<div class="card"><div class="lvl c">⏰ 결단하지 못했다</div><p style="text-align:center">군주가 망설이는 사이 백성은 실망했습니다. 해결책은 실행되지 않았습니다.</p><div style="text-align:center">${fxHTML(U, st.fxd)}</div></div><button class="btn full big" onclick="A.afterResult()">다음 ▶</button>`;
-  const L = LV[st.level];
-  return `<div class="card"><h2>📜 장면 ${run.sc + 1} 결과</h2>
-    <p><b>채택:</b> ${esc(TH(st.adopt).name)} — <span class="lvl ${L.cls}" style="font-size:18px">${L.t}</span></p>
-    <div>${fxHTML(U, st.fxd)}</div>
-    <p style="margin-top:8px"><b>재반박:</b> ${st.rebutOk ? '🛡️ 성공 — ' + esc(U.rival.name) + '이(가) 고개를 끄덕였습니다.' : '💢 실패 — 신하들이 술렁입니다.'} ${fxHTML(U, st.rebutFx)}</p>
-    <p class="small muted">신념 지표 변화: ${Object.entries(TH(st.adopt).b || {}).map(([k, v]) => k + ' +' + (v * (st.level === 'a' ? 2 : 1) + (st.rebutOk ? v : 0))).join(', ')}</p></div>
+  const L = LV[st.level], third = st.adopt === 'third', o = third ? sc.third : sc.options.find(x => x.th === st.adopt);
+  const story = (o.after || {})[st.level] || '';
+  const tot = {}; [st.fxd, st.evFx, st.rebutFx].forEach(d => Object.entries(d || {}).forEach(([k, v]) => tot[k] = (tot[k] || 0) + v));
+  const users = third ? (st.thUsed || []) : [st.adopt];
+  const bel = {}; users.forEach(id => Object.entries(TH(id).b || {}).forEach(([k, v]) => bel[k] = (bel[k] || 0) + v * (st.level === 'a' ? 2 : 1) + (st.rebutOk ? v : 0)));
+  return `<div class="card"><h2>📜 장면 ${run.sc + 1} — 그 뒤 운나라에서는</h2>
+    <p><b>${third ? '✍️ 제3의 길' : esc(TH(st.adopt).name)}</b> — <span class="lvl ${L.cls}" style="font-size:18px">${L.t}</span>${third && st.level === 'a' ? ' <span class="pill gold">✨ 아무도 생각 못 한 길</span>' : ''}</p>
+    <div class="stage"><p>${esc(story)}</p>${st.rebutOk ? `<p>🛡️ ${esc(U.rival.name)}이(가) 당신의 재반박에 고개를 끄덕였다.</p>` : `<p>💢 ${esc(U.rival.name)}의 반박에 답하지 못하자 신하들이 술렁였다.</p>`}</div>
+    <h3>📊 결과 공개</h3>
+    <div class="small">해결책 ${fxHTML(U, st.fxd)}</div>
+    ${Object.keys(st.evFx || {}).length ? `<div class="small">📎 증거 인용 보너스 ${fxHTML(U, st.evFx)}</div>` : ''}
+    <div class="small">재반박 ${fxHTML(U, st.rebutFx)}</div>
+    <div style="margin-top:6px"><b>합계</b> ${fxHTML(U, tot)}</div>
+    <p class="small muted">신념 지표 변화: ${Object.entries(bel).map(([k, v]) => k + ' +' + v).join(', ') || '없음'}</p></div>
     ${distH(U, run, sc)}
     <button class="btn full big" onclick="A.afterResult()">다음 ▶</button>`;
 }
@@ -608,7 +694,7 @@ function rescueH(U, run) {
     <button class="btn full big ${T.fall ? 'bad' : ''}" onclick="A.fall()">${T.fall ? '회고록 쓰러 가기' : '계속하기'}</button></div>`;
 }
 function pickH(U, run) {
-  let c = [...new Set(Object.values(run.adopt))].filter(t => !run.elim.includes(t));
+  let c = [...new Set(Object.values(run.adopt))].filter(t => t !== 'third' && !run.elim.includes(t));
   if (!c.length) c = U.thinkers.filter(t => !run.elim.includes(t));
   return `<div class="card"><h2>👑 ${esc(U.final.title)}</h2><p>${esc(U.final.pickPrompt)}</p>
     ${c.map(th => { const t = TH(th); return `<button class="thc" onclick="A.pickChief('${th}')">${avatar(th, 64)}<div><span class="nm">${esc(t.name)}</span><span class="sc">${esc(t.school)}</span><div class="pl small">${esc(t.intro)}</div></div></button>`; }).join('')}
