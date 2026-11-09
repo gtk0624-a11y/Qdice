@@ -65,7 +65,7 @@ function renderTeacher() {
   const tabs = [['run', '🎛️ 진행'], ['big', '📺 큰 화면'], ['board', '📊 현황판'], ['verdict', '📝 판결문·점수'], ['pf', '🗂️ 포트폴리오'], ['obs', '🔎 관찰 기록'], ['kpi', '📈 시범 지표'], ['fb', '💬 피드백'], ['set', '⚙️ 설정']];
   let body = '';
   try {
-    body = TTAB === 'run' ? runTabH(U, L) : TTAB === 'big' ? bigH(U, L) : TTAB === 'board' ? boardH(U, L) : TTAB === 'verdict' ? verdictTabH(U, L) : TTAB === 'pf' ? pfH(U, L) : TTAB === 'obs' ? obsH(U, L) : TTAB === 'kpi' ? kpiH(U, L) : TTAB === 'fb' ? fbH() : settingsH();
+    body = TTAB === 'run' ? guideH() + runTabH(U, L) : TTAB === 'big' ? bigH(U, L) : TTAB === 'board' ? boardH(U, L) : TTAB === 'verdict' ? verdictTabH(U, L) : TTAB === 'pf' ? pfH(U, L) : TTAB === 'obs' ? obsH(U, L) : TTAB === 'kpi' ? kpiH(U, L) : TTAB === 'fb' ? fbH() : settingsH();
   } catch (e) { console.error(e); body = `<div class="banner">화면 오류: ${esc(e.message)}</div>`; }
   app.innerHTML = `<div class="twrap"><div class="top"><h1><span class="logo">딜</span>${esc(META.name)} <small>방 ${esc(ROOM)} · ${esc(U.title)} · ${esc(TN(META.tension).n)}</small></h1>
     <span class="pill ${META.status === 'play' ? 'ok' : META.status === 'pause' ? 'gold' : ''}">${{ play: '▶ 진행 중', pause: '⏸ 멈춤', end: '⏹ 끝', wait: '대기' }[META.status] || '대기'}</span>${META.reveal ? '<span class="pill main">📣 결과 공개 중</span>' : ''}
@@ -123,20 +123,54 @@ function bigH(U, L) {
     ${META.rank !== false ? `<h2 style="margin-top:16px">🏆 순위</h2><div class="dist">${rankList(STU, U).slice(0, 10).map((x, i) => `<div class="b"><div class="l">${i + 1}위 · ${x.num}번</div><div class="g"><i style="width:${Math.min(100, x.sc / 3)}%"></i></div><div class="n">${x.r.fallen ? '🥀' : x.sc}</div></div>`).join('') || '<p class="muted">아직 없어요.</p>'}</div>` : ''}
     <h2 style="margin-top:16px">⚖️ 우리 반의 선택</h2>${dist}${mosaic}</div>`;
 }
+/* 진행 순서·수업 흐름 안내 (펼쳐 보기) */
+function guideH() {
+  return `<details class="card guide" style="margin-bottom:10px"><summary><b>📘 진행 순서 · 수업 흐름 한눈에 보기</b> <span class="small muted">(눌러서 펼치기)</span></summary>
+  <h3>⏱️ 수업 흐름 (50분 1차시 기준)</h3>
+  <table class="sumtbl">
+    <tr><td>0~5분</td><td><b>입장</b> — 큰 화면에 QR·방 코드 → 학생은 번호로 입장 → [▶ 시작]</td></tr>
+    <tr><td>5~15분</td><td><b>장면 1</b> 책사 회의 — 증거 열기 → 해결책 채택(또는 제3의 길) → 한 줄 논증 → 확신도 → 공손연과 공방 → 결과 → 탈락자 지명</td></tr>
+    <tr><td>15~25분</td><td><b>장면 2</b> 맞대결 — 두 책사의 토론을 보고 판정</td></tr>
+    <tr><td>25~33분</td><td><b>장면 3</b> 긴급 결단 — 짧은 제한 시간 → 반전</td></tr>
+    <tr><td>33~48분</td><td><b>판결문</b> — 재상 선택 → RAFTS 교서 쓰기(연대기를 근거로) → 제출</td></tr>
+    <tr><td>48~50분</td><td><b>마무리</b> — 📺 큰 화면 순위, 반 선택 분포 짧게 이야기</td></tr>
+  </table>
+  <p class="small muted">판결문을 다 못 쓰면 숙제나 다음 시간 첫 10분으로 넘겨도 됩니다(자동 저장).</p>
+  <h3>🎛️ 선생님 진행 순서</h3>
+  <ol class="small" style="padding-left:20px;line-height:1.8">
+    <li><b>수업 전</b>: ⚙️ 설정 → 📖 수업 자료에 수업 노트·힌트·<b>학습지 열쇠</b>를 넣고, 태블릿 한 대로 먼저 접속해 보기</li>
+    <li><b>🎛️ 진행</b>: 반 만들기 → 단원 → 긴장감(순한·보통·매운 맛) → 순위·연출·효과음 켜기/끄기 → [▶ 시작]</li>
+    <li><b>📺 큰 화면</b>을 프로젝터로 띄움 (QR·진행 인원·반 선택 분포·순위)</li>
+    <li>속도 차이가 크면 <b>🚪 진도 잠금</b>으로 "장면 1까지만" 열기, 필요하면 [⏸ 일시정지]</li>
+    <li><b>📊 현황판</b>: 빨간 줄(민심 20 이하·폐위)과 붙여넣기 횟수 확인, [보기]로 한 학생 글 전체 확인</li>
+    <li><b>수업 후</b>: 📝 판결문·점수 → [💾 전체 TXT] → 하이러닝 채점 → 점수 입력</li>
+    <li><b>다음 시간</b>: 🎛️ 진행 → [📣 엔딩·점수 공개] → 학생 화면에 엔딩이 열림</li>
+    <li><b>평가</b>: 🗂️ 포트폴리오(제출·분량·개념어·반론 4기준, 느슨한 절대평가), 🔎 관찰 기록은 세특 참고용</li>
+  </ol>
+  <h3>🎮 학생이 알아야 할 것 (시작 전 1분 안내)</h3>
+  <ul class="small" style="padding-left:20px;line-height:1.8">
+    <li>한 줄 논증 = <b>사상가 개념어 + 왜냐하면 + 지금 상황</b>. 상황이 빠지면 무조건 흔들림</li>
+    <li>막히면 📖 수업 노트 → 🧭 방향 → 🔍 개념 → ✍️ 문장 틀 순서로 힌트 (문장 틀을 베끼면 인정 안 됨)</li>
+    <li>🔑 학습지 열쇠를 맞히면 힌트 카드 +1 — <b>수업을 잘 들은 사람이 유리</b></li>
+    <li>쓰는 도중 📯 급보가 오면 글에 반영해야 함 · 확신도는 신중하게 · 사람들이 죽거나 떠날 수 있음</li>
+    <li>점수(순위)는 게임용이고, <b>성적은 판결문</b>으로만 매김</li>
+  </ul>
+  </details>`;
+}
 function boardH(U, L) {
   if (!L.length) return `<div class="card muted">아직 들어온 학생이 없어요.</div>`;
   const gk = gaugeKeys(U), lk = lifeKey(U);
   return `<div class="card"><div class="row"><h2 style="flex:1;margin:0">📊 실시간 현황판 — ${esc(U.title)}</h2><span class="muted small">빨간 줄 = ${esc(U.gauges[lk].n)} 20 이하 / 폐위</span></div>
-  <div class="scroll" style="margin-top:8px"><table class="st"><tr><th>번호</th><th>이름</th><th>진행</th>${gk.map(k => `<th>${U.gauges[k].e}${esc(U.gauges[k].n)}</th>`).join('')}${U.scenes.map((s, i) => `<th>장면${i + 1}</th>`).join('')}<th>탈락</th><th>⚔️진군</th><th>🧓충성</th><th>💡힌트·🔑</th><th>재상</th><th>판결문</th><th>붙여넣기</th><th>카드</th><th></th></tr>
-  ${L.map(s => { const r = runOf(s); if (!r) return `<tr><td>${s.num}</td><td>${esc(s.name)}</td><td>시작 전</td><td colspan="${gk.length + U.scenes.length + 9}"></td><td><button class="btn sm ghost" onclick="T.reset('${s.sid}')">삭제</button></td></tr>`;
+  <div class="scroll" style="margin-top:8px"><table class="st"><tr><th>번호</th><th>이름</th><th>진행</th>${gk.map(k => `<th>${U.gauges[k].e}${esc(U.gauges[k].n)}</th>`).join('')}${U.scenes.map((s, i) => `<th>장면${i + 1}</th>`).join('')}<th>탈락</th><th>패나라 진군</th><th>공손연 마음</th><th>힌트 단계<br><span class="small muted">장면1·2·3</span></th><th>학습지 열쇠</th><th>재상</th><th>판결문</th><th>붙여넣기</th><th>카드 사용</th><th></th></tr>
+  ${L.map(s => { const r = runOf(s); if (!r) return `<tr><td>${s.num}</td><td>${esc(s.name)}</td><td>시작 전</td><td colspan="${gk.length + U.scenes.length + 10}"></td><td><button class="btn sm ghost" onclick="T.reset('${s.sid}')">삭제</button></td></tr>`;
     const warn = r.fallen || (r.g[lk] <= 20 && r.step !== 'done');
     return `<tr class="${warn ? 'warn' : ''}"><td>${s.num}</td><td>${esc(s.name)}</td><td>${r.fallen ? '🥀 폐위 · ' : ''}${esc(stepName(r, U))}</td>${gk.map(k => `<td>${r.g[k]}</td>`).join('')}
-      ${U.scenes.map(sc => { const st = r.scenes[sc.id] || {}; return `<td>${st.adopt ? esc(TH(st.adopt).name) + ' ' + (st.level ? ({ a: '🏆', b: '✅', c: '⚠️', x: '⏰' })[st.level] : '') + (st.rebutOk === true ? '🛡️' : st.rebutOk === false ? '💢' : '') : '-'}</td>`; }).join('')}
-      <td>${r.elim.map(id => esc(TH(id).name)).join(',') || '-'}</td><td>${r.march || 0}%</td><td>${r.rival || 0}</td><td>${U.scenes.map(sc => { const st = r.scenes[sc.id] || {}; return (st.hl ? st.hl : '0') + (st.keyOk ? '🔑' : ''); }).join(' / ')}</td><td>${r.chief ? esc(TH(r.chief).name) : '-'}</td>
+      ${U.scenes.map(sc => { const st = r.scenes[sc.id] || {}; const lv = { a: '대성공', b: '성공', c: '흔들림', x: '시간 초과' }[st.level] || ''; const rb = st.rebutOk === true ? '공방 이김' : st.rebutOk === false ? '공방 밀림' : ''; return `<td>${st.adopt ? `<b>${st.adopt === 'third' ? '제3의 길' : esc(TH(st.adopt).name)}</b><div class="small">${[lv, rb].filter(Boolean).join(' · ')}</div>` : '-'}</td>`; }).join('')}
+      <td>${r.elim.map(id => esc(TH(id).name)).join(',') || '-'}</td><td>${r.march || 0}%${(r.march || 0) >= 80 ? ' <b style="color:var(--bad)">위험</b>' : ''}</td><td>${(r.rival || 0) >= 2 ? '감복' : (r.rival || 0) <= -2 ? '<b style="color:var(--bad)">적대</b>' : '흔들림'} (${(r.rival || 0) > 0 ? '+' : ''}${r.rival || 0})</td><td>${U.scenes.map(sc => (r.scenes[sc.id] || {}).hl || 0).join('·')}</td><td>${U.scenes.filter(sc => (r.scenes[sc.id] || {}).keyOk).length}/${U.scenes.length} 풂</td><td>${r.chief ? esc(TH(r.chief).name) : '-'}</td>
       <td>${nz(r.verdict.text).length}자${r.verdict.submittedAt ? ' ✅' : ''}</td><td>${r.paste ? `<b style="color:var(--bad)">${r.paste}회</b>` : '0'}</td>
-      <td>${r.hintUsed ? '💡' : ''}${r.rescued ? '❤️‍🩹' + r.rescued : ''}</td>
+      <td class="small">${[r.hintUsed ? '문장 틀 씀' : '', r.rescued ? '구제 ' + r.rescued + '회' : ''].filter(Boolean).join('<br>') || '-'}</td>
       <td><button class="btn sm line" onclick="T.view('${s.sid}')">보기</button> <button class="btn sm ghost" onclick="T.resetRun('${s.sid}')">단원 초기화</button></td></tr>`; }).join('')}
-  </table></div><p class="muted small">🏆 대성공 ✅ 성공 ⚠️ 흔들림 ⏰ 시간 초과 · 🛡️ 재반박 성공 💢 실패 · 💡 힌트 사용 ❤️‍🩹 구제 카드 사용</p></div>`;
+  </table></div><p class="muted small">힌트 단계: 0 = 안 봄, 1 = 방향 질문, 2 = 개념 짚기, 3 = 문장 틀(숨겨진 엔딩 불가) · 공손연 마음: +2 이상 감복, -2 이하 적대(배신 반전)</p></div>`;
 }
 T.view = sid => {
   const s = STU[sid], U = unitById(META.unit), r = runOf(s); if (!s || !r) return;

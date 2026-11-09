@@ -601,15 +601,17 @@ function lessonH(U, sc, st, run) {
   if (img && !LIMG[U.id + '_' + sc.id] && !LIMGREQ[U.id + '_' + sc.id]) { LIMGREQ[U.id + '_' + sc.id] = 1; backend.get(P_CONTENT + '/limg/' + U.id + '_' + sc.id).then(v => { if (v && v.d) { LIMG[U.id + '_' + sc.id] = v.d; const p = document.getElementById('noteimg'); if (p) p.innerHTML = `<img src="${v.d}" style="max-width:100%;border-radius:10px">`; } }).catch(() => { }); }
   const hasNote = L.note || img || L.link;
   return `<div class="lesson">
+    <div class="small muted" style="margin-bottom:4px">막히면 👇 수업 노트를 보거나 힌트를 순서대로 여세요. 아래 <b>학습지 열쇠</b>를 맞히면 힌트 카드 +1</div>
     <div class="row">${hasNote ? `<button class="btn sm line" onclick="A.note()">📖 수업 노트</button>` : ''}
-      ${h.map((x, i) => x ? `<button class="btn sm ${hl > i ? 'jade' : 'ghost'}" ${hl > i ? 'disabled' : ''} onclick="A.hintL(${i + 1})">💡 ${i + 1}단계${i === 0 ? '' : i === 1 ? (st.keyOk ? ' (공짜)' : ' (민심-2)') : ' (카드)'}</button>` : '').join('')}</div>
+      ${h.map((x, i) => x ? `<button class="btn sm ${hl > i ? 'jade' : 'ghost'}" ${hl > i ? 'disabled' : ''} onclick="A.hintL(${i + 1})">${HINTNM[i]}<span class="hc">${i === 0 ? '무료' : i === 1 ? (st.keyOk ? '무료(열쇠)' : U.gauges[lifeKey(U)].n + ' -2') : '힌트 카드 1장'}</span></button>` : '').join('')}</div>
     ${hasNote ? `<div id="notepanel" class="notep" style="display:${NOTEOPEN ? 'block' : 'none'}">${L.note ? `<div style="white-space:pre-wrap">${esc(L.note)}</div>` : ''}<div id="noteimg">${img && LIMG[U.id + '_' + sc.id] ? `<img src="${LIMG[U.id + '_' + sc.id]}" style="max-width:100%;border-radius:10px">` : ''}</div>${L.link ? `<a href="${esc(L.link)}" target="_blank" rel="noopener">📎 학습지·자료 열기</a>` : ''}</div>` : ''}
-    ${h.slice(0, hl).map((x, i) => `<div class="hintl"><b>💡 ${i + 1}단계</b> ${esc(x)}${i === 2 ? '<div class="small muted">문장 틀을 그대로 베끼면 인정되지 않습니다. 내 생각으로 채우세요.</div>' : ''}</div>`).join('')}
+    ${h.slice(0, hl).map((x, i) => `<div class="hintl"><b>${HINTNM[i]}</b> ${esc(x)}${i === 2 ? '<div class="small muted">문장 틀을 그대로 베끼면 인정되지 않습니다. 내 생각으로 채우세요.</div>' : ''}</div>`).join('')}
     ${hl >= 3 ? `<div class="note small">🔑 개념어 — ${(st.adopt === 'third' ? sc.options.map(o => o.th) : [st.adopt]).map(id => `<b>${esc(TH(id).name)}</b>: ${esc((TH(id).kw || []).join(', '))}`).join(' / ')}</div>` : ''}
-    ${L.key && L.key.q ? (st.keyOk ? `<div class="keyok">🔓 학습지 열쇠를 풀었습니다! (힌트 카드 +1)</div>` : `<div class="keybox"><div class="small"><b>${esc(L.key.q)}</b></div><div class="row"><input id="f_key" class="inp" style="flex:1" placeholder="학습지에서 찾은 답" onkeydown="if(event.key==='Enter')A.key()"><button class="btn sm gold" onclick="A.key()">🔑 열기</button></div></div>`) : ''}
+    ${L.key && L.key.q ? (st.keyOk ? `<div class="keyok">🔓 학습지 열쇠를 풀었습니다! (힌트 카드 +1)</div>` : `<div class="keybox"><div class="small">🔑 <b>학습지 열쇠</b> (맞히면 힌트 카드 +1, 개념 힌트 무료)<br><b>${esc(L.key.q)}</b></div><div class="row"><input id="f_key" class="inp" style="flex:1" placeholder="학습지에서 찾은 답" onkeydown="if(event.key==='Enter')A.key()"><button class="btn sm gold" onclick="A.key()">🔑 열쇠 맞히기</button></div></div>`) : ''}
   </div>`;
 }
 const LIMG = {}, LIMGREQ = {};
+const HINTNM = ['🧭 방향 힌트', '🔍 개념 힌트', '✍️ 문장 틀'];
 /* 확신도 걸기 */
 function betH(U, run, sc) {
   return `<div class="card" style="text-align:center"><h2>🎲 판정 직전 — 얼마나 자신 있습니까?</h2><p class="muted">당신의 논증이 어떤 판정을 받을지 아직 모릅니다. 확신이 클수록 맞으면 크게 얻고, 틀리면 크게 잃습니다.</p>
@@ -628,7 +630,7 @@ function stepsH(U, run) {
   const cur = ['pick', 'verdict', 'done'].includes(run.step) ? U.scenes.length : run.sc;
   return `<div class="steps">${names.map((n, i) => `<span class="${i < cur ? 'done' : i === cur ? 'on' : ''}">${n}</span>`).join('')}</div>`;
 }
-function cardsH(run) { return `<span class="pill gold">❤️‍🩹 구제 카드 ${run.rescueLeft}</span><span class="pill jade">💡 힌트 카드 ${run.hintLeft}</span><span class="pill">${esc(TN(run.tn).n)}</span>`; }
+function cardsH(run) { return `<span class="pill gold" title="민심이 바닥나 폐위될 때 호소문으로 한 번 살아남기">❤️‍🩹 구제 카드 ${run.rescueLeft}장 <span class="small">(폐위 직전 1번 부활)</span></span><span class="pill jade" title="✍️ 문장 틀 힌트를 열 때 1장 사용">💡 힌트 카드 ${run.hintLeft}장 <span class="small">(문장 틀 열기)</span></span><span class="pill">${esc(TN(run.tn).n)}</span>`; }
 function headH() {
   return `<div class="top"><h1><span class="logo">딜</span>${TITLE}<small>${SUBTITLE}${ROOM ? ' · 방 ' + esc(ROOM) : ''}</small></h1>
     ${S ? `<span class="pill main">${S.num}번${S.name ? ' ' + esc(S.name) : ''}</span>
@@ -930,7 +932,7 @@ function verdictH(U, run) {
     <table class="rafts"><tr><th>R</th><td><b>역할</b> ${esc(R.R)}</td></tr><tr><th>A</th><td><b>독자</b> ${esc(R.A)}</td></tr><tr><th>F</th><td><b>형식</b> ${esc(R.F)}</td></tr><tr><th>T</th><td><b>주제</b> ${esc(R.T)}</td></tr><tr><th>S</th><td><b>목적</b> ${esc(R.S)}</td></tr></table>
     <h3>꼭 넣을 것</h3><ol class="small" style="margin:0;padding-left:20px">${F.needs.map(n => `<li>${esc(n)}</li>`).join('')}</ol>
     <details class="chron-m"><summary><b>📜 운나라 연대기 펼치기</b> (판결문 근거)</summary>${chronicleH(U, run, true)}</details>
-    <textarea id="f_verdict" class="inp tall" style="margin-top:10px" placeholder="${esc(R.F)}를 쓰세요. 옆의 연대기를 근거로 쓰면 좋습니다." oninput="A.draft('verdict',this)" onpaste="A.paste('verdict',event)">${esc(run.verdict.text || '')}</textarea>
+    <h3 style="margin-bottom:4px">✍️ 여기에 판결문을 쓰세요</h3><textarea id="f_verdict" class="inp tall" style="margin-top:4px;min-height:260px" placeholder="${esc(R.F)}를 쓰세요. 연대기를 근거로 쓰면 좋습니다." oninput="A.draft('verdict',this)" onpaste="A.paste('verdict',event)">${esc(run.verdict.text || '')}</textarea>
     <div class="row" id="vcnt" style="margin-top:6px">${verdictLive(run, U)}</div>
     <p class="muted small">✏️ 자동 저장됩니다. 다른 곳에서 붙여 넣은 글은 기록이 남습니다. AI가 쓴 글을 그대로 내면 안 됩니다.</p>
     <button class="btn full big" onclick="A.submitVerdict()">📤 판결문 제출</button></div>${chronicleH(U, run)}</div>`;
