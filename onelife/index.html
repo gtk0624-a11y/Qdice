@@ -382,6 +382,8 @@ function writing(key){ return (S && S.w && S.w[key]) || null; }
 const wkeyR = uid => 'R-'+uid;
 function raftsState(uid){ if(PASS[uid]) return 'p'; const w=writing(wkeyR(uid)); if(UPL[wkeyR(uid)]) return 'u'; if(w&&w.done) return 'd'; if(w&&(w.text||w.deleted)) return 'w'; return ''; }
 function phOf(uid){ return (S.u[uid]||{}).ph||''; }
+/* 단원 글쓰기 최소 글자 수: 교사가 진행 탭에서 정하면(반마다) 그 값, 아니면 단원 기본값(content.js min) */
+function wMin(r){ return +((META||{}).minLen) || (r&&r.min) || 100; }
 const isSkip = uid => !!((META.skip||{})[uid]);   // 교사가 '건너뛰기'로 지정한 단원
 /* 건너뛴 단원 자동 처리: 열린 범위 안의 건너뛰기 단원은 자동으로 '지나간 시기'가 되고,
    교사가 다시 '하기'로 바꾸면 (아직 아무것도 안 한 경우) 다시 할 수 있게 되돌린다. */
@@ -654,8 +656,8 @@ function viewRafts(u){
   <table class="rafts"><tr><th>R<br><small>역할</small></th><td>${esc(r.R)}</td></tr><tr><th>A<br><small>독자</small></th><td>${esc(r.A)}</td></tr><tr><th>F<br><small>형식</small></th><td>${esc(r.F)}</td></tr><tr><th>T<br><small>주제</small></th><td>${esc(r.T)}</td></tr><tr><th>S<br><small>동사</small></th><td><b>${esc(r.S)}</b></td></tr></table>
   <h3>🎬 나의 인생 기록</h3><div class="echo" style="background:#fff8e1;border-color:#f08c00;color:#7a4b00">${esc(myChoiceLine(u))}<br>→ ${esc(ev?(ev.ok?c.r:(c.rf||c.r)):'')}</div>
   <h3>🔑 개념어·가치어 (${r.need||2}개 이상)</h3><div>${(u.concepts||[]).map(a=>`<span class="pill ${hs.includes(a)?'on':''}" data-pillr="${u.id}">${esc(a)}</span>`).join('')}</div>
-  <textarea class="inp tall" data-w="${key}" data-min="${r.min||100}" placeholder="R의 입장에서, A에게, F의 형식으로 쓰세요.">${esc(txt)}</textarea>
-  <div class="cnt" data-cnt="${key}">${txt.length}자 / 최소 ${r.min||100}자 · 개념어 <b>${hs.length}</b>/${r.need||2}</div>
+  <textarea class="inp tall" data-w="${key}" data-min="${wMin(r)}" placeholder="R의 입장에서, A에게, F의 형식으로 쓰세요.">${esc(txt)}</textarea>
+  <div class="cnt" data-cnt="${key}">${txt.length}자 / 최소 ${wMin(r)}자 · 개념어 <b>${hs.length}</b>/${r.need||2}</div>
   <h3>✅ 스스로 확인하기</h3>${conds.map((cc,ci)=>`<label style="display:flex;gap:8px;align-items:flex-start;margin:6px 0"><input type="checkbox" data-chk="${key}" data-i="${ci}" ${chk[ci]?'checked':''} style="width:20px;height:20px;margin-top:3px"> <span>${esc(cc)}</span></label>`).join('')}
   <div class="row" style="margin-top:10px"><button class="btn warm" data-act="raftsDone" data-v="${u.id}">작성 완료 (⭐ +${G.XP.rafts} XP)</button></div>${wActions(key)}
   <p class="muted">선생님이 하이러닝에 올려 AI 채점·피드백을 받습니다. 통과하면 ⭐ +${G.XP.pass} XP와 함께 다음 시기가 열려요.</p></div>`;
@@ -806,7 +808,7 @@ const SA={
   miniDone(ds){ const L=lessonById(ds.v); const w=S.w[ds.v]||{}; const t=w.text||''; if(t.length<MINI_MIN) return toast(`최소 ${MINI_MIN}자 이상 써 주세요. (지금 ${t.length}자)`); if(!hits(t,L.l.any).length) return toast('개념어를 하나 이상 넣어 주세요: '+L.l.any.join(', '));
     S.w[ds.v].done=true; S.w[ds.v].doneAt=Date.now(); if(!S.xpw[ds.v]){ S.xpw[ds.v]=1; addXP(G.XP.mini); } saveS(); toast(`✅ 작성 완료! ⭐ +${G.XP.mini} XP`); render(); },
   raftsDone(ds){ const u=unitById(ds.v); const r=u.rafts||{}; const key=wkeyR(u.id); const w=S.w[key]||{}; const t=w.text||''; const hs=hits(t,u.concepts); const conds=(r.cond&&r.cond.length)?r.cond:[1,2,3];
-    if(t.length<(r.min||100)) return toast(`최소 ${r.min||100}자 이상 써 주세요. (지금 ${t.length}자)`); if(hs.length<(r.need||2)) return toast(`개념어를 ${r.need||2}개 이상 써 주세요. (지금 ${hs.length}개)`);
+    if(t.length<(wMin(r))) return toast(`최소 ${wMin(r)}자 이상 써 주세요. (지금 ${t.length}자)`); if(hs.length<(r.need||2)) return toast(`개념어를 ${r.need||2}개 이상 써 주세요. (지금 ${hs.length}개)`);
     if(conds.some((c,ci)=>!(w.chk||{})[ci])) return toast('"스스로 확인하기"를 모두 확인해 주세요.');
     S.w[key].done=true; S.w[key].doneAt=Date.now(); if(!S.xpw[key]){ S.xpw[key]=1; addXP(G.XP.rafts); } saveS(); toast(`📤 제출 완료! ⭐ +${G.XP.rafts} XP`); render(); },
   endDone(){ const key='END-'+grade(); const E=ENDINGS[grade()]||{}; const t=(S.w[key]||{}).text||''; if(t.length<(E.min||300)) return toast(`최소 ${E.min||300}자 이상 써 주세요.`); S.w[key].done=true; saveS(); toast('✅ 작성 완료!'); render(); },
@@ -904,6 +906,7 @@ function tProg(){
    <h3>⏱️ 인생 사건 제한 시간</h3><div class="row"><button class="btn sm ${META.timer===false?'ghost':''}" data-act="timer">${META.timer===false?'꺼짐 → 켜기':'켜짐 → 끄기'}</button>${META.timer===false?'':`<select class="inp" style="width:auto" data-tin="tsec">${[60,90,120,180].map(s=>`<option ${+(META.tsec||90)===s?'selected':''} value="${s}">${s}초</option>`).join('')}</select>`}</div></div>
   <div class="card"><h2>📌 오늘 차시</h2><select class="inp" data-tin="lesson"><option value="">(선택 안 함)</option>${lessonOpts}</select></div></div>
   <div><div class="card"><h2>📅 진도 (열린 시기)</h2><p class="muted">필요한 단원만 하려면 나머지를 <b>⏭ 건너뛰기</b>로 바꾸세요. 건너뛴 시기는 학생 캐릭터가 자동으로 지나가고(능력치 조금 성장, 자서전 한 줄), 글쓰기 관문도 없습니다. 다시 <b>▶ 하기</b>로 바꾸면 아직 안 한 학생은 그 시기를 할 수 있습니다.</p><div class="tl">${L.map((u,i)=>`<div class="tli ${i<open?'':'lock'}" style="opacity:${isSkip(u.id)?.55:1}"><div class="ag">${u.age}살</div><div class="tt"><span class="muted">${esc(u.code)} · ${esc(u.stage)}</span><b>${esc(u.title)}</b></div>${i<open?'<span class="pill on">열림</span>':''}<button class="btn sm ${isSkip(u.id)?'warm':'line'}" data-act="skipU" data-v="${u.id}">${isSkip(u.id)?'⏭ 건너뜀 → ▶ 하기':'▶ 함 → ⏭ 건너뛰기'}</button><button class="btn sm ${i<open?'ghost':''}" data-act="setOpen" data-v="${i+1}">${i<open?'여기까지':'열기'}</button></div>`).join('')}</div></div>
+  <div class="card"><h2>✍️ 단원 글쓰기 분량</h2><p class="muted">이 반 학생들의 단원 글쓰기 최소 글자 수입니다. 바꾸면 바로 적용됩니다.</p><select class="inp" style="width:auto" data-tin="minLen">${[['','단원 기본값 (100자)'],['50','50자 이상'],['100','100자 이상'],['150','150자 이상'],['200','200자 이상'],['300','300자 이상'],['400','400자 이상'],['500','500자 이상']].map(([v,n])=>`<option value="${v}" ${String(META.minLen||'')===v?'selected':''}>${n}</option>`).join('')}</select></div>
   <div class="card"><h2>🚪 관문</h2><p>${META.gate===false?'<b>꺼짐</b>: 글쓰기 통과 없이도 다음 시기로 갑니다.':'<b>켜짐</b>: 앞 단원 글쓰기를 교사가 "통과"해야 다음 시기가 열립니다.'}</p><button class="btn ${META.gate===false?'':'ghost'}" data-act="gate">${META.gate===false?'관문 켜기':'관문 끄기'}</button>
   <h3>🎓 마무리 글쓰기</h3><button class="btn ghost sm" data-act="endToggle">${META.end?'닫기':'지금 열기'}</button></div>
   <div class="card"><h2>ℹ️ 한 시기(20분) 운영 순서</h2><ol style="margin:0;padding-left:20px;font-size:15px"><li>개념 수업(슬라이드·영상) 후 학생: ⏰ 시작 → 🗓️ 시간 쓰기</li><li>🎲 인생 사건 (필요하면 ⏸ 갈림길로 반 전체 토론)</li><li>교사: <b>짝 정하기</b> → 학생: 🤝 짝 딜레마</li><li>학생: 🏘️ 공동체 기금 → 교사: <b>공동체 결산</b></li><li>중간중간 교사: 🃏 <b>운명 카드</b>로 판 흔들기</li><li>학생: ✏️ 차시 글쓰기 → 단원 끝 📝 RAFTS → ZIP → 하이러닝 → ✅ 통과</li></ol></div></div></div>`;
@@ -1036,6 +1039,7 @@ document.addEventListener('change',e=>{
   else if(k==='fu'){ tFilter={u:v,k:''}; render(); } else if(k==='fk'){ tFilter.k=v; render(); }
   else if(k==='gu'){ tGU=v; render(); } else if(k==='fate'){ tFate=v; render(); }
   else if(k==='pairAnon') backend.update(`rooms/${ROOM}/meta`,{pairAnon:t.checked});
+  else if(k==='minLen') backend.update(`rooms/${ROOM}/meta`,{minLen:+v||null});
   else if(k==='tsec') backend.update(`rooms/${ROOM}/meta`,{tsec:+v});
   else if(k==='delEnd') backend.update(`rooms/${ROOM}/meta/del`,{end:v||null,days:+((META.del||{}).days||30)});
   else if(k==='delDays') backend.update(`rooms/${ROOM}/meta/del`,{days:+v||30});
