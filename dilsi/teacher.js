@@ -327,9 +327,10 @@ T.saveStd = id => backend.set(P_CONTENT + '/std/' + id, document.getElementById(
 /* 📚 교사 첫 화면 교과서 표지 (교사 화면에만 보임, rooms/DSIMG/default/cover) */
 const COVERS = [['ethics', '윤리와 사상'], ['modern', '현대사회와 윤리']], COVER = {}, COVERREQ = {};
 function coverImg(k) { if ((CONTENT.coverOn || {})[k] && !COVER[k] && !COVERREQ[k]) { COVERREQ[k] = 1; getImg('cover', k).then(v => { if (v && v.d) { COVER[k] = v.d; render(); } }).catch(() => { }); } return COVER[k] || ''; }
+const COVER_FILE = { ethics: 'img/cover_ethics.jpg', modern: 'img/cover_modern.jpg' };   // 기본 표지(사이트 파일) — 설정에서 올리면 그 그림이 우선
 function coversH() {
-  const on = COVERS.filter(([k]) => (CONTENT.coverOn || {})[k]); if (!on.length) return '';
-  return `<div class="covers">${on.map(([k, n]) => { const d = coverImg(k); return `<div class="cov">${d ? `<img src="${d}" alt="${esc(n)}">` : '<div class="muted small" style="padding:40px 0">불러오는 중…</div>'}<b>${esc(n)}</b></div>`; }).join('')}</div>`;
+  const on = COVERS;
+  return `<div class="covers">${on.map(([k, n]) => { const d = ((CONTENT.coverOn || {})[k] && coverImg(k)) || COVER_FILE[k]; return `<div class="cov">${d ? `<img src="${d}" alt="${esc(n)}">` : '<div class="muted small" style="padding:40px 0">불러오는 중…</div>'}<b>${esc(n)}</b></div>`; }).join('')}</div>`;
 }
 T.cover = async (k, inp) => { const f = inp.files && inp.files[0]; if (!f) return; try { const d = await compressWide(f); COVER[k] = d; await backend.set(P_IMG + '/cover/' + k, { d }); await backend.set(P_CONTENT + '/coverOn/' + k, true); toast('📚 표지를 올렸어요.'); } catch (e) { toast('그림을 읽지 못했어요.'); } };
 T.coverReset = k => { delete COVER[k]; backend.remove(P_IMG + '/cover/' + k); backend.remove(P_CONTENT + '/coverOn/' + k); };
@@ -346,8 +347,8 @@ function setBrandH() {
     <div class="row" style="margin-top:10px"><button class="btn sm" onclick="T.saveBrand()">저장</button><button class="btn sm ghost" onclick="T.brandReset()">처음 이름(딜시)으로</button></div>
     <p class="muted small">저장하면 모든 반 교사 화면에 바로 적용됩니다. 체크하면 학생 화면 위쪽에도 보입니다.</p></fieldset>
   <fieldset><legend>📚 교사 첫 화면 교과서 표지</legend>
-    <div class="row">${COVERS.map(([k, n]) => { const on = (CONTENT.coverOn || {})[k], d = on ? coverImg(k) : ''; return `<div style="border:1px solid var(--line);border-radius:10px;padding:8px;min-width:180px;text-align:center"><b class="small">${esc(n)}</b><div style="margin:6px 0">${d ? `<img src="${d}" style="max-height:120px;border-radius:6px">` : '<span class="muted small">없음</span>'}</div><label class="btn sm line" style="cursor:pointer">🖼️ 올리기<input type="file" accept="image/*" style="display:none" onchange="T.cover('${k}',this)"></label>${on ? ` <button class="btn sm ghost" onclick="T.coverReset('${k}')">지우기</button>` : ''}</div>`; }).join('')}</div>
-    <p class="muted small">교사 비밀번호 화면과 반 목록 화면에 보입니다(학생 화면에는 안 나옴). 선생님이 직접 찍은 교과서 사진을 올려 주세요.</p></fieldset>`;
+    <div class="row">${COVERS.map(([k, n]) => { const on = (CONTENT.coverOn || {})[k], d = (on && coverImg(k)) || COVER_FILE[k]; return `<div style="border:1px solid var(--line);border-radius:10px;padding:8px;min-width:180px;text-align:center"><b class="small">${esc(n)}</b><div style="margin:6px 0">${d ? `<img src="${d}" style="max-height:120px;border-radius:6px">` : '<span class="muted small">없음</span>'}</div><label class="btn sm line" style="cursor:pointer">🖼️ 올리기<input type="file" accept="image/*" style="display:none" onchange="T.cover('${k}',this)"></label>${on ? ` <button class="btn sm ghost" onclick="T.coverReset('${k}')">지우기</button>` : ''}</div>`; }).join('')}</div>
+    <p class="muted small">교사 비밀번호 화면과 반 목록 화면에 보입니다(학생 화면에는 안 나옴). 기본 표지가 들어 있고, 다른 그림을 올리면 그 그림으로 바뀝니다. [지우기]를 누르면 기본 표지로 돌아갑니다.</p></fieldset>`;
 }
 T.saveBrand = () => { const g = id => document.getElementById(id); const v = Object.assign({}, BR(), { title: g('br_title').value.trim(), sub: g('br_sub').value.trim(), all: g('br_all').checked });
   backend.set(P_CONTENT + '/brand', v).then(() => { toast('💾 저장했어요.'); setDocTitle(); }); };
