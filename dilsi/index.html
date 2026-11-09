@@ -149,12 +149,74 @@ table.st tr.warn td{background:#fff5f5}
 .toggle{cursor:pointer;user-select:none}
 .toggle.on{color:var(--ok);font-weight:900} .toggle.off{color:var(--bad);font-weight:900}
 .toggle.ovr{text-decoration:underline dotted}
+
+/* ===== 연출 (fx.js) ===== */
+.fx-off *{animation:none!important;transition:none!important}
+.world{border-radius:14px;overflow:hidden;line-height:0;margin:8px 0;border:1px solid var(--line)}
+.world svg{width:100%;height:auto;display:block}
+.world.hurt{animation:hurt .6s 2}
+@keyframes hurt{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+body.shake{animation:shake .6s}
+@keyframes shake{0%,100%{transform:none}20%{transform:translate(-8px,2px)}40%{transform:translate(8px,-2px)}60%{transform:translate(-5px,1px)}80%{transform:translate(5px,0)}}
+.stampwrap{display:flex;justify-content:center;margin:6px 0 2px}
+.stamp{font-family:serif;font-weight:900;font-size:40px;letter-spacing:4px;padding:6px 18px;border:6px double currentColor;border-radius:10px;transform:rotate(-8deg);animation:stampIn .45s cubic-bezier(.2,1.6,.4,1) both}
+.stamp.a{color:#c92a2a}.stamp.b{color:#2f7d6d}.stamp.c{color:#6b6b6b}
+.stamp.still{animation:none}
+@keyframes stampIn{0%{transform:scale(2.6) rotate(-8deg);opacity:0}100%{transform:scale(1) rotate(-8deg);opacity:1}}
+.typein{animation:typein .9s ease both}
+@keyframes typein{from{opacity:0;clip-path:inset(0 100% 0 0)}to{opacity:1;clip-path:inset(0 0 0 0)}}
+.evc.flip{animation:flip .55s ease both}
+@keyframes flip{0%{transform:perspective(600px) rotateY(90deg)}100%{transform:perspective(600px) rotateY(0)}}
+.vs{display:flex;align-items:center;justify-content:center;gap:16px;margin:8px 0 4px}
+.vs .side{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:110px}
+.vsb{font-size:34px;font-weight:900;color:#fff;background:var(--main);border-radius:50%;width:66px;height:66px;display:flex;align-items:center;justify-content:center;font-style:italic}
+.vsb.pulse{animation:vsp 1.2s infinite}
+@keyframes vsp{50%{transform:scale(1.12)}}
+.bubbles{display:flex;flex-direction:column;gap:8px;margin-top:6px}
+.rnd{font-weight:800;font-size:14px;color:var(--sub);text-align:center;margin-top:4px}
+.bub{max-width:82%;padding:10px 12px;border-radius:16px;font-size:16px;line-height:1.55}
+.bub.l{align-self:flex-start;background:#fff4e6;border:1px solid #f0d9b5;border-bottom-left-radius:4px}
+.bub.r{align-self:flex-end;background:#e7f5ff;border:1px solid #c5dff5;border-bottom-right-radius:4px}
+.bub.pop{animation:pop .45s ease both}
+@keyframes pop{from{opacity:0;transform:translateY(10px) scale(.96)}to{opacity:1;transform:none}}
+.lampbar{display:flex;align-items:center;gap:8px;margin:8px 0}
+.lamps{display:flex;gap:6px;flex-wrap:wrap}
+.lamps span{font-size:13px;font-weight:800;padding:6px 10px;border-radius:99px;background:#ececec;color:#8a8a8a;transition:all .25s}
+.lamps span.on{background:#fff3bf;color:#8a5a00;box-shadow:0 0 0 2px #ffd43b,0 0 14px #ffe066}
+.rivmini{text-align:center;line-height:1.1}
+.gloss{min-height:0;font-size:15px;background:#f3f0ff;border-left:4px solid #7048e8;border-radius:8px;padding:0 12px;max-height:0;overflow:hidden;transition:all .3s}
+.gloss.show{padding:8px 12px;max-height:120px;margin:6px 0}
+.evref{background:#fffdf8;border:1px solid var(--line);border-radius:8px;padding:6px 8px;margin:4px 0;transition:all .25s}
+.evref.used{background:#fff3bf;border-color:#ffd43b}
+.ring{position:relative;width:64px;height:64px}
+.ring #tmr{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:15px;font-variant-numeric:tabular-nums}
+.wrap.urgent{position:relative}
+.wrap.urgent::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:30;box-shadow:inset 0 0 0 0 rgba(201,42,42,0);animation:urg 1.1s infinite}
+@keyframes urg{50%{box-shadow:inset 0 0 0 10px rgba(201,42,42,.55)}}
+.vgrid{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:12px;align-items:start;margin:12px 0}
+@media(max-width:900px){.vgrid{grid-template-columns:1fr}.paper{order:-1;max-height:260px}}
+.paper{background:#f6ecd2;border:1px solid #d8c59a;border-radius:6px 6px 14px 14px;padding:12px;max-height:80vh;overflow:auto;box-shadow:inset 0 0 30px rgba(140,100,40,.18);font-size:14px;position:sticky;top:10px}
+.ptitle{font-weight:900;font-family:serif;font-size:18px;color:#6b3a12;text-align:center;border-bottom:2px solid #c9a96b;margin-bottom:6px;padding-bottom:4px}
+.chron{border-bottom:1px dashed #c9a96b;padding:6px 0}
+.chron .ch{font-weight:900;color:#7b2d26;margin-bottom:2px}
+.chron div{margin:2px 0}
+.rf{border-radius:22%;display:block}
+.rival .ic svg{display:block}
+.bigscr{background:#1d2433;color:#fff;border-radius:20px;padding:20px}
+.bigscr .bigcode{color:#ffd43b}
+.bigscr .kpi div{background:#2b3446;border-color:#3b465c;color:#fff}
+.bigscr .kpi b{color:#ffd43b}
+.bigscr .dist .b .l{color:#fff}
+.mosaic{display:flex;flex-wrap:wrap;gap:8px}
+.mosaic div{background:#2b3446;border-radius:12px;padding:8px;text-align:center;width:84px;font-size:12px}
+.mosaic div b{display:block;font-size:30px}
 </style>
 </head>
 <body>
 <div id="app"></div>
 <script src="content.js"></script>
 <script src="app.js"></script>
+<script src="fx.js"></script>
 <script src="teacher.js"></script>
 <script>boot();</script>
 </body>

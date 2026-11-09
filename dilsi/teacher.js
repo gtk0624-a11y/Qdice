@@ -62,19 +62,20 @@ function renderTeacher() {
   if (!metaLoaded) { app.innerHTML = `<div class="wrap"><div class="card">불러오는 중…</div></div>`; return; }
   if (!META.created) { app.innerHTML = `<div class="wrap"><div class="card"><h2>방 ${esc(ROOM)}을(를) 찾을 수 없어요</h2><button class="btn ghost" onclick="T.rooms()">← 반 목록</button></div></div>`; return; }
   const U = unitById(META.unit) || UNITS[0], L = studentList();
-  const tabs = [['run', '🎛️ 진행'], ['board', '📊 현황판'], ['verdict', '📝 판결문·점수'], ['pf', '🗂️ 포트폴리오'], ['obs', '🔎 관찰 기록'], ['kpi', '📈 시범 지표'], ['fb', '💬 피드백'], ['set', '⚙️ 설정']];
+  const tabs = [['run', '🎛️ 진행'], ['big', '📺 큰 화면'], ['board', '📊 현황판'], ['verdict', '📝 판결문·점수'], ['pf', '🗂️ 포트폴리오'], ['obs', '🔎 관찰 기록'], ['kpi', '📈 시범 지표'], ['fb', '💬 피드백'], ['set', '⚙️ 설정']];
   let body = '';
   try {
-    body = TTAB === 'run' ? runTabH(U, L) : TTAB === 'board' ? boardH(U, L) : TTAB === 'verdict' ? verdictTabH(U, L) : TTAB === 'pf' ? pfH(U, L) : TTAB === 'obs' ? obsH(U, L) : TTAB === 'kpi' ? kpiH(U, L) : TTAB === 'fb' ? fbH() : settingsH();
+    body = TTAB === 'run' ? runTabH(U, L) : TTAB === 'big' ? bigH(U, L) : TTAB === 'board' ? boardH(U, L) : TTAB === 'verdict' ? verdictTabH(U, L) : TTAB === 'pf' ? pfH(U, L) : TTAB === 'obs' ? obsH(U, L) : TTAB === 'kpi' ? kpiH(U, L) : TTAB === 'fb' ? fbH() : settingsH();
   } catch (e) { console.error(e); body = `<div class="banner">화면 오류: ${esc(e.message)}</div>`; }
   app.innerHTML = `<div class="twrap"><div class="top"><h1><span class="logo">딜</span>${esc(META.name)} <small>방 ${esc(ROOM)} · ${esc(U.title)} · ${esc(TN(META.tension).n)}</small></h1>
     <span class="pill ${META.status === 'play' ? 'ok' : META.status === 'pause' ? 'gold' : ''}">${{ play: '▶ 진행 중', pause: '⏸ 멈춤', end: '⏹ 끝', wait: '대기' }[META.status] || '대기'}</span>${META.reveal ? '<span class="pill main">📣 결과 공개 중</span>' : ''}
     <button class="btn ghost sm" onclick="T.rooms()">← 반 목록</button></div>
     <div class="tabs">${tabs.map(([k, n]) => `<button class="tab ${TTAB === k ? 'on' : ''}" onclick="T.tab('${k}')">${n}</button>`).join('')}</div>${body}${footH()}</div>${fbButton()}`;
-  if (TTAB === 'run') drawQR();
+  if (TTAB === 'run' || TTAB === 'big') drawQR();
 }
 function studentURL() { return location.origin + location.pathname + '?room=' + ROOM; }
-function drawQR() { const el = document.getElementById('qrbox'); if (!el || !window.QRCode) return; el.innerHTML = ''; new QRCode(el, { text: studentURL(), width: 180, height: 180 }); }
+function drawQR() { const el = document.getElementById('qrbox'); if (!el || !window.QRCode) return; el.innerHTML = ''; new QRCode(el, { text: studentURL(), width: +(el.dataset.s || 180), height: +(el.dataset.s || 180) }); }
+function stdOf(U) { const o = (CONTENT.std || {})[U.id]; if (o) return o.split('\n').map(l => l.trim()).filter(Boolean).map(l => { const i = l.indexOf('|'); return i > 0 ? { code: l.slice(0, i).trim(), text: l.slice(i + 1).trim() } : { code: '', text: l }; }); return U.standards || []; }
 
 function runTabH(U, L) {
   const subj = [...new Set(UNITS.map(u => u.subject))];
@@ -89,6 +90,7 @@ function runTabH(U, L) {
       <label class="lb">📣 결과 공개</label>
       <div class="row"><button class="btn ${META.reveal ? 'ghost' : 'jade'}" onclick="T.meta('reveal',${!META.reveal})">${META.reveal ? '공개 취소' : '📣 엔딩·점수 공개'}</button><span class="muted small">판결문 점수를 넣은 뒤 누르세요. 숨겨진 엔딩 기준</span><input class="inp" style="width:80px" type="number" value="${esc(META.hiddenTh || 80)}" onchange="T.meta('hiddenTh',+this.value)"><span class="muted small">점 이상</span></div>
     </div></div>
+    <div class="card"><h2>🎯 이 단원의 성취기준 — ${esc(U.title)}</h2>${stdOf(U).map(x => `<p class="small" style="margin:4px 0"><b>[${esc(x.code)}]</b> ${esc(x.text)}</p>`).join('') || '<p class="muted small">입력된 성취기준이 없습니다. ⚙️ 설정 → 단원 관리에서 넣으세요.</p>'}${U.extNote ? `<div class="note small">${esc(U.extNote)}</div>` : ''}</div>
     <div class="card"><h2>📚 단원 고르기</h2><p class="muted small">완성된 단원만 고를 수 있어요. 단원을 바꿔도 학생의 다른 단원 기록은 남아 있습니다.</p>
       ${subj.map(sj => `<h3>${esc(sj)}</h3><div class="row">${UNITS.filter(u => u.subject === sj).map(u => { const on = u.ready && unitOn(u.id);
         return `<button class="btn sm ${META.unit === u.id ? '' : 'line'}" ${on ? '' : 'disabled'} onclick="T.meta('unit','${u.id}')" title="${esc(u.logline)}">${esc(u.title)}${u.ready ? (reviewed(u.id) ? '' : ' · 미검수') : ' · 준비 중'}${u.sensitive ? ' ⚠️' : ''}</button>`; }).join('')}</div>`).join('')}
@@ -100,8 +102,24 @@ function runTabH(U, L) {
       <label class="row muted"><input type="radio" disabled> 모둠 <span class="pill">2단계에서 열림</span></label>
       <label class="row muted"><input type="radio" disabled> 학급 전체 <span class="pill">2단계에서 열림</span></label>
       <label class="row" style="margin-top:10px;cursor:pointer"><input type="checkbox" ${META.askName ? 'checked' : ''} onchange="T.meta('askName',this.checked)"> 이름도 받기 <span class="muted small">(끄면 번호만 받음 — 시범 운영은 끄기 권장)</span></label>
+      <label class="lb">🎬 연출 강도</label>
+      <select class="inp" style="width:auto" onchange="T.meta('fx',this.value)">${[['full', '전체 (도장·흔들림·대사창·등장 효과)'], ['lite', '간단히 (흔들림·타이핑 없음)'], ['off', '끔 (저사양 태블릿용)']].map(([v, n]) => `<option value="${v}" ${(META.fx || 'full') === v ? 'selected' : ''}>${n}</option>`).join('')}</select>
+      <label class="row" style="margin-top:8px;cursor:pointer"><input type="checkbox" ${META.sound ? 'checked' : ''} onchange="T.meta('sound',this.checked)"> 🔊 효과음 <span class="muted small">(도장·경고·심장 박동 — 교실에서는 끄기 권장)</span></label>
       <label class="lb">포트폴리오 만점(판결문 1편당)</label><input class="inp" style="width:100px" type="number" value="${esc(META.pfPts || 10)}" onchange="T.meta('pfPts',+this.value)">
     </div></div>`;
+}
+function bigH(U, L) {
+  const R = L.map(s => runOf(s)).filter(Boolean), done = R.filter(r => r.verdict && r.verdict.submittedAt).length;
+  const stepCnt = U.scenes.map((s, i) => R.filter(r => r.sc === i && !['pick', 'verdict', 'done'].includes(r.step)).length);
+  const vCnt = R.filter(r => ['pick', 'verdict'].includes(r.step)).length;
+  const dist = U.scenes.map((sc, i) => { const c = {}; let n = 0; R.forEach(r => { const a = r.adopt[sc.id]; if (a) { c[a] = (c[a] || 0) + 1; n++; } });
+    const ids = sc.options.map(o => o.th).concat(['third']);
+    return `<div style="margin:10px 0"><b>장면 ${i + 1} · ${esc(sc.title)}</b> <span class="muted small">(${n}명)</span><div class="dist">${ids.map(id => `<div class="b"><div class="l">${esc(TH(id).name)}</div><div class="g"><i style="width:${n ? Math.round((c[id] || 0) / n * 100) : 0}%"></i></div><div class="n">${c[id] || 0}</div></div>`).join('')}</div></div>`; }).join('');
+  const mosaic = META.reveal ? `<h2>🏁 엔딩</h2><div class="mosaic">${L.map(s => { const r = runOf(s); if (!r || !r.verdict || !r.verdict.submittedAt) return ''; const e = endingOf(r, U, SCORES[s.sid] || null, true); return `<div style="${e.hidden ? 'outline:3px solid #ffd43b' : ''}"><b>${e.e}</b>${s.num}번<br>${esc(e.t)}</div>`; }).join('')}</div>` : '<p class="muted">📣 결과를 공개하면 여기에 반 전체 엔딩이 모입니다.</p>';
+  return `<div class="bigscr"><div class="row"><div><div class="muted small" style="color:#aab">방 코드</div><div class="bigcode">${esc(ROOM)}</div></div><div class="qr" id="qrbox" data-s="120" style="border-radius:12px"></div><span class="sp"></span>
+    <button class="btn gold" onclick="document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen().catch(()=>{})">⛶ 전체 화면</button></div>
+    <div class="kpi" style="margin-top:12px"><div><b>${L.length}</b>접속</div>${stepCnt.map((n, i) => `<div><b>${n}</b>장면 ${i + 1}</div>`).join('')}<div><b>${vCnt}</b>판결문 작성</div><div><b>${done}</b>제출</div></div>
+    <h2 style="margin-top:16px">⚖️ 우리 반의 선택</h2>${dist}${mosaic}</div>`;
 }
 function boardH(U, L) {
   if (!L.length) return `<div class="card muted">아직 들어온 학생이 없어요.</div>`;
@@ -240,8 +258,22 @@ function setTnH() {
 T.saveTn = k => { const g = f => document.getElementById('tn_' + k + '_' + f).value; const v = { n: TN(k).n };
   ['timer', 'peek', 'ev', 'evBad', 'loss', 'rebut', 'rescue', 'hint'].forEach(f => v[f] = +g(f) || 0); v.dist = g('dist') === '1'; v.fall = g('fall') === '1';
   backend.set(P_CONTENT + '/tn/' + k, v).then(() => toast('💾 저장했어요.')); };
+T.bg = async (key, inp) => { const f = inp.files && inp.files[0]; if (!f) return; try { const d = await compressWide(f); BG[key] = d; await backend.set(P_CONTENT + '/bg/' + key, { d }); await backend.set(P_CONTENT + '/bgImg/' + key, true); toast('🖼️ 배경을 올렸어요.'); } catch (e) { toast('이미지를 읽을 수 없어요.'); } };
+T.bgReset = key => { delete BG[key]; backend.remove(P_CONTENT + '/bg/' + key); backend.remove(P_CONTENT + '/bgImg/' + key); };
+T.saveStd = id => backend.set(P_CONTENT + '/std/' + id, document.getElementById('std_' + id).value.trim() || null).then(() => toast('💾 저장했어요.'));
+function compressWide(file) {   // 배경: 가로 900px 이하, 약 120KB 이하
+  return new Promise((ok, no) => { const fr = new FileReader(); fr.onload = () => { const im = new Image(); im.onload = () => { const w = Math.min(900, im.width), h = Math.round(im.height * w / im.width), cv = document.createElement('canvas'); cv.width = w; cv.height = h; cv.getContext('2d').drawImage(im, 0, 0, w, h); let q = .8, d = cv.toDataURL('image/jpeg', q); while (d.length * .75 > 120000 && q > .3) { q -= .1; d = cv.toDataURL('image/jpeg', q); } ok(d); }; im.onerror = no; im.src = fr.result; }; fr.onerror = no; fr.readAsDataURL(file); });
+}
+function setUnitBgH() {
+  return UNITS.filter(u => u.ready).map(u => `<fieldset><legend>${esc(u.title)} — 장면 배경 · 성취기준</legend>
+    <div class="row">${[['open', '시작 화면']].concat(u.scenes.map((s, i) => [s.id, '장면' + (i + 1) + ' ' + s.title])).map(([sid, n]) => { const key = u.id + '_' + sid, on = (CONTENT.bgImg || {})[key];
+      return `<div style="border:1px solid var(--line);border-radius:10px;padding:8px;min-width:180px"><b class="small">${esc(n)}</b><br><label class="btn sm line" style="cursor:pointer;margin-top:4px">🖼️ 올리기<input type="file" accept="image/*" style="display:none" onchange="T.bg('${key}',this)"></label>${on ? ` <button class="btn sm ghost" onclick="T.bgReset('${key}')">기본 그림으로</button> <span class="pill ok">올림</span>` : ''}</div>`; }).join('')}</div>
+    <p class="muted small">Canva 등으로 만든 가로형 그림(16:9 권장)을 올리면 코드 그림 대신 보입니다. 자동으로 작게 줄여 저장합니다.</p>
+    <label class="lb">성취기준 (한 줄에 하나, "번호|내용")</label><textarea id="std_${u.id}" class="inp" style="min-height:90px">${esc(((CONTENT.std || {})[u.id]) || (u.standards || []).map(x => x.code + '|' + x.text).join('\n'))}</textarea>
+    <div class="row" style="margin-top:6px"><button class="btn sm" onclick="T.saveStd('${u.id}')">저장</button><button class="btn sm ghost" onclick="backend.remove(P_CONTENT+'/std/${u.id}')">파일 기본값으로</button></div></fieldset>`).join('');
+}
 function setUnitH() {
-  return `<p class="muted small">끈 단원은 단원 고르기에서 보이지 않습니다. 사상가 대사·개념어를 교과서와 대조한 뒤 [검수 완료]를 눌러 주세요(검수 전에는 '미검수' 표시).</p>
+  return setUnitBgH() + `<p class="muted small">끈 단원은 단원 고르기에서 보이지 않습니다. 사상가 대사·개념어를 교과서와 대조한 뒤 [검수 완료]를 눌러 주세요(검수 전에는 '미검수' 표시).</p>
     <div class="scroll"><table class="st"><tr><th>과목</th><th>단원</th><th>장르</th><th>상태</th><th>사용</th><th>검수</th></tr>
     ${UNITS.map(u => `<tr><td>${esc(u.subject)}</td><td class="l"><b>${esc(u.title)}</b>${u.sensitive ? ' ⚠️' : ''}<div class="small muted">${esc(u.area)} · ${esc(u.logline)}</div></td><td>${esc(u.genre)}</td><td>${u.ready ? '<span class="pill ok">완성</span>' : '<span class="pill">준비 중</span>'}</td>
       <td><button class="btn sm ${unitOn(u.id) ? 'ok' : 'ghost'}" onclick="backend.set(P_CONTENT+'/off/${u.id}',${unitOn(u.id) ? 'true' : 'null'})">${unitOn(u.id) ? '켜짐' : '꺼짐'}</button></td>
