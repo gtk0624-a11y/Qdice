@@ -103,7 +103,7 @@ const BG = {}, BGREQ = {};
 function sceneArt(bg, key) {
   if (key && (CONTENT.bgImg || {})[key]) {
     if (BG[key]) return `<div class="art"><img src="${BG[key]}" alt="" style="width:100%;height:auto;display:block;max-height:260px;object-fit:cover"></div>`;
-    if (!BGREQ[key] && backend) { BGREQ[key] = 1; backend.get(P_CONTENT + '/bg/' + key).then(v => { if (v && v.d) { BG[key] = v.d; safeRender(); } }).catch(() => { }); }
+    if (!BGREQ[key] && backend) { BGREQ[key] = 1; getImg('bg', key).then(v => { if (v && v.d) { BG[key] = v.d; safeRender(); } }).catch(() => { }); }
   }
   return sceneArtCode(bg);
 }

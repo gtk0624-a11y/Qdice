@@ -50,15 +50,15 @@ function pfScore(f) { const P = +(META.pfPts || 10); if (!f.sub) return 0; const
 
 /* ---------- 화면 ---------- */
 function renderTeacher() {
-  if (!TAUTH) { app.innerHTML = `<div class="wrap"><div class="top"><h1><span class="logo">딜</span>${TITLE} 교사 화면</h1></div><div class="card"><h2>🔐 교사 비밀번호</h2><input id="tpin" type="password" class="inp" inputmode="numeric" onkeydown="if(event.key==='Enter')T.login()"><button class="btn full" style="margin-top:10px" onclick="T.login()">들어가기</button></div>${footH()}</div>`; return; }
+  if (!TAUTH) { app.innerHTML = `<div class="wrap"><div class="top"><h1>${brandLogo()}${brandTitle()} 교사 화면</h1></div><div class="card"><h2>🔐 교사 비밀번호</h2><input id="tpin" type="password" class="inp" inputmode="numeric" onkeydown="if(event.key==='Enter')T.login()"><button class="btn full" style="margin-top:10px" onclick="T.login()">들어가기</button></div>${footH()}</div>`; return; }
   if (!ROOM) {
-    app.innerHTML = `<div class="wrap"><div class="top"><h1><span class="logo">딜</span>${TITLE} 교사 화면<small>${SUBTITLE}</small></h1></div>
-    <div class="card"><h2>➕ 새 반 만들기</h2><input id="rname" class="inp" placeholder="예: 3학년 2반 윤리와 사상"><button class="btn full" style="margin-top:8px" onclick="T.create()">방 만들기</button></div>
+    app.innerHTML = `<div class="wrap"><div class="top"><h1>${brandLogo()}${brandTitle()} 교사 화면<small>${brandSub()}</small></h1></div>
+    ${coversH()}<div class="card"><h2>➕ 새 반 만들기</h2><input id="rname" class="inp" placeholder="예: 3학년 2반 윤리와 사상"><button class="btn full" style="margin-top:8px" onclick="T.create()">방 만들기</button></div>
     <div class="card"><h2>📂 내 반</h2>${tRooms().length ? tRooms().map(r => `<div class="row" style="border-top:1px solid var(--line);padding:8px 0"><b style="flex:1">${esc(r.name)} <span class="pill main">${esc(r.code)}</span></b><button class="btn sm" onclick="T.open('${r.code}')">열기</button><button class="btn sm ghost" onclick="T.forget('${r.code}')">목록에서 빼기</button></div>`).join('') : '<p class="muted">아직 없어요.</p>'}
       <div class="row" style="margin-top:10px"><input id="ocode" class="inp" style="flex:1" placeholder="다른 기기에서 만든 방 코드"><button class="btn line" onclick="T.open(document.getElementById('ocode').value)">코드로 열기</button></div></div>
     <div class="card"><button class="btn ghost" onclick="TTAB='set';ROOM='__SET__';render()">⚙️ 공통 설정만 열기</button></div>${footH()}</div>${fbButton()}`; return;
   }
-  if (ROOM === '__SET__') { app.innerHTML = `<div class="twrap"><div class="top"><h1><span class="logo">딜</span>⚙️ 공통 설정</h1><button class="btn ghost sm" onclick="T.rooms()">← 반 목록</button></div>${settingsH()}${footH()}</div>`; return; }
+  if (ROOM === '__SET__') { app.innerHTML = `<div class="twrap"><div class="top"><h1>${brandLogo()}⚙️ 공통 설정</h1><button class="btn ghost sm" onclick="T.rooms()">← 반 목록</button></div>${settingsH()}${footH()}</div>`; return; }
   if (!metaLoaded) { app.innerHTML = `<div class="wrap"><div class="card">불러오는 중…</div></div>`; return; }
   if (!META.created) { app.innerHTML = `<div class="wrap"><div class="card"><h2>방 ${esc(ROOM)}을(를) 찾을 수 없어요</h2><button class="btn ghost" onclick="T.rooms()">← 반 목록</button></div></div>`; return; }
   const U = unitById(META.unit) || UNITS[0], L = studentList();
@@ -67,7 +67,7 @@ function renderTeacher() {
   try {
     body = TTAB === 'run' ? guideH() + runTabH(U, L) : TTAB === 'big' ? bigH(U, L) : TTAB === 'board' ? boardH(U, L) : TTAB === 'verdict' ? verdictTabH(U, L) : TTAB === 'pf' ? pfH(U, L) : TTAB === 'obs' ? obsH(U, L) : TTAB === 'kpi' ? kpiH(U, L) : TTAB === 'fb' ? fbH() : settingsH();
   } catch (e) { console.error(e); body = `<div class="banner">화면 오류: ${esc(e.message)}</div>`; }
-  app.innerHTML = `<div class="twrap"><div class="top"><h1><span class="logo">딜</span>${esc(META.name)} <small>방 ${esc(ROOM)} · ${esc(U.title)} · ${esc(TN(META.tension).n)}</small></h1>
+  app.innerHTML = `<div class="twrap"><div class="top"><h1>${brandLogo()}${esc(META.name)} <small>${brandTitle()} · 방 ${esc(ROOM)} · ${esc(U.title)} · ${esc(TN(META.tension).n)}</small></h1>
     <span class="pill ${META.status === 'play' ? 'ok' : META.status === 'pause' ? 'gold' : ''}">${{ play: '▶ 진행 중', pause: '⏸ 멈춤', end: '⏹ 끝', wait: '대기' }[META.status] || '대기'}</span>${META.reveal ? '<span class="pill main">📣 결과 공개 중</span>' : ''}
     <button class="btn ghost sm" onclick="T.rooms()">← 반 목록</button></div>
     <div class="tabs">${tabs.map(([k, n]) => `<button class="tab ${TTAB === k ? 'on' : ''}" onclick="T.tab('${k}')">${n}</button>`).join('')}</div>${body}${footH()}</div>${fbButton()}`;
@@ -252,8 +252,8 @@ T.dlFb = () => { const rows = Object.values(FB || {}).map(f => [fmtTime(f.t), f.
 
 /* ---------- ⚙️ 설정 (모든 반 공통: rooms/DSCONTENT/default) ---------- */
 function settingsH() {
-  const subs = [['th', '① 사상가·도감'], ['lesson', '📖 수업 자료'], ['judge', '③ 논술·판정 기준'], ['tn', '⑨ 긴장감'], ['unit', '단원 관리'], ['rec', '⑦ 학생 기록']];
-  const b = SETSUB === 'th' ? setThH() : SETSUB === 'lesson' ? setLessonH() : SETSUB === 'judge' ? setJudgeH() : SETSUB === 'tn' ? setTnH() : SETSUB === 'unit' ? setUnitH() : setRecH();
+  const subs = [['brand', '🏷️ 이름·로고'], ['th', '① 사상가·도감'], ['lesson', '📖 수업 자료'], ['judge', '③ 논술·판정 기준'], ['tn', '⑨ 긴장감'], ['unit', '단원 관리'], ['rec', '⑦ 학생 기록']];
+  const b = SETSUB === 'brand' ? setBrandH() : SETSUB === 'th' ? setThH() : SETSUB === 'lesson' ? setLessonH() : SETSUB === 'judge' ? setJudgeH() : SETSUB === 'tn' ? setTnH() : SETSUB === 'unit' ? setUnitH() : setRecH();
   return `<div class="note">⚙️ 여기서 바꾼 내용은 <b>모든 반에 함께</b> 적용되고, content.js 파일보다 우선합니다.</div>
     <div class="tabs">${subs.map(([k, n]) => `<button class="tab ${SETSUB === k ? 'on' : ''}" onclick="SETSUB='${k}';render()">${n}</button>`).join('')}</div><div class="ed">${b}</div>`;
 }
@@ -298,8 +298,8 @@ function setLessonH() {
 }
 T.saveLesson = (uid, sid) => { const k = uid + '_' + sid, g = p => document.getElementById(p + '_' + k).value.trim();
   backend.set(P_CONTENT + '/lesson/' + uid + '/' + sid, { note: g('ln'), link: g('ll'), hints: [g('lh1'), g('lh2'), g('lh3')], key: { q: g('lkq'), a: g('lka').split(/[,，]/).map(x => x.trim()).filter(Boolean) } }).then(() => toast('💾 저장했어요.')); };
-T.limg = async (key, inp) => { const f = inp.files && inp.files[0]; if (!f) return; try { const d = await compressWide(f); LIMG[key] = d; await backend.set(P_CONTENT + '/limg/' + key, { d }); await backend.set(P_CONTENT + '/limgOn/' + key, true); toast('🖼️ 올렸어요.'); } catch (e) { toast('이미지를 읽을 수 없어요.'); } };
-T.limgReset = key => { delete LIMG[key]; backend.remove(P_CONTENT + '/limg/' + key); backend.remove(P_CONTENT + '/limgOn/' + key); };
+T.limg = async (key, inp) => { const f = inp.files && inp.files[0]; if (!f) return; try { const d = await compressWide(f); LIMG[key] = d; await backend.set(P_IMG + '/limg/' + key, { d }); backend.remove(P_CONTENT + '/limg/' + key); await backend.set(P_CONTENT + '/limgOn/' + key, true); toast('🖼️ 올렸어요.'); } catch (e) { toast('이미지를 읽을 수 없어요.'); } };
+T.limgReset = key => { delete LIMG[key]; backend.remove(P_IMG + '/limg/' + key); backend.remove(P_CONTENT + '/limg/' + key); backend.remove(P_CONTENT + '/limgOn/' + key); };
 
 function setJudgeH() {
   const J = JUDGE(), F = [['lineMin', '한 줄 논증 최소 글자'], ['lineKw', '한 줄 논증 개념어 수'], ['rebutMin', '재반박 최소 글자'], ['verdictMin', '판결문 최소 글자'], ['verdictKw', '판결문 개념어 수']];
@@ -321,9 +321,42 @@ function setTnH() {
 T.saveTn = k => { const g = f => document.getElementById('tn_' + k + '_' + f).value; const v = { n: TN(k).n };
   ['timer', 'peek', 'ev', 'evBad', 'loss', 'rebut', 'rescue', 'hint'].forEach(f => v[f] = +g(f) || 0); v.dist = g('dist') === '1'; v.fall = g('fall') === '1';
   backend.set(P_CONTENT + '/tn/' + k, v).then(() => toast('💾 저장했어요.')); };
-T.bg = async (key, inp) => { const f = inp.files && inp.files[0]; if (!f) return; try { const d = await compressWide(f); BG[key] = d; await backend.set(P_CONTENT + '/bg/' + key, { d }); await backend.set(P_CONTENT + '/bgImg/' + key, true); toast('🖼️ 배경을 올렸어요.'); } catch (e) { toast('이미지를 읽을 수 없어요.'); } };
-T.bgReset = key => { delete BG[key]; backend.remove(P_CONTENT + '/bg/' + key); backend.remove(P_CONTENT + '/bgImg/' + key); };
+T.bg = async (key, inp) => { const f = inp.files && inp.files[0]; if (!f) return; try { const d = await compressWide(f); BG[key] = d; await backend.set(P_IMG + '/bg/' + key, { d }); backend.remove(P_CONTENT + '/bg/' + key); await backend.set(P_CONTENT + '/bgImg/' + key, true); toast('🖼️ 배경을 올렸어요.'); } catch (e) { toast('이미지를 읽을 수 없어요.'); } };
+T.bgReset = key => { delete BG[key]; backend.remove(P_IMG + '/bg/' + key); backend.remove(P_CONTENT + '/bg/' + key); backend.remove(P_CONTENT + '/bgImg/' + key); };
 T.saveStd = id => backend.set(P_CONTENT + '/std/' + id, document.getElementById('std_' + id).value.trim() || null).then(() => toast('💾 저장했어요.'));
+/* 📚 교사 첫 화면 교과서 표지 (교사 화면에만 보임, rooms/DSIMG/default/cover) */
+const COVERS = [['ethics', '윤리와 사상'], ['modern', '현대사회와 윤리']], COVER = {}, COVERREQ = {};
+function coverImg(k) { if ((CONTENT.coverOn || {})[k] && !COVER[k] && !COVERREQ[k]) { COVERREQ[k] = 1; getImg('cover', k).then(v => { if (v && v.d) { COVER[k] = v.d; render(); } }).catch(() => { }); } return COVER[k] || ''; }
+function coversH() {
+  const on = COVERS.filter(([k]) => (CONTENT.coverOn || {})[k]); if (!on.length) return '';
+  return `<div class="covers">${on.map(([k, n]) => { const d = coverImg(k); return `<div class="cov">${d ? `<img src="${d}" alt="${esc(n)}">` : '<div class="muted small" style="padding:40px 0">불러오는 중…</div>'}<b>${esc(n)}</b></div>`; }).join('')}</div>`;
+}
+T.cover = async (k, inp) => { const f = inp.files && inp.files[0]; if (!f) return; try { const d = await compressWide(f); COVER[k] = d; await backend.set(P_IMG + '/cover/' + k, { d }); await backend.set(P_CONTENT + '/coverOn/' + k, true); toast('📚 표지를 올렸어요.'); } catch (e) { toast('그림을 읽지 못했어요.'); } };
+T.coverReset = k => { delete COVER[k]; backend.remove(P_IMG + '/cover/' + k); backend.remove(P_CONTENT + '/coverOn/' + k); };
+/* 🏷️ 이름·로고 */
+function setBrandH() {
+  const b = BR();
+  return `<fieldset><legend>🏷️ 화면 위쪽 이름·로고</legend>
+    <div class="row" style="align-items:center;gap:12px"><div style="font-size:20px;font-weight:800">${brandLogo()}${brandTitle()} <small class="muted" style="font-size:13px">${brandSub()}</small></div><span class="muted small">← 지금 모습</span></div>
+    <label class="lb">이름 (예: 도디쌤의 딜시 수업)</label><input id="br_title" class="inp" value="${esc(b.title || '')}" placeholder="${esc(TITLE)}">
+    <label class="lb">작은 설명 (예: Dilemma Simulation · 딜레마 시뮬레이션 수업)</label><input id="br_sub" class="inp" value="${esc(b.sub || '')}" placeholder="${esc(SUBTITLE)}">
+    <label class="lb">로고 그림 (도디쌤 이미지 등, 정사각형으로 잘라 작게 저장)</label>
+    <div class="row"><label class="btn sm line" style="cursor:pointer">🖼️ 그림 올리기<input type="file" accept="image/*" style="display:none" onchange="T.brandLogo(this)"></label>${b.logo ? `<button class="btn sm ghost" onclick="T.brandLogoReset()">그림 지우기</button>` : ''}</div>
+    <label class="row" style="margin-top:10px;gap:6px;align-items:center"><input type="checkbox" id="br_all" ${b.all ? 'checked' : ''}> 학생 화면에도 같은 이름·로고 보이기</label>
+    <div class="row" style="margin-top:10px"><button class="btn sm" onclick="T.saveBrand()">저장</button><button class="btn sm ghost" onclick="T.brandReset()">처음 이름(딜시)으로</button></div>
+    <p class="muted small">저장하면 모든 반 교사 화면에 바로 적용됩니다. 체크하면 학생 화면 위쪽에도 보입니다.</p></fieldset>
+  <fieldset><legend>📚 교사 첫 화면 교과서 표지</legend>
+    <div class="row">${COVERS.map(([k, n]) => { const on = (CONTENT.coverOn || {})[k], d = on ? coverImg(k) : ''; return `<div style="border:1px solid var(--line);border-radius:10px;padding:8px;min-width:180px;text-align:center"><b class="small">${esc(n)}</b><div style="margin:6px 0">${d ? `<img src="${d}" style="max-height:120px;border-radius:6px">` : '<span class="muted small">없음</span>'}</div><label class="btn sm line" style="cursor:pointer">🖼️ 올리기<input type="file" accept="image/*" style="display:none" onchange="T.cover('${k}',this)"></label>${on ? ` <button class="btn sm ghost" onclick="T.coverReset('${k}')">지우기</button>` : ''}</div>`; }).join('')}</div>
+    <p class="muted small">반 목록이 있는 교사 첫 화면에만 보입니다(학생 화면에는 안 나옴). 선생님이 직접 찍은 교과서 사진을 올려 주세요.</p></fieldset>`;
+}
+T.saveBrand = () => { const g = id => document.getElementById(id); const v = Object.assign({}, BR(), { title: g('br_title').value.trim(), sub: g('br_sub').value.trim(), all: g('br_all').checked });
+  backend.set(P_CONTENT + '/brand', v).then(() => { toast('💾 저장했어요.'); setDocTitle(); }); };
+T.brandLogo = async inp => { const f = inp.files && inp.files[0]; if (!f) return; try { const d = await compressSquare(f, 160); await backend.set(P_CONTENT + '/brand', Object.assign({}, BR(), { logo: d })); toast('🖼️ 로고를 올렸어요.'); } catch (e) { toast('그림을 읽지 못했어요. 다른 그림으로 해 보세요.'); } };
+T.brandLogoReset = () => { const v = Object.assign({}, BR()); delete v.logo; backend.set(P_CONTENT + '/brand', v); };
+T.brandReset = () => { if (confirm('이름·설명·로고를 처음(딜시)으로 되돌릴까요?')) backend.remove(P_CONTENT + '/brand'); };
+function compressSquare(file, size) {   // 로고: 정사각형 가운데 자르기, 약 15KB
+  return new Promise((ok, no) => { const fr = new FileReader(); fr.onload = () => { const im = new Image(); im.onload = () => { const s = Math.min(im.width, im.height), cv = document.createElement('canvas'); cv.width = cv.height = size; const c = cv.getContext('2d'); c.fillStyle = '#fff'; c.fillRect(0, 0, size, size); c.drawImage(im, (im.width - s) / 2, (im.height - s) / 2, s, s, 0, 0, size, size); ok(cv.toDataURL('image/jpeg', 0.85)); }; im.onerror = no; im.src = fr.result; }; fr.onerror = no; fr.readAsDataURL(file); });
+}
 function compressWide(file) {   // 배경: 가로 900px 이하, 약 120KB 이하
   return new Promise((ok, no) => { const fr = new FileReader(); fr.onload = () => { const im = new Image(); im.onload = () => { const w = Math.min(900, im.width), h = Math.round(im.height * w / im.width), cv = document.createElement('canvas'); cv.width = w; cv.height = h; cv.getContext('2d').drawImage(im, 0, 0, w, h); let q = .8, d = cv.toDataURL('image/jpeg', q); while (d.length * .75 > 120000 && q > .3) { q -= .1; d = cv.toDataURL('image/jpeg', q); } ok(d); }; im.onerror = no; im.src = fr.result; }; fr.onerror = no; fr.readAsDataURL(file); });
 }

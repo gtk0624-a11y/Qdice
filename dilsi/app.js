@@ -19,7 +19,9 @@ const FIREBASE_CONFIG = {
 const TEACHER_PIN = '0624';
 const TITLE = '딜시';
 const SUBTITLE = '딜레마 시뮬레이션';
-const P_CONTENT = 'rooms/DSCONTENT/default';   // 교사 설정(사상가·판정·긴장감·단원) — 모든 반 공통
+const P_CONTENT = 'rooms/DSCONTENT/default';
+const P_IMG = 'rooms/DSIMG/default';          // 큰 그림(배경·학습지·교과서 표지)은 따로 — 학생이 필요할 때만 받음
+function getImg(kind, key) { return backend.get(P_IMG + '/' + kind + '/' + key).then(v => v || backend.get(P_CONTENT + '/' + kind + '/' + key)); }   // 교사 설정(사상가·판정·긴장감·단원) — 모든 반 공통
 const P_FB = 'rooms/DSFEEDBACK';                // 피드백 보내기
 const roomPath = c => 'rooms/DS_' + c;          // 반마다: meta, students, score
 
@@ -598,7 +600,7 @@ let NOTEOPEN = false;
 A.note = () => { NOTEOPEN = !NOTEOPEN; const p = document.getElementById('notepanel'); if (p) p.style.display = NOTEOPEN ? 'block' : 'none'; };
 function lessonH(U, sc, st, run) {
   const L = lessonOf(U, sc), h = L.hints || [], hl = st.hl || 0, img = ((CONTENT.limgOn || {})[U.id + '_' + sc.id]);
-  if (img && !LIMG[U.id + '_' + sc.id] && !LIMGREQ[U.id + '_' + sc.id]) { LIMGREQ[U.id + '_' + sc.id] = 1; backend.get(P_CONTENT + '/limg/' + U.id + '_' + sc.id).then(v => { if (v && v.d) { LIMG[U.id + '_' + sc.id] = v.d; const p = document.getElementById('noteimg'); if (p) p.innerHTML = `<img src="${v.d}" style="max-width:100%;border-radius:10px">`; } }).catch(() => { }); }
+  if (img && !LIMG[U.id + '_' + sc.id] && !LIMGREQ[U.id + '_' + sc.id]) { LIMGREQ[U.id + '_' + sc.id] = 1; getImg('limg', U.id + '_' + sc.id).then(v => { if (v && v.d) { LIMG[U.id + '_' + sc.id] = v.d; const p = document.getElementById('noteimg'); if (p) p.innerHTML = `<img src="${v.d}" style="max-width:100%;border-radius:10px">`; } }).catch(() => { }); }
   const hasNote = L.note || img || L.link;
   return `<div class="lesson">
     <div class="small muted" style="margin-bottom:4px">막히면 👇 수업 노트를 보거나 힌트를 순서대로 여세요. 아래 <b>학습지 열쇠</b>를 맞히면 힌트 카드 +1</div>
@@ -631,8 +633,14 @@ function stepsH(U, run) {
   return `<div class="steps">${names.map((n, i) => `<span class="${i < cur ? 'done' : i === cur ? 'on' : ''}">${n}</span>`).join('')}</div>`;
 }
 function cardsH(run) { return `<span class="pill gold" title="민심이 바닥나 폐위될 때 호소문으로 한 번 살아남기">❤️‍🩹 구제 카드 ${run.rescueLeft}장 <span class="small">(폐위 직전 1번 부활)</span></span><span class="pill jade" title="✍️ 문장 틀 힌트를 열 때 1장 사용">💡 힌트 카드 ${run.hintLeft}장 <span class="small">(문장 틀 열기)</span></span><span class="pill">${esc(TN(run.tn).n)}</span>`; }
+/* 이름·로고 꾸미기 (⚙️ 설정 → 🏷️ 이름·로고, CONTENT.brand) */
+function BR() { return (CONTENT && CONTENT.brand) || {}; }
+function brandLogo(forStudent) { const b = BR(); if (forStudent && !b.all) return '<span class="logo">딜</span>'; return b.logo ? `<img class="logo img" src="${b.logo}" alt="">` : '<span class="logo">딜</span>'; }
+function brandTitle(forStudent) { const b = BR(); return esc((forStudent && !b.all) ? TITLE : (b.title || TITLE)); }
+function brandSub(forStudent) { const b = BR(); return esc((forStudent && !b.all) ? SUBTITLE : (b.sub || SUBTITLE)); }
+function setDocTitle() { try { const b = BR(); document.title = (b.title || TITLE) + ' — ' + (b.sub || SUBTITLE); } catch (e) { } }
 function headH() {
-  return `<div class="top"><h1><span class="logo">딜</span>${TITLE}<small>${SUBTITLE}${ROOM ? ' · 방 ' + esc(ROOM) : ''}</small></h1>
+  return `<div class="top"><h1>${brandLogo(true)}${brandTitle(true)}<small>${brandSub(true)}${ROOM ? ' · 방 ' + esc(ROOM) : ''}</small></h1>
     ${S ? `<span class="pill main">${S.num}번${S.name ? ' ' + esc(S.name) : ''}</span>
     <div class="tabs" style="margin:0"><button class="tab ${STAB === 'game' ? 'on' : ''}" onclick="A.tab('game')">🎮 게임</button><button class="tab ${STAB === 'rec' ? 'on' : ''}" onclick="A.tab('rec')">📚 내 기록</button></div>` : ''}</div>`;
 }
@@ -740,7 +748,7 @@ function storyH(U, run, sc) {
 function prepH(U, sc) {
   const L = lessonOf(U, sc), k = U.id + '_' + sc.id, img = ((CONTENT.limgOn || {})[k]);
   if (!(L.note || img || L.link)) return '';
-  if (img && !LIMG[k] && !LIMGREQ[k]) { LIMGREQ[k] = 1; backend.get(P_CONTENT + '/limg/' + k).then(v => { if (v && v.d) { LIMG[k] = v.d; const p = document.getElementById('prepimg'); if (p) p.innerHTML = `<img src="${v.d}" style="max-width:100%;border-radius:10px">`; } }).catch(() => { }); }
+  if (img && !LIMG[k] && !LIMGREQ[k]) { LIMGREQ[k] = 1; getImg('limg', k).then(v => { if (v && v.d) { LIMG[k] = v.d; const p = document.getElementById('prepimg'); if (p) p.innerHTML = `<img src="${v.d}" style="max-width:100%;border-radius:10px">`; } }).catch(() => { }); }
   return `<details class="card prep"><summary><b>📖 학습지·수업 노트 먼저 보기</b> <span class="small muted">(여기서는 시간이 흐르지 않아요)</span></summary>
     ${L.link ? `<a class="btn line full" style="margin:8px 0" href="${esc(L.link)}" target="_blank" rel="noopener">📎 학습지 열기 (새 탭)</a>` : ''}
     ${L.note ? `<div class="notep" style="display:block;white-space:pre-wrap">${esc(L.note)}</div>` : ''}
@@ -1003,7 +1011,7 @@ function listenScore() { if (S && MODE === 'student') backend.on(roomPath(ROOM) 
 async function boot() {
   app.innerHTML = `<div class="wrap"><div class="card">불러오는 중…</div></div>`;
   await initBackend();
-  backend.on(P_CONTENT, v => { CONTENT = v || {}; safeRender(); });
+  backend.on(P_CONTENT, v => { CONTENT = v || {}; if (MODE === 'teacher' || (BR().all)) setDocTitle(); safeRender(); });
   if (MODE === 'teacher') return bootTeacher();
   if (!ROOM) { metaLoaded = true; return render(); }
   backend.on(roomPath(ROOM) + '/meta', v => { META = v || {}; metaLoaded = true; safeRender(); });
