@@ -254,7 +254,7 @@ const tension = () => TN(META.tension);
 function newRun(U) {
   const T = tension(), g = {}; Object.entries(U.gauges).forEach(([k, d]) => g[k] = d.start);
   const bd = {}; BK.forEach(k => bd[k] = 0);
-  return { unit: U.id, startedAt: Date.now(), tn: T.key, g, flags: {}, elim: [], adopt: {}, sc: 0, step: 'story', scenes: {}, rescueLeft: T.rescue, hintLeft: T.hint, hintUsed: false, rescued: 0, fallen: false, bd, paste: 0, pasteChars: 0, verdict: { text: '', log: [], paste: 0, pasteChars: 0 } };
+  return { unit: U.id, startedAt: Date.now(), tn: T.key, g, flags: {}, elim: [], adopt: {}, sc: 0, step: 'story', scenes: {}, rescueLeft: T.rescue, hintLeft: T.hint, hintUsed: false, rescued: 0, fallen: false, bd, march: U.march ? U.march.start : 0, npc: Object.fromEntries(Object.keys(U.npcs || {}).map(k => [k, 'ok'])), rival: 0, keys: {}, paste: 0, pasteChars: 0, verdict: { text: '', log: [], paste: 0, pasteChars: 0 } };
 }
 function gaugeKeys(U) { return Object.keys(U.gauges); }
 function lifeKey(U) { return Object.keys(U.gauges).find(k => U.gauges[k].life) || Object.keys(U.gauges)[0]; }
@@ -279,6 +279,12 @@ function cond(run, c) {
   if (c.fallen != null && !!run.fallen !== !!c.fallen) return false;
   if (c.gMin && Object.entries(c.gMin).some(([k, v]) => (run.g[k] || 0) < v)) return false;
   if (c.gMax && Object.entries(c.gMax).some(([k, v]) => (run.g[k] || 0) > v)) return false;
+  if (c.lvl && !c.lvl.includes(run._lvl)) return false;
+  if (c.npc && Object.entries(c.npc).some(([k, v]) => ((run.npc || {})[k] || 'ok') !== v)) return false;
+  if (c.rivalMin != null && (run.rival || 0) < c.rivalMin) return false;
+  if (c.rivalMax != null && (run.rival || 0) > c.rivalMax) return false;
+  if (c.marchMin != null && (run.march || 0) < c.marchMin) return false;
+  if (c.marchMax != null && (run.march || 0) > c.marchMax) return false;
   return true;
 }
 function endingOf(run, U, score, reveal) {
@@ -308,6 +314,8 @@ function enterScene(run, U) {
   const sc = sceneOf(U, run), st = scState(run, sc); if (st.entered) return;
   st.entered = Date.now(); st.seeds = [];
   if (run.sc > 0 && U.decay) st.decay = applyFx(run, U, U.decay.fx);
+  if (run.sc > 0 && U.march) marchStep(run, U, st, U.march.per);
+  const AL = SX(U, sc).alarms || []; if (AL.length && Math.random() < (TN(run.tn).alarm || 0)) st.alarmI = Math.floor(Math.random() * AL.length);
   (sc.seeds || []).forEach((s, i) => { if (cond(run, s.if)) { const d = applyFx(run, U, s.fx); st.seeds.push({ i, d }); } });
   const T = TN(run.tn);
   if (U.events && U.events.length && Math.random() < T.ev) {
@@ -315,6 +323,31 @@ function enterScene(run, U) {
     const ev = pick(pool.length ? pool : U.events), i = U.events.indexOf(ev);
     st.event = { i, d: applyFx(run, U, ev.fx) };
   }
+}
+
+/* ---------- 장면 추가 장치 (진군·급보·인물·수업 자료) ---------- */
+const SX = (U, sc) => ((U.sceneX || {})[sc.id]) || {};
+function lessonOf(U, sc) { const base = SX(U, sc).lesson || {}, o = ((CONTENT.lesson || {})[U.id] || {})[sc.id] || {}; const L = Object.assign({}, base, o); L.hints = (o.hints && o.hints.some(Boolean)) ? o.hints : (base.hints || []); L.key = (o.key && o.key.q) ? o.key : base.key; return L; }
+function marchStep(run, U, st, d) {
+  if (!U.march || !d) return; run.march = clamp((run.march || 0) + d, 0, 100);
+  if (run.march >= 100) { st.invade = applyFx(run, U, U.march.hit); run.march = 60; }
+}
+const RALLY_ORDER = ['ctx', 'kw', 'why', 'cost', 'base'];
+const RALLY_ESC = ['', '그 말에도 일리는 있군요. 하지만 하나 더 묻겠습니다. ', '좋습니다. 그렇다면 마지막으로 묻겠습니다. '];
+function rallyType(st) { if (!(st.rally || []).length) return st.weak || 'base'; const used = st.rally.map(r => r.type); return RALLY_ORDER.find(t => !used.includes(t) && t !== 'ctx') || 'base'; }
+function rallyText(sc, st) {
+  const k = (st.rally || []).length, t = rallyType(st), o = st.adopt === 'third' ? sc.third : sc.options.find(x => x.th === st.adopt);
+  const body = (o.rb && o.rb[t]) || (t === 'ctx' ? WEAK.ctx.rb : (o.rb && o.rb.base) || '');
+  return (RALLY_ESC[k] || RALLY_ESC[2]) + body;
+}
+/* 장면 끝: 인물 운명 + 진군 */
+function finishScene(run, U, sc, st) {
+  if (st.finished) return; st.finished = Date.now(); st.people = []; run._lvl = st.level;
+  const done = {};
+  (SX(U, sc).people || []).forEach((r, i) => { if (done[r.npc] || !cond(run, r.if)) return; done[r.npc] = 1; run.npc[r.npc] = r.st; st.people.push({ i, d: r.fx ? applyFx(run, U, r.fx) : {} }); });
+  delete run._lvl;
+  const md = ((SX(U, sc).march || {})[st.adopt] || 0) + (st.level === 'c' ? 8 : st.level === 'x' ? 12 : 0) + (st.rebutOk === false ? 4 : 0);
+  st.marchD = md; marchStep(run, U, st, md);
 }
 
 /* ---------- 학생 행동 (버튼) ---------- */
@@ -357,14 +390,24 @@ A.adopt = () => {
   const run = curRun(), U = curUnit(), sc = sceneOf(U, run), st = scState(run, sc);
   if (!SEL) return toast('하나를 고르세요.');
   if (SEL !== 'third' && !choosable(sc, run).includes(SEL)) return toast('고를 수 없는 책사입니다.');
-  st.adopt = SEL; run.adopt[sc.id] = SEL; SEL = null; run.step = 'write'; run.gv = clone(run.g);   // 결과는 장면 끝에 공개
+  st.adopt = SEL; run.adopt[sc.id] = SEL; SEL = null; run.step = 'write'; run.gv = clone(run.g); st.writeAt = Date.now();   // 결과는 장면 끝에 공개
   const sec = timerSec(sc); if (sec > 0) { st.deadline = Date.now() + sec * 1000; st.timerTotal = sec; }
   saveS(true); render(); window.scrollTo(0, 0);
 };
-A.hint = () => {
-  const run = curRun(); if (run.hintLeft <= 0) return toast('힌트 카드가 없습니다.');
-  if (!confirm('힌트 카드를 쓰면 숨겨진 엔딩을 볼 수 없게 됩니다. 쓸까요?')) return;
-  run.hintLeft--; run.hintUsed = true; const st = scState(run, sceneOf(curUnit(), run)); st.hint = true; saveS(); render();
+A.hintL = n => {
+  const run = curRun(), U = curUnit(), sc = sceneOf(U, run), st = scState(run, sc), L = lessonOf(U, sc);
+  if ((st.hl || 0) >= n) return; if (n > (st.hl || 0) + 1) return toast('앞 단계 힌트부터 여세요.');
+  if (n === 2 && !st.keyOk) { if (!confirm('2단계 힌트는 ' + U.gauges[lifeKey(U)].n + ' -2가 듭니다. (학습지 열쇠를 풀면 공짜) 열까요?')) return; st.h2Fx = applyFx(run, U, { [lifeKey(U)]: -2 }); }
+  if (n === 3) { if (run.hintLeft <= 0) return toast('힌트 카드가 없습니다. 학습지 열쇠를 풀면 얻을 수 있어요.'); if (!confirm('3단계(문장 틀)는 힌트 카드 1장이 들고, 숨겨진 엔딩을 볼 수 없게 됩니다. 문장 틀을 그대로 베끼면 인정되지 않습니다. 열까요?')) return; run.hintLeft--; run.hintUsed = true; st.hint = true; }
+  st.hl = n; saveS(); render();
+};
+A.hint = () => A.hintL(3);
+A.key = () => {
+  const run = curRun(), U = curUnit(), sc = sceneOf(U, run), st = scState(run, sc), L = lessonOf(U, sc), el = document.getElementById('f_key');
+  if (!L.key || st.keyOk) return; const v = nz(el ? el.value : ''); if (!v) return toast('답을 입력하세요.');
+  st.keyTry = (st.keyTry || 0) + 1;
+  if ((L.key.a || []).some(a => nz(a) === v)) { st.keyOk = true; run.keys[sc.id] = 1; run.hintLeft++; saveS(true); toast('🔑 정답! 힌트 카드 1장을 얻고, 2단계 힌트가 공짜가 됩니다.'); render(); }
+  else { saveS(); toast('🔒 틀렸습니다. 학습지를 다시 확인해 보세요.'); }
 };
 A.draft = (field, el) => {
   const run = curRun(); if (!run) return; const U = curUnit();
@@ -393,6 +436,8 @@ A.submitLine = timeout => {
     st.level = 'x'; st.chk = null; st.fxd = applyFx(run, U, { [lifeKey(U)]: -15 });
   } else {
     const j = judgeLine(text, st.adopt, U, sc, st);
+    const frame = ((lessonOf(U, sc).hints || [])[2] || '');
+    if ((st.hl || 0) >= 3 && frame) { const parts = frame.split(/_+/).map(x => nz(x)).filter(x => x.length >= 3); if (parts.length && parts.every(x => nz(text).includes(x)) && j.len < nz(frame).length + 25) { st.copied = true; j.level = 'c'; } }   // 문장 틀 베끼기
     st.chk = { len: j.len, kw: j.kw, mk: j.mk, ctx: j.ctx, ev: j.ev, cost: j.cost, c: j.c }; st.level = j.level; st.weak = j.weak; st.thUsed = j.thUsed;
     const d = third ? applyFx(run, U, opt.fx[j.level]) : applyFx(run, U, opt.fx, { pos: j.level === 'c' ? 0.5 : 1 });
     if (j.level === 'a') add(d, applyFx(run, U, { [lifeKey(U)]: 3 }));
@@ -404,18 +449,36 @@ A.submitLine = timeout => {
     const users = third ? j.thUsed : [st.adopt];
     users.forEach(id => { addBeliefs(run, id, j.level === 'a' ? 2 : 1); dexMeet(id); S.dex[id].used++; if (j.level === 'a') S.dex[id].mastered = true; });
   }
-  st.tries = 0; checkLife(run, U, st.level === 'x' ? 'result' : 'rebut'); saveS(true); render(); window.scrollTo(0, 0);
+  if (st.alarmI != null && st.alarmShown) {   // 급보 대응
+    const al = (SX(U, sc).alarms || [])[st.alarmI]; st.alarmOk = !!(al && mkHits(text, al.key || []).length);
+    st.alarmFx = applyFx(run, U, st.alarmOk ? { [lifeKey(U)]: 4 } : (al ? al.fx : {}));
+  }
+  st.tries = 0; st.rally = [];
+  if (st.level === 'x') { finishScene(run, U, sc, st); checkLife(run, U, 'result'); }
+  else checkLife(run, U, 'bet');
+  saveS(true); render(); window.scrollTo(0, 0);
+};
+/* 확신도 걸기: 판정이 나오기 전에 건다 */
+const BET = { 1: { t: '🤔 조심스럽게', a: 2, b: 1, c: -2 }, 2: { t: '😐 보통', a: 6, b: 2, c: -6 }, 3: { t: '🔥 확신한다', a: 12, b: 0, c: -12 } };
+A.bet = n => {
+  const run = curRun(), U = curUnit(), sc = sceneOf(U, run), st = scState(run, sc); if (st.bet) return;
+  st.bet = n; st.betFx = applyFx(run, U, { [lifeKey(U)]: BET[n][st.level] || 0 }); checkLife(run, U, 'rebut'); saveS(true); render(); window.scrollTo(0, 0);
 };
 A.submitRebut = skip => {
-  const run = curRun(), U = curUnit(), sc = sceneOf(U, run), st = scState(run, sc), T = TN(run.tn);
-  const el = document.getElementById('f_rebut'); const text = (el ? el.value : '').trim();
-  if (skip) { st.rebutOk = false; st.rebut = ''; st.rebutFx = applyFx(run, U, { [lifeKey(U)]: -6 }); checkLife(run, U, 'result'); saveS(true); render(); return; }
-  if (nz(text).length < 5) return toast('재반박을 써 주세요.');
-  const j = judgeRebut(text, U, st.weak || 'base', sc, st); st.tries = (st.tries || 0) + 1; st.rebut = text; st.rebutChk = { len: j.len, mk: j.mk, kw: j.kw };
-  if (j.ok) { st.rebutOk = true; st.rebutFx = applyFx(run, U, { [lifeKey(U)]: 3 }); (st.adopt === 'third' ? (st.thUsed || []) : [st.adopt]).forEach(id => addBeliefs(run, id, 1)); run.step = 'result'; }
-  else if (st.tries < T.rebut) { const W = WEAK[st.weak || 'base']; toast('🧓 "그것으로는 저를 설득할 수 없습니다." — 노린 약점은 [' + W.t + ']입니다. ' + W.d + ' (' + JUDGE().rebutMin + '자 이상, 남은 기회 ' + (T.rebut - st.tries) + '번)', 5500); saveS(); render(); return; }
-  else { st.rebutOk = false; st.rebutFx = applyFx(run, U, { [lifeKey(U)]: -6 }); }
-  checkLife(run, U, 'result'); saveS(true); render(); window.scrollTo(0, 0);
+  const run = curRun(), U = curUnit(), sc = sceneOf(U, run), st = scState(run, sc), T = TN(run.tn), rounds = T.rally || 1;
+  const el = document.getElementById('f_rebut'); const text = (el ? el.value : '').trim(); st.rally = st.rally || []; st.rebutFx = st.rebutFx || {};
+  const add = x => Object.entries(x).forEach(([k, v]) => st.rebutFx[k] = (st.rebutFx[k] || 0) + v);
+  const type = rallyType(st);
+  if (!skip && nz(text).length < 5) return toast('재반박을 써 주세요.');
+  const j = skip ? { ok: false, len: 0, mk: [], kw: [] } : judgeRebut(text, U, type, sc, st);
+  st.rally.push({ type, rival: rallyText(sc, st), text, ok: j.ok }); st.d_rebut = '';
+  st.rebut = st.rally.map(r => r.text).filter(Boolean).join(' / '); st.tries = st.rally.length;
+  if (j.ok) {
+    run.rival = (run.rival || 0) + 1; add(applyFx(run, U, { [lifeKey(U)]: 2 })); (st.adopt === 'third' ? (st.thUsed || []) : [st.adopt]).forEach(id => addBeliefs(run, id, 1));
+    if (st.rally.length < rounds) { snd('good'); toast('🛡️ 막아 냈습니다! 공손연이 다시 공격해 옵니다. (' + st.rally.length + '/' + rounds + ')', 3000); saveS(true); render(); window.scrollTo(0, 0); return; }
+    st.rebutOk = true; run.rival++; add(applyFx(run, U, { [lifeKey(U)]: 3 }));
+  } else { st.rebutOk = false; run.rival = (run.rival || 0) - 1; add(applyFx(run, U, { [lifeKey(U)]: -5 })); }
+  finishScene(run, U, sc, st); checkLife(run, U, 'result'); saveS(true); render(); window.scrollTo(0, 0);
 };
 A.afterResult = () => {
   const run = curRun(), U = curUnit(), sc = sceneOf(U, run), st = scState(run, sc);
@@ -466,6 +529,24 @@ A.submitVerdict = () => {
 };
 A.copyVerdict = () => { const run = curRun(); copyText((run.verdict || {}).text || '', '📋 복사했어요. 하이러닝 답안 칸에 붙여 넣으세요.'); };
 A.pin = uid => { S.pin[uid] = !S.pin[uid]; saveS(); render(); };
+let RANK = null;
+A.loadRank = async () => { const d = await backend.get(roomPath(ROOM) + '/students').catch(() => null); RANK = d || {}; safeRender(); };
+function rankScore(r, U) { if (!r || r.fallen) return 0; return gaugeKeys(U).reduce((a, k) => a + (r.g[k] || 0), 0) + (r.thirdOk || 0) * 5; }
+function rankList(data, U) { return Object.values(data || {}).filter(s => s && s.runs && s.runs[U.id]).map(s => ({ num: s.num, sid: s.sid, sc: rankScore(s.runs[U.id], U), r: s.runs[U.id] })).sort((a, b) => b.sc - a.sc); }
+A.dex = id => {
+  const t = TH(id), d = (S && S.dex || {})[id]; const o = document.createElement('div'); o.className = 'ovl'; o.onclick = e => { if (e.target === o) o.remove(); };
+  if (!d) { o.innerHTML = `<div class="box" style="text-align:center"><div style="font-size:50px">🔒</div><h2>아직 만나지 않은 사상가</h2><p class="muted">게임에서 만나면 정리 카드가 열립니다.</p><button class="btn" onclick="this.closest('.ovl').remove()">닫기</button></div>`; document.body.appendChild(o); return; }
+  const gl = Object.entries(t.gl || {}), cl = Array.isArray(t.claim) ? t.claim : (t.claim ? String(t.claim).split('\n') : []);
+  o.innerHTML = `<div class="box"><div class="row" style="align-items:center">${avatar(id, 84)}<div style="flex:1"><h2 style="margin:0">${esc(t.name)}</h2><div class="muted">${esc(t.school || '')}${t.era ? ' · ' + esc(t.era) : ''}</div>${d.mastered ? '<span class="pill gold">🏆 완전 발동</span>' : ''}<span class="pill">📜 채택 ${d.used || 0}회</span></div><button class="btn ghost sm" onclick="this.closest('.ovl').remove()">닫기</button></div>
+    ${t.quote ? `<div class="stage" style="margin-top:10px"><p style="font-family:serif">"${esc(t.quote)}"</p></div>` : ''}
+    ${t.intro ? `<p>${esc(t.intro)}</p>` : ''}
+    ${t.view ? `<h3>🧠 인간관</h3><p>${esc(t.view)}</p>` : ''}
+    ${cl.length ? `<h3>📌 핵심 주장</h3><ul style="margin:0;padding-left:20px">${cl.filter(Boolean).map(x => `<li>${esc(x)}</li>`).join('')}</ul>` : ''}
+    ${gl.length ? `<h3>🔑 주요 개념</h3><table class="sumtbl">${gl.map(([k, v]) => `<tr><td>${esc(k)}</td><td>${esc(v)}</td></tr>`).join('')}</table>` : ''}
+    ${t.crit ? `<h3>⚔️ 이런 비판도 있다</h3><p>${esc(t.crit)}</p>` : ''}
+    ${((CONTENT || {}).th || {})[id] ? '<p class="muted small" style="margin-top:12px">※ 선생님이 수업 내용에 맞게 고친 정리입니다.</p>' : ''}</div>`;
+  document.body.appendChild(o);
+};
 A.loadDist = async () => { const run = curRun(), U = curUnit(); const sc = run && U ? sceneOf(U, run) : null; const d = await backend.get(roomPath(ROOM) + '/students').catch(() => null); CLASS = { for: sc ? sc.id : '', data: d || {} }; render(); };
 
 /* 제한 시간 (화면 글자만 바꿈 → 쓰던 글이 지워지지 않음) */
@@ -474,6 +555,7 @@ function startTick() {
   clearInterval(tickT);
   tickT = setInterval(() => {
     const run = curRun(); if (!run || run.step !== 'write') return; const U = curUnit(); const st = scState(run, sceneOf(U, run));
+    if (st.alarmI != null && !st.alarmShown && META.status !== 'pause') { const f = document.getElementById('f_line'); if (Date.now() - (st.writeAt || 0) > 18000 || (f && nz(f.value).length >= 25)) triggerAlarm(); }
     if (!st.deadline) return;
     if (META.status === 'pause') { st.deadline += 1000; return; }   // 일시정지 동안 시간 멈춤
     const left = Math.ceil((st.deadline - Date.now()) / 1000), el = document.getElementById('tmr');
@@ -484,9 +566,59 @@ function startTick() {
   }, 1000);
 }
 
+/* ---------- 진군 막대 · 인물 · 순위 ---------- */
+function marchH(U, run) {
+  if (!U.march) return ''; const m = run.march || 0;
+  return `<div class="march"><span>${U.march.e} ${esc(U.march.n)}</span><div class="mbar"><i style="width:${m}%" class="${m >= 80 ? 'hot' : ''}"></i><b style="left:calc(${m}% - 12px)">🐎</b></div><span class="${m >= 80 ? 'mhot' : ''}">${m >= 80 ? '성 밑까지!' : m >= 50 ? '다가온다' : '아직 멀다'}</span></div>`;
+}
+const NPCST = { ok: '', left: '떠남', caught: '붙잡힘', lost: '끌려감', worried: '근심', dead: '쓰러짐', doubt: '수상함', hero: '영웅' };
+function npcH(U, run) {
+  if (!U.npcs) return '';
+  return `<div class="npcs">${Object.entries(U.npcs).map(([k, n]) => { const s = (run.npc || {})[k] || 'ok'; return `<span class="npc ${['left', 'lost', 'dead'].includes(s) ? 'gone' : s === 'hero' ? 'hero' : s === 'doubt' || s === 'caught' || s === 'worried' ? 'warn' : ''}" title="${esc(n.d)}">${n.e} ${esc(n.n)}${NPCST[s] ? ' · ' + NPCST[s] : ''}</span>`; }).join('')}<span class="npc rv" title="공손연의 마음">🧓 공손연 ${run.rival >= 3 ? '· 감복' : run.rival <= -2 ? '· 배신 기운' : run.rival > 0 ? '· 흔들림' : run.rival < 0 ? '· 불만' : ''}</span></div>`;
+}
+function rankH(U, run) {
+  if (META.rank === false) return '';
+  if (!RANK) return `<div class="card"><button class="btn line full" onclick="A.loadRank()">🏆 우리 반 순위 보기</button></div>`;
+  const L = rankList(RANK, U), me = L.findIndex(x => x.sid === S.sid);
+  return `<div class="card rank"><div class="row"><h3 style="margin:0;flex:1">🏆 우리 반 순위</h3><button class="btn sm ghost" onclick="A.loadRank()">새로고침</button></div>
+    ${L.slice(0, 5).map((x, i) => `<div class="rk ${x.sid === S.sid ? 'me' : ''}"><b>${['🥇', '🥈', '🥉', '4', '5'][i]}</b><span>${x.num}번${x.sid === S.sid ? ' (나)' : ''}</span><span class="sp"></span><span>${x.r.fallen ? '🥀 폐위' : x.sc + '점'}</span></div>`).join('')}
+    ${me >= 5 ? `<div class="rk me"><b>${me + 1}</b><span>${S.num}번 (나)</span><span class="sp"></span><span>${L[me].sc}점</span></div>` : ''}
+    <p class="muted small" style="margin:4px 0 0">점수 = 세 게이지 합 + 제3의 길 대성공 보너스 · ${L.length}명 참여</p></div>`;
+}
+/* 급보 */
+function alarmBoxH(U, sc, st) { if (st.alarmI == null || !st.alarmShown) return ''; const al = SX(U, sc).alarms[st.alarmI]; return `<div class="alarm">${esc(al.t)}<div class="small">글에 이 상황을 반영해 대응하세요. 대응하면 민심 +4, 무시하면 피해를 입습니다.</div></div>`; }
+function triggerAlarm() {
+  const run = curRun(), U = curUnit(); if (!run || run.step !== 'write') return; const sc = sceneOf(U, run), st = scState(run, sc);
+  if (st.alarmI == null || st.alarmShown) return; st.alarmShown = Date.now(); saveS();
+  const b = document.getElementById('alarmbox'); if (b) b.innerHTML = alarmBoxH(U, sc, st);
+  snd('alarm'); if (fxLv() === 'full') { document.body.classList.remove('shake'); void document.body.offsetWidth; document.body.classList.add('shake'); setTimeout(() => document.body.classList.remove('shake'), 700); }
+}
+/* 수업 노트 · 힌트 사다리 · 학습지 열쇠 */
+let NOTEOPEN = false;
+A.note = () => { NOTEOPEN = !NOTEOPEN; const p = document.getElementById('notepanel'); if (p) p.style.display = NOTEOPEN ? 'block' : 'none'; };
+function lessonH(U, sc, st, run) {
+  const L = lessonOf(U, sc), h = L.hints || [], hl = st.hl || 0, img = ((CONTENT.limgOn || {})[U.id + '_' + sc.id]);
+  if (img && !LIMG[U.id + '_' + sc.id] && !LIMGREQ[U.id + '_' + sc.id]) { LIMGREQ[U.id + '_' + sc.id] = 1; backend.get(P_CONTENT + '/limg/' + U.id + '_' + sc.id).then(v => { if (v && v.d) { LIMG[U.id + '_' + sc.id] = v.d; const p = document.getElementById('noteimg'); if (p) p.innerHTML = `<img src="${v.d}" style="max-width:100%;border-radius:10px">`; } }).catch(() => { }); }
+  const hasNote = L.note || img || L.link;
+  return `<div class="lesson">
+    <div class="row">${hasNote ? `<button class="btn sm line" onclick="A.note()">📖 수업 노트</button>` : ''}
+      ${h.map((x, i) => x ? `<button class="btn sm ${hl > i ? 'jade' : 'ghost'}" ${hl > i ? 'disabled' : ''} onclick="A.hintL(${i + 1})">💡 ${i + 1}단계${i === 0 ? '' : i === 1 ? (st.keyOk ? ' (공짜)' : ' (민심-2)') : ' (카드)'}</button>` : '').join('')}</div>
+    ${hasNote ? `<div id="notepanel" class="notep" style="display:${NOTEOPEN ? 'block' : 'none'}">${L.note ? `<div style="white-space:pre-wrap">${esc(L.note)}</div>` : ''}<div id="noteimg">${img && LIMG[U.id + '_' + sc.id] ? `<img src="${LIMG[U.id + '_' + sc.id]}" style="max-width:100%;border-radius:10px">` : ''}</div>${L.link ? `<a href="${esc(L.link)}" target="_blank" rel="noopener">📎 학습지·자료 열기</a>` : ''}</div>` : ''}
+    ${h.slice(0, hl).map((x, i) => `<div class="hintl"><b>💡 ${i + 1}단계</b> ${esc(x)}${i === 2 ? '<div class="small muted">문장 틀을 그대로 베끼면 인정되지 않습니다. 내 생각으로 채우세요.</div>' : ''}</div>`).join('')}
+    ${hl >= 3 ? `<div class="note small">🔑 개념어 — ${(st.adopt === 'third' ? sc.options.map(o => o.th) : [st.adopt]).map(id => `<b>${esc(TH(id).name)}</b>: ${esc((TH(id).kw || []).join(', '))}`).join(' / ')}</div>` : ''}
+    ${L.key && L.key.q ? (st.keyOk ? `<div class="keyok">🔓 학습지 열쇠를 풀었습니다! (힌트 카드 +1)</div>` : `<div class="keybox"><div class="small"><b>${esc(L.key.q)}</b></div><div class="row"><input id="f_key" class="inp" style="flex:1" placeholder="학습지에서 찾은 답" onkeydown="if(event.key==='Enter')A.key()"><button class="btn sm gold" onclick="A.key()">🔑 열기</button></div></div>`) : ''}
+  </div>`;
+}
+const LIMG = {}, LIMGREQ = {};
+/* 확신도 걸기 */
+function betH(U, run, sc) {
+  return `<div class="card" style="text-align:center"><h2>🎲 판정 직전 — 얼마나 자신 있습니까?</h2><p class="muted">당신의 논증이 어떤 판정을 받을지 아직 모릅니다. 확신이 클수록 맞으면 크게 얻고, 틀리면 크게 잃습니다.</p>
+    <div class="bets">${[1, 2, 3].map(n => { const b = BET[n]; return `<button class="bet b${n}" onclick="A.bet(${n})"><div class="bt">${b.t}</div><div class="small">大成功 <b>+${b.a}</b> · 成功 <b>+${b.b}</b> · 動搖 <b>${b.c}</b></div><div class="small muted">${U.gauges[lifeKey(U)].n} 기준</div></button>`; }).join('')}</div></div>`;
+}
+
 /* ---------- ⑦ 학생 화면 ---------- */
 function gaugesH(U, run) {
-  const hide = ['write', 'rebut'].includes(run.step) && run.gv;   // 결정 직후에는 숫자를 숨김 → 장면 끝에 공개
+  const hide = ['write', 'bet', 'rebut'].includes(run.step) && run.gv;   // 결정 직후에는 숫자를 숨김 → 장면 끝에 공개
   const G = hide ? run.gv : run.g;
   return `<div class="gauges">${gaugeKeys(U).map(k => { const d = U.gauges[k], v = G[k]; const c = v < 25 ? 'lo' : v < 50 ? 'mid' : 'hi';
     return `<div class="gg ${d.life ? 'life' : ''} ${d.life && v <= 20 ? 'danger' : ''}"><div class="h"><span>${d.e} ${esc(d.n)}${d.life ? ' <span class="small" style="color:var(--main)">생명</span>' : ''}</span><span>${hide ? v + ' → ❔' : (run.step === 'result' && run.gv && run.gv[k] !== v ? `<span data-from="${run.gv[k]}" data-to="${v}">${run.gv[k]}</span>` : v)}</span></div><div class="gbar"><i class="${c}" style="width:${v}%"></i></div></div>`; }).join('')}</div>`;
@@ -534,6 +666,7 @@ function postRender(run, U, sc, urg) {
   const key = U.id + '_' + (sc ? sc.id : 'end') + '_' + run.startedAt;
   if (urg && once('urg' + key)) snd('alarm');
   if (run.step === 'rebut' && once('stamp' + key)) snd('stamp');
+  if (['result', 'done'].includes(run.step) && META.rank !== false && once('rk' + key + run.step)) A.loadRank();
   if (run.step === 'result' && sc) {
     animateNums(); const st = scState(run, sc), tot = sceneTotal(st), life = tot[lifeKey(U)] || 0;
     if (once('res' + key)) { snd(life < 0 ? 'bad' : 'good'); if (life <= -10 && fxLv() === 'full') { document.body.classList.remove('shake'); void document.body.offsetWidth; document.body.classList.add('shake'); setTimeout(() => document.body.classList.remove('shake'), 700); } }
@@ -546,7 +679,7 @@ function gameH() {
   if (!run) return introH(U);
   if (META.status === 'end' && !['verdict', 'done'].includes(run.step)) return `<div class="card"><h2>🔒 수업이 끝났어요</h2><p class="muted">다음 시간에 이어서 해요.</p></div>`;
   const busy = META.status === 'pause';
-  let h = stepsH(U, run) + gaugesH(U, run) + `<div class="row" style="margin-bottom:6px">${cardsH(run)}</div>`;
+  let h = stepsH(U, run) + gaugesH(U, run) + marchH(U, run) + npcH(U, run) + `<div class="row" style="margin-bottom:6px">${cardsH(run)}</div>`;
   const sc = run.sc < U.scenes.length ? sceneOf(U, run) : null;
   const sceneGateBlocked = sc && ['story', 'evidence'].includes(run.step) && !gateOK(run.sc);
   const verdictGateBlocked = ['pick', 'verdict'].includes(run.step) && !gateOK(U.scenes.length);
@@ -557,6 +690,7 @@ function gameH() {
     case 'evidence': return h + evidenceH(U, run, sc);
     case 'council': return h + councilH(U, run, sc);
     case 'write': return h + writeH(U, run, sc);
+    case 'bet': return h + betH(U, run, sc);
     case 'rebut': return h + rebutH(U, run, sc);
     case 'result': return h + resultH(U, run, sc);
     case 'elim': return h + elimH(U, run, sc);
@@ -596,6 +730,7 @@ function storyH(U, run, sc) {
     ${sc.story.slice(0, n).map((p, i) => `<p class="${i === Math.min(n, sc.story.length) - 1 && !all && fxLv() === 'full' ? 'typein' : ''}">${esc(p)}</p>`).join('')}
     ${all ? '' : `<div class="row" style="margin-top:8px"><button class="btn" onclick="event.stopPropagation();A.more('${sc.id}')">▶ 계속</button><span class="sp"></span><button class="btn ghost sm" onclick="event.stopPropagation();A.allStory('${sc.id}')">모두 보기</button></div>`}</div>
     ${all ? `${st.decay ? `<div class="event">${esc(U.decay.text)}<br>${fxHTML(U, st.decay)}</div>` : ''}${seeds}${ev ? `<div class="event ${ev.good ? 'good' : ''}">🎲 돌발 사건: ${esc(ev.t)}<br>${fxHTML(U, st.event.d)}</div>` : ''}
+    ${st.invade ? `<div class="event">${esc(U.march.text)}<br>${fxHTML(U, st.invade)}</div>` : ''}
     ${worldArt(U, run.g)}
     <button class="btn full big" style="margin-top:12px" onclick="A.toEvidence()">🔍 증거 살펴보기</button>` : ''}`;
 }
@@ -646,10 +781,11 @@ function writeH(U, run, sc) {
     <div class="lampbar">${showL ? `<div class="lamps"><span id="lamp0">📏 분량 ${J.lineMin + (third ? LINE_THIRD_PLUS : 0)}자</span><span id="lamp1">🔑 ${third ? '두 사상가 개념' : '개념어'}</span><span id="lamp2">🔗 근거</span><span id="lamp3">📍 상황·증거</span></div>` : `<span class="muted small">🌶️🌶️🌶️ 매운 맛: 설득력 등불이 꺼져 있습니다. 스스로 판단하세요.</span>`}<span class="sp"></span><div class="rivmini" title="${esc(U.rival.name)}">${showL ? `<span id="rivface">${rivalFace('calm', 52)}</span>` : rivalFace('calm', 52)}<div class="small muted">${esc(U.rival.name)}</div></div></div>
     <div id="glossbox" class="gloss" ${showL ? '' : 'style="display:none"'}></div>
     ${opened.length ? `<details ${fxLv() === 'off' ? '' : 'open'}><summary class="small"><b>📎 내가 연 증거 (인용하면 보너스)</b></summary>${opened.map(e => `<div class="small evref" id="evr_${e.id}"><b>${esc(e.t)}</b> ${esc(evBody(run, e))}</div>`).join('')}</details>` : ''}
-    ${st.hint ? `<div class="note">💡 개념어 — ${kwNames.map(id => `<b>${esc(TH(id).name)}</b>: ${esc((TH(id).kw || []).join(', '))}`).join(' / ')}</div>` : ''}
+    <div id="alarmbox">${alarmBoxH(U, sc, st)}</div>
+    ${lessonH(U, sc, st, run)}
     <textarea id="f_line" class="inp" placeholder="예) 나는 ○○을 택한다. 왜냐하면 지금 ○○ 상황에서 …" oninput="A.draft('line',this)" onpaste="A.paste('line',event)">${esc(st.d_line || '')}</textarea>
     <div class="cnt" id="cnt_line">${nz(st.d_line).length}자</div>
-    <div class="row" style="margin-top:8px">${!st.hint && run.hintLeft > 0 ? `<button class="btn ghost" onclick="A.hint()">💡 힌트 카드 쓰기</button>` : ''}<span class="sp"></span><button class="btn big" onclick="A.submitLine(false)">결단하기 ⚔️</button></div></div>`;
+    <div class="row" style="margin-top:8px"><span class="sp"></span><button class="btn big" onclick="A.submitLine(false)">결단하기 ⚔️</button></div></div>`;
 }
 /* 쓰는 동안 등불·표정·개념 뜻풀이가 바뀜 */
 let LASTGLOSS = '';
@@ -678,14 +814,17 @@ function rebutText(sc, st) {
 }
 const WEAKMOOD = { ctx: 'sneer', kw: 'sneer', why: 'frown', cost: 'frown', base: 'alarm' };
 function rebutH(U, run, sc) {
-  const st = scState(run, sc), L = LV[st.level], T = TN(run.tn), J = JUDGE(), W = WEAK[st.weak || 'base'];
-  return `<div class="card" style="text-align:center">${stampH(st.level)}<p class="muted">${L.d}</p>${chkH(st.chk, J)}
-    <p class="small">📜 나라에 어떤 일이 일어났는지는 <b>장면이 끝날 때</b> 공개됩니다.</p></div>
-    <div class="rival"><div class="ic">${rivalFace(WEAKMOOD[st.weak || 'base'], 64)}</div><div><b>${esc(U.rival.name)}의 반박</b> <span class="pill bad">🎯 노린 약점: ${W.t}</span><br>"${esc(rebutText(sc, st))}"</div></div>
-    <div class="card"><h2>🛡️ 재반박</h2><p class="muted"><b>${W.d}</b> (${J.rebutMin}자 이상 · 기회 ${T.rebut - (st.tries || 0)}번)</p>
+  const st = scState(run, sc), L = LV[st.level], T = TN(run.tn), J = JUDGE(), rounds = T.rally || 1, k = (st.rally || []).length, type = rallyType(st), W = WEAK[type];
+  const mood = k === 0 ? WEAKMOOD[type] : k === 1 ? 'frown' : 'alarm';
+  return `${k === 0 ? `<div class="card" style="text-align:center">${stampH(st.level)}<p class="muted">${L.d}</p>${chkH(st.chk, J)}${st.copied ? '<div class="banner">문장 틀을 거의 그대로 옮겨 써서 흔들림으로 처리되었습니다.</div>' : ''}
+    <p class="small">🎲 확신도: <b>${BET[st.bet] ? BET[st.bet].t : '-'}</b> · 📜 나라에 어떤 일이 일어났는지는 <b>장면이 끝날 때</b> 공개됩니다.</p></div>` : ''}
+    <div class="rally"><span>⚔️ 공손연과의 공방</span>${Array.from({ length: rounds }, (_, i) => `<i class="${i < k ? (st.rally[i].ok ? 'w' : 'l') : i === k ? 'now' : ''}">${i + 1}</i>`).join('')}<span class="small muted">모두 막아 내면 공손연이 감복합니다. 한 번이라도 밀리면 공방이 끝납니다.</span></div>
+    ${(st.rally || []).map(r => `<div class="ex"><div class="exr">🧓 ${esc(r.rival)}</div><div class="exm">🛡️ ${esc(r.text)} <b>${r.ok ? '✓ 막음' : '✗'}</b></div></div>`).join('')}
+    <div class="rival"><div class="ic">${rivalFace(mood, 64)}</div><div><b>${esc(U.rival.name)} — ${k + 1}번째 공격</b> <span class="pill bad">🎯 노린 약점: ${W.t}</span><br>"${esc(rallyText(sc, st))}"</div></div>
+    <div class="card"><h2>🛡️ 재반박 ${k + 1}/${rounds}</h2><p class="muted"><b>${W.d}</b> (${J.rebutMin}자 이상)</p>
     <textarea id="f_rebut" class="inp" placeholder="그러나 … 왜냐하면 …" oninput="A.draft('rebut',this)" onpaste="A.paste('rebut',event)">${esc(st.d_rebut || '')}</textarea>
     <div class="cnt" id="cnt_rebut">${nz(st.d_rebut).length}자</div>
-    <div class="row" style="margin-top:8px"><button class="btn ghost" onclick="if(confirm('반박하지 않으면 ${esc(U.gauges[lifeKey(U)].n)}이 떨어집니다. 넘어갈까요?'))A.submitRebut(true)">말없이 넘어가기</button><span class="sp"></span><button class="btn big" onclick="A.submitRebut(false)">재반박하기 🛡️</button></div></div>`;
+    <div class="row" style="margin-top:8px"><button class="btn ghost" onclick="if(confirm('물러서면 공방에서 지고 ${esc(U.gauges[lifeKey(U)].n)}이 떨어집니다. 물러설까요?'))A.submitRebut(true)">물러서기</button><span class="sp"></span><button class="btn big" onclick="A.submitRebut(false)">반격하기 🛡️</button></div></div>`;
 }
 function distH(U, run, sc) {
   if (!TN(run.tn).dist) return '';
@@ -698,9 +837,10 @@ function distH(U, run, sc) {
     <button class="btn sm ghost" onclick="A.loadDist()">새로고침</button></div>`;
 }
 function sceneTotal(st) { const tot = {}; [st.fxd, st.evFx, st.rebutFx].forEach(d => Object.entries(d || {}).forEach(([k, v]) => tot[k] = (tot[k] || 0) + v)); return tot; }
+function sceneTotal(st) { const tot = {}; [st.fxd, st.evFx, st.rebutFx, st.betFx, st.alarmFx, st.h2Fx, ...(st.people || []).map(p => p.d), st.invade].forEach(d => Object.entries(d || {}).forEach(([k, v]) => tot[k] = (tot[k] || 0) + v)); return tot; }
 function resultH(U, run, sc) {
   const st = scState(run, sc);
-  if (st.level === 'x') return `<div class="card" style="text-align:center">${stampH('x')}<p>군주가 망설이는 사이 백성은 실망했습니다. 해결책은 실행되지 않았습니다.</p></div>${worldArt(U, run.g, st.fxd)}<button class="btn full big" onclick="A.afterResult()">다음 ▶</button>`;
+  if (st.level === 'x') return `<div class="card" style="text-align:center">${stampH('x')}<p>군주가 망설이는 사이 백성은 실망했습니다. 해결책은 실행되지 않았습니다.</p>${(st.people || []).map(p => { const r = SX(U, sc).people[p.i], n = U.npcs[r.npc]; return `<div class="seed" style="text-align:left">${n.e} <b>${esc(n.n)}</b> — ${esc(r.t)}</div>`; }).join('')}</div>${worldArt(U, run.g, sceneTotal(st))}<button class="btn full big" onclick="A.afterResult()">다음 ▶</button>`;
   const L = LV[st.level], third = st.adopt === 'third', o = third ? sc.third : sc.options.find(x => x.th === st.adopt);
   const story = (o.after || {})[st.level] || '', tot = sceneTotal(st);
   const users = third ? (st.thUsed || []) : [st.adopt];
@@ -715,12 +855,18 @@ function resultH(U, run, sc) {
     <h3>📊 결과 공개</h3>${worldArt(U, run.g, tot)}
     <div class="small">해결책 ${fxHTML(U, st.fxd)}</div>
     ${Object.keys(st.evFx || {}).length ? `<div class="small">📎 증거 인용 보너스 ${fxHTML(U, st.evFx)}</div>` : ''}
-    <div class="small">재반박 ${fxHTML(U, st.rebutFx)}</div>
+    <div class="small">⚔️ 공방 (${(st.rally || []).filter(r => r.ok).length}/${(st.rally || []).length} 막음${st.rebutOk ? ' · 공손연 감복' : ''}) ${fxHTML(U, st.rebutFx)}</div>
+    ${st.betFx ? `<div class="small">🎲 확신도 ${BET[st.bet] ? BET[st.bet].t : ''} ${fxHTML(U, st.betFx)}</div>` : ''}
+    ${st.alarmFx ? `<div class="small">📯 급보 ${st.alarmOk ? '대응 성공' : '대응 못 함'} ${fxHTML(U, st.alarmFx)}</div>` : ''}
+    ${st.h2Fx ? `<div class="small">💡 힌트 2단계 ${fxHTML(U, st.h2Fx)}</div>` : ''}
+    ${(st.people || []).length ? `<h3>👥 사람들</h3>${st.people.map(p => { const r = SX(U, sc).people[p.i], n = U.npcs[r.npc]; return `<div class="seed">${n.e} <b>${esc(n.n)}</b> — ${esc(r.t)} ${Object.keys(p.d || {}).length ? fxHTML(U, p.d) : ''}</div>`; }).join('')}` : ''}
+    ${U.march ? `<div class="small" style="margin-top:6px">${U.march.e} ${esc(U.march.n)} ${st.marchD > 0 ? `<b style="color:var(--bad)">+${st.marchD} 더 다가옴</b>` : st.marchD < 0 ? `<b style="color:var(--ok)">${st.marchD} 늦춰짐</b>` : '변화 없음'} → ${run.march}%</div>` : ''}
+    ${st.invade ? `<div class="event">${esc(U.march.text)}<br>${fxHTML(U, st.invade)}</div>` : ''}
     <div style="margin-top:6px"><b>합계</b> ${fxHTML(U, tot)}</div>
     <p class="small muted">신념 지표 변화: ${Object.entries(bel).map(([k, v]) => k + ' +' + v).join(', ') || '없음'}</p></div>
     ${missed.length ? `<div class="card"><h3 style="margin-top:0">🔒 열지 못한 증거</h3><p class="muted small">이 카드를 봤다면 판단이 달라졌을까요?</p>${missed.map(e => `<div class="small evref"><b>${esc(e.t)}</b> ${esc(evBody(run, e))}</div>`).join('')}</div>` : ''}
     ${gl.length ? `<div class="card"><h3 style="margin-top:0">📚 이 장면의 개념</h3><table class="sumtbl">${gl.slice(0, 5).map(g => `<tr><td>${esc(g[1])}</td><td>${esc(g[2])} <span class="muted small">(${esc(g[0])})</span></td></tr>`).join('')}</table></div>` : ''}
-    ${distH(U, run, sc)}
+    ${distH(U, run, sc)}${rankH(U, run)}
     <button class="btn full big" onclick="A.afterResult()">다음 ▶</button>`;
 }
 function elimH(U, run, sc) {
@@ -757,7 +903,7 @@ function verdictLive(run, U) {
   return `<span class="pill ${len >= J.verdictMin ? 'ok' : ''}">📏 ${len} / ${J.verdictMin}자</span><span class="pill ${ck.length >= J.verdictKw ? 'ok' : ''}">🔑 ${run.fallen ? '' : esc(TH(run.chief).name) + ' '}개념어 ${ck.length}/${J.verdictKw}${ck.length ? ' (' + esc(ck.join(', ')) + ')' : ''}</span><span class="pill ${c.ctr ? 'ok' : ''}">⚔️ 반론 ${c.ctr ? '있음' : '없음'}</span>`;
 }
 /* 연대기 두루마리: 지금까지의 선택과 글을 모아 판결문 근거로 */
-function chronicleH(U, run) {
+function chronicleH(U, run, inner) {
   const rows = [];
   U.scenes.forEach((sc, i) => {
     const st = run.scenes[sc.id]; if (!st || !st.entered) return;
@@ -767,13 +913,15 @@ function chronicleH(U, run) {
     if (st.adopt) it.push(`<b>⚖️ ${st.adopt === 'third' ? '제3의 길' : esc(TH(st.adopt).name) + ' 채택'}</b> ${st.level && LV[st.level] ? '— ' + LV[st.level].t : ''}`);
     if (st.line) it.push('🗣️ 나: "' + esc(st.line) + '"');
     if (st.adopt && st.level && st.level !== 'x') it.push('🧓 ' + esc(U.rival.name) + ': "' + esc(rebutText(sc, st)) + '"');
-    if (st.rebut) it.push('🛡️ 재반박(' + (st.rebutOk ? '성공' : '실패') + '): "' + esc(st.rebut) + '"');
+    (st.rally || []).forEach((r, k) => { if (k > 0) it.push('🧓 ' + esc(U.rival.name) + ': "' + esc(r.rival) + '"'); if (r.text) it.push('🛡️ 반격(' + (r.ok ? '막음' : '밀림') + '): "' + esc(r.text) + '"'); });
+    (st.people || []).forEach(p => { const r = SX(U, sc).people[p.i]; it.push(U.npcs[r.npc].e + ' ' + esc(r.t)); });
     if (st.adopt) { const o = st.adopt === 'third' ? sc.third : sc.options.find(x => x.th === st.adopt); if (o && o.after && o.after[st.level]) it.push('📜 ' + esc(o.after[st.level])); }
     if (st.elim) it.push('🔥 탈락: ' + esc(TH(st.elim).name));
     (st.twist || []).forEach(x => it.push('⚡ ' + esc(sc.twist.rules[x.i].text)));
     rows.push(`<div class="chron"><div class="ch">장면 ${i + 1} · ${esc(sc.title)}</div>${it.map(x => `<div>${x.startsWith('<b>') || x.startsWith('🎲') || x.startsWith('🌱') ? x : x}</div>`).join('')}</div>`);
   });
-  return `<aside class="paper"><div class="ptitle">📜 운나라 연대기</div><p class="small muted" style="margin:0 0 6px">판결문의 근거로 끌어다 쓰세요.</p>${rows.join('') || '<p class="muted small">기록이 없습니다.</p>'}</aside>`;
+  if (inner) return `<div class="paper" style="position:static;max-height:300px">${rows.join('') || '<p class="muted small">기록이 없습니다.</p>'}</div>`;
+  return `<aside class="paper chron-d"><div class="ptitle">📜 운나라 연대기</div><p class="small muted" style="margin:0 0 6px">판결문의 근거로 끌어다 쓰세요.</p>${rows.join('') || '<p class="muted small">기록이 없습니다.</p>'}</aside>`;
 }
 function verdictH(U, run) {
   const F = run.fallen ? U.final.fallen : U.final, R = F.rafts || U.final.rafts, J = JUDGE();
@@ -781,6 +929,7 @@ function verdictH(U, run) {
     ${run.fallen ? '' : `<div class="thc sel" style="cursor:default">${avatar(run.chief, 56)}<div><span class="nm">재상: ${esc(TH(run.chief).name)}</span><div class="small muted">떨어진 책사: ${run.elim.map(id => esc(TH(id).name)).join(', ') || '없음'}</div></div></div>`}
     <table class="rafts"><tr><th>R</th><td><b>역할</b> ${esc(R.R)}</td></tr><tr><th>A</th><td><b>독자</b> ${esc(R.A)}</td></tr><tr><th>F</th><td><b>형식</b> ${esc(R.F)}</td></tr><tr><th>T</th><td><b>주제</b> ${esc(R.T)}</td></tr><tr><th>S</th><td><b>목적</b> ${esc(R.S)}</td></tr></table>
     <h3>꼭 넣을 것</h3><ol class="small" style="margin:0;padding-left:20px">${F.needs.map(n => `<li>${esc(n)}</li>`).join('')}</ol>
+    <details class="chron-m"><summary><b>📜 운나라 연대기 펼치기</b> (판결문 근거)</summary>${chronicleH(U, run, true)}</details>
     <textarea id="f_verdict" class="inp tall" style="margin-top:10px" placeholder="${esc(R.F)}를 쓰세요. 옆의 연대기를 근거로 쓰면 좋습니다." oninput="A.draft('verdict',this)" onpaste="A.paste('verdict',event)">${esc(run.verdict.text || '')}</textarea>
     <div class="row" id="vcnt" style="margin-top:6px">${verdictLive(run, U)}</div>
     <p class="muted small">✏️ 자동 저장됩니다. 다른 곳에서 붙여 넣은 글은 기록이 남습니다. AI가 쓴 글을 그대로 내면 안 됩니다.</p>
@@ -798,6 +947,8 @@ function doneH(U, run) {
       ${sc.hl != null ? `<p><b>판결문 점수:</b> ${esc(sc.hl)}점</p>` : ''}${sc.memo ? `<div class="note" style="text-align:left">💬 선생님: ${esc(sc.memo)}</div>` : ''}
       ${!e.hidden && U.hidden ? `<p class="muted small">숨겨진 엔딩이 하나 더 있습니다… (힌트: 판결문 점수, 그리고 "${esc(U.hidden.t)}")</p>` : ''}</div>` : ''}
     ${worldArt(U, run.g)}${gaugesH(U, run)}
+    ${U.npcs ? `<div class="card"><h3 style="margin-top:0">👥 사람들의 운명</h3>${Object.entries(U.npcs).map(([k, n]) => `<div>${n.e} <b>${esc(n.n)}</b> — ${esc({ ok: '무사히 살아간다', left: '나라를 떠났다', caught: '붙잡혔다', lost: '노역장에 끌려갔다', worried: '근심 속에 산다', dead: '세상을 떠났다', doubt: '끝내 믿을 수 없는 사람이었다', hero: '나라를 지킨 영웅이 되었다' }[(run.npc || {})[k] || 'ok'])}</div>`).join('')}<div>🧓 <b>${esc(U.rival.name)}</b> — ${run.rival >= 3 ? '당신에게 감복한 충신이 되었다' : run.rival <= -2 ? '끝내 마음을 돌렸다' : '여전히 당신을 지켜보고 있다'}</div></div>` : ''}
+    ${rankH(U, run)}
     <div class="card"><h3 style="margin-top:0">📚 핵심 개념 정리</h3><table class="sumtbl">${sum}</table></div>
     <div class="card"><h3 style="margin-top:0">🧭 이번 단원에서 바뀐 나의 신념</h3>${BELIEFS.map(b => `<span class="pill ${(run.bd[b.k] || 0) > 0 ? 'main' : ''}">${b.e} ${b.k} +${run.bd[b.k] || 0}</span>`).join('')}</div>`;
 }
@@ -808,8 +959,8 @@ function recordsH() {
   return `<div class="card"><h2>🧭 나의 신념 지표</h2><p class="muted small">단원을 넘어 계속 쌓입니다. 어떤 사상가의 해결책을 택하고 잘 논증했는지에 따라 오릅니다.</p>
     <div class="dist">${BELIEFS.map(b => `<div class="b"><div class="l">${b.e} ${b.k}</div><div class="g"><i style="width:${Math.round((S.beliefs[b.k] || 0) / mx * 100)}%;background:var(--main)"></i></div><div class="n">${S.beliefs[b.k] || 0}</div></div>`).join('')}</div>
     <p class="small muted">${BELIEFS.map(b => b.k + ': ' + b.d).join(' · ')}</p></div>
-    <div class="card"><h2>📖 사상가 도감 <span class="muted small">${Object.keys(S.dex).length} / ${allT.length}</span></h2>
-    <div class="dex">${allT.map(id => { const d = S.dex[id], t = TH(id); return `<div class="d ${d ? '' : 'no'}">${avatar(id, 64)}<b>${d ? esc(t.name) : '???'}</b><div class="muted">${d ? esc(t.school) : '아직 만나지 않음'}</div>${d ? `<div>${d.mastered ? '🏆 완전 발동' : d.used ? '📜 채택 ' + d.used + '회' : '👀 만남'}</div>` : ''}</div>`; }).join('')}</div></div>
+    <div class="card"><h2>📖 사상가 도감 <span class="muted small">카드를 누르면 사상 정리가 열립니다 · ${Object.keys(S.dex).length} / ${allT.length}</span></h2>
+    <div class="dex">${allT.map(id => { const d = S.dex[id], t = TH(id); return `<div class="d ${d ? '' : 'no'}" onclick="A.dex('${id}')" style="cursor:pointer">${avatar(id, 64)}<b>${d ? esc(t.name) : '???'}</b><div class="muted">${d ? esc(t.school) : '아직 만나지 않음'}</div>${d ? `<div>${d.mastered ? '🏆 완전 발동' : d.used ? '📜 채택 ' + d.used + '회' : '👀 만남'}</div>` : ''}</div>`; }).join('')}</div></div>
     <div class="card"><h2>🗂️ 나의 판결문 (포트폴리오)</h2>${runs.length ? runs.map(([id, r]) => { const U = unitById(id), c = critOf(r, U);
       return `<div style="border-top:1px solid var(--line);padding-top:10px;margin-top:10px"><div class="row"><b style="flex:1">${esc(U ? U.title : id)}</b><button class="btn sm ${S.pin[id] ? 'gold' : 'line'}" onclick="A.pin('${id}')">${S.pin[id] ? '⭐ 대표작' : '☆ 대표작으로'}</button></div>
       <div class="row">${CRIT.map(([k, n]) => `<span class="pill ${c[k] ? 'ok' : 'bad'}">${c[k] ? '✓' : '✗'} ${n}</span>`).join('')}<span class="muted small">${fmtTime(r.verdict.submittedAt)}</span></div>

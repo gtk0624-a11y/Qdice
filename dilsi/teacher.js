@@ -102,6 +102,7 @@ function runTabH(U, L) {
       <label class="row muted"><input type="radio" disabled> 모둠 <span class="pill">2단계에서 열림</span></label>
       <label class="row muted"><input type="radio" disabled> 학급 전체 <span class="pill">2단계에서 열림</span></label>
       <label class="row" style="margin-top:10px;cursor:pointer"><input type="checkbox" ${META.askName ? 'checked' : ''} onchange="T.meta('askName',this.checked)"> 이름도 받기 <span class="muted small">(끄면 번호만 받음 — 시범 운영은 끄기 권장)</span></label>
+      <label class="row" style="margin-top:8px;cursor:pointer"><input type="checkbox" ${META.rank !== false ? 'checked' : ''} onchange="T.meta('rank',this.checked)"> 🏆 반 순위 보이기 <span class="muted small">(학생 화면엔 상위 5명과 자기 순위만, 번호로 표시)</span></label>
       <label class="lb">🎬 연출 강도</label>
       <select class="inp" style="width:auto" onchange="T.meta('fx',this.value)">${[['full', '전체 (도장·흔들림·대사창·등장 효과)'], ['lite', '간단히 (흔들림·타이핑 없음)'], ['off', '끔 (저사양 태블릿용)']].map(([v, n]) => `<option value="${v}" ${(META.fx || 'full') === v ? 'selected' : ''}>${n}</option>`).join('')}</select>
       <label class="row" style="margin-top:8px;cursor:pointer"><input type="checkbox" ${META.sound ? 'checked' : ''} onchange="T.meta('sound',this.checked)"> 🔊 효과음 <span class="muted small">(도장·경고·심장 박동 — 교실에서는 끄기 권장)</span></label>
@@ -119,18 +120,19 @@ function bigH(U, L) {
   return `<div class="bigscr"><div class="row"><div><div class="muted small" style="color:#aab">방 코드</div><div class="bigcode">${esc(ROOM)}</div></div><div class="qr" id="qrbox" data-s="120" style="border-radius:12px"></div><span class="sp"></span>
     <button class="btn gold" onclick="document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen().catch(()=>{})">⛶ 전체 화면</button></div>
     <div class="kpi" style="margin-top:12px"><div><b>${L.length}</b>접속</div>${stepCnt.map((n, i) => `<div><b>${n}</b>장면 ${i + 1}</div>`).join('')}<div><b>${vCnt}</b>판결문 작성</div><div><b>${done}</b>제출</div></div>
+    ${META.rank !== false ? `<h2 style="margin-top:16px">🏆 순위</h2><div class="dist">${rankList(STU, U).slice(0, 10).map((x, i) => `<div class="b"><div class="l">${i + 1}위 · ${x.num}번</div><div class="g"><i style="width:${Math.min(100, x.sc / 3)}%"></i></div><div class="n">${x.r.fallen ? '🥀' : x.sc}</div></div>`).join('') || '<p class="muted">아직 없어요.</p>'}</div>` : ''}
     <h2 style="margin-top:16px">⚖️ 우리 반의 선택</h2>${dist}${mosaic}</div>`;
 }
 function boardH(U, L) {
   if (!L.length) return `<div class="card muted">아직 들어온 학생이 없어요.</div>`;
   const gk = gaugeKeys(U), lk = lifeKey(U);
   return `<div class="card"><div class="row"><h2 style="flex:1;margin:0">📊 실시간 현황판 — ${esc(U.title)}</h2><span class="muted small">빨간 줄 = ${esc(U.gauges[lk].n)} 20 이하 / 폐위</span></div>
-  <div class="scroll" style="margin-top:8px"><table class="st"><tr><th>번호</th><th>이름</th><th>진행</th>${gk.map(k => `<th>${U.gauges[k].e}${esc(U.gauges[k].n)}</th>`).join('')}${U.scenes.map((s, i) => `<th>장면${i + 1}</th>`).join('')}<th>탈락</th><th>재상</th><th>판결문</th><th>붙여넣기</th><th>카드</th><th></th></tr>
-  ${L.map(s => { const r = runOf(s); if (!r) return `<tr><td>${s.num}</td><td>${esc(s.name)}</td><td>시작 전</td><td colspan="${gk.length + U.scenes.length + 6}"></td><td><button class="btn sm ghost" onclick="T.reset('${s.sid}')">삭제</button></td></tr>`;
+  <div class="scroll" style="margin-top:8px"><table class="st"><tr><th>번호</th><th>이름</th><th>진행</th>${gk.map(k => `<th>${U.gauges[k].e}${esc(U.gauges[k].n)}</th>`).join('')}${U.scenes.map((s, i) => `<th>장면${i + 1}</th>`).join('')}<th>탈락</th><th>⚔️진군</th><th>🧓충성</th><th>💡힌트·🔑</th><th>재상</th><th>판결문</th><th>붙여넣기</th><th>카드</th><th></th></tr>
+  ${L.map(s => { const r = runOf(s); if (!r) return `<tr><td>${s.num}</td><td>${esc(s.name)}</td><td>시작 전</td><td colspan="${gk.length + U.scenes.length + 9}"></td><td><button class="btn sm ghost" onclick="T.reset('${s.sid}')">삭제</button></td></tr>`;
     const warn = r.fallen || (r.g[lk] <= 20 && r.step !== 'done');
     return `<tr class="${warn ? 'warn' : ''}"><td>${s.num}</td><td>${esc(s.name)}</td><td>${r.fallen ? '🥀 폐위 · ' : ''}${esc(stepName(r, U))}</td>${gk.map(k => `<td>${r.g[k]}</td>`).join('')}
       ${U.scenes.map(sc => { const st = r.scenes[sc.id] || {}; return `<td>${st.adopt ? esc(TH(st.adopt).name) + ' ' + (st.level ? ({ a: '🏆', b: '✅', c: '⚠️', x: '⏰' })[st.level] : '') + (st.rebutOk === true ? '🛡️' : st.rebutOk === false ? '💢' : '') : '-'}</td>`; }).join('')}
-      <td>${r.elim.map(id => esc(TH(id).name)).join(',') || '-'}</td><td>${r.chief ? esc(TH(r.chief).name) : '-'}</td>
+      <td>${r.elim.map(id => esc(TH(id).name)).join(',') || '-'}</td><td>${r.march || 0}%</td><td>${r.rival || 0}</td><td>${U.scenes.map(sc => { const st = r.scenes[sc.id] || {}; return (st.hl ? st.hl : '0') + (st.keyOk ? '🔑' : ''); }).join(' / ')}</td><td>${r.chief ? esc(TH(r.chief).name) : '-'}</td>
       <td>${nz(r.verdict.text).length}자${r.verdict.submittedAt ? ' ✅' : ''}</td><td>${r.paste ? `<b style="color:var(--bad)">${r.paste}회</b>` : '0'}</td>
       <td>${r.hintUsed ? '💡' : ''}${r.rescued ? '❤️‍🩹' + r.rescued : ''}</td>
       <td><button class="btn sm line" onclick="T.view('${s.sid}')">보기</button> <button class="btn sm ghost" onclick="T.resetRun('${s.sid}')">단원 초기화</button></td></tr>`; }).join('')}
@@ -181,7 +183,9 @@ function obsText(s, U) {
   const parts = U.scenes.map((sc, i) => { const st = r.scenes[sc.id] || {}; if (!st.adopt) return null; return `장면${i + 1}(${sc.title}): ${TH(st.adopt).name} 채택${st.level ? '·' + (LV[st.level] ? LV[st.level].t.replace(/^\S+\s/, '') : '시간 초과') : ''}${st.rebutOk === true ? '·재반박 성공' : st.rebutOk === false ? '·재반박 실패' : ''}${st.elim ? '·' + TH(st.elim).name + ' 탈락' : ''}`; }).filter(Boolean);
   const kws = []; U.scenes.forEach(sc => { const st = r.scenes[sc.id] || {}; if (st.chk) kws.push(...st.chk.kw); }); kws.push(...kwHits((r.verdict || {}).text, allUnitKw(U)));
   const bd = Object.entries(r.bd || {}).filter(([k, v]) => v).map(([k, v]) => k + '+' + v).join(', ');
-  return [`경로: ${parts.join(' → ') || '-'}`, `최종 재상: ${r.chief ? TH(r.chief).name : r.fallen ? '(폐위)' : '-'}`, `사용한 개념어: ${[...new Set(kws)].join(', ') || '-'}`, `신념 변화: ${bd || '-'}`, `판결문: ${nz((r.verdict || {}).text).length}자, 붙여넣기 ${(r.verdict || {}).paste || 0}회, 구제 카드 ${r.rescued || 0}회, 힌트 ${r.hintUsed ? '사용' : '안 씀'}`].join('\n');
+  const rallyN = U.scenes.reduce((a, sc) => { const st = r.scenes[sc.id] || {}; (st.rally || []).forEach(x => { a[0]++; if (x.ok) a[1]++; }); return a; }, [0, 0]);
+  const hints = U.scenes.map((sc, i) => { const st = r.scenes[sc.id] || {}; return `장면${i + 1} 힌트 ${st.hl || 0}단계${st.keyOk ? '·열쇠 풂' : ''}${st.bet ? '·확신도 ' + st.bet : ''}${st.alarmShown ? (st.alarmOk ? '·급보 대응' : '·급보 무시') : ''}`; }).join(' / ');
+  return [`경로: ${parts.join(' → ') || '-'}`, `공손연과의 공방: ${rallyN[0]}번 중 ${rallyN[1]}번 막음 · 수업 자료 활용: ${hints}`, `최종 재상: ${r.chief ? TH(r.chief).name : r.fallen ? '(폐위)' : '-'}`, `사용한 개념어: ${[...new Set(kws)].join(', ') || '-'}`, `신념 변화: ${bd || '-'}`, `판결문: ${nz((r.verdict || {}).text).length}자, 붙여넣기 ${(r.verdict || {}).paste || 0}회, 구제 카드 ${r.rescued || 0}회, 힌트 ${r.hintUsed ? '사용' : '안 씀'}`].join('\n');
 }
 function obsH(U, L) {
   return `<div class="card"><h2>🔎 관찰 기록 요약 — ${esc(U.title)}</h2><p class="muted small">세특을 쓰실 때 참고할 <b>근거 자료</b>입니다. 문장은 선생님이 직접 관찰한 내용으로 쓰셔야 합니다. (자동 문장 생성 기능은 일부러 넣지 않았습니다.)</p>
@@ -214,30 +218,55 @@ T.dlFb = () => { const rows = Object.values(FB || {}).map(f => [fmtTime(f.t), f.
 
 /* ---------- ⚙️ 설정 (모든 반 공통: rooms/DSCONTENT/default) ---------- */
 function settingsH() {
-  const subs = [['th', '① 사상가 관리'], ['judge', '③ 논술·판정 기준'], ['tn', '⑨ 긴장감'], ['unit', '단원 관리'], ['rec', '⑦ 학생 기록']];
-  const b = SETSUB === 'th' ? setThH() : SETSUB === 'judge' ? setJudgeH() : SETSUB === 'tn' ? setTnH() : SETSUB === 'unit' ? setUnitH() : setRecH();
+  const subs = [['th', '① 사상가·도감'], ['lesson', '📖 수업 자료'], ['judge', '③ 논술·판정 기준'], ['tn', '⑨ 긴장감'], ['unit', '단원 관리'], ['rec', '⑦ 학생 기록']];
+  const b = SETSUB === 'th' ? setThH() : SETSUB === 'lesson' ? setLessonH() : SETSUB === 'judge' ? setJudgeH() : SETSUB === 'tn' ? setTnH() : SETSUB === 'unit' ? setUnitH() : setRecH();
   return `<div class="note">⚙️ 여기서 바꾼 내용은 <b>모든 반에 함께</b> 적용되고, content.js 파일보다 우선합니다.</div>
     <div class="tabs">${subs.map(([k, n]) => `<button class="tab ${SETSUB === k ? 'on' : ''}" onclick="SETSUB='${k}';render()">${n}</button>`).join('')}</div><div class="ed">${b}</div>`;
 }
 function setThH() {
   const U = unitById(META.unit) || UNITS[0]; const ids = Object.keys(window.THINKERS || {}); const first = (U.thinkers || []);
   const order = [...first, ...ids.filter(i => !first.includes(i))];
-  return `<p class="muted small">사상가 이미지(정사각형으로 잘려 작게 저장), 이름·소개·대사, <b>자동 판정용 개념어</b>를 고칩니다. 현대 사상가는 사진 대신 일러스트·캐릭터를 쓰세요(저작권).</p>
+  return `<p class="muted small">사상가 이미지(정사각형으로 잘려 작게 저장), 이름·소개·대사, <b>자동 판정용 개념어</b>, 그리고 학생 <b>도감</b>에 나오는 인간관·핵심 주장·개념 뜻풀이·비판을 고칩니다. 교과서에 맞게 고친 뒤 저장하세요. 현대 사상가는 사진 대신 일러스트·캐릭터를 쓰세요(저작권).</p>
     ${order.map(id => { const t = TH(id), base = window.THINKERS[id]; return `<fieldset><legend>${esc(t.name)} <span class="muted small">${esc(t.school)}${first.includes(id) ? ' · 이번 단원' : ''}</span></legend>
       <div class="row" style="align-items:flex-start">${avatar(id, 88)}<div style="flex:1;min-width:240px">
         <div class="row"><label class="btn sm line" style="cursor:pointer">🖼️ 이미지 올리기<input type="file" accept="image/*" style="display:none" onchange="T.img('${id}',this)"></label>${(CONTENT.thImg || {})[id] ? `<button class="btn sm ghost" onclick="T.imgReset('${id}')">기본 그림으로</button>` : ''}</div>
         <label class="lb">이름</label><input class="inp" id="tn_${id}" value="${esc(t.name)}">
         <label class="lb">한 줄 소개</label><input class="inp" id="ti_${id}" value="${esc(t.intro)}">
         <label class="lb">대표 말</label><input class="inp" id="tq_${id}" value="${esc(t.quote || '')}">
-        <label class="lb">개념어 (쉼표로 구분)</label><input class="inp" id="tk_${id}" value="${esc((t.kw || []).join(', '))}">
+        <label class="lb">개념어 (자동 판정용, 쉼표로 구분)</label><input class="inp" id="tk_${id}" value="${esc((t.kw || []).join(', '))}">
+        <label class="lb">🧠 인간관 (도감)</label><textarea class="inp" style="min-height:60px" id="tv_${id}">${esc(t.view || '')}</textarea>
+        <label class="lb">📌 핵심 주장 (도감, 한 줄에 하나)</label><textarea class="inp" style="min-height:90px" id="tc_${id}">${esc((Array.isArray(t.claim) ? t.claim : (t.claim ? [t.claim] : [])).join('\n'))}</textarea>
+        <label class="lb">🔑 개념 뜻풀이 (도감·쓰기 화면, 한 줄에 "개념|뜻")</label><textarea class="inp" style="min-height:90px" id="tg_${id}">${esc(Object.entries(t.gl || {}).map(([k, v]) => k + '|' + v).join('\n'))}</textarea>
+        <label class="lb">⚔️ 이런 비판도 있다 (도감)</label><textarea class="inp" style="min-height:50px" id="tx_${id}">${esc(t.crit || '')}</textarea>
         <div class="row" style="margin-top:8px"><button class="btn sm" onclick="T.saveTh('${id}')">저장</button>${(CONTENT.th || {})[id] ? `<button class="btn sm ghost" onclick="T.resetTh('${id}')">파일 기본값으로</button>` : ''}<span class="muted small">기본 개념어: ${esc((base.kw || []).join(', '))}</span></div>
       </div></div></fieldset>`; }).join('')}`;
 }
-T.saveTh = id => { const g = k => document.getElementById(k + '_' + id).value.trim(); const v = { name: g('tn'), intro: g('ti'), quote: g('tq'), kw: g('tk').split(/[,，]/).map(x => x.trim()).filter(Boolean) };
+T.saveTh = id => { const g = k => document.getElementById(k + '_' + id).value.trim(); const gl = {}; g('tg').split('\n').forEach(l => { const i = l.indexOf('|'); if (i > 0) gl[l.slice(0, i).trim()] = l.slice(i + 1).trim(); });
+  const v = { name: g('tn'), intro: g('ti'), quote: g('tq'), kw: g('tk').split(/[,，]/).map(x => x.trim()).filter(Boolean), view: g('tv'), claim: g('tc').split('\n').map(x => x.trim()).filter(Boolean), gl, crit: g('tx') };
   backend.set(P_CONTENT + '/th/' + id, v).then(() => toast('💾 저장했어요.')); };
 T.resetTh = id => { if (confirm('이 사상가를 content.js 기본값으로 되돌릴까요?')) backend.remove(P_CONTENT + '/th/' + id); };
 T.img = async (id, inp) => { const f = inp.files && inp.files[0]; if (!f) return; try { const d = await compressImage(f, 256, 60000); IMG[id] = d; await backend.set(P_CONTENT + '/img/' + id, { d }); await backend.set(P_CONTENT + '/thImg/' + id, true); toast('🖼️ 올렸어요.'); } catch (e) { toast('이미지를 읽을 수 없어요.'); } };
 T.imgReset = id => { delete IMG[id]; backend.remove(P_CONTENT + '/img/' + id); backend.remove(P_CONTENT + '/thImg/' + id); };
+/* ---------- 📖 수업 자료 (장면별 수업 노트 · 힌트 3단계 · 학습지 열쇠) ---------- */
+function setLessonH() {
+  return `<p class="muted small">장면마다 학생이 쓰는 화면에 <b>📖 수업 노트</b>, <b>💡 힌트 3단계</b>, <b>🔑 학습지 열쇠</b>가 나옵니다. 비워 두면 그 기능은 보이지 않습니다. 교과서 본문을 그대로 넣지 말고 선생님이 요약한 내용을 넣어 주세요(방 코드를 아는 사람은 읽을 수 있음).</p>
+  ${UNITS.filter(u => u.ready).map(u => u.scenes.map((sc, i) => { const L = lessonOf(u, sc), key = u.id + '_' + sc.id, img = (CONTENT.limgOn || {})[key];
+    return `<fieldset><legend>${esc(u.title)} · 장면${i + 1} ${esc(sc.title)}</legend>
+    <label class="lb">📖 수업 노트 (개념 정리·판서 요약)</label><textarea id="ln_${key}" class="inp" style="min-height:110px">${esc(L.note || '')}</textarea>
+    <div class="row" style="margin-top:6px"><label class="btn sm line" style="cursor:pointer">🖼️ 학습지·판서 사진 올리기<input type="file" accept="image/*" style="display:none" onchange="T.limg('${key}',this)"></label>${img ? `<span class="pill ok">사진 있음</span><button class="btn sm ghost" onclick="T.limgReset('${key}')">사진 지우기</button>` : ''}</div>
+    <label class="lb">📎 자료 링크 (한글·PDF 학습지는 구글 드라이브 링크로)</label><input id="ll_${key}" class="inp" value="${esc(L.link || '')}" placeholder="https://drive.google.com/...">
+    <label class="lb">💡 1단계 — 방향 질문 (공짜)</label><input id="lh1_${key}" class="inp" value="${esc((L.hints || [])[0] || '')}">
+    <label class="lb">💡 2단계 — 개념 짚기 (민심 -2, 열쇠를 풀면 공짜)</label><input id="lh2_${key}" class="inp" value="${esc((L.hints || [])[1] || '')}">
+    <label class="lb">💡 3단계 — 문장 틀 (힌트 카드, 숨겨진 엔딩 불가, 그대로 베끼면 인정 안 됨. 빈칸은 ____)</label><input id="lh3_${key}" class="inp" value="${esc((L.hints || [])[2] || '')}">
+    <label class="lb">🔑 학습지 열쇠 문제 (맞히면 힌트 카드 +1, 2단계 공짜)</label><input id="lkq_${key}" class="inp" value="${esc((L.key || {}).q || '')}" placeholder="예: 학습지 2번 빈칸 — 일정한 생업을 뜻하는 말은?">
+    <label class="lb">정답 (쉼표로 여러 개)</label><input id="lka_${key}" class="inp" value="${esc(((L.key || {}).a || []).join(', '))}">
+    <div class="row" style="margin-top:8px"><button class="btn sm" onclick="T.saveLesson('${u.id}','${sc.id}')">저장</button><button class="btn sm ghost" onclick="if(confirm('이 장면 수업 자료를 파일 기본값으로 되돌릴까요?'))backend.remove(P_CONTENT+'/lesson/${u.id}/${sc.id}')">파일 기본값으로</button></div></fieldset>`; }).join('')).join('')}`;
+}
+T.saveLesson = (uid, sid) => { const k = uid + '_' + sid, g = p => document.getElementById(p + '_' + k).value.trim();
+  backend.set(P_CONTENT + '/lesson/' + uid + '/' + sid, { note: g('ln'), link: g('ll'), hints: [g('lh1'), g('lh2'), g('lh3')], key: { q: g('lkq'), a: g('lka').split(/[,，]/).map(x => x.trim()).filter(Boolean) } }).then(() => toast('💾 저장했어요.')); };
+T.limg = async (key, inp) => { const f = inp.files && inp.files[0]; if (!f) return; try { const d = await compressWide(f); LIMG[key] = d; await backend.set(P_CONTENT + '/limg/' + key, { d }); await backend.set(P_CONTENT + '/limgOn/' + key, true); toast('🖼️ 올렸어요.'); } catch (e) { toast('이미지를 읽을 수 없어요.'); } };
+T.limgReset = key => { delete LIMG[key]; backend.remove(P_CONTENT + '/limg/' + key); backend.remove(P_CONTENT + '/limgOn/' + key); };
+
 function setJudgeH() {
   const J = JUDGE(), F = [['lineMin', '한 줄 논증 최소 글자'], ['lineKw', '한 줄 논증 개념어 수'], ['rebutMin', '재반박 최소 글자'], ['verdictMin', '판결문 최소 글자'], ['verdictKw', '판결문 개념어 수']];
   return `<fieldset><legend>숫자 기준</legend><div class="vals">${F.map(([k, n]) => `<label>${n}<input type="number" id="j_${k}" value="${J[k]}"></label>`).join('')}</div></fieldset>
