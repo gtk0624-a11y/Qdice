@@ -514,12 +514,12 @@ A.rescue = () => {
   const j = judgeRebut(text, U);
   if (nz(text).length < 40 || !j.mk.length) return toast('40자 이상, "왜냐하면·그러나" 같은 근거를 넣어 호소문을 써 주세요.');
   run.rescueLeft--; run.rescued++; run.rescueLog = (run.rescueLog || []).concat([{ t: Date.now(), text }]);
-  run.g[lifeKey(U)] = 15; run.step = run.rescueReturn || 'story'; delete run.rescueReturn; saveS(true); toast('❤️ 백성들이 한 번 더 기회를 주었습니다.'); render();
+  run.g[lifeKey(U)] = 15; run.step = run.rescueReturn || 'story'; delete run.rescueReturn; saveS(true); toast('❤️ 백성들이 한 번 더 기회를 주었습니다.'); emit('❤️‍🩹', (S ? S.num + '번' : '') + ' 군주, 호소문으로 기사회생!'); render();
 };
 A.fall = () => {
   const run = curRun(), U = curUnit(), T = TN(run.tn);
   if (!T.fall) { run.g[lifeKey(U)] = 10; run.step = run.rescueReturn || 'story'; delete run.rescueReturn; toast('순한 맛: 백성들이 마지막 기회를 줍니다.'); }
-  else { run.fallen = true; run.step = 'verdict'; delete run.rescueReturn; }
+  else { run.fallen = true; run.step = 'verdict'; delete run.rescueReturn; emit('🥀', (S ? S.num + '번' : '') + ' 군주 폐위!'); cine('<div class="c2" style="color:#ff6b6b">폐위</div><div class="c1">백성이 당신을 버렸습니다</div>', 2200); }
   saveS(true); render(); window.scrollTo(0, 0);
 };
 A.pickChief = th => { const run = curRun(); run.chief = th; run.step = 'verdict'; saveS(true); render(); window.scrollTo(0, 0); };
@@ -528,6 +528,7 @@ A.submitVerdict = () => {
   if (el) run.verdict.text = el.value; const len = nz(run.verdict.text).length;
   if (len < 30) return toast('판결문을 써 주세요.');
   if (len < J.verdictMin && !confirm('아직 ' + len + '자예요. (기준 ' + J.verdictMin + '자) 그래도 제출할까요?')) return;
+  if (!run.verdict.submittedAt) emit('📜', (S ? S.num + '번' : '') + ' 판결문 제출!');
   run.verdict.submittedAt = Date.now(); run.verdict.len = len; run.verdict.log.push({ t: Date.now(), len });
   run.step = 'done'; run.doneAt = Date.now(); const e = endingOf(run, U, null, false); run.endingId = e.id || '';
   saveS(true); render(); window.scrollTo(0, 0);
@@ -674,14 +675,31 @@ function renderStudent() {
 /* 그린 뒤 한 번: 숫자 올라가기, 흔들림, 효과음 (장면마다 한 번만) */
 const ONCE = {};
 function once(k) { if (ONCE[k]) return false; ONCE[k] = 1; return true; }
+/* 📺 큰 화면 생중계: 학생 기기의 큰 사건을 rooms/DS_방/feed 로 보냄 (번호만, 글 내용은 보내지 않음) */
+function josa(w, a, b) { const c = String(w || '').slice(-1).charCodeAt(0) - 0xAC00; if (c < 0 || c > 11171) return w + a; const j = c % 28; return w + ((j === 0 || (a === '로' && j === 8)) ? a : b); }   // 받침 따라 로/으로, 를/을
+function emit(e, text) { try { if (!ROOM || !S || MODE !== 'student') return; const id = Date.now().toString(36) + '_' + S.sid; backend.set(roomPath(ROOM) + '/feed/' + id, { t: Date.now(), num: S.num, e, text }).catch(() => { }); } catch (x) { } }
+function feedScene(run, U, sc, st) {
+  if (st.fed) return; st.fed = 1; const n = S ? S.num + '번' : '';
+  const nm = st.adopt === 'third' ? '제3의 길' : TH(st.adopt).name;
+  if (st.level === 'a') emit(st.adopt === 'third' ? '✨' : '🏆', `${n} 군주, ${josa(nm, '로', '으로')} 大成功!`);
+  if (st.rebutOk) emit('🧓', `${n} 군주가 공방 끝에 ${josa(U.rival.name, '를', '을')} 감복시켰다!`);
+  if (st.invade) emit('⚔️', `${n} 나라에 ${U.march.n} 침공!`);
+  (st.people || []).forEach(p => { const r = SX(U, sc).people[p.i], np = U.npcs[r.npc]; if (['hero', 'dead', 'left', 'lost', 'caught'].includes(r.st)) emit(np.e, `${n} 나라의 ${np.n} — ${NPCST[r.st]}`); });
+  (st.twist || []).forEach(x => { const tx = sc.twist.rules[x.i].text || ''; if (/배신|무릎/.test(tx)) emit('⚡', `${n} 나라에 반전! ${tx.slice(0, 30)}${tx.length > 30 ? '…' : ''}`); });
+  saveS();
+}
+/* 🎬 영화 같은 전환 화면 */
+function cine(html, ms) { if (fxLv() === 'off') return; const d = document.createElement('div'); d.className = 'cine'; d.innerHTML = `<div class="cin">${html}</div>`; d.onclick = () => d.remove(); document.body.appendChild(d); setTimeout(() => { d.classList.add('out'); setTimeout(() => d.remove(), 500); }, fxLv() === 'lite' ? ms * 0.6 : ms); }
 function postRender(run, U, sc, urg) {
   if (!run || !U || STAB !== 'game') return;
   const key = U.id + '_' + (sc ? sc.id : 'end') + '_' + run.startedAt;
   if (urg && once('urg' + key)) snd('alarm');
-  if (run.step === 'rebut' && once('stamp' + key)) snd('stamp');
+  if (run.step === 'story' && sc && once('cine' + key)) { cine(`<div class="c1">장면 ${run.sc + 1}</div><div class="c2">${esc(sc.title)}</div>${sc.mode === 'duel' ? '<div class="c3">⚔️ 맞대결</div>' : sc.urgent ? '<div class="c3 hot">🚨 긴급 결단</div>' : ''}`, 1900); snd('alarm'); }
+  if (run.step === 'rebut' && once('stamp' + key)) { snd('stamp'); const st = scState(run, sc); if (st && st.level) cine(`<div class="c1">판정</div>${stampH(st.level)}`, 1500); }
+  if (run.step === 'pick' && once('cinep' + key)) cine(`<div class="c1">마지막 결단</div><div class="c2">재상을 임명하라</div>`, 1700);
   if (['result', 'done'].includes(run.step) && META.rank !== false && once('rk' + key + run.step)) A.loadRank();
   if (run.step === 'result' && sc) {
-    animateNums(); const st = scState(run, sc), tot = sceneTotal(st), life = tot[lifeKey(U)] || 0;
+    animateNums(); const st = scState(run, sc), tot = sceneTotal(st), life = tot[lifeKey(U)] || 0; feedScene(run, U, sc, st);
     if (once('res' + key)) { snd(life < 0 ? 'bad' : 'good'); if (life <= -10 && fxLv() === 'full') { document.body.classList.remove('shake'); void document.body.offsetWidth; document.body.classList.add('shake'); setTimeout(() => document.body.classList.remove('shake'), 700); } }
   }
 }

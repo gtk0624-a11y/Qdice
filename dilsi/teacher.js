@@ -17,7 +17,7 @@ function bootTeacher() {
 }
 function listenRoom() {
   if (roomListening === ROOM) return; roomListening = ROOM;
-  backend.on(roomPath(ROOM), v => { const d = v || {}; META = d.meta || {}; STU = d.students || {}; SCORES = d.score || {}; metaLoaded = true; safeRender(); });
+  backend.on(roomPath(ROOM), v => { const d = v || {}; META = d.meta || {}; STU = d.students || {}; SCORES = d.score || {}; FEED = d.feed || {}; metaLoaded = true; safeRender(); });
 }
 async function pinHash(sp, pin) { try { const b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode('dilsi|' + sp + '|' + pin)); return Array.from(new Uint8Array(b)).map(x => x.toString(16).padStart(2, '0')).join(''); } catch (e) { return 'p' + sp + pin; } }
 T.login = async () => {
@@ -129,6 +129,19 @@ function runTabH(U, L) {
       <label class="lb">포트폴리오 만점(판결문 1편당)</label><input class="inp" style="width:100px" type="number" value="${esc(META.pfPts || 10)}" onchange="T.meta('pfPts',+this.value)">
     </div></div>`;
 }
+/* 📺 생중계 피드 (rooms/DS_방/feed) — 최근 90분, 새 소식은 크게 */
+let FEED = {}, FEEDSEEN = 0, TOP1 = null, LOCALEV = [];
+function feedList() {
+  const cut = Date.now() - 90 * 60000;
+  return Object.values(FEED || {}).concat(LOCALEV).filter(x => x && x.t > cut).sort((a, b) => b.t - a.t);
+}
+function feedH(U, L) {
+  const top = rankList(STU, U)[0]; if (META.rank !== false && top && top.sc > 0) { if (TOP1 && TOP1 !== top.sid) LOCALEV.push({ t: Date.now(), e: '👑', text: `1위 교체! ${top.num}번 군주가 선두로` }); TOP1 = top.sid; }
+  const F = feedList(), last = F[0], fresh = last && last.t > FEEDSEEN;
+  if (fresh) { FEEDSEEN = last.t; try { snd(/폐위|침공|쓰러짐/.test(last.text) ? 'bad' : 'good'); } catch (e) { } }
+  return `<div class="feed">${last ? `<div class="fbig ${fresh ? 'pop2' : ''}"><span class="fe">${esc(last.e)}</span>${esc(last.text)}</div>` : '<div class="fbig dim">📡 생중계 대기 중 — 학생들의 大成功·감복·침공·폐위 소식이 여기에 뜹니다</div>'}
+    <div class="flist">${F.slice(1, 7).map(x => `<div><span>${esc(x.e)}</span> ${esc(x.text)} <i>${Math.round((Date.now() - x.t) / 60000) < 1 ? '방금' : Math.round((Date.now() - x.t) / 60000) + '분 전'}</i></div>`).join('')}</div></div>`;
+}
 function bigH(U, L) {
   const R = L.map(s => runOf(s)).filter(Boolean), done = R.filter(r => r.verdict && r.verdict.submittedAt).length;
   const stepCnt = U.scenes.map((s, i) => R.filter(r => r.sc === i && !['pick', 'verdict', 'done'].includes(r.step)).length);
@@ -140,6 +153,7 @@ function bigH(U, L) {
   return `<div class="bigscr"><div class="row"><div><div class="muted small" style="color:#aab">방 코드</div><div class="bigcode">${esc(ROOM)}</div></div><div class="qr" id="qrbox" data-s="120" style="border-radius:12px"></div><span class="sp"></span>
     <button class="btn gold" onclick="document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen().catch(()=>{})">⛶ 전체 화면</button></div>
     <div class="kpi" style="margin-top:12px"><div><b>${L.length}</b>접속</div>${stepCnt.map((n, i) => `<div><b>${n}</b>장면 ${i + 1}</div>`).join('')}<div><b>${vCnt}</b>판결문 작성</div><div><b>${done}</b>제출</div></div>
+    ${feedH(U, L)}
     ${META.rank !== false ? `<h2 style="margin-top:16px">🏆 순위</h2><div class="dist">${rankList(STU, U).slice(0, 10).map((x, i) => `<div class="b"><div class="l">${i + 1}위 · ${x.num}번</div><div class="g"><i style="width:${Math.min(100, x.sc / 3)}%"></i></div><div class="n">${x.r.fallen ? '🥀' : x.sc}</div></div>`).join('') || '<p class="muted">아직 없어요.</p>'}</div>` : ''}
     <h2 style="margin-top:16px">⚖️ 우리 반의 선택</h2>${dist}${mosaic}</div>`;
 }

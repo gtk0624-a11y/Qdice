@@ -253,14 +253,34 @@ body.shake{animation:shake .6s}
 .lesson .btn .hc{display:block;font-size:11px;font-weight:400;opacity:.8}
 @media(min-width:901px){.chron-m{display:none}}
 @media(max-width:900px){.chron-d{display:none}}
+
+/* 🎬 전환 화면 · 📺 생중계 */
+.cine{position:fixed;inset:0;z-index:300;background:radial-gradient(circle at 50% 45%,rgba(40,20,10,.86),rgba(0,0,0,.94));display:flex;align-items:center;justify-content:center;animation:cineIn .35s ease;cursor:pointer}
+.cine.out{animation:cineOut .5s ease forwards}
+.cin{text-align:center;color:#fff}
+.cin .c1{font-size:18px;letter-spacing:.4em;color:#e9c46a;opacity:0;animation:rise .6s .15s forwards}
+.cin .c2{font-size:clamp(34px,8vw,64px);font-weight:900;margin:8px 0;font-family:serif;text-shadow:0 0 30px rgba(233,196,106,.45);opacity:0;animation:zoom .9s .35s forwards}
+.cin .c3{display:inline-block;margin-top:8px;padding:6px 14px;border:2px solid #e9c46a;border-radius:999px;color:#e9c46a;font-weight:800;opacity:0;animation:rise .5s .9s forwards}
+.cin .c3.hot{border-color:#ff6b6b;color:#ff6b6b}
+.cin .stampwrap{transform:scale(1.8);margin-top:30px}
+@keyframes cineIn{from{opacity:0}to{opacity:1}}@keyframes cineOut{to{opacity:0}}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes zoom{from{opacity:0;transform:scale(1.25);letter-spacing:.3em}to{opacity:1;transform:none;letter-spacing:.02em}}
+.feed{margin-top:14px}
+.fbig{background:linear-gradient(90deg,#7a1f1f,#b5462e);border-radius:16px;padding:18px 20px;font-size:clamp(20px,3vw,34px);font-weight:900;display:flex;gap:14px;align-items:center;box-shadow:0 0 0 3px #ffd43b inset}
+.fbig.dim{background:#2b3446;box-shadow:none;font-size:18px;font-weight:600;color:#aab}
+.fbig .fe{font-size:1.4em}
+.fbig.pop2{animation:fpop .9s ease}
+@keyframes fpop{0%{transform:scale(.7);opacity:0}55%{transform:scale(1.06);opacity:1}100%{transform:none}}
+.flist div{padding:6px 4px;border-bottom:1px solid #3b465c;font-size:17px}.flist i{color:#8a93a6;font-style:normal;font-size:13px;margin-left:6px}
 </style>
 </head>
 <body>
 <div id="app"></div>
-<script src="content.js?v=11092249"></script>
-<script src="app.js?v=11092249"></script>
-<script src="fx.js?v=11092249"></script>
-<script src="teacher.js?v=11092249"></script>
+<script src="content.js?v=11092338"></script>
+<script src="app.js?v=11092338"></script>
+<script src="fx.js?v=11092338"></script>
+<script src="teacher.js?v=11092338"></script>
 <script>boot();</script>
 </body>
 </html>
