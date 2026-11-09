@@ -654,8 +654,8 @@ function viewRafts(u){
   <table class="rafts"><tr><th>R<br><small>역할</small></th><td>${esc(r.R)}</td></tr><tr><th>A<br><small>독자</small></th><td>${esc(r.A)}</td></tr><tr><th>F<br><small>형식</small></th><td>${esc(r.F)}</td></tr><tr><th>T<br><small>주제</small></th><td>${esc(r.T)}</td></tr><tr><th>S<br><small>동사</small></th><td><b>${esc(r.S)}</b></td></tr></table>
   <h3>🎬 나의 인생 기록</h3><div class="echo" style="background:#fff8e1;border-color:#f08c00;color:#7a4b00">${esc(myChoiceLine(u))}<br>→ ${esc(ev?(ev.ok?c.r:(c.rf||c.r)):'')}</div>
   <h3>🔑 개념어·가치어 (${r.need||2}개 이상)</h3><div>${(u.concepts||[]).map(a=>`<span class="pill ${hs.includes(a)?'on':''}" data-pillr="${u.id}">${esc(a)}</span>`).join('')}</div>
-  <textarea class="inp tall" data-w="${key}" data-min="${r.min||350}" placeholder="R의 입장에서, A에게, F의 형식으로 쓰세요.">${esc(txt)}</textarea>
-  <div class="cnt" data-cnt="${key}">${txt.length}자 / 최소 ${r.min||350}자 · 개념어 <b>${hs.length}</b>/${r.need||2}</div>
+  <textarea class="inp tall" data-w="${key}" data-min="${r.min||100}" placeholder="R의 입장에서, A에게, F의 형식으로 쓰세요.">${esc(txt)}</textarea>
+  <div class="cnt" data-cnt="${key}">${txt.length}자 / 최소 ${r.min||100}자 · 개념어 <b>${hs.length}</b>/${r.need||2}</div>
   <h3>✅ 스스로 확인하기</h3>${conds.map((cc,ci)=>`<label style="display:flex;gap:8px;align-items:flex-start;margin:6px 0"><input type="checkbox" data-chk="${key}" data-i="${ci}" ${chk[ci]?'checked':''} style="width:20px;height:20px;margin-top:3px"> <span>${esc(cc)}</span></label>`).join('')}
   <div class="row" style="margin-top:10px"><button class="btn warm" data-act="raftsDone" data-v="${u.id}">작성 완료 (⭐ +${G.XP.rafts} XP)</button></div>${wActions(key)}
   <p class="muted">선생님이 하이러닝에 올려 AI 채점·피드백을 받습니다. 통과하면 ⭐ +${G.XP.pass} XP와 함께 다음 시기가 열려요.</p></div>`;
@@ -806,7 +806,7 @@ const SA={
   miniDone(ds){ const L=lessonById(ds.v); const w=S.w[ds.v]||{}; const t=w.text||''; if(t.length<MINI_MIN) return toast(`최소 ${MINI_MIN}자 이상 써 주세요. (지금 ${t.length}자)`); if(!hits(t,L.l.any).length) return toast('개념어를 하나 이상 넣어 주세요: '+L.l.any.join(', '));
     S.w[ds.v].done=true; S.w[ds.v].doneAt=Date.now(); if(!S.xpw[ds.v]){ S.xpw[ds.v]=1; addXP(G.XP.mini); } saveS(); toast(`✅ 작성 완료! ⭐ +${G.XP.mini} XP`); render(); },
   raftsDone(ds){ const u=unitById(ds.v); const r=u.rafts||{}; const key=wkeyR(u.id); const w=S.w[key]||{}; const t=w.text||''; const hs=hits(t,u.concepts); const conds=(r.cond&&r.cond.length)?r.cond:[1,2,3];
-    if(t.length<(r.min||350)) return toast(`최소 ${r.min||350}자 이상 써 주세요. (지금 ${t.length}자)`); if(hs.length<(r.need||2)) return toast(`개념어를 ${r.need||2}개 이상 써 주세요. (지금 ${hs.length}개)`);
+    if(t.length<(r.min||100)) return toast(`최소 ${r.min||100}자 이상 써 주세요. (지금 ${t.length}자)`); if(hs.length<(r.need||2)) return toast(`개념어를 ${r.need||2}개 이상 써 주세요. (지금 ${hs.length}개)`);
     if(conds.some((c,ci)=>!(w.chk||{})[ci])) return toast('"스스로 확인하기"를 모두 확인해 주세요.');
     S.w[key].done=true; S.w[key].doneAt=Date.now(); if(!S.xpw[key]){ S.xpw[key]=1; addXP(G.XP.rafts); } saveS(); toast(`📤 제출 완료! ⭐ +${G.XP.rafts} XP`); render(); },
   endDone(){ const key='END-'+grade(); const E=ENDINGS[grade()]||{}; const t=(S.w[key]||{}).text||''; if(t.length<(E.min||300)) return toast(`최소 ${E.min||300}자 이상 써 주세요.`); S.w[key].done=true; saveS(); toast('✅ 작성 완료!'); render(); },
