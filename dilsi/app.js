@@ -604,7 +604,7 @@ function lessonH(U, sc, st, run) {
     <div class="small muted" style="margin-bottom:4px">막히면 👇 수업 노트를 보거나 힌트를 순서대로 여세요. 아래 <b>학습지 열쇠</b>를 맞히면 힌트 카드 +1</div>
     <div class="row">${hasNote ? `<button class="btn sm line" onclick="A.note()">📖 수업 노트</button>` : ''}
       ${h.map((x, i) => x ? `<button class="btn sm ${hl > i ? 'jade' : 'ghost'}" ${hl > i ? 'disabled' : ''} onclick="A.hintL(${i + 1})">${HINTNM[i]}<span class="hc">${i === 0 ? '무료' : i === 1 ? (st.keyOk ? '무료(열쇠)' : U.gauges[lifeKey(U)].n + ' -2') : '힌트 카드 1장'}</span></button>` : '').join('')}</div>
-    ${hasNote ? `<div id="notepanel" class="notep" style="display:${NOTEOPEN ? 'block' : 'none'}">${L.note ? `<div style="white-space:pre-wrap">${esc(L.note)}</div>` : ''}<div id="noteimg">${img && LIMG[U.id + '_' + sc.id] ? `<img src="${LIMG[U.id + '_' + sc.id]}" style="max-width:100%;border-radius:10px">` : ''}</div>${L.link ? `<a href="${esc(L.link)}" target="_blank" rel="noopener">📎 학습지·자료 열기</a>` : ''}</div>` : ''}
+    ${hasNote ? `<div id="notepanel" class="notep" style="display:${NOTEOPEN ? 'block' : 'none'}">${L.note ? `<div style="white-space:pre-wrap">${esc(L.note)}</div>` : ''}<div id="noteimg">${img && LIMG[U.id + '_' + sc.id] ? `<img src="${LIMG[U.id + '_' + sc.id]}" style="max-width:100%;border-radius:10px">` : ''}</div>${L.link ? `<a href="${esc(L.link)}" target="_blank" rel="noopener">📎 학습지·자료 열기 (⏱️ 시간은 계속 흐름)</a>` : ''}</div>` : ''}
     ${h.slice(0, hl).map((x, i) => `<div class="hintl"><b>${HINTNM[i]}</b> ${esc(x)}${i === 2 ? '<div class="small muted">문장 틀을 그대로 베끼면 인정되지 않습니다. 내 생각으로 채우세요.</div>' : ''}</div>`).join('')}
     ${hl >= 3 ? `<div class="note small">🔑 개념어 — ${(st.adopt === 'third' ? sc.options.map(o => o.th) : [st.adopt]).map(id => `<b>${esc(TH(id).name)}</b>: ${esc((TH(id).kw || []).join(', '))}`).join(' / ')}</div>` : ''}
     ${L.key && L.key.q ? (st.keyOk ? `<div class="keyok">🔓 학습지 열쇠를 풀었습니다! (힌트 카드 +1)</div>` : `<div class="keybox"><div class="small">🔑 <b>학습지 열쇠</b> (맞히면 힌트 카드 +1, 개념 힌트 무료)<br><b>${esc(L.key.q)}</b></div><div class="row"><input id="f_key" class="inp" style="flex:1" placeholder="학습지에서 찾은 답" onkeydown="if(event.key==='Enter')A.key()"><button class="btn sm gold" onclick="A.key()">🔑 열쇠 맞히기</button></div></div>`) : ''}
@@ -689,8 +689,8 @@ function gameH() {
   if (busy && !['done'].includes(run.step)) return h + `<div class="card"><h2>⏸ 잠시 멈춤</h2><p class="muted">선생님 말씀을 들어요.</p></div>`;
   switch (run.step) {
     case 'story': return h + storyH(U, run, sc);
-    case 'evidence': return h + evidenceH(U, run, sc);
-    case 'council': return h + councilH(U, run, sc);
+    case 'evidence': return h + evidenceH(U, run, sc) + prepH(U, sc);
+    case 'council': return h + councilH(U, run, sc) + prepH(U, sc);
     case 'write': return h + writeH(U, run, sc);
     case 'bet': return h + betH(U, run, sc);
     case 'rebut': return h + rebutH(U, run, sc);
@@ -735,6 +735,17 @@ function storyH(U, run, sc) {
     ${st.invade ? `<div class="event">${esc(U.march.text)}<br>${fxHTML(U, st.invade)}</div>` : ''}
     ${worldArt(U, run.g)}
     <button class="btn full big" style="margin-top:12px" onclick="A.toEvidence()">🔍 증거 살펴보기</button>` : ''}`;
+}
+/* 시간이 흐르지 않는 단계(증거·회의)에서 수업 자료 미리 보기 — 힌트·열쇠는 쓰는 화면에서만 */
+function prepH(U, sc) {
+  const L = lessonOf(U, sc), k = U.id + '_' + sc.id, img = ((CONTENT.limgOn || {})[k]);
+  if (!(L.note || img || L.link)) return '';
+  if (img && !LIMG[k] && !LIMGREQ[k]) { LIMGREQ[k] = 1; backend.get(P_CONTENT + '/limg/' + k).then(v => { if (v && v.d) { LIMG[k] = v.d; const p = document.getElementById('prepimg'); if (p) p.innerHTML = `<img src="${v.d}" style="max-width:100%;border-radius:10px">`; } }).catch(() => { }); }
+  return `<details class="card prep"><summary><b>📖 학습지·수업 노트 먼저 보기</b> <span class="small muted">(여기서는 시간이 흐르지 않아요)</span></summary>
+    ${L.link ? `<a class="btn line full" style="margin:8px 0" href="${esc(L.link)}" target="_blank" rel="noopener">📎 학습지 열기 (새 탭)</a>` : ''}
+    ${L.note ? `<div class="notep" style="display:block;white-space:pre-wrap">${esc(L.note)}</div>` : ''}
+    <div id="prepimg">${img && LIMG[k] ? `<img src="${LIMG[k]}" style="max-width:100%;border-radius:10px">` : ''}</div>
+    <p class="small muted">한 줄 논증을 쓸 때는 시간이 흐릅니다. 필요한 개념을 지금 확인해 두세요.</p></details>`;
 }
 function evBody(run, e) { return e.alt && cond(run, e.alt.if) ? e.alt.body : e.body; }
 function evidenceH(U, run, sc) {
