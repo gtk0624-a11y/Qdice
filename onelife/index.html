@@ -382,19 +382,30 @@ function writing(key){ return (S && S.w && S.w[key]) || null; }
 const wkeyR = uid => 'R-'+uid;
 function raftsState(uid){ if(PASS[uid]) return 'p'; const w=writing(wkeyR(uid)); if(UPL[wkeyR(uid)]) return 'u'; if(w&&w.done) return 'd'; if(w&&(w.text||w.deleted)) return 'w'; return ''; }
 function phOf(uid){ return (S.u[uid]||{}).ph||''; }
+const isSkip = uid => !!((META.skip||{})[uid]);   // 교사가 '건너뛰기'로 지정한 단원
+/* 건너뛴 단원 자동 처리: 열린 범위 안의 건너뛰기 단원은 자동으로 '지나간 시기'가 되고,
+   교사가 다시 '하기'로 바꾸면 (아직 아무것도 안 한 경우) 다시 할 수 있게 되돌린다. */
+function autoSkip(){
+  if(!S || !S.birth) return false; const L=UG(grade()); let ch=false;
+  L.forEach(u=>{ const st=S.u[u.id]; if(st && st.skip && !isSkip(u.id)){ if(st.ab) S.ab[st.ab]=r1(clamp((S.ab[st.ab]||0)-0.5,0,12)); delete S.u[u.id]; ch=true; } });
+  for(let k=0;k<L.length;k++){ let moved=false;
+    L.forEach((u,i)=>{ if(isSkip(u.id) && !S.u[u.id] && unitOpen(i)){ const a=AB[Math.floor(Math.random()*AB.length)]; S.ab[a]=r1(clamp((S.ab[a]||0)+0.5,0,12)); S.u[u.id]={ph:'done',skip:true,doneAt:Date.now(),ab:a}; ch=true; moved=true; } });
+    if(!moved) break; }
+  if(ch) saveS(); return ch;
+}
 function unitOpen(i){
   const L=UG(grade()); const u=L[i]; if(!u) return false;
   if(i>=+(META.open||1)) return false;
   if(i===0) return true;
   if(phOf(L[i-1].id)!=='done') return false;
-  if(META.gate===false) return true;
+  if(META.gate===false || isSkip(L[i-1].id) || (S.u[L[i-1].id]||{}).skip) return true;
   return !!PASS[L[i-1].id];
 }
 function lockReason(i){
   const L=UG(grade());
   if(i>=+(META.open||1)) return '선생님이 아직 열지 않았어요';
   if(i>0 && phOf(L[i-1].id)!=='done') return '앞 시기를 먼저 마쳐야 해요';
-  if(META.gate!==false && i>0 && !PASS[L[i-1].id]) return '앞 단원 글쓰기를 통과해야 열려요';
+  if(META.gate!==false && i>0 && !PASS[L[i-1].id] && !isSkip(L[i-1].id) && !(S.u[L[i-1].id]||{}).skip) return '앞 단원 글쓰기를 통과해야 열려요';
   return '';
 }
 function curAge(){ const L=UG(grade()); let a=L[0]?L[0].age:7; L.forEach(u=>{ if(S.u[u.id]) a=u.age; }); return a; }
@@ -426,6 +437,7 @@ function renderStudent(){
   let h='';
   if(!ROOM) h=viewNoRoom();
   else if(!S || sv.view==='join') h=viewJoin();
+  else if(S.birth && sv.view!=='continue' && autoSkip() && false) h='';
   else if(sv.view==='continue') h=viewContinue();
   else if(!S.birth || sv.view==='birth') h=viewBirth();
   else if(grade()===2 && !S.path) h=viewPathPick(true);
@@ -486,6 +498,7 @@ function viewHome(){
   const L=UG(grade()); const cu=curUnit(); const today=META.lesson?lessonById(META.lesson):null; const P=pathById(S.path), GL=goalById(S.goal);
   const tl=L.map((u,i)=>{ const op=unitOpen(i), ph=phOf(u.id), st=raftsState(u.id), ch=S.ch[u.id];
     const icons=`${ph==='done'?'<span class="pill on">시기 완료</span>':ph?'<span class="pill warm">진행 중</span>':''}${ch?`<span class="pill ${ch.ok===false?'bad':'main'}">${ch.ok===false?'실패':'성공'}</span>`:''}${st==='p'?'<span class="pill on">✅ 글 통과</span>':st==='u'?'<span class="pill main">하이러닝 제출</span>':st==='d'?'<span class="pill warm">글 완료</span>':''}`;
+    if((S.u[u.id]||{}).skip) return `<div class="tli" style="opacity:.6"><div class="ag">${u.age}살</div><div class="tt"><span class="muted">${esc(u.stage)} · ${esc(u.code)}</span><b>${esc(u.title)}</b><span class="pill">⏭ 이번엔 건너뛴 시기</span></div></div>`;
     return `<button class="tli ${op?'':'lock'} ${cu&&cu.id===u.id?'now':''}" data-act="openUnit" data-v="${u.id}" ${op?'':'disabled'}><div class="ag">${u.age}살</div><div class="tt"><span class="muted">${esc(u.stage)} · ${esc(u.code)}</span><b>${esc(u.title)}</b>${op?icons:`<span class="muted">🔒 ${lockReason(i)}</span>`}</div>${cu&&cu.id===u.id?'<span class="pill warm">지금</span>':''}</button>`; }).join('');
   const g1done = grade()===1 && phOf(L[L.length-1].id)==='done';
   return `<div class="wrap">${headerBar(false)}
@@ -661,7 +674,7 @@ function viewCards(){
   <div class="card"><h2>⭐ 재능·극복 카드</h2><div class="cardsg">${(S.perks||[]).map(id=>{ const p=perkById(id); return p?`<div class="c"><div style="font-size:28px">${p.e}</div><b>${p.n}</b><div>${esc(p.s)}</div></div>`:''; }).join('')||'<p class="muted">레벨업과 위기 극복으로 얻어요.</p>'}</div></div></div>`;
 }
 function bioLines(){
-  return UNITS.filter(u=>u.g<=grade()&&S.u[u.id]&&S.u[u.id].ev).map(u=>{ const e=S.u[u.id].ev; const c=u.ev.c[e.c]||{}; return {age:u.age, t: e.ok ? (c.bio||c.t) : `${c.t} … 하지만 뜻대로 되지 않았다.`}; });
+  return UNITS.filter(u=>u.g<=grade()&&S.u[u.id]&&(S.u[u.id].ev||S.u[u.id].skip)).map(u=>{ if(S.u[u.id].skip) return {age:u.age, t:`${u.stage||'이 시기'}는 큰 일 없이 지나갔다. 그 사이 ${S.u[u.id].ab||'마음'}이 조금 자랐다.`}; const e=S.u[u.id].ev; const c=u.ev.c[e.c]||{}; return {age:u.age, t: e.ok ? (c.bio||c.t) : `${c.t} … 하지만 뜻대로 되지 않았다.`}; });
 }
 function viewBio(){
   const b=bioLines();
@@ -844,7 +857,7 @@ function studentURL(){ return location.origin+location.pathname.replace(/teacher
 const tPass=(sid,uid)=>!!(((DATA.pass||{})[sid]||{})[uid]);
 const tUpl=(sid,key)=>!!(((DATA.upl||{})[sid]||{})[key]);
 function delInfo(){ const d=META.del||{}; if(!d.end) return null; const end=new Date(d.end+'T23:59:59'); const at=new Date(end.getTime()+(+d.days||30)*86400000); return {at,left:Math.ceil((at-Date.now())/86400000)}; }
-function gameUnit(){ const L=UG(+META.grade).slice(0,Math.max(1,+(META.open||1))); if(tGU && L.some(u=>u.id===tGU)) return tGU;
+function gameUnit(){ const L0=UG(+META.grade).slice(0,Math.max(1,+(META.open||1))); const L=L0.filter(u=>!isSkip(u.id)).length?L0.filter(u=>!isSkip(u.id)):L0; if(tGU && L.some(u=>u.id===tGU)) return tGU;
   const SS=studs(); let best=null, bn=0; L.forEach(u=>{ const n=SS.filter(s=>{ const st=(s.u||{})[u.id]; return st && st.ph!=='done'; }).length; if(n>bn){ bn=n; best=u.id; } });
   if(best) return best; let last=null; L.forEach(u=>{ if(SS.some(s=>(s.u||{})[u.id])) last=u.id; }); return last || L[0].id; }
 function renderTeacher(){
@@ -879,7 +892,7 @@ function tProg(){
   const selN=Object.values(tSel).filter(Boolean).length;
   const atUnit=SS.filter(s=>(s.u||{})[gu.id]); const phCount={}; atUnit.forEach(s=>{ const p=s.u[gu.id].ph; phCount[p]=(phCount[p]||0)+1; });
   return `<div class="grid2"><div>
-  <div class="card" style="border:2px solid var(--warm)"><h2>🎮 게임 진행</h2><label class="lb">진행할 시기</label><select class="inp" data-tin="gu">${L.slice(0,open).map(u=>`<option value="${u.id}" ${u.id===gu.id?'selected':''}>${esc(u.code)} ${u.age}살 · ${esc(u.ev.t)}</option>`).join('')}</select>
+  <div class="card" style="border:2px solid var(--warm)"><h2>🎮 게임 진행</h2><label class="lb">진행할 시기</label><select class="inp" data-tin="gu">${L.slice(0,open).filter(u=>!isSkip(u.id)).map(u=>`<option value="${u.id}" ${u.id===gu.id?'selected':''}>${esc(u.code)} ${u.age}살 · ${esc(u.ev.t)}</option>`).join('')}</select>
    <p class="muted">이 시기에 들어온 학생 ${atUnit.length}/${SS.length}명 · ${PHASES.map(p=>phCount[p[0]]?`${p[1]} ${phCount[p[0]]}`:'').filter(Boolean).join(' · ')}${phCount.done?` · ✔완료 ${phCount.done}`:''}</p>
    <h3>🤝 짝 딜레마 — ${esc((gu.pair||{}).t||'')}</h3><div class="row"><button class="btn sm warm" data-act="makePairs">짝 정하기 (무작위)</button><label class="muted"><input type="checkbox" data-tin="pairAnon" ${META.pairAnon===false?'':'checked'}> 짝에게 인물 이름만 보이기</label></div>
    ${Object.keys(pairs).length?`<p class="muted">${Object.entries(pairs).filter(([a,b])=>a<b.p).map(([a,b])=>`${(DATA.students[a]||{}).num}번(${pd[a]||'…'}) ↔ ${(DATA.students[b.p]||{}).num}번(${pd[b.p]||'…'})`).join(' · ')}</p>`:'<p class="muted">짝을 안 정하면 학생은 가상의 짝(🤖)과 합니다.</p>'}
@@ -890,7 +903,7 @@ function tProg(){
    ${tFate?`<p class="muted">${esc((fateById(tFate)||{}).s||'')}</p>`:''}
    <h3>⏱️ 인생 사건 제한 시간</h3><div class="row"><button class="btn sm ${META.timer===false?'ghost':''}" data-act="timer">${META.timer===false?'꺼짐 → 켜기':'켜짐 → 끄기'}</button>${META.timer===false?'':`<select class="inp" style="width:auto" data-tin="tsec">${[60,90,120,180].map(s=>`<option ${+(META.tsec||90)===s?'selected':''} value="${s}">${s}초</option>`).join('')}</select>`}</div></div>
   <div class="card"><h2>📌 오늘 차시</h2><select class="inp" data-tin="lesson"><option value="">(선택 안 함)</option>${lessonOpts}</select></div></div>
-  <div><div class="card"><h2>📅 진도 (열린 시기)</h2><div class="tl">${L.map((u,i)=>`<div class="tli ${i<open?'':'lock'}" style="opacity:1"><div class="ag">${u.age}살</div><div class="tt"><span class="muted">${esc(u.code)} · ${esc(u.stage)}</span><b>${esc(u.title)}</b></div>${i<open?'<span class="pill on">열림</span>':''}<button class="btn sm ${i<open?'ghost':''}" data-act="setOpen" data-v="${i+1}">${i<open?'여기까지':'열기'}</button></div>`).join('')}</div></div>
+  <div><div class="card"><h2>📅 진도 (열린 시기)</h2><p class="muted">필요한 단원만 하려면 나머지를 <b>⏭ 건너뛰기</b>로 바꾸세요. 건너뛴 시기는 학생 캐릭터가 자동으로 지나가고(능력치 조금 성장, 자서전 한 줄), 글쓰기 관문도 없습니다. 다시 <b>▶ 하기</b>로 바꾸면 아직 안 한 학생은 그 시기를 할 수 있습니다.</p><div class="tl">${L.map((u,i)=>`<div class="tli ${i<open?'':'lock'}" style="opacity:${isSkip(u.id)?.55:1}"><div class="ag">${u.age}살</div><div class="tt"><span class="muted">${esc(u.code)} · ${esc(u.stage)}</span><b>${esc(u.title)}</b></div>${i<open?'<span class="pill on">열림</span>':''}<button class="btn sm ${isSkip(u.id)?'warm':'line'}" data-act="skipU" data-v="${u.id}">${isSkip(u.id)?'⏭ 건너뜀 → ▶ 하기':'▶ 함 → ⏭ 건너뛰기'}</button><button class="btn sm ${i<open?'ghost':''}" data-act="setOpen" data-v="${i+1}">${i<open?'여기까지':'열기'}</button></div>`).join('')}</div></div>
   <div class="card"><h2>🚪 관문</h2><p>${META.gate===false?'<b>꺼짐</b>: 글쓰기 통과 없이도 다음 시기로 갑니다.':'<b>켜짐</b>: 앞 단원 글쓰기를 교사가 "통과"해야 다음 시기가 열립니다.'}</p><button class="btn ${META.gate===false?'':'ghost'}" data-act="gate">${META.gate===false?'관문 켜기':'관문 끄기'}</button>
   <h3>🎓 마무리 글쓰기</h3><button class="btn ghost sm" data-act="endToggle">${META.end?'닫기':'지금 열기'}</button></div>
   <div class="card"><h2>ℹ️ 한 시기(20분) 운영 순서</h2><ol style="margin:0;padding-left:20px;font-size:15px"><li>개념 수업(슬라이드·영상) 후 학생: ⏰ 시작 → 🗓️ 시간 쓰기</li><li>🎲 인생 사건 (필요하면 ⏸ 갈림길로 반 전체 토론)</li><li>교사: <b>짝 정하기</b> → 학생: 🤝 짝 딜레마</li><li>학생: 🏘️ 공동체 기금 → 교사: <b>공동체 결산</b></li><li>중간중간 교사: 🃏 <b>운명 카드</b>로 판 흔들기</li><li>학생: ✏️ 차시 글쓰기 → 단원 끝 📝 RAFTS → ZIP → 하이러닝 → ✅ 통과</li></ol></div></div></div>`;
@@ -978,6 +991,7 @@ const TA={
   qr(){ showQR=true; render(); }, qrClose(){ showQR=false; render(); },
   copyLink(){ copyText(studentURL()); },
   newRoom(){ if(!confirm('새 방(다른 반용)을 만들까요?')) return; location.search='?mode=teacher&room=OL'+newCode(4); },
+  skipU(ds){ const on=!isSkip(ds.v); backend.update(`rooms/${ROOM}/meta/skip`,{[ds.v]:on||null}); const u=unitById(ds.v); toast(on?`⏭ ${u.code} ${u.age}살 시기를 건너뜁니다.`:`▶ ${u.code} ${u.age}살 시기를 다시 합니다.`); },
   setOpen(ds){ backend.update(`rooms/${ROOM}/meta`,{open:+ds.v}); tGU=null; toast(`${ds.v}번째 시기까지 열었습니다.`); },
   gate(){ backend.update(`rooms/${ROOM}/meta`,{gate:META.gate===false}); },
   endToggle(){ backend.update(`rooms/${ROOM}/meta`,{end:!META.end}); },
