@@ -68,6 +68,14 @@ footer{text-align:center;color:var(--sub);font-size:12px;padding:18px}
 .pos{color:var(--grn);font-weight:700}.neg{color:var(--red);font-weight:700}
 .nv{border:1px dashed var(--navy);border-radius:8px;padding:8px 10px;margin-top:8px;background:#f7f9fd;font-size:13px}
 .nv .nvrow{margin:6px 0}.nv textarea{font-size:14px;margin-top:4px}
+.pick{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:8px 0}
+.pick .lab{font-weight:700;color:var(--navy);width:48px;font-size:15px}
+.pick button{font-family:inherit;font-size:15px;padding:9px 14px;border-radius:9px;border:2px solid var(--line);background:#fff;color:var(--txt);cursor:pointer}
+.pick button:hover{border-color:var(--navy)}
+.pick button.on{background:var(--navy);border-color:var(--navy);color:#fff;font-weight:700}
+.pick button small{opacity:.75;margin-left:5px;font-weight:400}
+.now{font-size:17px;font-weight:700;color:var(--navy);margin:4px 0 8px}
+.steps{font-size:16px;line-height:1.9}
 #dchip{background:var(--yel);color:var(--navy);font-weight:700;border-radius:14px;padding:3px 10px;font-size:13px;white-space:nowrap;display:none;cursor:pointer}
 .dd{display:flex;gap:10px;flex-wrap:wrap}
 .dd div{flex:1;min-width:150px;background:var(--yel2);border:1px solid var(--yel);border-radius:10px;padding:10px 12px}
@@ -95,8 +103,8 @@ footer{text-align:center;color:var(--sub);font-size:12px;padding:18px}
   <input id="gsearch" type="text" placeholder="학생 이름 검색" autocomplete="off">
 </header>
 <nav id="nav">
-  <button data-tab="write" class="on">작성</button>
-  <button data-tab="search">학생별 보기</button>
+  <button data-tab="write" class="on">영역별 입력</button>
+  <button data-tab="search">학생별 입력</button>
   <button data-tab="check">점검·현황</button>
   <button data-tab="sched">일정</button>
   <button data-tab="sisu">시수</button>
@@ -269,6 +277,28 @@ function itemsToLines(items){
   return rows.map(r=>{ r.items.sort((a,b)=>a.x-b.x); let t='', end=null;
     r.items.forEach(it=>{ if(end!==null && it.x-end > Math.max(1.5,(it.h||10)*0.25)) t+=' '; t+=it.s; end=it.x+(it.w||0); }); return t; });
 }
+// 독서기록(구글 폼 응답 표) → 학생별 "도서명(저자)" 목록
+function cleanBook(v){ return String(v==null?'':v).replace(/[『』「」《》〈〉<>"“”'‘’\[\]]/g,'').replace(/\s+/g,' ').trim(); }
+function parseReadingRows(rows){
+  if(!rows||rows.length<2) return {ok:false,msg:'내용이 없는 파일입니다.'};
+  const head=rows[0].map(x=>String(x==null?'':x).replace(/\s+/g,''));
+  const find=re=>head.findIndex(h=>re.test(h));
+  const ci={hak:find(/학번/), g:find(/학년/), c:head.findIndex(h=>/^반|학급/.test(h)), n:find(/번호/), name:find(/이름|성명/)};
+  const tcols=[], acols=[];
+  head.forEach((h,j)=>{ if(/저자|지은이|글쓴이|작가/.test(h)) acols.push(j); else if(/도서|책|제목/.test(h)) tcols.push(j); });
+  if(!tcols.length) return {ok:false,msg:'책 제목 칸을 찾지 못했습니다. 질문 이름에 "책 제목"이나 "도서명"이 들어가야 합니다.'};
+  if(ci.hak<0 && (ci.g<0||ci.c<0||ci.n<0)) return {ok:false,msg:'학년·반·번호 칸(또는 학번 칸)을 찾지 못했습니다.'};
+  const num=v=>{ const m=String(v==null?'':v).match(/\d+/); return m? parseInt(m[0],10) : 0; };
+  const out=[]; let bad=0;
+  rows.slice(1).forEach(r=>{ let g,c,n;
+    if(ci.g>=0&&ci.c>=0&&ci.n>=0){ g=num(r[ci.g]); c=num(r[ci.c]); n=num(r[ci.n]); }
+    else { const d=String(r[ci.hak]==null?'':r[ci.hak]).replace(/\D/g,''); if(d.length===5){ g=+d[0]; c=+d.slice(1,3); n=+d.slice(3); } else if(d.length===4){ g=+d[0]; c=+d[1]; n=+d.slice(2); } }
+    const books=[]; tcols.forEach((tj,i)=>{ const t=cleanBook(r[tj]); if(!t) return; const a=acols[i]!==undefined? cleanBook(r[acols[i]]).replace(/[()]/g,'') : ''; books.push(a? t+'('+a+')' : t); });
+    if(!books.length) return;
+    if(!(g>0&&c>0&&n>0)){ bad++; return; }
+    out.push({g,c,n,name:ci.name>=0? String(r[ci.name]==null?'':r[ci.name]).replace(/\s+/g,'').trim() : '', books}); });
+  return {ok:true, entries:out, bad};
+}
 // 네이버 맞춤법 검사기용: 문장 단위로 max자 이하 조각 나누기(이어 붙이면 원문과 같음)
 function splitChunks(text, max){
   const parts=String(text).match(/[^.!?\n]*[.!?\n]+\s*|[^.!?\n]+$/g)||[];
@@ -302,7 +332,7 @@ function freshState(){
   };
 }
 let S=freshState();
-const UI={tab:'write', cls:'', item:'', filter:'all', q:'', sid:'', detected:[], cal:'', selDate:''};
+const UI={tab:'write', cls:'', item:'', filter:'all', q:'', sid:'', detected:[], cal:'', selDate:'', readPlan:null};
 const undoMap=new Map(), noFix=new Set();
 
 const DB={db:null, ok:false,
@@ -444,7 +474,7 @@ function naverApply(card){
 // ───────── 5. 화면: 작성 ─────────
 function renderWrite(){
   const cl=classes();
-  if(!S.students.length){ $('#main').innerHTML='<div class="box"><h2>먼저 학생 명단을 넣어 주세요</h2><p>위쪽 <b>설정·백업</b> 탭 → <b>학생 명단</b>에서 엑셀 명단을 복사해 붙여넣으면 됩니다.</p><button class="b" data-go="set">설정·백업으로 가기</button></div>'; return; }
+  if(!S.students.length){ $('#main').innerHTML='<div class="box"><h2>처음이시면 학생 명단부터 넣습니다</h2><div class="steps">① 엑셀 명단에서 <b>학년 · 반 · 번호 · 이름</b> 4칸을 마우스로 긁어 복사(Ctrl+C)합니다.<br>② 아래 칸을 누르고 붙여넣기(Ctrl+V) 합니다.<br>③ <b>명단 넣기</b>를 누르면 바로 영역별 입력 화면이 나옵니다.</div><textarea id="roster" rows="6" placeholder="예)&#10;1	1	1	홍길동&#10;1	1	2	김철수"></textarea><div class="row"><button class="b" id="rosterAdd" style="font-size:16px;padding:10px 18px">명단 넣기</button><span class="hint">직접 쳐도 됩니다. 한 줄에 한 명, 칸 사이는 띄어쓰기: 1 1 1 홍길동</span></div></div>'; return; }
   if(!cl.includes(UI.cls)) UI.cls=cl[0];
   if(!itemBy(UI.item)) UI.item=S.items[0]? S.items[0].key : '';
   const it=itemBy(UI.item); if(!it){ $('#main').innerHTML='<div class="box">설정에서 항목을 하나 이상 만들어 주세요.</div>'; return; }
@@ -453,12 +483,12 @@ function renderWrite(){
   list.forEach(s=>{ const r=peek(sid(s),it.key); if(r.text.trim()) written++; if(r.done) done++; if(B(r.text)>it.limit) over++; });
   list=list.filter(s=>{ const r=peek(sid(s),it.key);
     return UI.filter==='all' || (UI.filter==='empty'&&!r.text.trim()) || (UI.filter==='over'&&B(r.text)>it.limit) || (UI.filter==='undone'&&!r.done) || (UI.filter==='uncopied'&&r.text.trim()&&!r.copied); });
-  let h='<div class="box"><div class="tb">'
-    +'<select id="selCls">'+cl.map(c=>'<option'+(c===UI.cls?' selected':'')+' value="'+esc(c)+'">'+esc(c.replace('-','학년 ')+'반')+'</option>').join('')+'</select>'
-    +'<select id="selItem">'+S.items.map(i=>'<option'+(i.key===UI.item?' selected':'')+' value="'+esc(i.key)+'">'+esc(i.name)+' ('+i.limit+'B)</option>').join('')+'</select>'
-    +'<select id="selFilter">'+[['all','전체'],['empty','미작성만'],['over','초과만'],['undone','미완료만'],['uncopied','나이스 미복사만']].map(f=>'<option value="'+f[0]+'"'+(UI.filter===f[0]?' selected':'')+'>'+f[1]+'</option>').join('')+'</select>'
-    +'<span class="hint">작성 '+written+'/'+all+' · 완료 '+done+'/'+all+(over?' · <b style="color:var(--red)">초과 '+over+'</b>':'')+'</span></div>'
-    +'<div class="hint">입력칸을 벗어나거나 붙여넣으면 띄어쓰기·맞춤법이 자동으로 고쳐집니다. 고친 내용은 칸 아래에 표시되고 되돌릴 수 있습니다.</div></div>';
+  const cnt=k=>S.students.filter(s=>clsOf(s)===UI.cls && peek(sid(s),k).text.trim()).length;
+  let h='<div class="box"><div class="pick"><span class="lab">학급</span>'+cl.map(c=>'<button data-cls="'+esc(c)+'" class="'+(c===UI.cls?'on':'')+'">'+esc(c.replace('-','학년 ')+'반')+'</button>').join('')+'</div>'
+    +'<div class="pick"><span class="lab">영역</span>'+S.items.map(i=>'<button data-itemk="'+esc(i.key)+'" class="'+(i.key===UI.item?'on':'')+'">'+esc(i.name)+'<small>'+cnt(i.key)+'/'+all+'</small></button>').join('')+'</div>'
+    +'<div class="now">'+esc(UI.cls.replace('-','학년 ')+'반')+' · '+esc(it.name)+' <span class="hint" style="font-weight:400">한도 '+it.limit.toLocaleString()+'B(한글 약 '+Math.floor(it.limit/3)+'자) · 작성 '+written+'/'+all+' · 완료 '+done+'/'+all+(over?' · <b style="color:var(--red)">초과 '+over+'</b>':'')+'</span></div>'
+    +'<div class="tb"><select id="selFilter">'+[['all','전체 학생 보기'],['empty','미작성만'],['over','초과만'],['undone','미완료만'],['uncopied','나이스 미복사만']].map(f=>'<option value="'+f[0]+'"'+(UI.filter===f[0]?' selected':'')+'>'+f[1]+'</option>').join('')+'</select>'
+    +'<span class="hint">아래 학생별 칸에 쓰거나 붙여넣으세요. 칸을 벗어나면 띄어쓰기·맞춤법이 자동으로 고쳐집니다. 영역 추가·삭제는 설정·백업 탭에서 합니다.</span></div></div>';
   h+= list.length? list.map(s=>cardHTML(s,it,'byItem')).join('') : '<div class="box hint">조건에 맞는 학생이 없습니다.</div>';
   $('#main').innerHTML=h; $$('#main .card').forEach(c=>refreshCard(c));
 }
@@ -666,6 +696,13 @@ function renderSet(){
   h+='<div class="box"><h2>학생 명단 ('+S.students.length+'명)</h2><textarea id="roster" rows="4" placeholder="엑셀에서 학년·반·번호·이름 4칸을 복사해 붙여넣으세요.&#10;예) 1	2	3	홍길동"></textarea><div class="row"><button class="b" id="rosterAdd">명단 넣기</button><label class="b g" style="cursor:pointer">엑셀 파일로 넣기<input type="file" id="rosterFile" accept=".xlsx,.xls,.csv" hidden></label><span class="hint">같은 학년·반·번호가 이미 있으면 이름만 바뀌고 써 둔 내용은 유지됩니다.</span></div>';
   if(S.students.length) h+='<details><summary>명단 보기·삭제</summary><div class="chips" style="margin-top:6px">'+S.students.map(s=>'<span>'+esc(clsOf(s)+' '+s.n+' '+s.name)+'<b data-studel="'+esc(sid(s))+'">×</b></span>').join('')+'</div></details>';
   h+='</div>';
+  h+='<div class="box" id="readBox"><h2>독서기록 불러오기 (학생이 구글 폼으로 입력)</h2><div class="row"><label class="b" style="cursor:pointer">구글 폼 응답 파일 올리기 (.xlsx / .csv)<input type="file" id="readFile" accept=".xlsx,.xls,.csv" hidden></label><span class="hint">폼 질문 이름: <b>학년 · 반 · 번호 · 이름 · 책 제목 · 지은이</b>. 한 번 제출에 책 한 권. 같은 학생이 여러 번 제출하면 "책 제목(지은이), 책 제목(지은이)"로 이어 붙여 <b>독서활동상황</b> 항목에 넣습니다. 이미 들어 있는 책은 다시 넣지 않습니다.</span></div>';
+  if(UI.readPlan){ const P=UI.readPlan;
+    h+='<div class="row"><b>넣을 내용: 학생 '+P.per.length+'명, 책 '+P.cnt+'권</b>'+(P.bad? '<span class="neg">학년·반·번호를 읽지 못한 줄 '+P.bad+'개</span>':'')+'</div>';
+    if(P.issues.length) h+='<div style="max-height:160px;overflow:auto;border:1px solid var(--line);border-radius:7px;padding:6px 9px">'+P.issues.map(x=>'<div class="m-warn" style="font-size:13px">⚠ '+esc(x)+'</div>').join('')+'</div>';
+    if(P.per.length) h+='<div style="max-height:220px;overflow:auto;margin-top:6px"><table><tr><th>학생</th><th class="l">추가될 책</th></tr>'+P.per.map(e=>{ const s=S.students.find(x=>sid(x)===e[0]); return '<tr><td>'+esc(e[0]+' '+(s?s.name:''))+'</td><td class="l">'+esc(e[1].join(', '))+'</td></tr>'; }).join('')+'</table></div>';
+    h+='<div class="row">'+(P.per.length? '<button class="b" id="readApply">이대로 넣기</button>':'<span class="hint">새로 넣을 책이 없습니다.</span>')+'<button class="b g" id="readCancel">취소</button></div>'; }
+  h+='</div>';
   h+='<div class="box"><h2>기재요령 규칙 (항목별 한도)</h2><div class="hint">기본값은 2026학년도 기준으로 넣어 두었습니다(창체 영역·세특 500자=1,500B, 자유학기 1,000자=3,000B, 행특 300자=900B). <b>반드시 2026 기재요령 "영역별 입력 가능 최대 글자수" 표와 실제 나이스 화면으로 확인</b>하고 다르면 아래에서 고치세요. <a href="https://star.moe.go.kr/web/contents/m21100.do" target="_blank" rel="noopener">기재요령 최신판 내려받기(학교생활기록부 종합지원포털)</a></div>'
     +'<table style="margin-top:8px"><tr><th class="l">항목 이름</th><th>한도(바이트)</th><th>한글 기준</th><th>현황 전송</th><th></th></tr>'+S.items.map((it,i)=>'<tr><td class="l"><input type="text" data-it="'+i+'" data-f="name" value="'+esc(it.name)+'" style="width:100%"></td><td><input type="number" min="1" data-it="'+i+'" data-f="limit" value="'+esc(it.limit)+'" style="width:90px"></td><td>'+Math.floor(it.limit/3)+'자</td><td><input type="checkbox" data-it="'+i+'" data-f="mine"'+(it.mine!==false?' checked':'')+'></td><td><button class="b r s" data-itdel="'+i+'">삭제</button></td></tr>').join('')+'</table>'
     +'<div class="row"><button class="b g" id="itAdd">항목 추가 (예: 세특: 역사)</button><button class="b g" id="ruleOut">규칙 파일 내보내기</button><label class="b g" style="cursor:pointer">규칙 파일 등록<input type="file" id="ruleIn" accept=".json" hidden></label></div>'
@@ -730,6 +767,34 @@ async function importXlsx(file){
   sortStudents(); save(); toast('불러왔습니다. 학생 '+plan.length+'명, 내용 '+filled+'칸'); render();
 }
 
+// 독서기록 불러오기(학생이 구글 폼으로 입력한 응답 파일)
+async function planReading(file){
+  await needXLSX();
+  const buf=await readFile(file); let wb;
+  if(/\.csv$/i.test(file.name||'')) wb=XLSX.read(new TextDecoder('utf-8').decode(buf).replace(/^﻿/,''),{type:'string',raw:true});
+  else wb=XLSX.read(buf,{type:'array'});
+  const rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,raw:false,defval:''});
+  const r=parseReadingRows(rows); if(!r.ok){ toast(r.msg); return; }
+  let it=S.items.find(i=>/^독서/.test(i.name));
+  const per=new Map(), issues=[];
+  r.entries.forEach(e=>{ const k=e.g+'-'+e.c+'-'+e.n; const s=S.students.find(x=>sid(x)===k);
+    if(!s){ issues.push(k+' '+e.name+' — 명단에 없는 학년·반·번호 (넣지 않음): '+e.books.join(', ')); return; }
+    if(e.name && e.name!==s.name.replace(/\s+/g,'')) issues.push(k+' — 폼에 적은 이름 "'+e.name+'" ≠ 명단 "'+s.name+'" (번호를 잘못 적었을 수 있음, 일단 넣음): '+e.books.join(', '));
+    if(!per.has(k)) per.set(k,[]); const cur=it? peek(k,it.key).text : '';
+    e.books.forEach(b=>{ if(!per.get(k).includes(b) && !cur.includes(b)) per.get(k).push(b); }); });
+  let cnt=0; per.forEach(v=>cnt+=v.length);
+  UI.readPlan={per:Array.from(per.entries()).filter(e=>e[1].length), issues, bad:r.bad, cnt};
+  renderSet(); const el=$('#readBox'); if(el) el.scrollIntoView&&el.scrollIntoView({block:'center'});
+}
+function applyReading(){
+  const P=UI.readPlan; if(!P) return;
+  let it=S.items.find(i=>/^독서/.test(i.name));
+  if(!it){ it={key:'read'+Date.now().toString(36),name:'독서활동상황',limit:1500,mine:true}; S.items.push(it); }
+  P.per.forEach(([k,books])=>{ const r=rec(k,it.key); const cur=r.text.trim().replace(/[,\s]+$/,''); r.text=(cur? cur+', ' : '')+books.join(', '); r.updated=Date.now(); r.copied=0; });
+  const n=P.cnt, st=P.per.length; UI.readPlan=null; save();
+  toast('학생 '+st+'명에게 책 '+n+'권을 넣었습니다. 영역별 입력 탭에서 "'+it.name+'" 항목을 확인하세요.'); UI.item=it.key; renderSet();
+}
+
 // ───────── 11. 이벤트 ─────────
 function render(){
   $$('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.tab===UI.tab));
@@ -777,6 +842,7 @@ M.addEventListener('change',e=>{
   if(t.id==='stKey'){ st.sheetKey=t.value.trim(); save(); return; }
   if(t.id==='stView'){ const v=t.value.trim(); st.sheetView=/^https:\/\//.test(v)? v : ''; save(); return; }
   if(t.id==='stAuto'){ st.autoSend=t.checked; save(); return; }
+  if(t.id==='readFile' && t.files[0]){ planReading(t.files[0]).catch(()=>toast('독서기록 파일을 읽지 못했습니다. 엑셀(.xlsx)이나 CSV 파일인지 확인해 주세요.')); return; }
   if(t.id==='xlsIn' && t.files[0]){ importXlsx(t.files[0]).catch(()=>toast('엑셀 파일을 읽지 못했습니다.')); return; }
   if(t.id==='rosterFile' && t.files[0]){ needXLSX().then(()=>readFile(t.files[0])).then(buf=>{ const wb=XLSX.read(buf,{type:'array'}); addRoster(XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,raw:false,defval:''})); renderSet(); }).catch(()=>toast('명단 파일을 읽지 못했습니다.')); return; }
   if(t.id==='jsonIn' && t.files[0]){ t.files[0].text().then(txt=>{ const d=JSON.parse(txt); if(!d||!Array.isArray(d.students)||!d.records||!Array.isArray(d.items)) throw 0; if(!confirm('지금 자료를 모두 지우고 이 파일 내용으로 바꿉니다. 계속할까요?')) return; S=Object.assign(freshState(),d); S.settings=Object.assign(freshState().settings,d.settings||{}); S.sisu=Object.assign(freshState().sisu,d.sisu||{}); save(); toast('불러왔습니다.'); render(); }).catch(()=>toast('이 프로그램의 백업 파일이 아닙니다.')); return; }
@@ -797,6 +863,8 @@ M.addEventListener('click',async e=>{
   if(card && t.dataset.act==='nvapply'){ naverApply(card); return; }
   if(card && t.dataset.act==='undo'){ const c=cardCtx(card), k=c.sidv+'|'+c.ik; if(undoMap.has(k)){ c.ta.value=undoMap.get(k); const r=rec(c.sidv,c.ik); r.text=c.ta.value; r.updated=Date.now(); undoMap.delete(k); noFix.add(k); save(); refreshCard(card,''); toast('되돌렸습니다. 이 칸은 다시 고칠 때까지 자동 교정을 하지 않습니다.'); } return; }
   if(t.dataset.pick){ UI.sid=t.dataset.pick; renderSearch(); return; }
+  const pc=t.closest('[data-cls]'); if(pc){ UI.cls=pc.dataset.cls; renderWrite(); return; }
+  const pi=t.closest('[data-itemk]'); if(pi){ UI.item=pi.dataset.itemk; renderWrite(); return; }
   if(t.id==='copyAll'){ const s=S.students.find(x=>sid(x)===UI.sid); if(!s) return; const txt=S.items.map(it=>'['+it.name+']\n'+peek(UI.sid,it.key).text).join('\n\n'); toast(await copyText(txt)? '전 항목을 복사했습니다.' : '복사에 실패했습니다.'); return; }
   const j=t.closest('[data-jump]'); if(j){ const p=j.dataset.jump.split('|'); UI.cls=p[0]; UI.item=p[1]; UI.filter='all'; go('write'); return; }
   const js=t.closest('[data-jumps]'); if(js){ const s=S.students.find(x=>sid(x)===js.dataset.jumps); if(s){ UI.q=s.name; UI.sid=sid(s); $('#gsearch').value=s.name; go('search'); } return; }
@@ -816,9 +884,11 @@ M.addEventListener('click',async e=>{
   if(t.dataset.zrdel!==undefined){ Z.rows.splice(+t.dataset.zrdel,1); save(); renderSisu(); return; }
   if(t.id==='clubAdd'){ let n=0; String($('#clubText').value).split(/\n/).forEach(line=>{ const r=extractDates(line,S.settings.year); const hrs=parseFloat((r.rest.match(/\d+(?:\.\d+)?/)||[])[0])||1; r.dates.forEach(d=>{ if(!Z.club.some(x=>x.date===d)){ Z.club.push({date:d,hours:hrs}); n++; } }); }); save(); toast(n? '동아리 '+n+'회를 추가했습니다.' : '날짜를 읽지 못했습니다. 예) 3.13 2'); renderSisu(); return; }
   if(t.dataset.clubdel){ Z.club=Z.club.filter(x=>x.date!==t.dataset.clubdel); save(); renderSisu(); return; }
+  if(t.id==='readApply'){ applyReading(); return; }
+  if(t.id==='readCancel'){ UI.readPlan=null; renderSet(); return; }
   if(t.id==='xlsOut'){ exportXlsx().catch(()=>{}); return; }
   if(t.id==='jsonOut'){ download('생기부도우미_전체백업_'+stamp()+'.json', new Blob([JSON.stringify(S)],{type:'application/json'})); S.settings.lastBackup=Date.now(); flush(); return; }
-  if(t.id==='rosterAdd'){ addRoster(String($('#roster').value).split(/\n/).map(l=>l.split(/[\t,]+|\s{1,}/))); renderSet(); return; }
+  if(t.id==='rosterAdd'){ addRoster(String($('#roster').value).split(/\n/).map(l=>l.split(/[\t,]+|\s{1,}/))); render(); return; }
   if(t.dataset.studel){ const k=t.dataset.studel; const has=S.items.some(it=>peek(k,it.key).text.trim()); if(has && !confirm('이 학생에게 써 둔 내용이 있습니다. 명단에서 지우면 내용도 함께 지워집니다. 지울까요?')) return; S.students=S.students.filter(s=>sid(s)!==k); Object.keys(S.records).forEach(rk=>{ if(rk.indexOf(k+'|')===0) delete S.records[rk]; }); save(); renderSet(); return; }
   if(t.id==='itAdd'){ const nm=prompt('항목 이름을 적어 주세요. 예) 세특: 역사'); if(!nm||!nm.trim()) return; if(S.items.some(i=>i.name===nm.trim())){ toast('같은 이름의 항목이 이미 있습니다.'); return; } S.items.push({key:'i'+Date.now().toString(36),name:nm.trim(),limit:1500,mine:true}); save(); renderSet(); return; }
   if(t.dataset.itdel!==undefined){ const it=S.items[+t.dataset.itdel]; if(!it) return; const n=Object.keys(S.records).filter(k=>k.endsWith('|'+it.key)&&S.records[k].text.trim()).length; if(!confirm('"'+it.name+'" 항목을 지웁니다.'+(n? ' 써 둔 내용 '+n+'건도 함께 지워집니다.':'')+' 계속할까요?')) return; Object.keys(S.records).forEach(k=>{ if(k.endsWith('|'+it.key)) delete S.records[k]; }); S.items.splice(+t.dataset.itdel,1); save(); renderSet(); return; }
