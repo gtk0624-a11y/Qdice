@@ -243,6 +243,32 @@ function classifyEvent(txt){
   if(/동아리/.test(txt)) return 'club';
   return 'no';
 }
+// 글줄 목록 → 날짜·내용 목록. "3월" 머리글 아래 "2(월) 입학식"처럼 일(요일)만 적힌 줄도 읽음(요일이 실제와 맞을 때만)
+function linesToEvents(lines, year){
+  const out=[]; let cm=0;
+  for(const raw of lines){
+    const line=String(raw).replace(/\s+/g,' ').trim(); if(!line) continue;
+    const r=extractDates(line,year);
+    if(r.dates.length){ r.dates.forEach(d=>out.push({date:d,text:r.rest})); cm=+r.dates[r.dates.length-1].slice(5,7); continue; }
+    const mh=line.match(/(?<!\d)(\d{1,2})\s*월(?!\s*\d)/);
+    if(mh && +mh[1]>=1 && +mh[1]<=12) cm=+mh[1];
+    if(!cm) continue;
+    const re=/(?<!\d)(\d{1,2})\s*일?\s*\(\s*([월화수목금토일])\s*\)/g; const hits=[]; let m;
+    while((m=re.exec(line))) hits.push({d:+m[1],w:m[2],s:m.index,e:m.index+m[0].length});
+    hits.forEach((h,i)=>{ const y=cm<=2? year+1 : year; if(!validYMD(y,cm,h.d)) return;
+      const ds=y+'-'+pad(cm)+'-'+pad(h.d); if('일월화수목금토'[toDate(ds).getDay()]!==h.w) return;
+      out.push({date:ds,text:line.slice(h.e, i+1<hits.length? hits[i+1].s : line.length).replace(/[~∼～–—]/g,' ').trim()}); });
+  }
+  return out;
+}
+// PDF 글자 조각 → 글줄(같은 높이끼리 묶어 왼쪽부터 이어 붙임)
+function itemsToLines(items){
+  const rows=[];
+  items.forEach(it=>{ if(!it.s||!String(it.s).trim()) return; let r=rows.find(r=>Math.abs(r.y-it.y)<4); if(!r){ r={y:it.y,items:[]}; rows.push(r); } r.items.push(it); });
+  rows.sort((a,b)=>b.y-a.y);
+  return rows.map(r=>{ r.items.sort((a,b)=>a.x-b.x); let t='', end=null;
+    r.items.forEach(it=>{ if(end!==null && it.x-end > Math.max(1.5,(it.h||10)*0.25)) t+=' '; t+=it.s; end=it.x+(it.w||0); }); return t; });
+}
 // 네이버 맞춤법 검사기용: 문장 단위로 max자 이하 조각 나누기(이어 붙이면 원문과 같음)
 function splitChunks(text, max){
   const parts=String(text).match(/[^.!?\n]*[.!?\n]+\s*|[^.!?\n]+$/g)||[];
@@ -566,16 +592,40 @@ function exportIcs(){
 
 // ───────── 9. 화면: 시수 ─────────
 function parseLines(text){ const out=[]; String(text).split(/\n/).forEach(line=>{ if(!line.trim()) return; const r=extractDates(line,S.settings.year); r.dates.forEach(d=>out.push({date:d,text:r.rest})); }); return out; }
+let pdfP=null;
+function needPDF(){ if(window.pdfjsLib) return Promise.resolve();
+  if(!pdfP) pdfP=loadScript(['https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js','https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js'])
+    .then(()=>{ const src=(document.querySelector('script[src*="pdf.min.js"]')||{}).src||''; window.pdfjsLib.GlobalWorkerOptions.workerSrc=src.replace('pdf.min.js','pdf.worker.min.js'); })
+    .catch(e=>{ pdfP=null; toast('PDF 기능을 불러오지 못했습니다. 인터넷 연결을 확인해 주세요.'); throw e; });
+  return pdfP; }
+async function pdfLines(buf){
+  await needPDF();
+  const pdf=await window.pdfjsLib.getDocument({data:new Uint8Array(buf)}).promise; let lines=[], chars=0;
+  for(let p=1;p<=pdf.numPages && p<=60;p++){ const page=await pdf.getPage(p); const tc=await page.getTextContent();
+    const items=tc.items.map(it=>({s:it.str,x:it.transform[4],y:it.transform[5],w:it.width,h:it.height})); items.forEach(it=>{ chars+=(it.s||'').trim().length; });
+    lines=lines.concat(itemsToLines(items)); }
+  return {lines,chars,pages:pdf.numPages};
+}
 async function scanFile(file){
-  await needXLSX();
-  const wb=XLSX.read(await readFile(file),{type:'array',cellDates:true});
   const found=[], seen=new Set();
-  wb.SheetNames.forEach(name=>{ const rows=XLSX.utils.sheet_to_json(wb.Sheets[name],{header:1,raw:true,defval:''});
-    rows.forEach(row=>{ const texts=[], dates=[];
-      row.forEach(cell=>{ if(Object.prototype.toString.call(cell)==='[object Date]' && !isNaN(cell)){ dates.push(ymd(new Date(cell.getTime()+3*3600000))); }
-        else if(typeof cell==='string' && cell.trim()){ const r=extractDates(cell,S.settings.year); if(r.dates.length){ dates.push.apply(dates,r.dates); if(r.rest) texts.push(r.rest); } else texts.push(cell.trim()); } });
-      const txt=texts.join(' ').replace(/\s+/g,' ').slice(0,80);
-      dates.forEach(d=>{ const k=d+'|'+txt; if(seen.has(k)) return; seen.add(k); found.push({date:d,text:txt,kind:classifyEvent(txt),hours:+((txt.match(/(\d+)\s*(?:시간|차시)/)||[])[1])||1}); }); }); });
+  const add=(d,txt)=>{ txt=String(txt||'').replace(/\s+/g,' ').trim().slice(0,80); const k=d+'|'+txt; if(seen.has(k)) return; seen.add(k); found.push({date:d,text:txt,kind:classifyEvent(txt),hours:+((txt.match(/(\d+)\s*(?:시간|차시)/)||[])[1])||1}); };
+  const isPdf=/\.pdf$/i.test(file.name||'') || file.type==='application/pdf';
+  if(isPdf){
+    const r=await pdfLines(await readFile(file));
+    if(!r.chars){ toast('이 PDF에는 글자가 없습니다(스캔한 그림 PDF). 아래 직접 입력칸을 이용해 주세요.'); return; }
+    linesToEvents(r.lines,S.settings.year).forEach(e=>add(e.date,e.text));
+  } else {
+    await needXLSX();
+    const wb=XLSX.read(await readFile(file),{type:'array',cellDates:true});
+    wb.SheetNames.forEach(name=>{ const rows=XLSX.utils.sheet_to_json(wb.Sheets[name],{header:1,raw:true,defval:''}); const loose=[];
+      rows.forEach(row=>{ const texts=[], dates=[];
+        row.forEach(cell=>{ if(Object.prototype.toString.call(cell)==='[object Date]' && !isNaN(cell)){ dates.push(ymd(new Date(cell.getTime()+3*3600000))); }
+          else if(typeof cell==='string' && cell.trim()){ const r=extractDates(cell,S.settings.year); if(r.dates.length){ dates.push.apply(dates,r.dates); if(r.rest) texts.push(r.rest); } else texts.push(cell.trim()); }
+          else if(typeof cell==='number') texts.push(String(cell)); });
+        if(dates.length){ const txt=texts.filter(t=>!/^\d+$/.test(t)).join(' '); dates.forEach(d=>add(d,txt)); loose.push(dates[dates.length-1].slice(5,7)*1+'월'); }
+        else loose.push(texts.join(' ')); });
+      linesToEvents(loose,S.settings.year).forEach(e=>add(e.date,e.text)); });
+  }
   found.sort((a,b)=>a.date.localeCompare(b.date));
   UI.detected=found.slice(0,600);
   toast(found.length? '날짜 '+found.length+'개를 찾았습니다. 아래 표에서 분류를 확인해 주세요.' : '날짜를 찾지 못했습니다. 아래 직접 입력칸을 이용해 주세요.');
@@ -583,7 +633,7 @@ async function scanFile(file){
 }
 function renderSisu(){
   const Z=S.sisu; const hs=Z.holidays.slice().sort((a,b)=>a.date.localeCompare(b.date));
-  let h='<div class="box"><h2>① 학사일정·동아리 일정 파일 올리기</h2><div class="row"><input type="file" id="sisuFile" accept=".xlsx,.xls,.csv"><span class="hint">엑셀(.xlsx)·CSV만 됩니다. 한글(.hwp)·PDF는 엑셀로 저장해서 올려 주세요. 한 줄에 "날짜 + 내용"이 있는 표 형식을 읽습니다(달력 모양 표는 읽지 못합니다).</span></div>';
+  let h='<div class="box"><h2>① 학사일정·동아리 일정 파일 올리기</h2><div class="row"><input type="file" id="sisuFile" accept=".pdf,.xlsx,.xls,.csv"><span class="hint">PDF·엑셀(.xlsx)·CSV를 읽습니다. 한글(.hwp)은 PDF로 저장해서 올려 주세요. "날짜 + 내용"이 한 줄에 있는 표, 또는 "3월" 아래 "2(월) 입학식"처럼 적힌 표를 읽습니다. 달력 모양(칸마다 숫자만 있는) 표와 스캔한 그림 PDF는 읽지 못합니다. 읽은 결과는 반드시 아래 표에서 확인하세요.</span></div>';
   if(UI.detected.length){
     h+='<div style="max-height:320px;overflow:auto"><table><tr><th>날짜</th><th class="l">내용</th><th>분류</th><th>동아리 시수</th></tr>'+UI.detected.map((d,i)=>'<tr><td>'+esc(d.date)+'</td><td class="l">'+esc(d.text)+'</td><td><select data-det="'+i+'"><option value="no"'+(d.kind==='no'?' selected':'')+'>넣지 않음</option><option value="hol"'+(d.kind==='hol'?' selected':'')+'>휴업일</option><option value="club"'+(d.kind==='club'?' selected':'')+'>동아리</option></select></td><td><input class="num" type="number" min="0" step="1" data-deth="'+i+'" value="'+esc(d.hours)+'"></td></tr>').join('')+'</table></div><div class="row"><button class="b" id="detApply">분류한 대로 반영</button><button class="b g" id="detClear">목록 지우기</button></div>';
   }
@@ -709,7 +759,7 @@ M.addEventListener('change',e=>{
   if(t.id==='selItem'){ UI.item=t.value; renderWrite(); return; }
   if(t.id==='selFilter'){ UI.filter=t.value; renderWrite(); return; }
   if(t.dataset.scfin){ const x=S.schedules.find(o=>o.id===t.dataset.scfin); if(x){ x.fin=t.checked; save(); render(); } return; }
-  if(t.id==='sisuFile' && t.files[0]){ scanFile(t.files[0]).catch(()=>toast('파일을 읽지 못했습니다. 엑셀(.xlsx) 파일인지 확인해 주세요.')); return; }
+  if(t.id==='sisuFile' && t.files[0]){ scanFile(t.files[0]).catch(()=>toast('파일을 읽지 못했습니다. PDF나 엑셀(.xlsx) 파일인지 확인해 주세요.')); return; }
   if(t.dataset.det!==undefined){ UI.detected[+t.dataset.det].kind=t.value; return; }
   if(t.dataset.deth!==undefined){ UI.detected[+t.dataset.deth].hours=Math.max(0,+t.value||0); return; }
   if(t.id==='zStart'){ Z.start=t.value; save(); renderSisu(); return; }
