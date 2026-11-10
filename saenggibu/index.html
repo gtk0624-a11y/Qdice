@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>도디쌤 생기부 도우미</title>
+<style>
+:root{--navy:#1f3a68;--navy2:#2d4f8a;--yel:#f9cf7a;--yel2:#fdeec9;--mint:#8fe3c0;--bg:#f4f6fa;--line:#d9dee8;--red:#d93025;--org:#e08a00;--grn:#1a8f55;--txt:#1c2533;--sub:#667085}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Pretendard","Malgun Gothic","맑은 고딕","Apple SD Gothic Neo",sans-serif;background:var(--bg);color:var(--txt);font-size:15px;line-height:1.5}
+header{background:var(--navy);color:#fff;padding:8px 14px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;position:sticky;top:0;z-index:20}
+header img{width:44px;height:44px;border-radius:50%;border:2px solid #fff;background:var(--yel)}
+header h1{font-size:18px;margin:0;white-space:nowrap}
+header .sp{flex:1}
+#gsearch{padding:8px 12px;border-radius:20px;border:0;width:210px;font-size:15px}
+#savest{font-size:12px;opacity:.85}
+nav{background:#fff;border-bottom:1px solid var(--line);display:flex;gap:2px;padding:0 8px;overflow-x:auto;position:sticky;top:60px;z-index:19}
+nav button{border:0;background:none;padding:11px 14px;font-size:15px;cursor:pointer;color:var(--sub);border-bottom:3px solid transparent;white-space:nowrap;font-family:inherit}
+nav button.on{color:var(--navy);font-weight:700;border-bottom-color:var(--yel)}
+#banner{background:var(--yel2);border-bottom:1px solid var(--yel);padding:7px 14px;font-size:14px;display:none}
+#banner b{color:var(--red)}
+main{max-width:1100px;margin:0 auto;padding:14px}
+.box{background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:14px}
+.box h2{font-size:16px;margin:0 0 10px;color:var(--navy)}
+.box h3{font-size:14px;margin:14px 0 6px;color:var(--navy)}
+.tb{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
+select,input[type=text],input[type=date],input[type=number],input[type=url],input[type=password],textarea{font-family:inherit;font-size:15px;padding:7px 9px;border:1px solid var(--line);border-radius:7px;background:#fff;color:var(--txt)}
+textarea{width:100%;resize:vertical;line-height:1.6}
+button.b{font-family:inherit;font-size:14px;padding:7px 12px;border-radius:7px;border:1px solid var(--navy);background:var(--navy);color:#fff;cursor:pointer}
+button.b:hover{background:var(--navy2)}
+button.b.g{background:#fff;color:var(--navy)}
+button.b.g:hover{background:#eef2f9}
+button.b.r{background:#fff;color:var(--red);border-color:var(--red)}
+button.b.s{padding:4px 9px;font-size:13px}
+.card{background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:10px}
+.card.over{border-color:var(--red);box-shadow:0 0 0 2px #fbd5d2}
+.card.done{border-left:5px solid var(--grn)}
+.chead{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px}
+.chead .ttl{font-weight:700;font-size:15px}
+.chead .sp{flex:1}
+.meter{font-size:13px;color:var(--sub);font-variant-numeric:tabular-nums}
+.meter.over{color:var(--red);font-weight:700}
+.bar{height:5px;background:#e9edf3;border-radius:3px;overflow:hidden;margin-top:5px}
+.bar i{display:block;height:100%;background:var(--grn)}
+.bar i.w{background:var(--org)}.bar i.o{background:var(--red)}
+.msgs{font-size:13px;margin-top:5px}
+.msgs div{padding:3px 0}
+.m-fix{color:var(--grn)}.m-warn{color:var(--org)}.m-over{color:var(--red)}
+.m-over span{background:#fde3e1;border-radius:3px;padding:0 2px}
+.tag{display:inline-block;font-size:12px;padding:1px 7px;border-radius:10px;background:#e8f6ee;color:var(--grn)}
+.tag.c{background:#e6eefb;color:var(--navy)}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{border:1px solid var(--line);padding:5px 7px;text-align:center}
+th{background:#eef2f9;color:var(--navy);font-weight:600}
+td.l,th.l{text-align:left}
+td.click{cursor:pointer}td.click:hover{background:var(--yel2)}
+.c-ok{background:#e8f6ee}.c-mid{background:#fff6dd}.c-bad{background:#fde3e1}
+.hint{font-size:13px;color:var(--sub)}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:6px 0}
+.row label{font-size:14px}
+.chips span{display:inline-block;background:#eef2f9;border-radius:12px;padding:2px 9px;margin:2px;font-size:13px}
+.chips span b{cursor:pointer;color:var(--red);margin-left:5px}
+#toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:#1c2533;color:#fff;padding:10px 18px;border-radius:22px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:99;max-width:90%}
+#toast.on{opacity:.95}
+footer{text-align:center;color:var(--sub);font-size:12px;padding:18px}
+.num{width:58px;text-align:center}
+.wide{width:100%}
+.pos{color:var(--grn);font-weight:700}.neg{color:var(--red);font-weight:700}
+.nv{border:1px dashed var(--navy);border-radius:8px;padding:8px 10px;margin-top:8px;background:#f7f9fd;font-size:13px}
+.nv .nvrow{margin:6px 0}.nv textarea{font-size:14px;margin-top:4px}
+#dchip{background:var(--yel);color:var(--navy);font-weight:700;border-radius:14px;padding:3px 10px;font-size:13px;white-space:nowrap;display:none;cursor:pointer}
+.dd{display:flex;gap:10px;flex-wrap:wrap}
+.dd div{flex:1;min-width:150px;background:var(--yel2);border:1px solid var(--yel);border-radius:10px;padding:10px 12px}
+.dd div.hot{background:#fde3e1;border-color:var(--red)}
+.dd b{display:block;font-size:26px;color:var(--navy);line-height:1.2}.dd div.hot b{color:var(--red)}
+.dd small{color:var(--sub)}
+.cal{table-layout:fixed}.cal th{padding:4px}.cal td{height:78px;vertical-align:top;text-align:left;padding:3px 4px;cursor:pointer;font-size:12px;overflow:hidden}
+.cal td:hover{background:var(--yel2)}.cal td.out{background:#f6f7f9;cursor:default}
+.cal td.today{box-shadow:inset 0 0 0 2px var(--navy)}
+.cal .dn{font-weight:700;font-size:13px}.cal .sun{color:var(--red)}.cal .sat{color:var(--navy2)}
+.cal .ev{display:block;background:var(--navy);color:#fff;border-radius:4px;padding:0 4px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cal .ev.fin{background:#9aa5b5;text-decoration:line-through}
+.cal .hol{display:block;color:var(--red);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cal .clb{display:block;color:var(--grn)}
+@media(max-width:640px){#gsearch{width:100%}nav{top:104px}header h1{font-size:16px}}
+</style>
+</head>
+<body>
+<header>
+  <img src="data:image/jpeg;base64,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" alt="도디쌤">
+  <h1>도디쌤 생기부 도우미</h1>
+  <span class="sp"></span>
+  <span id="dchip" title="일정 탭으로 이동"></span>
+  <span id="savest"></span>
+  <input id="gsearch" type="text" placeholder="학생 이름 검색" autocomplete="off">
+</header>
+<nav id="nav">
+  <button data-tab="write" class="on">작성</button>
+  <button data-tab="search">학생별 보기</button>
+  <button data-tab="check">점검·현황</button>
+  <button data-tab="sched">일정</button>
+  <button data-tab="sisu">시수</button>
+  <button data-tab="set">설정·백업</button>
+</nav>
+<div id="banner"></div>
+<main id="main"></main>
+<footer>© 김정환 · M.A.D.T (Moral And Digital Teacher) — 생기부 내용은 이 컴퓨터의 브라우저 안에만 저장됩니다.</footer>
+<div id="toast"></div>
+
+<script>
+'use strict';
+/*CORE-START*/
+// ───────── 1. 순수 계산 함수(화면과 무관) ─────────
+// 바이트 계산: 한글 등 비ASCII 3바이트, 영문·숫자·공백 1바이트, 엔터는 설정값(1 또는 2)
+function byteLen(s, enterBytes){
+  let n=0;
+  for(const ch of String(s).replace(/\r\n?/g,'\n')){
+    if(ch==='\n'){ n+=enterBytes; continue; }
+    const c=ch.codePointAt(0);
+    n += c<0x80 ? 1 : (c<0x10000 ? 3 : 4);
+  }
+  return n;
+}
+// 한도를 넘기 시작하는 글자 위치(넘지 않으면 -1)
+function cutIndex(s, limit, enterBytes){
+  let n=0,i=0;
+  for(const ch of String(s).replace(/\r\n?/g,'\n')){
+    const c=ch.codePointAt(0);
+    n += ch==='\n' ? enterBytes : (c<0x80?1:(c<0x10000?3:4));
+    if(n>limit) return i;
+    i+=ch.length;
+  }
+  return -1;
+}
+// 기계적 교정: 공백·기호 정리(항상 자동)
+function mechFix(src){
+  let t=String(src), notes=[];
+  const step=(name,fn)=>{ const b=t; t=fn(t); if(b!==t && !notes.includes(name)) notes.push(name); };
+  step('줄바꿈 정리', x=>x.replace(/\r\n?/g,'\n'));
+  step('보이지 않는 문자 제거', x=>x.replace(/[​-‍﻿]/g,'').replace(/[ 　\t]/g,' '));
+  step('전각 문자→반각', x=>x.replace(/[！-～]/g,c=>String.fromCharCode(c.charCodeAt(0)-0xFEE0)));
+  step('둥근 따옴표→곧은 따옴표', x=>x.replace(/[“”]/g,'"').replace(/[‘’]/g,"'"));
+  step('연속 공백', x=>x.replace(/ {2,}/g,' '));
+  step('문장부호 앞 공백', x=>x.replace(/ +([,.!?)\]])/g,'$1').replace(/([(\[]) +/g,'$1'));
+  step('마침표 중복', x=>x.replace(/(^|[^.])\.\.(?!\.)/g,'$1.').replace(/,{2,}/g,','));
+  step('문장부호 뒤 띄어쓰기', x=>x.replace(/([,.!?])(?=[가-힣])/g,'$1 '));
+  step('줄 끝 공백', x=>x.replace(/ +\n/g,'\n').replace(/\n +/g,'\n').replace(/\n{2,}/g,'\n'));
+  step('앞뒤 공백', x=>x.trim());
+  return {text:t, notes};
+}
+// 맞춤법·띄어쓰기 사전 규칙(틀린 형태가 분명한 것만)
+const SPELL_RULES=[
+  [/됬/g,'됐'],[/됌/g,'됨'],[/할께/g,'할게'],[/할껄/g,'할걸'],[/몇\s?일/g,'며칠'],
+  [/않됨/g,'안 됨'],[/않하/g,'안 하'],[/않함/g,'안 함'],
+  [/되요/g,'돼요'],[/뵈요/g,'봬요'],[/금새/g,'금세'],[/오랫만/g,'오랜만'],[/역활/g,'역할'],
+  [/설레임/g,'설렘'],[/어떻해/g,'어떡해'],[/왠만/g,'웬만'],[/웬지/g,'왠지'],
+  [/일일히/g,'일일이'],[/깨끗히/g,'깨끗이'],[/곰곰히/g,'곰곰이'],[/틈틈히/g,'틈틈이'],[/번번히/g,'번번이'],
+  [/꼼꼼이/g,'꼼꼼히'],[/묵묵이/g,'묵묵히'],[/꾸준이/g,'꾸준히'],
+  [/함으로서/g,'함으로써'],[/가르키/g,'가리키'],[/문안하게/g,'무난하게'],[/문안한/g,'무난한'],
+  [/어의없/g,'어이없'],[/희안하/g,'희한하'],[/희안한/g,'희한한'],[/(^|\s)들어나/g,'$1드러나'],[/요컨데/g,'요컨대'],
+  [/치뤘/g,'치렀'],[/치뤄/g,'치러'],[/치루고/g,'치르고'],[/치루는/g,'치르는'],[/치룬/g,'치른'],
+  [/삼가하고/g,'삼가고'],[/삼가하는/g,'삼가는'],[/삼가해야/g,'삼가야'],
+  [/보여진다/g,'보인다'],[/보여짐/g,'보임'],[/보여지는/g,'보이는'],[/보여진/g,'보인'],
+  [/쓰여지는/g,'쓰이는'],[/쓰여진/g,'쓰인'],
+  [/되어진다/g,'된다'],[/되어짐/g,'됨'],[/되어지는/g,'되는'],[/되어진/g,'된'],
+  [/잊혀지지/g,'잊히지'],[/잊혀진/g,'잊힌'],[/나뉘어지는/g,'나뉘는'],[/나뉘어진/g,'나뉜'],
+  [/불리우는/g,'불리는'],[/불리운/g,'불린'],
+  [/([할될볼갈줄쓸낼알풀올킬릴칠질을울])\s?수\s?(있|없(?!이))/g,'$1 수 $2'],
+  [/것같/g,'것 같'],[/뿐만아니라/g,'뿐만 아니라'],[/뿐아니라/g,'뿐 아니라'],
+  [/그럼에도불구하고/g,'그럼에도 불구하고'],
+  [/에대해/g,'에 대해'],[/에대한/g,'에 대한'],[/에관한/g,'에 관한'],[/에관해/g,'에 관해'],
+  [/([을를])통해/g,'$1 통해'],[/에따라/g,'에 따라'],[/기위해/g,'기 위해'],[/기위한/g,'기 위한']
+];
+function escRe(s){ return String(s).replace(/[.*+?^${}()|[\]\\]/g,'\\$&'); }
+function spellFix(src, custom){
+  let t=String(src); const changes=[];
+  const rules=SPELL_RULES.slice();
+  (custom||[]).forEach(r=>{ if(r && r.from) rules.push([new RegExp(escRe(r.from),'g'), String(r.to||'').replace(/\$/g,'$$$$')]); });
+  for(const [re,to] of rules){
+    const one=new RegExp(re.source, re.flags.replace('g',''));
+    t=t.replace(re, m=>{ const r=m.replace(one,to); if(r!==m) changes.push({from:m.trim(),to:r.trim()}); return r; });
+  }
+  return {text:t, changes};
+}
+// 기재요령 점검(경고만, 자동 수정 안 함)
+const LINT_RULES=[
+  [/(토익|토플|텝스|TOEIC|TOEFL|TEPS|HSK|JLPT|JPT|한자능력검정|한자급수)/i,'공인어학시험·한자급수 관련 표현'],
+  [/(교외|전국\s?대회|올림피아드|경시대회)/,'교외 대회·수상 관련 표현'],
+  [/(논문|학회|특허|출원|도서\s?출간|출판)/,'논문·학회·특허·출판 관련 표현'],
+  [/[가-힣]{2,}(대학교|대학원)/,'대학명 표기'],
+  [/(영재교육원|영재원|학원|과외)/,'영재교육원·사교육 관련 표현'],
+  [/(아버지|어머니|부모|부친|모친|보호자).{0,15}(교수|의사|변호사|판사|검사|대표|회사|직업|직장|근무)/,'부모(보호자)의 직업·지위를 암시하는 표현'],
+  [/[<>&\\^~`|※★☆♥♡→←↑↓■□●○◆◇▶▷◀◁①-⑳]/,'특수문자(나이스 입력 오류 가능)'],
+  [/[A-Za-z]{2,}/,'영문 표기(한글 표기 원칙, 꼭 필요한지 확인)']
+];
+function lint(text, ctx){
+  const out=[]; const t=String(text||''); if(!t.trim()) return out;
+  for(const [re,msg] of LINT_RULES){ const m=t.match(re); if(m) out.push(msg+' — "'+m[0]+'"'); }
+  (ctx&&ctx.banned||[]).forEach(w=>{ if(w && t.includes(w)) out.push('내가 등록한 금지어 — "'+w+'"'); });
+  (ctx&&ctx.names||[]).forEach(n=>{ if(n && n.length>=2 && t.includes(n)) out.push('다른 학생 이름이 들어 있음(내용 뒤바뀜 확인) — "'+n+'"'); });
+  const m2=t.match(/[가-힣]*(니다|다|요|까)[.!?](?=\s|$)/);
+  if(m2) out.push('종결어미 확인(~함/~음/~임 체가 아님) — "'+m2[0]+'"');
+  if(!/[.]$/.test(t.trim())) out.push('마침표로 끝나지 않음');
+  return out;
+}
+// 날짜 유틸
+function pad(n){ return (n<10?'0':'')+n; }
+function ymd(d){ return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()); }
+function toDate(s){ const m=String(s).match(/^(\d{4})-(\d{2})-(\d{2})$/); return m? new Date(+m[1],+m[2]-1,+m[3]) : null; }
+function validYMD(y,m,d){ const x=new Date(y,m-1,d); return x.getFullYear()===y && x.getMonth()===m-1 && x.getDate()===d; }
+function dayRange(a,b){ const out=[]; let x=toDate(a), e=toDate(b); if(!x||!e||x>e) return out; let g=0; while(x<=e && g++<800){ out.push(ymd(x)); x=new Date(x.getFullYear(),x.getMonth(),x.getDate()+1); } return out; }
+// 글자에서 날짜 뽑기. year=학년도(3~12월은 그 해, 1~2월은 다음 해)
+function extractDates(str, year){
+  const s=String(str); const found=[];
+  const re=/(\d{4})\s*[.\-\/년]\s*(\d{1,2})\s*[.\-\/월]\s*(\d{1,2})\s*(?:일|\.)?(?!\d)|(?<![\d.\-\/])(\d{1,2})\s*(?:[.\/]|월)\s*(\d{1,2})\s*(?:일|\.)?(?![\d])/g;
+  let m;
+  while((m=re.exec(s))){
+    const mo=+(m[2]||m[4]), d=+(m[3]||m[5]); const y=m[1]? +m[1] : (mo<=2? year+1 : year);
+    if(mo<1||mo>12||!validYMD(y,mo,d)) continue;
+    found.push({date:y+'-'+pad(mo)+'-'+pad(d), s:m.index, e:m.index+m[0].length});
+  }
+  if(!found.length) return {dates:[], rest:s.trim()};
+  let dates=found.map(f=>f.date);
+  if(found.length===2 && /[~∼～\-–—]/.test(s.slice(found[0].e, found[1].s)) && found[0].date<found[1].date){
+    dates=dayRange(found[0].date, found[1].date);
+  }
+  let rest=s; for(let i=found.length-1;i>=0;i--) rest=rest.slice(0,found[i].s)+' '+rest.slice(found[i].e);
+  rest=rest.replace(/\([월화수목금토일]\)/g,' ').replace(/[~∼～–—]/g,' ').replace(/\s+/g,' ').trim();
+  return {dates, rest};
+}
+// 수업일 계산: 주말·휴업일 제외, 요일별 일수(월~금)
+function countSchoolDays(start, end, holidays){
+  const hs=new Set(holidays||[]); const by=[0,0,0,0,0]; let total=0;
+  for(const d of dayRange(start,end)){
+    const w=toDate(d).getDay(); if(w===0||w===6||hs.has(d)) continue;
+    by[w-1]++; total++;
+  }
+  return {total, by};
+}
+function classifyEvent(txt){
+  if(/(방학식|개학|입학식|졸업식|종업식)/.test(txt)) return /동아리/.test(txt)?'club':'no';
+  if(/(방학|휴업|공휴|대체|재량|개교기념|연휴|설날|추석|어린이날|현충일|광복절|개천절|한글날|성탄|삼일절|3\.1절|선거|석가탄신|부처님)/.test(txt)) return 'hol';
+  if(/동아리/.test(txt)) return 'club';
+  return 'no';
+}
+// 네이버 맞춤법 검사기용: 문장 단위로 max자 이하 조각 나누기(이어 붙이면 원문과 같음)
+function splitChunks(text, max){
+  const parts=String(text).match(/[^.!?\n]*[.!?\n]+\s*|[^.!?\n]+$/g)||[];
+  const out=[]; let cur='';
+  const push=()=>{ if(cur) out.push(cur); cur=''; };
+  for(let p of parts){
+    while(p.length>max){ push(); out.push(p.slice(0,max)); p=p.slice(max); }
+    if((cur+p).length>max) push();
+    cur+=p;
+  }
+  push(); return out;
+}
+/*CORE-END*/
+
+// ───────── 2. 데이터 ─────────
+const DEFAULT_ITEMS=[
+  {key:'jayul', name:'자율·자치활동', limit:1500, mine:true},
+  {key:'club',  name:'동아리활동', limit:1500, mine:true},
+  {key:'jinro', name:'진로활동', limit:1500, mine:true},
+  {key:'seteuk1', name:'세특: 도덕', limit:1500, mine:true},
+  {key:'free',  name:'자유학기 활동', limit:3000, mine:true},
+  {key:'haeng', name:'행동특성 및 종합의견', limit:900, mine:true}
+];
+function freshState(){
+  return { v:1,
+    settings:{teacher:'', year:new Date().getMonth()<2? new Date().getFullYear()-1 : new Date().getFullYear(),
+      enterBytes:2, stripNL:true, autoSpell:true, sheetUrl:'', sheetKey:'', sheetView:'', autoSend:true, lastBackup:0, lastSent:0},
+    items:JSON.parse(JSON.stringify(DEFAULT_ITEMS)),
+    students:[], records:{}, schedules:[], rules:[], banned:[],
+    sisu:{start:'', end:'', holidays:[], rows:[], club:[], clubTarget:''}
+  };
+}
+let S=freshState();
+const UI={tab:'write', cls:'', item:'', filter:'all', q:'', sid:'', detected:[], cal:'', selDate:''};
+const undoMap=new Map(), noFix=new Set();
+
+const DB={db:null, ok:false,
+  open(){ return new Promise(res=>{ try{ const r=indexedDB.open('dodi-saenggibu',1);
+      r.onupgradeneeded=()=>r.result.createObjectStore('kv');
+      r.onsuccess=()=>{DB.db=r.result;DB.ok=true;res();}; r.onerror=()=>res(); }catch(e){res();} }); },
+  get(k){ return new Promise(res=>{ if(!DB.ok){ try{res(JSON.parse(localStorage.getItem('dodi-'+k)||'null'));}catch(e){res(null);} return; }
+      const t=DB.db.transaction('kv').objectStore('kv').get(k); t.onsuccess=()=>res(t.result||null); t.onerror=()=>res(null); }); },
+  set(k,v){ return new Promise((res,rej)=>{ if(!DB.ok){ try{localStorage.setItem('dodi-'+k,JSON.stringify(v));res();}catch(e){rej(e);} return; }
+      const tx=DB.db.transaction('kv','readwrite'); tx.objectStore('kv').put(v,k); tx.oncomplete=()=>res(); tx.onerror=()=>rej(tx.error); }); }
+};
+let saveTimer=null, sendTimer=null;
+function save(){ clearTimeout(saveTimer); saveTimer=setTimeout(flush,500); }
+function flush(){ clearTimeout(saveTimer);
+  return DB.set('state',S).then(()=>{ const d=new Date(); $('#savest').textContent='저장됨 '+pad(d.getHours())+':'+pad(d.getMinutes())+backupNote(); queueSend(); })
+    .catch(()=>{ $('#savest').textContent='⚠ 저장 실패 — 엑셀 백업을 받아 두세요'; }); }
+function backupNote(){ if(!S.settings.lastBackup) return ' · 백업 없음'; const n=Math.floor((Date.now()-S.settings.lastBackup)/86400000); return ' · 백업 '+(n===0?'오늘':n+'일 전'); }
+
+// ───────── 3. 공통 도구 ─────────
+const $=(s,r)=> (r||document).querySelector(s);
+const $$=(s,r)=> Array.from((r||document).querySelectorAll(s));
+function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+let toastTimer=null;
+function toast(msg){ const t=$('#toast'); t.textContent=msg; t.classList.add('on'); clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('on'),2600); }
+function sid(s){ return s.g+'-'+s.c+'-'+s.n; }
+function clsOf(s){ return s.g+'-'+s.c; }
+function classes(){ return Array.from(new Set(S.students.map(clsOf))).sort((a,b)=>a.localeCompare(b,'ko',{numeric:true})); }
+function sortStudents(){ S.students.sort((a,b)=> a.g-b.g || a.c-b.c || a.n-b.n); }
+function itemBy(k){ return S.items.find(i=>i.key===k); }
+function rec(sidv,ik){ const k=sidv+'|'+ik; if(!S.records[k]) S.records[k]={text:'',done:false,copied:0,updated:0}; return S.records[k]; }
+function peek(sidv,ik){ return S.records[sidv+'|'+ik] || {text:'',done:false,copied:0,updated:0}; }
+function B(t){ return byteLen(t, S.settings.enterBytes); }
+function loadScript(urls){ return new Promise((res,rej)=>{ let i=0; const next=()=>{ if(i>=urls.length) return rej(new Error('load')); const s=document.createElement('script'); s.src=urls[i++]; s.onload=()=>res(); s.onerror=next; document.head.appendChild(s); }; next(); }); }
+let xlsxP=null;
+function needXLSX(){ if(window.XLSX) return Promise.resolve(); if(!xlsxP) xlsxP=loadScript(['https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js','https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js']).catch(e=>{ xlsxP=null; toast('엑셀 기능을 불러오지 못했습니다. 인터넷 연결을 확인해 주세요.'); throw e; }); return xlsxP; }
+function download(name, blob){ const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name; document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},500); }
+function stamp(){ const d=new Date(); return d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate())+'_'+pad(d.getHours())+pad(d.getMinutes()); }
+async function copyText(t){ try{ await navigator.clipboard.writeText(t); return true; }catch(e){ const x=document.createElement('textarea'); x.value=t; x.style.position='fixed'; x.style.opacity='0'; document.body.appendChild(x); x.select(); let ok=false; try{ok=document.execCommand('copy');}catch(_){ } x.remove(); return ok; } }
+function readFile(file){ return new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(r.result); r.onerror=()=>rej(r.error); r.readAsArrayBuffer(file); }); }
+
+// ───────── 4. 입력 카드(작성·학생별 보기 공용) ─────────
+function cardHTML(s, it, mode){
+  const r=peek(sid(s), it.key);
+  const title = mode==='byItem' ? esc(s.n+'번 '+s.name) : esc(it.name);
+  return '<div class="card" data-sid="'+esc(sid(s))+'" data-ik="'+esc(it.key)+'">'
+    +'<div class="chead"><span class="ttl">'+title+'</span><span class="cp"></span><span class="sp"></span>'
+    +'<span class="meter"></span>'
+    +'<label><input type="checkbox" data-act="done"'+(r.done?' checked':'')+'> 완료</label>'
+    +'<button class="b g s" data-act="nv">네이버 맞춤법</button>'
+    +'<button class="b s" data-act="copy">나이스용 복사</button></div>'
+    +'<textarea class="ta" rows="3" spellcheck="true" placeholder="여기에 입력하거나 붙여넣으세요">'+esc(r.text)+'</textarea>'
+    +'<div class="bar"><i></i></div><div class="msgs"></div><div class="nv" hidden></div></div>';
+}
+function cardCtx(card){ const sidv=card.dataset.sid, ik=card.dataset.ik; return {sidv, ik, it:itemBy(ik), ta:$('.ta',card)}; }
+function otherNames(sidv){ const me=S.students.find(s=>sid(s)===sidv); return S.students.filter(s=>sid(s)!==sidv && (!me || s.name!==me.name)).map(s=>s.name); }
+function refreshCard(card, fixHTML){
+  const {sidv,ik,it,ta}=cardCtx(card); if(!it) return;
+  const r=peek(sidv,ik), t=ta.value, b=B(t), lim=it.limit, over=b>lim;
+  ta.style.height='auto'; ta.style.height=Math.max(70, ta.scrollHeight+4)+'px';
+  const m=$('.meter',card);
+  m.textContent=b.toLocaleString()+' / '+lim.toLocaleString()+' B · '+Array.from(t).length+'자 · '+(over?('초과 '+(b-lim)+' B'):('남음 '+(lim-b)+' B'));
+  m.classList.toggle('over',over);
+  const bar=$('.bar i',card); bar.style.width=Math.min(100,b/lim*100)+'%'; bar.className= over?'o':(b>lim*0.95?'w':'');
+  card.classList.toggle('over',over); card.classList.toggle('done',!!r.done);
+  $('.cp',card).innerHTML = r.copied? '<span class="tag c">복사함</span>' : '';
+  let h='';
+  if(fixHTML!==undefined) card.dataset.fix=fixHTML;
+  if(card.dataset.fix) h+='<div class="m-fix">'+card.dataset.fix+'</div>';
+  if(over){ const ci=cutIndex(t,lim,S.settings.enterBytes); const tail=t.slice(ci); h+='<div class="m-over">✂ 나이스에서 잘리는 부분: <span>'+esc(tail.length>120? tail.slice(0,120)+'…':tail)+'</span></div>'; }
+  lint(t,{banned:S.banned,names:otherNames(sidv)}).forEach(w=>{ h+='<div class="m-warn">⚠ '+esc(w)+'</div>'; });
+  $('.msgs',card).innerHTML=h;
+}
+function autoFix(card){
+  const {sidv,ik,ta}=cardCtx(card); const key=sidv+'|'+ik;
+  if(noFix.has(key)) return false;
+  const t0=ta.value; if(!t0) return false;
+  const r1=mechFix(t0);
+  const r2=S.settings.autoSpell? spellFix(r1.text,S.rules) : {text:r1.text,changes:[]};
+  if(r2.text===t0) return false;
+  undoMap.set(key,t0);
+  const pos=ta.selectionStart; ta.value=r2.text;
+  if(document.activeElement===ta){ try{ ta.selectionStart=ta.selectionEnd=Math.min(pos,r2.text.length); }catch(e){} }
+  const r=rec(sidv,ik); r.text=r2.text; r.updated=Date.now(); r.copied=0;
+  const parts=[]; if(r1.notes.length) parts.push(esc(r1.notes.join(', ')));
+  const seen=new Set(); r2.changes.forEach(c=>{ const k=c.from+'→'+c.to; if(!seen.has(k)){ seen.add(k); parts.push(esc(c.from)+' → <b>'+esc(c.to)+'</b>'); } });
+  refreshCard(card, '✔ 자동 교정: '+parts.join(' / ')+' <button class="b g s" data-act="undo">되돌리기</button>');
+  save(); return true;
+}
+let lintTimers=new WeakMap();
+function onCardInput(card){
+  const {sidv,ik,ta}=cardCtx(card); const r=rec(sidv,ik);
+  r.text=ta.value; r.updated=Date.now(); r.copied=0; noFix.delete(sidv+'|'+ik);
+  clearTimeout(lintTimers.get(card)); lintTimers.set(card,setTimeout(()=>refreshCard(card),250));
+  save();
+}
+async function onCopy(card){
+  autoFix(card);
+  const {sidv,ik,it,ta}=cardCtx(card); let t=ta.value;
+  if(!t.trim()){ toast('복사할 내용이 없습니다.'); return; }
+  if(S.settings.stripNL) t=t.replace(/\s*\n\s*/g,' ').trim();
+  const ok=await copyText(t);
+  if(!ok){ toast('복사에 실패했습니다. 글을 직접 선택해 Ctrl+C 해 주세요.'); return; }
+  const r=rec(sidv,ik); r.copied=Date.now(); save(); refreshCard(card);
+  toast(B(t)>it.limit? '⚠ 한도를 넘긴 상태로 복사했습니다. 나이스에서 잘립니다.' : '복사했습니다. 나이스 입력칸에서 Ctrl+V 하세요.');
+}
+
+// 네이버 맞춤법 검사기 연결(300자 제한 → 자동으로 나눠 줌)
+const NV_MAX=300, NV_URL='https://search.naver.com/search.naver?query='+encodeURIComponent('맞춤법 검사기');
+function toggleNaver(card){
+  const box=$('.nv',card); if(!box.hidden){ box.hidden=true; box.innerHTML=''; return; }
+  autoFix(card);
+  const {ta}=cardCtx(card); const t=ta.value; if(!t.trim()){ toast('검사할 내용이 없습니다.'); return; }
+  const chunks=splitChunks(t,NV_MAX); card._nv=chunks;
+  let h='<b>네이버 맞춤법 검사기로 한 번 더 검사하기</b> <span class="hint">네이버는 한 번에 '+NV_MAX+'자까지만 검사합니다.'+(chunks.length>1?' 글을 '+chunks.length+'조각으로 나눴습니다.':'')+'</span>';
+  chunks.forEach((c,i)=>{ h+='<div class="nvrow"><button class="b s" data-act="nvcopy" data-i="'+i+'">'+(chunks.length>1?(i+1)+'번 조각 ':'')+'복사하고 네이버 열기 ('+c.length+'자)</button>'
+    +'<textarea class="nvin" data-i="'+i+'" rows="2" placeholder="네이버에서 교정된 결과를 복사해 여기에 붙여넣으세요 (비워 두면 원래 글 그대로)"></textarea></div>'; });
+  h+='<div class="hint">순서: ① 버튼 누르기 → ② 열린 네이버 창 입력칸에 Ctrl+V → 검사하기 → 고친 뒤 "복사" → ③ 위 칸에 Ctrl+V → ④ 적용. 학생 이름이 글에 들어 있으면 네이버로 그대로 넘어가니 주의하세요.</div>'
+    +'<div class="row"><button class="b s" data-act="nvapply">교정본 적용</button><button class="b g s" data-act="nv">닫기</button></div>';
+  box.innerHTML=h; box.hidden=false;
+}
+async function naverCopy(card,i){
+  const c=(card._nv||[])[i]; if(c==null) return;
+  const ok=await copyText(c.trim());
+  const win=window.open(NV_URL,'naverSpell');
+  toast(ok? (win? '복사했습니다. 네이버 창 입력칸에 Ctrl+V 하세요.' : '복사했습니다. 팝업이 막혀 있으니 네이버에서 "맞춤법 검사기"를 검색해 주세요.') : '복사에 실패했습니다.');
+}
+function naverApply(card){
+  const {sidv,ik,ta}=cardCtx(card); const chunks=card._nv||[]; if(!chunks.length) return;
+  let used=0;
+  const out=chunks.map((c,i)=>{ const v=$('.nvin[data-i="'+i+'"]',card).value.trim(); if(!v) return c; used++; const tail=(c.match(/\s+$/)||[''])[0]; return v+(tail||(i<chunks.length-1?' ':'')); }).join('');
+  if(!used){ toast('붙여넣은 교정 결과가 없습니다.'); return; }
+  undoMap.set(sidv+'|'+ik, ta.value);
+  ta.value=out; const r=rec(sidv,ik); r.text=out; r.updated=Date.now(); r.copied=0; noFix.delete(sidv+'|'+ik);
+  const box=$('.nv',card); box.hidden=true; box.innerHTML='';
+  if(!autoFix(card)) refreshCard(card,'✔ 네이버 교정본을 적용했습니다. <button class="b g s" data-act="undo">되돌리기</button>');
+  save(); toast('교정본을 적용했습니다.');
+}
+
+// ───────── 5. 화면: 작성 ─────────
+function renderWrite(){
+  const cl=classes();
+  if(!S.students.length){ $('#main').innerHTML='<div class="box"><h2>먼저 학생 명단을 넣어 주세요</h2><p>위쪽 <b>설정·백업</b> 탭 → <b>학생 명단</b>에서 엑셀 명단을 복사해 붙여넣으면 됩니다.</p><button class="b" data-go="set">설정·백업으로 가기</button></div>'; return; }
+  if(!cl.includes(UI.cls)) UI.cls=cl[0];
+  if(!itemBy(UI.item)) UI.item=S.items[0]? S.items[0].key : '';
+  const it=itemBy(UI.item); if(!it){ $('#main').innerHTML='<div class="box">설정에서 항목을 하나 이상 만들어 주세요.</div>'; return; }
+  let list=S.students.filter(s=>clsOf(s)===UI.cls);
+  const all=list.length; let written=0, done=0, over=0;
+  list.forEach(s=>{ const r=peek(sid(s),it.key); if(r.text.trim()) written++; if(r.done) done++; if(B(r.text)>it.limit) over++; });
+  list=list.filter(s=>{ const r=peek(sid(s),it.key);
+    return UI.filter==='all' || (UI.filter==='empty'&&!r.text.trim()) || (UI.filter==='over'&&B(r.text)>it.limit) || (UI.filter==='undone'&&!r.done) || (UI.filter==='uncopied'&&r.text.trim()&&!r.copied); });
+  let h='<div class="box"><div class="tb">'
+    +'<select id="selCls">'+cl.map(c=>'<option'+(c===UI.cls?' selected':'')+' value="'+esc(c)+'">'+esc(c.replace('-','학년 ')+'반')+'</option>').join('')+'</select>'
+    +'<select id="selItem">'+S.items.map(i=>'<option'+(i.key===UI.item?' selected':'')+' value="'+esc(i.key)+'">'+esc(i.name)+' ('+i.limit+'B)</option>').join('')+'</select>'
+    +'<select id="selFilter">'+[['all','전체'],['empty','미작성만'],['over','초과만'],['undone','미완료만'],['uncopied','나이스 미복사만']].map(f=>'<option value="'+f[0]+'"'+(UI.filter===f[0]?' selected':'')+'>'+f[1]+'</option>').join('')+'</select>'
+    +'<span class="hint">작성 '+written+'/'+all+' · 완료 '+done+'/'+all+(over?' · <b style="color:var(--red)">초과 '+over+'</b>':'')+'</span></div>'
+    +'<div class="hint">입력칸을 벗어나거나 붙여넣으면 띄어쓰기·맞춤법이 자동으로 고쳐집니다. 고친 내용은 칸 아래에 표시되고 되돌릴 수 있습니다.</div></div>';
+  h+= list.length? list.map(s=>cardHTML(s,it,'byItem')).join('') : '<div class="box hint">조건에 맞는 학생이 없습니다.</div>';
+  $('#main').innerHTML=h; $$('#main .card').forEach(c=>refreshCard(c));
+}
+
+// ───────── 6. 화면: 학생별 보기 ─────────
+function renderSearch(){
+  const q=UI.q.trim();
+  let h='<div class="box"><div class="tb"><input id="q2" type="text" placeholder="학생 이름" value="'+esc(q)+'"><span class="hint">이름 일부만 써도 됩니다. 예: 김, 민준</span></div>';
+  let hits = q? S.students.filter(s=>s.name.includes(q)) : [];
+  if(q && !hits.length) h+='<div class="hint">검색된 학생이 없습니다.</div>';
+  if(hits.length>1){ h+='<div class="row">'+hits.map(s=>'<button class="b '+(UI.sid===sid(s)?'':'g')+' s" data-pick="'+esc(sid(s))+'">'+esc(clsOf(s)+' '+s.n+'번 '+s.name)+'</button>').join('')+'</div>'; }
+  h+='</div>';
+  let target=null;
+  if(hits.length===1) target=hits[0]; else if(hits.length>1) target=hits.find(s=>sid(s)===UI.sid)||null;
+  if(target){
+    UI.sid=sid(target);
+    let tot=0; S.items.forEach(it=>{ tot+=B(peek(UI.sid,it.key).text); });
+    h+='<div class="box"><h2>'+esc(target.g+'학년 '+target.c+'반 '+target.n+'번 '+target.name)+'</h2><div class="row"><button class="b g s" id="copyAll">전 항목 한꺼번에 복사(검토용)</button><span class="hint">전체 '+tot.toLocaleString()+' B</span></div></div>';
+    h+=S.items.map(it=>cardHTML(target,it,'byStudent')).join('');
+  }
+  $('#main').innerHTML=h; $$('#main .card').forEach(c=>refreshCard(c));
+}
+
+// ───────── 7. 화면: 점검·현황 ─────────
+function stats(){
+  const rows=[];
+  classes().forEach(c=>{ const st=S.students.filter(s=>clsOf(s)===c);
+    S.items.forEach(it=>{ let w=0,d=0,o=0; st.forEach(s=>{ const r=peek(sid(s),it.key); if(r.text.trim()) w++; if(r.done) d++; if(B(r.text)>it.limit) o++; });
+      rows.push({cls:c,item:it.name,key:it.key,mine:it.mine!==false,total:st.length,written:w,done:d,over:o}); }); });
+  return rows;
+}
+function problems(){
+  const out=[];
+  S.items.forEach(it=>{ const seen=new Map();
+    S.students.forEach(s=>{ const r=peek(sid(s),it.key); const t=r.text.trim(); if(!t) return;
+      const who=clsOf(s)+' '+s.n+'번 '+s.name;
+      if(B(t)>it.limit) out.push({s,it,msg:'한도 초과 '+(B(t)-it.limit)+'B',who});
+      const ws=lint(t,{banned:S.banned,names:otherNames(sid(s))}); if(ws.length) out.push({s,it,msg:ws.join(' / '),who});
+      if(seen.has(t)) out.push({s,it,msg:'다른 학생과 내용이 완전히 같음 ↔ '+seen.get(t),who}); else seen.set(t,who);
+    }); });
+  return out;
+}
+function renderCheck(){
+  const rows=stats(), cl=classes();
+  let h='<div class="box"><h2>입력 현황 (작성 수 / 학생 수)</h2>';
+  if(!cl.length) h+='<div class="hint">학생 명단이 없습니다.</div>';
+  else{
+    h+='<div style="overflow-x:auto"><table><tr><th>학급</th>'+S.items.map(i=>'<th>'+esc(i.name)+'</th>').join('')+'</tr>';
+    cl.forEach(c=>{ h+='<tr><th>'+esc(c)+'</th>'+S.items.map(it=>{ const r=rows.find(x=>x.cls===c&&x.key===it.key);
+        const k= r.written===0?'':(r.written>=r.total?'c-ok':'c-mid'); return '<td class="click '+(r.over?'c-bad':k)+'" data-jump="'+esc(c)+'|'+esc(it.key)+'">'+r.written+'/'+r.total+(r.done?' <span class="hint">완료 '+r.done+'</span>':'')+(r.over?' <b style="color:var(--red)">초과 '+r.over+'</b>':'')+'</td>'; }).join('')+'</tr>'; });
+    h+='</table></div><div class="hint">칸을 누르면 그 학급·항목 작성 화면으로 이동합니다.</div>';
+  }
+  h+='<h3>담당자 현황판(구글 시트)으로 보내기</h3><div class="row"><button class="b" id="sendNow">지금 현황 전송</button>'
+    +(/^https:\/\//.test(S.settings.sheetView)? '<a class="b g" style="text-decoration:none" target="_blank" rel="noopener" href="'+esc(S.settings.sheetView)+'">현황판 시트 열기</a>':'')
+    +'<span class="hint">'+(S.settings.sheetUrl? ('보내는 것: 교사 이름·학급·항목·숫자뿐입니다. 학생 이름과 생기부 내용은 보내지 않습니다.'+(S.settings.lastSent? ' 마지막 전송 '+new Date(S.settings.lastSent).toLocaleString('ko-KR'):'')) : '설정·백업 탭에서 현황판 주소를 먼저 넣어 주세요.')+'</span></div></div>';
+  const ps=problems();
+  h+='<div class="box"><h2>일괄 점검 — 확인할 곳 '+ps.length+'건</h2>';
+  if(!ps.length) h+='<div class="hint">문제가 발견되지 않았습니다.</div>';
+  else h+='<table><tr><th>학생</th><th>항목</th><th class="l">내용</th></tr>'+ps.slice(0,300).map(p=>'<tr><td class="click" data-jumps="'+esc(sid(p.s))+'">'+esc(p.who)+'</td><td>'+esc(p.it.name)+'</td><td class="l">'+esc(p.msg)+'</td></tr>').join('')+'</table>'+(ps.length>300?'<div class="hint">300건까지만 표시했습니다.</div>':'');
+  h+='</div>';
+  $('#main').innerHTML=h;
+}
+function queueSend(){ if(!S.settings.autoSend||!S.settings.sheetUrl||!S.settings.teacher) return; clearTimeout(sendTimer); sendTimer=setTimeout(()=>sendStats(true),120000); }
+async function sendStats(silent){
+  const st=S.settings;
+  if(!st.sheetUrl||!st.teacher){ if(!silent) toast('설정·백업 탭에서 교사 이름과 현황판 주소를 먼저 넣어 주세요.'); return; }
+  if(!/^https:\/\/script\.google\.com\//.test(st.sheetUrl)){ if(!silent) toast('현황판 주소는 https://script.google.com/ 으로 시작해야 합니다.'); return; }
+  const rows=stats().filter(r=>r.mine && r.total>0).map(r=>({cls:r.cls,item:r.item,total:r.total,written:r.written,done:r.done,over:r.over}));
+  try{
+    await fetch(st.sheetUrl,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({key:st.sheetKey,teacher:st.teacher,rows})});
+    st.lastSent=Date.now(); DB.set('state',S).catch(()=>{});
+    if(!silent){ toast('현황을 보냈습니다. 시트에서 반영됐는지 확인해 주세요.'); if(UI.tab==='check') renderCheck(); }
+  }catch(e){ if(!silent) toast('전송하지 못했습니다. 인터넷 연결과 주소를 확인해 주세요.'); }
+}
+
+// ───────── 8. 화면: 일정 ─────────
+function dday(date){ const t=toDate(date); if(!t) return null; const n=new Date(); const today=new Date(n.getFullYear(),n.getMonth(),n.getDate()); return Math.round((t-today)/86400000); }
+function ddayText(n){ return n===0?'오늘':(n>0?'D-'+n:'D+'+(-n)+' 지남'); }
+function renderBanner(){
+  const up=S.schedules.map(x=>({x,n:dday(x.date)})).filter(o=>o.n!==null&&o.n>=0&&o.n<=7&&!o.x.fin).sort((a,b)=>a.n-b.n);
+  const nx=S.schedules.map(x=>({x,n:dday(x.date)})).filter(o=>o.n!==null&&o.n>=0&&!o.x.fin).sort((a,b)=>a.n-b.n)[0];
+  const chip=$('#dchip'); if(nx){ chip.style.display='inline-block'; chip.textContent=ddayText(nx.n)+' '+(nx.x.title.length>12? nx.x.title.slice(0,12)+'…' : nx.x.title); } else chip.style.display='none';
+  const b=$('#banner'); if(!up.length){ b.style.display='none'; return; }
+  b.style.display='block'; b.innerHTML='📌 다가오는 일정: '+up.map(o=>'<b>'+ddayText(o.n)+'</b> '+esc(o.x.title)+' ('+esc(o.x.date.slice(5))+')').join(' · ');
+}
+function notifyDue(){
+  if(!('Notification' in window) || Notification.permission!=='granted') return;
+  const today=ymd(new Date()); let changed=false;
+  S.schedules.forEach(x=>{ const n=dday(x.date); if(n!==null&&n>=0&&n<=3&&!x.fin&&x.notified!==today){ try{ new Notification('생기부 일정 '+ddayText(n),{body:x.title+' ('+x.date+')'}); }catch(e){} x.notified=today; changed=true; } });
+  if(changed) save();
+}
+function calHTML(){
+  const now=new Date(); if(!UI.cal) UI.cal=now.getFullYear()+'-'+pad(now.getMonth()+1);
+  const y=+UI.cal.slice(0,4), m=+UI.cal.slice(5,7); const first=new Date(y,m-1,1), last=new Date(y,m,0).getDate(), today=ymd(now);
+  const hol={}; S.sisu.holidays.forEach(x=>{ hol[x.date]=x.name||'휴업일'; });
+  const club={}; S.sisu.club.forEach(x=>{ club[x.date]=x.hours; });
+  const ev={}; S.schedules.forEach(x=>{ (ev[x.date]=ev[x.date]||[]).push(x); });
+  let h='<div class="row"><button class="b g s" data-cal="-1">◀ 이전 달</button><b style="font-size:17px;color:var(--navy)">'+y+'년 '+m+'월</b><button class="b g s" data-cal="1">다음 달 ▶</button><button class="b g s" data-cal="0">오늘</button><span class="hint">날짜를 누르면 아래 등록 칸에 그 날짜가 들어갑니다. 빨강=휴업일, 초록=동아리(시수 탭에서 넣은 것)</span></div>';
+  h+='<table class="cal"><tr>'+['일','월','화','수','목','금','토'].map((d,i)=>'<th class="'+(i===0?'sun':(i===6?'sat':''))+'">'+d+'</th>').join('')+'</tr><tr>';
+  for(let i=0;i<first.getDay();i++) h+='<td class="out"></td>';
+  for(let d=1;d<=last;d++){ const ds=y+'-'+pad(m)+'-'+pad(d), w=new Date(y,m-1,d).getDay();
+    h+='<td data-day="'+ds+'" class="'+(ds===today?'today':'')+'"><span class="dn '+((w===0||hol[ds])?'sun':(w===6?'sat':''))+'">'+d+'</span>'
+      +(hol[ds]? '<span class="hol">'+esc(hol[ds])+'</span>':'')
+      +(club[ds]? '<span class="clb">동아리 '+esc(club[ds])+'시간</span>':'')
+      +(ev[ds]||[]).map(x=>'<span class="ev'+(x.fin?' fin':'')+'" title="'+esc(x.title)+'">'+esc(x.title)+'</span>').join('')+'</td>';
+    if(w===6 && d<last) h+='</tr><tr>'; }
+  for(let i=new Date(y,m-1,last).getDay();i<6;i++) h+='<td class="out"></td>';
+  return h+'</tr></table>';
+}
+function renderSched(){
+  const list=S.schedules.slice().sort((a,b)=>a.date.localeCompare(b.date));
+  const perm=('Notification' in window)? Notification.permission : 'none';
+  const up=list.map(x=>({x,n:dday(x.date)})).filter(o=>o.n!==null&&o.n>=0&&!o.x.fin).slice(0,4);
+  let h='<div class="box"><h2>디데이</h2>'+(up.length? '<div class="dd">'+up.map(o=>'<div class="'+(o.n<=3?'hot':'')+'"><b>'+(o.n===0?'D-DAY':'D-'+o.n)+'</b>'+esc(o.x.title)+'<br><small>'+esc(o.x.date)+' ('+'일월화수목금토'[toDate(o.x.date).getDay()]+')'+(o.x.note? ' · '+esc(o.x.note):'')+'</small></div>').join('')+'</div>' : '<div class="hint">다가오는 일정이 없습니다. 아래에서 등록하면 여기와 화면 맨 위에 디데이가 표시됩니다.</div>')+'</div>';
+  h+='<div class="box"><h2>달력</h2>'+calHTML()+'</div>';
+  h+='<div class="box"><h2>일정 등록</h2><div class="row"><input id="scTitle" type="text" placeholder="예: 2학년 세특 입력 마감" style="flex:1;min-width:200px"><input id="scDate" type="date" value="'+esc(UI.selDate||'')+'"><input id="scNote" type="text" placeholder="메모(선택)"><button class="b" id="scAdd">등록</button></div>';
+  h+='<div class="row"><button class="b g s" id="scNoti">'+(perm==='granted'?'알림 켜져 있음':'브라우저 알림 켜기')+'</button><button class="b g s" id="scIcs">캘린더 파일(.ics)로 내보내기</button><span class="hint">알림은 이 화면을 열어 둔 동안 마감 3일 전부터 하루 한 번 뜹니다. 휴대폰 알림이 필요하면 .ics 파일을 캘린더 앱에 넣으세요(하루 전 오전 9시 알림 포함).</span></div>';
+  if(!list.length) h+='<div class="hint">등록된 일정이 없습니다.</div>';
+  else h+='<table><tr><th>날짜</th><th>남은 날</th><th class="l">일정</th><th class="l">메모</th><th>끝남</th><th></th></tr>'+list.map(x=>{ const n=dday(x.date); return '<tr'+(x.fin?' style="opacity:.5"':'')+'><td>'+esc(x.date)+'</td><td class="'+(n<=3?'neg':'')+'">'+(x.fin?'-':ddayText(n))+'</td><td class="l">'+esc(x.title)+'</td><td class="l">'+esc(x.note||'')+'</td><td><input type="checkbox" data-scfin="'+esc(x.id)+'"'+(x.fin?' checked':'')+'></td><td><button class="b r s" data-scdel="'+esc(x.id)+'">삭제</button></td></tr>'; }).join('')+'</table>';
+  h+='</div>'; $('#main').innerHTML=h;
+}
+function exportIcs(){
+  if(!S.schedules.length){ toast('내보낼 일정이 없습니다.'); return; }
+  const e=s=>String(s||'').replace(/\\/g,'\\\\').replace(/[,;]/g,m=>'\\'+m).replace(/\n/g,'\\n');
+  let out=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//dodi//saenggibu//KO'];
+  S.schedules.forEach(x=>{ const d=x.date.replace(/-/g,''); const nx=toDate(x.date); const d2=ymd(new Date(nx.getFullYear(),nx.getMonth(),nx.getDate()+1)).replace(/-/g,'');
+    out=out.concat(['BEGIN:VEVENT','UID:'+x.id+'@dodi-saenggibu','DTSTAMP:'+d+'T000000Z','DTSTART;VALUE=DATE:'+d,'DTEND;VALUE=DATE:'+d2,'SUMMARY:'+e(x.title),'DESCRIPTION:'+e(x.note),'BEGIN:VALARM','ACTION:DISPLAY','DESCRIPTION:'+e(x.title),'TRIGGER:-PT15H','END:VALARM','END:VEVENT']); });
+  out.push('END:VCALENDAR');
+  download('생기부일정.ics', new Blob([out.join('\r\n')],{type:'text/calendar;charset=utf-8'}));
+}
+
+// ───────── 9. 화면: 시수 ─────────
+function parseLines(text){ const out=[]; String(text).split(/\n/).forEach(line=>{ if(!line.trim()) return; const r=extractDates(line,S.settings.year); r.dates.forEach(d=>out.push({date:d,text:r.rest})); }); return out; }
+async function scanFile(file){
+  await needXLSX();
+  const wb=XLSX.read(await readFile(file),{type:'array',cellDates:true});
+  const found=[], seen=new Set();
+  wb.SheetNames.forEach(name=>{ const rows=XLSX.utils.sheet_to_json(wb.Sheets[name],{header:1,raw:true,defval:''});
+    rows.forEach(row=>{ const texts=[], dates=[];
+      row.forEach(cell=>{ if(Object.prototype.toString.call(cell)==='[object Date]' && !isNaN(cell)){ dates.push(ymd(new Date(cell.getTime()+3*3600000))); }
+        else if(typeof cell==='string' && cell.trim()){ const r=extractDates(cell,S.settings.year); if(r.dates.length){ dates.push.apply(dates,r.dates); if(r.rest) texts.push(r.rest); } else texts.push(cell.trim()); } });
+      const txt=texts.join(' ').replace(/\s+/g,' ').slice(0,80);
+      dates.forEach(d=>{ const k=d+'|'+txt; if(seen.has(k)) return; seen.add(k); found.push({date:d,text:txt,kind:classifyEvent(txt),hours:+((txt.match(/(\d+)\s*(?:시간|차시)/)||[])[1])||1}); }); }); });
+  found.sort((a,b)=>a.date.localeCompare(b.date));
+  UI.detected=found.slice(0,600);
+  toast(found.length? '날짜 '+found.length+'개를 찾았습니다. 아래 표에서 분류를 확인해 주세요.' : '날짜를 찾지 못했습니다. 아래 직접 입력칸을 이용해 주세요.');
+  renderSisu();
+}
+function renderSisu(){
+  const Z=S.sisu; const hs=Z.holidays.slice().sort((a,b)=>a.date.localeCompare(b.date));
+  let h='<div class="box"><h2>① 학사일정·동아리 일정 파일 올리기</h2><div class="row"><input type="file" id="sisuFile" accept=".xlsx,.xls,.csv"><span class="hint">엑셀(.xlsx)·CSV만 됩니다. 한글(.hwp)·PDF는 엑셀로 저장해서 올려 주세요. 한 줄에 "날짜 + 내용"이 있는 표 형식을 읽습니다(달력 모양 표는 읽지 못합니다).</span></div>';
+  if(UI.detected.length){
+    h+='<div style="max-height:320px;overflow:auto"><table><tr><th>날짜</th><th class="l">내용</th><th>분류</th><th>동아리 시수</th></tr>'+UI.detected.map((d,i)=>'<tr><td>'+esc(d.date)+'</td><td class="l">'+esc(d.text)+'</td><td><select data-det="'+i+'"><option value="no"'+(d.kind==='no'?' selected':'')+'>넣지 않음</option><option value="hol"'+(d.kind==='hol'?' selected':'')+'>휴업일</option><option value="club"'+(d.kind==='club'?' selected':'')+'>동아리</option></select></td><td><input class="num" type="number" min="0" step="1" data-deth="'+i+'" value="'+esc(d.hours)+'"></td></tr>').join('')+'</table></div><div class="row"><button class="b" id="detApply">분류한 대로 반영</button><button class="b g" id="detClear">목록 지우기</button></div>';
+  }
+  h+='</div>';
+  const sd=(Z.start&&Z.end)? countSchoolDays(Z.start,Z.end,hs.map(x=>x.date)) : null;
+  h+='<div class="box"><h2>② 수업일수와 과목 시수</h2><div class="row"><label>시작일 <input type="date" id="zStart" value="'+esc(Z.start)+'"></label><label>종료일 <input type="date" id="zEnd" value="'+esc(Z.end)+'"></label>'
+    +(sd? '<span>수업일수 <b>'+sd.total+'일</b> (월 '+sd.by[0]+' · 화 '+sd.by[1]+' · 수 '+sd.by[2]+' · 목 '+sd.by[3]+' · 금 '+sd.by[4]+')</span>':'<span class="hint">시작일·종료일을 넣으면 계산됩니다. 주말은 자동으로 빠집니다.</span>')+'</div>';
+  h+='<h3>휴업일 ('+hs.length+'일)</h3><div class="chips">'+(hs.map(x=>'<span>'+esc(x.date.slice(5))+' '+esc(x.name||'')+'<b data-holdel="'+esc(x.date)+'">×</b></span>').join('')||'<span class="hint">없음</span>')+'</div>'
+    +'<div class="row"><textarea id="holText" rows="2" placeholder="직접 입력: 한 줄에 하나씩. 예) 5.5 어린이날 / 7.20~8.16 여름방학"></textarea><button class="b g" id="holAdd">휴업일 추가</button>'+(hs.length?'<button class="b r s" id="holClear">휴업일 모두 지우기</button>':'')+'</div>';
+  h+='<h3>과목·학급별 시수 맞추기</h3><table><tr><th class="l">이름 (예: 1-1 도덕)</th><th>월</th><th>화</th><th>수</th><th>목</th><th>금</th><th>기준 시수</th><th>조정(±)</th><th>계산 시수</th><th>차이</th><th></th></tr>';
+  Z.rows.forEach((r,i)=>{ let calc=null, diff=null; if(sd){ calc=sd.by.reduce((a,n,k)=>a+n*(+r.w[k]||0),0)+(+r.adj||0); if(r.target!==''&&r.target!=null) diff=calc-(+r.target); }
+    h+='<tr><td class="l"><input type="text" data-zr="'+i+'" data-f="name" value="'+esc(r.name)+'" style="width:150px"></td>'+[0,1,2,3,4].map(k=>'<td><input class="num" type="number" min="0" data-zr="'+i+'" data-f="w'+k+'" value="'+esc(r.w[k])+'"></td>').join('')
+      +'<td><input class="num" type="number" min="0" data-zr="'+i+'" data-f="target" value="'+esc(r.target)+'"></td><td><input class="num" type="number" data-zr="'+i+'" data-f="adj" value="'+esc(r.adj)+'"></td><td><b>'+(calc===null?'-':calc)+'</b></td><td class="'+(diff===null?'':(diff===0?'pos':'neg'))+'">'+(diff===null?'-':(diff===0?'일치':(diff>0?'+'+diff+' 초과':diff+' 부족')))+'</td><td><button class="b r s" data-zrdel="'+i+'">삭제</button></td></tr>'; });
+  h+='</table><div class="row"><button class="b g" id="zrAdd">줄 추가</button><span class="hint">월~금 칸에는 그 요일에 든 수업 시간 수를 적습니다(예: 화 1, 목 1). "조정"에는 행사로 빠진 시간(−)이나 보강(+)을 적습니다.</span></div></div>';
+  const club=Z.club.slice().sort((a,b)=>a.date.localeCompare(b.date)); const ct=club.reduce((a,x)=>a+(+x.hours||0),0);
+  const hset=new Set(hs.map(x=>x.date));
+  h+='<div class="box"><h2>③ 동아리 시수</h2><div class="row"><label>기준 시수 <input class="num" type="number" min="0" id="clubTarget" value="'+esc(Z.clubTarget)+'"></label><span>편성 합계 <b>'+ct+'시간</b> ('+club.length+'회)</span>'
+    +(Z.clubTarget!==''? '<span class="'+(ct-(+Z.clubTarget)===0?'pos':'neg')+'">'+(ct-(+Z.clubTarget)===0?'일치':(ct>+Z.clubTarget?'+'+(ct-Z.clubTarget)+' 초과':(ct-Z.clubTarget)+' 부족'))+'</span>':'')+'</div>';
+  if(club.length) h+='<table><tr><th>날짜</th><th>요일</th><th>시수</th><th class="l">확인</th><th></th></tr>'+club.map(x=>{ const d=toDate(x.date), w=d.getDay(); const warn=[]; if(w===0||w===6) warn.push('주말'); if(hset.has(x.date)) warn.push('휴업일과 겹침'); if(Z.start&&x.date<Z.start||Z.end&&x.date>Z.end) warn.push('학기 기간 밖');
+      return '<tr><td>'+esc(x.date)+'</td><td>'+'일월화수목금토'[w]+'</td><td><input class="num" type="number" min="0" data-clubh="'+esc(x.date)+'" value="'+esc(x.hours)+'"></td><td class="l neg">'+esc(warn.join(', '))+'</td><td><button class="b r s" data-clubdel="'+esc(x.date)+'">삭제</button></td></tr>'; }).join('')+'</table>';
+  h+='<div class="row"><textarea id="clubText" rows="2" placeholder="직접 입력: 한 줄에 날짜와 시수. 예) 3.13 2 / 4.10 2"></textarea><button class="b g" id="clubAdd">동아리 일정 추가</button></div></div>';
+  $('#main').innerHTML=h;
+}
+
+// ───────── 10. 화면: 설정·백업 ─────────
+function renderSet(){
+  const st=S.settings;
+  let h='<div class="box"><h2>백업 (엑셀)</h2><div class="row"><button class="b" id="xlsOut">엑셀로 백업 받기</button><label class="b g" style="cursor:pointer">엑셀 백업 불러오기<input type="file" id="xlsIn" accept=".xlsx,.xls" hidden></label><button class="b g" id="jsonOut">전체 설정 백업(.json)</button><label class="b g" style="cursor:pointer">전체 설정 불러오기<input type="file" id="jsonIn" accept=".json" hidden></label></div>'
+    +'<div class="hint">엑셀 백업 = 학생×항목 표(다른 컴퓨터로 옮길 때도 이 파일 사용). 전체 설정 백업 = 일정·시수·규칙까지 모두. 백업 파일에는 학생 이름과 생기부 내용이 들어 있으니 업무용 PC·교육청 드라이브에만 보관하세요.</div></div>';
+  h+='<div class="box"><h2>학생 명단 ('+S.students.length+'명)</h2><textarea id="roster" rows="4" placeholder="엑셀에서 학년·반·번호·이름 4칸을 복사해 붙여넣으세요.&#10;예) 1	2	3	홍길동"></textarea><div class="row"><button class="b" id="rosterAdd">명단 넣기</button><label class="b g" style="cursor:pointer">엑셀 파일로 넣기<input type="file" id="rosterFile" accept=".xlsx,.xls,.csv" hidden></label><span class="hint">같은 학년·반·번호가 이미 있으면 이름만 바뀌고 써 둔 내용은 유지됩니다.</span></div>';
+  if(S.students.length) h+='<details><summary>명단 보기·삭제</summary><div class="chips" style="margin-top:6px">'+S.students.map(s=>'<span>'+esc(clsOf(s)+' '+s.n+' '+s.name)+'<b data-studel="'+esc(sid(s))+'">×</b></span>').join('')+'</div></details>';
+  h+='</div>';
+  h+='<div class="box"><h2>기재요령 규칙 (항목별 한도)</h2><div class="hint">기본값은 2026학년도 기준으로 넣어 두었습니다(창체 영역·세특 500자=1,500B, 자유학기 1,000자=3,000B, 행특 300자=900B). <b>반드시 2026 기재요령 "영역별 입력 가능 최대 글자수" 표와 실제 나이스 화면으로 확인</b>하고 다르면 아래에서 고치세요. <a href="https://star.moe.go.kr/web/contents/m21100.do" target="_blank" rel="noopener">기재요령 최신판 내려받기(학교생활기록부 종합지원포털)</a></div>'
+    +'<table style="margin-top:8px"><tr><th class="l">항목 이름</th><th>한도(바이트)</th><th>한글 기준</th><th>현황 전송</th><th></th></tr>'+S.items.map((it,i)=>'<tr><td class="l"><input type="text" data-it="'+i+'" data-f="name" value="'+esc(it.name)+'" style="width:100%"></td><td><input type="number" min="1" data-it="'+i+'" data-f="limit" value="'+esc(it.limit)+'" style="width:90px"></td><td>'+Math.floor(it.limit/3)+'자</td><td><input type="checkbox" data-it="'+i+'" data-f="mine"'+(it.mine!==false?' checked':'')+'></td><td><button class="b r s" data-itdel="'+i+'">삭제</button></td></tr>').join('')+'</table>'
+    +'<div class="row"><button class="b g" id="itAdd">항목 추가 (예: 세특: 역사)</button><button class="b g" id="ruleOut">규칙 파일 내보내기</button><label class="b g" style="cursor:pointer">규칙 파일 등록<input type="file" id="ruleIn" accept=".json" hidden></label></div>'
+    +'<div class="row"><label>엔터(줄바꿈) 1개 = <select id="stEnter"><option value="2"'+(st.enterBytes===2?' selected':'')+'>2바이트(안전)</option><option value="1"'+(st.enterBytes===1?' selected':'')+'>1바이트(기재요령 표기)</option></select></label><label><input type="checkbox" id="stNL"'+(st.stripNL?' checked':'')+'> 복사할 때 줄바꿈을 띄어쓰기로 바꾸기</label></div></div>';
+  h+='<div class="box"><h2>자동 교정</h2><div class="row"><label><input type="checkbox" id="stSpell"'+(st.autoSpell?' checked':'')+'> 맞춤법·띄어쓰기 사전 규칙 자동 적용 (끄면 공백·기호 정리만 합니다)</label></div>'
+    +'<h3>내 교정 규칙 ('+S.rules.length+'개)</h3><div class="chips">'+(S.rules.map((r,i)=>'<span>'+esc(r.from)+' → '+esc(r.to)+'<b data-ruledel="'+i+'">×</b></span>').join('')||'<span class="hint">없음</span>')+'</div><div class="row"><input type="text" id="ruleFrom" placeholder="틀린 표현"><span>→</span><input type="text" id="ruleTo" placeholder="고칠 표현"><button class="b g" id="ruleAdd">추가</button></div>'
+    +'<h3>내 금지어 ('+S.banned.length+'개) — 들어 있으면 경고</h3><div class="chips">'+(S.banned.map((w,i)=>'<span>'+esc(w)+'<b data-bandel="'+i+'">×</b></span>').join('')||'<span class="hint">없음</span>')+'</div><div class="row"><input type="text" id="banWord" placeholder="예: 최고의, 천재"><button class="b g" id="banAdd">추가</button></div></div>';
+  h+='<div class="box"><h2>담당자 현황판 연결 (구글 시트)</h2><div class="row"><label>교사 이름 <input type="text" id="stTeacher" value="'+esc(st.teacher)+'" placeholder="예: 김정환"></label><label>학년도 <input class="num" type="number" id="stYear" value="'+esc(st.year)+'" style="width:80px"></label></div>'
+    +'<div class="row"><label style="flex:1">웹앱 주소 <input class="wide" type="url" id="stUrl" value="'+esc(st.sheetUrl)+'" placeholder="https://script.google.com/macros/s/.../exec"></label></div>'
+    +'<div class="row"><label>암호 <input type="text" id="stKey" value="'+esc(st.sheetKey)+'" placeholder="스크립트에 적은 암호"></label><label style="flex:1">현황판 시트 주소(보기용) <input class="wide" type="url" id="stView" value="'+esc(st.sheetView)+'" placeholder="https://docs.google.com/spreadsheets/..."></label></div>'
+    +'<div class="row"><label><input type="checkbox" id="stAuto"'+(st.autoSend?' checked':'')+'> 내용이 바뀌면 2분 뒤 자동으로 현황 전송</label></div></div>';
+  h+='<div class="box"><h2>위험 구역</h2><button class="b r" id="wipe">이 컴퓨터의 모든 자료 지우기</button> <span class="hint">공용 PC에서 썼다면 백업을 받은 뒤 반드시 지우세요.</span></div>';
+  $('#main').innerHTML=h;
+}
+function addRoster(rows){
+  let add=0, upd=0, bad=0;
+  rows.forEach(r=>{ const c=r.map(x=>String(x==null?'':x).trim()).filter(x=>x!==''); if(c.length<4){ if(c.length) bad++; return; }
+    const g=parseInt(c[0],10), cl=parseInt(c[1],10), n=parseInt(c[2],10), name=c[3]; if(!(g>0&&cl>0&&n>0)||!name||name.length>20){ bad++; return; }
+    const ex=S.students.find(s=>s.g===g&&s.c===cl&&s.n===n); if(ex){ if(ex.name!==name){ ex.name=name; upd++; } } else { S.students.push({g,c:cl,n,name}); add++; } });
+  sortStudents(); save(); toast('추가 '+add+'명, 이름 변경 '+upd+'명'+(bad?', 읽지 못한 줄 '+bad+'개(제목 줄 포함)':''));
+}
+async function exportXlsx(){
+  await needXLSX();
+  const head=['학년','반','번호','이름'].concat(S.items.map(i=>i.name));
+  const a=[head], b=[head], c=[['학년','반','번호','이름'].concat(S.items.map(i=>i.name))];
+  S.students.forEach(s=>{ const base=[s.g,s.c,s.n,s.name];
+    a.push(base.concat(S.items.map(i=>peek(sid(s),i.key).text)));
+    b.push(base.concat(S.items.map(i=>B(peek(sid(s),i.key).text))));
+    c.push(base.concat(S.items.map(i=>peek(sid(s),i.key).done?'완료':''))); });
+  const wb=XLSX.utils.book_new();
+  const ws=XLSX.utils.aoa_to_sheet(a); ws['!cols']=[{wch:5},{wch:5},{wch:5},{wch:10}].concat(S.items.map(()=>({wch:60})));
+  XLSX.utils.book_append_sheet(wb,ws,'생기부');
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(b),'바이트');
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(c),'완료여부');
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([['항목','한도(바이트)']].concat(S.items.map(i=>[i.name,i.limit]))),'항목한도');
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([['날짜','일정','메모']].concat(S.schedules.map(x=>[x.date,x.title,x.note||'']))),'일정');
+  XLSX.writeFile(wb,'생기부백업_'+stamp()+'.xlsx');
+  S.settings.lastBackup=Date.now(); flush(); toast('엑셀 백업 파일을 내려받았습니다.');
+}
+async function importXlsx(file){
+  await needXLSX();
+  const wb=XLSX.read(await readFile(file),{type:'array'});
+  const ws=wb.Sheets['생기부']||wb.Sheets[wb.SheetNames[0]];
+  const rows=XLSX.utils.sheet_to_json(ws,{header:1,raw:false,defval:''});
+  if(rows.length<2){ toast('내용이 없는 파일입니다.'); return; }
+  const head=rows[0].map(x=>String(x).trim());
+  const ci={g:head.indexOf('학년'),c:head.indexOf('반'),n:head.indexOf('번호'),name:head.indexOf('이름')};
+  if(ci.name<0) ci.name=head.indexOf('성명');
+  if(ci.g<0||ci.c<0||ci.n<0||ci.name<0){ toast('첫 줄에 학년·반·번호·이름 제목이 있어야 합니다.'); return; }
+  const limits={}; if(wb.Sheets['항목한도']) XLSX.utils.sheet_to_json(wb.Sheets['항목한도'],{header:1,defval:''}).slice(1).forEach(r=>{ if(r[0]&&+r[1]>0) limits[String(r[0]).trim()]=+r[1]; });
+  const doneRows={}; if(wb.Sheets['완료여부']){ const dr=XLSX.utils.sheet_to_json(wb.Sheets['완료여부'],{header:1,defval:''}); const dh=(dr[0]||[]).map(x=>String(x).trim()); dr.slice(1).forEach(r=>{ const k=parseInt(r[0],10)+'-'+parseInt(r[1],10)+'-'+parseInt(r[2],10); doneRows[k]={}; dh.forEach((nm,j)=>{ if(j>3&&String(r[j]).trim()==='완료') doneRows[k][nm]=true; }); }); }
+  const cols=[]; head.forEach((nm,j)=>{ if(!nm||[ci.g,ci.c,ci.n,ci.name].includes(j)) return;
+    let it=S.items.find(i=>i.name===nm); if(!it){ it={key:'i'+Date.now().toString(36)+j,name:nm,limit:limits[nm]||1500,mine:true}; S.items.push(it); }
+    cols.push({j,it}); });
+  let filled=0, conflict=0;
+  const plan=[];
+  rows.slice(1).forEach(r=>{ const g=parseInt(r[ci.g],10), c=parseInt(r[ci.c],10), n=parseInt(r[ci.n],10), name=String(r[ci.name]||'').trim(); if(!(g>0&&c>0&&n>0)||!name) return;
+    plan.push({g,c,n,name,r}); const k=g+'-'+c+'-'+n; cols.forEach(o=>{ const t=String(r[o.j]||''); if(!t.trim()) return; const cur=peek(k,o.it.key).text; if(cur.trim()&&cur!==t) conflict++; }); });
+  if(conflict && !confirm('이미 써 둔 내용과 다른 칸이 '+conflict+'개 있습니다.\n[확인] 파일 내용으로 덮어쓰기\n[취소] 불러오기 중단')){ return; }
+  plan.forEach(p=>{ let s=S.students.find(x=>x.g===p.g&&x.c===p.c&&x.n===p.n); if(!s){ s={g:p.g,c:p.c,n:p.n,name:p.name}; S.students.push(s); } else s.name=p.name;
+    const k=sid(s); cols.forEach(o=>{ const t=String(p.r[o.j]||''); if(!t.trim()) return; const rr=rec(k,o.it.key); if(rr.text!==t){ rr.text=t; rr.updated=Date.now(); rr.copied=0; } if(doneRows[k]&&doneRows[k][o.it.name]) rr.done=true; filled++; }); });
+  sortStudents(); save(); toast('불러왔습니다. 학생 '+plan.length+'명, 내용 '+filled+'칸'); render();
+}
+
+// ───────── 11. 이벤트 ─────────
+function render(){
+  $$('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.tab===UI.tab));
+  ({write:renderWrite,search:renderSearch,check:renderCheck,sched:renderSched,sisu:renderSisu,set:renderSet})[UI.tab]();
+  renderBanner();
+}
+function keep(fn){ setTimeout(()=>{ const a=document.activeElement; let sel=null; if(a&&a.dataset){ if(a.dataset.zr!==undefined) sel='[data-zr="'+a.dataset.zr+'"][data-f="'+a.dataset.f+'"]'; else if(a.dataset.it!==undefined) sel='[data-it="'+a.dataset.it+'"][data-f="'+a.dataset.f+'"]'; else if(a.id) sel='#'+a.id; } fn(); if(sel){ const n=$(sel); if(n){ n.focus(); if(n.select&&n.type!=='checkbox') n.select(); } } },0); }
+function go(tab){ UI.tab=tab; render(); window.scrollTo(0,0); }
+$('#dchip').addEventListener('click',()=>go('sched'));
+$('#nav').addEventListener('click',e=>{ const b=e.target.closest('button[data-tab]'); if(b) go(b.dataset.tab); });
+let gsT=null;
+$('#gsearch').addEventListener('input',e=>{ clearTimeout(gsT); const v=e.target.value; gsT=setTimeout(()=>{ UI.q=v; UI.sid=''; UI.tab='search'; render(); },250); });
+
+const M=$('#main');
+M.addEventListener('input',e=>{
+  const t=e.target; const card=t.closest('.card');
+  if(card && t.classList.contains('ta')){ onCardInput(card); return; }
+  if(t.id==='q2'){ clearTimeout(gsT); gsT=setTimeout(()=>{ UI.q=t.value; UI.sid=''; renderSearch(); const q=$('#q2'); if(q){ q.focus(); q.setSelectionRange(q.value.length,q.value.length); } },300); }
+});
+M.addEventListener('focusout',e=>{ const t=e.target; const card=t.closest&&t.closest('.card'); if(card && t.classList.contains('ta')) autoFix(card); });
+M.addEventListener('paste',e=>{ const t=e.target; const card=t.closest&&t.closest('.card'); if(card && t.classList.contains('ta')) setTimeout(()=>{ onCardInput(card); autoFix(card); },0); });
+M.addEventListener('change',e=>{
+  const t=e.target, Z=S.sisu, st=S.settings;
+  const card=t.closest('.card');
+  if(card && t.dataset.act==='done'){ const c=cardCtx(card); rec(c.sidv,c.ik).done=t.checked; save(); refreshCard(card); return; }
+  if(t.id==='selCls'){ UI.cls=t.value; renderWrite(); return; }
+  if(t.id==='selItem'){ UI.item=t.value; renderWrite(); return; }
+  if(t.id==='selFilter'){ UI.filter=t.value; renderWrite(); return; }
+  if(t.dataset.scfin){ const x=S.schedules.find(o=>o.id===t.dataset.scfin); if(x){ x.fin=t.checked; save(); render(); } return; }
+  if(t.id==='sisuFile' && t.files[0]){ scanFile(t.files[0]).catch(()=>toast('파일을 읽지 못했습니다. 엑셀(.xlsx) 파일인지 확인해 주세요.')); return; }
+  if(t.dataset.det!==undefined){ UI.detected[+t.dataset.det].kind=t.value; return; }
+  if(t.dataset.deth!==undefined){ UI.detected[+t.dataset.deth].hours=Math.max(0,+t.value||0); return; }
+  if(t.id==='zStart'){ Z.start=t.value; save(); renderSisu(); return; }
+  if(t.id==='zEnd'){ Z.end=t.value; save(); renderSisu(); return; }
+  if(t.dataset.zr!==undefined){ const r=Z.rows[+t.dataset.zr], f=t.dataset.f; if(!r) return; if(f==='name') r.name=t.value; else if(f==='target') r.target=t.value===''?'':+t.value; else if(f==='adj') r.adj=+t.value||0; else r.w[+f.slice(1)]=Math.max(0,+t.value||0); save(); keep(renderSisu); return; }
+  if(t.id==='clubTarget'){ Z.clubTarget=t.value===''?'':+t.value; save(); renderSisu(); return; }
+  if(t.dataset.clubh){ const x=Z.club.find(o=>o.date===t.dataset.clubh); if(x){ x.hours=Math.max(0,+t.value||0); save(); keep(renderSisu); } return; }
+  if(t.dataset.it!==undefined){ const it=S.items[+t.dataset.it], f=t.dataset.f; if(!it) return; if(f==='name'){ if(t.value.trim()) it.name=t.value.trim(); } else if(f==='limit'){ if(+t.value>0) it.limit=Math.floor(+t.value); } else it.mine=t.checked; save(); keep(renderSet); return; }
+  if(t.id==='stEnter'){ st.enterBytes=+t.value; save(); return; }
+  if(t.id==='stNL'){ st.stripNL=t.checked; save(); return; }
+  if(t.id==='stSpell'){ st.autoSpell=t.checked; save(); return; }
+  if(t.id==='stTeacher'){ st.teacher=t.value.trim(); save(); return; }
+  if(t.id==='stYear'){ if(+t.value>2000) st.year=+t.value; save(); return; }
+  if(t.id==='stUrl'){ st.sheetUrl=t.value.trim(); save(); return; }
+  if(t.id==='stKey'){ st.sheetKey=t.value.trim(); save(); return; }
+  if(t.id==='stView'){ const v=t.value.trim(); st.sheetView=/^https:\/\//.test(v)? v : ''; save(); return; }
+  if(t.id==='stAuto'){ st.autoSend=t.checked; save(); return; }
+  if(t.id==='xlsIn' && t.files[0]){ importXlsx(t.files[0]).catch(()=>toast('엑셀 파일을 읽지 못했습니다.')); return; }
+  if(t.id==='rosterFile' && t.files[0]){ needXLSX().then(()=>readFile(t.files[0])).then(buf=>{ const wb=XLSX.read(buf,{type:'array'}); addRoster(XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,raw:false,defval:''})); renderSet(); }).catch(()=>toast('명단 파일을 읽지 못했습니다.')); return; }
+  if(t.id==='jsonIn' && t.files[0]){ t.files[0].text().then(txt=>{ const d=JSON.parse(txt); if(!d||!Array.isArray(d.students)||!d.records||!Array.isArray(d.items)) throw 0; if(!confirm('지금 자료를 모두 지우고 이 파일 내용으로 바꿉니다. 계속할까요?')) return; S=Object.assign(freshState(),d); S.settings=Object.assign(freshState().settings,d.settings||{}); S.sisu=Object.assign(freshState().sisu,d.sisu||{}); save(); toast('불러왔습니다.'); render(); }).catch(()=>toast('이 프로그램의 백업 파일이 아닙니다.')); return; }
+  if(t.id==='ruleIn' && t.files[0]){ t.files[0].text().then(txt=>{ const d=JSON.parse(txt); if(!d||!Array.isArray(d.items)) throw 0;
+      d.items.forEach(n=>{ if(!n||!n.name||!(+n.limit>0)) return; const it=S.items.find(i=>i.name===n.name); if(it) it.limit=Math.floor(+n.limit); else S.items.push({key:'i'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),name:String(n.name),limit:Math.floor(+n.limit),mine:true}); });
+      if(Array.isArray(d.rules)) S.rules=d.rules.filter(r=>r&&r.from).map(r=>({from:String(r.from),to:String(r.to||'')}));
+      if(Array.isArray(d.banned)) S.banned=d.banned.map(String).filter(Boolean);
+      if(d.enterBytes===1||d.enterBytes===2) S.settings.enterBytes=d.enterBytes;
+      save(); toast('규칙 파일을 등록했습니다.'); renderSet(); }).catch(()=>toast('규칙 파일 형식이 아닙니다.')); return; }
+});
+M.addEventListener('click',async e=>{
+  const t=e.target, Z=S.sisu;
+  const g=t.closest('[data-go]'); if(g){ go(g.dataset.go); return; }
+  const card=t.closest('.card');
+  if(card && t.dataset.act==='copy'){ onCopy(card); return; }
+  if(card && t.dataset.act==='nv'){ toggleNaver(card); return; }
+  if(card && t.dataset.act==='nvcopy'){ naverCopy(card,+t.dataset.i); return; }
+  if(card && t.dataset.act==='nvapply'){ naverApply(card); return; }
+  if(card && t.dataset.act==='undo'){ const c=cardCtx(card), k=c.sidv+'|'+c.ik; if(undoMap.has(k)){ c.ta.value=undoMap.get(k); const r=rec(c.sidv,c.ik); r.text=c.ta.value; r.updated=Date.now(); undoMap.delete(k); noFix.add(k); save(); refreshCard(card,''); toast('되돌렸습니다. 이 칸은 다시 고칠 때까지 자동 교정을 하지 않습니다.'); } return; }
+  if(t.dataset.pick){ UI.sid=t.dataset.pick; renderSearch(); return; }
+  if(t.id==='copyAll'){ const s=S.students.find(x=>sid(x)===UI.sid); if(!s) return; const txt=S.items.map(it=>'['+it.name+']\n'+peek(UI.sid,it.key).text).join('\n\n'); toast(await copyText(txt)? '전 항목을 복사했습니다.' : '복사에 실패했습니다.'); return; }
+  const j=t.closest('[data-jump]'); if(j){ const p=j.dataset.jump.split('|'); UI.cls=p[0]; UI.item=p[1]; UI.filter='all'; go('write'); return; }
+  const js=t.closest('[data-jumps]'); if(js){ const s=S.students.find(x=>sid(x)===js.dataset.jumps); if(s){ UI.q=s.name; UI.sid=sid(s); $('#gsearch').value=s.name; go('search'); } return; }
+  if(t.id==='sendNow'){ sendStats(false); return; }
+  if(t.dataset.cal!==undefined){ const k=+t.dataset.cal; const n=new Date(); let y=+UI.cal.slice(0,4), m=+UI.cal.slice(5,7); if(k===0){ y=n.getFullYear(); m=n.getMonth()+1; } else { m+=k; if(m<1){m=12;y--;} if(m>12){m=1;y++;} } UI.cal=y+'-'+pad(m); renderSched(); return; }
+  const dc=t.closest('td[data-day]'); if(dc){ UI.selDate=dc.dataset.day; const di=$('#scDate'); if(di){ di.value=UI.selDate; $('#scTitle').focus(); toast(UI.selDate+' 을(를) 골랐습니다. 일정 이름을 적고 등록을 누르세요.'); } return; }
+  if(t.id==='scAdd'){ const ti=$('#scTitle').value.trim(), d=$('#scDate').value; if(!ti||!d){ toast('일정 이름과 날짜를 넣어 주세요.'); return; } S.schedules.push({id:'s'+Date.now().toString(36),title:ti,date:d,note:$('#scNote').value.trim(),fin:false}); UI.selDate=''; UI.cal=d.slice(0,7); save(); render(); return; }
+  if(t.dataset.scdel){ S.schedules=S.schedules.filter(o=>o.id!==t.dataset.scdel); save(); render(); return; }
+  if(t.id==='scNoti'){ if(!('Notification' in window)){ toast('이 브라우저는 알림을 지원하지 않습니다.'); return; } const p=await Notification.requestPermission(); toast(p==='granted'?'알림을 켰습니다.':'알림이 차단되어 있습니다. 브라우저 주소창 옆 자물쇠에서 허용해 주세요.'); notifyDue(); renderSched(); return; }
+  if(t.id==='scIcs'){ exportIcs(); return; }
+  if(t.id==='detApply'){ let h=0,c=0; UI.detected.forEach(d=>{ if(d.kind==='hol'){ if(!Z.holidays.some(x=>x.date===d.date)){ Z.holidays.push({date:d.date,name:d.text.slice(0,20)}); h++; } } else if(d.kind==='club'){ if(!Z.club.some(x=>x.date===d.date)){ Z.club.push({date:d.date,hours:+d.hours||1}); c++; } } }); UI.detected=[]; save(); toast('휴업일 '+h+'일, 동아리 '+c+'회를 반영했습니다.'); renderSisu(); return; }
+  if(t.id==='detClear'){ UI.detected=[]; renderSisu(); return; }
+  if(t.id==='holAdd'){ const ls=parseLines($('#holText').value); let n=0; ls.forEach(o=>{ if(!Z.holidays.some(x=>x.date===o.date)){ Z.holidays.push({date:o.date,name:o.text.slice(0,20)}); n++; } }); save(); toast(n? '휴업일 '+n+'일을 추가했습니다.' : '날짜를 읽지 못했습니다. 예) 5.5 어린이날'); renderSisu(); return; }
+  if(t.id==='holClear'){ if(confirm('휴업일을 모두 지울까요?')){ Z.holidays=[]; save(); renderSisu(); } return; }
+  if(t.dataset.holdel){ Z.holidays=Z.holidays.filter(x=>x.date!==t.dataset.holdel); save(); renderSisu(); return; }
+  if(t.id==='zrAdd'){ Z.rows.push({name:'',w:[0,0,0,0,0],target:'',adj:0}); save(); renderSisu(); return; }
+  if(t.dataset.zrdel!==undefined){ Z.rows.splice(+t.dataset.zrdel,1); save(); renderSisu(); return; }
+  if(t.id==='clubAdd'){ let n=0; String($('#clubText').value).split(/\n/).forEach(line=>{ const r=extractDates(line,S.settings.year); const hrs=parseFloat((r.rest.match(/\d+(?:\.\d+)?/)||[])[0])||1; r.dates.forEach(d=>{ if(!Z.club.some(x=>x.date===d)){ Z.club.push({date:d,hours:hrs}); n++; } }); }); save(); toast(n? '동아리 '+n+'회를 추가했습니다.' : '날짜를 읽지 못했습니다. 예) 3.13 2'); renderSisu(); return; }
+  if(t.dataset.clubdel){ Z.club=Z.club.filter(x=>x.date!==t.dataset.clubdel); save(); renderSisu(); return; }
+  if(t.id==='xlsOut'){ exportXlsx().catch(()=>{}); return; }
+  if(t.id==='jsonOut'){ download('생기부도우미_전체백업_'+stamp()+'.json', new Blob([JSON.stringify(S)],{type:'application/json'})); S.settings.lastBackup=Date.now(); flush(); return; }
+  if(t.id==='rosterAdd'){ addRoster(String($('#roster').value).split(/\n/).map(l=>l.split(/[\t,]+|\s{1,}/))); renderSet(); return; }
+  if(t.dataset.studel){ const k=t.dataset.studel; const has=S.items.some(it=>peek(k,it.key).text.trim()); if(has && !confirm('이 학생에게 써 둔 내용이 있습니다. 명단에서 지우면 내용도 함께 지워집니다. 지울까요?')) return; S.students=S.students.filter(s=>sid(s)!==k); Object.keys(S.records).forEach(rk=>{ if(rk.indexOf(k+'|')===0) delete S.records[rk]; }); save(); renderSet(); return; }
+  if(t.id==='itAdd'){ const nm=prompt('항목 이름을 적어 주세요. 예) 세특: 역사'); if(!nm||!nm.trim()) return; if(S.items.some(i=>i.name===nm.trim())){ toast('같은 이름의 항목이 이미 있습니다.'); return; } S.items.push({key:'i'+Date.now().toString(36),name:nm.trim(),limit:1500,mine:true}); save(); renderSet(); return; }
+  if(t.dataset.itdel!==undefined){ const it=S.items[+t.dataset.itdel]; if(!it) return; const n=Object.keys(S.records).filter(k=>k.endsWith('|'+it.key)&&S.records[k].text.trim()).length; if(!confirm('"'+it.name+'" 항목을 지웁니다.'+(n? ' 써 둔 내용 '+n+'건도 함께 지워집니다.':'')+' 계속할까요?')) return; Object.keys(S.records).forEach(k=>{ if(k.endsWith('|'+it.key)) delete S.records[k]; }); S.items.splice(+t.dataset.itdel,1); save(); renderSet(); return; }
+  if(t.id==='ruleOut'){ download('기재요령규칙_'+S.settings.year+'.json', new Blob([JSON.stringify({year:S.settings.year,enterBytes:S.settings.enterBytes,items:S.items.map(i=>({name:i.name,limit:i.limit})),rules:S.rules,banned:S.banned},null,2)],{type:'application/json'})); return; }
+  if(t.id==='ruleAdd'){ const f=$('#ruleFrom').value.trim(), to=$('#ruleTo').value.trim(); if(!f||f===to){ toast('틀린 표현과 고칠 표현을 넣어 주세요.'); return; } S.rules.push({from:f,to}); save(); renderSet(); return; }
+  if(t.dataset.ruledel!==undefined){ S.rules.splice(+t.dataset.ruledel,1); save(); renderSet(); return; }
+  if(t.id==='banAdd'){ const w=$('#banWord').value.trim(); if(!w) return; if(!S.banned.includes(w)) S.banned.push(w); save(); renderSet(); return; }
+  if(t.dataset.bandel!==undefined){ S.banned.splice(+t.dataset.bandel,1); save(); renderSet(); return; }
+  if(t.id==='wipe'){ if(confirm('이 컴퓨터에 저장된 학생 명단·생기부 내용·일정이 모두 지워집니다. 백업을 받으셨습니까?') && confirm('정말 지웁니다. 되돌릴 수 없습니다.')){ S=freshState(); await flush(); toast('모두 지웠습니다.'); go('write'); } return; }
+});
+document.addEventListener('visibilitychange',()=>{ if(document.hidden) flush(); });
+window.addEventListener('beforeunload',()=>{ flush(); });
+
+// ───────── 12. 시작 ─────────
+(async function init(){
+  await DB.open();
+  const d=await DB.get('state');
+  if(d && Array.isArray(d.students) && d.records){ const f=freshState(); S=Object.assign(f,d); S.settings=Object.assign(freshState().settings,d.settings||{}); S.sisu=Object.assign(freshState().sisu,d.sisu||{}); }
+  $('#savest').textContent='자료 불러옴'+backupNote();
+  render(); notifyDue(); setInterval(()=>{ renderBanner(); notifyDue(); },3600000);
+})();
+</script>
+</body>
+</html>
