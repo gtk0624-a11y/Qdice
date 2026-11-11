@@ -112,6 +112,7 @@ footer{text-align:center;color:var(--sub);font-size:12px;padding:18px}
   <span id="rchip" title="수정 요청 탭으로 이동"></span>
   <span id="dchip" title="일정 탭으로 이동"></span>
   <span id="savest"></span>
+  <button id="lockBtn" class="b g s" style="display:none" title="지금 잠그기">🔒 잠그기</button>
   <input id="gsearch" type="text" placeholder="학생 이름 검색" autocomplete="off">
 </header>
 <nav id="nav">
@@ -127,6 +128,16 @@ footer{text-align:center;color:var(--sub);font-size:12px;padding:18px}
 <main id="main"></main>
 <footer>© 김정환 · M.A.D.T (Moral And Digital Teacher) — 생기부 내용은 이 컴퓨터의 브라우저 안에만 저장됩니다.</footer>
 <div id="toast"></div>
+<div id="lockScr" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:90;align-items:center;justify-content:center">
+  <div class="box" style="width:340px;text-align:center">
+    <img src="data:image/jpeg;base64,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" alt="" style="width:90px;height:90px;border-radius:50%;margin-bottom:6px">
+    <h2 style="margin:4px 0 12px">도디쌤 생기부 도우미 — 잠김</h2>
+    <input id="lockPw" type="password" placeholder="암호" style="width:100%;font-size:17px;text-align:center" autocomplete="current-password">
+    <div class="row" style="justify-content:center"><button class="b" id="lockGo" style="font-size:16px;padding:9px 22px">열기</button></div>
+    <div id="lockMsg" class="hint" style="color:var(--red);min-height:18px"></div>
+    <details style="text-align:left;margin-top:8px"><summary class="hint">암호를 잊었어요</summary><div class="hint">암호는 되찾을 수 없습니다. 엑셀 백업이 있으면 아래 단추로 새로 시작한 뒤 설정·백업 → 엑셀 백업 불러오기로 되살리세요.</div><button class="b r s" id="lockWipe" style="margin-top:6px">이 컴퓨터 자료 지우고 새로 시작</button></details>
+  </div>
+</div>
 
 <script>
 'use strict';
@@ -312,6 +323,36 @@ function parseReadingRows(rows){
     out.push({g,c,n,name:ci.name>=0? String(r[ci.name]==null?'':r[ci.name]).replace(/\s+/g,'').trim() : '', books}); });
   return {ok:true, entries:out, bad};
 }
+// 학생 명단 표 → [{g,c,n,name}] (제목 줄이 있으면 칸 순서 무관, 없으면 숫자·이름을 추정)
+function splitHak(v){ const d=String(v==null?'':v).replace(/\D/g,''); if(d.length===5) return [+d[0],+d.slice(1,3),+d.slice(3)]; if(d.length===4) return [+d[0],+d[1],+d.slice(2)]; return [0,0,0]; }
+function parseRoster(rows, askGrade){
+  rows=(rows||[]).map(r=>(r||[]).map(x=>String(x==null?'':x).trim()));
+  const num=v=>{ const m=String(v).match(/\d+/); return m? parseInt(m[0],10) : 0; };
+  const isName=x=>{ const t=String(x).replace(/\s+/g,''); return /^[가-힣A-Za-z]{2,20}$/.test(t) && !/^(학년|학번|번호|성명|이름|성별|남자?|여자?|전입|전출|비고|담임|학급|반)$/.test(t) && !/(학년|학교|중학|고등|초등|명단)$/.test(t); };
+  let hi=-1, ci=null;
+  for(let i=0;i<Math.min(rows.length,15);i++){ const h=rows[i].map(x=>x.replace(/\s+/g,''));
+    const name=h.findIndex(x=>/^(이름|성명|학생명|학생이름|학생성명)$/.test(x)); if(name<0) continue;
+    const c={name, hak:h.findIndex(x=>/학번/.test(x)), g:h.findIndex(x=>/^학년$/.test(x)), c:h.findIndex(x=>/^(반|학급)$/.test(x)), n:h.findIndex(x=>/^(번호|번|출석번호)$/.test(x))};
+    if(c.hak>=0 || c.n>=0){ hi=i; ci=c; break; } }
+  const out=[]; let bad=0, needG=false, needGC=false;
+  if(hi>=0){
+    rows.slice(hi+1).forEach(r=>{ const nm=(r[ci.name]||'').replace(/\s+/g,''); if(!nm) return; let g=0,c=0,n=0;
+      if(ci.c>=0&&ci.n>=0){ c=num(r[ci.c]); n=num(r[ci.n]); g= ci.g>=0? num(r[ci.g]) : 0; if(!g && ci.hak>=0) g=splitHak(r[ci.hak])[0]; if(!g) needG=true; }
+      else if(ci.hak>=0 && splitHak(r[ci.hak])[2]>0) [g,c,n]=splitHak(r[ci.hak]);
+      else if(ci.n>=0){ n=num(r[ci.n]); c=-1; needGC=true; }
+      if((c>0||c===-1)&&n>0&&nm.length<=20&&!/^(이름|성명)$/.test(nm)) out.push({g,c,n,name:nm}); else bad++; });
+  } else {
+    rows.forEach(r=>{ const cells=r.filter(x=>x!==''); if(!cells.length) return;
+      const nm=cells.find(isName); const nums=[]; let hak=null;
+      cells.forEach(x=>{ const t=x.replace(/\s+/g,''); if(/^\d{4,5}$/.test(t)) hak=t; else { const m=t.match(/^(\d{1,2})(학년|반|번)?\.?$/); if(m) nums.push(+m[1]); } });
+      let g=0,c=0,n=0;
+      if(nums.length>=3) [g,c,n]=nums; else if(hak) [g,c,n]=splitHak(hak); else if(nums.length===2){ [c,n]=nums; needG=true; }
+      if(nm && c>0 && n>0) out.push({g,c,n,name:nm.replace(/\s+/g,'')}); else bad++; });
+  }
+  if(needGC){ const v=askGrade? askGrade('gc') : ''; const m=String(v||'').match(/(\d+)\D+(\d+)/); out.forEach(o=>{ if(o.c===-1){ o.g=m?+m[1]:0; o.c=m?+m[2]:0; } }); }
+  if(needG){ const gg=askGrade? askGrade('g') : 0; out.forEach(o=>{ if(!o.g) o.g=parseInt(gg,10)||0; }); }
+  return {list:out.filter(o=>o.g>0&&o.c>0&&o.n>0), bad: bad+out.filter(o=>!(o.g>0&&o.c>0)).length, header:hi>=0};
+}
 // 네이버 맞춤법 검사기용: 문장 단위로 max자 이하 조각 나누기(이어 붙이면 원문과 같음)
 function splitChunks(text, max){
   const parts=String(text).match(/[^.!?\n]*[.!?\n]+\s*|[^.!?\n]+$/g)||[];
@@ -338,7 +379,7 @@ const DEFAULT_ITEMS=[
 function freshState(){
   return { v:1,
     settings:{teacher:'', year:new Date().getMonth()<2? new Date().getFullYear()-1 : new Date().getFullYear(),
-      enterBytes:2, stripNL:true, autoSpell:true, sheetUrl:'', sheetKey:'', sheetView:'', autoSend:true, lastBackup:0, lastSent:0, admin:false, sendFixed:false, askDone:true, lastReqFetch:0, lastRound:'1'},
+      enterBytes:2, stripNL:true, autoSpell:true, sheetUrl:'', sheetKey:'', sheetView:'', autoSend:true, lastBackup:0, lastSent:0, admin:false, sendFixed:false, askDone:true, lastReqFetch:0, lastRound:'1', locked:false, autoLock:30},
     items:JSON.parse(JSON.stringify(DEFAULT_ITEMS)),
     students:[], records:{}, schedules:[], rules:[], banned:[], reqs:[], reqSeen:{}, reqInit:false, reqWho:[],
     sisu:{start:'', end:'', holidays:[], rows:[], club:[], clubTarget:''}
@@ -348,6 +389,19 @@ let S=freshState();
 const UI={tab:'write', cls:'', item:'', filter:'all', q:'', sid:'', detected:[], cal:'', selDate:'', readPlan:null};
 const undoMap=new Map(), noFix=new Set();
 
+// 이 컴퓨터 잠금: 저장 자료를 암호로 바꿔 저장(AES-GCM). 암호를 모르면 아무도(만든 사람도) 못 엶.
+const LOCK={key:null, salt:null, last:Date.now()};
+function b64e(u8){ let s=''; u8.forEach(b=>s+=String.fromCharCode(b)); return btoa(s); }
+function b64d(t){ const s=atob(t); const u=new Uint8Array(s.length); for(let i=0;i<s.length;i++) u[i]=s.charCodeAt(i); return u; }
+async function deriveKey(pw,salt){ const base=await crypto.subtle.importKey('raw',new TextEncoder().encode(pw),'PBKDF2',false,['deriveKey']);
+  return crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:150000,hash:'SHA-256'},base,{name:'AES-GCM',length:256},false,['encrypt','decrypt']); }
+async function sealState(obj){ const iv=crypto.getRandomValues(new Uint8Array(12)); const ct=await crypto.subtle.encrypt({name:'AES-GCM',iv},LOCK.key,new TextEncoder().encode(JSON.stringify(obj)));
+  return {enc:1, salt:b64e(LOCK.salt), iv:b64e(iv), ct:b64e(new Uint8Array(ct))}; }
+async function openState(box,pw){ const salt=b64d(box.salt); const key=await deriveKey(pw,salt);
+  const pt=await crypto.subtle.decrypt({name:'AES-GCM',iv:b64d(box.iv)},key,b64d(box.ct)); LOCK.key=key; LOCK.salt=salt; return JSON.parse(new TextDecoder().decode(pt)); }
+async function setLock(pw){ LOCK.salt=crypto.getRandomValues(new Uint8Array(16)); LOCK.key=await deriveKey(pw,LOCK.salt); S.settings.locked=true; await flush(); }
+async function removeLock(){ LOCK.key=null; LOCK.salt=null; S.settings.locked=false; await flush(); }
+function lockNow(){ if(!LOCK.key) return; flush().then(()=>location.reload()); }
 const DB={db:null, ok:false,
   open(){ return new Promise(res=>{ try{ const r=indexedDB.open('dodi-saenggibu',1);
       r.onupgradeneeded=()=>r.result.createObjectStore('kv');
@@ -360,7 +414,7 @@ const DB={db:null, ok:false,
 let saveTimer=null, sendTimer=null;
 function save(){ clearTimeout(saveTimer); saveTimer=setTimeout(flush,500); }
 function flush(){ clearTimeout(saveTimer);
-  return DB.set('state',S).then(()=>{ const d=new Date(); $('#savest').textContent='저장됨 '+pad(d.getHours())+':'+pad(d.getMinutes())+backupNote(); queueSend(); })
+  return (LOCK.key? sealState(S) : Promise.resolve(S)).then(v=>DB.set('state',v)).then(()=>{ const d=new Date(); $('#savest').textContent=(LOCK.key?'🔒 ':'')+'저장됨 '+pad(d.getHours())+':'+pad(d.getMinutes())+backupNote(); queueSend(); })
     .catch(()=>{ $('#savest').textContent='⚠ 저장 실패 — 엑셀 백업을 받아 두세요'; }); }
 function backupNote(){ if(!S.settings.lastBackup) return ' · 백업 없음'; const n=Math.floor((Date.now()-S.settings.lastBackup)/86400000); return ' · 백업 '+(n===0?'오늘':n+'일 전'); }
 
@@ -536,7 +590,7 @@ function writeHeadHTML(){
 }
 function renderWrite(){
   const cl=classes();
-  if(!S.students.length){ $('#main').innerHTML='<div class="box"><h2>처음이시면 학생 명단부터 넣습니다</h2><div class="steps">① 엑셀 명단에서 <b>학년 · 반 · 번호 · 이름</b> 4칸을 마우스로 긁어 복사(Ctrl+C)합니다.<br>② 아래 칸을 누르고 붙여넣기(Ctrl+V) 합니다.<br>③ <b>명단 넣기</b>를 누르면 바로 영역별 입력 화면이 나옵니다.</div><textarea id="roster" rows="6" placeholder="예)&#10;1	1	1	홍길동&#10;1	1	2	김철수"></textarea><div class="row"><button class="b" id="rosterAdd" style="font-size:16px;padding:10px 18px">명단 넣기</button><span class="hint">직접 쳐도 됩니다. 한 줄에 한 명, 칸 사이는 띄어쓰기: 1 1 1 홍길동</span></div></div>'; return; }
+  if(!S.students.length){ $('#main').innerHTML='<div class="box"><h2>처음이시면 학생 명단부터 넣습니다</h2><div class="steps">가장 쉬운 방법: <label class="b" style="cursor:pointer;font-size:16px;padding:9px 16px">명단 엑셀 파일 올리기<input type="file" id="rosterFile0" accept=".xlsx,.xls,.csv" hidden></label><br><span class="hint">학년·반·번호·이름(또는 학번·이름) 칸이 있는 파일이면 됩니다. 칸 순서가 달라도, 성별·생년월일 같은 다른 칸이 있어도, 여러 반이 섞여 있어도 알아서 정리합니다. 나이스에서 내려받은 명단도 됩니다.</span><br>또는 엑셀에서 표를 통째로 복사(Ctrl+C)해 아래 칸에 붙여넣고(Ctrl+V) <b>명단 넣기</b>를 누르세요.</div><textarea id="roster" rows="6" placeholder="예)&#10;1	1	1	홍길동&#10;1	1	2	김철수"></textarea><div class="row"><button class="b" id="rosterAdd" style="font-size:16px;padding:10px 18px">명단 넣기</button><span class="hint">직접 쳐도 됩니다. 한 줄에 한 명, 칸 사이는 띄어쓰기: 1 1 1 홍길동</span></div></div>'; return; }
   if(!cl.includes(UI.cls)) UI.cls=cl[0];
   if(!itemBy(UI.item)) UI.item=S.items[0]? S.items[0].key : '';
   const it=itemBy(UI.item); if(!it){ $('#main').innerHTML='<div class="box">설정에서 항목을 하나 이상 만들어 주세요.</div>'; return; }
@@ -627,7 +681,7 @@ async function sendStats(silent){
   const rows=stats().filter(r=>r.mine && r.total>0).map(r=>({cls:r.cls,item:r.item,total:r.total,written:r.written,done:r.done,over:r.over}));
   try{
     await fetch(st.sheetUrl,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({key:st.sheetKey,teacher:st.teacher,rows})});
-    st.lastSent=Date.now(); DB.set('state',S).catch(()=>{});
+    st.lastSent=Date.now(); save();
     if(!silent){ toast('현황을 보냈습니다. 시트에서 반영됐는지 확인해 주세요.'); if(UI.tab==='check') renderCheck(); }
   }catch(e){ if(!silent) toast('전송하지 못했습니다. 인터넷 연결과 주소를 확인해 주세요.'); }
 }
@@ -766,7 +820,7 @@ function renderSet(){
   const st=S.settings;
   let h='<div class="box"><h2>백업 (엑셀)</h2><div class="row"><button class="b" id="xlsOut">엑셀로 백업 받기</button><label class="b g" style="cursor:pointer">엑셀 백업 불러오기<input type="file" id="xlsIn" accept=".xlsx,.xls" hidden></label><button class="b g" id="jsonOut">전체 설정 백업(.json)</button><label class="b g" style="cursor:pointer">전체 설정 불러오기<input type="file" id="jsonIn" accept=".json" hidden></label></div>'
     +'<div class="hint"><b>엑셀 백업 하나에 입력한 것이 전부 들어갑니다</b> — 명단·영역별 내용·바이트·완료·나이스 복사 기록·영역 설정(한도·입력 대상%·내 담당)·일정·휴업일·시수표·동아리·교정 규칙·금지어·설정. 다른 컴퓨터에서는 "엑셀 백업 불러오기"로 그대로 되살아납니다. 엑셀에서 내용 칸을 고친 뒤 불러오면 고친 내용이 반영됩니다. (.json 백업은 예비용입니다.) 백업 파일에는 학생 이름과 생기부 내용이 들어 있으니 업무용 PC·교육청 드라이브에만 보관하세요.</div></div>';
-  h+='<div class="box"><h2>학생 명단 ('+S.students.length+'명)</h2><textarea id="roster" rows="4" placeholder="엑셀에서 학년·반·번호·이름 4칸을 복사해 붙여넣으세요.&#10;예) 1	2	3	홍길동"></textarea><div class="row"><button class="b" id="rosterAdd">명단 넣기</button><label class="b g" style="cursor:pointer">엑셀 파일로 넣기<input type="file" id="rosterFile" accept=".xlsx,.xls,.csv" hidden></label><span class="hint">같은 학년·반·번호가 이미 있으면 이름만 바뀌고 써 둔 내용은 유지됩니다.</span></div>';
+  h+='<div class="box"><h2>학생 명단 ('+S.students.length+'명)</h2><textarea id="roster" rows="4" placeholder="엑셀 명단 표를 통째로 복사해 붙여넣으세요(제목 줄 포함). 학년·반·번호·이름 또는 학번·이름이 있으면 알아서 정리합니다."></textarea><div class="row"><button class="b" id="rosterAdd">명단 넣기</button><label class="b g" style="cursor:pointer">엑셀 파일로 넣기<input type="file" id="rosterFile" accept=".xlsx,.xls,.csv" hidden></label><span class="hint">칸 순서·다른 칸·여러 반 섞임 상관없이 알아서 정리합니다. 같은 학년·반·번호가 이미 있으면 이름만 바뀌고 써 둔 내용은 유지됩니다.</span></div>';
   if(S.students.length) h+='<details><summary>명단 보기·삭제</summary><div class="chips" style="margin-top:6px">'+S.students.map(s=>'<span>'+esc(clsOf(s)+' '+s.n+' '+s.name)+'<b data-studel="'+esc(sid(s))+'">×</b></span>').join('')+'</div></details>';
   h+='</div>';
   h+='<div class="box" id="readBox"><h2>독서기록 불러오기 (학생이 구글 폼으로 입력)</h2><div class="row"><label class="b" style="cursor:pointer">구글 폼 응답 파일 올리기 (.xlsx / .csv)<input type="file" id="readFile" accept=".xlsx,.xls,.csv" hidden></label><span class="hint">폼 질문 이름: <b>학년 · 반 · 번호 · 이름 · 책 제목 · 지은이</b>. 한 번 제출에 책 한 권. 같은 학생이 여러 번 제출하면 "책 제목(지은이), 책 제목(지은이)"로 이어 붙여 <b>독서활동상황</b> 항목에 넣습니다. 이미 들어 있는 책은 다시 넣지 않습니다.</span></div>';
@@ -791,16 +845,31 @@ function renderSet(){
     +'<div class="row"><label><input type="checkbox" id="stFixed"'+(st.sendFixed?' checked':'')+'> 수정 완료 때 고친 문장도 담당자 시트로 보내기 (점검자가 나이스를 안 열고 확인 가능 · 학생 생기부 문장이 구글 시트에 저장됨)</label></div>'
     +'<div class="row"><label><input type="checkbox" id="stAdmin"'+(st.admin?' checked':'')+'> 담당자 모드 — 학교 전체 수정 요청과 차수별·교사별 현황 보기</label></div>'
     +'<div class="row"><button class="b g" id="rqTest">연결 시험</button></div></div>';
+  h+='<div class="box"><h2>🔒 내 암호로 잠그기</h2>'
+    +(st.locked? '<div class="row"><span class="tag">잠금 켜짐</span><span class="hint">열 때마다 암호를 묻습니다. 저장 자료가 암호로 바뀌어 있어 다른 사람은 이 컴퓨터에서 열 수 없습니다.</span></div>'
+        +'<div class="row"><label>자동 잠금 <select id="stAutoLock">'+[[0,'안 함'],[10,'10분'],[30,'30분'],[60,'1시간']].map(o=>'<option value="'+o[0]+'"'+(+st.autoLock===o[0]?' selected':'')+'>'+o[1]+'</option>').join('')+'</select> 동안 손대지 않으면 잠금</label><button class="b g s" id="lockNowBtn">지금 잠그기</button></div>'
+        +'<div class="row"><input id="pw1" type="password" placeholder="새 암호" autocomplete="new-password"><input id="pw2" type="password" placeholder="새 암호 한 번 더" autocomplete="new-password"><button class="b g s" id="pwSet">암호 바꾸기</button><button class="b r s" id="pwOff">잠금 끄기</button></div>'
+      : '<div class="row"><input id="pw1" type="password" placeholder="암호 정하기 (4자 이상)" autocomplete="new-password"><input id="pw2" type="password" placeholder="암호 한 번 더" autocomplete="new-password"><button class="b" id="pwSet">잠금 켜기</button></div>')
+    +'<div class="hint">암호는 각 선생님이 각자 정합니다. 잊으면 되찾을 수 없습니다.</div></div>';
+  h+='<div class="box"><h2>🗓 새 학년도 준비 — 백업 후 초기화</h2><div class="hint" style="margin-bottom:6px">엑셀 백업을 먼저 내려받은 뒤, 고른 자료만 지웁니다. <b>남는 것:</b> 영역·한도·입력 대상(%), 교정 규칙·금지어, 교사 이름·담당자 시트 연결, 잠금 암호.</div>'
+    +'<div class="row"><label><input type="checkbox" checked disabled> 학생 명단·생기부 내용·완료 표시 (항상 지움)</label></div>'
+    +'<div class="row"><label><input type="checkbox" id="ny2" checked> 일정</label><label><input type="checkbox" id="ny3" checked> 시수 자료(휴업일·시수표·동아리)</label><label><input type="checkbox" id="ny4" checked> 수정 요청 기록</label></div>'
+    +'<div class="row"><button class="b r" id="newYear">엑셀 백업 받고 '+(+st.year+1)+'학년도로 초기화</button></div></div>';
   h+='<div class="box"><h2>위험 구역</h2><button class="b r" id="wipe">이 컴퓨터의 모든 자료 지우기</button> <span class="hint">공용 PC에서 썼다면 백업을 받은 뒤 반드시 지우세요.</span></div>';
   $('#main').innerHTML=h;
 }
 function addRoster(rows){
-  let add=0, upd=0, bad=0;
-  rows.forEach(r=>{ const c=r.map(x=>String(x==null?'':x).trim()).filter(x=>x!==''); if(c.length<4){ if(c.length) bad++; return; }
-    const g=parseInt(c[0],10), cl=parseInt(c[1],10), n=parseInt(c[2],10), name=c[3]; if(!(g>0&&cl>0&&n>0)||!name||name.length>20){ bad++; return; }
-    const ex=S.students.find(s=>s.g===g&&s.c===cl&&s.n===n); if(ex){ if(ex.name!==name){ ex.name=name; upd++; } } else { S.students.push({g,c:cl,n,name}); add++; } });
-  sortStudents(); save(); toast('추가 '+add+'명, 이름 변경 '+upd+'명'+(bad?', 읽지 못한 줄 '+bad+'개(제목 줄 포함)':''));
+  const r=parseRoster(rows, k=> k==='gc'? prompt('명단에 학년·반 칸이 없습니다. 몇 학년 몇 반인가요?\n예) 1-2  (1학년 2반)','') : prompt('명단에 학년 칸이 없습니다. 몇 학년인가요? (숫자만)',''));
+  let add=0, upd=0;
+  r.list.forEach(o=>{ const ex=S.students.find(s=>s.g===o.g&&s.c===o.c&&s.n===o.n); if(ex){ if(ex.name!==o.name){ ex.name=o.name; upd++; } } else { S.students.push(o); add++; } });
+  sortStudents(); save();
+  const cls=Array.from(new Set(r.list.map(o=>o.g+'-'+o.c))).sort((a,b)=>a.localeCompare(b,'ko',{numeric:true}));
+  if(!r.list.length){ toast('학생을 찾지 못했습니다. 학년·반·번호·이름(또는 학번·이름) 칸이 있는지 확인해 주세요.'); return; }
+  toast('명단 정리 완료 — '+cls.map(c=>clsName(c)).join(', ')+' · 추가 '+add+'명'+(upd?', 이름 변경 '+upd+'명':'')+(r.bad?' · 읽지 않은 줄 '+r.bad+'개(제목·빈 줄 등)':'')+(r.header?'':' · 제목 줄이 없어 추정했으니 확인해 주세요'));
 }
+function readRosterFile(file){ return needXLSX().then(()=>readFile(file)).then(buf=>{ const wb=XLSX.read(buf,{type:'array'}); let best=[], bk=0;
+  wb.SheetNames.forEach(n=>{ const rows=XLSX.utils.sheet_to_json(wb.Sheets[n],{header:1,raw:false,defval:''}); const k=parseRoster(rows,k=>k==='gc'?'1-1':'1').list.length; if(k>bk){ bk=k; best=rows; } });
+  addRoster(best); }); }
 async function exportXlsx(){
   await needXLSX();
   const head=['학년','반','번호','이름'].concat(S.items.map(i=>i.name));
@@ -1089,6 +1158,7 @@ function render(){
 function keep(fn){ setTimeout(()=>{ const a=document.activeElement; let sel=null; if(a&&a.dataset){ if(a.dataset.zr!==undefined) sel='[data-zr="'+a.dataset.zr+'"][data-f="'+a.dataset.f+'"]'; else if(a.dataset.it!==undefined) sel='[data-it="'+a.dataset.it+'"][data-f="'+a.dataset.f+'"]'; else if(a.id) sel='#'+a.id; } fn(); if(sel){ const n=$(sel); if(n){ n.focus(); if(n.select&&n.type!=='checkbox') n.select(); } } },0); }
 function go(tab){ UI.tab=tab; render(); window.scrollTo(0,0); }
 $('#dchip').addEventListener('click',()=>go('sched'));
+$('#lockBtn').addEventListener('click',()=>lockNow());
 $('#rchip').addEventListener('click',()=>{ $('#rchip').classList.remove('flash'); go('req'); });
 $('#banner').addEventListener('click',e=>{ const g=e.target.closest('[data-go]'); if(g) go(g.dataset.go); });
 $('#nav').addEventListener('click',e=>{ const b=e.target.closest('button[data-tab]'); if(b) go(b.dataset.tab); });
@@ -1133,10 +1203,11 @@ M.addEventListener('change',e=>{
   if(t.id==='stAuto'){ st.autoSend=t.checked; save(); return; }
   if(t.id==='stAsk'){ st.askDone=t.checked; save(); return; }
   if(t.id==='stFixed'){ st.sendFixed=t.checked; save(); return; }
+  if(t.id==='stAutoLock'){ st.autoLock=+t.value; save(); return; }
   if(t.id==='stAdmin'){ st.admin=t.checked; save(); fetchReqs(true); return; }
   if(t.id==='readFile' && t.files[0]){ planReading(t.files[0]).catch(()=>toast('독서기록 파일을 읽지 못했습니다. 엑셀(.xlsx)이나 CSV 파일인지 확인해 주세요.')); return; }
   if(t.id==='xlsIn' && t.files[0]){ importXlsx(t.files[0]).catch(()=>toast('엑셀 파일을 읽지 못했습니다.')); return; }
-  if(t.id==='rosterFile' && t.files[0]){ needXLSX().then(()=>readFile(t.files[0])).then(buf=>{ const wb=XLSX.read(buf,{type:'array'}); addRoster(XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,raw:false,defval:''})); renderSet(); }).catch(()=>toast('명단 파일을 읽지 못했습니다.')); return; }
+  if((t.id==='rosterFile'||t.id==='rosterFile0') && t.files[0]){ readRosterFile(t.files[0]).then(()=>render()).catch(()=>toast('명단 파일을 읽지 못했습니다. 엑셀(.xlsx)이나 CSV인지 확인해 주세요.')); return; }
   if(t.id==='jsonIn' && t.files[0]){ t.files[0].text().then(txt=>{ const d=JSON.parse(txt); if(!d||!Array.isArray(d.students)||!d.records||!Array.isArray(d.items)) throw 0; if(!confirm('지금 자료를 모두 지우고 이 파일 내용으로 바꿉니다. 계속할까요?')) return; S=Object.assign(freshState(),d); S.settings=Object.assign(freshState().settings,d.settings||{}); S.sisu=Object.assign(freshState().sisu,d.sisu||{}); save(); toast('불러왔습니다.'); render(); }).catch(()=>toast('이 프로그램의 백업 파일이 아닙니다.')); return; }
   if(t.id==='ruleIn' && t.files[0]){ t.files[0].text().then(txt=>{ const d=JSON.parse(txt); if(!d||!Array.isArray(d.items)) throw 0;
       d.items.forEach(n=>{ if(!n||!n.name||!(+n.limit>0)) return; const it=S.items.find(i=>i.name===n.name); if(it) it.limit=Math.floor(+n.limit); else S.items.push({key:'i'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),name:String(n.name),limit:Math.floor(+n.limit),mine:true}); });
@@ -1202,7 +1273,7 @@ M.addEventListener('click',async e=>{
   if(t.id==='readCancel'){ UI.readPlan=null; renderSet(); return; }
   if(t.id==='xlsOut'){ exportXlsx().catch(()=>{}); return; }
   if(t.id==='jsonOut'){ download('생기부도우미_전체백업_'+stamp()+'.json', new Blob([JSON.stringify(S)],{type:'application/json'})); S.settings.lastBackup=Date.now(); flush(); return; }
-  if(t.id==='rosterAdd'){ addRoster(String($('#roster').value).split(/\n/).map(l=>l.split(/[\t,]+|\s{1,}/))); render(); return; }
+  if(t.id==='rosterAdd'){ addRoster(String($('#roster').value).split(/\n/).map(l=> /\t/.test(l)? l.split('\t') : (/,/.test(l)? l.split(',') : l.trim().split(/\s+/)))); render(); return; }
   if(t.dataset.studel){ const k=t.dataset.studel; const has=S.items.some(it=>peek(k,it.key).text.trim()); if(has && !confirm('이 학생에게 써 둔 내용이 있습니다. 명단에서 지우면 내용도 함께 지워집니다. 지울까요?')) return; S.students=S.students.filter(s=>sid(s)!==k); Object.keys(S.records).forEach(rk=>{ if(rk.indexOf(k+'|')===0) delete S.records[rk]; }); save(); renderSet(); return; }
   if(t.id==='itAdd'){ const nm=prompt('항목 이름을 적어 주세요. 예) 세특: 역사'); if(!nm||!nm.trim()) return; if(S.items.some(i=>i.name===nm.trim())){ toast('같은 이름의 항목이 이미 있습니다.'); return; } S.items.push({key:'i'+Date.now().toString(36),name:nm.trim(),limit:1500,mine:true}); save(); renderSet(); return; }
   if(t.dataset.itdel!==undefined){ const it=S.items[+t.dataset.itdel]; if(!it) return; const n=Object.keys(S.records).filter(k=>k.endsWith('|'+it.key)&&S.records[k].text.trim()).length; if(!confirm('"'+it.name+'" 항목을 지웁니다.'+(n? ' 써 둔 내용 '+n+'건도 함께 지워집니다.':'')+' 계속할까요?')) return; Object.keys(S.records).forEach(k=>{ if(k.endsWith('|'+it.key)) delete S.records[k]; }); S.items.splice(+t.dataset.itdel,1); save(); renderSet(); return; }
@@ -1211,7 +1282,24 @@ M.addEventListener('click',async e=>{
   if(t.dataset.ruledel!==undefined){ S.rules.splice(+t.dataset.ruledel,1); save(); renderSet(); return; }
   if(t.id==='banAdd'){ const w=$('#banWord').value.trim(); if(!w) return; if(!S.banned.includes(w)) S.banned.push(w); save(); renderSet(); return; }
   if(t.dataset.bandel!==undefined){ S.banned.splice(+t.dataset.bandel,1); save(); renderSet(); return; }
-  if(t.id==='wipe'){ if(confirm('이 컴퓨터에 저장된 학생 명단·생기부 내용·일정이 모두 지워집니다. 백업을 받으셨습니까?') && confirm('정말 지웁니다. 되돌릴 수 없습니다.')){ S=freshState(); await flush(); toast('모두 지웠습니다.'); go('write'); } return; }
+  if(t.id==='pwSet'){ const a=$('#pw1').value, b=$('#pw2').value; if(a.length<4){ toast('암호는 4자 이상으로 정해 주세요.'); return; } if(a!==b){ toast('두 암호가 다릅니다.'); return; }
+    if(!window.crypto||!crypto.subtle){ toast('이 브라우저(또는 주소)에서는 잠금을 쓸 수 없습니다. 크롬·엣지에서 https 주소로 열어 주세요.'); return; }
+    if(!confirm('암호를 잊으면 되찾을 수 없습니다. '+(S.settings.locked?'새 암호로 바꿀까요?':'잠금을 켤까요?'))) return;
+    await setLock(a); LOCK.last=Date.now(); toast('🔒 잠금을 켰습니다. 다음에 열 때부터 암호를 묻습니다.'); renderSet(); $('#lockBtn').style.display='inline-block'; return; }
+  if(t.id==='pwOff'){ if(!confirm('잠금을 끌까요?')) return; await removeLock(); toast('잠금을 껐습니다.'); renderSet(); $('#lockBtn').style.display='none'; return; }
+  if(t.id==='lockNowBtn'){ lockNow(); return; }
+  if(t.id==='newYear'){ const ok=await exportXlsx().then(()=>true).catch(()=>false); if(!ok){ toast('엑셀 백업을 만들지 못해 초기화를 멈췄습니다. 인터넷 연결을 확인해 주세요.'); return; }
+    const o2=$('#ny2').checked, o3=$('#ny3').checked, o4=$('#ny4').checked;
+    setTimeout(async ()=>{
+      if(!confirm('엑셀 백업 파일을 내려받았습니다.\n\n[확인]을 누르면 학생 명단과 생기부 내용'+(o2?', 일정':'')+(o3?', 시수 자료':'')+(o4?', 수정 요청 기록':'')+'을 지우고 '+(+S.settings.year+1)+'학년도로 넘어갑니다. 되돌릴 수 없습니다.')) return;
+      S.students=[]; S.records={};
+      if(o2) S.schedules=[];
+      if(o3) S.sisu=freshState().sisu;
+      if(o4){ S.reqs=[]; S.reqSeen={}; S.reqInit=false; }
+      S.settings.year=+S.settings.year+1; UI.cls=''; UI.q=''; UI.sid='';
+      await flush(); toast(S.settings.year+'학년도로 넘어갔습니다. 새 명단을 넣어 주세요.'); go('write'); },600);
+    return; }
+  if(t.id==='wipe'){ if(confirm('이 컴퓨터에 저장된 학생 명단·생기부 내용·일정이 모두 지워집니다. 백업을 받으셨습니까?') && confirm('정말 지웁니다. 되돌릴 수 없습니다.')){ LOCK.key=null; LOCK.salt=null; S=freshState(); await flush(); $('#lockBtn').style.display='none'; toast('모두 지웠습니다.'); go('write'); } return; }
 });
 document.addEventListener('visibilitychange',()=>{ if(document.hidden) flush(); else if(Date.now()-(S.settings.lastReqFetch||0)>60000) fetchReqs(true); });
 window.addEventListener('beforeunload',()=>{ flush(); });
@@ -1220,10 +1308,22 @@ window.addEventListener('beforeunload',()=>{ flush(); });
 (async function init(){
   await DB.open();
   const d=await DB.get('state');
-  if(d && Array.isArray(d.students) && d.records){ const f=freshState(); S=Object.assign(f,d); S.settings=Object.assign(freshState().settings,d.settings||{}); S.sisu=Object.assign(freshState().sisu,d.sisu||{}); }
-  $('#savest').textContent='자료 불러옴'+backupNote();
-  render(); notifyDue(); setInterval(()=>{ renderBanner(); notifyDue(); },3600000);
-  refreshReqUI(); fetchReqs(true); setInterval(()=>{ if(!document.hidden) fetchReqs(true); },90000);
+  const start=()=>{ $('#lockScr').style.display='none'; $('#lockBtn').style.display=LOCK.key?'inline-block':'none';
+    $('#savest').textContent=(LOCK.key?'🔒 ':'')+'자료 불러옴'+backupNote();
+    render(); notifyDue(); setInterval(()=>{ renderBanner(); notifyDue(); },3600000);
+    refreshReqUI(); fetchReqs(true); setInterval(()=>{ if(!document.hidden) fetchReqs(true); },90000);
+    ['click','keydown','input'].forEach(ev=>document.addEventListener(ev,()=>{ LOCK.last=Date.now(); },true));
+    setInterval(()=>{ const m=+S.settings.autoLock; if(LOCK.key && m>0 && Date.now()-LOCK.last>m*60000) lockNow(); },30000); };
+  const load=x=>{ if(x && Array.isArray(x.students) && x.records){ S=Object.assign(freshState(),x); S.settings=Object.assign(freshState().settings,x.settings||{}); S.sisu=Object.assign(freshState().sisu,x.sisu||{}); } };
+  if(d && d.enc){
+    $('#lockScr').style.display='flex'; const pw=$('#lockPw'); pw.focus();
+    const tryOpen=async()=>{ $('#lockMsg').textContent='여는 중…';
+      try{ const x=await openState(d,pw.value); load(x); start(); }catch(e){ $('#lockMsg').textContent='암호가 맞지 않습니다.'; pw.select(); } };
+    $('#lockGo').onclick=tryOpen; pw.onkeydown=e=>{ if(e.key==='Enter') tryOpen(); };
+    $('#lockWipe').onclick=async()=>{ if(confirm('이 컴퓨터의 생기부 도우미 자료를 모두 지웁니다. 지울까요?') && confirm('정말 지웁니다. 되돌릴 수 없습니다.')){ LOCK.key=null; S=freshState(); await DB.set('state',S); location.reload(); } };
+    return;
+  }
+  load(d); start();
 })();
 </script>
 </body>

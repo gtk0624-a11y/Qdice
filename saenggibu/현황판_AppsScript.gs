@@ -53,6 +53,22 @@ function doPost(e) {
   return out_(saveStats_(teacher, d.rows));
 }
 
+// 프로그램을 안 쓰는 선생님이 시트에서 '상태'를 직접 바꾸면 시각을 자동으로 찍어 줍니다.
+// (구글 시트의 기본 기능이라 따로 설정할 것 없음)
+function onEdit(e) {
+  if (!e || !e.range) return;
+  var sh = e.range.getSheet();
+  if (sh.getName() !== REQ_NAME || e.range.getColumn() !== C.status || e.range.getRow() < 2) return;
+  var v = String(e.range.getValue()).trim(), row = e.range.getRow();
+  if (v === '수정 완료') {
+    sh.getRange(row, C.doneAt, 1, 1).setValues([[new Date()]]);
+    var memo = String(sh.getRange(row, C.memo, 1, 1).getValues()[0][0]);
+    if (!memo) sh.getRange(row, C.memo, 1, 1).setValues([['(시트에서 직접 처리)']]);
+  } else if (v === '확인') {
+    sh.getRange(row, C.confirmAt, 1, 1).setValues([[new Date()]]);
+  }
+}
+
 // ───── 수정 요청 ─────
 function listReqs_(teacher, all, who) {
   var sh = reqSheet_();
