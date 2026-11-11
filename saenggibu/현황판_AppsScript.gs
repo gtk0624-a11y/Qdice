@@ -216,7 +216,7 @@ function saveStats_(teacher, rows) {
     return [teacher, clean_(r.cls, 40), clean_(r.item, 40), total, written, num_(r.done), num_(r.over),
             total ? Math.round(written / total * 100) + '%' : '', now];
   });
-  if (data.length) sh.getRange(sh.getLastRow() + 1, 1, data.length, STAT_HEAD.length).setValues(data);
+  if (data.length) { var r0 = sh.getLastRow() + 1; sh.getRange(r0, 2, data.length, 1).setNumberFormat('@'); sh.getRange(r0, 1, data.length, STAT_HEAD.length).setValues(data); }
   return 'ok';
 }
 function saveDuties_(teacher, duties, homeroom) {
@@ -226,19 +226,19 @@ function saveDuties_(teacher, duties, homeroom) {
   var now = Utilities.formatDate(new Date(), 'Asia/Seoul', 'yyyy-MM-dd HH:mm');
   var data = duties.slice(0, 50).map(function (x) { return [teacher, clean_(x.field, 40), clean_(x.sub, 40), clean_(homeroom, 10), now]; });
   if (!data.length && homeroom) data.push([teacher, '', '', clean_(homeroom, 10), now]);
-  if (data.length) sh.getRange(sh.getLastRow() + 1, 1, data.length, DUTY_HEAD.length).setValues(data);
+  if (data.length) { var r0 = sh.getLastRow() + 1; sh.getRange(r0, 4, data.length, 1).setNumberFormat('@'); sh.getRange(r0, 1, data.length, DUTY_HEAD.length).setValues(data); }
 }
 function who_() {
   var sh = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(STAT_NAME);
   if (!sh || sh.getLastRow() < 2) return [];
   return sh.getRange(2, 1, sh.getLastRow() - 1, 3).getValues().filter(function (r) { return String(r[0]).trim(); })
-    .map(function (r) { return { teacher: String(r[0]), cls: String(r[1]), item: String(r[2]) }; });
+    .map(function (r) { return { teacher: String(r[0]), cls: cls_(r[1]), item: String(r[2]) }; });
 }
 function duties_() {
   var sh = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(DUTY_NAME);
   if (!sh || sh.getLastRow() < 2) return [];
   return sh.getRange(2, 1, sh.getLastRow() - 1, 4).getValues().filter(function (r) { return String(r[0]).trim(); })
-    .map(function (r) { return { teacher: String(r[0]), field: String(r[1]), sub: String(r[2]), homeroom: String(r[3]) }; });
+    .map(function (r) { return { teacher: String(r[0]), field: String(r[1]), sub: String(r[2]), homeroom: cls_(r[3]) }; });
 }
 function statSheet_() { return headSheet_(STAT_NAME, STAT_HEAD); }
 function dutySheet_() { return headSheet_(DUTY_NAME, DUTY_HEAD); }
@@ -255,6 +255,11 @@ function out_(t) { return ContentService.createTextOutput(t); }
 function num_(v) { v = Number(v); return isFinite(v) && v >= 0 ? Math.floor(v) : 0; }
 function newId_() { return Utilities.getUuid().replace(/-/g, '').slice(0, 10); }
 function today_() { return Utilities.formatDate(new Date(), 'Asia/Seoul', 'M/ d'); }
+// '1-1' 같은 학급이 시트에서 날짜(1월 1일)로 바뀐 경우 되돌림
+function cls_(v) {
+  if (Object.prototype.toString.call(v) === '[object Date]' && !isNaN(v)) return (v.getMonth() + 1) + '-' + v.getDate();
+  return String(v == null ? '' : v).trim();
+}
 function fmt_(v) {
   if (Object.prototype.toString.call(v) === '[object Date]' && !isNaN(v)) return Utilities.formatDate(v, 'Asia/Seoul', 'M/ d');
   return String(v == null ? '' : v).trim();
