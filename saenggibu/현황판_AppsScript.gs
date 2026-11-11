@@ -22,6 +22,7 @@ var STD_HEAD = ['점검일자', '학번', '이름', '오류(확인) 분야', '�
                 '담당교사 반영 날짜', '담임 반영 확인', '생기부 담당자 확인', '비고'];
 var STAT_NAME = '현황', STAT_HEAD = ['교사', '학급', '항목', '학생 수', '작성', '완료', '초과', '작성률', '갱신 시각'];
 var DUTY_NAME = '담당교사', DUTY_HEAD = ['교사', '분야', '상세 분야', '담임 학급', '갱신 시각'];
+var SEEN_NAME = '접속', SEEN_HEAD = ['교사', '마지막 접속', '처음 접속'];
 
 function setup() { reqInfo_(); statSheet_(); dutySheet_(); }
 
@@ -30,8 +31,9 @@ function doGet(e) {
   if (p.action === 'list') {
     if (String(p.key) !== KEY) return json_({ ok: false, msg: '암호가 맞지 않습니다.' });
     var info = reqInfo_();
+    if (p.teacher) touch_(clean_(p.teacher, 40));
     return json_({ ok: true, now: today_(), sheet: info.sh.getName(), rows: listReqs_(info),
-                   meta: meta_(info), who: who_(), duties: duties_() });
+                   meta: meta_(info), who: who_(), duties: duties_(), seen: seen_() });
   }
   return ContentService.createTextOutput('생기부 도우미 담당자 시트가 작동 중입니다.');
 }
@@ -237,8 +239,29 @@ function who_() {
 function duties_() {
   var sh = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(DUTY_NAME);
   if (!sh || sh.getLastRow() < 2) return [];
-  return sh.getRange(2, 1, sh.getLastRow() - 1, 4).getValues().filter(function (r) { return String(r[0]).trim(); })
-    .map(function (r) { return { teacher: String(r[0]), field: String(r[1]), sub: String(r[2]), homeroom: cls_(r[3]) }; });
+  return sh.getRange(2, 1, sh.getLastRow() - 1, 5).getValues().filter(function (r) { return String(r[0]).trim(); })
+    .map(function (r) { return { teacher: String(r[0]), field: String(r[1]), sub: String(r[2]), homeroom: cls_(r[3]), at: fmtAt_(r[4]) }; });
+}
+// 사이트에 들어온 선생님 기록(담당자가 누가 연결됐는지 봄). 같은 선생님은 3분에 한 번만 적음.
+function touch_(teacher) {
+  if (!teacher) return;
+  var cache = CacheService.getScriptCache(), ck = 'seen_' + Utilities.base64EncodeWebSafe(teacher);
+  if (cache.get(ck)) return;
+  cache.put(ck, '1', 180);
+  var lock = LockService.getScriptLock();
+  if (!lock.tryLock(5000)) return;
+  try {
+    var sh = headSheet_(SEEN_NAME, SEEN_HEAD), now = Utilities.formatDate(new Date(), 'Asia/Seoul', 'yyyy-MM-dd HH:mm');
+    var v = sh.getLastRow() > 1 ? sh.getRange(2, 1, sh.getLastRow() - 1, 1).getValues() : [];
+    for (var i = 0; i < v.length; i++) if (String(v[i][0]) === teacher) { sh.getRange(i + 2, 2, 1, 1).setNumberFormat('@').setValue(now); return; }
+    var r0 = sh.getLastRow() + 1; sh.getRange(r0, 1, 1, 3).setNumberFormat('@').setValues([[teacher, now, now]]);
+  } finally { lock.releaseLock(); }
+}
+function seen_() {
+  var sh = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SEEN_NAME);
+  if (!sh || sh.getLastRow() < 2) return [];
+  return sh.getRange(2, 1, sh.getLastRow() - 1, 3).getDisplayValues().filter(function (r) { return String(r[0]).trim(); })
+    .map(function (r) { return { teacher: r[0], last: r[1], first: r[2] }; });
 }
 function statSheet_() { return headSheet_(STAT_NAME, STAT_HEAD); }
 function dutySheet_() { return headSheet_(DUTY_NAME, DUTY_HEAD); }
@@ -258,6 +281,10 @@ function today_() { return Utilities.formatDate(new Date(), 'Asia/Seoul', 'M/ d'
 // '1-1' 같은 학급이 시트에서 날짜(1월 1일)로 바뀐 경우 되돌림
 function cls_(v) {
   if (Object.prototype.toString.call(v) === '[object Date]' && !isNaN(v)) return (v.getMonth() + 1) + '-' + v.getDate();
+  return String(v == null ? '' : v).trim();
+}
+function fmtAt_(v) {
+  if (Object.prototype.toString.call(v) === '[object Date]' && !isNaN(v)) return Utilities.formatDate(v, 'Asia/Seoul', 'yyyy-MM-dd HH:mm');
   return String(v == null ? '' : v).trim();
 }
 function fmt_(v) {
