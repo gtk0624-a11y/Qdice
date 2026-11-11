@@ -50,6 +50,7 @@ function doPost(e) {
   if (!teacher) return out_('교사 이름 없음');
   if (d.action === 'request') return out_(addReqs_(teacher, d.items));
   if (d.action === 'done' || d.action === 'confirm' || d.action === 'reopen') return out_(updReq_(teacher, d));
+  if (d.action === 'purge') return out_(purgeReqs_(d.mode === 'all'));
   return out_(saveStats_(teacher, d.rows));
 }
 
@@ -163,6 +164,25 @@ function updReq_(teacher, d) {
       return 'ok';
     }
     return '해당 요청 없음';
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+// 개인정보 지우기: 끝난(확인) 요청만, 또는 전부
+function purgeReqs_(all) {
+  var sh = reqSheet_();
+  var lock = LockService.getScriptLock();
+  lock.waitLock(20000);
+  try {
+    var last = sh.getLastRow();
+    if (last < 2) return 'ok 0';
+    var st = sh.getRange(2, C.status, last - 1, 1).getValues();
+    var n = 0;
+    for (var i = st.length - 1; i >= 0; i--) {
+      if (all || String(st[i][0]).trim() === '확인') { sh.deleteRow(i + 2); n++; }
+    }
+    return 'ok ' + n;
   } finally {
     lock.releaseLock();
   }
