@@ -33,7 +33,8 @@ function doGet(e) {
     var info = reqInfo_();
     if (p.teacher) touch_(clean_(p.teacher, 40));
     return json_({ ok: true, now: today_(), sheet: info.sh.getName(), rows: listReqs_(info),
-                   meta: meta_(info), who: who_(), duties: duties_(), seen: seen_() });
+                   meta: meta_(info), who: who_(), duties: duties_(), seen: seen_(),
+                   link: SpreadsheetApp.getActiveSpreadsheet().getUrl() + '#gid=' + info.sh.getSheetId() });
   }
   return ContentService.createTextOutput('생기부 도우미 담당자 시트가 작동 중입니다.');
 }
