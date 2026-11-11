@@ -327,6 +327,16 @@ function parseReadingRows(rows){
   return {ok:true, entries:out, bad};
 }
 // 학생 명단 표 → [{g,c,n,name}] (제목 줄이 있으면 칸 순서 무관, 없으면 숫자·이름을 추정)
+// 특이사항: 전출·학업중단·유예 등은 입력 대상에서 빼고(명단엔 남김), 재택·위탁·장기결석 등은 사유 입력 안내
+const NOTE_LIST=['전입','전출','재택(순회)교육','위탁','장기결석','학업중단','유예·면제','기타'];
+function noteNorm(t){ t=String(t||'').trim(); if(!t) return '';
+  if(/전출/.test(t)) return '전출'; if(/전입/.test(t)) return '전입'; if(/재택|순회/.test(t)) return '재택(순회)교육'; if(/위탁/.test(t)) return '위탁';
+  if(/장기\s*결석/.test(t)) return '장기결석'; if(/학업\s*중단|자퇴|제적|퇴학/.test(t)) return '학업중단'; if(/유예|면제/.test(t)) return '유예·면제';
+  return '기타: '+t.slice(0,30); }
+function isOut(s){ return /전출|학업중단|유예/.test(s&&s.note||''); }
+function noteWarn(s){ return /재택|위탁|장기결석/.test(s&&s.note||''); }
+function noteTag(s){ if(!s||!s.note) return ''; return ' <span class="tag" style="background:'+(isOut(s)?'#e9edf3;color:var(--sub)':(noteWarn(s)?'#fff1cc;color:#8a5a00':'#e6eefb;color:var(--navy)'))+'">'+esc(s.note)+(isOut(s)?' · 입력 제외':'')+'</span>'; }
+function act(list){ return list.filter(s=>!isOut(s)); }
 function normName(v){ const t=String(v==null?'':v).trim(); return /[A-Za-z]/.test(t)? t.replace(/\s+/g,' ') : t.replace(/\s+/g,''); }
 function splitHak(v){ const d=String(v==null?'':v).replace(/\D/g,''); if(d.length===5) return [+d[0],+d.slice(1,3),+d.slice(3)]; if(d.length===4) return [+d[0],+d[1],+d.slice(2)]; return [0,0,0]; }
 function parseRoster(rows, askGrade){
@@ -336,16 +346,16 @@ function parseRoster(rows, askGrade){
   let hi=-1, ci=null;
   for(let i=0;i<Math.min(rows.length,15);i++){ const h=rows[i].map(x=>x.replace(/\s+/g,''));
     const name=h.findIndex(x=>/^(이름|성명|학생명|학생이름|학생성명)$/.test(x)); if(name<0) continue;
-    const c={name, memo:h.findIndex(x=>/^(비고|학적|상태|학적변동)$/.test(x)), hak:h.findIndex(x=>/학번/.test(x)), g:h.findIndex(x=>/^학년$/.test(x)), c:h.findIndex(x=>/^(반|학급)$/.test(x)), n:h.findIndex(x=>/^(번호|번|출석번호)$/.test(x))};
+    const c={name, memo:h.findIndex(x=>/^(비고|학적|상태|학적변동|특이사항)$/.test(x)), hak:h.findIndex(x=>/학번/.test(x)), g:h.findIndex(x=>/^학년$/.test(x)), c:h.findIndex(x=>/^(반|학급)$/.test(x)), n:h.findIndex(x=>/^(번호|번|출석번호)$/.test(x))};
     if(c.hak>=0 || c.n>=0){ hi=i; ci=c; break; } }
   const out=[]; let bad=0, needG=false, needGC=false; const skipped=[];
   if(hi>=0){
     rows.slice(hi+1).forEach(r=>{ const nm=normName(r[ci.name]); if(!nm) return; let g=0,c=0,n=0;
-      if(ci.memo>=0 && /(전출|학업중단|자퇴|유예|면제|제적|퇴학|사망)/.test(r[ci.memo]||'')){ skipped.push(nm+'('+r[ci.memo]+')'); return; }
+      const memoTxt= ci.memo>=0? String(r[ci.memo]||'').trim() : ''; if(memoTxt) skipped.push(nm);
       if(ci.c>=0&&ci.n>=0){ c=num(r[ci.c]); n=num(r[ci.n]); g= ci.g>=0? num(r[ci.g]) : 0; if(!g && ci.hak>=0) g=splitHak(r[ci.hak])[0]; if(!g) needG=true; }
       else if(ci.hak>=0 && splitHak(r[ci.hak])[2]>0) [g,c,n]=splitHak(r[ci.hak]);
       else if(ci.n>=0){ n=num(r[ci.n]); c=-1; needGC=true; }
-      if((c>0||c===-1)&&n>0&&nm.length<=30&&!/^(이름|성명)$/.test(nm)) out.push({g,c,n,name:nm}); else bad++; });
+      if((c>0||c===-1)&&n>0&&nm.length<=30&&!/^(이름|성명)$/.test(nm)) out.push({g,c,n,name:nm,note:memoTxt?noteNorm(memoTxt):''}); else bad++; });
   } else {
     rows.forEach(r=>{ const cells=r.filter(x=>x!==''); if(!cells.length) return;
       const nm=cells.find(isName); const nums=[]; let hak=null;
@@ -454,8 +464,8 @@ function readFile(file){ return new Promise((res,rej)=>{ const r=new FileReader(
 // ───────── 4. 입력 카드(작성·학생별 보기 공용) ─────────
 function cardHTML(s, it, mode){
   const r=peek(sid(s), it.key);
-  const title = mode==='byItem' ? esc(s.n+'번 '+s.name) : esc(it.name);
-  return '<div class="card" data-sid="'+esc(sid(s))+'" data-ik="'+esc(it.key)+'">'
+  const title = (mode==='byItem' ? esc(s.n+'번 '+s.name) : esc(it.name))+noteTag(s);
+  return '<div class="card" data-sid="'+esc(sid(s))+'" data-ik="'+esc(it.key)+'"'+(isOut(s)?' style="opacity:.6"':'')+'>'
     +'<div class="chead"><span class="ttl">'+title+'</span><span class="cp"></span><span class="sp"></span>'
     +'<span class="meter"></span>'
     +'<label><input type="checkbox" data-act="done"'+(r.done?' checked':'')+'> 완료</label>'
@@ -476,7 +486,7 @@ function refreshCard(card, fixHTML){
   m.classList.toggle('over',over);
   const bar=$('.bar i',card); bar.style.width=Math.min(100,b/lim*100)+'%'; bar.className= over?'o':(b>lim*0.95?'w':'');
   card.classList.toggle('over',over); card.classList.toggle('done',!!r.done);
-  $('.cp',card).innerHTML = !t.trim()? '<span class="tag" style="background:#fde3e1;color:var(--red)">미입력</span>' : (r.copied? '<span class="tag c">복사함</span>' : '');
+  $('.cp',card).innerHTML = (!t.trim() && !isOut(S.students.find(x=>sid(x)===sidv)))? '<span class="tag" style="background:#fde3e1;color:var(--red)">미입력</span>' : (r.copied? '<span class="tag c">복사함</span>' : '');
   let h='';
   if(fixHTML!==undefined) card.dataset.fix=fixHTML;
   if(card.dataset.fix) h+='<div class="m-fix">'+card.dataset.fix+'</div>';
@@ -486,6 +496,9 @@ function refreshCard(card, fixHTML){
     card.classList.toggle('hasreq',op.length>0); }
   if(over){ const ci=cutIndex(t,lim,S.settings.enterBytes); const tail=t.slice(ci); h+='<div class="m-over">✂ 나이스에서 잘리는 부분: <span>'+esc(tail.length>120? tail.slice(0,120)+'…':tail)+'</span></div>'; }
   lint(t,{banned:S.banned,names:otherNames(sidv)}).forEach(w=>{ h+='<div class="m-warn">⚠ '+esc(w)+'</div>'; });
+  const stu=S.students.find(x=>sid(x)===sidv);
+  if(stu && noteWarn(stu)) h+='<div class="m-warn">📌 특이사항 "'+esc(stu.note)+'" — 기재요령에 따라 사유를 입력했는지 확인하세요.</div>';
+  if(stu && isOut(stu)) h+='<div class="hint">📌 '+esc(stu.note)+' 학생 — 입력 대상·빠진 입력·완료 계산에서 뺐습니다. 필요하면 써도 됩니다.</div>';
   $('.msgs',card).innerHTML=h;
 }
 function autoFix(card){
@@ -517,7 +530,7 @@ function onCardInput(card){
 // 작성 수가 바뀌면: 위쪽 현황 다시 그리기 + 목표(30% 등)를 채우거나 넘는 순간 알려 주기
 function countChanged(sidv,ik,added){
   const it=itemBy(ik), s=S.students.find(x=>sid(x)===sidv); if(!it||!s) return;
-  const st=S.students.filter(x=>clsOf(x)===clsOf(s)); const w=countWritten(st,ik), need=needOf(st.length,it), ra=ratioOf(it);
+  if(isOut(s)) return; const st=act(S.students.filter(x=>clsOf(x)===clsOf(s))); const w=countWritten(st,ik), need=needOf(st.length,it), ra=ratioOf(it);
   if(added){
     if(w===need) toast('✔ '+clsName(clsOf(s))+' '+it.name+' 완료 — '+(ra<100? '입력 대상 '+ra+'%('+need+'명)를 채웠습니다.' : st.length+'명 모두 입력했습니다.'));
     else if(ra<100 && w>need) toast(clsName(clsOf(s))+' '+it.name+' — '+ra+'%를 넘었습니다 ('+w+'/'+st.length+'명, '+pct(w,st.length)+'%)');
@@ -571,11 +584,11 @@ function naverApply(card){
 
 // ───────── 5. 화면: 작성 ─────────
 function writeHeadHTML(){
-  const cl=classes(), it=itemBy(UI.item); const mine=S.students.filter(s=>clsOf(s)===UI.cls); const all=mine.length;
+  const cl=classes(), it=itemBy(UI.item); const mine=act(S.students.filter(s=>clsOf(s)===UI.cls)); const all=mine.length;
   const written=countWritten(mine,it.key), need=needOf(all,it), ra=ratioOf(it);
   let done=0, over=0; mine.forEach(s=>{ const r=peek(sid(s),it.key); if(r.done) done++; if(B(r.text)>it.limit) over++; });
-  const g=UI.cls.split('-')[0]; const gl=S.students.filter(s=>String(s.g)===g); const gw=countWritten(gl,it.key), gn=needOf(gl.length,it);
-  let h='<div class="pick"><span class="lab">학급</span><button data-go="set" data-focus="roster" title="다른 학년·반 명단 더 넣기" style="border-style:dashed">＋ 명단 더 넣기</button>'+cl.map(c=>{ const st=S.students.filter(s=>clsOf(s)===c); const ok=st.length && countWritten(st,it.key)>=needOf(st.length,it); return '<button data-cls="'+esc(c)+'" class="'+(c===UI.cls?'on':'')+'">'+esc(clsName(c))+(ok?'<small>✔완료</small>':'')+'</button>'; }).join('')+'</div>'
+  const g=UI.cls.split('-')[0]; const gl=act(S.students.filter(s=>String(s.g)===g)); const gw=countWritten(gl,it.key), gn=needOf(gl.length,it);
+  let h='<div class="pick"><span class="lab">학급</span><button data-go="set" data-focus="roster" title="다른 학년·반 명단 더 넣기" style="border-style:dashed">＋ 명단 더 넣기</button>'+cl.map(c=>{ const st=act(S.students.filter(s=>clsOf(s)===c)); const ok=st.length && countWritten(st,it.key)>=needOf(st.length,it); return '<button data-cls="'+esc(c)+'" class="'+(c===UI.cls?'on':'')+'">'+esc(clsName(c))+(ok?'<small>✔완료</small>':'')+'</button>'; }).join('')+'</div>'
     +'<div class="pick"><span class="lab">영역</span>'+S.items.map(i=>{ const w=countWritten(mine,i.key), ok=all && w>=needOf(all,i); const rq=S.reqs.filter(r=>rqToMe(r)&&rqOpen(r)&&rqSid(r).indexOf(UI.cls+'-')===0&&rqIk(r)===i.key).length; return '<button data-itemk="'+esc(i.key)+'" class="'+(i.key===UI.item?'on':'')+'">'+esc(i.name)+'<small>'+(ok?'✔완료 ':'')+w+'/'+all+'</small>'+(rq?'<small style="color:var(--red);font-weight:700">🛠'+rq+'</small>':'')+'</button>'; }).join('')+'</div>';
   h+='<div class="now">'+esc(clsName(UI.cls))+' · '+esc(it.name)+' <span class="hint" style="font-weight:400">한도 '+it.limit.toLocaleString()+'B(한글 약 '+Math.floor(it.limit/3)+'자)'+(over?' · <b style="color:var(--red)">초과 '+over+'</b>':'')+'</span></div>';
   let msg, cls2;
@@ -603,7 +616,7 @@ function renderWrite(){
   const all=list.length; let written=0, done=0, over=0;
   list.forEach(s=>{ const r=peek(sid(s),it.key); if(r.text.trim()) written++; if(r.done) done++; if(B(r.text)>it.limit) over++; });
   list=list.filter(s=>{ const r=peek(sid(s),it.key);
-    return UI.filter==='all' || (UI.filter==='req'&&cardReqs(sid(s),it.key).some(rqOpen)) || (UI.filter==='empty'&&!r.text.trim()) || (UI.filter==='over'&&B(r.text)>it.limit) || (UI.filter==='undone'&&!r.done) || (UI.filter==='uncopied'&&r.text.trim()&&!r.copied); });
+    return UI.filter==='all' || (UI.filter==='req'&&cardReqs(sid(s),it.key).some(rqOpen)) || (UI.filter==='empty'&&!r.text.trim()&&!isOut(s)) || (UI.filter==='over'&&B(r.text)>it.limit) || (UI.filter==='undone'&&!r.done) || (UI.filter==='uncopied'&&r.text.trim()&&!r.copied); });
   let h='<div class="box" id="whead">'+writeHeadHTML()+'</div>';
   h+= list.length? list.map(s=>cardHTML(s,it,'byItem')).join('') : '<div class="box hint">조건에 맞는 학생이 없습니다.</div>';
   $('#main').innerHTML=h; $$('#main .card').forEach(c=>refreshCard(c));
@@ -622,9 +635,10 @@ function renderSearch(){
   if(target){
     UI.sid=sid(target);
     let tot=0; S.items.forEach(it=>{ tot+=B(peek(UI.sid,it.key).text); });
-    const miss=S.items.filter(it=>it.mine!==false && !peek(UI.sid,it.key).text.trim());
+    const miss=isOut(target)? [] : S.items.filter(it=>it.mine!==false && !peek(UI.sid,it.key).text.trim());
     const fill=S.items.filter(it=>peek(UI.sid,it.key).text.trim()).length;
-    h+='<div class="box"><h2>'+esc(target.g+'학년 '+target.c+'반 '+target.n+'번 '+target.name)+'</h2>'
+    h+='<div class="box"><h2>'+esc(target.g+'학년 '+target.c+'반 '+target.n+'번 '+target.name)+noteTag(target)+'</h2>'
+      +'<div class="row"><label>특이사항 <select data-note="'+esc(sid(target))+'"><option value="">없음</option>'+NOTE_LIST.map(n=>'<option'+((target.note||'').indexOf(n)===0?' selected':'')+'>'+n+'</option>').join('')+'</select></label>'+((target.note||'').indexOf('기타')===0?'<input type="text" data-notememo="'+esc(sid(target))+'" value="'+esc((target.note||'').replace(/^기타:?\s*/,''))+'" placeholder="기타 내용">':'')+'<span class="hint">전출·학업중단·유예·면제는 입력 대상에서 빠집니다.</span></div>'
       +(miss.length? '<div class="c-mid" style="border:1px solid var(--yel);border-radius:8px;padding:8px 11px;margin-bottom:8px"><b>빠진 영역 '+miss.length+'개:</b> '+miss.map(it=>'<button class="b r s" data-goit="'+esc(it.key)+'">'+esc(it.name)+(ratioOf(it)<100?' (선택 '+ratioOf(it)+'%)':'')+'</button>').join(' ')+'<div class="hint">누르면 그 칸으로 갑니다. 세특처럼 일부 학생만 쓰는 영역은 이 학생이 대상이 아니면 비워 두셔도 됩니다.</div></div>' : '<div class="c-ok" style="border:1px solid var(--line);border-radius:8px;padding:8px 11px;margin-bottom:8px;font-weight:700">✔ 모든 영역 입력 완료 ('+fill+'/'+S.items.length+')</div>')
       +'<div class="row"><button class="b g s" id="copyAll">전 항목 한꺼번에 복사(검토용)</button><span class="hint">전체 '+tot.toLocaleString()+' B</span></div></div>';
     h+=S.items.map(it=>cardHTML(target,it,'byStudent')).join('');
@@ -635,7 +649,7 @@ function renderSearch(){
 // ───────── 7. 화면: 점검·현황 ─────────
 function stats(){
   const rows=[];
-  classes().forEach(c=>{ const st=S.students.filter(s=>clsOf(s)===c);
+  classes().forEach(c=>{ const st=act(S.students.filter(s=>clsOf(s)===c));
     S.items.forEach(it=>{ let w=0,d=0,o=0; st.forEach(s=>{ const r=peek(sid(s),it.key); if(r.text.trim()) w++; if(r.done) d++; if(B(r.text)>it.limit) o++; });
       rows.push({cls:c,item:it.name,key:it.key,mine:it.mine!==false,total:st.length,written:w,done:d,over:o,need:needOf(st.length,it),ratio:ratioOf(it)}); }); });
   return rows;
@@ -666,7 +680,7 @@ function renderCheck(){
     +(/^https:\/\//.test(S.settings.sheetView)? '<a class="b g" style="text-decoration:none" target="_blank" rel="noopener" href="'+esc(S.settings.sheetView)+'">현황판 시트 열기</a>':'')
     +'<span class="hint">'+(S.settings.sheetUrl? ('보내는 것: 교사 이름·학급·항목·숫자뿐입니다. 학생 이름과 생기부 내용은 보내지 않습니다.'+(S.settings.lastSent? ' 마지막 전송 '+new Date(S.settings.lastSent).toLocaleString('ko-KR'):'')) : '설정·백업 탭에서 현황판 주소를 먼저 넣어 주세요.')+'</span></div></div>';
   let mh='', mc=0;
-  cl.forEach(c=>{ const st=S.students.filter(s=>clsOf(s)===c);
+  cl.forEach(c=>{ const st=act(S.students.filter(s=>clsOf(s)===c));
     S.items.forEach(it=>{ if(it.mine===false) return; const miss=st.filter(s=>!peek(sid(s),it.key).text.trim()); const w=st.length-miss.length, need=needOf(st.length,it), ra=ratioOf(it);
       if(ra<100){ if(w<need){ mc+=need-w; mh+='<tr><td>'+esc(c)+'</td><td>'+esc(it.name)+'</td><td class="l click" data-jump="'+esc(c)+'|'+esc(it.key)+'"><b class="neg">'+(need-w)+'명 더 필요</b> (목표 '+ra+'% = '+need+'명, 지금 '+w+'명)</td></tr>'; } }
       else if(miss.length){ mc+=miss.length; mh+='<tr><td>'+esc(c)+'</td><td>'+esc(it.name)+'</td><td class="l">'+miss.map(s=>'<span class="click" style="display:inline-block;padding:1px 6px;margin:1px;border:1px solid var(--line);border-radius:10px;cursor:pointer" data-miss="'+esc(sid(s))+'|'+esc(it.key)+'">'+esc(s.n+'번 '+s.name)+'</span>').join('')+'</td></tr>'; } }); });
@@ -826,7 +840,7 @@ function renderSet(){
   let h='<div class="box"><h2>백업 (엑셀)</h2><div class="row"><button class="b" id="xlsOut">엑셀로 백업 받기</button><label class="b g" style="cursor:pointer">엑셀 백업(또는 입력 양식) 불러오기<input type="file" id="xlsIn" accept=".xlsx,.xls" hidden></label><a class="b g" style="text-decoration:none" href="생기부_입력양식.xlsx" download>📄 입력 양식 내려받기</a><button class="b g" id="jsonOut">전체 설정 백업(.json)</button><label class="b g" style="cursor:pointer">전체 설정 불러오기<input type="file" id="jsonIn" accept=".json" hidden></label></div>'
     +'<div class="hint"><b>엑셀 백업 하나에 입력한 것이 전부 들어갑니다</b> — 명단·영역별 내용·바이트·완료·나이스 복사 기록·영역 설정(한도·입력 대상%·내 담당)·일정·휴업일·시수표·동아리·교정 규칙·금지어·설정. 다른 컴퓨터에서는 "엑셀 백업 불러오기"로 그대로 되살아납니다. 엑셀에서 내용 칸을 고친 뒤 불러오면 고친 내용이 반영됩니다. (.json 백업은 예비용입니다.) 백업 파일에는 학생 이름과 생기부 내용이 들어 있으니 업무용 PC·교육청 드라이브에만 보관하세요.</div></div>';
   h+='<div class="box"><h2>학생 명단 ('+S.students.length+'명)</h2><textarea id="roster" rows="4" placeholder="엑셀 명단 표를 통째로 복사해 붙여넣으세요(제목 줄 포함). 학년·반·번호·이름 또는 학번·이름이 있으면 알아서 정리합니다."></textarea><div class="row"><button class="b" id="rosterAdd">명단 넣기</button><label class="b g" style="cursor:pointer">엑셀 파일로 넣기<input type="file" id="rosterFile" accept=".xlsx,.xls,.csv" multiple hidden></label><span class="hint">칸 순서·다른 칸·여러 반 섞임 상관없이 알아서 정리합니다. 같은 학년·반·번호가 이미 있으면 이름만 바뀌고 써 둔 내용은 유지됩니다.</span></div>';
-  if(S.students.length) h+='<details><summary>명단 보기·삭제</summary><div class="chips" style="margin-top:6px">'+S.students.map(s=>'<span>'+esc(clsOf(s)+' '+s.n+' '+s.name)+'<b data-studel="'+esc(sid(s))+'">×</b></span>').join('')+'</div></details>';
+  if(S.students.length) h+='<details><summary>명단 보기·삭제·특이사항 (이름을 누르면 특이사항)</summary><div class="chips" style="margin-top:6px">'+S.students.map(s=>'<span data-stunote="'+esc(sid(s))+'" style="cursor:pointer'+(isOut(s)?';opacity:.55':'')+'" title="눌러서 특이사항 정하기">'+esc(clsOf(s)+' '+s.n+' '+s.name)+(s.note?' <i style="color:var(--org)">'+esc(s.note)+'</i>':'')+'<b data-studel="'+esc(sid(s))+'">×</b></span>').join('')+'</div></details>';
   h+='</div>';
   h+='<div class="box" id="readBox"><h2>독서기록 불러오기 (학생이 구글 폼으로 입력)</h2><div class="row"><label class="b" style="cursor:pointer">구글 폼 응답 파일 올리기 (.xlsx / .csv)<input type="file" id="readFile" accept=".xlsx,.xls,.csv" hidden></label><span class="hint">폼 질문 이름: <b>학년 · 반 · 번호 · 이름 · 책 제목 · 지은이</b>. 한 번 제출에 책 한 권. 같은 학생이 여러 번 제출하면 "책 제목(지은이), 책 제목(지은이)"로 이어 붙여 <b>독서활동상황</b> 항목에 넣습니다. 이미 들어 있는 책은 다시 넣지 않습니다.</span></div>';
   if(UI.readPlan){ const P=UI.readPlan;
@@ -867,11 +881,11 @@ function renderSet(){
 function addRoster(rows){
   const r=parseRoster(rows, k=> k==='gc'? prompt('명단에 학년·반 칸이 없습니다. 몇 학년 몇 반인가요?\n예) 1-2  (1학년 2반)','') : prompt('명단에 학년 칸이 없습니다. 몇 학년인가요? (숫자만)',''));
   let add=0, upd=0;
-  r.list.forEach(o=>{ const ex=S.students.find(s=>s.g===o.g&&s.c===o.c&&s.n===o.n); if(ex){ if(ex.name!==o.name){ ex.name=o.name; upd++; } } else { S.students.push(o); add++; } });
+  r.list.forEach(o=>{ if(!o.note) delete o.note; const ex=S.students.find(s=>s.g===o.g&&s.c===o.c&&s.n===o.n); if(ex){ if(ex.name!==o.name){ ex.name=o.name; upd++; } if(o.note) ex.note=o.note; } else { S.students.push(o); add++; } });
   sortStudents(); save();
   const cls=Array.from(new Set(r.list.map(o=>o.g+'-'+o.c))).sort((a,b)=>a.localeCompare(b,'ko',{numeric:true}));
   if(!r.list.length){ toast('학생을 찾지 못했습니다. 학년·반·번호·이름(또는 학번·이름) 칸이 있는지 확인해 주세요.'); return; }
-  toast('명단 정리 완료 — '+cls.map(c=>clsName(c)).join(', ')+' · 추가 '+add+'명'+(upd?', 이름 변경 '+upd+'명':'')+(r.skipped.length?' · 비고(전출 등)로 뺀 학생 '+r.skipped.length+'명':'')+(r.bad?' · 읽지 않은 줄 '+r.bad+'개(제목·빈 줄 등)':'')+(r.header?'':' · 제목 줄이 없어 추정했으니 확인해 주세요')+' · 전체 '+S.students.length+'명'+(new Set(S.students.map(x=>x.g)).size===1?' · 다른 학년은 "＋ 명단 더 넣기"로 이어서 넣으세요':''));
+  toast('명단 정리 완료 — '+cls.map(c=>clsName(c)).join(', ')+' · 추가 '+add+'명'+(upd?', 이름 변경 '+upd+'명':'')+(r.skipped.length?' · 특이사항 표시 '+r.skipped.length+'명'+(r.list.filter(isOut).length?'(전출 등 '+r.list.filter(isOut).length+'명은 입력 제외)':''):'')+(r.bad?' · 읽지 않은 줄 '+r.bad+'개(제목·빈 줄 등)':'')+(r.header?'':' · 제목 줄이 없어 추정했으니 확인해 주세요')+' · 전체 '+S.students.length+'명'+(new Set(S.students.map(x=>x.g)).size===1?' · 다른 학년은 "＋ 명단 더 넣기"로 이어서 넣으세요':''));
   return r.list.length;
 }
 function rosterRowsFromText(txt){ return String(txt).replace(/\r/g,'').split('\n').map(l=> /\t/.test(l)? l.split('\t') : (/,/.test(l)? l.split(',') : l.trim().split(/\s+/))); }
@@ -881,13 +895,13 @@ function readRosterFile(file){ return needXLSX().then(()=>readFile(file)).then(b
 async function exportXlsx(){
   await needXLSX();
   const head=['학년','반','번호','이름'].concat(S.items.map(i=>i.name));
-  const a=[head], b=[head], c=[['학년','반','번호','이름'].concat(S.items.map(i=>i.name))];
+  const a=[['학년','반','번호','이름','특이사항'].concat(S.items.map(i=>i.name))], b=[head], c=[['학년','반','번호','이름'].concat(S.items.map(i=>i.name))];
   S.students.forEach(s=>{ const base=[s.g,s.c,s.n,s.name];
-    a.push(base.concat(S.items.map(i=>peek(sid(s),i.key).text)));
+    a.push(base.concat([s.note||'']).concat(S.items.map(i=>peek(sid(s),i.key).text)));
     b.push(base.concat(S.items.map(i=>B(peek(sid(s),i.key).text))));
     c.push(base.concat(S.items.map(i=>peek(sid(s),i.key).done?'완료':''))); });
   const wb=XLSX.utils.book_new();
-  const ws=XLSX.utils.aoa_to_sheet(a); ws['!cols']=[{wch:5},{wch:5},{wch:5},{wch:10}].concat(S.items.map(()=>({wch:60})));
+  const ws=XLSX.utils.aoa_to_sheet(a); ws['!cols']=[{wch:5},{wch:5},{wch:5},{wch:10},{wch:12}].concat(S.items.map(()=>({wch:60})));
   XLSX.utils.book_append_sheet(wb,ws,'생기부');
   XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(b),'바이트');
   XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(c),'완료여부');
@@ -927,10 +941,11 @@ async function importXlsx(file){
   const head=rows[0].map(x=>String(x).trim());
   const ci={g:head.indexOf('학년'),c:head.indexOf('반'),n:head.indexOf('번호'),name:head.indexOf('이름')};
   if(ci.name<0) ci.name=head.indexOf('성명');
+  ci.note=head.findIndex(h=>/^(특이사항|비고)$/.test(h));
   if(ci.g<0||ci.c<0||ci.n<0||ci.name<0){ toast('첫 줄에 학년·반·번호·이름 제목이 있어야 합니다.'); return; }
   const limits={}; if(wb.Sheets['항목한도']) XLSX.utils.sheet_to_json(wb.Sheets['항목한도'],{header:1,defval:''}).slice(1).forEach(r=>{ if(r[0]&&+r[1]>0) limits[String(r[0]).trim()]=+r[1]; });
   const doneRows={}; if(wb.Sheets['완료여부']){ const dr=XLSX.utils.sheet_to_json(wb.Sheets['완료여부'],{header:1,defval:''}); const dh=(dr[0]||[]).map(x=>String(x).trim()); dr.slice(1).forEach(r=>{ const k=parseInt(r[0],10)+'-'+parseInt(r[1],10)+'-'+parseInt(r[2],10); doneRows[k]={}; dh.forEach((nm,j)=>{ if(j>3&&String(r[j]).trim()==='완료') doneRows[k][nm]=true; }); }); }
-  const cols=[]; head.forEach((nm,j)=>{ if(!nm||[ci.g,ci.c,ci.n,ci.name].includes(j)) return;
+  const cols=[]; head.forEach((nm,j)=>{ if(!nm||[ci.g,ci.c,ci.n,ci.name,ci.note].includes(j)) return;
     let it=S.items.find(i=>i.name===nm);
     if(!it && /^세특/.test(nm)){ const ph=S.items.find(i=>i.name==='세특: 과목명' && !Object.keys(S.records).some(k=>k.endsWith('|'+i.key)&&S.records[k].text.trim())); if(ph){ ph.name=nm; it=ph; if(limits[nm]) ph.limit=limits[nm]; } }
     if(!it){ it={key:'i'+Date.now().toString(36)+j,name:nm,limit:limits[nm]||1500,mine:true}; S.items.push(it); }
@@ -941,6 +956,7 @@ async function importXlsx(file){
     plan.push({g,c,n,name,r}); const k=g+'-'+c+'-'+n; cols.forEach(o=>{ const t=String(r[o.j]||''); if(!t.trim()) return; const cur=peek(k,o.it.key).text; if(cur.trim()&&cur!==t) conflict++; }); });
   if(conflict && !restored && !confirm('이미 써 둔 내용과 다른 칸이 '+conflict+'개 있습니다.\n[확인] 파일 내용으로 덮어쓰기\n[취소] 불러오기 중단')){ return; }
   plan.forEach(p=>{ let s=S.students.find(x=>x.g===p.g&&x.c===p.c&&x.n===p.n); if(!s){ s={g:p.g,c:p.c,n:p.n,name:p.name}; S.students.push(s); } else s.name=p.name;
+    if(ci.note>=0){ const nt=String(p.r[ci.note]||'').trim(); if(nt) s.note=(NOTE_LIST.some(n=>nt.indexOf(n)===0)? nt : noteNorm(nt)); }
     const k=sid(s); cols.forEach(o=>{ const t=String(p.r[o.j]||''); if(!t.trim()) return; const rr=rec(k,o.it.key); if(rr.text!==t){ rr.text=t; rr.updated=Date.now(); rr.copied=0; } if(doneRows[k]&&doneRows[k][o.it.name]) rr.done=true; filled++; }); });
   sortStudents(); save(); toast((restored?'전부 되돌렸습니다. ':'불러왔습니다. ')+'학생 '+plan.length+'명, 내용 '+filled+'칸'); render();
 }
@@ -985,14 +1001,16 @@ function normArea(x){ return String(x==null?'':x).replace(/[\s·:()]/g,''); }
 function areaSame(a,b){ const x=normArea(a), y=normArea(b); return !!x && !!y && (x===y || x.includes(y) || y.includes(x)); }
 function dutyHit(d,r){ return !!d.field && normArea(d.field)===normArea(r.field) && (!d.sub || !r.sub || areaSame(d.sub,r.sub)); }
 function myDuties(){ return S.settings.duties||[]; }
-function rqToMe(r){ return myDuties().some(d=>dutyHit(d,r)); }
+function isHrField(r){ return /담임/.test(r.field||''); }
+function rqToMe(r){ return (isHrField(r) && rqHome(r)) || myDuties().some(d=>dutyHit(d,r)); }
 function rqHome(r){ const h=S.settings.homeroom; return !!h && r.g>0 && (r.g+'-'+r.c)===h; }
 function rqFromMe(r){ return !!me() && r.from===me(); }
-function responsible(r){ return Array.from(new Set((S.reqDuties||[]).filter(d=>dutyHit(d,r)).map(d=>d.teacher))); }
+function responsible(r){ if(isHrField(r)){ const t=homeTeacher(r); return t? [t] : []; } return Array.from(new Set((S.reqDuties||[]).filter(d=>dutyHit(d,r)).map(d=>d.teacher))); }
 function homeTeacher(r){ const d=(S.reqDuties||[]).find(d=>d.homeroom && r.g>0 && d.homeroom===(r.g+'-'+r.c)); return d? d.teacher : ''; }
 function rqWho(r){ return r.g? r.g+'-'+r.c+' '+r.n+'번 '+r.name : (r.name||'전체'); }
 function inbox(){ return S.reqs.filter(r=>rqToMe(r)&&rqOpen(r)); }
-function waitConfirm(){ return S.reqs.filter(r=>(rqHome(r)&&rqDone(r)) || (S.settings.admin&&(rqHr(r)||(rqDone(r)&&!r.g)))); }
+function adminReady(r){ return rqHr(r) || (rqDone(r) && (!r.g || isHrField(r))); }
+function waitConfirm(){ return S.reqs.filter(r=>(rqHome(r)&&rqDone(r)&&!isHrField(r)) || (S.settings.admin&&adminReady(r))); }
 // 시트의 분야·상세 분야를 내 영역 항목과 짝짓기 (예: 교과세특 사회 → 세특: 사회, 자유학기 → 자유학기 활동)
 function matchItem(area){
   const n=normArea(area); if(!n) return null;
@@ -1051,7 +1069,7 @@ function mergeServer(rows){
   next.forEach(r=>{ const key=r.status+'|'+r.text.length+'|'+r.memo.length;
     if(S.reqSeen[r.id]!==key){
       if(rqToMe(r) && rqOpen(r) && !r.pend) news.push(r);
-      if(((rqHome(r)||rqFromMe(r)) && rqDone(r)) || (S.settings.admin && rqHr(r))) if(!r.pend) fixed.push(r);
+      if((((rqHome(r)&&!isHrField(r))||rqFromMe(r)) && rqDone(r)) || (S.settings.admin && adminReady(r))) if(!r.pend) fixed.push(r);
       S.reqSeen[r.id]=key; } });
   S.reqs=next;
   if(first){ S.reqInit=true; const a=inbox().length, b=waitConfirm().length; if(a||b) toast('🛠 고칠 요청 '+a+'건, 확인할 것 '+b+'건이 있습니다.'); return; }
@@ -1060,9 +1078,10 @@ function mergeServer(rows){
 function notifyReqs(news,fixed){
   const pop=(title,body)=>{ if('Notification' in window && Notification.permission==='granted'){ try{ new Notification(title,{body}); }catch(e){} } };
   if(news.length){ const r=news[0]; toast('🛠 새 수정 요청 '+news.length+'건 — '+rqWho(r)+' '+r.area+': '+r.text.slice(0,30));
+    blinkTitle('새 수정 요청 '+news.length+'건');
     news.slice(0,3).forEach(x=>pop('생기부 수정 요청', rqWho(x)+' · '+x.area+'\n'+x.text.slice(0,60)+(x.after?' → '+x.after.slice(0,40):''))); $('#rchip').classList.add('flash'); }
   if(fixed.length){ const r=fixed[0]; const who=rqHr(r)? '담임 확인' : '반영 완료'; const msg='✔ '+who+' '+fixed.length+'건 — '+rqWho(r)+' '+r.area+(rqHr(r)?' (담당자 확인해 주세요)':' (담임 확인해 주세요)');
-    setTimeout(()=>toast(msg), news.length?2800:0); fixed.slice(0,3).forEach(x=>pop('생기부 '+(rqHr(x)?'담임 확인':'반영 완료'), rqWho(x)+' · '+x.area+(rqHr(x)?' — 담당자 확인 차례':' — 담임 확인 차례'))); $('#rchip').classList.add('flash'); }
+    setTimeout(()=>toast(msg), news.length?2800:0); blinkTitle((rqHr(r)?'담당자 확인 ':'반영 완료 ')+fixed.length+'건'); fixed.slice(0,3).forEach(x=>pop('생기부 '+(rqHr(x)?'담임 확인':'반영 완료'), rqWho(x)+' · '+x.area+(rqHr(x)?' — 담당자 확인 차례':' — 담임 확인 차례'))); $('#rchip').classList.add('flash'); }
 }
 async function rqAct(r, action, body, status){
   const prev=r.status; r.status=status; r.pend={action,status,prev,at:Date.now(),body:Object.assign({action,id:r.id},body)}; r.failed=false;
@@ -1110,7 +1129,13 @@ function dutyHTML(){
     +'<div class="hint">점검 시트의 <b>오류(확인) 분야 · 상세 분야</b>가 내 담당과 같은 줄이 "내가 고칠 것"으로 옵니다. 담임 학급을 정하면 그 반 학생 줄이 반영되었을 때 "담임 확인" 알림이 옵니다.</div>';
 }
 function saveDuty(){ S.reqs.forEach(r=>{ S.reqSeen[r.id]=r.status+'|'+r.text.length+'|'+r.memo.length; }); S.reqInit=true; save(); if(S.settings.sheetUrl&&S.settings.teacher) sendStats(true); refreshReqUI(); }
+// 브라우저 탭 제목에 숫자 표시 + 다른 탭을 보고 있을 때 새 알림이 오면 깜박임
+const BASE_TITLE='도디쌤 생기부 도우미'; let blinkT=null;
+function setTitle(){ const k=inbox().length+waitConfirm().length; if(!blinkT) document.title=(k?'('+k+') 🛠 ':'')+BASE_TITLE; }
+function blinkTitle(msg){ if(!document.hidden) return; clearInterval(blinkT); let on=false; blinkT=setInterval(()=>{ on=!on; document.title= on? '🔔 '+msg : '('+(inbox().length+waitConfirm().length)+') 🛠 '+BASE_TITLE; },1000); }
+document.addEventListener('visibilitychange',()=>{ if(!document.hidden && blinkT){ clearInterval(blinkT); blinkT=null; setTitle(); } });
 function refreshReqUI(){
+  setTitle();
   const n=inbox().length, w=waitConfirm().length, chip=$('#rchip');
   if(S.settings.sheetUrl && (n||w)){ chip.style.display='inline-block'; chip.textContent='🛠 고칠 것 '+n+(w?' · ✔ 확인할 것 '+w:''); } else { chip.style.display='none'; chip.classList.remove('flash'); }
   const nb=$('#nav [data-tab=req]'); if(nb) nb.textContent='수정 요청'+(n+w? ' ('+(n+w)+')':'');
@@ -1139,7 +1164,7 @@ function renderReq(){
   const ib=inbox();
   h+='<div class="box"><h2>① 내가 고칠 것 — '+ib.length+'건</h2>'+(ib.length? tbl(ib,r=>'<button class="b g s" data-rqgo="'+esc(r.id)+'">고치러 가기</button> <button class="b s" data-rqdone="'+esc(r.id)+'">반영 완료</button>')+'<div class="hint">"고치러 가기" → 그 학생 칸. 고친 뒤 <b>나이스용 복사</b>를 누르면 반영 완료를 바로 묻습니다. 나이스에서 직접 고쳤으면 <b>반영 완료</b>만 누르세요(시트 "담당교사 반영 날짜"에 오늘 날짜가 들어갑니다).</div>' : '<div class="hint">'+(ds.length?'고칠 요청이 없습니다.':'위 "내 담당"을 정하면 내 분야 요청이 여기에 뜹니다.')+'</div>')+'</div>';
   // ② 담임 확인
-  if(st.homeroom){ const mine=S.reqs.filter(rqHome); const wd=mine.filter(rqDone), wo=mine.filter(rqOpen);
+  if(st.homeroom){ const mine=S.reqs.filter(r=>rqHome(r)&&!isHrField(r)); const wd=mine.filter(rqDone), wo=mine.filter(rqOpen);
     h+='<div class="box"><h2>② 담임 확인 — '+esc(clsName(st.homeroom))+' · 반영됨(확인 대기) '+wd.length+' · 미반영 '+wo.length+'</h2>'
       +(wd.length? '<h3>반영됨 — 나이스에서 보고 확인해 주세요</h3>'+tbl(wd,r=>'<button class="b s" data-rqhr="'+esc(r.id)+'">담임 확인</button> <button class="b r s" data-rqre="'+esc(r.id)+'">재요청</button>') : '')
       +(wo.length? '<h3>아직 반영 안 됨</h3>'+tbl(wo,r=>'<span class="hint">담당: '+esc(responsible(r).join(', ')||'미정')+'</span>') : '')
@@ -1165,7 +1190,7 @@ function renderReq(){
     h+='<div class="box"><h2>⑤ 담당자 — 전체 '+all.length+'건 · 미반영 '+op.length+' · 담임 확인 대기 '+dn.length+' · 담당자 확인 대기 '+hr.length+' · 끝 '+cl.length+'</h2>';
     const grp={}; all.forEach(r=>{ const k=r.field+(r.sub?' · '+r.sub:''); (grp[k]=grp[k]||[]).push(r); });
     h+='<table><tr><th class="l">분야 · 상세</th><th class="l">담당교사</th><th>미반영</th><th>담임 대기</th><th>담당자 대기</th><th>끝</th></tr>'+Object.keys(grp).sort((a,b)=>a.localeCompare(b,'ko')).map(k=>{ const x=grp[k]; const o=x.filter(rqOpen).length; return '<tr><td class="l">'+esc(k)+'</td><td class="l">'+esc(responsible(x[0]).join(', ')||'(미정)')+'</td><td class="'+(o?'neg':'')+'">'+o+'</td><td>'+x.filter(rqDone).length+'</td><td>'+x.filter(rqHr).length+'</td><td>'+x.filter(rqClosed).length+'</td></tr>'; }).join('')+'</table>';
-    if(hr.length||dn.filter(r=>!r.g).length){ const ready=hr.concat(dn.filter(r=>!r.g)); h+='<h3>담당자 확인할 것 '+ready.length+'건</h3>'+tbl(ready,r=>'<button class="b s" data-rqad="'+esc(r.id)+'">담당자 확인</button> <button class="b r s" data-rqre="'+esc(r.id)+'">재요청</button>')+'<div class="row"><button class="b g s" id="rqAdAll">'+ready.length+'건 모두 담당자 확인</button></div>'; }
+    if(all.filter(adminReady).length){ const ready=all.filter(adminReady); h+='<h3>담당자 확인할 것 '+ready.length+'건</h3>'+tbl(ready,r=>'<button class="b s" data-rqad="'+esc(r.id)+'">담당자 확인</button> <button class="b r s" data-rqre="'+esc(r.id)+'">재요청</button>')+'<div class="row"><button class="b g s" id="rqAdAll">'+ready.length+'건 모두 담당자 확인</button></div>'; }
     if(sk.length) h+='<h3 class="neg">담당교사 반영 체크 없이 넘어간 줄 '+sk.length+'건</h3>'+tbl(sk,()=>'' );
     if(op.length) h+='<h3>미반영 '+op.length+'건</h3>'+tbl(op,r=>'<span class="hint">'+esc(responsible(r).join(', ')||'담당 미정')+'</span>');
     h+='<div class="row" style="margin-top:8px"><button class="b" id="rqNag">미처리 독촉 메시지 복사</button><span class="hint">담당교사별 미반영 + 담임별 확인 대기 목록을 글로 만들어 복사합니다. 업무메신저에 붙여넣으세요.</span></div>'
@@ -1180,7 +1205,7 @@ function rqAutofill(){
   $('#rqToHint').textContent=(field? (t.length? '담당교사: '+t.join(', ') : '이 분야·상세의 담당교사를 아직 모릅니다(그 선생님이 "내 담당"을 정하면 보입니다).') : '')+(h?' · 담임: '+h:'');
 }
 function nagText(){
-  const op=S.reqs.filter(rqOpen), dn=S.reqs.filter(r=>rqDone(r)&&r.g); if(!op.length&&!dn.length) return '';
+  const op=S.reqs.filter(rqOpen), dn=S.reqs.filter(r=>rqDone(r)&&r.g&&!isHrField(r)); if(!op.length&&!dn.length) return '';
   const by={}; op.forEach(r=>{ const ts=responsible(r); (ts.length?ts:['('+r.field+(r.sub?' · '+r.sub:'')+' 담당 선생님)']).forEach(t=>{ (by[t]=by[t]||[]).push(r); }); });
   const hb={}; dn.forEach(r=>{ const t=homeTeacher(r)||(r.g+'-'+r.c+' 담임 선생님'); (hb[t]=hb[t]||[]).push(r); });
   let s='[생활기록부 점검 미처리 안내] '+new Date().toLocaleDateString('ko-KR')+'\n';
@@ -1263,6 +1288,8 @@ M.addEventListener('change',e=>{
   if(t.id==='selCls'){ UI.cls=t.value; renderWrite(); return; }
   if(t.id==='selItem'){ UI.item=t.value; renderWrite(); return; }
   if(t.id==='selFilter'){ UI.filter=t.value; renderWrite(); return; }
+  if(t.dataset.note!==undefined){ const st0=S.students.find(x=>sid(x)===t.dataset.note); if(st0){ st0.note=t.value; if(!t.value) delete st0.note; save(); renderSearch(); toast(t.value? '특이사항: '+t.value : '특이사항을 지웠습니다.'); } return; }
+  if(t.dataset.notememo!==undefined){ const st0=S.students.find(x=>sid(x)===t.dataset.notememo); if(st0){ st0.note='기타'+(t.value.trim()?': '+t.value.trim().slice(0,30):''); save(); } return; }
   if(t.dataset.scfin){ const x=S.schedules.find(o=>o.id===t.dataset.scfin); if(x){ x.fin=t.checked; save(); render(); } return; }
   if(t.id==='sisuFile' && t.files[0]){ scanFile(t.files[0]).catch(()=>toast('파일을 읽지 못했습니다. PDF나 엑셀(.xlsx) 파일인지 확인해 주세요.')); return; }
   if(t.dataset.det!==undefined){ UI.detected[+t.dataset.det].kind=t.value; return; }
@@ -1306,7 +1333,7 @@ M.addEventListener('click',async e=>{
   if(t.dataset.rqresend){ resendReq(t.dataset.rqresend); return; }
   if(t.dataset.rqhr){ hrOk(t.dataset.rqhr); return; }
   if(t.dataset.rqad){ adminOk(t.dataset.rqad); return; }
-  if(t.id==='rqAdAll'){ const ready=S.reqs.filter(r=>rqHr(r)||(rqDone(r)&&!r.g)); if(!ready.length||!confirm(ready.length+'건을 모두 담당자 확인으로 적을까요?')) return; for(const r of ready) await rqAct(r,'adminok',{},'확인'); toast(ready.length+'건 담당자 확인을 적었습니다.'); return; }
+  if(t.id==='rqAdAll'){ const ready=S.reqs.filter(adminReady); if(!ready.length||!confirm(ready.length+'건을 모두 담당자 확인으로 적을까요?')) return; for(const r of ready) await rqAct(r,'adminok',{},'확인'); toast(ready.length+'건 담당자 확인을 적었습니다.'); return; }
   if(t.id==='dAdd'){ const f=$('#dField').value, sb=$('#dSub').value.trim(); S.settings.duties=myDuties().concat([{field:f,sub:sb}]).filter((d,i,a)=>a.findIndex(x=>x.field===d.field&&x.sub===d.sub)===i); saveDuty(); toast('담당을 더했습니다: '+f+(sb?' · '+sb:'')); return; }
   if(t.id==='dAuto'){ S.settings.duties=myDuties().concat(suggestDuties()).filter((d,i,a)=>a.findIndex(x=>x.field===d.field&&x.sub===d.sub)===i); saveDuty(); toast('내 영역에서 담당을 정했습니다. 동아리 담당이면 직접 더해 주세요.'); return; }
   if(t.dataset.ddel!==undefined){ const ds=myDuties().slice(); ds.splice(+t.dataset.ddel,1); S.settings.duties=ds; saveDuty(); return; }
@@ -1365,6 +1392,9 @@ M.addEventListener('click',async e=>{
   if(t.id==='xlsOut'){ exportXlsx().catch(()=>{}); return; }
   if(t.id==='jsonOut'){ download('생기부도우미_전체백업_'+stamp()+'.json', new Blob([JSON.stringify(S)],{type:'application/json'})); S.settings.lastBackup=Date.now(); flush(); return; }
   if(t.id==='rosterAdd'){ if(addRoster(rosterRowsFromText($('#roster').value))) render(); return; }
+  if(t.closest('[data-stunote]') && !t.dataset.studel){ const k=t.closest('[data-stunote]').dataset.stunote; const st0=S.students.find(x=>sid(x)===k); if(!st0) return;
+    const v=prompt(st0.name+' 특이사항을 적어 주세요.\n예) 전입, 전출, 재택, 위탁, 장기결석, 학업중단, 유예 (비우면 지움)', st0.note||''); if(v===null) return;
+    if(v.trim()) st0.note=noteNorm(v); else delete st0.note; save(); renderSet(); toast(v.trim()? st0.name+': '+st0.note : '특이사항을 지웠습니다.'); return; }
   if(t.dataset.studel){ const k=t.dataset.studel; const has=S.items.some(it=>peek(k,it.key).text.trim()); if(has && !confirm('이 학생에게 써 둔 내용이 있습니다. 명단에서 지우면 내용도 함께 지워집니다. 지울까요?')) return; S.students=S.students.filter(s=>sid(s)!==k); Object.keys(S.records).forEach(rk=>{ if(rk.indexOf(k+'|')===0) delete S.records[rk]; }); save(); renderSet(); return; }
   if(t.id==='itAdd'){ const nm=prompt('항목 이름을 적어 주세요. 예) 세특: 역사'); if(!nm||!nm.trim()) return; if(S.items.some(i=>i.name===nm.trim())){ toast('같은 이름의 항목이 이미 있습니다.'); return; } S.items.push({key:'i'+Date.now().toString(36),name:nm.trim(),limit:1500,mine:true}); save(); renderSet(); return; }
   if(t.dataset.itdel!==undefined){ const it=S.items[+t.dataset.itdel]; if(!it) return; const n=Object.keys(S.records).filter(k=>k.endsWith('|'+it.key)&&S.records[k].text.trim()).length; if(!confirm('"'+it.name+'" 항목을 지웁니다.'+(n? ' 써 둔 내용 '+n+'건도 함께 지워집니다.':'')+' 계속할까요?')) return; Object.keys(S.records).forEach(k=>{ if(k.endsWith('|'+it.key)) delete S.records[k]; }); S.items.splice(+t.dataset.itdel,1); save(); renderSet(); return; }
