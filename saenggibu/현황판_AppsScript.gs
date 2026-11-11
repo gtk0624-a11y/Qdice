@@ -21,7 +21,7 @@ var KEY = '여기에암호';   // ← 원하는 암호로 바꾸세요. 학교 �
 var STD_HEAD = ['점검일자', '학번', '이름', '오류(확인) 분야', '상세 분야', '오류(확인) 내용', '변경 후',
                 '담당교사 반영 날짜', '담임 반영 확인', '생기부 담당자 확인', '비고'];
 var STAT_NAME = '현황', STAT_HEAD = ['교사', '학급', '항목', '학생 수', '작성', '완료', '초과', '작성률', '갱신 시각'];
-var DUTY_NAME = '담당교사', DUTY_HEAD = ['교사', '분야', '상세 분야', '담임 학급', '갱신 시각'];
+var DUTY_NAME = '담당교사', DUTY_HEAD = ['교사', '분야', '상세 분야', '담임 학급', '갱신 시각', '담당 학급'];
 var SEEN_NAME = '접속', SEEN_HEAD = ['교사', '마지막 접속', '처음 접속'];
 
 function setup() { reqInfo_(); statSheet_(); dutySheet_(); }
@@ -244,21 +244,21 @@ function saveDuties_(teacher, duties, homeroom) {
   var vals = sh.getDataRange().getValues();
   for (var i = vals.length - 1; i >= 1; i--) if (String(vals[i][0]) === teacher) sh.deleteRow(i + 1);
   var now = Utilities.formatDate(new Date(), 'Asia/Seoul', 'yyyy-MM-dd HH:mm');
-  var data = duties.slice(0, 50).map(function (x) { return [teacher, clean_(x.field, 40), clean_(x.sub, 40), clean_(homeroom, 10), now]; });
-  if (!data.length && homeroom) data.push([teacher, '', '', clean_(homeroom, 10), now]);
-  if (data.length) { var r0 = sh.getLastRow() + 1; sh.getRange(r0, 4, data.length, 1).setNumberFormat('@'); sh.getRange(r0, 1, data.length, DUTY_HEAD.length).setValues(data); }
+  var data = duties.slice(0, 50).map(function (x) { return [teacher, clean_(x.field, 40), clean_(x.sub, 40), clean_(homeroom, 10), now, clean_(x.cls, 200)]; });
+  if (!data.length && homeroom) data.push([teacher, '', '', clean_(homeroom, 10), now, '']);
+  if (data.length) { var r0 = sh.getLastRow() + 1; sh.getRange(r0, 4, data.length, 1).setNumberFormat('@'); sh.getRange(r0, 6, data.length, 1).setNumberFormat('@'); sh.getRange(r0, 1, data.length, DUTY_HEAD.length).setValues(data); }
 }
 function who_() {
   var sh = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(STAT_NAME);
   if (!sh || sh.getLastRow() < 2) return [];
-  return sh.getRange(2, 1, sh.getLastRow() - 1, 3).getValues().filter(function (r) { return String(r[0]).trim(); })
-    .map(function (r) { return { teacher: String(r[0]), cls: cls_(r[1]), item: String(r[2]) }; });
+  return sh.getRange(2, 1, sh.getLastRow() - 1, 9).getValues().filter(function (r) { return String(r[0]).trim(); })
+    .map(function (r) { return { teacher: String(r[0]), cls: cls_(r[1]), item: String(r[2]), total: num_(r[3]), written: num_(r[4]), done: num_(r[5]), over: num_(r[6]), at: fmtAt_(r[8]) }; });
 }
 function duties_() {
   var sh = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(DUTY_NAME);
   if (!sh || sh.getLastRow() < 2) return [];
-  return sh.getRange(2, 1, sh.getLastRow() - 1, 5).getValues().filter(function (r) { return String(r[0]).trim(); })
-    .map(function (r) { return { teacher: String(r[0]), field: String(r[1]), sub: String(r[2]), homeroom: cls_(r[3]), at: fmtAt_(r[4]) }; });
+  return sh.getRange(2, 1, sh.getLastRow() - 1, 6).getValues().filter(function (r) { return String(r[0]).trim(); })
+    .map(function (r) { return { teacher: String(r[0]), field: String(r[1]), sub: String(r[2]), homeroom: cls_(r[3]), at: fmtAt_(r[4]), cls: String(r[5] || '').trim() }; });
 }
 // 사이트에 들어온 선생님 기록(담당자가 누가 연결됐는지 봄). 같은 선생님은 3분에 한 번만 적음.
 function touch_(teacher) {
@@ -287,6 +287,7 @@ function headSheet_(name, head) {
   var ss = SpreadsheetApp.getActiveSpreadsheet(), sh = ss.getSheetByName(name);
   if (!sh) sh = ss.insertSheet(name);
   if (sh.getLastRow() === 0) { sh.appendRow(head); sh.setFrozenRows(1); }
+  else if (sh.getLastColumn() < head.length) sh.getRange(1, 1, 1, head.length).setValues([head]); // 새 칸이 생긴 경우 머리줄 보충
   return sh;
 }
 
