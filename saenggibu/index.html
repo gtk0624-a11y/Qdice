@@ -1120,7 +1120,7 @@ function hakSplit(h){ const d=String(h||'').replace(/\D/g,''); if(d.length===5) 
 function rowStatus(r){ return (r.adminAt || /오류\s*아님/.test(r.memo))? '확인' : r.hrAt? '담임 확인' : r.doneAt? '수정 완료' : (/\[재요청/.test(r.memo)? '재요청' : '요청'); }
 function normRow(x){ const [g,c,n]=hakSplit(x.hak);
   const r={id:String(x.id), date:String(x.date||''), hak:String(x.hak||''), g, c, n, name:String(x.name||''), field:String(x.field||''), sub:String(x.sub||''),
-    text:String(x.text||''), after:String(x.after||''), memo:String(x.memo||''), from:String(x.from||''), doneAt:String(x.done||''), hrAt:String(x.hr||''), adminAt:String(x.admin||'')};
+    text:String(x.text||''), after:String(x.after||''), memo:String(x.memo||''), from:String(x.from||''), trail:String(x.trail||''), doneAt:String(x.done||''), hrAt:String(x.hr||''), adminAt:String(x.admin||'')};
   r.area=(r.field+' '+r.sub).trim(); r.status=rowStatus(r); r.skipDone=!r.doneAt && !!(r.hrAt||r.adminAt) && !/오류\s*아님/.test(r.memo); return r; }
 async function fetchReqs(silent){
   if(!sheetReady(silent) || RQ.busy) return;
@@ -1183,7 +1183,8 @@ async function markDone(id, askMemo){
     const m=prompt('담임·담당자에게 남길 말이 있으면 적고, 없으면 그냥 [확인]을 누르세요.',''); if(m===null) return; memo=m.trim(); }
   const it=matchItem(r.area); const fixed=(it&&r.g)? peek(rqSid(r),it.key).text : '';
   r.doneAt='오늘';
-  if(await rqAct(r,'done',{memo},'수정 완료')){ logAdd('반영 완료', r, {before:S.reqSnap[id]||'', fixed, neis:'나이스 저장 확인 (교사 체크) '+new Date().toLocaleString('ko-KR'), memo}); toast('✔ 반영 완료 — 시트에 날짜가 들어갔고, 수정 기록에 남았습니다. 담임 선생님께 알림이 갑니다.'); }
+  const snap=S.reqSnap[id]||''; const changed=!!fixed && fixed.trim()!==snap.trim();
+  if(await rqAct(r,'done',{memo, neis:!!askMemo, fixed: changed? fixed.slice(0,300) : '', nochange: !changed},'수정 완료')){ logAdd('반영 완료', r, {before:S.reqSnap[id]||'', fixed, neis:'나이스 저장 확인 (교사 체크) '+new Date().toLocaleString('ko-KR'), memo}); toast('✔ 반영 완료 — 시트에 날짜가 들어갔고, 수정 기록에 남았습니다. 담임 선생님께 알림이 갑니다.'); }
 }
 async function hrOk(id){ const r=S.reqs.find(x=>x.id===id); if(!r) return;
   if(!confirm('나이스에서 반영된 것을 보셨습니까?\n'+rqWho(r)+' · '+r.area+'\n[확인] → 점검 시트 "담임 반영 확인"에 오늘 날짜')) return;
@@ -1285,7 +1286,7 @@ function renderReq(){
   if(!st.sheetUrl||!st.teacher){ $('#main').innerHTML='<div class="box"><h2>수정 요청 (생기부 메신저)</h2><div class="steps">학교 점검 시트로 <b>요청 → 담당교사 반영 → 담임 확인 → 담당자 확인</b>이 이 화면에서 오갑니다.<br>담당자에게 받은 <b>학교 전용 링크</b>로 열거나, <b>설정·백업 → 담당자 시트 연결</b>에 교사 이름·웹앱 주소·암호를 넣어 주세요.</div><button class="b" data-go="set">설정·백업으로 가기</button></div>'; return; }
   const perm=('Notification' in window)? Notification.permission : 'none';
   const th='<tr><th>점검일</th><th>학생</th><th>분야 · 상세</th><th class="l">오류 내용 → 변경 후</th><th class="l">비고</th><th>상태</th><th></th></tr>';
-  const row=(r,btn)=>'<tr><td>'+esc(r.date)+'</td><td>'+esc(rqWho(r))+'</td><td>'+esc(r.field)+(r.sub?'<br><span class="hint">'+esc(r.sub)+'</span>':'')+'</td><td class="l" style="white-space:pre-wrap">'+rqTxt(r)+'</td><td class="l hint" style="white-space:pre-wrap">'+esc(r.memo)+'</td><td>'+stTag(r)+pendNote(r)+(r.skipDone?'<br><b class="neg" style="font-size:12px">담당교사 반영 체크 없음</b>':'')+'</td><td style="white-space:nowrap">'+(btn?btn(r):'')+'</td></tr>';
+  const row=(r,btn)=>'<tr><td>'+esc(r.date)+'</td><td>'+esc(rqWho(r))+'</td><td>'+esc(r.field)+(r.sub?'<br><span class="hint">'+esc(r.sub)+'</span>':'')+'</td><td class="l" style="white-space:pre-wrap">'+rqTxt(r)+'</td><td class="l hint" style="white-space:pre-wrap">'+esc(r.memo)+(r.trail?'<details><summary style="cursor:pointer;color:var(--navy2)">반영 기록</summary><div style="white-space:pre-wrap;font-size:12px">'+esc(r.trail)+'</div></details>':'')+'</td><td>'+stTag(r)+pendNote(r)+(r.skipDone?'<br><b class="neg" style="font-size:12px">담당교사 반영 체크 없음</b>':'')+'</td><td style="white-space:nowrap">'+(btn?btn(r):'')+'</td></tr>';
   const tbl=(list,btn)=>'<div style="overflow-x:auto"><table>'+th+list.map(r=>row(r,btn)).join('')+'</table></div>';
   let h='<div class="box"><div class="row"><button class="b" id="rqFetch">새로 고침</button>'+(perm!=='granted'?'<button class="b g s" id="rqNoti">알림 켜기 (요청·반영·확인 때 팝업)</button>':'<span class="tag">알림 켜짐</span>')
     +(/^https:\/\//.test(st.sheetView)?'<a class="b g s" style="text-decoration:none" target="_blank" rel="noopener" href="'+esc(st.sheetView)+'">점검 시트 열기</a>':'')

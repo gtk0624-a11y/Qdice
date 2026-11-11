@@ -74,7 +74,8 @@ function findCols_(head) {
     admin: f(function (x) { return x.indexOf('담당자') >= 0 && x.indexOf('확인') >= 0; }),
     memo: f(function (x) { return x === '비고'; }),
     id: f(function (x) { return x === '도우미ID'; }),
-    from: f(function (x) { return x === '요청자'; })
+    from: f(function (x) { return x === '요청자'; }),
+    trail: f(function (x) { return x === '반영기록'; })
   };
 }
 function reqInfo_() {
@@ -101,7 +102,14 @@ function addHelpers_(sh, headRow, c) {
     try { sh.hideColumns(col, 2); } catch (e) {}
     c.id = col - 1; c.from = col;
   }
-  return { sh: sh, headRow: headRow, c: c, width: Math.max(sh.getLastColumn(), c.from + 1) };
+  // 누가·언제·무엇으로 반영했는지 쌓이는 칸(보이게 둠) — 분란 방지용 증빙
+  if (c.trail < 0) {
+    var tc = sh.getLastColumn() + 1;
+    sh.getRange(headRow, tc, 1, 1).setValues([['반영 기록']]).setFontWeight('bold').setBackground('#fdeec9');
+    try { sh.setColumnWidth(tc, 360); } catch (e) {}
+    c.trail = tc - 1;
+  }
+  return { sh: sh, headRow: headRow, c: c, width: Math.max(sh.getLastColumn(), c.from + 1, c.trail + 1) };
 }
 
 function listReqs_(info) {
@@ -117,7 +125,8 @@ function listReqs_(info) {
       field: String(r[c.field]).trim(), sub: c.sub >= 0 ? String(r[c.sub]).trim() : '',
       text: String(r[c.text]), after: c.after >= 0 ? String(r[c.after]) : '',
       done: fmt_(r[c.done]), hr: c.hr >= 0 ? fmt_(r[c.hr]) : '', admin: c.admin >= 0 ? fmt_(r[c.admin]) : '',
-      memo: c.memo >= 0 ? String(r[c.memo]) : '', from: String(r[c.from]).trim()
+      memo: c.memo >= 0 ? String(r[c.memo]) : '', from: String(r[c.from]).trim(),
+      trail: c.trail >= 0 ? String(r[c.trail] || '') : ''
     });
   }
   if (changed) sh.getRange(first, c.id + 1, v.length, 1).setValues(v.map(function (r) { return [r[c.id]]; }));
@@ -166,6 +175,7 @@ function addReqs_(teacher, items) {
     r[c.text] = clean_(it.text, 1000); if (c.after >= 0) r[c.after] = clean_(it.after, 1000);
     if (c.memo >= 0) r[c.memo] = clean_(it.memo, 300);
     r[c.id] = id; r[c.from] = teacher;
+    if (c.trail >= 0) r[c.trail] = '📝 요청 ' + Utilities.formatDate(new Date(), 'Asia/Seoul', 'M/d HH:mm') + ' ' + teacher;
     rows.push(r);
   });
   if (rows.length) {
@@ -181,16 +191,23 @@ function updReq_(teacher, d) {
   if (row < 0) return '해당 요청 없음';
   var memo = clean_(d.memo, 300), old = String(getCell_(info, row, c.memo) || '');
   var addMemo = function (t) { if (c.memo >= 0 && t) setCell_(info, row, c.memo, (old ? old + ' / ' : '') + t); };
+  var stamp = Utilities.formatDate(new Date(), 'Asia/Seoul', 'M/d HH:mm');
+  var addTrail = function (t) { if (c.trail < 0) return; var o = String(getCell_(info, row, c.trail) || ''); setCell_(info, row, c.trail, clean_((o ? o + '\n' : '') + t, 2000)); };
   if (d.action === 'done') {
     setCell_(info, row, c.done, today_());
     if (memo) addMemo(memo + '(' + teacher + ')');
+    var fx = clean_(d.fixed, 300);
+    addTrail('✔ 반영 ' + stamp + ' ' + teacher + (d.neis ? ' · 나이스 저장 확인' : '') + (fx ? ' · 고친 문장: "' + fx + '"' : (d.nochange ? ' · (사이트 문장은 그대로, 나이스에서 고침)' : '')) + (memo ? ' · 메모: ' + memo : ''));
   } else if (d.action === 'hrok') {
     setCell_(info, row, c.hr, today_());
+    addTrail('👀 담임 확인 ' + stamp + ' ' + teacher + ' · 나이스에서 반영 확인');
   } else if (d.action === 'adminok') {
     setCell_(info, row, c.admin, '✔ ' + today_());
+    addTrail('🏁 담당자 확인 ' + stamp + ' ' + teacher);
   } else if (d.action === 'reopen') {
     setCell_(info, row, c.done, ''); setCell_(info, row, c.hr, '');
     addMemo('[재요청 ' + today_() + '] ' + clean_(d.text, 300) + '(' + teacher + ')');
+    addTrail('↩ 재요청 ' + stamp + ' ' + teacher + ' · ' + clean_(d.text, 200));
   }
   return 'ok';
 }
