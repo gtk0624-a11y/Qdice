@@ -326,34 +326,36 @@ function parseReadingRows(rows){
   return {ok:true, entries:out, bad};
 }
 // 학생 명단 표 → [{g,c,n,name}] (제목 줄이 있으면 칸 순서 무관, 없으면 숫자·이름을 추정)
+function normName(v){ const t=String(v==null?'':v).trim(); return /[A-Za-z]/.test(t)? t.replace(/\s+/g,' ') : t.replace(/\s+/g,''); }
 function splitHak(v){ const d=String(v==null?'':v).replace(/\D/g,''); if(d.length===5) return [+d[0],+d.slice(1,3),+d.slice(3)]; if(d.length===4) return [+d[0],+d[1],+d.slice(2)]; return [0,0,0]; }
 function parseRoster(rows, askGrade){
   rows=(rows||[]).map(r=>(r||[]).map(x=>String(x==null?'':x).trim()));
   const num=v=>{ const m=String(v).match(/\d+/); return m? parseInt(m[0],10) : 0; };
-  const isName=x=>{ const t=String(x).replace(/\s+/g,''); return /^[가-힣A-Za-z]{2,20}$/.test(t) && !/^(학년|학번|번호|성명|이름|성별|남자?|여자?|전입|전출|비고|담임|학급|반)$/.test(t) && !/(학년|학교|중학|고등|초등|명단)$/.test(t); };
+  const isName=x=>{ const t=String(x).replace(/\s+/g,''); return /^[가-힣A-Za-z]{2,30}$/.test(t) && !/^(학년|학번|번호|성명|이름|성별|남자?|여자?|전입|전출|비고|담임|학급|반)$/.test(t) && !/(학년|학교|중학|고등|초등|명단)$/.test(t); };
   let hi=-1, ci=null;
   for(let i=0;i<Math.min(rows.length,15);i++){ const h=rows[i].map(x=>x.replace(/\s+/g,''));
     const name=h.findIndex(x=>/^(이름|성명|학생명|학생이름|학생성명)$/.test(x)); if(name<0) continue;
-    const c={name, hak:h.findIndex(x=>/학번/.test(x)), g:h.findIndex(x=>/^학년$/.test(x)), c:h.findIndex(x=>/^(반|학급)$/.test(x)), n:h.findIndex(x=>/^(번호|번|출석번호)$/.test(x))};
+    const c={name, memo:h.findIndex(x=>/^(비고|학적|상태|학적변동)$/.test(x)), hak:h.findIndex(x=>/학번/.test(x)), g:h.findIndex(x=>/^학년$/.test(x)), c:h.findIndex(x=>/^(반|학급)$/.test(x)), n:h.findIndex(x=>/^(번호|번|출석번호)$/.test(x))};
     if(c.hak>=0 || c.n>=0){ hi=i; ci=c; break; } }
-  const out=[]; let bad=0, needG=false, needGC=false;
+  const out=[]; let bad=0, needG=false, needGC=false; const skipped=[];
   if(hi>=0){
-    rows.slice(hi+1).forEach(r=>{ const nm=(r[ci.name]||'').replace(/\s+/g,''); if(!nm) return; let g=0,c=0,n=0;
+    rows.slice(hi+1).forEach(r=>{ const nm=normName(r[ci.name]); if(!nm) return; let g=0,c=0,n=0;
+      if(ci.memo>=0 && /(전출|학업중단|자퇴|유예|면제|제적|퇴학|사망)/.test(r[ci.memo]||'')){ skipped.push(nm+'('+r[ci.memo]+')'); return; }
       if(ci.c>=0&&ci.n>=0){ c=num(r[ci.c]); n=num(r[ci.n]); g= ci.g>=0? num(r[ci.g]) : 0; if(!g && ci.hak>=0) g=splitHak(r[ci.hak])[0]; if(!g) needG=true; }
       else if(ci.hak>=0 && splitHak(r[ci.hak])[2]>0) [g,c,n]=splitHak(r[ci.hak]);
       else if(ci.n>=0){ n=num(r[ci.n]); c=-1; needGC=true; }
-      if((c>0||c===-1)&&n>0&&nm.length<=20&&!/^(이름|성명)$/.test(nm)) out.push({g,c,n,name:nm}); else bad++; });
+      if((c>0||c===-1)&&n>0&&nm.length<=30&&!/^(이름|성명)$/.test(nm)) out.push({g,c,n,name:nm}); else bad++; });
   } else {
     rows.forEach(r=>{ const cells=r.filter(x=>x!==''); if(!cells.length) return;
       const nm=cells.find(isName); const nums=[]; let hak=null;
       cells.forEach(x=>{ const t=x.replace(/\s+/g,''); if(/^\d{4,5}$/.test(t)) hak=t; else { const m=t.match(/^(\d{1,2})(학년|반|번)?\.?$/); if(m) nums.push(+m[1]); } });
       let g=0,c=0,n=0;
       if(nums.length>=3) [g,c,n]=nums; else if(hak) [g,c,n]=splitHak(hak); else if(nums.length===2){ [c,n]=nums; needG=true; }
-      if(nm && c>0 && n>0) out.push({g,c,n,name:nm.replace(/\s+/g,'')}); else bad++; });
+      if(nm && c>0 && n>0) out.push({g,c,n,name:normName(nm)}); else bad++; });
   }
   if(needGC){ const v=askGrade? askGrade('gc') : ''; const m=String(v||'').match(/(\d+)\D+(\d+)/); out.forEach(o=>{ if(o.c===-1){ o.g=m?+m[1]:0; o.c=m?+m[2]:0; } }); }
   if(needG){ const gg=askGrade? askGrade('g') : 0; out.forEach(o=>{ if(!o.g) o.g=parseInt(gg,10)||0; }); }
-  return {list:out.filter(o=>o.g>0&&o.c>0&&o.n>0), bad: bad+out.filter(o=>!(o.g>0&&o.c>0)).length, header:hi>=0};
+  return {list:out.filter(o=>o.g>0&&o.c>0&&o.n>0), bad: bad+out.filter(o=>!(o.g>0&&o.c>0)).length, header:hi>=0, skipped};
 }
 // 네이버 맞춤법 검사기용: 문장 단위로 max자 이하 조각 나누기(이어 붙이면 원문과 같음)
 function splitChunks(text, max){
@@ -381,9 +383,9 @@ const DEFAULT_ITEMS=[
 function freshState(){
   return { v:1,
     settings:{teacher:'', year:new Date().getMonth()<2? new Date().getFullYear()-1 : new Date().getFullYear(),
-      enterBytes:2, stripNL:true, autoSpell:true, sheetUrl:'', sheetKey:'', sheetView:'', autoSend:true, lastBackup:0, lastSent:0, admin:false, sendFixed:false, askDone:true, lastReqFetch:0, lastRound:'1', locked:false, autoLock:30},
+      enterBytes:2, stripNL:true, autoSpell:true, sheetUrl:'', sheetKey:'', sheetView:'', autoSend:true, lastBackup:0, lastSent:0, admin:false, askDone:true, duties:[], homeroom:'', lastReqFetch:0, lastRound:'1', locked:false, autoLock:30},
     items:JSON.parse(JSON.stringify(DEFAULT_ITEMS)),
-    students:[], records:{}, schedules:[], rules:[], banned:[], reqs:[], reqSeen:{}, reqInit:false, reqWho:[],
+    students:[], records:{}, schedules:[], rules:[], banned:[], reqs:[], reqSeen:{}, reqInit:false, reqWho:[], reqDuties:[], reqMeta:{fields:[],subs:{}}, reqSheetName:'',
     sisu:{start:'', end:'', holidays:[], rows:[], club:[], clubTarget:''}
   };
 }
@@ -478,8 +480,8 @@ function refreshCard(card, fixHTML){
   if(fixHTML!==undefined) card.dataset.fix=fixHTML;
   if(card.dataset.fix) h+='<div class="m-fix">'+card.dataset.fix+'</div>';
   const rb=$('.reqs',card); if(rb){ const rs=cardReqs(sidv,ik); const op=rs.filter(rqOpen), dn=rs.filter(r=>!rqOpen(r));
-    rb.innerHTML=op.map(r=>'<div class="rq"><b>🛠 '+(r.round?esc(r.round)+'차 ':'')+'수정 요청</b> · '+esc(r.from||'담당자')+' · '+esc(r.date||'')+(r.status==='재요청'?' <span class="st open">재요청</span>':'')+'<div class="rqt">'+esc(r.text)+'</div><button class="b s" data-rqdone="'+esc(r.id)+'">고쳤어요 — 수정 완료 알리기</button></div>').join('')
-      +dn.slice(-2).map(r=>'<div class="rq ok">✔ '+(r.round?esc(r.round)+'차 ':'')+esc(r.status)+pendNote(r)+' · '+esc(r.text.split('\n')[0].slice(0,60))+'</div>').join('');
+    rb.innerHTML=op.map(r=>'<div class="rq"><b>🛠 수정 요청</b> · '+esc(r.area)+' · '+esc(r.date||'')+(r.from?' · '+esc(r.from):'')+(r.status==='재요청'?' <span class="st open">재요청</span>':'')+'<div class="rqt">'+rqTxt(r)+(r.memo?'<div class="hint">'+esc(r.memo)+'</div>':'')+'</div><button class="b s" data-rqdone="'+esc(r.id)+'">고쳤어요 — 반영 완료</button></div>').join('')
+      +dn.slice(-2).map(r=>'<div class="rq ok">✔ '+stTag(r)+pendNote(r)+' · '+esc(r.text.slice(0,60))+'</div>').join('');
     card.classList.toggle('hasreq',op.length>0); }
   if(over){ const ci=cutIndex(t,lim,S.settings.enterBytes); const tail=t.slice(ci); h+='<div class="m-over">✂ 나이스에서 잘리는 부분: <span>'+esc(tail.length>120? tail.slice(0,120)+'…':tail)+'</span></div>'; }
   lint(t,{banned:S.banned,names:otherNames(sidv)}).forEach(w=>{ h+='<div class="m-warn">⚠ '+esc(w)+'</div>'; });
@@ -531,7 +533,7 @@ async function onCopy(card){
   const r=rec(sidv,ik); r.copied=Date.now(); save(); refreshCard(card);
   toast(B(t)>it.limit? '⚠ 한도를 넘긴 상태로 복사했습니다. 나이스에서 잘립니다.' : '복사했습니다. 나이스 입력칸에서 Ctrl+V 하세요.');
   const op=cardReqs(sidv,ik).filter(rqOpen);
-  if(op.length && S.settings.askDone){ setTimeout(()=>{ if(confirm('이 칸에 수정 요청이 '+op.length+'건 있습니다.\n('+op.map(r=>(r.round?r.round+'차 ':'')+(r.from||'담당자')).join(', ')+')\n\n나이스에 붙여넣어 고치셨으면 [확인]을 누르세요.\n요청한 선생님께 "수정 완료"가 바로 전달됩니다.')) op.forEach(r=>markDone(r.id,false)); },350); }
+  if(op.length && S.settings.askDone){ setTimeout(()=>{ if(confirm('이 칸에 수정 요청이 '+op.length+'건 있습니다.\n('+op.map(r=>r.text.slice(0,20)+(r.after?' → '+r.after.slice(0,20):'')).join(', ')+')\n\n나이스에 붙여넣어 고치셨으면 [확인]을 누르세요.\n점검 시트 "담당교사 반영 날짜"에 오늘 날짜가 들어가고 담임 선생님께 알림이 갑니다.')) op.forEach(r=>markDone(r.id,false)); },350); }
 }
 
 // 네이버 맞춤법 검사기 연결(300자 제한 → 자동으로 나눠 줌)
@@ -572,7 +574,7 @@ function writeHeadHTML(){
   const written=countWritten(mine,it.key), need=needOf(all,it), ra=ratioOf(it);
   let done=0, over=0; mine.forEach(s=>{ const r=peek(sid(s),it.key); if(r.done) done++; if(B(r.text)>it.limit) over++; });
   const g=UI.cls.split('-')[0]; const gl=S.students.filter(s=>String(s.g)===g); const gw=countWritten(gl,it.key), gn=needOf(gl.length,it);
-  let h='<div class="pick"><span class="lab">학급</span>'+cl.map(c=>{ const st=S.students.filter(s=>clsOf(s)===c); const ok=st.length && countWritten(st,it.key)>=needOf(st.length,it); return '<button data-cls="'+esc(c)+'" class="'+(c===UI.cls?'on':'')+'">'+esc(clsName(c))+(ok?'<small>✔완료</small>':'')+'</button>'; }).join('')+'</div>'
+  let h='<div class="pick"><span class="lab">학급</span><button data-go="set" data-focus="roster" title="다른 학년·반 명단 더 넣기" style="border-style:dashed">＋ 명단 더 넣기</button>'+cl.map(c=>{ const st=S.students.filter(s=>clsOf(s)===c); const ok=st.length && countWritten(st,it.key)>=needOf(st.length,it); return '<button data-cls="'+esc(c)+'" class="'+(c===UI.cls?'on':'')+'">'+esc(clsName(c))+(ok?'<small>✔완료</small>':'')+'</button>'; }).join('')+'</div>'
     +'<div class="pick"><span class="lab">영역</span>'+S.items.map(i=>{ const w=countWritten(mine,i.key), ok=all && w>=needOf(all,i); const rq=S.reqs.filter(r=>rqToMe(r)&&rqOpen(r)&&rqSid(r).indexOf(UI.cls+'-')===0&&rqIk(r)===i.key).length; return '<button data-itemk="'+esc(i.key)+'" class="'+(i.key===UI.item?'on':'')+'">'+esc(i.name)+'<small>'+(ok?'✔완료 ':'')+w+'/'+all+'</small>'+(rq?'<small style="color:var(--red);font-weight:700">🛠'+rq+'</small>':'')+'</button>'; }).join('')+'</div>';
   h+='<div class="now">'+esc(clsName(UI.cls))+' · '+esc(it.name)+' <span class="hint" style="font-weight:400">한도 '+it.limit.toLocaleString()+'B(한글 약 '+Math.floor(it.limit/3)+'자)'+(over?' · <b style="color:var(--red)">초과 '+over+'</b>':'')+'</span></div>';
   let msg, cls2;
@@ -592,7 +594,7 @@ function writeHeadHTML(){
 }
 function renderWrite(){
   const cl=classes();
-  if(!S.students.length){ $('#main').innerHTML='<div class="box"><h2>처음이시면 학생 명단부터 넣습니다</h2><div class="steps">가장 쉬운 방법: <label class="b" style="cursor:pointer;font-size:16px;padding:9px 16px">명단 엑셀 파일 올리기<input type="file" id="rosterFile0" accept=".xlsx,.xls,.csv" hidden></label><br><span class="hint">학년·반·번호·이름(또는 학번·이름) 칸이 있는 파일이면 됩니다. 칸 순서가 달라도, 성별·생년월일 같은 다른 칸이 있어도, 여러 반이 섞여 있어도 알아서 정리합니다. 나이스에서 내려받은 명단도 됩니다.</span><br><a class="b g s" style="text-decoration:none" href="생기부_입력양식.xlsx" download>📄 입력 양식 엑셀 내려받기</a> <span class="hint">엑셀에 명단과 AI로 만든 문장을 정리한 뒤 설정·백업 → 엑셀 백업 불러오기로 한 번에 올릴 수 있습니다.</span><br>또는 엑셀에서 표를 통째로 복사(Ctrl+C)해 아래 칸에 붙여넣고(Ctrl+V) <b>명단 넣기</b>를 누르세요.</div><textarea id="roster" rows="6" placeholder="예)&#10;1	1	1	홍길동&#10;1	1	2	김철수"></textarea><div class="row"><button class="b" id="rosterAdd" style="font-size:16px;padding:10px 18px">명단 넣기</button><span class="hint">직접 쳐도 됩니다. 한 줄에 한 명, 칸 사이는 띄어쓰기: 1 1 1 홍길동</span></div></div>'; return; }
+  if(!S.students.length){ $('#main').innerHTML='<div class="box"><h2>처음이시면 학생 명단부터 넣습니다</h2><div class="steps">가장 쉬운 방법: <label class="b" style="cursor:pointer;font-size:16px;padding:9px 16px">명단 엑셀 파일 올리기<input type="file" id="rosterFile0" accept=".xlsx,.xls,.csv" multiple hidden></label><br><span class="hint">학년·반·번호·이름(또는 학번·이름) 칸이 있는 파일이면 됩니다. 칸 순서가 달라도, 성별·생년월일 같은 다른 칸이 있어도, 여러 반이 섞여 있어도 알아서 정리합니다. 나이스에서 내려받은 명단도 됩니다.</span><br><a class="b g s" style="text-decoration:none" href="생기부_입력양식.xlsx" download>📄 입력 양식 엑셀 내려받기</a> <span class="hint">엑셀에 명단과 AI로 만든 문장을 정리한 뒤 설정·백업 → 엑셀 백업 불러오기로 한 번에 올릴 수 있습니다.</span><br>또는 엑셀에서 표를 통째로 긁어 복사(Ctrl+C)한 뒤 <b>아래 칸에 붙여넣기(Ctrl+V)만 하면 바로 들어갑니다.</b> 학년별 파일이 따로 있으면 하나씩 이어서 붙여넣으세요(파일 올리기는 여러 개를 한꺼번에 골라도 됩니다).</div><textarea id="roster" rows="6" placeholder="여기에 붙여넣기(Ctrl+V) — 붙이는 순간 명단이 들어갑니다.&#10;예) 학년	반	번호	성명	비고 …"></textarea><div class="row"><button class="b" id="rosterAdd" style="font-size:16px;padding:10px 18px">명단 넣기</button><span class="hint">직접 쳐도 됩니다. 한 줄에 한 명, 칸 사이는 띄어쓰기: 1 1 1 홍길동</span></div></div>'; return; }
   if(!cl.includes(UI.cls)) UI.cls=cl[0];
   if(!itemBy(UI.item)) UI.item=S.items[0]? S.items[0].key : '';
   const it=itemBy(UI.item); if(!it){ $('#main').innerHTML='<div class="box">설정에서 항목을 하나 이상 만들어 주세요.</div>'; return; }
@@ -682,7 +684,7 @@ async function sendStats(silent){
   if(!/^https:\/\/script\.google\.com\//.test(st.sheetUrl)){ if(!silent) toast('현황판 주소는 https://script.google.com/ 으로 시작해야 합니다.'); return; }
   const rows=stats().filter(r=>r.mine && r.total>0).map(r=>({cls:r.cls,item:r.item,total:r.total,written:r.written,done:r.done,over:r.over}));
   try{
-    await fetch(st.sheetUrl,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({key:st.sheetKey,teacher:st.teacher,rows})});
+    await fetch(st.sheetUrl,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({key:st.sheetKey,teacher:st.teacher,rows,duties:st.duties||[],homeroom:st.homeroom||''})});
     st.lastSent=Date.now(); save();
     if(!silent){ toast('현황을 보냈습니다. 시트에서 반영됐는지 확인해 주세요.'); if(UI.tab==='check') renderCheck(); }
   }catch(e){ if(!silent) toast('전송하지 못했습니다. 인터넷 연결과 주소를 확인해 주세요.'); }
@@ -698,7 +700,7 @@ function renderBanner(){
   const b=$('#banner'); const parts=[];
   const ib=inbox().length, wc=waitConfirm().length;
   if(ib) parts.push('<span data-go="req" style="cursor:pointer">🛠 <b style="color:var(--red)">고칠 수정 요청 '+ib+'건</b></span>');
-  if(wc) parts.push('<span data-go="req" style="cursor:pointer">✔ <b>수정 완료 '+wc+'건 — 확인해 주세요</b></span>');
+  if(wc) parts.push('<span data-go="req" style="cursor:pointer">✔ <b>확인할 것 '+wc+'건 (반영 완료됨)</b></span>');
   if(up.length) parts.push('📌 다가오는 일정: '+up.map(o=>'<b>'+ddayText(o.n)+'</b> '+esc(o.x.title)+' ('+esc(o.x.date.slice(5))+')').join(' · '));
   if(!parts.length){ b.style.display='none'; return; }
   b.style.display='block'; b.innerHTML=parts.join(' ｜ ');
@@ -822,7 +824,7 @@ function renderSet(){
   const st=S.settings;
   let h='<div class="box"><h2>백업 (엑셀)</h2><div class="row"><button class="b" id="xlsOut">엑셀로 백업 받기</button><label class="b g" style="cursor:pointer">엑셀 백업(또는 입력 양식) 불러오기<input type="file" id="xlsIn" accept=".xlsx,.xls" hidden></label><a class="b g" style="text-decoration:none" href="생기부_입력양식.xlsx" download>📄 입력 양식 내려받기</a><button class="b g" id="jsonOut">전체 설정 백업(.json)</button><label class="b g" style="cursor:pointer">전체 설정 불러오기<input type="file" id="jsonIn" accept=".json" hidden></label></div>'
     +'<div class="hint"><b>엑셀 백업 하나에 입력한 것이 전부 들어갑니다</b> — 명단·영역별 내용·바이트·완료·나이스 복사 기록·영역 설정(한도·입력 대상%·내 담당)·일정·휴업일·시수표·동아리·교정 규칙·금지어·설정. 다른 컴퓨터에서는 "엑셀 백업 불러오기"로 그대로 되살아납니다. 엑셀에서 내용 칸을 고친 뒤 불러오면 고친 내용이 반영됩니다. (.json 백업은 예비용입니다.) 백업 파일에는 학생 이름과 생기부 내용이 들어 있으니 업무용 PC·교육청 드라이브에만 보관하세요.</div></div>';
-  h+='<div class="box"><h2>학생 명단 ('+S.students.length+'명)</h2><textarea id="roster" rows="4" placeholder="엑셀 명단 표를 통째로 복사해 붙여넣으세요(제목 줄 포함). 학년·반·번호·이름 또는 학번·이름이 있으면 알아서 정리합니다."></textarea><div class="row"><button class="b" id="rosterAdd">명단 넣기</button><label class="b g" style="cursor:pointer">엑셀 파일로 넣기<input type="file" id="rosterFile" accept=".xlsx,.xls,.csv" hidden></label><span class="hint">칸 순서·다른 칸·여러 반 섞임 상관없이 알아서 정리합니다. 같은 학년·반·번호가 이미 있으면 이름만 바뀌고 써 둔 내용은 유지됩니다.</span></div>';
+  h+='<div class="box"><h2>학생 명단 ('+S.students.length+'명)</h2><textarea id="roster" rows="4" placeholder="엑셀 명단 표를 통째로 복사해 붙여넣으세요(제목 줄 포함). 학년·반·번호·이름 또는 학번·이름이 있으면 알아서 정리합니다."></textarea><div class="row"><button class="b" id="rosterAdd">명단 넣기</button><label class="b g" style="cursor:pointer">엑셀 파일로 넣기<input type="file" id="rosterFile" accept=".xlsx,.xls,.csv" multiple hidden></label><span class="hint">칸 순서·다른 칸·여러 반 섞임 상관없이 알아서 정리합니다. 같은 학년·반·번호가 이미 있으면 이름만 바뀌고 써 둔 내용은 유지됩니다.</span></div>';
   if(S.students.length) h+='<details><summary>명단 보기·삭제</summary><div class="chips" style="margin-top:6px">'+S.students.map(s=>'<span>'+esc(clsOf(s)+' '+s.n+' '+s.name)+'<b data-studel="'+esc(sid(s))+'">×</b></span>').join('')+'</div></details>';
   h+='</div>';
   h+='<div class="box" id="readBox"><h2>독서기록 불러오기 (학생이 구글 폼으로 입력)</h2><div class="row"><label class="b" style="cursor:pointer">구글 폼 응답 파일 올리기 (.xlsx / .csv)<input type="file" id="readFile" accept=".xlsx,.xls,.csv" hidden></label><span class="hint">폼 질문 이름: <b>학년 · 반 · 번호 · 이름 · 책 제목 · 지은이</b>. 한 번 제출에 책 한 권. 같은 학생이 여러 번 제출하면 "책 제목(지은이), 책 제목(지은이)"로 이어 붙여 <b>독서활동상황</b> 항목에 넣습니다. 이미 들어 있는 책은 다시 넣지 않습니다.</span></div>';
@@ -843,9 +845,9 @@ function renderSet(){
     +'<div class="row"><label style="flex:1">웹앱 주소 <input class="wide" type="url" id="stUrl" value="'+esc(st.sheetUrl)+'" placeholder="https://script.google.com/macros/s/.../exec"></label></div>'
     +'<div class="row"><label>암호 <input type="text" id="stKey" value="'+esc(st.sheetKey)+'" placeholder="스크립트에 적은 암호"></label><label style="flex:1">현황판 시트 주소(보기용) <input class="wide" type="url" id="stView" value="'+esc(st.sheetView)+'" placeholder="https://docs.google.com/spreadsheets/..."></label></div>'
     +'<div class="row"><label><input type="checkbox" id="stAuto"'+(st.autoSend?' checked':'')+'> 내용이 바뀌면 2분 뒤 자동으로 현황 전송</label></div>'
-    +'<div class="row"><label><input type="checkbox" id="stAsk"'+(st.askDone?' checked':'')+'> 수정 요청이 있는 칸에서 "나이스용 복사"를 누르면 수정 완료를 보낼지 묻기</label></div>'
-    +'<div class="row"><label><input type="checkbox" id="stFixed"'+(st.sendFixed?' checked':'')+'> 수정 완료 때 고친 문장도 담당자 시트로 보내기 (점검자가 나이스를 안 열고 확인 가능 · 학생 생기부 문장이 구글 시트에 저장됨)</label></div>'
-    +'<div class="row"><label><input type="checkbox" id="stAdmin"'+(st.admin?' checked':'')+'> 담당자 모드 — 학교 전체 수정 요청과 차수별·교사별 현황 보기</label></div>'
+    +'<div class="row"><label><input type="checkbox" id="stAsk"'+(st.askDone?' checked':'')+'> 수정 요청이 있는 칸에서 "나이스용 복사"를 누르면 반영 완료를 적을지 묻기</label></div>'
+    +'<div class="row"><label><input type="checkbox" id="stAdmin"'+(st.admin?' checked':'')+'> 담당자 모드 — 점검 시트 전체 현황, 담당자 확인, 독촉 메시지, 시트 기록 지우기</label></div>'
+    +'<h3>내 담당 (분야·상세 분야·담임 학급)</h3>'+dutyHTML()
     +'<div class="row"><button class="b g" id="rqTest">연결 시험</button>'+(st.sheetUrl&&st.sheetKey?'<button class="b g" id="linkCopy">학교 전용 링크 복사 (담당자용)</button>':'')+'</div>'
     +(st.sheetUrl&&st.sheetKey?'<div class="hint">학교 전용 링크 = 이 프로그램 주소 + 담당자 시트 주소·암호. 선생님들이 이 링크로 열면 자동으로 연결되고 이름만 적으면 됩니다. 진짜 시트로 바꿀 때는 새 링크를 다시 보내면 모두 새 시트로 넘어갑니다. <b>링크에 암호가 들어 있으니 교직원에게만</b> 보내세요.</div>':'')+'</div>';
   h+='<div class="box"><h2>🔒 내 암호로 잠그기</h2>'
@@ -868,8 +870,10 @@ function addRoster(rows){
   sortStudents(); save();
   const cls=Array.from(new Set(r.list.map(o=>o.g+'-'+o.c))).sort((a,b)=>a.localeCompare(b,'ko',{numeric:true}));
   if(!r.list.length){ toast('학생을 찾지 못했습니다. 학년·반·번호·이름(또는 학번·이름) 칸이 있는지 확인해 주세요.'); return; }
-  toast('명단 정리 완료 — '+cls.map(c=>clsName(c)).join(', ')+' · 추가 '+add+'명'+(upd?', 이름 변경 '+upd+'명':'')+(r.bad?' · 읽지 않은 줄 '+r.bad+'개(제목·빈 줄 등)':'')+(r.header?'':' · 제목 줄이 없어 추정했으니 확인해 주세요'));
+  toast((UI.tab==='write'&&S.students.length===r.list.length?'(다른 학년은 "＋ 명단 더 넣기"로 이어서) ':'')+'명단 정리 완료 — '+cls.map(c=>clsName(c)).join(', ')+' · 추가 '+add+'명'+(upd?', 이름 변경 '+upd+'명':'')+(r.skipped.length?' · 비고(전출 등)로 뺀 학생 '+r.skipped.length+'명':'')+(r.bad?' · 읽지 않은 줄 '+r.bad+'개(제목·빈 줄 등)':'')+(r.header?'':' · 제목 줄이 없어 추정했으니 확인해 주세요')+' · 전체 '+S.students.length+'명');
+  return r.list.length;
 }
+function rosterRowsFromText(txt){ return String(txt).replace(/\r/g,'').split('\n').map(l=> /\t/.test(l)? l.split('\t') : (/,/.test(l)? l.split(',') : l.trim().split(/\s+/))); }
 function readRosterFile(file){ return needXLSX().then(()=>readFile(file)).then(buf=>{ const wb=XLSX.read(buf,{type:'array'}); let best=[], bk=0;
   wb.SheetNames.forEach(n=>{ const rows=XLSX.utils.sheet_to_json(wb.Sheets[n],{header:1,raw:false,defval:''}); const k=parseRoster(rows,k=>k==='gc'?'1-1':'1').list.length; if(k>bk){ bk=k; best=rows; } });
   addRoster(best); }); }
@@ -895,7 +899,7 @@ async function exportXlsx(){
   add('시수표',[['시작일',Z.start,'종료일',Z.end],[],['이름','월','화','수','목','금','기준 시수','조정']].concat(Z.rows.map(r=>[r.name].concat(r.w).concat([r.target,r.adj]))));
   add('동아리',[['동아리 기준 시수',Z.clubTarget],[],['날짜','시수']].concat(Z.club.map(x=>[x.date,x.hours])));
   add('교정규칙·금지어',[['틀린 표현','고칠 표현','','금지어']].concat(Array.from({length:Math.max(S.rules.length,S.banned.length)},(_,i)=>[S.rules[i]?S.rules[i].from:'',S.rules[i]?S.rules[i].to:'','',S.banned[i]||''])));
-  add('수정요청',[['ID','등록일','차수','요청자','받는 교사','학년','반','번호','이름','영역','요청 내용','상태','수정 완료 시각','메모','확인 시각']].concat(S.reqs.map(r=>[r.id,r.date,r.round,r.from,r.to,r.g,r.c,r.n,r.name,r.area,r.text,r.status,r.doneAt,r.memo,r.confirmAt])));
+  add('수정요청',[['점검일자','학번','이름','오류(확인) 분야','상세 분야','오류(확인) 내용','변경 후','담당교사 반영 날짜','담임 반영 확인','생기부 담당자 확인','비고','상태','요청자']].concat(S.reqs.map(r=>[r.date,r.hak,r.name,r.field,r.sub,r.text,r.after,r.doneAt,r.hrAt,r.adminAt,r.memo,r.status,r.from])));
   add('설정',[['교사 이름',st.teacher],['학년도',st.year],['엔터 바이트',st.enterBytes],['복사 시 줄바꿈 제거',st.stripNL?'O':''],['맞춤법 자동 교정',st.autoSpell?'O':''],['현황판 웹앱 주소',st.sheetUrl],['현황판 암호',st.sheetKey],['현황판 시트 주소',st.sheetView],['현황 자동 전송',st.autoSend?'O':'']]);
   // 복원용 전체 자료(숨김 시트): 프로그램이 다시 불러올 때 이것으로 모든 것을 되살림
   const js=JSON.stringify(S), parts=[]; for(let i=0;i<js.length;i+=30000) parts.push([js.slice(i,i+30000)]);
@@ -968,35 +972,42 @@ function applyReading(){
   toast('학생 '+st+'명에게 책 '+n+'권을 넣었습니다. 영역별 입력 탭에서 "'+it.name+'" 항목을 확인하세요.'); UI.item=it.key; renderSet();
 }
 
-// ───────── 10-2. 수정 요청(생기부 메신저): 점검 → 수정 → 확인 ─────────
+// ───────── 10-2. 수정 요청(생기부 메신저): 학교 점검 시트 그대로 — 요청 → 담당교사 반영 → 담임 확인 → 담당자 확인 ─────────
 const RQ={busy:false, err:''};
 function me(){ return S.settings.teacher; }
-function rqOpen(r){ return !r.status || r.status==='요청' || r.status==='재요청'; }
+function rqOpen(r){ return r.status==='요청' || r.status==='재요청'; }
 function rqDone(r){ return r.status==='수정 완료'; }
+function rqHr(r){ return r.status==='담임 확인'; }
 function rqClosed(r){ return r.status==='확인'; }
-function rqSid(r){ return (parseInt(r.g,10)||0)+'-'+(parseInt(r.c,10)||0)+'-'+(parseInt(r.n,10)||0); }
-function rqToMe(r){ return !!me() && r.to===me(); }
-function rqFromMe(r){ return !!me() && r.from===me(); }
-function rqWho(r){ return (parseInt(r.g,10)||'?')+'-'+(parseInt(r.c,10)||'?')+' '+(parseInt(r.n,10)||'?')+'번 '+(r.name||''); }
-function inbox(){ return S.reqs.filter(r=>rqToMe(r)&&rqOpen(r)); }
-function waitConfirm(){ return S.reqs.filter(r=>(rqFromMe(r)||S.settings.admin)&&rqDone(r)); }
+function rqSid(r){ return (r.g||0)+'-'+(r.c||0)+'-'+(r.n||0); }
 function normArea(x){ return String(x==null?'':x).replace(/[\s·:()]/g,''); }
 function areaSame(a,b){ const x=normArea(a), y=normArea(b); return !!x && !!y && (x===y || x.includes(y) || y.includes(x)); }
-// 시트의 '영역' 글자를 내 영역 항목과 짝짓기 (예: "도덕", "도덕 세특", "행특", "진로")
+function dutyHit(d,r){ return !!d.field && normArea(d.field)===normArea(r.field) && (!d.sub || !r.sub || areaSame(d.sub,r.sub)); }
+function myDuties(){ return S.settings.duties||[]; }
+function rqToMe(r){ return myDuties().some(d=>dutyHit(d,r)); }
+function rqHome(r){ const h=S.settings.homeroom; return !!h && r.g>0 && (r.g+'-'+r.c)===h; }
+function rqFromMe(r){ return !!me() && r.from===me(); }
+function responsible(r){ return Array.from(new Set((S.reqDuties||[]).filter(d=>dutyHit(d,r)).map(d=>d.teacher))); }
+function homeTeacher(r){ const d=(S.reqDuties||[]).find(d=>d.homeroom && r.g>0 && d.homeroom===(r.g+'-'+r.c)); return d? d.teacher : ''; }
+function rqWho(r){ return r.g? r.g+'-'+r.c+' '+r.n+'번 '+r.name : (r.name||'전체'); }
+function inbox(){ return S.reqs.filter(r=>rqToMe(r)&&rqOpen(r)); }
+function waitConfirm(){ return S.reqs.filter(r=>(rqHome(r)&&rqDone(r)) || (S.settings.admin&&(rqHr(r)||(rqDone(r)&&!r.g)))); }
+// 시트의 분야·상세 분야를 내 영역 항목과 짝짓기 (예: 교과세특 사회 → 세특: 사회, 자유학기 → 자유학기 활동)
 function matchItem(area){
   const n=normArea(area); if(!n) return null;
   let it=S.items.find(i=>normArea(i.name)===n); if(it) return it;
-  const map=[[/자율|자치/,/^자율/],[/동아리/,/^동아리/],[/진로/,/^진로/],[/행동|행특|종합의견/,/^행동/],[/독서/,/^독서/],[/자유학기/,/^자유/]];
+  const map=[[/자유학기/,/^자유/],[/자율|자치/,/^자율/],[/동아리/,/^동아리/],[/진로/,/^진로/],[/행동|행특|종합의견/,/^행동/],[/독서/,/^독서/]];
   for(const [a,b] of map){ if(a.test(n)){ it=S.items.find(i=>b.test(normArea(i.name))); if(it) return it; } }
   const se=S.items.filter(i=>/^세특/.test(i.name));
   const hit=se.find(i=>{ const sub=normArea(i.name).replace(/^세특/,''); return sub && n.includes(sub); }); if(hit) return hit;
-  if(se.length===1) return se[0];   // 다른 영역에 해당하지 않으면 내 유일한 세특으로(요청은 이미 나에게 온 것)
+  if(se.length===1) return se[0];
   return null;
 }
 function rqIk(r){ const it=matchItem(r.area); return it? it.key : ''; }
 function cardReqs(sidv,ik){ return S.reqs.filter(r=>rqToMe(r)&&rqSid(r)===sidv&&rqIk(r)===ik); }
 function pendNote(r){ if(!r.pend) return ''; return r.failed? ' — <b class="neg">⚠ 시트에 반영 안 됨</b> <button class="b g s" data-rqresend="'+esc(r.id)+'">다시 보내기</button>' : ' — <span class="hint">보내는 중…</span>'; }
-function stTag(r){ return rqOpen(r)? '<span class="st open">'+(r.status==='재요청'?'재요청':'요청')+'</span>' : (rqDone(r)? '<span class="st done">수정 완료</span>' : '<span class="st closed">확인</span>'); }
+function stTag(r){ return rqOpen(r)? '<span class="st open">'+(r.status==='재요청'?'재요청':'미반영')+'</span>' : rqDone(r)? '<span class="st done">반영 — 담임 확인 대기</span>' : rqHr(r)? '<span class="st done">담임 확인 — 담당자 확인 대기</span>' : '<span class="st closed">끝</span>'; }
+function rqTxt(r){ return esc(r.text)+(r.after?' <b>→ '+esc(r.after)+'</b>':''); }
 function sheetReady(silent){
   const st=S.settings;
   if(!st.sheetUrl||!st.teacher){ if(!silent) toast('설정·백업 탭 "담당자 시트 연결"에 교사 이름과 웹앱 주소를 먼저 넣어 주세요.'); return false; }
@@ -1005,94 +1016,102 @@ function sheetReady(silent){
 }
 function rqUrl(q){ const st=S.settings; const u=new URL(st.sheetUrl); Object.entries(Object.assign({key:st.sheetKey,teacher:st.teacher,t:Date.now()},q)).forEach(([k,v])=>u.searchParams.set(k,v)); return u.toString(); }
 function rqPost(body){ const st=S.settings; return fetch(st.sheetUrl,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(Object.assign({key:st.sheetKey,teacher:st.teacher},body))}); }
+function hakSplit(h){ const d=String(h||'').replace(/\D/g,''); if(d.length===5) return [+d[0],+d.slice(1,3),+d.slice(3)]; if(d.length===4) return [+d[0],+d[1],+d.slice(2)]; return [0,0,0]; }
+function rowStatus(r){ return (r.adminAt || /오류\s*아님/.test(r.memo))? '확인' : r.hrAt? '담임 확인' : r.doneAt? '수정 완료' : (/\[재요청/.test(r.memo)? '재요청' : '요청'); }
+function normRow(x){ const [g,c,n]=hakSplit(x.hak);
+  const r={id:String(x.id), date:String(x.date||''), hak:String(x.hak||''), g, c, n, name:String(x.name||''), field:String(x.field||''), sub:String(x.sub||''),
+    text:String(x.text||''), after:String(x.after||''), memo:String(x.memo||''), from:String(x.from||''), doneAt:String(x.done||''), hrAt:String(x.hr||''), adminAt:String(x.admin||'')};
+  r.area=(r.field+' '+r.sub).trim(); r.status=rowStatus(r); r.skipDone=!r.doneAt && !!(r.hrAt||r.adminAt) && !/오류\s*아님/.test(r.memo); return r; }
 async function fetchReqs(silent){
   if(!sheetReady(silent) || RQ.busy) return;
   RQ.busy=true;
   try{
-    const res=await fetch(rqUrl({action:'list',all:S.settings.admin?'1':''}));
+    const res=await fetch(rqUrl({action:'list'}));
     const txt=await res.text(); let d;
     try{ d=JSON.parse(txt); }catch(e){ throw new Error('old'); }
     if(!d.ok){ RQ.err=d.msg||'오류'; if(!silent) toast('수정 요청을 불러오지 못했습니다: '+RQ.err); return; }
-    RQ.err=''; S.reqWho=Array.isArray(d.who)? d.who : [];
-    mergeServer(Array.isArray(d.rows)? d.rows : []);
+    if(!Array.isArray(d.rows) || !d.meta){ throw new Error('old'); }
+    RQ.err=''; S.reqWho=Array.isArray(d.who)? d.who : []; S.reqDuties=Array.isArray(d.duties)? d.duties : []; S.reqMeta=d.meta||{fields:[],subs:{}}; S.reqSheetName=d.sheet||'';
+    mergeServer(d.rows);
     S.settings.lastReqFetch=Date.now(); save();
-    if(!silent) toast('새로 불러왔습니다. 받은 요청 '+inbox().length+'건, 확인 대기 '+waitConfirm().length+'건');
+    if(!silent) toast('새로 불러왔습니다. 고칠 것 '+inbox().length+'건, 확인할 것 '+waitConfirm().length+'건');
   }catch(e){
-    RQ.err= e.message==='old'? '담당자 시트 코드가 예전 버전입니다. 설명서 7번대로 새 코드를 붙이고 "새 버전"으로 다시 배포해 주세요.' : '연결하지 못했습니다. 인터넷, 웹앱 주소, 배포 설정("액세스: 모든 사용자")을 확인해 주세요.';
+    RQ.err= e.message==='old'? '담당자 시트 코드가 예전 버전입니다. 새 코드(현황판_AppsScript.gs)를 붙이고 "새 버전"으로 다시 배포해 주세요.' : '연결하지 못했습니다. 인터넷, 웹앱 주소, 배포 설정("액세스: 모든 사용자")을 확인해 주세요.';
     if(!silent) toast(RQ.err);
   }finally{ RQ.busy=false; refreshReqUI(); }
 }
 function mergeServer(rows){
   const old=new Map(S.reqs.map(r=>[r.id,r])); const now=Date.now(), first=!S.reqInit; const news=[], fixed=[];
-  const next=rows.map(x=>({id:String(x.id), date:String(x.date||''), round:String(x.round||''), from:String(x.from||''), to:String(x.to||''),
-    g:x.g, c:x.c, n:x.n, name:String(x.name||''), area:String(x.area||''), text:String(x.text||''), status:String(x.status||'').trim(),
-    doneAt:String(x.doneAt||''), memo:String(x.memo||''), confirmAt:String(x.confirmAt||'')}));
-  const seenIds=new Set(next.map(r=>r.id));
+  const next=rows.map(normRow); const seenIds=new Set(next.map(r=>r.id));
   next.forEach(r=>{ const o=old.get(r.id);
-    if(o && o.pend){ const pd=o.pend; const reflected = pd.action==='request' || r.status===pd.status || (pd.prev!==undefined && r.status!==pd.prev) || (pd.plen!==undefined && r.text.length!==pd.plen && pd.action!=='reopen');
-      if(!reflected){ r.status=o.pend.status; r.pend=o.pend; r.failed= now-o.pend.at>180000; } } });
+    if(o && o.pend){ const pd=o.pend; const reflected = pd.action==='request' || r.status===pd.status || (pd.prev!==undefined && r.status!==pd.prev);
+      if(!reflected){ r.status=pd.status; r.pend=pd; r.failed= now-pd.at>180000; } } });
   S.reqs.forEach(o=>{ if(o.pend && o.pend.action==='request' && !seenIds.has(o.id)){ o.failed= now-o.pend.at>180000; next.push(o); } });
-  next.forEach(r=>{ const key=r.status+'|'+r.text.length;
+  next.forEach(r=>{ const key=r.status+'|'+r.text.length+'|'+r.memo.length;
     if(S.reqSeen[r.id]!==key){
       if(rqToMe(r) && rqOpen(r) && !r.pend) news.push(r);
-      if((rqFromMe(r)||S.settings.admin) && rqDone(r) && !r.pend) fixed.push(r);
+      if(((rqHome(r)||rqFromMe(r)) && rqDone(r)) || (S.settings.admin && rqHr(r))) if(!r.pend) fixed.push(r);
       S.reqSeen[r.id]=key; } });
   S.reqs=next;
-  if(first){ S.reqInit=true; if(inbox().length) toast('🛠 받은 수정 요청이 '+inbox().length+'건 있습니다.'); return; }
+  if(first){ S.reqInit=true; const a=inbox().length, b=waitConfirm().length; if(a||b) toast('🛠 고칠 요청 '+a+'건, 확인할 것 '+b+'건이 있습니다.'); return; }
   notifyReqs(news,fixed);
 }
 function notifyReqs(news,fixed){
   const pop=(title,body)=>{ if('Notification' in window && Notification.permission==='granted'){ try{ new Notification(title,{body}); }catch(e){} } };
-  if(news.length){ const r=news[0]; const msg='🛠 새 수정 요청 '+news.length+'건 — '+(r.from||'담당자')+': '+rqWho(r)+' '+r.area;
-    toast(msg); news.slice(0,3).forEach(x=>pop('생기부 수정 요청'+(x.round?' ('+x.round+'차)':''), (x.from||'담당자')+' → '+rqWho(x)+' '+x.area+'\n'+x.text.slice(0,80))); $('#rchip').classList.add('flash'); }
-  if(fixed.length){ const r=fixed[0]; const msg='✔ 수정 완료 '+fixed.length+'건 — '+(r.to||'')+' 선생님: '+rqWho(r)+' '+r.area;
-    setTimeout(()=>toast(msg), news.length?2800:0); fixed.slice(0,3).forEach(x=>pop('생기부 수정 완료', (x.to||'')+' 선생님이 고쳤습니다: '+rqWho(x)+' '+x.area)); $('#rchip').classList.add('flash'); }
+  if(news.length){ const r=news[0]; toast('🛠 새 수정 요청 '+news.length+'건 — '+rqWho(r)+' '+r.area+': '+r.text.slice(0,30));
+    news.slice(0,3).forEach(x=>pop('생기부 수정 요청', rqWho(x)+' · '+x.area+'\n'+x.text.slice(0,60)+(x.after?' → '+x.after.slice(0,40):''))); $('#rchip').classList.add('flash'); }
+  if(fixed.length){ const r=fixed[0]; const who=rqHr(r)? '담임 확인' : '반영 완료'; const msg='✔ '+who+' '+fixed.length+'건 — '+rqWho(r)+' '+r.area+(rqHr(r)?' (담당자 확인해 주세요)':' (담임 확인해 주세요)');
+    setTimeout(()=>toast(msg), news.length?2800:0); fixed.slice(0,3).forEach(x=>pop('생기부 '+(rqHr(x)?'담임 확인':'반영 완료'), rqWho(x)+' · '+x.area+(rqHr(x)?' — 담당자 확인 차례':' — 담임 확인 차례'))); $('#rchip').classList.add('flash'); }
 }
 async function rqAct(r, action, body, status){
-  const prev=r.status, plen=r.text.length; if(action==='reopen') r.text=r.text; r.status=status; r.pend={action,status,prev,plen,at:Date.now(),body:Object.assign({action,id:r.id},body)}; r.failed=false;
-  S.reqSeen[r.id]=r.status+'|'+r.text.length; save(); refreshReqUI();
+  const prev=r.status; r.status=status; r.pend={action,status,prev,at:Date.now(),body:Object.assign({action,id:r.id},body)}; r.failed=false;
+  S.reqSeen[r.id]=r.status+'|'+r.text.length+'|'+r.memo.length; save(); refreshReqUI();
   try{ await rqPost(r.pend.body); }catch(e){ r.failed=true; refreshReqUI(); toast('보내지 못했습니다. 인터넷 연결을 확인한 뒤 "다시 보내기"를 눌러 주세요.'); return false; }
   setTimeout(()=>fetchReqs(true),4000); return true;
 }
 async function markDone(id, askMemo){
   const r=S.reqs.find(x=>x.id===id); if(!r||!rqOpen(r)) return;
   let memo='';
-  if(askMemo){ const m=prompt((r.from||'요청한 선생님')+'께 "수정 완료"를 알립니다.\n남길 말이 있으면 적고, 없으면 그냥 [확인]을 누르세요.',''); if(m===null) return; memo=m.trim(); }
-  const it=matchItem(r.area); const fixedText=(S.settings.sendFixed&&it)? peek(rqSid(r),it.key).text : '';
-  r.memo=memo; r.doneAt=new Date().toLocaleString('ko-KR');
-  if(await rqAct(r,'done',{memo,fixed:fixedText},'수정 완료')) toast('✔ '+(r.from||'요청한 선생님')+'께 수정 완료를 알렸습니다.');
+  if(askMemo){ const m=prompt('반영 완료로 표시합니다(담당교사 반영 날짜 칸에 오늘 날짜).\n담임·담당자에게 남길 말이 있으면 적고, 없으면 그냥 [확인]을 누르세요.',''); if(m===null) return; memo=m.trim(); }
+  r.doneAt='오늘'; if(await rqAct(r,'done',{memo},'수정 완료')) toast('✔ 반영 완료를 시트에 적었습니다. 담임 선생님께 알림이 갑니다.');
 }
-async function confirmReq(id){ const r=S.reqs.find(x=>x.id===id); if(!r) return; if(await rqAct(r,'confirm',{},'확인')) toast('확인 처리했습니다. 이 요청은 끝났습니다.'); }
+async function hrOk(id){ const r=S.reqs.find(x=>x.id===id); if(!r) return; if(await rqAct(r,'hrok',{},'담임 확인')) toast('담임 확인을 적었습니다. 담당자에게 알림이 갑니다.'); }
+async function adminOk(id){ const r=S.reqs.find(x=>x.id===id); if(!r) return; if(await rqAct(r,'adminok',{},'확인')) toast('담당자 확인을 적었습니다. 이 줄은 끝났습니다.'); }
 async function reopenReq(id){ const r=S.reqs.find(x=>x.id===id); if(!r) return;
-  const t=prompt('다시 고칠 내용을 적어 주세요. ('+(r.to||'작성 교사')+' 선생님께 재요청)',''); if(!t||!t.trim()) return;
-  const before=r.text.length; r.text+='\n[재요청] '+t.trim(); const ok=await rqAct(r,'reopen',{text:t.trim()},'재요청'); if(r.pend) r.pend.plen=before; if(ok) toast('재요청을 보냈습니다.'); }
+  const t=prompt('다시 고칠 내용을 적어 주세요. (담당교사에게 재요청)',''); if(!t||!t.trim()) return;
+  r.memo+=(r.memo?' / ':'')+'[재요청] '+t.trim(); if(await rqAct(r,'reopen',{text:t.trim()},'재요청')) toast('재요청을 보냈습니다.'); }
 async function resendReq(id){ const r=S.reqs.find(x=>x.id===id); if(!r||!r.pend) return; r.pend.at=Date.now(); r.failed=false; refreshReqUI();
   try{ await rqPost(r.pend.body); toast('다시 보냈습니다.'); setTimeout(()=>fetchReqs(true),4000); }catch(e){ r.failed=true; refreshReqUI(); toast('보내지 못했습니다. 인터넷 연결을 확인해 주세요.'); } }
 function newRid(){ return 'r'+Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
+function pad2(n){ n=parseInt(n,10)||0; return (n<10?'0':'')+n; }
 async function sendReqs(items){
   if(!sheetReady(false)) return;
-  const ok=items.filter(x=>x.text && x.g>0 && x.c>0 && x.n>0 && x.area);
-  if(!ok.length){ toast('학년·반·번호·영역·내용을 모두 넣어 주세요.'); return; }
-  const rows=ok.map(x=>({id:newRid(), date:new Date().toLocaleString('ko-KR'), round:String(x.round||''), from:me(), to:x.to||lookupTeacher(x.g,x.c,x.area),
-    g:x.g, c:x.c, n:x.n, name:x.name||'', area:x.area, text:x.text, status:'요청', doneAt:'', memo:'', confirmAt:''}));
-  const body={action:'request', items:rows.map(r=>({id:r.id,round:r.round,to:r.to,g:r.g,c:r.c,n:r.n,name:r.name,area:r.area,text:r.text}))};
-  const at=Date.now(); rows.forEach(r=>{ r.pend={action:'request',status:'요청',at,body}; S.reqSeen[r.id]=r.status+'|'+r.text.length; S.reqs.push(r); });
+  const ok=items.filter(x=>x.text && x.field && (x.hak||x.name));
+  if(!ok.length){ toast('학생(학번 또는 "전체"), 분야, 오류 내용을 넣어 주세요.'); return; }
+  const rows=ok.map(x=>normRow({id:newRid(), date:'오늘', hak:x.hak||'', name:x.name||'', field:x.field, sub:x.sub||'', text:x.text, after:x.after||'', memo:x.memo||'', from:me()}));
+  const body={action:'request', items:rows.map(r=>({id:r.id,hak:r.hak,name:r.name,field:r.field,sub:r.sub,text:r.text,after:r.after,memo:r.memo}))};
+  const at=Date.now(); rows.forEach(r=>{ r.pend={action:'request',status:'요청',at,body}; S.reqSeen[r.id]=r.status+'|'+r.text.length+'|'+r.memo.length; S.reqs.push(r); });
   save(); refreshReqUI();
-  try{ await rqPost(body); toast('수정 요청 '+rows.length+'건을 보냈습니다.'+(rows.some(r=>!r.to)?' (받는 교사를 못 찾은 요청은 담당자만 볼 수 있습니다)':'')); setTimeout(()=>fetchReqs(true),4000); }
+  const nobody=rows.filter(r=>!responsible(r).length).length;
+  try{ await rqPost(body); toast('점검 요청 '+rows.length+'건을 시트에 적었습니다.'+(nobody?' ('+nobody+'건은 담당교사를 아직 모릅니다 — 그 선생님이 "내 담당"을 정하면 보입니다)':'')); setTimeout(()=>fetchReqs(true),4000); }
   catch(e){ rows.forEach(r=>r.failed=true); refreshReqUI(); toast('보내지 못했습니다. 인터넷 연결을 확인한 뒤 다시 보내 주세요.'); }
 }
-function lookupTeacher(g,c,area){ const cls=(parseInt(g,10)||0)+'-'+(parseInt(c,10)||0); const names=Array.from(new Set((S.reqWho||[]).filter(w=>w.cls===cls&&areaSame(w.item,area)).map(w=>w.teacher))); return names.length===1? names[0] : ''; }
-function teacherNames(){ return Array.from(new Set((S.reqWho||[]).map(w=>w.teacher).concat(S.reqs.map(r=>r.to)).concat(S.reqs.map(r=>r.from)).filter(Boolean))).sort((a,b)=>a.localeCompare(b,'ko')); }
-function areaNames(){ return Array.from(new Set(S.items.map(i=>i.name).concat((S.reqWho||[]).map(w=>w.item)).filter(Boolean))); }
-function rqAutofill(){
-  const g=+$('#rqG').value, c=+$('#rqC').value, n=+$('#rqN').value, area=$('#rqArea').value;
-  const s=S.students.find(x=>x.g===g&&x.c===c&&x.n===n); const nm=$('#rqName'); if(s && !nm.dataset.touched) nm.value=s.name;
-  const to=$('#rqTo'); if(!to.dataset.touched){ to.value=lookupTeacher(g,c,area); }
-  $('#rqToHint').textContent= to.value? '' : (area&&g&&c? '받는 교사를 자동으로 찾지 못했습니다. 이름을 골라 주세요(비워 두면 담당자만 봅니다).' : '');
+function fieldList(){ const f=(S.reqMeta&&S.reqMeta.fields)||[]; return f.length? f : ['자율·자치','진로','교과세특','자유학기','스포츠동아리','창체동아리','행동특성','독서','출결','수상']; }
+function subList(field){ const m=(S.reqMeta&&S.reqMeta.subs)||{}; const a=(m[field]||[]).slice(); if(/세특|교과/.test(field)) S.items.filter(i=>/^세특/.test(i.name)).forEach(i=>{ const s=i.name.replace(/^세특\s*:?\s*/,''); if(s&&s!=='과목명'&&!a.includes(s)) a.push(s); }); return a; }
+function suggestDuties(){ const out=[]; const fs=fieldList(); const fSe=fs.find(f=>/세특|교과/.test(f))||'교과세특'; const fFree=fs.find(f=>/자유학기/.test(f));
+  S.items.forEach(i=>{ if(/^세특/.test(i.name)){ const s=i.name.replace(/^세특\s*:?\s*/,''); if(s && s!=='과목명') out.push({field:fSe,sub:s}); } if(/^자유학기/.test(i.name) && fFree) out.push({field:fFree,sub:''}); });
+  return out; }
+function dutyHTML(){
+  const st=S.settings, ds=myDuties(); const cls=Array.from(new Set(classes().concat(['1-1','1-2','1-3','2-1','2-2','2-3','3-1','3-2','3-3'])));
+  return '<div class="row"><label>담임 학급 <select id="dHome"><option value="">담임 아님</option>'+cls.map(c=>'<option value="'+c+'"'+(st.homeroom===c?' selected':'')+'>'+esc(clsName(c))+'</option>').join('')+'</select></label></div>'
+    +'<div class="chips">'+(ds.map((d,i)=>'<span>'+esc(d.field)+(d.sub?' · '+esc(d.sub):' · (전부)')+'<b data-ddel="'+i+'">×</b></span>').join('')||'<span class="hint">담당 분야가 없습니다.</span>')+'</div>'
+    +'<div class="row"><select id="dField">'+fieldList().map(f=>'<option>'+esc(f)+'</option>').join('')+'</select><input id="dSub" list="dSubList" placeholder="상세 분야 (예: 사회, 주제(사회), 보드게임) — 비우면 그 분야 전부" style="min-width:260px"><datalist id="dSubList">'+subList(fieldList()[0]).map(s=>'<option value="'+esc(s)+'">').join('')+'</datalist><button class="b g s" id="dAdd">담당 추가</button>'+(suggestDuties().length?'<button class="b g s" id="dAuto">내 영역에서 자동으로</button>':'')+'</div>'
+    +'<div class="hint">점검 시트의 <b>오류(확인) 분야 · 상세 분야</b>가 내 담당과 같은 줄이 "내가 고칠 것"으로 옵니다. 담임 학급을 정하면 그 반 학생 줄이 반영되었을 때 "담임 확인" 알림이 옵니다.</div>';
 }
+function saveDuty(){ S.reqs.forEach(r=>{ S.reqSeen[r.id]=r.status+'|'+r.text.length+'|'+r.memo.length; }); S.reqInit=true; save(); if(S.settings.sheetUrl&&S.settings.teacher) sendStats(true); refreshReqUI(); }
 function refreshReqUI(){
   const n=inbox().length, w=waitConfirm().length, chip=$('#rchip');
-  if(S.settings.sheetUrl && (n||w)){ chip.style.display='inline-block'; chip.textContent='🛠 받은 요청 '+n+(w?' · ✔ 수정 완료 '+w:''); } else { chip.style.display='none'; chip.classList.remove('flash'); }
+  if(S.settings.sheetUrl && (n||w)){ chip.style.display='inline-block'; chip.textContent='🛠 고칠 것 '+n+(w?' · ✔ 확인할 것 '+w:''); } else { chip.style.display='none'; chip.classList.remove('flash'); }
   const nb=$('#nav [data-tab=req]'); if(nb) nb.textContent='수정 요청'+(n+w? ' ('+(n+w)+')':'');
   const typing=document.activeElement && /TEXTAREA|INPUT|SELECT/.test(document.activeElement.tagName) && M.contains(document.activeElement);
   if(UI.tab==='req' && !typing) renderReq();
@@ -1101,64 +1120,78 @@ function refreshReqUI(){
 }
 function renderReq(){
   const st=S.settings;
-  if(!st.sheetUrl||!st.teacher){ $('#main').innerHTML='<div class="box"><h2>수정 요청 (생기부 메신저)</h2><div class="steps">점검(담임·담당자) → 수정(작성 교사) → 확인이 이 화면에서 오갑니다.<br>먼저 <b>설정·백업 → 담당자 시트 연결</b>에 교사 이름·웹앱 주소·암호를 넣어 주세요. 담당자 시트 만드는 법은 설명서 7번에 있습니다.</div><button class="b" data-go="set">설정·백업으로 가기</button></div>'; return; }
+  if(!st.sheetUrl||!st.teacher){ $('#main').innerHTML='<div class="box"><h2>수정 요청 (생기부 메신저)</h2><div class="steps">학교 점검 시트로 <b>요청 → 담당교사 반영 → 담임 확인 → 담당자 확인</b>이 이 화면에서 오갑니다.<br>담당자에게 받은 <b>학교 전용 링크</b>로 열거나, <b>설정·백업 → 담당자 시트 연결</b>에 교사 이름·웹앱 주소·암호를 넣어 주세요.</div><button class="b" data-go="set">설정·백업으로 가기</button></div>'; return; }
   const perm=('Notification' in window)? Notification.permission : 'none';
-  let h='<div class="box"><div class="row"><button class="b" id="rqFetch">새로 고침</button>'+(perm!=='granted'?'<button class="b g s" id="rqNoti">알림 켜기 (요청·수정 완료 때 팝업)</button>':'<span class="tag">알림 켜짐</span>')
-    +(/^https:\/\//.test(st.sheetView)?'<a class="b g s" style="text-decoration:none" target="_blank" rel="noopener" href="'+esc(st.sheetView)+'">담당자 시트 열기</a>':'')
-    +'<span class="hint">나: <b>'+esc(st.teacher)+'</b>'+(st.admin?' (담당자 모드)':'')+' · 마지막 확인 '+(st.lastReqFetch? new Date(st.lastReqFetch).toLocaleTimeString('ko-KR'):'없음')+' · 열어 둔 동안 1분 30초마다 자동 확인</span></div>'
+  const th='<tr><th>점검일</th><th>학생</th><th>분야 · 상세</th><th class="l">오류 내용 → 변경 후</th><th class="l">비고</th><th>상태</th><th></th></tr>';
+  const row=(r,btn)=>'<tr><td>'+esc(r.date)+'</td><td>'+esc(rqWho(r))+'</td><td>'+esc(r.field)+(r.sub?'<br><span class="hint">'+esc(r.sub)+'</span>':'')+'</td><td class="l" style="white-space:pre-wrap">'+rqTxt(r)+'</td><td class="l hint" style="white-space:pre-wrap">'+esc(r.memo)+'</td><td>'+stTag(r)+pendNote(r)+(r.skipDone?'<br><b class="neg" style="font-size:12px">담당교사 반영 체크 없음</b>':'')+'</td><td style="white-space:nowrap">'+(btn?btn(r):'')+'</td></tr>';
+  const tbl=(list,btn)=>'<div style="overflow-x:auto"><table>'+th+list.map(r=>row(r,btn)).join('')+'</table></div>';
+  let h='<div class="box"><div class="row"><button class="b" id="rqFetch">새로 고침</button>'+(perm!=='granted'?'<button class="b g s" id="rqNoti">알림 켜기 (요청·반영·확인 때 팝업)</button>':'<span class="tag">알림 켜짐</span>')
+    +(/^https:\/\//.test(st.sheetView)?'<a class="b g s" style="text-decoration:none" target="_blank" rel="noopener" href="'+esc(st.sheetView)+'">점검 시트 열기</a>':'')
+    +'<span class="hint">나: <b>'+esc(st.teacher)+'</b>'+(st.homeroom?' · 담임 '+esc(clsName(st.homeroom)):'')+(st.admin?' · 담당자 모드':'')+' · 시트: '+esc(S.reqSheetName||'-')+' · 마지막 확인 '+(st.lastReqFetch? new Date(st.lastReqFetch).toLocaleTimeString('ko-KR'):'없음')+' (열어 둔 동안 1분 30초마다)</span></div>'
     +(RQ.err?'<div class="m-over">⚠ '+esc(RQ.err)+'</div>':'')+'</div>';
-  // ① 받은 요청
-  const ib=inbox().sort((a,b)=>String(a.date).localeCompare(String(b.date)));
-  h+='<div class="box"><h2>① 받은 수정 요청 — 내가 고칠 것 '+ib.length+'건</h2>';
-  if(!ib.length) h+='<div class="hint">받은 요청이 없습니다.</div>';
-  else h+='<div style="overflow-x:auto"><table><tr><th>차수</th><th>학생</th><th>영역</th><th class="l">요청 내용</th><th>보낸 사람</th><th></th></tr>'+ib.map(r=>'<tr><td>'+esc(r.round||'-')+'</td><td>'+esc(rqWho(r))+'</td><td>'+esc(r.area)+'</td><td class="l" style="white-space:pre-wrap">'+(r.status==='재요청'?'<span class="st open">재요청</span> ':'')+esc(r.text)+'</td><td>'+esc(r.from||'담당자')+'<br><span class="hint">'+esc(r.date)+'</span></td><td style="white-space:nowrap"><button class="b g s" data-rqgo="'+esc(r.id)+'">고치러 가기</button> <button class="b s" data-rqdone="'+esc(r.id)+'">수정 완료</button></td></tr>').join('')+'</table></div><div class="hint">"고치러 가기" → 그 학생 칸이 열립니다. 고친 뒤 <b>나이스용 복사</b>를 누르면 수정 완료를 보낼지 바로 묻습니다. 나이스에서 직접 고치셨으면 <b>수정 완료</b>만 누르세요.</div>';
-  h+='</div>';
-  // ② 보내기
-  const lr=st.lastRound||'1';
-  h+='<div class="box"><h2>② 수정 요청 보내기 — 점검(담임·담당자)</h2><div class="rqform">'
-    +'<label>차수<select id="rqRound">'+['1','2','3','4','5'].map(x=>'<option value="'+x+'"'+(x===lr?' selected':'')+'>'+x+'차 점검</option>').join('')+'</select></label>'
+  const fl=S.reqs.filter(r=>r.failed);
+  if(fl.length) h+='<div class="box" style="border:2px solid var(--red)"><h2 class="neg">⚠ 시트에 안 들어간 것 '+fl.length+'건 — 인터넷 확인 후 다시 보내 주세요</h2>'+tbl(fl,r=>'<button class="b s" data-rqresend="'+esc(r.id)+'">다시 보내기</button>')+'</div>';
+  // 내 담당
+  const ds=myDuties();
+  h+='<div class="box"'+(!ds.length&&!st.homeroom&&!st.admin?' style="border:2px solid var(--org)"':'')+'><details'+(!ds.length&&!st.homeroom&&!st.admin?' open':'')+'><summary><b>내 담당</b> — '+(ds.length? ds.map(d=>esc(d.field)+(d.sub?'·'+esc(d.sub):'')).join(', ') : '<span class="neg">아직 안 정함 — 먼저 정해 주세요</span>')+(st.homeroom?' · 담임 '+esc(clsName(st.homeroom)):'')+'</summary>'+dutyHTML()+'</details></div>';
+  // ① 내가 고칠 것
+  const ib=inbox();
+  h+='<div class="box"><h2>① 내가 고칠 것 — '+ib.length+'건</h2>'+(ib.length? tbl(ib,r=>'<button class="b g s" data-rqgo="'+esc(r.id)+'">고치러 가기</button> <button class="b s" data-rqdone="'+esc(r.id)+'">반영 완료</button>')+'<div class="hint">"고치러 가기" → 그 학생 칸. 고친 뒤 <b>나이스용 복사</b>를 누르면 반영 완료를 바로 묻습니다. 나이스에서 직접 고쳤으면 <b>반영 완료</b>만 누르세요(시트 "담당교사 반영 날짜"에 오늘 날짜가 들어갑니다).</div>' : '<div class="hint">'+(ds.length?'고칠 요청이 없습니다.':'위 "내 담당"을 정하면 내 분야 요청이 여기에 뜹니다.')+'</div>')+'</div>';
+  // ② 담임 확인
+  if(st.homeroom){ const mine=S.reqs.filter(rqHome); const wd=mine.filter(rqDone), wo=mine.filter(rqOpen);
+    h+='<div class="box"><h2>② 담임 확인 — '+esc(clsName(st.homeroom))+' · 반영됨(확인 대기) '+wd.length+' · 미반영 '+wo.length+'</h2>'
+      +(wd.length? '<h3>반영됨 — 나이스에서 보고 확인해 주세요</h3>'+tbl(wd,r=>'<button class="b s" data-rqhr="'+esc(r.id)+'">담임 확인</button> <button class="b r s" data-rqre="'+esc(r.id)+'">재요청</button>') : '')
+      +(wo.length? '<h3>아직 반영 안 됨</h3>'+tbl(wo,r=>'<span class="hint">담당: '+esc(responsible(r).join(', ')||'미정')+'</span>') : '')
+      +(!wd.length&&!wo.length?'<div class="hint">우리 반 요청이 없습니다.</div>':'')+'</div>'; }
+  // ③ 보내기
+  const f0=fieldList()[0];
+  h+='<div class="box"><h2>③ 점검 요청 보내기</h2><div class="rqform">'
     +'<label>학년<input id="rqG" type="number" min="1" max="6"></label><label>반<input id="rqC" type="number" min="1"></label><label>번호<input id="rqN" type="number" min="1"></label>'
-    +'<label>이름<input id="rqName" type="text"></label>'
-    +'<label>영역<input id="rqArea" type="text" list="rqAreaList" placeholder="예: 세특: 도덕, 행특"></label>'
-    +'<label>받는 교사<input id="rqTo" type="text" list="rqTList" placeholder="자동으로 찾음"></label></div>'
-    +'<datalist id="rqAreaList">'+areaNames().map(a=>'<option value="'+esc(a)+'">').join('')+'</datalist><datalist id="rqTList">'+teacherNames().map(a=>'<option value="'+esc(a)+'">').join('')+'</datalist>'
+    +'<label>이름 (전체면 "전체")<input id="rqName" type="text"></label>'
+    +'<label>오류(확인) 분야<select id="rqField">'+fieldList().map(f=>'<option>'+esc(f)+'</option>').join('')+'</select></label>'
+    +'<label>상세 분야<input id="rqSub" type="text" list="rqSubList" placeholder="예: 사회"></label></div>'
+    +'<datalist id="rqSubList">'+subList(f0).map(s=>'<option value="'+esc(s)+'">').join('')+'</datalist>'
     +'<div class="hint" id="rqToHint" style="color:var(--org)"></div>'
-    +'<textarea id="rqText" rows="2" placeholder="고칠 내용 (예: 둘째 문장 종결어미 ~함으로 / 대학명 삭제)"></textarea>'
-    +'<div class="row"><button class="b" id="rqSend">보내기</button><span class="hint">받는 교사는 학급·영역으로 자동으로 찾습니다(그 선생님이 이 프로그램에서 현황을 보낸 적이 있어야 함).</span></div>'
-    +'<details><summary>여러 건 한꺼번에 보내기 (엑셀에서 붙여넣기)</summary><div class="hint">한 줄에 한 건: <b>학년 · 반 · 번호 · 이름 · 영역 · 내용</b> (엑셀 6칸을 복사해 붙여넣기). 차수는 위에서 고른 것으로 갑니다.</div><textarea id="rqBulk" rows="4"></textarea><div class="row"><button class="b g" id="rqBulkSend">여러 건 보내기</button></div></details></div>';
-  // ③ 보낸 요청
-  const mine=S.reqs.filter(r=>rqFromMe(r)); const wd=mine.filter(rqDone), wo=mine.filter(rqOpen), wc=mine.filter(rqClosed);
-  const row=(r,btn)=>'<tr><td>'+esc(r.round||'-')+'</td><td>'+esc(rqWho(r))+'</td><td>'+esc(r.area)+'</td><td>'+esc(r.to||'(받는 교사 미정)')+'</td><td class="l" style="white-space:pre-wrap">'+esc(r.text)+(r.memo?'<div class="hint">💬 '+esc(r.memo)+'</div>':'')+'</td><td>'+stTag(r)+pendNote(r)+'<br><span class="hint">'+esc(rqDone(r)?r.doneAt:(rqClosed(r)?r.confirmAt:r.date))+'</span></td><td style="white-space:nowrap">'+btn(r)+'</td></tr>';
-  const th='<tr><th>차수</th><th>학생</th><th>영역</th><th>받는 교사</th><th class="l">요청 내용</th><th>상태</th><th></th></tr>';
-  h+='<div class="box"><h2>③ 내가 보낸 요청 — 수정 완료(확인 대기) '+wd.length+' · 처리 중 '+wo.length+' · 끝 '+wc.length+'</h2>';
-  if(!mine.length) h+='<div class="hint">보낸 요청이 없습니다.</div>';
-  if(wd.length) h+='<h3>수정 완료 — 확인해 주세요</h3><div style="overflow-x:auto"><table>'+th+wd.map(r=>row(r,r=>'<button class="b s" data-rqok="'+esc(r.id)+'">확인</button> <button class="b r s" data-rqre="'+esc(r.id)+'">재요청</button>')).join('')+'</table></div>';
-  if(wo.length) h+='<h3>아직 안 고침</h3><div style="overflow-x:auto"><table>'+th+wo.map(r=>row(r,()=>'' )).join('')+'</table></div>';
-  if(wc.length) h+='<details><summary>끝난 요청 '+wc.length+'건</summary><table>'+th+wc.map(r=>row(r,()=>'')).join('')+'</table></details>';
-  h+='</div>';
-  // ④ 담당자
+    +'<div class="rqform" style="grid-template-columns:2fr 2fr 1fr"><label>오류(확인) 내용<input id="rqText" type="text" placeholder="예: 억혀"></label><label>변경 후<input id="rqAfter" type="text" placeholder="예: 얽혀 (오타)"></label><label>비고<input id="rqMemo" type="text" placeholder="예: 3학년 2반도 해당"></label></div>'
+    +'<div class="row"><button class="b" id="rqSend">시트에 적기</button><span class="hint">점검 시트에 한 줄이 그대로 들어가고, 담당교사에게 알림이 갑니다. 시트에 직접 적어도 똑같이 갑니다.</span></div>'
+    +'<details><summary>여러 건 한꺼번에 (엑셀에서 붙여넣기)</summary><div class="hint">한 줄에 한 건: <b>학번 · 이름 · 분야 · 상세 분야 · 오류 내용 · 변경 후</b> (엑셀 6칸을 복사해 붙여넣기)</div><textarea id="rqBulk" rows="4"></textarea><div class="row"><button class="b g" id="rqBulkSend">여러 건 적기</button></div></details></div>';
+  // ④ 내가 보낸 요청
+  const mine=S.reqs.filter(rqFromMe);
+  if(mine.length) h+='<div class="box"><details><summary><b>④ 내가 보낸 요청 '+mine.length+'건</b> (미반영 '+mine.filter(rqOpen).length+' · 반영 '+mine.filter(rqDone).length+' · 담임 확인 '+mine.filter(rqHr).length+' · 끝 '+mine.filter(rqClosed).length+')</summary>'+tbl(mine,r=>rqDone(r)&&!r.g?'<button class="b r s" data-rqre="'+esc(r.id)+'">재요청</button>':'')+'</details></div>';
+  // ⑤ 담당자
   if(st.admin){
-    const all=S.reqs; const rounds=Array.from(new Set(all.map(r=>r.round||'-'))).sort();
-    h+='<div class="box"><h2>④ 담당자 현황 — 전체 '+all.length+'건</h2>';
-    if(!all.length) h+='<div class="hint">요청이 없습니다.</div>';
-    rounds.forEach(rd=>{ const rs=all.filter(r=>(r.round||'-')===rd); const ts=Array.from(new Set(rs.map(r=>r.to||'(미정)'))).sort((a,b)=>a.localeCompare(b,'ko'));
-      h+='<h3>'+esc(rd)+'차 점검 — '+rs.length+'건 (확인 '+rs.filter(rqClosed).length+' · 수정 완료 '+rs.filter(rqDone).length+' · 미처리 '+rs.filter(rqOpen).length+')</h3><table><tr><th class="l">받는 교사</th><th>요청</th><th>미처리</th><th>수정 완료</th><th>확인</th></tr>'
-        +ts.map(t=>{ const x=rs.filter(r=>(r.to||'(미정)')===t); const o=x.filter(rqOpen).length; return '<tr><td class="l">'+esc(t)+'</td><td>'+x.length+'</td><td class="'+(o?'neg':'')+'">'+o+'</td><td>'+x.filter(rqDone).length+'</td><td>'+x.filter(rqClosed).length+'</td></tr>'; }).join('')+'</table>'; });
-    h+='<div class="row"><button class="b" id="rqNag">미처리 독촉 메시지 복사</button><span class="hint">선생님별 미처리 목록을 글로 만들어 복사합니다. 업무메신저에 붙여넣어 보내세요.</span></div>'
-      +'<h3>개인정보 지우기 (담당자 시트)</h3><div class="row"><button class="b r s" id="rqPurgeClosed">끝난(확인) 요청 시트에서 지우기</button><button class="b r s" id="rqPurgeAll">수정 요청 전부 지우기</button><span class="hint">점검이 끝나면 학생 이름·요청 내용이 시트에 남지 않게 지우세요. 되돌릴 수 없습니다.</span></div></div>';
+    const all=S.reqs; const op=all.filter(rqOpen), dn=all.filter(rqDone), hr=all.filter(rqHr), cl=all.filter(rqClosed), sk=all.filter(r=>r.skipDone&&!rqClosed(r));
+    h+='<div class="box"><h2>⑤ 담당자 — 전체 '+all.length+'건 · 미반영 '+op.length+' · 담임 확인 대기 '+dn.length+' · 담당자 확인 대기 '+hr.length+' · 끝 '+cl.length+'</h2>';
+    const grp={}; all.forEach(r=>{ const k=r.field+(r.sub?' · '+r.sub:''); (grp[k]=grp[k]||[]).push(r); });
+    h+='<table><tr><th class="l">분야 · 상세</th><th class="l">담당교사</th><th>미반영</th><th>담임 대기</th><th>담당자 대기</th><th>끝</th></tr>'+Object.keys(grp).sort((a,b)=>a.localeCompare(b,'ko')).map(k=>{ const x=grp[k]; const o=x.filter(rqOpen).length; return '<tr><td class="l">'+esc(k)+'</td><td class="l">'+esc(responsible(x[0]).join(', ')||'(미정)')+'</td><td class="'+(o?'neg':'')+'">'+o+'</td><td>'+x.filter(rqDone).length+'</td><td>'+x.filter(rqHr).length+'</td><td>'+x.filter(rqClosed).length+'</td></tr>'; }).join('')+'</table>';
+    if(hr.length||dn.filter(r=>!r.g).length){ const ready=hr.concat(dn.filter(r=>!r.g)); h+='<h3>담당자 확인할 것 '+ready.length+'건</h3>'+tbl(ready,r=>'<button class="b s" data-rqad="'+esc(r.id)+'">담당자 확인</button> <button class="b r s" data-rqre="'+esc(r.id)+'">재요청</button>')+'<div class="row"><button class="b g s" id="rqAdAll">'+ready.length+'건 모두 담당자 확인</button></div>'; }
+    if(sk.length) h+='<h3 class="neg">담당교사 반영 체크 없이 넘어간 줄 '+sk.length+'건</h3>'+tbl(sk,()=>'' );
+    if(op.length) h+='<h3>미반영 '+op.length+'건</h3>'+tbl(op,r=>'<span class="hint">'+esc(responsible(r).join(', ')||'담당 미정')+'</span>');
+    h+='<div class="row" style="margin-top:8px"><button class="b" id="rqNag">미처리 독촉 메시지 복사</button><span class="hint">담당교사별 미반영 + 담임별 확인 대기 목록을 글로 만들어 복사합니다. 업무메신저에 붙여넣으세요.</span></div>'
+      +'<h3>개인정보 지우기 (점검 시트)</h3><div class="row"><button class="b r s" id="rqPurgeClosed">끝난 줄 시트에서 지우기</button><button class="b r s" id="rqPurgeAll">점검 줄 전부 지우기</button><span class="hint">점검이 끝나면 학생 이름·오류 내용이 시트에 남지 않게 지우세요. 되돌릴 수 없습니다.</span></div></div>';
   }
   $('#main').innerHTML=h;
 }
+function rqAutofill(){
+  const g=+$('#rqG').value, c=+$('#rqC').value, n=+$('#rqN').value, field=$('#rqField').value, sub=$('#rqSub').value;
+  const s=S.students.find(x=>x.g===g&&x.c===c&&x.n===n); const nm=$('#rqName'); if(s && !nm.dataset.touched) nm.value=s.name;
+  const r={field,sub,g,c,n}; const t=responsible(r), h=g&&c? homeTeacher(r) : '';
+  $('#rqToHint').textContent=(field? (t.length? '담당교사: '+t.join(', ') : '이 분야·상세의 담당교사를 아직 모릅니다(그 선생님이 "내 담당"을 정하면 보입니다).') : '')+(h?' · 담임: '+h:'');
+}
 function nagText(){
-  const op=S.reqs.filter(rqOpen); if(!op.length) return '';
-  const by={}; op.forEach(r=>{ const t=r.to||'(받는 교사 미정)'; (by[t]=by[t]||[]).push(r); });
-  return '[생기부 수정 요청 미처리 안내] '+new Date().toLocaleDateString('ko-KR')+'\n'+Object.keys(by).sort((a,b)=>a.localeCompare(b,'ko')).map(t=>'\n■ '+t+' 선생님 '+by[t].length+'건\n'+by[t].map(r=>' - '+(r.round?r.round+'차 ':'')+rqWho(r)+' '+r.area+': '+r.text.split('\n')[0].slice(0,50)).join('\n')).join('\n')+'\n\n생기부 도우미 "수정 요청" 탭에서 고친 뒤 [수정 완료]를 눌러 주세요.';
+  const op=S.reqs.filter(rqOpen), dn=S.reqs.filter(r=>rqDone(r)&&r.g); if(!op.length&&!dn.length) return '';
+  const by={}; op.forEach(r=>{ const ts=responsible(r); (ts.length?ts:['('+r.field+(r.sub?' · '+r.sub:'')+' 담당 선생님)']).forEach(t=>{ (by[t]=by[t]||[]).push(r); }); });
+  const hb={}; dn.forEach(r=>{ const t=homeTeacher(r)||(r.g+'-'+r.c+' 담임 선생님'); (hb[t]=hb[t]||[]).push(r); });
+  let s='[생활기록부 점검 미처리 안내] '+new Date().toLocaleDateString('ko-KR')+'\n';
+  if(op.length) s+='\n▶ 반영 안 된 요청 (담당교사)\n'+Object.keys(by).sort((a,b)=>a.localeCompare(b,'ko')).map(t=>'■ '+t+' '+by[t].length+'건\n'+by[t].map(r=>' - '+rqWho(r)+' '+r.area+': '+r.text.slice(0,40)+(r.after?' → '+r.after.slice(0,30):'')).join('\n')).join('\n');
+  if(dn.length) s+='\n\n▶ 반영됨 — 담임 확인 기다리는 줄\n'+Object.keys(hb).sort((a,b)=>a.localeCompare(b,'ko')).map(t=>'■ '+t+' '+hb[t].length+'건\n'+hb[t].map(r=>' - '+rqWho(r)+' '+r.area).join('\n')).join('\n');
+  return s+'\n\n생기부 도우미 "수정 요청" 탭에서 반영 완료 / 담임 확인을 눌러 주세요. (시트에 직접 날짜를 적어도 됩니다)';
 }
 
 // 담당자 시트를 바꾸면(테스트 → 진짜) 이전 시트에서 받은 수정 요청 기록을 비우고 새로 연결
 function switchSheet(url, key){
   const st=S.settings, changed=url!==st.sheetUrl;
-  if(changed && st.sheetUrl){ S.reqs=[]; S.reqSeen={}; S.reqInit=false; S.reqWho=[]; st.lastSent=0; st.lastReqFetch=0; }
+  if(changed && st.sheetUrl){ S.reqs=[]; S.reqSeen={}; S.reqInit=false; S.reqWho=[]; S.reqDuties=[]; S.reqMeta={fields:[],subs:{}}; st.lastSent=0; st.lastReqFetch=0; }
   st.sheetUrl=url; if(key!==undefined) st.sheetKey=key; save();
   if(changed && url && st.teacher){ sendStats(true); fetchReqs(true); }
   return changed;
@@ -1195,12 +1228,15 @@ const M=$('#main');
 M.addEventListener('input',e=>{
   const t=e.target; const card=t.closest('.card');
   if(card && t.classList.contains('ta')){ onCardInput(card); return; }
-  if(['rqG','rqC','rqN','rqArea'].includes(t.id)){ rqAutofill(); return; }
-  if(t.id==='rqName'||t.id==='rqTo'){ t.dataset.touched=t.value? '1' : ''; if(!t.value) delete t.dataset.touched; if(t.id==='rqTo') rqAutofill(); return; }
+  if(['rqG','rqC','rqN','rqSub'].includes(t.id)){ rqAutofill(); return; }
+  if(t.id==='rqName'){ if(t.value) t.dataset.touched='1'; else delete t.dataset.touched; return; }
+  if(t.id==='dSub') return;
   if(t.id==='q2'){ clearTimeout(gsT); gsT=setTimeout(()=>{ UI.q=t.value; UI.sid=''; renderSearch(); const q=$('#q2'); if(q){ q.focus(); q.setSelectionRange(q.value.length,q.value.length); } },300); }
 });
 M.addEventListener('focusout',e=>{ const t=e.target; const card=t.closest&&t.closest('.card'); if(card && t.classList.contains('ta')) autoFix(card); });
-M.addEventListener('paste',e=>{ const t=e.target; const card=t.closest&&t.closest('.card'); if(card && t.classList.contains('ta')) setTimeout(()=>{ onCardInput(card); autoFix(card); },0); });
+M.addEventListener('paste',e=>{ const t=e.target;
+  if(t && t.id==='roster'){ const txt=(e.clipboardData||window.clipboardData)? (e.clipboardData||window.clipboardData).getData('text') : '';
+    if(txt){ e.preventDefault(); const n=addRoster(rosterRowsFromText(txt)); if(n){ render(); if(UI.tab==='set'){ const r=$('#roster'); if(r) r.placeholder='계속 붙여넣으면 다른 학년·반도 이어서 들어갑니다.'; } } else { t.value=txt; } } return; } const card=t.closest&&t.closest('.card'); if(card && t.classList.contains('ta')) setTimeout(()=>{ onCardInput(card); autoFix(card); },0); });
 M.addEventListener('change',e=>{
   const t=e.target, Z=S.sisu, st=S.settings;
   const card=t.closest('.card');
@@ -1227,13 +1263,15 @@ M.addEventListener('change',e=>{
   if(t.id==='stKey'){ st.sheetKey=t.value.trim(); save(); renderSet(); return; }
   if(t.id==='stView'){ const v=t.value.trim(); st.sheetView=/^https:\/\//.test(v)? v : ''; save(); return; }
   if(t.id==='stAuto'){ st.autoSend=t.checked; save(); return; }
+  if(t.id==='rqField'){ const dl=$('#rqSubList'); if(dl) dl.innerHTML=subList(t.value).map(s=>'<option value="'+esc(s)+'">').join(''); rqAutofill(); return; }
+  if(t.id==='dField'){ const dl=$('#dSubList'); if(dl) dl.innerHTML=subList(t.value).map(s=>'<option value="'+esc(s)+'">').join(''); return; }
+  if(t.id==='dHome'){ st.homeroom=t.value; saveDuty(); toast(t.value? clsName(t.value)+' 담임으로 정했습니다.' : '담임 아님으로 정했습니다.'); return; }
   if(t.id==='stAsk'){ st.askDone=t.checked; save(); return; }
-  if(t.id==='stFixed'){ st.sendFixed=t.checked; save(); return; }
   if(t.id==='stAutoLock'){ st.autoLock=+t.value; save(); return; }
   if(t.id==='stAdmin'){ st.admin=t.checked; save(); fetchReqs(true); return; }
   if(t.id==='readFile' && t.files[0]){ planReading(t.files[0]).catch(()=>toast('독서기록 파일을 읽지 못했습니다. 엑셀(.xlsx)이나 CSV 파일인지 확인해 주세요.')); return; }
   if(t.id==='xlsIn' && t.files[0]){ importXlsx(t.files[0]).catch(()=>toast('엑셀 파일을 읽지 못했습니다.')); return; }
-  if((t.id==='rosterFile'||t.id==='rosterFile0') && t.files[0]){ readRosterFile(t.files[0]).then(()=>render()).catch(()=>toast('명단 파일을 읽지 못했습니다. 엑셀(.xlsx)이나 CSV인지 확인해 주세요.')); return; }
+  if((t.id==='rosterFile'||t.id==='rosterFile0') && t.files.length){ const fs=Array.from(t.files); (async()=>{ for(const f of fs){ await readRosterFile(f); } })().then(()=>{ render(); if(fs.length>1) toast(fs.length+'개 파일에서 명단을 넣었습니다 · 전체 '+S.students.length+'명 ('+classes().length+'개 학급)'); }).catch(()=>toast('명단 파일을 읽지 못했습니다. 엑셀(.xlsx)이나 CSV인지 확인해 주세요.')); return; }
   if(t.id==='jsonIn' && t.files[0]){ t.files[0].text().then(txt=>{ const d=JSON.parse(txt); if(!d||!Array.isArray(d.students)||!d.records||!Array.isArray(d.items)) throw 0; if(!confirm('지금 자료를 모두 지우고 이 파일 내용으로 바꿉니다. 계속할까요?')) return; S=Object.assign(freshState(),d); S.settings=Object.assign(freshState().settings,d.settings||{}); S.sisu=Object.assign(freshState().sisu,d.sisu||{}); save(); toast('불러왔습니다.'); render(); }).catch(()=>toast('이 프로그램의 백업 파일이 아닙니다.')); return; }
   if(t.id==='ruleIn' && t.files[0]){ t.files[0].text().then(txt=>{ const d=JSON.parse(txt); if(!d||!Array.isArray(d.items)) throw 0;
       d.items.forEach(n=>{ if(!n||!n.name||!(+n.limit>0)) return; const it=S.items.find(i=>i.name===n.name); if(it) it.limit=Math.floor(+n.limit); else S.items.push({key:'i'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),name:String(n.name),limit:Math.floor(+n.limit),mine:true}); });
@@ -1244,10 +1282,15 @@ M.addEventListener('change',e=>{
 });
 M.addEventListener('click',async e=>{
   const t=e.target, Z=S.sisu;
-  const g=t.closest('[data-go]'); if(g){ go(g.dataset.go); return; }
+  const g=t.closest('[data-go]'); if(g){ go(g.dataset.go); if(g.dataset.focus){ const el=$('#'+g.dataset.focus); if(el){ el.scrollIntoView&&el.scrollIntoView({block:'center'}); el.focus(); } } return; }
   if(t.dataset.rqdone){ markDone(t.dataset.rqdone,true); return; }
   if(t.dataset.rqresend){ resendReq(t.dataset.rqresend); return; }
-  if(t.dataset.rqok){ confirmReq(t.dataset.rqok); return; }
+  if(t.dataset.rqhr){ hrOk(t.dataset.rqhr); return; }
+  if(t.dataset.rqad){ adminOk(t.dataset.rqad); return; }
+  if(t.id==='rqAdAll'){ const ready=S.reqs.filter(r=>rqHr(r)||(rqDone(r)&&!r.g)); if(!ready.length||!confirm(ready.length+'건을 모두 담당자 확인으로 적을까요?')) return; for(const r of ready) await rqAct(r,'adminok',{},'확인'); toast(ready.length+'건 담당자 확인을 적었습니다.'); return; }
+  if(t.id==='dAdd'){ const f=$('#dField').value, sb=$('#dSub').value.trim(); S.settings.duties=myDuties().concat([{field:f,sub:sb}]).filter((d,i,a)=>a.findIndex(x=>x.field===d.field&&x.sub===d.sub)===i); saveDuty(); toast('담당을 더했습니다: '+f+(sb?' · '+sb:'')); return; }
+  if(t.id==='dAuto'){ S.settings.duties=myDuties().concat(suggestDuties()).filter((d,i,a)=>a.findIndex(x=>x.field===d.field&&x.sub===d.sub)===i); saveDuty(); toast('내 영역에서 담당을 정했습니다. 동아리 담당이면 직접 더해 주세요.'); return; }
+  if(t.dataset.ddel!==undefined){ const ds=myDuties().slice(); ds.splice(+t.dataset.ddel,1); S.settings.duties=ds; saveDuty(); return; }
   if(t.dataset.rqre){ reopenReq(t.dataset.rqre); return; }
   if(t.dataset.rqgo){ const r=S.reqs.find(x=>x.id===t.dataset.rqgo); const it=r&&matchItem(r.area); const s=r&&S.students.find(x=>sid(x)===rqSid(r));
     if(!s){ toast('내 명단에 없는 학생입니다. 나이스에서 고친 뒤 [수정 완료]를 눌러 주세요.'); return; }
@@ -1255,18 +1298,16 @@ M.addEventListener('click',async e=>{
     UI.cls=clsOf(s); UI.item=it.key; UI.filter='req'; go('write'); const c=$('.card[data-sid="'+sid(s)+'"][data-ik="'+it.key+'"]'); if(c){ c.scrollIntoView&&c.scrollIntoView({block:'center'}); $('.ta',c).focus(); } return; }
   if(t.id==='rqFetch'){ fetchReqs(false); return; }
   if(t.id==='rqNoti'){ if(!('Notification' in window)){ toast('이 브라우저는 알림을 지원하지 않습니다.'); return; } Notification.requestPermission().then(p=>{ toast(p==='granted'?'알림을 켰습니다. 요청·수정 완료 때 팝업이 뜹니다.':'알림이 차단되어 있습니다. 주소창 왼쪽 자물쇠에서 알림을 허용해 주세요.'); renderReq(); }); return; }
-  if(t.id==='rqSend'){ const rd=$('#rqRound').value; S.settings.lastRound=rd;
-    sendReqs([{round:rd,g:+$('#rqG').value,c:+$('#rqC').value,n:+$('#rqN').value,name:$('#rqName').value.trim(),area:$('#rqArea').value.trim(),to:$('#rqTo').value.trim(),text:$('#rqText').value.trim()}])
-      .then(()=>{ const x=$('#rqText'); if(x){ x.value=''; ['rqN','rqName'].forEach(i=>{ const e=$('#'+i); if(e){ e.value=''; delete e.dataset.touched; } }); } });
+  if(t.id==='rqSend'){ const g=+$('#rqG').value, c=+$('#rqC').value, n=+$('#rqN').value, nm=$('#rqName').value.trim();
+    const hak= g&&c&&n? (g+pad2(c)+pad2(n)) : '';
+    if(!hak && !nm){ toast('학년·반·번호를 넣거나, 여러 학생이면 이름에 "전체"라고 적어 주세요.'); return; }
+    sendReqs([{hak,name:nm,field:$('#rqField').value,sub:$('#rqSub').value.trim(),text:$('#rqText').value.trim(),after:$('#rqAfter').value.trim(),memo:$('#rqMemo').value.trim()}])
+      .then(()=>{ ['rqText','rqAfter','rqMemo','rqN','rqName'].forEach(i=>{ const e=$('#'+i); if(e){ e.value=''; delete e.dataset.touched; } }); });
     return; }
-  if(t.id==='rqBulkSend'){ const rd=$('#rqRound').value; S.settings.lastRound=rd;
-    const items=String($('#rqBulk').value).split(/\n/).map(l=>l.split('\t')).filter(c=>c.length>=6).map(c=>({round:rd,g:parseInt(c[0],10),c:parseInt(c[1],10),n:parseInt(c[2],10),name:c[3].trim(),area:c[4].trim(),text:c.slice(5).join(' ').trim()}));
-    if(!items.length){ toast('엑셀 6칸(학년·반·번호·이름·영역·내용)을 복사해 붙여넣어 주세요.'); return; }
+  if(t.id==='rqBulkSend'){
+    const items=String($('#rqBulk').value).replace(/\r/g,'').split('\n').map(l=>l.split('\t')).filter(c=>c.length>=5).map(c=>({hak:String(c[0]).replace(/\D/g,''),name:(c[1]||'').trim(),field:(c[2]||'').trim(),sub:(c[3]||'').trim(),text:(c[4]||'').trim(),after:(c[5]||'').trim()}));
+    if(!items.length){ toast('엑셀 6칸(학번·이름·분야·상세 분야·오류 내용·변경 후)을 복사해 붙여넣어 주세요.'); return; }
     sendReqs(items).then(()=>{ const x=$('#rqBulk'); if(x) x.value=''; }); return; }
-  if(t.id==='rqPurgeClosed'||t.id==='rqPurgeAll'){ const all=t.id==='rqPurgeAll';
-    if(!confirm(all? '담당자 시트의 수정 요청을 전부(처리 중인 것 포함) 지웁니다. 되돌릴 수 없습니다. 지울까요?' : '확인까지 끝난 요청을 담당자 시트에서 지웁니다. 지울까요?')) return;
-    if(all && !confirm('정말 전부 지웁니다.')) return;
-    try{ await rqPost({action:'purge',mode:all?'all':'closed'}); toast('지우기를 보냈습니다. 잠시 뒤 새로 고칩니다.'); setTimeout(()=>{ S.reqs=S.reqs.filter(r=>!all && !rqClosed(r)); fetchReqs(true); },3000); }catch(e){ toast('보내지 못했습니다.'); } return; }
   if(t.id==='rqNag'){ const txt=nagText(); if(!txt){ toast('미처리 요청이 없습니다.'); return; } toast(await copyText(txt)? '독촉 메시지를 복사했습니다. 업무메신저에 붙여넣으세요.' : '복사에 실패했습니다.'); return; }
   const card=t.closest('.card');
   if(card && t.dataset.act==='copy'){ onCopy(card); return; }
@@ -1304,7 +1345,7 @@ M.addEventListener('click',async e=>{
   if(t.id==='readCancel'){ UI.readPlan=null; renderSet(); return; }
   if(t.id==='xlsOut'){ exportXlsx().catch(()=>{}); return; }
   if(t.id==='jsonOut'){ download('생기부도우미_전체백업_'+stamp()+'.json', new Blob([JSON.stringify(S)],{type:'application/json'})); S.settings.lastBackup=Date.now(); flush(); return; }
-  if(t.id==='rosterAdd'){ addRoster(String($('#roster').value).split(/\n/).map(l=> /\t/.test(l)? l.split('\t') : (/,/.test(l)? l.split(',') : l.trim().split(/\s+/)))); render(); return; }
+  if(t.id==='rosterAdd'){ if(addRoster(rosterRowsFromText($('#roster').value))) render(); return; }
   if(t.dataset.studel){ const k=t.dataset.studel; const has=S.items.some(it=>peek(k,it.key).text.trim()); if(has && !confirm('이 학생에게 써 둔 내용이 있습니다. 명단에서 지우면 내용도 함께 지워집니다. 지울까요?')) return; S.students=S.students.filter(s=>sid(s)!==k); Object.keys(S.records).forEach(rk=>{ if(rk.indexOf(k+'|')===0) delete S.records[rk]; }); save(); renderSet(); return; }
   if(t.id==='itAdd'){ const nm=prompt('항목 이름을 적어 주세요. 예) 세특: 역사'); if(!nm||!nm.trim()) return; if(S.items.some(i=>i.name===nm.trim())){ toast('같은 이름의 항목이 이미 있습니다.'); return; } S.items.push({key:'i'+Date.now().toString(36),name:nm.trim(),limit:1500,mine:true}); save(); renderSet(); return; }
   if(t.dataset.itdel!==undefined){ const it=S.items[+t.dataset.itdel]; if(!it) return; const n=Object.keys(S.records).filter(k=>k.endsWith('|'+it.key)&&S.records[k].text.trim()).length; if(!confirm('"'+it.name+'" 항목을 지웁니다.'+(n? ' 써 둔 내용 '+n+'건도 함께 지워집니다.':'')+' 계속할까요?')) return; Object.keys(S.records).forEach(k=>{ if(k.endsWith('|'+it.key)) delete S.records[k]; }); S.items.splice(+t.dataset.itdel,1); save(); renderSet(); return; }
