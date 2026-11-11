@@ -1674,7 +1674,8 @@ function ask(q){
   const r=search(q), n=liveDocs().length;
   if(!r.base.length && !r.up.length){
     bot('찾지 못했습니다. 질문하신 내용은 <b>'+(n? '기본 자료와 올린 자료('+n+'개)' : '2026 개정사항 자료')+'</b>에 없습니다.<br>'
-      +'바뀌지 않은 규정일 수 있습니다. 그런 규정은 <b>기재요령 전체 PDF</b>를 아래 [📄 자료 올리기]로 넣으면 찾을 수 있습니다.<br>다른 낱말로 물어보셔도 됩니다. (예: "행특 글자 수", "개근")'+chipsHTML());
+      +'<div class="gbc" style="border-left-color:var(--org);background:var(--yel2)"><b>☎ 생기부 담당자에게 문의하세요.</b><br><span style="font-size:12.5px">(괜히 혼자 추측해서 입력하면 입력 다시 해야 합니다. 다들 바쁘잖아요. 그냥 전화 한 번 시원하게 하세요^^)</span></div>'
+      +'<div class="gbw" style="margin-top:6px">다른 낱말로 다시 물어보셔도 됩니다. (예: "행특 글자 수", "개근") 바뀌지 않은 규정은 기재요령 전체 PDF를 [📄 자료 올리기]로 넣으면 찾을 수 있습니다.</div>'+chipsHTML());
     return;
   }
   let h='관련 근거 <b>'+(r.base.length+r.up.length)+'건</b>을 찾았습니다. 근거 원문을 꼭 확인해 주세요.';
