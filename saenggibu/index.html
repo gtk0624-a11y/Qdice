@@ -76,6 +76,17 @@ footer{text-align:center;color:var(--sub);font-size:12px;padding:18px}
 .pick button small{opacity:.75;margin-left:5px;font-weight:400}
 .now{font-size:17px;font-weight:700;color:var(--navy);margin:4px 0 8px}
 .steps{font-size:16px;line-height:1.9}
+.rq{background:#fff4e5;border:1px solid var(--org);border-radius:8px;padding:6px 9px;margin:4px 0 6px;font-size:13.5px}
+.rq.ok{background:#eef8f2;border-color:#bfe3cf;color:var(--grn)}
+.rqt{margin:3px 0 5px;white-space:pre-wrap;color:var(--txt);font-size:14px}
+.card.hasreq{border-color:var(--org);box-shadow:0 0 0 2px #ffe1b3}
+#rchip{background:#fff;color:var(--red);font-weight:700;border-radius:14px;padding:3px 10px;font-size:13px;white-space:nowrap;display:none;cursor:pointer}
+#rchip.flash{animation:fl 1s 4}
+@keyframes fl{50%{background:var(--red);color:#fff}}
+.st{display:inline-block;font-size:12px;padding:1px 8px;border-radius:10px;font-weight:700}
+.st.open{background:#fde3e1;color:var(--red)}.st.done{background:#fff1cc;color:#8a5a00}.st.closed{background:#e8f6ee;color:var(--grn)}
+.rqform{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin:6px 0}
+.rqform label{font-size:13px;color:var(--sub);display:flex;flex-direction:column;gap:3px}
 #dchip{background:var(--yel);color:var(--navy);font-weight:700;border-radius:14px;padding:3px 10px;font-size:13px;white-space:nowrap;display:none;cursor:pointer}
 .dd{display:flex;gap:10px;flex-wrap:wrap}
 .dd div{flex:1;min-width:150px;background:var(--yel2);border:1px solid var(--yel);border-radius:10px;padding:10px 12px}
@@ -98,6 +109,7 @@ footer{text-align:center;color:var(--sub);font-size:12px;padding:18px}
   <img src="data:image/jpeg;base64,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" alt="도디쌤">
   <h1>도디쌤 생기부 도우미</h1>
   <span class="sp"></span>
+  <span id="rchip" title="수정 요청 탭으로 이동"></span>
   <span id="dchip" title="일정 탭으로 이동"></span>
   <span id="savest"></span>
   <input id="gsearch" type="text" placeholder="학생 이름 검색" autocomplete="off">
@@ -105,6 +117,7 @@ footer{text-align:center;color:var(--sub);font-size:12px;padding:18px}
 <nav id="nav">
   <button data-tab="write" class="on">영역별 입력</button>
   <button data-tab="search">학생별 입력</button>
+  <button data-tab="req">수정 요청</button>
   <button data-tab="check">점검·현황</button>
   <button data-tab="sched">일정</button>
   <button data-tab="sisu">시수</button>
@@ -325,9 +338,9 @@ const DEFAULT_ITEMS=[
 function freshState(){
   return { v:1,
     settings:{teacher:'', year:new Date().getMonth()<2? new Date().getFullYear()-1 : new Date().getFullYear(),
-      enterBytes:2, stripNL:true, autoSpell:true, sheetUrl:'', sheetKey:'', sheetView:'', autoSend:true, lastBackup:0, lastSent:0},
+      enterBytes:2, stripNL:true, autoSpell:true, sheetUrl:'', sheetKey:'', sheetView:'', autoSend:true, lastBackup:0, lastSent:0, admin:false, sendFixed:false, askDone:true, lastReqFetch:0, lastRound:'1'},
     items:JSON.parse(JSON.stringify(DEFAULT_ITEMS)),
-    students:[], records:{}, schedules:[], rules:[], banned:[],
+    students:[], records:{}, schedules:[], rules:[], banned:[], reqs:[], reqSeen:{}, reqInit:false, reqWho:[],
     sisu:{start:'', end:'', holidays:[], rows:[], club:[], clubTarget:''}
   };
 }
@@ -389,6 +402,7 @@ function cardHTML(s, it, mode){
     +'<label><input type="checkbox" data-act="done"'+(r.done?' checked':'')+'> 완료</label>'
     +'<button class="b g s" data-act="nv">네이버 맞춤법</button>'
     +'<button class="b s" data-act="copy">나이스용 복사</button></div>'
+    +'<div class="reqs"></div>'
     +'<textarea class="ta" rows="3" spellcheck="true" placeholder="여기에 입력하거나 붙여넣으세요">'+esc(r.text)+'</textarea>'
     +'<div class="bar"><i></i></div><div class="msgs"></div><div class="nv" hidden></div></div>';
 }
@@ -407,6 +421,10 @@ function refreshCard(card, fixHTML){
   let h='';
   if(fixHTML!==undefined) card.dataset.fix=fixHTML;
   if(card.dataset.fix) h+='<div class="m-fix">'+card.dataset.fix+'</div>';
+  const rb=$('.reqs',card); if(rb){ const rs=cardReqs(sidv,ik); const op=rs.filter(rqOpen), dn=rs.filter(r=>!rqOpen(r));
+    rb.innerHTML=op.map(r=>'<div class="rq"><b>🛠 '+(r.round?esc(r.round)+'차 ':'')+'수정 요청</b> · '+esc(r.from||'담당자')+' · '+esc(r.date||'')+(r.status==='재요청'?' <span class="st open">재요청</span>':'')+'<div class="rqt">'+esc(r.text)+'</div><button class="b s" data-rqdone="'+esc(r.id)+'">고쳤어요 — 수정 완료 알리기</button></div>').join('')
+      +dn.slice(-2).map(r=>'<div class="rq ok">✔ '+(r.round?esc(r.round)+'차 ':'')+esc(r.status)+pendNote(r)+' · '+esc(r.text.split('\n')[0].slice(0,60))+'</div>').join('');
+    card.classList.toggle('hasreq',op.length>0); }
   if(over){ const ci=cutIndex(t,lim,S.settings.enterBytes); const tail=t.slice(ci); h+='<div class="m-over">✂ 나이스에서 잘리는 부분: <span>'+esc(tail.length>120? tail.slice(0,120)+'…':tail)+'</span></div>'; }
   lint(t,{banned:S.banned,names:otherNames(sidv)}).forEach(w=>{ h+='<div class="m-warn">⚠ '+esc(w)+'</div>'; });
   $('.msgs',card).innerHTML=h;
@@ -456,6 +474,8 @@ async function onCopy(card){
   if(!ok){ toast('복사에 실패했습니다. 글을 직접 선택해 Ctrl+C 해 주세요.'); return; }
   const r=rec(sidv,ik); r.copied=Date.now(); save(); refreshCard(card);
   toast(B(t)>it.limit? '⚠ 한도를 넘긴 상태로 복사했습니다. 나이스에서 잘립니다.' : '복사했습니다. 나이스 입력칸에서 Ctrl+V 하세요.');
+  const op=cardReqs(sidv,ik).filter(rqOpen);
+  if(op.length && S.settings.askDone){ setTimeout(()=>{ if(confirm('이 칸에 수정 요청이 '+op.length+'건 있습니다.\n('+op.map(r=>(r.round?r.round+'차 ':'')+(r.from||'담당자')).join(', ')+')\n\n나이스에 붙여넣어 고치셨으면 [확인]을 누르세요.\n요청한 선생님께 "수정 완료"가 바로 전달됩니다.')) op.forEach(r=>markDone(r.id,false)); },350); }
 }
 
 // 네이버 맞춤법 검사기 연결(300자 제한 → 자동으로 나눠 줌)
@@ -497,7 +517,7 @@ function writeHeadHTML(){
   let done=0, over=0; mine.forEach(s=>{ const r=peek(sid(s),it.key); if(r.done) done++; if(B(r.text)>it.limit) over++; });
   const g=UI.cls.split('-')[0]; const gl=S.students.filter(s=>String(s.g)===g); const gw=countWritten(gl,it.key), gn=needOf(gl.length,it);
   let h='<div class="pick"><span class="lab">학급</span>'+cl.map(c=>{ const st=S.students.filter(s=>clsOf(s)===c); const ok=st.length && countWritten(st,it.key)>=needOf(st.length,it); return '<button data-cls="'+esc(c)+'" class="'+(c===UI.cls?'on':'')+'">'+esc(clsName(c))+(ok?'<small>✔완료</small>':'')+'</button>'; }).join('')+'</div>'
-    +'<div class="pick"><span class="lab">영역</span>'+S.items.map(i=>{ const w=countWritten(mine,i.key), ok=all && w>=needOf(all,i); return '<button data-itemk="'+esc(i.key)+'" class="'+(i.key===UI.item?'on':'')+'">'+esc(i.name)+'<small>'+(ok?'✔완료 ':'')+w+'/'+all+'</small></button>'; }).join('')+'</div>';
+    +'<div class="pick"><span class="lab">영역</span>'+S.items.map(i=>{ const w=countWritten(mine,i.key), ok=all && w>=needOf(all,i); const rq=S.reqs.filter(r=>rqToMe(r)&&rqOpen(r)&&rqSid(r).indexOf(UI.cls+'-')===0&&rqIk(r)===i.key).length; return '<button data-itemk="'+esc(i.key)+'" class="'+(i.key===UI.item?'on':'')+'">'+esc(i.name)+'<small>'+(ok?'✔완료 ':'')+w+'/'+all+'</small>'+(rq?'<small style="color:var(--red);font-weight:700">🛠'+rq+'</small>':'')+'</button>'; }).join('')+'</div>';
   h+='<div class="now">'+esc(clsName(UI.cls))+' · '+esc(it.name)+' <span class="hint" style="font-weight:400">한도 '+it.limit.toLocaleString()+'B(한글 약 '+Math.floor(it.limit/3)+'자)'+(over?' · <b style="color:var(--red)">초과 '+over+'</b>':'')+'</span></div>';
   let msg, cls2;
   if(ra<100){
@@ -510,7 +530,7 @@ function writeHeadHTML(){
     else { const miss=mine.filter(s=>!peek(sid(s),it.key).text.trim()); msg='작성 '+written+'/'+all+'명 · 빠진 학생 '+miss.length+'명: '+miss.slice(0,12).map(s=>s.n+'번 '+s.name).join(', ')+(miss.length>12?' …':''); cls2=''; }
   }
   h+='<div class="'+cls2+'" style="border:1px solid var(--line);border-radius:8px;padding:8px 11px;font-weight:600;margin-bottom:8px">'+esc(msg)+'</div>';
-  h+='<div class="tb"><select id="selFilter">'+[['all','전체 학생 보기'],['empty','미작성만'],['over','초과만'],['undone','미완료만'],['uncopied','나이스 미복사만']].map(f=>'<option value="'+f[0]+'"'+(UI.filter===f[0]?' selected':'')+'>'+f[1]+'</option>').join('')+'</select>'
+  h+='<div class="tb"><select id="selFilter">'+[['all','전체 학생 보기'],['req','수정 요청 있는 학생만'],['empty','미작성만'],['over','초과만'],['undone','미완료만'],['uncopied','나이스 미복사만']].map(f=>'<option value="'+f[0]+'"'+(UI.filter===f[0]?' selected':'')+'>'+f[1]+'</option>').join('')+'</select>'
     +'<span class="hint">아래 학생별 칸에 쓰거나 붙여넣으세요. 칸을 벗어나면 띄어쓰기·맞춤법이 자동으로 고쳐집니다. 영역 추가·삭제와 입력 대상 %는 설정·백업 탭에서 고칩니다.</span></div>';
   return h;
 }
@@ -524,7 +544,7 @@ function renderWrite(){
   const all=list.length; let written=0, done=0, over=0;
   list.forEach(s=>{ const r=peek(sid(s),it.key); if(r.text.trim()) written++; if(r.done) done++; if(B(r.text)>it.limit) over++; });
   list=list.filter(s=>{ const r=peek(sid(s),it.key);
-    return UI.filter==='all' || (UI.filter==='empty'&&!r.text.trim()) || (UI.filter==='over'&&B(r.text)>it.limit) || (UI.filter==='undone'&&!r.done) || (UI.filter==='uncopied'&&r.text.trim()&&!r.copied); });
+    return UI.filter==='all' || (UI.filter==='req'&&cardReqs(sid(s),it.key).some(rqOpen)) || (UI.filter==='empty'&&!r.text.trim()) || (UI.filter==='over'&&B(r.text)>it.limit) || (UI.filter==='undone'&&!r.done) || (UI.filter==='uncopied'&&r.text.trim()&&!r.copied); });
   let h='<div class="box" id="whead">'+writeHeadHTML()+'</div>';
   h+= list.length? list.map(s=>cardHTML(s,it,'byItem')).join('') : '<div class="box hint">조건에 맞는 학생이 없습니다.</div>';
   $('#main').innerHTML=h; $$('#main .card').forEach(c=>refreshCard(c));
@@ -619,8 +639,13 @@ function renderBanner(){
   const up=S.schedules.map(x=>({x,n:dday(x.date)})).filter(o=>o.n!==null&&o.n>=0&&o.n<=7&&!o.x.fin).sort((a,b)=>a.n-b.n);
   const nx=S.schedules.map(x=>({x,n:dday(x.date)})).filter(o=>o.n!==null&&o.n>=0&&!o.x.fin).sort((a,b)=>a.n-b.n)[0];
   const chip=$('#dchip'); if(nx){ chip.style.display='inline-block'; chip.textContent=ddayText(nx.n)+' '+(nx.x.title.length>12? nx.x.title.slice(0,12)+'…' : nx.x.title); } else chip.style.display='none';
-  const b=$('#banner'); if(!up.length){ b.style.display='none'; return; }
-  b.style.display='block'; b.innerHTML='📌 다가오는 일정: '+up.map(o=>'<b>'+ddayText(o.n)+'</b> '+esc(o.x.title)+' ('+esc(o.x.date.slice(5))+')').join(' · ');
+  const b=$('#banner'); const parts=[];
+  const ib=inbox().length, wc=waitConfirm().length;
+  if(ib) parts.push('<span data-go="req" style="cursor:pointer">🛠 <b style="color:var(--red)">고칠 수정 요청 '+ib+'건</b></span>');
+  if(wc) parts.push('<span data-go="req" style="cursor:pointer">✔ <b>수정 완료 '+wc+'건 — 확인해 주세요</b></span>');
+  if(up.length) parts.push('📌 다가오는 일정: '+up.map(o=>'<b>'+ddayText(o.n)+'</b> '+esc(o.x.title)+' ('+esc(o.x.date.slice(5))+')').join(' · '));
+  if(!parts.length){ b.style.display='none'; return; }
+  b.style.display='block'; b.innerHTML=parts.join(' ｜ ');
 }
 function notifyDue(){
   if(!('Notification' in window) || Notification.permission!=='granted') return;
@@ -758,10 +783,14 @@ function renderSet(){
   h+='<div class="box"><h2>자동 교정</h2><div class="row"><label><input type="checkbox" id="stSpell"'+(st.autoSpell?' checked':'')+'> 맞춤법·띄어쓰기 사전 규칙 자동 적용 (끄면 공백·기호 정리만 합니다)</label></div>'
     +'<h3>내 교정 규칙 ('+S.rules.length+'개)</h3><div class="chips">'+(S.rules.map((r,i)=>'<span>'+esc(r.from)+' → '+esc(r.to)+'<b data-ruledel="'+i+'">×</b></span>').join('')||'<span class="hint">없음</span>')+'</div><div class="row"><input type="text" id="ruleFrom" placeholder="틀린 표현"><span>→</span><input type="text" id="ruleTo" placeholder="고칠 표현"><button class="b g" id="ruleAdd">추가</button></div>'
     +'<h3>내 금지어 ('+S.banned.length+'개) — 들어 있으면 경고</h3><div class="chips">'+(S.banned.map((w,i)=>'<span>'+esc(w)+'<b data-bandel="'+i+'">×</b></span>').join('')||'<span class="hint">없음</span>')+'</div><div class="row"><input type="text" id="banWord" placeholder="예: 최고의, 천재"><button class="b g" id="banAdd">추가</button></div></div>';
-  h+='<div class="box"><h2>담당자 현황판 연결 (구글 시트)</h2><div class="row"><label>교사 이름 <input type="text" id="stTeacher" value="'+esc(st.teacher)+'" placeholder="예: 김정환"></label><label>학년도 <input class="num" type="number" id="stYear" value="'+esc(st.year)+'" style="width:80px"></label></div>'
+  h+='<div class="box"><h2>담당자 시트 연결 — 입력 현황 + 수정 요청(생기부 메신저)</h2><div class="hint" style="margin-bottom:6px">학교 선생님 모두가 <b>같은 웹앱 주소와 암호</b>를 넣어야 수정 요청이 오갑니다. <b>교사 이름</b>은 받는 사람을 찾는 기준이니 정확히(띄어쓰기 없이) 적어 주세요.</div><div class="row"><label>교사 이름 <input type="text" id="stTeacher" value="'+esc(st.teacher)+'" placeholder="예: 김정환"></label><label>학년도 <input class="num" type="number" id="stYear" value="'+esc(st.year)+'" style="width:80px"></label></div>'
     +'<div class="row"><label style="flex:1">웹앱 주소 <input class="wide" type="url" id="stUrl" value="'+esc(st.sheetUrl)+'" placeholder="https://script.google.com/macros/s/.../exec"></label></div>'
     +'<div class="row"><label>암호 <input type="text" id="stKey" value="'+esc(st.sheetKey)+'" placeholder="스크립트에 적은 암호"></label><label style="flex:1">현황판 시트 주소(보기용) <input class="wide" type="url" id="stView" value="'+esc(st.sheetView)+'" placeholder="https://docs.google.com/spreadsheets/..."></label></div>'
-    +'<div class="row"><label><input type="checkbox" id="stAuto"'+(st.autoSend?' checked':'')+'> 내용이 바뀌면 2분 뒤 자동으로 현황 전송</label></div></div>';
+    +'<div class="row"><label><input type="checkbox" id="stAuto"'+(st.autoSend?' checked':'')+'> 내용이 바뀌면 2분 뒤 자동으로 현황 전송</label></div>'
+    +'<div class="row"><label><input type="checkbox" id="stAsk"'+(st.askDone?' checked':'')+'> 수정 요청이 있는 칸에서 "나이스용 복사"를 누르면 수정 완료를 보낼지 묻기</label></div>'
+    +'<div class="row"><label><input type="checkbox" id="stFixed"'+(st.sendFixed?' checked':'')+'> 수정 완료 때 고친 문장도 담당자 시트로 보내기 (점검자가 나이스를 안 열고 확인 가능 · 학생 생기부 문장이 구글 시트에 저장됨)</label></div>'
+    +'<div class="row"><label><input type="checkbox" id="stAdmin"'+(st.admin?' checked':'')+'> 담당자 모드 — 학교 전체 수정 요청과 차수별·교사별 현황 보기</label></div>'
+    +'<div class="row"><button class="b g" id="rqTest">연결 시험</button></div></div>';
   h+='<div class="box"><h2>위험 구역</h2><button class="b r" id="wipe">이 컴퓨터의 모든 자료 지우기</button> <span class="hint">공용 PC에서 썼다면 백업을 받은 뒤 반드시 지우세요.</span></div>';
   $('#main').innerHTML=h;
 }
@@ -794,6 +823,7 @@ async function exportXlsx(){
   add('시수표',[['시작일',Z.start,'종료일',Z.end],[],['이름','월','화','수','목','금','기준 시수','조정']].concat(Z.rows.map(r=>[r.name].concat(r.w).concat([r.target,r.adj]))));
   add('동아리',[['동아리 기준 시수',Z.clubTarget],[],['날짜','시수']].concat(Z.club.map(x=>[x.date,x.hours])));
   add('교정규칙·금지어',[['틀린 표현','고칠 표현','','금지어']].concat(Array.from({length:Math.max(S.rules.length,S.banned.length)},(_,i)=>[S.rules[i]?S.rules[i].from:'',S.rules[i]?S.rules[i].to:'','',S.banned[i]||''])));
+  add('수정요청',[['ID','등록일','차수','요청자','받는 교사','학년','반','번호','이름','영역','요청 내용','상태','수정 완료 시각','메모','확인 시각']].concat(S.reqs.map(r=>[r.id,r.date,r.round,r.from,r.to,r.g,r.c,r.n,r.name,r.area,r.text,r.status,r.doneAt,r.memo,r.confirmAt])));
   add('설정',[['교사 이름',st.teacher],['학년도',st.year],['엔터 바이트',st.enterBytes],['복사 시 줄바꿈 제거',st.stripNL?'O':''],['맞춤법 자동 교정',st.autoSpell?'O':''],['현황판 웹앱 주소',st.sheetUrl],['현황판 암호',st.sheetKey],['현황판 시트 주소',st.sheetView],['현황 자동 전송',st.autoSend?'O':'']]);
   // 복원용 전체 자료(숨김 시트): 프로그램이 다시 불러올 때 이것으로 모든 것을 되살림
   const js=JSON.stringify(S), parts=[]; for(let i=0;i<js.length;i+=30000) parts.push([js.slice(i,i+30000)]);
@@ -864,15 +894,203 @@ function applyReading(){
   toast('학생 '+st+'명에게 책 '+n+'권을 넣었습니다. 영역별 입력 탭에서 "'+it.name+'" 항목을 확인하세요.'); UI.item=it.key; renderSet();
 }
 
+// ───────── 10-2. 수정 요청(생기부 메신저): 점검 → 수정 → 확인 ─────────
+const RQ={busy:false, err:''};
+function me(){ return S.settings.teacher; }
+function rqOpen(r){ return !r.status || r.status==='요청' || r.status==='재요청'; }
+function rqDone(r){ return r.status==='수정 완료'; }
+function rqClosed(r){ return r.status==='확인'; }
+function rqSid(r){ return (parseInt(r.g,10)||0)+'-'+(parseInt(r.c,10)||0)+'-'+(parseInt(r.n,10)||0); }
+function rqToMe(r){ return !!me() && r.to===me(); }
+function rqFromMe(r){ return !!me() && r.from===me(); }
+function rqWho(r){ return (parseInt(r.g,10)||'?')+'-'+(parseInt(r.c,10)||'?')+' '+(parseInt(r.n,10)||'?')+'번 '+(r.name||''); }
+function inbox(){ return S.reqs.filter(r=>rqToMe(r)&&rqOpen(r)); }
+function waitConfirm(){ return S.reqs.filter(r=>(rqFromMe(r)||S.settings.admin)&&rqDone(r)); }
+function normArea(x){ return String(x==null?'':x).replace(/[\s·:()]/g,''); }
+function areaSame(a,b){ const x=normArea(a), y=normArea(b); return !!x && !!y && (x===y || x.includes(y) || y.includes(x)); }
+// 시트의 '영역' 글자를 내 영역 항목과 짝짓기 (예: "도덕", "도덕 세특", "행특", "진로")
+function matchItem(area){
+  const n=normArea(area); if(!n) return null;
+  let it=S.items.find(i=>normArea(i.name)===n); if(it) return it;
+  const map=[[/자율|자치/,/^자율/],[/동아리/,/^동아리/],[/진로/,/^진로/],[/행동|행특|종합의견/,/^행동/],[/독서/,/^독서/],[/자유학기/,/^자유/]];
+  for(const [a,b] of map){ if(a.test(n)){ it=S.items.find(i=>b.test(normArea(i.name))); if(it) return it; } }
+  const se=S.items.filter(i=>/^세특/.test(i.name));
+  const hit=se.find(i=>{ const sub=normArea(i.name).replace(/^세특/,''); return sub && n.includes(sub); }); if(hit) return hit;
+  if(se.length===1 && /세특|세부|특기|교과|과목/.test(n)) return se[0];
+  return null;
+}
+function rqIk(r){ const it=matchItem(r.area); return it? it.key : ''; }
+function cardReqs(sidv,ik){ return S.reqs.filter(r=>rqToMe(r)&&rqSid(r)===sidv&&rqIk(r)===ik); }
+function pendNote(r){ if(!r.pend) return ''; return r.failed? ' — <b class="neg">⚠ 시트에 반영 안 됨</b> <button class="b g s" data-rqresend="'+esc(r.id)+'">다시 보내기</button>' : ' — <span class="hint">보내는 중…</span>'; }
+function stTag(r){ return rqOpen(r)? '<span class="st open">'+(r.status==='재요청'?'재요청':'요청')+'</span>' : (rqDone(r)? '<span class="st done">수정 완료</span>' : '<span class="st closed">확인</span>'); }
+function sheetReady(silent){
+  const st=S.settings;
+  if(!st.sheetUrl||!st.teacher){ if(!silent) toast('설정·백업 탭 "담당자 시트 연결"에 교사 이름과 웹앱 주소를 먼저 넣어 주세요.'); return false; }
+  if(!/^https:\/\/script\.google\.com\//.test(st.sheetUrl)){ if(!silent) toast('웹앱 주소는 https://script.google.com/ 으로 시작해야 합니다.'); return false; }
+  return true;
+}
+function rqUrl(q){ const st=S.settings; const u=new URL(st.sheetUrl); Object.entries(Object.assign({key:st.sheetKey,teacher:st.teacher,t:Date.now()},q)).forEach(([k,v])=>u.searchParams.set(k,v)); return u.toString(); }
+function rqPost(body){ const st=S.settings; return fetch(st.sheetUrl,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(Object.assign({key:st.sheetKey,teacher:st.teacher},body))}); }
+async function fetchReqs(silent){
+  if(!sheetReady(silent) || RQ.busy) return;
+  RQ.busy=true;
+  try{
+    const res=await fetch(rqUrl({action:'list',all:S.settings.admin?'1':''}));
+    const txt=await res.text(); let d;
+    try{ d=JSON.parse(txt); }catch(e){ throw new Error('old'); }
+    if(!d.ok){ RQ.err=d.msg||'오류'; if(!silent) toast('수정 요청을 불러오지 못했습니다: '+RQ.err); return; }
+    RQ.err=''; S.reqWho=Array.isArray(d.who)? d.who : [];
+    mergeServer(Array.isArray(d.rows)? d.rows : []);
+    S.settings.lastReqFetch=Date.now(); save();
+    if(!silent) toast('새로 불러왔습니다. 받은 요청 '+inbox().length+'건, 확인 대기 '+waitConfirm().length+'건');
+  }catch(e){
+    RQ.err= e.message==='old'? '담당자 시트 코드가 예전 버전입니다. 설명서 7번대로 새 코드를 붙이고 "새 버전"으로 다시 배포해 주세요.' : '연결하지 못했습니다. 인터넷, 웹앱 주소, 배포 설정("액세스: 모든 사용자")을 확인해 주세요.';
+    if(!silent) toast(RQ.err);
+  }finally{ RQ.busy=false; refreshReqUI(); }
+}
+function mergeServer(rows){
+  const old=new Map(S.reqs.map(r=>[r.id,r])); const now=Date.now(), first=!S.reqInit; const news=[], fixed=[];
+  const next=rows.map(x=>({id:String(x.id), date:String(x.date||''), round:String(x.round||''), from:String(x.from||''), to:String(x.to||''),
+    g:x.g, c:x.c, n:x.n, name:String(x.name||''), area:String(x.area||''), text:String(x.text||''), status:String(x.status||'').trim(),
+    doneAt:String(x.doneAt||''), memo:String(x.memo||''), confirmAt:String(x.confirmAt||'')}));
+  const seenIds=new Set(next.map(r=>r.id));
+  next.forEach(r=>{ const o=old.get(r.id);
+    if(o && o.pend){ const pd=o.pend; const reflected = pd.action==='request' || r.status===pd.status || (pd.prev!==undefined && r.status!==pd.prev) || (pd.plen!==undefined && r.text.length!==pd.plen && pd.action!=='reopen');
+      if(!reflected){ r.status=o.pend.status; r.pend=o.pend; r.failed= now-o.pend.at>180000; } } });
+  S.reqs.forEach(o=>{ if(o.pend && o.pend.action==='request' && !seenIds.has(o.id)){ o.failed= now-o.pend.at>180000; next.push(o); } });
+  next.forEach(r=>{ const key=r.status+'|'+r.text.length;
+    if(S.reqSeen[r.id]!==key){
+      if(rqToMe(r) && rqOpen(r) && !r.pend) news.push(r);
+      if((rqFromMe(r)||S.settings.admin) && rqDone(r) && !r.pend) fixed.push(r);
+      S.reqSeen[r.id]=key; } });
+  S.reqs=next;
+  if(first){ S.reqInit=true; if(inbox().length) toast('🛠 받은 수정 요청이 '+inbox().length+'건 있습니다.'); return; }
+  notifyReqs(news,fixed);
+}
+function notifyReqs(news,fixed){
+  const pop=(title,body)=>{ if('Notification' in window && Notification.permission==='granted'){ try{ new Notification(title,{body}); }catch(e){} } };
+  if(news.length){ const r=news[0]; const msg='🛠 새 수정 요청 '+news.length+'건 — '+(r.from||'담당자')+': '+rqWho(r)+' '+r.area;
+    toast(msg); news.slice(0,3).forEach(x=>pop('생기부 수정 요청'+(x.round?' ('+x.round+'차)':''), (x.from||'담당자')+' → '+rqWho(x)+' '+x.area+'\n'+x.text.slice(0,80))); $('#rchip').classList.add('flash'); }
+  if(fixed.length){ const r=fixed[0]; const msg='✔ 수정 완료 '+fixed.length+'건 — '+(r.to||'')+' 선생님: '+rqWho(r)+' '+r.area;
+    setTimeout(()=>toast(msg), news.length?2800:0); fixed.slice(0,3).forEach(x=>pop('생기부 수정 완료', (x.to||'')+' 선생님이 고쳤습니다: '+rqWho(x)+' '+x.area)); $('#rchip').classList.add('flash'); }
+}
+async function rqAct(r, action, body, status){
+  const prev=r.status, plen=r.text.length; if(action==='reopen') r.text=r.text; r.status=status; r.pend={action,status,prev,plen,at:Date.now(),body:Object.assign({action,id:r.id},body)}; r.failed=false;
+  S.reqSeen[r.id]=r.status+'|'+r.text.length; save(); refreshReqUI();
+  try{ await rqPost(r.pend.body); }catch(e){ r.failed=true; refreshReqUI(); toast('보내지 못했습니다. 인터넷 연결을 확인한 뒤 "다시 보내기"를 눌러 주세요.'); return false; }
+  setTimeout(()=>fetchReqs(true),4000); return true;
+}
+async function markDone(id, askMemo){
+  const r=S.reqs.find(x=>x.id===id); if(!r||!rqOpen(r)) return;
+  let memo='';
+  if(askMemo){ const m=prompt((r.from||'요청한 선생님')+'께 "수정 완료"를 알립니다.\n남길 말이 있으면 적고, 없으면 그냥 [확인]을 누르세요.',''); if(m===null) return; memo=m.trim(); }
+  const it=matchItem(r.area); const fixedText=(S.settings.sendFixed&&it)? peek(rqSid(r),it.key).text : '';
+  r.memo=memo; r.doneAt=new Date().toLocaleString('ko-KR');
+  if(await rqAct(r,'done',{memo,fixed:fixedText},'수정 완료')) toast('✔ '+(r.from||'요청한 선생님')+'께 수정 완료를 알렸습니다.');
+}
+async function confirmReq(id){ const r=S.reqs.find(x=>x.id===id); if(!r) return; if(await rqAct(r,'confirm',{},'확인')) toast('확인 처리했습니다. 이 요청은 끝났습니다.'); }
+async function reopenReq(id){ const r=S.reqs.find(x=>x.id===id); if(!r) return;
+  const t=prompt('다시 고칠 내용을 적어 주세요. ('+(r.to||'작성 교사')+' 선생님께 재요청)',''); if(!t||!t.trim()) return;
+  const before=r.text.length; r.text+='\n[재요청] '+t.trim(); const ok=await rqAct(r,'reopen',{text:t.trim()},'재요청'); if(r.pend) r.pend.plen=before; if(ok) toast('재요청을 보냈습니다.'); }
+async function resendReq(id){ const r=S.reqs.find(x=>x.id===id); if(!r||!r.pend) return; r.pend.at=Date.now(); r.failed=false; refreshReqUI();
+  try{ await rqPost(r.pend.body); toast('다시 보냈습니다.'); setTimeout(()=>fetchReqs(true),4000); }catch(e){ r.failed=true; refreshReqUI(); toast('보내지 못했습니다. 인터넷 연결을 확인해 주세요.'); } }
+function newRid(){ return 'r'+Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
+async function sendReqs(items){
+  if(!sheetReady(false)) return;
+  const ok=items.filter(x=>x.text && x.g>0 && x.c>0 && x.n>0 && x.area);
+  if(!ok.length){ toast('학년·반·번호·영역·내용을 모두 넣어 주세요.'); return; }
+  const rows=ok.map(x=>({id:newRid(), date:new Date().toLocaleString('ko-KR'), round:String(x.round||''), from:me(), to:x.to||lookupTeacher(x.g,x.c,x.area),
+    g:x.g, c:x.c, n:x.n, name:x.name||'', area:x.area, text:x.text, status:'요청', doneAt:'', memo:'', confirmAt:''}));
+  const body={action:'request', items:rows.map(r=>({id:r.id,round:r.round,to:r.to,g:r.g,c:r.c,n:r.n,name:r.name,area:r.area,text:r.text}))};
+  const at=Date.now(); rows.forEach(r=>{ r.pend={action:'request',status:'요청',at,body}; S.reqSeen[r.id]=r.status+'|'+r.text.length; S.reqs.push(r); });
+  save(); refreshReqUI();
+  try{ await rqPost(body); toast('수정 요청 '+rows.length+'건을 보냈습니다.'+(rows.some(r=>!r.to)?' (받는 교사를 못 찾은 요청은 담당자만 볼 수 있습니다)':'')); setTimeout(()=>fetchReqs(true),4000); }
+  catch(e){ rows.forEach(r=>r.failed=true); refreshReqUI(); toast('보내지 못했습니다. 인터넷 연결을 확인한 뒤 다시 보내 주세요.'); }
+}
+function lookupTeacher(g,c,area){ const cls=(parseInt(g,10)||0)+'-'+(parseInt(c,10)||0); const names=Array.from(new Set((S.reqWho||[]).filter(w=>w.cls===cls&&areaSame(w.item,area)).map(w=>w.teacher))); return names.length===1? names[0] : ''; }
+function teacherNames(){ return Array.from(new Set((S.reqWho||[]).map(w=>w.teacher).concat(S.reqs.map(r=>r.to)).concat(S.reqs.map(r=>r.from)).filter(Boolean))).sort((a,b)=>a.localeCompare(b,'ko')); }
+function areaNames(){ return Array.from(new Set(S.items.map(i=>i.name).concat((S.reqWho||[]).map(w=>w.item)).filter(Boolean))); }
+function rqAutofill(){
+  const g=+$('#rqG').value, c=+$('#rqC').value, n=+$('#rqN').value, area=$('#rqArea').value;
+  const s=S.students.find(x=>x.g===g&&x.c===c&&x.n===n); const nm=$('#rqName'); if(s && !nm.dataset.touched) nm.value=s.name;
+  const to=$('#rqTo'); if(!to.dataset.touched){ to.value=lookupTeacher(g,c,area); }
+  $('#rqToHint').textContent= to.value? '' : (area&&g&&c? '받는 교사를 자동으로 찾지 못했습니다. 이름을 골라 주세요(비워 두면 담당자만 봅니다).' : '');
+}
+function refreshReqUI(){
+  const n=inbox().length, w=waitConfirm().length, chip=$('#rchip');
+  if(S.settings.sheetUrl && (n||w)){ chip.style.display='inline-block'; chip.textContent='🛠 받은 요청 '+n+(w?' · ✔ 수정 완료 '+w:''); } else { chip.style.display='none'; chip.classList.remove('flash'); }
+  const nb=$('#nav [data-tab=req]'); if(nb) nb.textContent='수정 요청'+(n+w? ' ('+(n+w)+')':'');
+  const typing=document.activeElement && /TEXTAREA|INPUT|SELECT/.test(document.activeElement.tagName) && M.contains(document.activeElement);
+  if(UI.tab==='req' && !typing) renderReq();
+  if(UI.tab==='write'||UI.tab==='search'){ $$('#main .card').forEach(c=>refreshCard(c)); const hd=$('#whead'); if(hd && !typing) hd.innerHTML=writeHeadHTML(); }
+  renderBanner();
+}
+function renderReq(){
+  const st=S.settings;
+  if(!st.sheetUrl||!st.teacher){ $('#main').innerHTML='<div class="box"><h2>수정 요청 (생기부 메신저)</h2><div class="steps">점검(담임·담당자) → 수정(작성 교사) → 확인이 이 화면에서 오갑니다.<br>먼저 <b>설정·백업 → 담당자 시트 연결</b>에 교사 이름·웹앱 주소·암호를 넣어 주세요. 담당자 시트 만드는 법은 설명서 7번에 있습니다.</div><button class="b" data-go="set">설정·백업으로 가기</button></div>'; return; }
+  const perm=('Notification' in window)? Notification.permission : 'none';
+  let h='<div class="box"><div class="row"><button class="b" id="rqFetch">새로 고침</button>'+(perm!=='granted'?'<button class="b g s" id="rqNoti">알림 켜기 (요청·수정 완료 때 팝업)</button>':'<span class="tag">알림 켜짐</span>')
+    +(/^https:\/\//.test(st.sheetView)?'<a class="b g s" style="text-decoration:none" target="_blank" rel="noopener" href="'+esc(st.sheetView)+'">담당자 시트 열기</a>':'')
+    +'<span class="hint">나: <b>'+esc(st.teacher)+'</b>'+(st.admin?' (담당자 모드)':'')+' · 마지막 확인 '+(st.lastReqFetch? new Date(st.lastReqFetch).toLocaleTimeString('ko-KR'):'없음')+' · 열어 둔 동안 1분 30초마다 자동 확인</span></div>'
+    +(RQ.err?'<div class="m-over">⚠ '+esc(RQ.err)+'</div>':'')+'</div>';
+  // ① 받은 요청
+  const ib=inbox().sort((a,b)=>String(a.date).localeCompare(String(b.date)));
+  h+='<div class="box"><h2>① 받은 수정 요청 — 내가 고칠 것 '+ib.length+'건</h2>';
+  if(!ib.length) h+='<div class="hint">받은 요청이 없습니다.</div>';
+  else h+='<div style="overflow-x:auto"><table><tr><th>차수</th><th>학생</th><th>영역</th><th class="l">요청 내용</th><th>보낸 사람</th><th></th></tr>'+ib.map(r=>'<tr><td>'+esc(r.round||'-')+'</td><td>'+esc(rqWho(r))+'</td><td>'+esc(r.area)+'</td><td class="l" style="white-space:pre-wrap">'+(r.status==='재요청'?'<span class="st open">재요청</span> ':'')+esc(r.text)+'</td><td>'+esc(r.from||'담당자')+'<br><span class="hint">'+esc(r.date)+'</span></td><td style="white-space:nowrap"><button class="b g s" data-rqgo="'+esc(r.id)+'">고치러 가기</button> <button class="b s" data-rqdone="'+esc(r.id)+'">수정 완료</button></td></tr>').join('')+'</table></div><div class="hint">"고치러 가기" → 그 학생 칸이 열립니다. 고친 뒤 <b>나이스용 복사</b>를 누르면 수정 완료를 보낼지 바로 묻습니다. 나이스에서 직접 고치셨으면 <b>수정 완료</b>만 누르세요.</div>';
+  h+='</div>';
+  // ② 보내기
+  const lr=st.lastRound||'1';
+  h+='<div class="box"><h2>② 수정 요청 보내기 — 점검(담임·담당자)</h2><div class="rqform">'
+    +'<label>차수<select id="rqRound">'+['1','2','3','4','5'].map(x=>'<option value="'+x+'"'+(x===lr?' selected':'')+'>'+x+'차 점검</option>').join('')+'</select></label>'
+    +'<label>학년<input id="rqG" type="number" min="1" max="6"></label><label>반<input id="rqC" type="number" min="1"></label><label>번호<input id="rqN" type="number" min="1"></label>'
+    +'<label>이름<input id="rqName" type="text"></label>'
+    +'<label>영역<input id="rqArea" type="text" list="rqAreaList" placeholder="예: 세특: 도덕, 행특"></label>'
+    +'<label>받는 교사<input id="rqTo" type="text" list="rqTList" placeholder="자동으로 찾음"></label></div>'
+    +'<datalist id="rqAreaList">'+areaNames().map(a=>'<option value="'+esc(a)+'">').join('')+'</datalist><datalist id="rqTList">'+teacherNames().map(a=>'<option value="'+esc(a)+'">').join('')+'</datalist>'
+    +'<div class="hint" id="rqToHint" style="color:var(--org)"></div>'
+    +'<textarea id="rqText" rows="2" placeholder="고칠 내용 (예: 둘째 문장 종결어미 ~함으로 / 대학명 삭제)"></textarea>'
+    +'<div class="row"><button class="b" id="rqSend">보내기</button><span class="hint">받는 교사는 학급·영역으로 자동으로 찾습니다(그 선생님이 이 프로그램에서 현황을 보낸 적이 있어야 함).</span></div>'
+    +'<details><summary>여러 건 한꺼번에 보내기 (엑셀에서 붙여넣기)</summary><div class="hint">한 줄에 한 건: <b>학년 · 반 · 번호 · 이름 · 영역 · 내용</b> (엑셀 6칸을 복사해 붙여넣기). 차수는 위에서 고른 것으로 갑니다.</div><textarea id="rqBulk" rows="4"></textarea><div class="row"><button class="b g" id="rqBulkSend">여러 건 보내기</button></div></details></div>';
+  // ③ 보낸 요청
+  const mine=S.reqs.filter(r=>rqFromMe(r)); const wd=mine.filter(rqDone), wo=mine.filter(rqOpen), wc=mine.filter(rqClosed);
+  const row=(r,btn)=>'<tr><td>'+esc(r.round||'-')+'</td><td>'+esc(rqWho(r))+'</td><td>'+esc(r.area)+'</td><td>'+esc(r.to||'(받는 교사 미정)')+'</td><td class="l" style="white-space:pre-wrap">'+esc(r.text)+(r.memo?'<div class="hint">💬 '+esc(r.memo)+'</div>':'')+'</td><td>'+stTag(r)+pendNote(r)+'<br><span class="hint">'+esc(rqDone(r)?r.doneAt:(rqClosed(r)?r.confirmAt:r.date))+'</span></td><td style="white-space:nowrap">'+btn(r)+'</td></tr>';
+  const th='<tr><th>차수</th><th>학생</th><th>영역</th><th>받는 교사</th><th class="l">요청 내용</th><th>상태</th><th></th></tr>';
+  h+='<div class="box"><h2>③ 내가 보낸 요청 — 수정 완료(확인 대기) '+wd.length+' · 처리 중 '+wo.length+' · 끝 '+wc.length+'</h2>';
+  if(!mine.length) h+='<div class="hint">보낸 요청이 없습니다.</div>';
+  if(wd.length) h+='<h3>수정 완료 — 확인해 주세요</h3><div style="overflow-x:auto"><table>'+th+wd.map(r=>row(r,r=>'<button class="b s" data-rqok="'+esc(r.id)+'">확인</button> <button class="b r s" data-rqre="'+esc(r.id)+'">재요청</button>')).join('')+'</table></div>';
+  if(wo.length) h+='<h3>아직 안 고침</h3><div style="overflow-x:auto"><table>'+th+wo.map(r=>row(r,()=>'' )).join('')+'</table></div>';
+  if(wc.length) h+='<details><summary>끝난 요청 '+wc.length+'건</summary><table>'+th+wc.map(r=>row(r,()=>'')).join('')+'</table></details>';
+  h+='</div>';
+  // ④ 담당자
+  if(st.admin){
+    const all=S.reqs; const rounds=Array.from(new Set(all.map(r=>r.round||'-'))).sort();
+    h+='<div class="box"><h2>④ 담당자 현황 — 전체 '+all.length+'건</h2>';
+    if(!all.length) h+='<div class="hint">요청이 없습니다.</div>';
+    rounds.forEach(rd=>{ const rs=all.filter(r=>(r.round||'-')===rd); const ts=Array.from(new Set(rs.map(r=>r.to||'(미정)'))).sort((a,b)=>a.localeCompare(b,'ko'));
+      h+='<h3>'+esc(rd)+'차 점검 — '+rs.length+'건 (확인 '+rs.filter(rqClosed).length+' · 수정 완료 '+rs.filter(rqDone).length+' · 미처리 '+rs.filter(rqOpen).length+')</h3><table><tr><th class="l">받는 교사</th><th>요청</th><th>미처리</th><th>수정 완료</th><th>확인</th></tr>'
+        +ts.map(t=>{ const x=rs.filter(r=>(r.to||'(미정)')===t); const o=x.filter(rqOpen).length; return '<tr><td class="l">'+esc(t)+'</td><td>'+x.length+'</td><td class="'+(o?'neg':'')+'">'+o+'</td><td>'+x.filter(rqDone).length+'</td><td>'+x.filter(rqClosed).length+'</td></tr>'; }).join('')+'</table>'; });
+    h+='<div class="row"><button class="b" id="rqNag">미처리 독촉 메시지 복사</button><span class="hint">선생님별 미처리 목록을 글로 만들어 복사합니다. 업무메신저에 붙여넣어 보내세요.</span></div></div>';
+  }
+  $('#main').innerHTML=h;
+}
+function nagText(){
+  const op=S.reqs.filter(rqOpen); if(!op.length) return '';
+  const by={}; op.forEach(r=>{ const t=r.to||'(받는 교사 미정)'; (by[t]=by[t]||[]).push(r); });
+  return '[생기부 수정 요청 미처리 안내] '+new Date().toLocaleDateString('ko-KR')+'\n'+Object.keys(by).sort((a,b)=>a.localeCompare(b,'ko')).map(t=>'\n■ '+t+' 선생님 '+by[t].length+'건\n'+by[t].map(r=>' - '+(r.round?r.round+'차 ':'')+rqWho(r)+' '+r.area+': '+r.text.split('\n')[0].slice(0,50)).join('\n')).join('\n')+'\n\n생기부 도우미 "수정 요청" 탭에서 고친 뒤 [수정 완료]를 눌러 주세요.';
+}
+
 // ───────── 11. 이벤트 ─────────
 function render(){
   $$('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.tab===UI.tab));
-  ({write:renderWrite,search:renderSearch,check:renderCheck,sched:renderSched,sisu:renderSisu,set:renderSet})[UI.tab]();
+  ({write:renderWrite,search:renderSearch,req:renderReq,check:renderCheck,sched:renderSched,sisu:renderSisu,set:renderSet})[UI.tab]();
   renderBanner();
 }
 function keep(fn){ setTimeout(()=>{ const a=document.activeElement; let sel=null; if(a&&a.dataset){ if(a.dataset.zr!==undefined) sel='[data-zr="'+a.dataset.zr+'"][data-f="'+a.dataset.f+'"]'; else if(a.dataset.it!==undefined) sel='[data-it="'+a.dataset.it+'"][data-f="'+a.dataset.f+'"]'; else if(a.id) sel='#'+a.id; } fn(); if(sel){ const n=$(sel); if(n){ n.focus(); if(n.select&&n.type!=='checkbox') n.select(); } } },0); }
 function go(tab){ UI.tab=tab; render(); window.scrollTo(0,0); }
 $('#dchip').addEventListener('click',()=>go('sched'));
+$('#rchip').addEventListener('click',()=>{ $('#rchip').classList.remove('flash'); go('req'); });
+$('#banner').addEventListener('click',e=>{ const g=e.target.closest('[data-go]'); if(g) go(g.dataset.go); });
 $('#nav').addEventListener('click',e=>{ const b=e.target.closest('button[data-tab]'); if(b) go(b.dataset.tab); });
 let gsT=null;
 $('#gsearch').addEventListener('input',e=>{ clearTimeout(gsT); const v=e.target.value; gsT=setTimeout(()=>{ UI.q=v; UI.sid=''; UI.tab='search'; render(); },250); });
@@ -881,6 +1099,8 @@ const M=$('#main');
 M.addEventListener('input',e=>{
   const t=e.target; const card=t.closest('.card');
   if(card && t.classList.contains('ta')){ onCardInput(card); return; }
+  if(['rqG','rqC','rqN','rqArea'].includes(t.id)){ rqAutofill(); return; }
+  if(t.id==='rqName'||t.id==='rqTo'){ t.dataset.touched=t.value? '1' : ''; if(!t.value) delete t.dataset.touched; if(t.id==='rqTo') rqAutofill(); return; }
   if(t.id==='q2'){ clearTimeout(gsT); gsT=setTimeout(()=>{ UI.q=t.value; UI.sid=''; renderSearch(); const q=$('#q2'); if(q){ q.focus(); q.setSelectionRange(q.value.length,q.value.length); } },300); }
 });
 M.addEventListener('focusout',e=>{ const t=e.target; const card=t.closest&&t.closest('.card'); if(card && t.classList.contains('ta')) autoFix(card); });
@@ -905,12 +1125,15 @@ M.addEventListener('change',e=>{
   if(t.id==='stEnter'){ st.enterBytes=+t.value; save(); return; }
   if(t.id==='stNL'){ st.stripNL=t.checked; save(); return; }
   if(t.id==='stSpell'){ st.autoSpell=t.checked; save(); return; }
-  if(t.id==='stTeacher'){ st.teacher=t.value.trim(); save(); return; }
+  if(t.id==='stTeacher'){ st.teacher=t.value.replace(/\s+/g,''); t.value=st.teacher; S.reqInit=false; save(); return; }
   if(t.id==='stYear'){ if(+t.value>2000) st.year=+t.value; save(); return; }
   if(t.id==='stUrl'){ st.sheetUrl=t.value.trim(); save(); return; }
   if(t.id==='stKey'){ st.sheetKey=t.value.trim(); save(); return; }
   if(t.id==='stView'){ const v=t.value.trim(); st.sheetView=/^https:\/\//.test(v)? v : ''; save(); return; }
   if(t.id==='stAuto'){ st.autoSend=t.checked; save(); return; }
+  if(t.id==='stAsk'){ st.askDone=t.checked; save(); return; }
+  if(t.id==='stFixed'){ st.sendFixed=t.checked; save(); return; }
+  if(t.id==='stAdmin'){ st.admin=t.checked; save(); fetchReqs(true); return; }
   if(t.id==='readFile' && t.files[0]){ planReading(t.files[0]).catch(()=>toast('독서기록 파일을 읽지 못했습니다. 엑셀(.xlsx)이나 CSV 파일인지 확인해 주세요.')); return; }
   if(t.id==='xlsIn' && t.files[0]){ importXlsx(t.files[0]).catch(()=>toast('엑셀 파일을 읽지 못했습니다.')); return; }
   if(t.id==='rosterFile' && t.files[0]){ needXLSX().then(()=>readFile(t.files[0])).then(buf=>{ const wb=XLSX.read(buf,{type:'array'}); addRoster(XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,raw:false,defval:''})); renderSet(); }).catch(()=>toast('명단 파일을 읽지 못했습니다.')); return; }
@@ -925,6 +1148,25 @@ M.addEventListener('change',e=>{
 M.addEventListener('click',async e=>{
   const t=e.target, Z=S.sisu;
   const g=t.closest('[data-go]'); if(g){ go(g.dataset.go); return; }
+  if(t.dataset.rqdone){ markDone(t.dataset.rqdone,true); return; }
+  if(t.dataset.rqresend){ resendReq(t.dataset.rqresend); return; }
+  if(t.dataset.rqok){ confirmReq(t.dataset.rqok); return; }
+  if(t.dataset.rqre){ reopenReq(t.dataset.rqre); return; }
+  if(t.dataset.rqgo){ const r=S.reqs.find(x=>x.id===t.dataset.rqgo); const it=r&&matchItem(r.area); const s=r&&S.students.find(x=>sid(x)===rqSid(r));
+    if(!s){ toast('내 명단에 없는 학생입니다. 나이스에서 고친 뒤 [수정 완료]를 눌러 주세요.'); return; }
+    if(!it){ toast('"'+r.area+'" 영역을 내 영역에서 찾지 못했습니다. 학생별 입력 화면으로 갑니다.'); UI.q=s.name; UI.sid=sid(s); $('#gsearch').value=s.name; go('search'); return; }
+    UI.cls=clsOf(s); UI.item=it.key; UI.filter='req'; go('write'); const c=$('.card[data-sid="'+sid(s)+'"][data-ik="'+it.key+'"]'); if(c){ c.scrollIntoView&&c.scrollIntoView({block:'center'}); $('.ta',c).focus(); } return; }
+  if(t.id==='rqFetch'){ fetchReqs(false); return; }
+  if(t.id==='rqNoti'){ if(!('Notification' in window)){ toast('이 브라우저는 알림을 지원하지 않습니다.'); return; } Notification.requestPermission().then(p=>{ toast(p==='granted'?'알림을 켰습니다. 요청·수정 완료 때 팝업이 뜹니다.':'알림이 차단되어 있습니다. 주소창 왼쪽 자물쇠에서 알림을 허용해 주세요.'); renderReq(); }); return; }
+  if(t.id==='rqSend'){ const rd=$('#rqRound').value; S.settings.lastRound=rd;
+    sendReqs([{round:rd,g:+$('#rqG').value,c:+$('#rqC').value,n:+$('#rqN').value,name:$('#rqName').value.trim(),area:$('#rqArea').value.trim(),to:$('#rqTo').value.trim(),text:$('#rqText').value.trim()}])
+      .then(()=>{ const x=$('#rqText'); if(x){ x.value=''; ['rqN','rqName'].forEach(i=>{ const e=$('#'+i); if(e){ e.value=''; delete e.dataset.touched; } }); } });
+    return; }
+  if(t.id==='rqBulkSend'){ const rd=$('#rqRound').value; S.settings.lastRound=rd;
+    const items=String($('#rqBulk').value).split(/\n/).map(l=>l.split('\t')).filter(c=>c.length>=6).map(c=>({round:rd,g:parseInt(c[0],10),c:parseInt(c[1],10),n:parseInt(c[2],10),name:c[3].trim(),area:c[4].trim(),text:c.slice(5).join(' ').trim()}));
+    if(!items.length){ toast('엑셀 6칸(학년·반·번호·이름·영역·내용)을 복사해 붙여넣어 주세요.'); return; }
+    sendReqs(items).then(()=>{ const x=$('#rqBulk'); if(x) x.value=''; }); return; }
+  if(t.id==='rqNag'){ const txt=nagText(); if(!txt){ toast('미처리 요청이 없습니다.'); return; } toast(await copyText(txt)? '독촉 메시지를 복사했습니다. 업무메신저에 붙여넣으세요.' : '복사에 실패했습니다.'); return; }
   const card=t.closest('.card');
   if(card && t.dataset.act==='copy'){ onCopy(card); return; }
   if(card && t.dataset.act==='nv'){ toggleNaver(card); return; }
@@ -940,6 +1182,7 @@ M.addEventListener('click',async e=>{
   const j=t.closest('[data-jump]'); if(j){ const p=j.dataset.jump.split('|'); UI.cls=p[0]; UI.item=p[1]; UI.filter='all'; go('write'); return; }
   const js=t.closest('[data-jumps]'); if(js){ const s=S.students.find(x=>sid(x)===js.dataset.jumps); if(s){ UI.q=s.name; UI.sid=sid(s); $('#gsearch').value=s.name; go('search'); } return; }
   if(t.id==='sendNow'){ sendStats(false); return; }
+  if(t.id==='rqTest'){ RQ.err=''; await fetchReqs(false); if(!RQ.err) toast('연결되었습니다. 받은 요청 '+inbox().length+'건'); return; }
   if(t.dataset.cal!==undefined){ const k=+t.dataset.cal; const n=new Date(); let y=+UI.cal.slice(0,4), m=+UI.cal.slice(5,7); if(k===0){ y=n.getFullYear(); m=n.getMonth()+1; } else { m+=k; if(m<1){m=12;y--;} if(m>12){m=1;y++;} } UI.cal=y+'-'+pad(m); renderSched(); return; }
   const dc=t.closest('td[data-day]'); if(dc){ UI.selDate=dc.dataset.day; const di=$('#scDate'); if(di){ di.value=UI.selDate; $('#scTitle').focus(); toast(UI.selDate+' 을(를) 골랐습니다. 일정 이름을 적고 등록을 누르세요.'); } return; }
   if(t.id==='scAdd'){ const ti=$('#scTitle').value.trim(), d=$('#scDate').value; if(!ti||!d){ toast('일정 이름과 날짜를 넣어 주세요.'); return; } S.schedules.push({id:'s'+Date.now().toString(36),title:ti,date:d,note:$('#scNote').value.trim(),fin:false}); UI.selDate=''; UI.cal=d.slice(0,7); save(); render(); return; }
@@ -970,7 +1213,7 @@ M.addEventListener('click',async e=>{
   if(t.dataset.bandel!==undefined){ S.banned.splice(+t.dataset.bandel,1); save(); renderSet(); return; }
   if(t.id==='wipe'){ if(confirm('이 컴퓨터에 저장된 학생 명단·생기부 내용·일정이 모두 지워집니다. 백업을 받으셨습니까?') && confirm('정말 지웁니다. 되돌릴 수 없습니다.')){ S=freshState(); await flush(); toast('모두 지웠습니다.'); go('write'); } return; }
 });
-document.addEventListener('visibilitychange',()=>{ if(document.hidden) flush(); });
+document.addEventListener('visibilitychange',()=>{ if(document.hidden) flush(); else if(Date.now()-(S.settings.lastReqFetch||0)>60000) fetchReqs(true); });
 window.addEventListener('beforeunload',()=>{ flush(); });
 
 // ───────── 12. 시작 ─────────
@@ -980,6 +1223,7 @@ window.addEventListener('beforeunload',()=>{ flush(); });
   if(d && Array.isArray(d.students) && d.records){ const f=freshState(); S=Object.assign(f,d); S.settings=Object.assign(freshState().settings,d.settings||{}); S.sisu=Object.assign(freshState().sisu,d.sisu||{}); }
   $('#savest').textContent='자료 불러옴'+backupNote();
   render(); notifyDue(); setInterval(()=>{ renderBanner(); notifyDue(); },3600000);
+  refreshReqUI(); fetchReqs(true); setInterval(()=>{ if(!document.hidden) fetchReqs(true); },90000);
 })();
 </script>
 </body>
