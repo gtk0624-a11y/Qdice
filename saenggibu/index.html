@@ -740,7 +740,7 @@ function renderSisu(){
 function renderSet(){
   const st=S.settings;
   let h='<div class="box"><h2>백업 (엑셀)</h2><div class="row"><button class="b" id="xlsOut">엑셀로 백업 받기</button><label class="b g" style="cursor:pointer">엑셀 백업 불러오기<input type="file" id="xlsIn" accept=".xlsx,.xls" hidden></label><button class="b g" id="jsonOut">전체 설정 백업(.json)</button><label class="b g" style="cursor:pointer">전체 설정 불러오기<input type="file" id="jsonIn" accept=".json" hidden></label></div>'
-    +'<div class="hint">엑셀 백업 = 학생×항목 표(다른 컴퓨터로 옮길 때도 이 파일 사용). 전체 설정 백업 = 일정·시수·규칙까지 모두. 백업 파일에는 학생 이름과 생기부 내용이 들어 있으니 업무용 PC·교육청 드라이브에만 보관하세요.</div></div>';
+    +'<div class="hint"><b>엑셀 백업 하나에 입력한 것이 전부 들어갑니다</b> — 명단·영역별 내용·바이트·완료·나이스 복사 기록·영역 설정(한도·입력 대상%·내 담당)·일정·휴업일·시수표·동아리·교정 규칙·금지어·설정. 다른 컴퓨터에서는 "엑셀 백업 불러오기"로 그대로 되살아납니다. 엑셀에서 내용 칸을 고친 뒤 불러오면 고친 내용이 반영됩니다. (.json 백업은 예비용입니다.) 백업 파일에는 학생 이름과 생기부 내용이 들어 있으니 업무용 PC·교육청 드라이브에만 보관하세요.</div></div>';
   h+='<div class="box"><h2>학생 명단 ('+S.students.length+'명)</h2><textarea id="roster" rows="4" placeholder="엑셀에서 학년·반·번호·이름 4칸을 복사해 붙여넣으세요.&#10;예) 1	2	3	홍길동"></textarea><div class="row"><button class="b" id="rosterAdd">명단 넣기</button><label class="b g" style="cursor:pointer">엑셀 파일로 넣기<input type="file" id="rosterFile" accept=".xlsx,.xls,.csv" hidden></label><span class="hint">같은 학년·반·번호가 이미 있으면 이름만 바뀌고 써 둔 내용은 유지됩니다.</span></div>';
   if(S.students.length) h+='<details><summary>명단 보기·삭제</summary><div class="chips" style="margin-top:6px">'+S.students.map(s=>'<span>'+esc(clsOf(s)+' '+s.n+' '+s.name)+'<b data-studel="'+esc(sid(s))+'">×</b></span>').join('')+'</div></details>';
   h+='</div>';
@@ -785,14 +785,35 @@ async function exportXlsx(){
   XLSX.utils.book_append_sheet(wb,ws,'생기부');
   XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(b),'바이트');
   XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(c),'완료여부');
-  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([['항목','한도(바이트)']].concat(S.items.map(i=>[i.name,i.limit]))),'항목한도');
-  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([['날짜','일정','메모']].concat(S.schedules.map(x=>[x.date,x.title,x.note||'']))),'일정');
+  const add=(name,aoa)=>XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(aoa),name);
+  const st=S.settings, Z=S.sisu;
+  add('항목한도',[['항목','한도(바이트)','입력 대상(%)','내 담당']].concat(S.items.map(i=>[i.name,i.limit,ratioOf(i),i.mine!==false?'O':''])));
+  add('나이스복사',[['학년','반','번호','이름'].concat(S.items.map(i=>i.name))].concat(S.students.map(s=>[s.g,s.c,s.n,s.name].concat(S.items.map(i=>{ const c=peek(sid(s),i.key).copied; return c? new Date(c).toLocaleString('ko-KR') : ''; })))));
+  add('일정',[['날짜','일정','메모','끝남']].concat(S.schedules.map(x=>[x.date,x.title,x.note||'',x.fin?'O':''])));
+  add('휴업일',[['날짜','이름']].concat(Z.holidays.map(x=>[x.date,x.name||''])));
+  add('시수표',[['시작일',Z.start,'종료일',Z.end],[],['이름','월','화','수','목','금','기준 시수','조정']].concat(Z.rows.map(r=>[r.name].concat(r.w).concat([r.target,r.adj]))));
+  add('동아리',[['동아리 기준 시수',Z.clubTarget],[],['날짜','시수']].concat(Z.club.map(x=>[x.date,x.hours])));
+  add('교정규칙·금지어',[['틀린 표현','고칠 표현','','금지어']].concat(Array.from({length:Math.max(S.rules.length,S.banned.length)},(_,i)=>[S.rules[i]?S.rules[i].from:'',S.rules[i]?S.rules[i].to:'','',S.banned[i]||''])));
+  add('설정',[['교사 이름',st.teacher],['학년도',st.year],['엔터 바이트',st.enterBytes],['복사 시 줄바꿈 제거',st.stripNL?'O':''],['맞춤법 자동 교정',st.autoSpell?'O':''],['현황판 웹앱 주소',st.sheetUrl],['현황판 암호',st.sheetKey],['현황판 시트 주소',st.sheetView],['현황 자동 전송',st.autoSend?'O':'']]);
+  // 복원용 전체 자료(숨김 시트): 프로그램이 다시 불러올 때 이것으로 모든 것을 되살림
+  const js=JSON.stringify(S), parts=[]; for(let i=0;i<js.length;i+=30000) parts.push([js.slice(i,i+30000)]);
+  add('_복원용',[['이 시트는 지우거나 고치지 마세요(생기부 도우미 복원용)']].concat(parts));
+  wb.Workbook={Sheets:wb.SheetNames.map(n=>({Hidden:n==='_복원용'?1:0}))};
   XLSX.writeFile(wb,'생기부백업_'+stamp()+'.xlsx');
   S.settings.lastBackup=Date.now(); flush(); toast('엑셀 백업 파일을 내려받았습니다.');
 }
 async function importXlsx(file){
   await needXLSX();
   const wb=XLSX.read(await readFile(file),{type:'array'});
+  let restored=false;
+  if(wb.Sheets['_복원용']){
+    try{ const rr=XLSX.utils.sheet_to_json(wb.Sheets['_복원용'],{header:1,raw:true,defval:''}).slice(1).map(r=>String(r[0]||'')).join('');
+      const d=JSON.parse(rr); if(!d||!Array.isArray(d.students)||!d.records||!Array.isArray(d.items)) throw 0;
+      if(!confirm('이 엑셀 백업으로 전부 되돌립니다.\n(명단·입력 내용·완료·영역 설정·일정·시수·교정 규칙·설정 모두)\n지금 이 컴퓨터에 있는 자료는 이 파일 내용으로 바뀝니다. 계속할까요?')) return;
+      S=Object.assign(freshState(),d); S.settings=Object.assign(freshState().settings,d.settings||{}); S.sisu=Object.assign(freshState().sisu,d.sisu||{});
+      restored=true;
+    }catch(e){ toast('복원용 시트가 손상되어 입력 내용만 불러옵니다.'); }
+  }
   const ws=wb.Sheets['생기부']||wb.Sheets[wb.SheetNames[0]];
   const rows=XLSX.utils.sheet_to_json(ws,{header:1,raw:false,defval:''});
   if(rows.length<2){ toast('내용이 없는 파일입니다.'); return; }
@@ -809,10 +830,10 @@ async function importXlsx(file){
   const plan=[];
   rows.slice(1).forEach(r=>{ const g=parseInt(r[ci.g],10), c=parseInt(r[ci.c],10), n=parseInt(r[ci.n],10), name=String(r[ci.name]||'').trim(); if(!(g>0&&c>0&&n>0)||!name) return;
     plan.push({g,c,n,name,r}); const k=g+'-'+c+'-'+n; cols.forEach(o=>{ const t=String(r[o.j]||''); if(!t.trim()) return; const cur=peek(k,o.it.key).text; if(cur.trim()&&cur!==t) conflict++; }); });
-  if(conflict && !confirm('이미 써 둔 내용과 다른 칸이 '+conflict+'개 있습니다.\n[확인] 파일 내용으로 덮어쓰기\n[취소] 불러오기 중단')){ return; }
+  if(conflict && !restored && !confirm('이미 써 둔 내용과 다른 칸이 '+conflict+'개 있습니다.\n[확인] 파일 내용으로 덮어쓰기\n[취소] 불러오기 중단')){ return; }
   plan.forEach(p=>{ let s=S.students.find(x=>x.g===p.g&&x.c===p.c&&x.n===p.n); if(!s){ s={g:p.g,c:p.c,n:p.n,name:p.name}; S.students.push(s); } else s.name=p.name;
     const k=sid(s); cols.forEach(o=>{ const t=String(p.r[o.j]||''); if(!t.trim()) return; const rr=rec(k,o.it.key); if(rr.text!==t){ rr.text=t; rr.updated=Date.now(); rr.copied=0; } if(doneRows[k]&&doneRows[k][o.it.name]) rr.done=true; filled++; }); });
-  sortStudents(); save(); toast('불러왔습니다. 학생 '+plan.length+'명, 내용 '+filled+'칸'); render();
+  sortStudents(); save(); toast((restored?'전부 되돌렸습니다. ':'불러왔습니다. ')+'학생 '+plan.length+'명, 내용 '+filled+'칸'); render();
 }
 
 // 독서기록 불러오기(학생이 구글 폼으로 입력한 응답 파일)
