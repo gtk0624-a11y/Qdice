@@ -1311,11 +1311,11 @@ function renderReq(){
     +'<label>학년<input id="rqG" type="number" min="1" max="6"></label><label>반<input id="rqC" type="number" min="1"></label><label>번호<input id="rqN" type="number" min="1"></label>'
     +'<label>이름 (전체면 "전체")<input id="rqName" type="text"></label>'
     +'<label>오류(확인) 분야<select id="rqField">'+fieldList().map(f=>'<option>'+esc(f)+'</option>').join('')+'</select></label>'
-    +'<label>상세 분야<input id="rqSub" type="text" list="rqSubList" placeholder="예: 사회"></label></div>'
-    +'<datalist id="rqSubList">'+subList(f0).map(s=>'<option value="'+esc(s)+'">').join('')+'</datalist>'
+    +'<label>상세 분야 → 받는 선생님<span id="rqSubBox">'+rqSubSelHTML(f0)+'</span></label></div>'
     +'<div class="hint" id="rqToHint" style="color:var(--org)"></div>'
     +'<div class="rqform" style="grid-template-columns:2fr 2fr 1fr"><label>오류(확인) 내용<input id="rqText" type="text" placeholder="예: 억혀"></label><label>변경 후<input id="rqAfter" type="text" placeholder="예: 얽혀 (오타)"></label><label>비고<input id="rqMemo" type="text" placeholder="예: 3학년 2반도 해당"></label></div>'
     +'<div class="row"><button class="b" id="rqSend">시트에 적기</button><span class="hint">점검 시트에 한 줄이 그대로 들어가고, 담당교사에게 알림이 갑니다. 시트에 직접 적어도 똑같이 갑니다.</span></div>'
+    +'<details><summary>📋 선생님별 담당 보기 (누구에게 보낼지 확인)</summary>'+teamListHTML()+'</details>'
     +'<details><summary>여러 건 한꺼번에 (엑셀에서 붙여넣기)</summary><div class="hint">한 줄에 한 건: <b>학번 · 이름 · 분야 · 상세 분야 · 오류 내용 · 변경 후</b> (엑셀 6칸을 복사해 붙여넣기)</div><textarea id="rqBulk" rows="4"></textarea><div class="row"><button class="b g" id="rqBulkSend">여러 건 적기</button></div></details></div>';
   // ④ 내가 보낸 요청
   const mine=S.reqs.filter(rqFromMe);
@@ -1340,8 +1340,21 @@ function renderReq(){
   }
   $('#main').innerHTML=h;
 }
+// 상세 분야 고르기 — 옆에 받는 선생님 이름을 같이 보여 줌
+function rqSubVal(){ const v=($('#rqSub')||{}).value||''; return v==='__type'? (($('#rqSubTxt')||{}).value||'').trim() : v; }
+function rqSubSelHTML(field){
+  const du=(S.reqDuties||[]).filter(d=>d.field===field); const subs=subOptions(field); du.forEach(d=>{ if(d.sub&&!subs.includes(d.sub)) subs.push(d.sub); });
+  const who=sub=>{ const t=responsible({field,sub,g:0,c:0,n:0}); return t.length? t.join(', ') : '담당 미정'; };
+  return '<select id="rqSub"><option value="">— 고르기 —</option>'+subs.map(x=>'<option value="'+esc(x)+'">'+esc(x)+' → '+esc(who(x))+'</option>').join('')+'<option value="__type">✏ 목록에 없음 (직접 쓰기)</option></select><input id="rqSubTxt" type="text" placeholder="상세 분야 직접 쓰기" style="display:none;margin-top:4px">';
+}
+function teamListHTML(){
+  const du=S.reqDuties||[]; const names=Array.from(new Set(du.map(d=>d.teacher))).filter(Boolean).sort((a,b)=>a.localeCompare(b,'ko'));
+  if(!names.length) return '<div class="hint">아직 담당을 정한 선생님이 없습니다.</div>';
+  return '<table><tr><th class="l">선생님</th><th>담임</th><th class="l">담당 분야</th></tr>'+names.map(n=>{ const ds=du.filter(d=>d.teacher===n); const hm=(ds.find(d=>d.homeroom)||{}).homeroom||''; const fs=ds.filter(d=>d.field);
+    return '<tr><td class="l"><b>'+esc(n)+'</b></td><td>'+(hm? esc(clsName(hm)) : '-')+'</td><td class="l">'+(fs.length? fs.map(d=>esc(d.field)+' · '+(d.sub? esc(d.sub) : '전부')).join(', ') : '<span class="hint">담임 항목만</span>')+'</td></tr>'; }).join('')+'</table>';
+}
 function rqAutofill(){
-  const g=+$('#rqG').value, c=+$('#rqC').value, n=+$('#rqN').value, field=$('#rqField').value, sub=$('#rqSub').value;
+  const g=+$('#rqG').value, c=+$('#rqC').value, n=+$('#rqN').value, field=$('#rqField').value, sub=rqSubVal();
   const s=S.students.find(x=>x.g===g&&x.c===c&&x.n===n); const nm=$('#rqName'); if(s && !nm.dataset.touched) nm.value=s.name;
   const r={field,sub,g,c,n}; const t=responsible(r), h=g&&c? homeTeacher(r) : '';
   $('#rqToHint').textContent=(field? (t.length? '담당교사: '+t.join(', ') : '이 분야·상세의 담당교사를 아직 모릅니다(그 선생님이 "내 담당"을 정하면 보입니다).') : '')+(h?' · 담임: '+h:'');
@@ -1444,7 +1457,7 @@ const M=$('#main');
 M.addEventListener('input',e=>{
   const t=e.target; const card=t.closest('.card');
   if(card && t.classList.contains('ta')){ onCardInput(card); return; }
-  if(['rqG','rqC','rqN','rqSub'].includes(t.id)){ rqAutofill(); return; }
+  if(['rqG','rqC','rqN','rqSubTxt'].includes(t.id)){ rqAutofill(); return; }
   if(t.id==='rqName'){ if(t.value) t.dataset.touched='1'; else delete t.dataset.touched; return; }
   if(t.id==='dSub') return;
   if(t.id==='q2'){ clearTimeout(gsT); gsT=setTimeout(()=>{ UI.q=t.value; UI.sid=''; renderSearch(); const q=$('#q2'); if(q){ q.focus(); q.setSelectionRange(q.value.length,q.value.length); } },300); }
@@ -1481,7 +1494,8 @@ M.addEventListener('change',e=>{
   if(t.id==='stKey'){ st.sheetKey=t.value.trim(); save(); renderSet(); return; }
   if(t.id==='stView'){ const v=t.value.trim(); st.sheetView=/^https:\/\//.test(v)? v : ''; save(); return; }
   if(t.id==='stAuto'){ st.autoSend=t.checked; save(); return; }
-  if(t.id==='rqField'){ const dl=$('#rqSubList'); if(dl) dl.innerHTML=subList(t.value).map(s=>'<option value="'+esc(s)+'">').join(''); rqAutofill(); return; }
+  if(t.id==='rqField'){ const b=$('#rqSubBox'); if(b) b.innerHTML=rqSubSelHTML(t.value); rqAutofill(); return; }
+  if(t.id==='rqSub'){ const ip=$('#rqSubTxt'); if(ip){ ip.style.display=t.value==='__type'?'':'none'; if(t.value==='__type') ip.focus(); } rqAutofill(); return; }
   if(t.id==='dField'){ const b=$('#dSubBox'); if(b) b.innerHTML=dSubSelHTML(t.value); const ip=$('#dSub'); if(ip){ ip.style.display='none'; ip.value=''; } return; }
   if(t.id==='dSubSel'){ const ip=$('#dSub'); if(ip){ ip.style.display=t.value==='__type'?'':'none'; if(t.value==='__type') ip.focus(); } return; }
   if(t.id==='dHome'){ st.homeroom=t.value; saveDuty(); UI.dutyOpen=true; if(UI.tab==='req') renderReq(); toast(t.value? clsName(t.value)+' 담임으로 정했습니다.' : '담임 아님으로 정했습니다.'); return; }
@@ -1522,7 +1536,7 @@ M.addEventListener('click',async e=>{
   if(t.id==='rqSend'){ const g=+$('#rqG').value, c=+$('#rqC').value, n=+$('#rqN').value, nm=$('#rqName').value.trim();
     const hak= g&&c&&n? (g+pad2(c)+pad2(n)) : '';
     if(!hak && !nm){ toast('학년·반·번호를 넣거나, 여러 학생이면 이름에 "전체"라고 적어 주세요.'); return; }
-    sendReqs([{hak,name:nm,field:$('#rqField').value,sub:$('#rqSub').value.trim(),text:$('#rqText').value.trim(),after:$('#rqAfter').value.trim(),memo:$('#rqMemo').value.trim()}])
+    sendReqs([{hak,name:nm,field:$('#rqField').value,sub:rqSubVal(),text:$('#rqText').value.trim(),after:$('#rqAfter').value.trim(),memo:$('#rqMemo').value.trim()}])
       .then(()=>{ ['rqText','rqAfter','rqMemo','rqN','rqName'].forEach(i=>{ const e=$('#'+i); if(e){ e.value=''; delete e.dataset.touched; } }); });
     return; }
   if(t.id==='rqBulkSend'){
