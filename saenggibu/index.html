@@ -167,7 +167,7 @@ footer{text-align:center;color:var(--sub);font-size:12px;padding:18px}
   <div class="gbin"><input id="gbQ" type="text" placeholder="예) 개근 기준, 행특 글자 수, AI로 써도 돼?" autocomplete="off"><button class="b" id="gbGo">찾기</button></div>
   <div class="gbft">찾은 근거만 보여 드립니다. 최종 판단은 원문으로 확인하세요. · <label>📄 자료 올리기(PDF)<input type="file" id="gbFile" accept=".pdf" multiple style="display:none"></label><div id="gbUps"></div></div>
 </div>
-<div id="dropZone" style="display:none;position:fixed;inset:0;background:rgba(31,58,104,.82);z-index:80;color:#fff;font-size:24px;font-weight:700;align-items:center;justify-content:center;text-align:center;border:6px dashed var(--yel)">여기에 놓으면 바로 들어갑니다<br><span style="font-size:16px;font-weight:400">명단 엑셀 · 입력 양식 · 엑셀 백업 모두 됩니다</span></div>
+<div id="dropZone" style="display:none;position:fixed;inset:0;background:rgba(31,58,104,.82);z-index:80;color:#fff;font-size:24px;font-weight:700;align-items:center;justify-content:center;text-align:center;border:6px dashed var(--yel)">여기에 놓으면 바로 들어갑니다<br><span style="font-size:16px;font-weight:400">명단 엑셀 · 입력 양식 · 엑셀 백업 · 기재요령/점검 일정 PDF 모두 됩니다</span></div>
 <div id="lockScr" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:90;align-items:center;justify-content:center">
   <div class="box" style="width:340px;text-align:center">
     <img src="data:image/jpeg;base64,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" alt="" style="width:90px;height:90px;border-radius:50%;margin-bottom:6px">
@@ -1351,8 +1351,9 @@ window.addEventListener('dragover',e=>{ if(!isFileDrag(e)) return; e.preventDefa
 window.addEventListener('dragleave',e=>{ if(!isFileDrag(e)) return; dragN=Math.max(0,dragN-1); if(!dragN) $('#dropZone').style.display='none'; });
 window.addEventListener('drop',async e=>{ if(!e.dataTransfer||!e.dataTransfer.files||!e.dataTransfer.files.length) return; e.preventDefault(); dragN=0; $('#dropZone').style.display='none';
   if($('#lockScr').style.display==='flex') return;
-  const fs=Array.from(e.dataTransfer.files).filter(f=>/\.(xlsx|xls|csv)$/i.test(f.name));
-  if(!fs.length){ toast('엑셀(.xlsx) 또는 CSV 파일만 넣을 수 있습니다.'); return; }
+  const all=Array.from(e.dataTransfer.files), pdfs=all.filter(f=>/\.pdf$/i.test(f.name)); if(pdfs.length && window.gbUpload) window.gbUpload(pdfs);
+  const fs=all.filter(f=>/\.(xlsx|xls|csv)$/i.test(f.name));
+  if(!fs.length){ if(!pdfs.length) toast('엑셀(.xlsx)·CSV·PDF 파일만 넣을 수 있습니다.'); return; }
   for(const f of fs){ try{ await importAny(f); }catch(err){ toast('"'+f.name+'"을(를) 읽지 못했습니다.'); } }
   render(); });
 async function importAny(file){
@@ -1561,7 +1562,7 @@ window.addEventListener('beforeunload',()=>{ flush(); });
 // 기본 자료: 2026 학교생활기록부 기재요령 주요 개정사항(중학교) — 쪽수·근거 원문을 함께 보여 줌
 // 올린 자료: 교사가 PDF를 올리면 이 컴퓨터(브라우저)에만 저장하고 쪽마다 찾음
 (function(){
-const GB={base:[], ups:[], open:false, busy:false};
+const GB={base:[], ups:[], shared:[], packYear:0, open:false, busy:false};
 try{ GB.base=JSON.parse(document.getElementById('guideData').textContent); }catch(e){ GB.base=[]; }
 const BASE_SRC='2026 학교생활기록부 기재요령 주요 개정사항(중학교)';
 const SYN=[
@@ -1625,17 +1626,26 @@ function snippet(txt,toks){
   const a=Math.max(0,at-110), b=Math.min(z.length,at+220);
   return (a>0?'…':'')+z.slice(a,b)+(b<z.length?'…':'');
 }
+// ── 연도: 자료마다 학년도를 붙여, 지난 학년도 자료는 찾지 않음 ──
+const BASE_YEAR=2026;
+function curYear(){ try{ return +(S.settings.year)||new Date().getFullYear(); }catch(e){ return new Date().getFullYear(); } }
+function yearOf(name,pages){ const m=String(name).match(/(20\d\d)/) || String((pages||[]).slice(0,3).join(' ')).match(/(20\d\d)\s*학년도/); return m? +m[1] : curYear(); }
+function allDocs(){ return GB.shared.map(d=>Object.assign({kind:'공용'},d)).concat(GB.ups.map(d=>Object.assign({kind:'내 자료'},d))); }
+function liveDocs(){ return allDocs().filter(d=>!d.year || d.year>=curYear()); }
+function baseOn(){ return !(GB.packYear>BASE_YEAR); }
 function search(q){
   const toks=tokens(q), qb=bigrams(toks.join(' ')||q);
   if(!toks.length) return {toks,base:[],up:[]};
-  let base=GB.base.map(o=>({o,s:scoreBase(o,toks,qb)})).filter(x=>x.s>=4).sort((a,b)=>b.s-a.s); const top=base.length?base[0].s:0; base.splice(0,base.length,...base.filter(x=>x.s>=top*0.5).slice(0,3));
-  const up=[]; GB.ups.forEach(d=>d.pages.forEach((t,i)=>{ const s=scoreText(t,toks,qb); if(s>=5) up.push({d,p:i+1,t,s}); }));
-  up.sort((a,b)=>b.s-a.s);
-  return {toks,base,up:up.slice(0,3)};
+  let base=baseOn()? GB.base.map(o=>({o,s:scoreBase(o,toks,qb)})).filter(x=>x.s>=4).sort((a,b)=>b.s-a.s) : []; const top=base.length?base[0].s:0; base=base.filter(x=>x.s>=top*0.5).slice(0,3);
+  let up=[]; liveDocs().forEach(d=>d.pages.forEach((t,i)=>{ const s=scoreText(t,toks,qb); if(s>=5) up.push({d,p:i+1,t,s}); }));
+  up.sort((a,b)=>b.s-a.s); const ut=up.length?up[0].s:0; up=up.filter(x=>x.s>=ut*0.4);
+  const seen=new Set(); up=up.filter(x=>{ const k=squash(snippet(x.t,toks)).slice(0,80); if(seen.has(k)) return false; seen.add(k); return true; });
+  return {toks,base,up:up.slice(0,4)};
 }
 function baseCard(o,toks){
   const tagC={신설:'#1a8f55',수정:'#e08a00',삭제:'#d93025'}[o.tag]||'#667085';
   let h='<div class="gbc"><div class="gbh"><b class="gbp">'+esc(o.ref)+'</b> '+esc(o.area)+(o.art?' · '+esc(o.kind+' '+o.art):'')+' <span class="gbt" style="background:'+tagC+'">2026 '+esc(o.tag)+'</span></div>';
+  if(curYear()>BASE_YEAR) h+='<div class="gbw" style="color:var(--red)">⚠ 2026학년도 자료입니다. '+curYear()+'학년도 기재요령으로 다시 확인하세요.</div>';
   if(o.why) h+='<div class="gbw">바뀐 이유: '+hl(o.why,toks)+'</div>';
   h+='<div class="gbl">📌 2026 기준 (근거 원문)</div><div class="gbx">'+(o.after? hl(o.after,toks) : '<b style="color:var(--red)">이 내용은 2026년에 삭제되었습니다.</b>')+'</div>';
   if(o.before) h+='<details><summary>2025 이전 내용 보기</summary><div class="gbx old">'+hl(o.before,toks)+'</div></details>';
@@ -1643,15 +1653,16 @@ function baseCard(o,toks){
   return h;
 }
 function upCard(x,toks){
-  return '<div class="gbc"><div class="gbh"><b class="gbp">파일 '+x.p+'쪽</b> '+esc(x.d.name)+'</div><div class="gbx">'+hl(snippet(x.t,toks),toks)+'</div>'
+  return '<div class="gbc"><div class="gbh"><b class="gbp">파일 '+x.p+'쪽</b> '+esc(x.d.name)+' <span class="gbt" style="background:'+(x.d.kind==='공용'?'#1f3a68':'#667085')+'">'+esc(x.d.kind)+(x.d.year?' '+x.d.year:'')+'</span></div><div class="gbx">'+hl(snippet(x.t,toks),toks)+'</div>'
     +'<details><summary>이 쪽 전체 보기</summary><div class="gbx old">'+hl(x.t,toks)+'</div></details>'
-    +'<div class="gbs">출처: 올린 자료 「'+esc(x.d.name)+'」 · PDF 파일 '+x.p+'번째 쪽 (인쇄된 쪽 번호와 다를 수 있음)</div></div>';
+    +'<div class="gbs">출처: 「'+esc(x.d.name)+'」 · PDF 파일 '+x.p+'번째 쪽 (인쇄된 쪽 번호와 다를 수 있음)</div></div>';
 }
 const CHIPS=['AI로 쓴 문장 붙여넣어도 돼?','개근 기준','진로활동 글자 수','동아리 이수시간 적어?','스포츠클럽 활동시간','장기결석 특기사항','같은 책 두 번 입력','행특에 방과후 활동','수상경력 기준','바뀐 것 전체 목록'];
 function chipsHTML(){ return '<div class="gbchips">'+CHIPS.map(c=>'<button data-gq="'+esc(c)+'">'+esc(c)+'</button>').join('')+'</div>'; }
-function bot(html){ const m=document.getElementById('gbMsgs'); const d=document.createElement('div'); d.className='gbm bot'; d.innerHTML='<img src="'+document.querySelector('header img').src+'" alt="도디쌤"><div class="gbb">'+html+'</div>'; m.appendChild(d); d.scrollIntoView({block:'start',behavior:'smooth'}); }
+function bot(html){ const m=document.getElementById('gbMsgs'); const d=document.createElement('div'); d.className='gbm bot'; d.innerHTML='<img src="'+document.querySelector('header img').src+'" alt="도디쌤"><div class="gbb">'+html+'</div>'; m.appendChild(d); d.scrollIntoView({block:'start',behavior:'smooth'}); return d; }
 function me(text){ const m=document.getElementById('gbMsgs'); const d=document.createElement('div'); d.className='gbm me'; d.innerHTML='<div class="gbb">'+esc(text)+'</div>'; m.appendChild(d); }
 function listAll(){
+  if(!baseOn()) return '기본 개정사항 목록은 '+GB.packYear+'학년도 공용 자료로 바뀌었습니다. 궁금한 낱말로 물어봐 주세요.';
   const by={}; GB.base.forEach(o=>{ (by[o.area]=by[o.area]||[]).push(o); });
   let h='<b>2026 개정사항 '+GB.base.length+'개</b>입니다. 누르면 근거 원문이 나옵니다.<div class="gblist">';
   Object.keys(by).forEach(a=>{ h+='<div class="gbla">'+esc(a)+'</div>'+by[a].map(o=>'<button data-gp="'+o.p+'"><b>'+esc(o.ref)+'</b> '+esc(o.why)+' <i>('+esc(o.tag)+')</i></button>').join(''); });
@@ -1660,59 +1671,120 @@ function listAll(){
 function ask(q){
   q=String(q||'').trim(); if(!q) return; me(q);
   if(/전체\s*목록|목록|바뀐\s*것\s*전체|다\s*보여/.test(q)){ bot(listAll()); return; }
-  const r=search(q);
+  const r=search(q), n=liveDocs().length;
   if(!r.base.length && !r.up.length){
-    bot('찾지 못했습니다. 질문하신 내용은 <b>'+(GB.ups.length?'기본 자료와 올린 자료':'2026 개정사항 자료')+'</b>에 없습니다.<br>'
+    bot('찾지 못했습니다. 질문하신 내용은 <b>'+(n? '기본 자료와 올린 자료('+n+'개)' : '2026 개정사항 자료')+'</b>에 없습니다.<br>'
       +'바뀌지 않은 규정일 수 있습니다. 그런 규정은 <b>기재요령 전체 PDF</b>를 아래 [📄 자료 올리기]로 넣으면 찾을 수 있습니다.<br>다른 낱말로 물어보셔도 됩니다. (예: "행특 글자 수", "개근")'+chipsHTML());
     return;
   }
   let h='관련 근거 <b>'+(r.base.length+r.up.length)+'건</b>을 찾았습니다. 근거 원문을 꼭 확인해 주세요.';
-  if(!GB.ups.length) h+='<div class="gbw">※ 기본 자료는 <b>바뀐 부분(개정사항)</b>만 담고 있습니다. 질문과 딱 맞지 않으면 기재요령 전체에서 다시 확인하세요.</div>';
+  if(!n && baseOn()) h+='<div class="gbw">※ 기본 자료는 <b>바뀐 부분(개정사항)</b>만 담고 있습니다. 질문과 딱 맞지 않으면 기재요령 전체에서 다시 확인하세요.</div>';
+  r.up.filter(x=>x.d.kind==='공용').forEach(x=>{ h+=upCard(x,r.toks); });
   r.base.forEach(x=>{ h+=baseCard(x.o,r.toks); });
-  r.up.forEach(x=>{ h+=upCard(x,r.toks); });
+  r.up.filter(x=>x.d.kind!=='공용').forEach(x=>{ h+=upCard(x,r.toks); });
   bot(h);
 }
 function renderUps(){
-  const b=document.getElementById('gbUps'); if(!b) return;
-  b.innerHTML=GB.ups.length? '올린 자료: '+GB.ups.map((d,i)=>'<span class="gbup">'+esc(d.name)+' ('+d.pages.length+'쪽) <button data-gdel="'+i+'" title="이 자료 지우기">✕</button></span>').join(' ') : '';
+  const b=document.getElementById('gbUps'); if(!b) return; const cy=curYear();
+  let h='';
+  if(GB.shared.length) h+='공용 자료('+GB.packYear+'): '+GB.shared.map(d=>'<span class="gbup">'+esc(d.name)+'</span>').join(' ')+'<br>';
+  if(GB.ups.length) h+='내 자료: '+GB.ups.map((d,i)=>'<span class="gbup"'+(d.year&&d.year<cy?' style="opacity:.55" title="지난 학년도 자료라 찾지 않습니다"':'')+'>'+esc(d.name)+' ('+d.pages.length+'쪽'+(d.year?', '+d.year+(d.year<cy?' 지난 자료':''):'')+') <button data-gdel="'+i+'" title="이 자료 지우기">✕</button></span>').join(' ')
+    +' <button class="b g s" id="gbPack" title="학교 전체가 쓰는 공용 자료 파일 만들기">공용 자료 파일 만들기</button>';
+  b.innerHTML=h;
+}
+// ── 일정 자동 넣기: 점검 일정 같은 짧은 자료에서 날짜를 찾아 일정 탭(D-day)에 바로 넣음 ──
+const SCHED_RE=/점검|마감|입력|제출|정정|검토|확인|완료|기한|마무리|생기부|학교생활기록부|세특|창체|행특|행동특성|자율|동아리|진로|출결|독서|봉사|수상|교과|성적|평가|나이스|NEIS|업로드|회의|연수/;
+function schedFromPages(name,pages){
+  if(typeof linesToEvents!=='function' || pages.length>30) return [];
+  const lines=[].concat(...pages.map(p=>p.split('\n')));
+  const ev=linesToEvents(lines,curYear()).filter(e=>e.date && SCHED_RE.test(e.text||'') && String(e.text||'').replace(/[\d\s.~()·\-:/월일요]/g,'').length>=2);
+  // 같은 내용이 며칠 연달아 나오면(기간) 시작·끝 두 개만 넣음
+  const by={}; ev.forEach(e=>{ const t=String(e.text).replace(/\s+/g,' ').trim().slice(0,40); (by[t]=by[t]||new Set()).add(e.date); });
+  const items=[]; const day=d=>Math.round(new Date(d+'T00:00:00')/86400000);
+  Object.keys(by).forEach(t=>{ const ds=Array.from(by[t]).sort(); let run=[ds[0]];
+    const flush=()=>{ if(run.length===1) items.push({date:run[0],title:t}); else { const md=d=>(+d.slice(5,7))+'.'+(+d.slice(8,10)); items.push({date:run[0],title:'[시작] '+t+' (~'+md(run[run.length-1])+')'}); items.push({date:run[run.length-1],title:'[끝] '+t}); } };
+    for(let i=1;i<ds.length;i++){ if(day(ds[i])-day(run[run.length-1])<=3) run.push(ds[i]); else { flush(); run=[ds[i]]; } } flush(); });
+  items.sort((a,b)=>a.date.localeCompare(b.date));
+  const have=new Set((S.schedules||[]).map(s=>s.date+'|'+s.title)), out=[];
+  items.forEach(e=>{ const k=e.date+'|'+e.title; if(have.has(k)) return; have.add(k); out.push({id:'s'+Date.now().toString(36)+out.length,title:e.title,date:e.date,note:'자료: '+name,fin:false,src:'gb:'+name}); });
+  return out.slice(0,40);
+}
+function addScheds(name,pages){
+  const add=schedFromPages(name,pages); if(!add.length) return;
+  S.schedules=(S.schedules||[]).concat(add); save(); if(typeof render==='function') render();
+  const today=new Date(); today.setHours(0,0,0,0);
+  const dd=d=>{ const n=Math.round((new Date(d+'T00:00:00')-today)/86400000); return n===0?'D-day':(n>0?'D-'+n:'D+'+(-n)); };
+  bot('📅 「'+esc(name)+'」에서 일정 <b>'+add.length+'개</b>를 찾아 <b>일정 탭에 넣었습니다</b>. 디데이와 알림이 자동으로 됩니다.<div class="gbx">'+add.map(s=>esc(s.date)+' ('+dd(s.date)+') '+esc(s.title)).join('\n')+'</div>'
+    +'<div class="row" style="margin-top:6px"><button class="b s" data-gogo="sched">일정 탭에서 고치기</button> <button class="b g s" data-gundo="'+esc(name)+'">방금 넣은 일정 빼기</button></div>');
+}
+function removeScheds(name){ const n=(S.schedules||[]).length; S.schedules=(S.schedules||[]).filter(s=>s.src!=='gb:'+name || s.fin); const k=n-S.schedules.length; save(); if(typeof render==='function') render(); return k; }
+async function pdfPages(buf){
+  await needPDF();
+  const pdf=await window.pdfjsLib.getDocument({data:new Uint8Array(buf)}).promise; const pages=[]; let chars=0;
+  for(let p=1;p<=pdf.numPages;p++){ const pg=await pdf.getPage(p); const tc=await pg.getTextContent();
+    const items=tc.items.map(it=>({s:it.str,x:it.transform[4],y:it.transform[5],w:it.width,h:it.height}));
+    const t=itemsToLines(items).map(l=>String(l)).join('\n').replace(/[ \t]+/g,' ').trim();
+    chars+=t.length; pages.push(t); }
+  return {pages,chars};
 }
 async function upload(files){
   for(const f of files){
     if(!/\.pdf$/i.test(f.name)){ toast('PDF 파일만 올릴 수 있습니다. 한글 파일은 [PDF로 저장하기] 후 올려 주세요.'); continue; }
     bot('「'+esc(f.name)+'」을(를) 읽고 있습니다… 쪽수가 많으면 1분쯤 걸립니다.');
     try{
-      await needPDF(); const buf=await f.arrayBuffer();
-      const pdf=await window.pdfjsLib.getDocument({data:new Uint8Array(buf)}).promise; const pages=[]; let chars=0;
-      for(let p=1;p<=pdf.numPages;p++){ const pg=await pdf.getPage(p); const tc=await pg.getTextContent();
-        const items=tc.items.map(it=>({s:it.str,x:it.transform[4],y:it.transform[5],w:it.width,h:it.height}));
-        const t=itemsToLines(items).map(l=>Array.isArray(l)? l.join(' ') : (l&&l.text!=null? l.text : String(l))).join('\n').replace(/[ \t]+/g,' ').trim();
-        chars+=t.length; pages.push(t); }
-      if(chars<50*pdf.numPages*0.2){ bot('이 PDF는 글자를 읽을 수 없습니다. 스캔한 그림 PDF 같습니다. 글자를 드래그해 복사할 수 있는 PDF로 올려 주세요.'); continue; }
-      GB.ups=GB.ups.filter(d=>d.name!==f.name).concat([{name:f.name, at:Date.now(), pages}]);
+      const {pages,chars}=await pdfPages(await f.arrayBuffer());
+      if(chars<10*pages.length){ bot('이 PDF는 글자를 읽을 수 없습니다. 스캔한 그림 PDF 같습니다. 글자를 드래그해 복사할 수 있는 PDF로 올려 주세요.'); continue; }
+      const year=yearOf(f.name,pages);
+      GB.ups=GB.ups.filter(d=>d.name!==f.name).concat([{name:f.name, at:Date.now(), year, pages}]);
       await DB.set('guides',GB.ups); renderUps();
-      bot('「'+esc(f.name)+'」 '+pages.length+'쪽을 넣었습니다. 이제 이 자료에서도 찾아 드립니다. (이 컴퓨터에만 저장됩니다)');
+      bot('「'+esc(f.name)+'」 '+pages.length+'쪽을 넣었습니다(<b>'+year+'학년도</b> 자료로 표시). 이제 이 자료에서도 찾아 드립니다. 이 컴퓨터에만 저장됩니다.'+(year<curYear()?'<br><b style="color:var(--red)">지난 학년도 자료라서 찾기에서는 빠집니다.</b>':''));
+      if(year>=curYear()) addScheds(f.name,pages);
     }catch(e){ bot('「'+esc(f.name)+'」을(를) 읽지 못했습니다. 인터넷 연결과 파일을 확인해 주세요.'); }
   }
+}
+// ── 공용 자료 파일(guide.json): 담당자가 한 번 만들어 사이트 폴더에 올리면 모든 선생님이 자동으로 받음 ──
+function packMenu(){
+  const cy=curYear();
+  bot('<b>공용 자료 파일 만들기</b><br>고른 자료를 <b>guide.json</b> 파일 하나로 묶습니다. 이 파일을 깃허브 사이트 폴더(saenggibu)에 올리면, 모든 선생님 화면에 그 자료가 자동으로 들어갑니다. 해가 바뀌면 새 자료로 이 파일만 다시 만들어 올리면 됩니다.<br>'
+    +'<b style="color:var(--red)">공개 사이트에 올라갑니다. 교육부·교육청 공개자료만 고르세요. 학교 내부자료·학생 정보가 든 자료는 고르지 마세요.</b>'
+    +'<br>※ 처음에는 아무것도 골라져 있지 않습니다. 넣을 자료만 직접 고르세요.<div class="gblist">'+GB.ups.map((d,i)=>'<label style="display:block;margin-top:3px"><input type="checkbox" data-pk="'+i+'"> '+esc(d.name)+' ('+d.pages.length+'쪽, '+d.year+')</label>').join('')+'</div>'
+    +'<div class="row" style="margin-top:6px">학년도 <input id="gbPackYear" type="number" value="'+cy+'" style="width:80px"> <button class="b s" id="gbPackGo">guide.json 받기</button></div>');
+}
+function packMake(){
+  const pick=Array.from(document.querySelectorAll('#gbMsgs [data-pk]')).slice(-GB.ups.length).filter(x=>x.checked).map(x=>GB.ups[+x.dataset.pk]).filter(Boolean);
+  if(!pick.length){ toast('자료를 하나 이상 골라 주세요.'); return; }
+  const year=+(document.querySelectorAll('#gbPackYear').length? Array.from(document.querySelectorAll('#gbPackYear')).pop().value : curYear());
+  const pack={app:'dodi-guide', year, made:new Date().toISOString().slice(0,10), docs:pick.map(d=>({name:d.name, year:d.year||year, pages:d.pages}))};
+  const blob=new Blob([JSON.stringify(pack)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='guide.json'; document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },500);
+  bot('<b>guide.json</b>을 받았습니다('+pick.length+'개 자료, '+year+'학년도). 올리는 법:<br>1) 깃허브 저장소에서 <b>saenggibu</b> 폴더 열기<br>2) <b>Add file → Upload files</b>로 guide.json 끌어 넣기(같은 이름이 있으면 덮어씀)<br>3) <b>Commit changes</b> 누르기 → 1~2분 뒤 모든 선생님 화면에 반영'
+    +(year>BASE_YEAR?'<br>※ '+year+'학년도 파일이 올라가면 사이트에 들어 있던 2026 개정사항 기본 자료는 자동으로 빠집니다.':''));
+}
+async function loadPack(){
+  try{ const r=await fetch('guide.json?v='+Date.now(),{cache:'no-store'}); if(!r.ok) return; const p=await r.json();
+    if(p && p.app==='dodi-guide' && Array.isArray(p.docs)){ GB.shared=p.docs.filter(d=>d&&Array.isArray(d.pages)); GB.packYear=+p.year||0; renderUps(); } }catch(e){}
 }
 function toggle(on){
   GB.open=on==null? !GB.open : on;
   document.getElementById('gbPanel').style.display=GB.open?'flex':'none';
-  if(GB.open){ const m=document.getElementById('gbMsgs'); if(!m.childElementCount) bot('안녕하세요, 도디쌤입니다. 생기부 기재 규정을 물어보시면 <b>'+esc(BASE_SRC)+'</b>에서 찾아 <b>쪽수와 근거 원문</b>으로 보여 드립니다.<br>예시를 눌러 보셔도 됩니다.'+chipsHTML()); setTimeout(()=>document.getElementById('gbQ').focus(),50); }
+  if(GB.open){ const m=document.getElementById('gbMsgs'); if(!m.childElementCount) bot('안녕하세요, 도디쌤입니다. 생기부 기재 규정을 물어보시면 <b>'+(baseOn()? esc(BASE_SRC) : GB.packYear+'학년도 공용 자료')+'</b>'+(GB.shared.length&&baseOn()?'와 공용 자료':'')+'에서 찾아 <b>쪽수와 근거 원문</b>으로 보여 드립니다.<br>점검 일정 PDF를 올리면 날짜를 찾아 <b>일정(D-day)</b>에 자동으로 넣습니다.<br>예시를 눌러 보셔도 됩니다.'+chipsHTML()); setTimeout(()=>document.getElementById('gbQ').focus(),50); }
 }
-window.GB=GB; window.gbAsk=ask; window.gbSearch=search;
-document.addEventListener('DOMContentLoaded',()=>{});
+window.GB=GB; window.gbAsk=ask; window.gbSearch=search; window.gbUpload=async fs=>{ toggle(true); await upload(fs); }; window.gbLoadPack=loadPack;
 const btn=document.getElementById('gbBtn'), pan=document.getElementById('gbPanel');
 btn.addEventListener('click',()=>toggle());
 pan.addEventListener('click',e=>{
   const c=e.target.closest('[data-gq]'); if(c){ ask(c.dataset.gq); return; }
   const g=e.target.closest('[data-gp]'); if(g){ const o=GB.base.find(x=>String(x.p)===g.dataset.gp); if(o){ me(o.ref+' '+o.why); bot(baseCard(o,[])); } return; }
-  const d=e.target.closest('[data-gdel]'); if(d){ const i=+d.dataset.gdel; const n=GB.ups[i]; if(n && confirm('「'+n.name+'」 자료를 이 컴퓨터에서 지울까요?')){ GB.ups.splice(i,1); DB.set('guides',GB.ups); renderUps(); } return; }
+  const gg=e.target.closest('[data-gogo]'); if(gg){ go(gg.dataset.gogo); return; }
+  const u=e.target.closest('[data-gundo]'); if(u){ const k=removeScheds(u.dataset.gundo); bot('일정 '+k+'개를 뺐습니다.'); u.disabled=true; return; }
+  const d=e.target.closest('[data-gdel]'); if(d){ const i=+d.dataset.gdel; const n=GB.ups[i]; if(n && confirm('「'+n.name+'」 자료를 이 컴퓨터에서 지울까요?')){ GB.ups.splice(i,1); DB.set('guides',GB.ups); const has=(S.schedules||[]).some(s=>s.src==='gb:'+n.name&&!s.fin); if(has && confirm('이 자료에서 넣은 일정도 같이 뺄까요?')) removeScheds(n.name); renderUps(); } return; }
+  if(e.target.id==='gbPack'){ packMenu(); return; }
+  if(e.target.id==='gbPackGo'){ packMake(); return; }
   if(e.target.id==='gbClose') toggle(false);
   if(e.target.id==='gbGo'){ const q=document.getElementById('gbQ'); ask(q.value); q.value=''; }
 });
 document.getElementById('gbQ').addEventListener('keydown',e=>{ if(e.key==='Enter' && !e.isComposing){ e.preventDefault(); ask(e.target.value); e.target.value=''; } });
 document.getElementById('gbFile').addEventListener('change',async e=>{ const fs=Array.from(e.target.files||[]); e.target.value=''; await upload(fs); });
-(async()=>{ try{ if(!DB.ok) await DB.open(); const g=await DB.get('guides'); if(Array.isArray(g)) GB.ups=g; renderUps(); }catch(e){} })();
+(async()=>{ try{ if(!DB.ok) await DB.open(); const g=await DB.get('guides'); if(Array.isArray(g)) GB.ups=g.map(d=>Object.assign({year:yearOf(d.name,d.pages)},d)); renderUps(); }catch(e){} loadPack(); })();
 })();
 </script>
 </body>
