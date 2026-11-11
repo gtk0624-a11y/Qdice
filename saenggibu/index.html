@@ -1307,7 +1307,9 @@ function renderReq(){
       +(!wd.length&&!wo.length?'<div class="hint">우리 반 요청이 없습니다.</div>':'')+'</div>'; }
   // ③ 보내기
   const f0=fieldList()[0];
-  h+='<div class="box"><h2>③ 점검 요청 보내기</h2><div class="rqform">'
+  const RD=['1차 (담임)','2차 (부담임)','3차 (옆 반 담임)','4차 (부장)','기타']; const rd=RD.includes(st.lastRound)? st.lastRound : RD[0];
+  h+='<div class="box"><h2>③ 점검 요청 보내기 <span class="hint" style="font-weight:400">— 누구나 보낼 수 있습니다. 보낸 사람 이름이 시트 "요청자"에 남고, 반영되면 보낸 사람에게 알림이 옵니다.</span></h2>'
+    +'<div class="row" style="margin-bottom:6px"><label>점검 차수 <select id="rqRound">'+RD.map(x=>'<option'+(x===rd?' selected':'')+'>'+esc(x)+'</option>').join('')+'</select></label><span class="hint">비고 칸 앞에 [2차] 처럼 붙습니다.</span></div><div class="rqform">'
     +'<label>학년<input id="rqG" type="number" min="1" max="6"></label><label>반<input id="rqC" type="number" min="1"></label><label>번호<input id="rqN" type="number" min="1"></label>'
     +'<label>이름 (전체면 "전체")<input id="rqName" type="text"></label>'
     +'<label>오류(확인) 분야<select id="rqField">'+fieldList().map(f=>'<option>'+esc(f)+'</option>').join('')+'</select></label>'
@@ -1353,6 +1355,7 @@ function teamListHTML(){
   return '<table><tr><th class="l">선생님</th><th>담임</th><th class="l">담당 분야</th></tr>'+names.map(n=>{ const ds=du.filter(d=>d.teacher===n); const hm=(ds.find(d=>d.homeroom)||{}).homeroom||''; const fs=ds.filter(d=>d.field);
     return '<tr><td class="l"><b>'+esc(n)+'</b></td><td>'+(hm? esc(clsName(hm)) : '-')+'</td><td class="l">'+(fs.length? fs.map(d=>esc(d.field)+' · '+(d.sub? esc(d.sub) : '전부')).join(', ') : '<span class="hint">담임 항목만</span>')+'</td></tr>'; }).join('')+'</table>';
 }
+function roundTag(){ const v=($('#rqRound')||{}).value||''; const m=v.match(/^(\d차)/); return m? '['+m[1]+'] ' : ''; }
 function rqAutofill(){
   const g=+$('#rqG').value, c=+$('#rqC').value, n=+$('#rqN').value, field=$('#rqField').value, sub=rqSubVal();
   const s=S.students.find(x=>x.g===g&&x.c===c&&x.n===n); const nm=$('#rqName'); if(s && !nm.dataset.touched) nm.value=s.name;
@@ -1497,6 +1500,7 @@ M.addEventListener('change',e=>{
   if(t.id==='stView'){ const v=t.value.trim(); st.sheetView=/^https:\/\//.test(v)? v : ''; save(); return; }
   if(t.id==='stAuto'){ st.autoSend=t.checked; save(); return; }
   if(t.id==='rqField'){ const b=$('#rqSubBox'); if(b) b.innerHTML=rqSubSelHTML(t.value); rqAutofill(); return; }
+  if(t.id==='rqRound'){ st.lastRound=t.value; save(); return; }
   if(t.id==='rqSub'){ const ip=$('#rqSubTxt'); if(ip){ ip.style.display=t.value==='__type'?'':'none'; if(t.value==='__type') ip.focus(); } rqAutofill(); return; }
   if(t.id==='dField'){ const b=$('#dSubBox'); if(b) b.innerHTML=dSubSelHTML(t.value); const ip=$('#dSub'); if(ip){ ip.style.display='none'; ip.value=''; } return; }
   if(t.id==='dSubSel'){ const ip=$('#dSub'); if(ip){ ip.style.display=t.value==='__type'?'':'none'; if(t.value==='__type') ip.focus(); } return; }
@@ -1538,11 +1542,11 @@ M.addEventListener('click',async e=>{
   if(t.id==='rqSend'){ const g=+$('#rqG').value, c=+$('#rqC').value, n=+$('#rqN').value, nm=$('#rqName').value.trim();
     const hak= g&&c&&n? (g+pad2(c)+pad2(n)) : '';
     if(!hak && !nm){ toast('학년·반·번호를 넣거나, 여러 학생이면 이름에 "전체"라고 적어 주세요.'); return; }
-    sendReqs([{hak,name:nm,field:$('#rqField').value,sub:rqSubVal(),text:$('#rqText').value.trim(),after:$('#rqAfter').value.trim(),memo:$('#rqMemo').value.trim()}])
+    sendReqs([{hak,name:nm,field:$('#rqField').value,sub:rqSubVal(),text:$('#rqText').value.trim(),after:$('#rqAfter').value.trim(),memo:roundTag()+$('#rqMemo').value.trim()}])
       .then(()=>{ ['rqText','rqAfter','rqMemo','rqN','rqName'].forEach(i=>{ const e=$('#'+i); if(e){ e.value=''; delete e.dataset.touched; } }); });
     return; }
   if(t.id==='rqBulkSend'){
-    const items=String($('#rqBulk').value).replace(/\r/g,'').split('\n').map(l=>l.split('\t')).filter(c=>c.length>=5).map(c=>({hak:String(c[0]).replace(/\D/g,''),name:(c[1]||'').trim(),field:(c[2]||'').trim(),sub:(c[3]||'').trim(),text:(c[4]||'').trim(),after:(c[5]||'').trim()}));
+    const items=String($('#rqBulk').value).replace(/\r/g,'').split('\n').map(l=>l.split('\t')).filter(c=>c.length>=5).map(c=>({hak:String(c[0]).replace(/\D/g,''),name:(c[1]||'').trim(),field:(c[2]||'').trim(),sub:(c[3]||'').trim(),text:(c[4]||'').trim(),after:(c[5]||'').trim(),memo:roundTag().trim()}));
     if(!items.length){ toast('엑셀 6칸(학번·이름·분야·상세 분야·오류 내용·변경 후)을 복사해 붙여넣어 주세요.'); return; }
     sendReqs(items).then(()=>{ const x=$('#rqBulk'); if(x) x.value=''; }); return; }
   if(t.id==='logXls'){ if(!S.log.length){ toast('아직 수정 기록이 없습니다.'); return; } exportLog().catch(()=>toast('엑셀을 만들지 못했습니다.')); return; }
