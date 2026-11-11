@@ -1162,7 +1162,7 @@ async function fetchReqs(silent){
     try{ d=JSON.parse(txt); }catch(e){ throw new Error('old'); }
     if(!d.ok){ RQ.err=d.msg||'오류'; if(!silent) toast('수정 요청을 불러오지 못했습니다: '+RQ.err); return; }
     if(!Array.isArray(d.rows) || !d.meta){ throw new Error('old'); }
-    RQ.err=''; S.reqWho=Array.isArray(d.who)? d.who : []; S.reqDuties=Array.isArray(d.duties)? d.duties : []; S.reqSeenT=Array.isArray(d.seen)? d.seen : []; if(d.link && /^https:\/\/docs\.google\.com\//.test(d.link)) S.reqSheetLink=d.link; S.reqMeta=d.meta||{fields:[],subs:{}}; S.reqSheetName=d.sheet||'';
+    RQ.err=''; S.reqWho=Array.isArray(d.who)? d.who : []; S.reqDuties=Array.isArray(d.duties)? d.duties : []; S.reqSeenT=Array.isArray(d.seen)? d.seen : []; if(d.link && /^https:\/\/docs\.google\.com\//.test(d.link)) S.reqSheetLink=d.link; if(Array.isArray(d.rounds)) S.reqRounds=d.rounds; S.reqMeta=d.meta||{fields:[],subs:{}}; S.reqSheetName=d.sheet||'';
     mergeServer(d.rows);
     S.settings.lastReqFetch=Date.now(); save();
     if(!silent) toast('새로 불러왔습니다. 고칠 것 '+inbox().length+'건, 확인할 것 '+waitConfirm().length+'건');
@@ -1343,18 +1343,18 @@ function renderReq(){
       +(!wd.length&&!wo.length?'<div class="hint">우리 반 요청이 없습니다.</div>':'')+'</div>'; }
   // ③ 보내기
   const f0=fieldList()[0];
-  const RD=['1차 (담임)','2차 (부담임)','3차 (옆 반 담임)','4차 (부장)','기타']; const rd=RD.includes(st.lastRound)? st.lastRound : RD[0];
+  const RD=roundList(); const rd=RD.includes(st.lastRound)? st.lastRound : RD[0];
   h+='<div class="box"><h2>③ 점검 요청 보내기 <span class="hint" style="font-weight:400">— 누구나 보낼 수 있습니다. 보낸 사람 이름이 시트 "요청자"에 남고, 반영되면 보낸 사람에게 알림이 옵니다.</span></h2>'
-    +'<div class="row" style="margin-bottom:6px"><label>점검 차수 <select id="rqRound">'+RD.map(x=>'<option'+(x===rd?' selected':'')+'>'+esc(x)+'</option>').join('')+'</select></label><span class="hint">비고 칸 앞에 [2차] 처럼 붙습니다.</span></div><div class="rqform">'
+    +'<div class="row" style="margin-bottom:6px"><label>점검 차수 <select id="rqRound">'+RD.map(x=>'<option'+(x===rd?' selected':'')+'>'+esc(x)+'</option>').join('')+'</select></label><span class="hint">비고 칸 앞에 [2차] 처럼 붙습니다.</span>'+(st.admin?'<button class="b g s" id="rdEdit">차수 고치기</button>':'')+'</div>'+(UI.rdEdit&&st.admin?'<div class="box" style="background:var(--yel2)"><b>점검 차수 고치기</b> <span class="hint">한 줄에 하나씩. 모든 선생님 화면에 똑같이 나옵니다. 앞에 "1차"처럼 숫자+차를 쓰면 비고에 [1차]가 붙습니다.</span><textarea id="rdText" rows="5" style="width:100%;margin-top:4px">'+esc(RD.join('\n'))+'</textarea><div class="row"><button class="b s" id="rdSave">저장 (모두에게 적용)</button><button class="b g s" id="rdCancel">취소</button></div></div>':'')+'<div class="rqform">'
     +'<label>학년<input id="rqG" type="number" min="1" max="6"></label><label>반<input id="rqC" type="number" min="1"></label><label>번호<input id="rqN" type="number" min="1"></label>'
     +'<label>이름 (전체면 "전체")<input id="rqName" type="text"></label>'
     +'<label>오류(확인) 분야<select id="rqField">'+fieldList().map(f=>'<option>'+esc(f)+'</option>').join('')+'</select></label>'
     +'<label>상세 분야 → 받는 선생님<span id="rqSubBox">'+rqSubSelHTML(f0)+'</span></label></div>'
     +'<div class="hint" id="rqToHint" style="color:var(--org)"></div>'
     +'<div class="rqform" style="grid-template-columns:2fr 2fr 1fr"><label>오류(확인) 내용<input id="rqText" type="text" placeholder="예: 억혀"></label><label>변경 후<input id="rqAfter" type="text" placeholder="예: 얽혀 (오타)"></label><label>비고<input id="rqMemo" type="text" placeholder="예: 3학년 2반도 해당"></label></div>'
-    +'<div class="row"><button class="b" id="rqSend">시트에 적기</button><span class="hint">점검 시트에 한 줄이 그대로 들어가고, 담당교사에게 알림이 갑니다. 시트에 직접 적어도 똑같이 갑니다.</span></div>'
+    +'<div class="row"><button class="b" id="rqSend" style="font-size:16px;padding:10px 22px">📨 요청 보내기</button><span class="hint">누르면 담당 선생님에게 알림이 가고, 점검 시트에도 한 줄이 자동으로 적힙니다.</span></div>'
     +'<details><summary>📋 선생님별 담당 보기 (누구에게 보낼지 확인)</summary>'+teamListHTML()+'</details>'
-    +'<details><summary>여러 건 한꺼번에 (엑셀에서 붙여넣기)</summary><div class="hint">한 줄에 한 건: <b>학번 · 이름 · 분야 · 상세 분야 · 오류 내용 · 변경 후</b> (엑셀 6칸을 복사해 붙여넣기)</div><textarea id="rqBulk" rows="4"></textarea><div class="row"><button class="b g" id="rqBulkSend">여러 건 적기</button></div></details></div>';
+    +'<details><summary>여러 건 한꺼번에 (엑셀에서 붙여넣기)</summary><div class="hint">한 줄에 한 건: <b>학번 · 이름 · 분야 · 상세 분야 · 오류 내용 · 변경 후</b> (엑셀 6칸을 복사해 붙여넣기)</div><textarea id="rqBulk" rows="4"></textarea><div class="row"><button class="b g" id="rqBulkSend">📨 여러 건 한꺼번에 보내기</button></div></details></div>';
   // ④ 내가 보낸 요청
   const mine=S.reqs.filter(rqFromMe);
   if(mine.length) h+='<div class="box"><details><summary><b>④ 내가 보낸 요청 '+mine.length+'건</b> (미반영 '+mine.filter(rqOpen).length+' · 반영 '+mine.filter(rqDone).length+' · 담임 확인 '+mine.filter(rqHr).length+' · 끝 '+mine.filter(rqClosed).length+')</summary>'+tbl(mine,r=>rqDone(r)&&!r.g?'<button class="b r s" data-rqre="'+esc(r.id)+'">재요청</button>':'')+'</details></div>';
@@ -1391,7 +1391,8 @@ function teamListHTML(){
   return '<table><tr><th class="l">선생님</th><th>담임</th><th class="l">담당 분야</th></tr>'+names.map(n=>{ const ds=du.filter(d=>d.teacher===n); const hm=(ds.find(d=>d.homeroom)||{}).homeroom||''; const fs=ds.filter(d=>d.field);
     return '<tr><td class="l"><b>'+esc(n)+'</b></td><td>'+(hm? esc(clsName(hm)) : '-')+'</td><td class="l">'+(fs.length? fs.map(d=>dutyLabel(d)).join('<br>') : '<span class="hint">담임 항목만</span>')+'</td></tr>'; }).join('')+'</table>';
 }
-function roundTag(){ const v=($('#rqRound')||{}).value||''; const m=v.match(/^(\d차)/); return m? '['+m[1]+'] ' : ''; }
+function roundList(){ const a=(S.reqRounds||[]).filter(Boolean); return a.length? a : ['1차 (담임)','2차 (부담임)','3차 (옆 반 담임)','4차 (부장)','기타']; }
+function roundTag(){ const v=($('#rqRound')||{}).value||''; const m=v.match(/^\s*(\d+\s*차)/); return m? '['+m[1].replace(/\s/g,'')+'] ' : ''; }
 function rqAutofill(){
   const g=+$('#rqG').value, c=+$('#rqC').value, n=+$('#rqN').value, field=$('#rqField').value, sub=rqSubVal();
   const s=S.students.find(x=>x.g===g&&x.c===c&&x.n===n); const nm=$('#rqName'); if(s && !nm.dataset.touched) nm.value=s.name;
@@ -1592,6 +1593,10 @@ M.addEventListener('click',async e=>{
   if(t.id==='logXls'){ if(!S.log.length){ toast('아직 수정 기록이 없습니다.'); return; } exportLog().catch(()=>toast('엑셀을 만들지 못했습니다.')); return; }
   if(t.dataset&&t.dataset.apt!==undefined){ UI.apT=UI.apT===t.dataset.apt?'':t.dataset.apt; renderCheck(); return; }
   if(t.id==='apRefresh'){ await fetchReqs(false); if(UI.tab==='check') renderCheck(); return; }
+  if(t.id==='rdEdit'){ UI.rdEdit=!UI.rdEdit; renderReq(); return; }
+  if(t.id==='rdCancel'){ UI.rdEdit=false; renderReq(); return; }
+  if(t.id==='rdSave'){ const a=String($('#rdText').value).split('\n').map(x=>x.trim()).filter(Boolean).slice(0,12); if(!a.length){ toast('차수를 한 줄 이상 적어 주세요.'); return; }
+    S.reqRounds=a; save(); UI.rdEdit=false; renderReq(); try{ await rqPost({action:'rounds', rounds:a}); toast('점검 차수를 바꿨습니다. 다른 선생님 화면에도 곧 바뀝니다.'); setTimeout(()=>fetchReqs(true),4000); }catch(e){ toast('시트에 저장하지 못했습니다. 인터넷을 확인해 주세요.'); } return; }
   if(t.id==='rqNag'){ const txt=nagText(); if(!txt){ toast('미처리 요청이 없습니다.'); return; } toast(await copyText(txt)? '독촉 메시지를 복사했습니다. 업무메신저에 붙여넣으세요.' : '복사에 실패했습니다.'); return; }
   const card=t.closest('.card');
   if(card && t.dataset.act==='copy'){ onCopy(card); return; }

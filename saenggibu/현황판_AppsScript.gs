@@ -34,7 +34,7 @@ function doGet(e) {
     if (p.teacher) touch_(clean_(p.teacher, 40));
     return json_({ ok: true, now: today_(), sheet: info.sh.getName(), rows: listReqs_(info),
                    meta: meta_(info), who: who_(), duties: duties_(), seen: seen_(),
-                   link: SpreadsheetApp.getActiveSpreadsheet().getUrl() + '#gid=' + info.sh.getSheetId() });
+                   link: SpreadsheetApp.getActiveSpreadsheet().getUrl() + '#gid=' + info.sh.getSheetId(), rounds: rounds_() });
   }
   return ContentService.createTextOutput('생기부 도우미 담당자 시트가 작동 중입니다.');
 }
@@ -51,6 +51,7 @@ function doPost(e) {
     if (d.action === 'request') return out_(addReqs_(teacher, d.items));
     if (['done', 'hrok', 'adminok', 'reopen'].indexOf(d.action) >= 0) return out_(updReq_(teacher, d));
     if (d.action === 'purge') return out_(purge_(d.mode === 'all'));
+    if (d.action === 'rounds') { var rs = (Array.isArray(d.rounds) ? d.rounds : []).slice(0, 12).map(function (x) { return clean_(x, 40); }).filter(function (x) { return x; }); PropertiesService.getScriptProperties().setProperty('rounds', JSON.stringify(rs)); return out_('ok'); }
     if (Array.isArray(d.duties)) saveDuties_(teacher, d.duties, d.homeroom);
     return out_(saveStats_(teacher, d.rows));
   } finally {
@@ -275,6 +276,7 @@ function touch_(teacher) {
     var r0 = sh.getLastRow() + 1; sh.getRange(r0, 1, 1, 3).setNumberFormat('@').setValues([[teacher, now, now]]);
   } finally { lock.releaseLock(); }
 }
+function rounds_() { try { return JSON.parse(PropertiesService.getScriptProperties().getProperty('rounds') || '[]'); } catch (e) { return []; } }
 function seen_() {
   var sh = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SEEN_NAME);
   if (!sh || sh.getLastRow() < 2) return [];
