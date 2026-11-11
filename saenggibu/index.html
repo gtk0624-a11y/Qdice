@@ -318,7 +318,7 @@ const DEFAULT_ITEMS=[
   {key:'jayul', name:'자율·자치활동', limit:1500, mine:true},
   {key:'club',  name:'동아리활동', limit:1500, mine:true},
   {key:'jinro', name:'진로활동', limit:1500, mine:true},
-  {key:'seteuk1', name:'세특: 도덕', limit:1500, mine:true},
+  {key:'seteuk1', name:'세특: 도덕', limit:1500, mine:true, ratio:30},
   {key:'free',  name:'자유학기 활동', limit:3000, mine:true},
   {key:'haeng', name:'행동특성 및 종합의견', limit:900, mine:true}
 ];
@@ -365,6 +365,12 @@ function itemBy(k){ return S.items.find(i=>i.key===k); }
 function rec(sidv,ik){ const k=sidv+'|'+ik; if(!S.records[k]) S.records[k]={text:'',done:false,copied:0,updated:0}; return S.records[k]; }
 function peek(sidv,ik){ return S.records[sidv+'|'+ik] || {text:'',done:false,copied:0,updated:0}; }
 function B(t){ return byteLen(t, S.settings.enterBytes); }
+// 입력 대상 비율(%): 따로 정하지 않았으면 세특은 30, 나머지는 100
+function ratioOf(it){ const r=+it.ratio; return (r>0&&r<=100)? r : (/^세특/.test(it.name)? 30 : 100); }
+function needOf(total,it){ return Math.ceil(total*ratioOf(it)/100); }
+function pct(a,b){ return b? Math.round(a/b*100) : 0; }
+function clsName(c){ return c.replace('-','학년 ')+'반'; }
+function countWritten(list,key){ return list.filter(s=>peek(sid(s),key).text.trim()).length; }
 function loadScript(urls){ return new Promise((res,rej)=>{ let i=0; const next=()=>{ if(i>=urls.length) return rej(new Error('load')); const s=document.createElement('script'); s.src=urls[i++]; s.onload=()=>res(); s.onerror=next; document.head.appendChild(s); }; next(); }); }
 let xlsxP=null;
 function needXLSX(){ if(window.XLSX) return Promise.resolve(); if(!xlsxP) xlsxP=loadScript(['https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js','https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js']).catch(e=>{ xlsxP=null; toast('엑셀 기능을 불러오지 못했습니다. 인터넷 연결을 확인해 주세요.'); throw e; }); return xlsxP; }
@@ -397,7 +403,7 @@ function refreshCard(card, fixHTML){
   m.classList.toggle('over',over);
   const bar=$('.bar i',card); bar.style.width=Math.min(100,b/lim*100)+'%'; bar.className= over?'o':(b>lim*0.95?'w':'');
   card.classList.toggle('over',over); card.classList.toggle('done',!!r.done);
-  $('.cp',card).innerHTML = r.copied? '<span class="tag c">복사함</span>' : '';
+  $('.cp',card).innerHTML = !t.trim()? '<span class="tag" style="background:#fde3e1;color:var(--red)">미입력</span>' : (r.copied? '<span class="tag c">복사함</span>' : '');
   let h='';
   if(fixHTML!==undefined) card.dataset.fix=fixHTML;
   if(card.dataset.fix) h+='<div class="m-fix">'+card.dataset.fix+'</div>';
@@ -424,9 +430,22 @@ function autoFix(card){
 let lintTimers=new WeakMap();
 function onCardInput(card){
   const {sidv,ik,ta}=cardCtx(card); const r=rec(sidv,ik);
+  const was=!!r.text.trim();
   r.text=ta.value; r.updated=Date.now(); r.copied=0; noFix.delete(sidv+'|'+ik);
   clearTimeout(lintTimers.get(card)); lintTimers.set(card,setTimeout(()=>refreshCard(card),250));
+  const now=!!r.text.trim();
+  if(was!==now) countChanged(sidv,ik,now);
   save();
+}
+// 작성 수가 바뀌면: 위쪽 현황 다시 그리기 + 목표(30% 등)를 채우거나 넘는 순간 알려 주기
+function countChanged(sidv,ik,added){
+  const it=itemBy(ik), s=S.students.find(x=>sid(x)===sidv); if(!it||!s) return;
+  const st=S.students.filter(x=>clsOf(x)===clsOf(s)); const w=countWritten(st,ik), need=needOf(st.length,it), ra=ratioOf(it);
+  if(added){
+    if(w===need) toast('✔ '+clsName(clsOf(s))+' '+it.name+' 완료 — '+(ra<100? '입력 대상 '+ra+'%('+need+'명)를 채웠습니다.' : st.length+'명 모두 입력했습니다.'));
+    else if(ra<100 && w>need) toast(clsName(clsOf(s))+' '+it.name+' — '+ra+'%를 넘었습니다 ('+w+'/'+st.length+'명, '+pct(w,st.length)+'%)');
+  }
+  const hd=$('#whead'); if(hd && UI.tab==='write') hd.innerHTML=writeHeadHTML();
 }
 async function onCopy(card){
   autoFix(card);
@@ -472,6 +491,29 @@ function naverApply(card){
 }
 
 // ───────── 5. 화면: 작성 ─────────
+function writeHeadHTML(){
+  const cl=classes(), it=itemBy(UI.item); const mine=S.students.filter(s=>clsOf(s)===UI.cls); const all=mine.length;
+  const written=countWritten(mine,it.key), need=needOf(all,it), ra=ratioOf(it);
+  let done=0, over=0; mine.forEach(s=>{ const r=peek(sid(s),it.key); if(r.done) done++; if(B(r.text)>it.limit) over++; });
+  const g=UI.cls.split('-')[0]; const gl=S.students.filter(s=>String(s.g)===g); const gw=countWritten(gl,it.key), gn=needOf(gl.length,it);
+  let h='<div class="pick"><span class="lab">학급</span>'+cl.map(c=>{ const st=S.students.filter(s=>clsOf(s)===c); const ok=st.length && countWritten(st,it.key)>=needOf(st.length,it); return '<button data-cls="'+esc(c)+'" class="'+(c===UI.cls?'on':'')+'">'+esc(clsName(c))+(ok?'<small>✔완료</small>':'')+'</button>'; }).join('')+'</div>'
+    +'<div class="pick"><span class="lab">영역</span>'+S.items.map(i=>{ const w=countWritten(mine,i.key), ok=all && w>=needOf(all,i); return '<button data-itemk="'+esc(i.key)+'" class="'+(i.key===UI.item?'on':'')+'">'+esc(i.name)+'<small>'+(ok?'✔완료 ':'')+w+'/'+all+'</small></button>'; }).join('')+'</div>';
+  h+='<div class="now">'+esc(clsName(UI.cls))+' · '+esc(it.name)+' <span class="hint" style="font-weight:400">한도 '+it.limit.toLocaleString()+'B(한글 약 '+Math.floor(it.limit/3)+'자)'+(over?' · <b style="color:var(--red)">초과 '+over+'</b>':'')+'</span></div>';
+  let msg, cls2;
+  if(ra<100){
+    if(written>need){ msg='✔ 입력 대상 '+ra+'%를 넘었습니다 — '+written+'/'+all+'명('+pct(written,all)+'%), 목표 '+need+'명보다 '+(written-need)+'명 많음'; cls2='c-mid'; }
+    else if(written===need && all){ msg='✔ 완료 — 입력 대상 '+ra+'%('+need+'명)를 딱 채웠습니다 ('+written+'/'+all+'명)'; cls2='c-ok'; }
+    else { msg='입력 대상 '+ra+'% = '+need+'명 · 지금 '+written+'명('+pct(written,all)+'%) · '+(need-written)+'명 더 쓰면 완료'; cls2=''; }
+    msg+=' ｜ '+g+'학년 전체 '+gw+'/'+gl.length+'명('+pct(gw,gl.length)+'%), 목표 '+gn+'명'+(gw>gn?' → 넘음':(gw===gn?' → 채움':''));
+  } else {
+    if(all && written>=all){ msg='✔ 완료 — '+all+'명 모두 입력했습니다'; cls2='c-ok'; }
+    else { const miss=mine.filter(s=>!peek(sid(s),it.key).text.trim()); msg='작성 '+written+'/'+all+'명 · 빠진 학생 '+miss.length+'명: '+miss.slice(0,12).map(s=>s.n+'번 '+s.name).join(', ')+(miss.length>12?' …':''); cls2=''; }
+  }
+  h+='<div class="'+cls2+'" style="border:1px solid var(--line);border-radius:8px;padding:8px 11px;font-weight:600;margin-bottom:8px">'+esc(msg)+'</div>';
+  h+='<div class="tb"><select id="selFilter">'+[['all','전체 학생 보기'],['empty','미작성만'],['over','초과만'],['undone','미완료만'],['uncopied','나이스 미복사만']].map(f=>'<option value="'+f[0]+'"'+(UI.filter===f[0]?' selected':'')+'>'+f[1]+'</option>').join('')+'</select>'
+    +'<span class="hint">아래 학생별 칸에 쓰거나 붙여넣으세요. 칸을 벗어나면 띄어쓰기·맞춤법이 자동으로 고쳐집니다. 영역 추가·삭제와 입력 대상 %는 설정·백업 탭에서 고칩니다.</span></div>';
+  return h;
+}
 function renderWrite(){
   const cl=classes();
   if(!S.students.length){ $('#main').innerHTML='<div class="box"><h2>처음이시면 학생 명단부터 넣습니다</h2><div class="steps">① 엑셀 명단에서 <b>학년 · 반 · 번호 · 이름</b> 4칸을 마우스로 긁어 복사(Ctrl+C)합니다.<br>② 아래 칸을 누르고 붙여넣기(Ctrl+V) 합니다.<br>③ <b>명단 넣기</b>를 누르면 바로 영역별 입력 화면이 나옵니다.</div><textarea id="roster" rows="6" placeholder="예)&#10;1	1	1	홍길동&#10;1	1	2	김철수"></textarea><div class="row"><button class="b" id="rosterAdd" style="font-size:16px;padding:10px 18px">명단 넣기</button><span class="hint">직접 쳐도 됩니다. 한 줄에 한 명, 칸 사이는 띄어쓰기: 1 1 1 홍길동</span></div></div>'; return; }
@@ -483,12 +525,7 @@ function renderWrite(){
   list.forEach(s=>{ const r=peek(sid(s),it.key); if(r.text.trim()) written++; if(r.done) done++; if(B(r.text)>it.limit) over++; });
   list=list.filter(s=>{ const r=peek(sid(s),it.key);
     return UI.filter==='all' || (UI.filter==='empty'&&!r.text.trim()) || (UI.filter==='over'&&B(r.text)>it.limit) || (UI.filter==='undone'&&!r.done) || (UI.filter==='uncopied'&&r.text.trim()&&!r.copied); });
-  const cnt=k=>S.students.filter(s=>clsOf(s)===UI.cls && peek(sid(s),k).text.trim()).length;
-  let h='<div class="box"><div class="pick"><span class="lab">학급</span>'+cl.map(c=>'<button data-cls="'+esc(c)+'" class="'+(c===UI.cls?'on':'')+'">'+esc(c.replace('-','학년 ')+'반')+'</button>').join('')+'</div>'
-    +'<div class="pick"><span class="lab">영역</span>'+S.items.map(i=>'<button data-itemk="'+esc(i.key)+'" class="'+(i.key===UI.item?'on':'')+'">'+esc(i.name)+'<small>'+cnt(i.key)+'/'+all+'</small></button>').join('')+'</div>'
-    +'<div class="now">'+esc(UI.cls.replace('-','학년 ')+'반')+' · '+esc(it.name)+' <span class="hint" style="font-weight:400">한도 '+it.limit.toLocaleString()+'B(한글 약 '+Math.floor(it.limit/3)+'자) · 작성 '+written+'/'+all+' · 완료 '+done+'/'+all+(over?' · <b style="color:var(--red)">초과 '+over+'</b>':'')+'</span></div>'
-    +'<div class="tb"><select id="selFilter">'+[['all','전체 학생 보기'],['empty','미작성만'],['over','초과만'],['undone','미완료만'],['uncopied','나이스 미복사만']].map(f=>'<option value="'+f[0]+'"'+(UI.filter===f[0]?' selected':'')+'>'+f[1]+'</option>').join('')+'</select>'
-    +'<span class="hint">아래 학생별 칸에 쓰거나 붙여넣으세요. 칸을 벗어나면 띄어쓰기·맞춤법이 자동으로 고쳐집니다. 영역 추가·삭제는 설정·백업 탭에서 합니다.</span></div></div>';
+  let h='<div class="box" id="whead">'+writeHeadHTML()+'</div>';
   h+= list.length? list.map(s=>cardHTML(s,it,'byItem')).join('') : '<div class="box hint">조건에 맞는 학생이 없습니다.</div>';
   $('#main').innerHTML=h; $$('#main .card').forEach(c=>refreshCard(c));
 }
@@ -506,7 +543,11 @@ function renderSearch(){
   if(target){
     UI.sid=sid(target);
     let tot=0; S.items.forEach(it=>{ tot+=B(peek(UI.sid,it.key).text); });
-    h+='<div class="box"><h2>'+esc(target.g+'학년 '+target.c+'반 '+target.n+'번 '+target.name)+'</h2><div class="row"><button class="b g s" id="copyAll">전 항목 한꺼번에 복사(검토용)</button><span class="hint">전체 '+tot.toLocaleString()+' B</span></div></div>';
+    const miss=S.items.filter(it=>it.mine!==false && !peek(UI.sid,it.key).text.trim());
+    const fill=S.items.filter(it=>peek(UI.sid,it.key).text.trim()).length;
+    h+='<div class="box"><h2>'+esc(target.g+'학년 '+target.c+'반 '+target.n+'번 '+target.name)+'</h2>'
+      +(miss.length? '<div class="c-mid" style="border:1px solid var(--yel);border-radius:8px;padding:8px 11px;margin-bottom:8px"><b>빠진 영역 '+miss.length+'개:</b> '+miss.map(it=>'<button class="b r s" data-goit="'+esc(it.key)+'">'+esc(it.name)+(ratioOf(it)<100?' (선택 '+ratioOf(it)+'%)':'')+'</button>').join(' ')+'<div class="hint">누르면 그 칸으로 갑니다. 세특처럼 일부 학생만 쓰는 영역은 이 학생이 대상이 아니면 비워 두셔도 됩니다.</div></div>' : '<div class="c-ok" style="border:1px solid var(--line);border-radius:8px;padding:8px 11px;margin-bottom:8px;font-weight:700">✔ 모든 영역 입력 완료 ('+fill+'/'+S.items.length+')</div>')
+      +'<div class="row"><button class="b g s" id="copyAll">전 항목 한꺼번에 복사(검토용)</button><span class="hint">전체 '+tot.toLocaleString()+' B</span></div></div>';
     h+=S.items.map(it=>cardHTML(target,it,'byStudent')).join('');
   }
   $('#main').innerHTML=h; $$('#main .card').forEach(c=>refreshCard(c));
@@ -517,7 +558,7 @@ function stats(){
   const rows=[];
   classes().forEach(c=>{ const st=S.students.filter(s=>clsOf(s)===c);
     S.items.forEach(it=>{ let w=0,d=0,o=0; st.forEach(s=>{ const r=peek(sid(s),it.key); if(r.text.trim()) w++; if(r.done) d++; if(B(r.text)>it.limit) o++; });
-      rows.push({cls:c,item:it.name,key:it.key,mine:it.mine!==false,total:st.length,written:w,done:d,over:o}); }); });
+      rows.push({cls:c,item:it.name,key:it.key,mine:it.mine!==false,total:st.length,written:w,done:d,over:o,need:needOf(st.length,it),ratio:ratioOf(it)}); }); });
   return rows;
 }
 function problems(){
@@ -538,12 +579,19 @@ function renderCheck(){
   else{
     h+='<div style="overflow-x:auto"><table><tr><th>학급</th>'+S.items.map(i=>'<th>'+esc(i.name)+'</th>').join('')+'</tr>';
     cl.forEach(c=>{ h+='<tr><th>'+esc(c)+'</th>'+S.items.map(it=>{ const r=rows.find(x=>x.cls===c&&x.key===it.key);
-        const k= r.written===0?'':(r.written>=r.total?'c-ok':'c-mid'); return '<td class="click '+(r.over?'c-bad':k)+'" data-jump="'+esc(c)+'|'+esc(it.key)+'">'+r.written+'/'+r.total+(r.done?' <span class="hint">완료 '+r.done+'</span>':'')+(r.over?' <b style="color:var(--red)">초과 '+r.over+'</b>':'')+'</td>'; }).join('')+'</tr>'; });
-    h+='</table></div><div class="hint">칸을 누르면 그 학급·항목 작성 화면으로 이동합니다.</div>';
+        const ok=r.total>0 && r.written>=r.need; const k= ok?'c-ok':(r.written===0?'':'c-mid');
+        return '<td class="click '+(r.over?'c-bad':k)+'" data-jump="'+esc(c)+'|'+esc(it.key)+'">'+(ok?'<b style="color:var(--grn)">✔완료</b> ':'')+r.written+'/'+r.total+(r.ratio<100?' <span class="hint">목표 '+r.need+'명('+r.ratio+'%)'+(r.written>r.need?' · 넘음':'')+'</span>':'')+(r.over?' <b style="color:var(--red)">초과 '+r.over+'</b>':'')+'</td>'; }).join('')+'</tr>'; });
+    h+='</table></div><div class="hint">초록 ✔완료 = 입력 대상을 다 채운 칸. 칸을 누르면 그 학급·영역 입력 화면으로 이동합니다. 세특처럼 일부만 쓰는 영역은 설정·백업 탭의 "입력 대상(%)"로 목표가 정해집니다.</div>';
   }
   h+='<h3>담당자 현황판(구글 시트)으로 보내기</h3><div class="row"><button class="b" id="sendNow">지금 현황 전송</button>'
     +(/^https:\/\//.test(S.settings.sheetView)? '<a class="b g" style="text-decoration:none" target="_blank" rel="noopener" href="'+esc(S.settings.sheetView)+'">현황판 시트 열기</a>':'')
     +'<span class="hint">'+(S.settings.sheetUrl? ('보내는 것: 교사 이름·학급·항목·숫자뿐입니다. 학생 이름과 생기부 내용은 보내지 않습니다.'+(S.settings.lastSent? ' 마지막 전송 '+new Date(S.settings.lastSent).toLocaleString('ko-KR'):'')) : '설정·백업 탭에서 현황판 주소를 먼저 넣어 주세요.')+'</span></div></div>';
+  let mh='', mc=0;
+  cl.forEach(c=>{ const st=S.students.filter(s=>clsOf(s)===c);
+    S.items.forEach(it=>{ if(it.mine===false) return; const miss=st.filter(s=>!peek(sid(s),it.key).text.trim()); const w=st.length-miss.length, need=needOf(st.length,it), ra=ratioOf(it);
+      if(ra<100){ if(w<need){ mc+=need-w; mh+='<tr><td>'+esc(c)+'</td><td>'+esc(it.name)+'</td><td class="l click" data-jump="'+esc(c)+'|'+esc(it.key)+'"><b class="neg">'+(need-w)+'명 더 필요</b> (목표 '+ra+'% = '+need+'명, 지금 '+w+'명)</td></tr>'; } }
+      else if(miss.length){ mc+=miss.length; mh+='<tr><td>'+esc(c)+'</td><td>'+esc(it.name)+'</td><td class="l">'+miss.map(s=>'<span class="click" style="display:inline-block;padding:1px 6px;margin:1px;border:1px solid var(--line);border-radius:10px;cursor:pointer" data-miss="'+esc(sid(s))+'|'+esc(it.key)+'">'+esc(s.n+'번 '+s.name)+'</span>').join('')+'</td></tr>'; } }); });
+  h+='<div class="box"><h2>빠진 입력 — '+mc+'건</h2>'+(mc? '<div style="max-height:420px;overflow:auto"><table><tr><th>학급</th><th>영역</th><th class="l">아직 안 쓴 학생 (이름을 누르면 그 학생 입력 화면으로)</th></tr>'+mh+'</table></div><div class="hint">내가 쓰지 않는 영역이 나오면 설정·백업 탭에서 그 영역의 "내 담당" 체크를 끄세요.</div>' : '<div class="hint">내 담당 영역에 빠진 입력이 없습니다.</div>')+'</div>';
   const ps=problems();
   h+='<div class="box"><h2>일괄 점검 — 확인할 곳 '+ps.length+'건</h2>';
   if(!ps.length) h+='<div class="hint">문제가 발견되지 않았습니다.</div>';
@@ -704,8 +752,8 @@ function renderSet(){
     h+='<div class="row">'+(P.per.length? '<button class="b" id="readApply">이대로 넣기</button>':'<span class="hint">새로 넣을 책이 없습니다.</span>')+'<button class="b g" id="readCancel">취소</button></div>'; }
   h+='</div>';
   h+='<div class="box"><h2>기재요령 규칙 (항목별 한도)</h2><div class="hint">기본값은 2026학년도 기준으로 넣어 두었습니다(창체 영역·세특 500자=1,500B, 자유학기 1,000자=3,000B, 행특 300자=900B). <b>반드시 2026 기재요령 "영역별 입력 가능 최대 글자수" 표와 실제 나이스 화면으로 확인</b>하고 다르면 아래에서 고치세요. <a href="https://star.moe.go.kr/web/contents/m21100.do" target="_blank" rel="noopener">기재요령 최신판 내려받기(학교생활기록부 종합지원포털)</a></div>'
-    +'<table style="margin-top:8px"><tr><th class="l">항목 이름</th><th>한도(바이트)</th><th>한글 기준</th><th>현황 전송</th><th></th></tr>'+S.items.map((it,i)=>'<tr><td class="l"><input type="text" data-it="'+i+'" data-f="name" value="'+esc(it.name)+'" style="width:100%"></td><td><input type="number" min="1" data-it="'+i+'" data-f="limit" value="'+esc(it.limit)+'" style="width:90px"></td><td>'+Math.floor(it.limit/3)+'자</td><td><input type="checkbox" data-it="'+i+'" data-f="mine"'+(it.mine!==false?' checked':'')+'></td><td><button class="b r s" data-itdel="'+i+'">삭제</button></td></tr>').join('')+'</table>'
-    +'<div class="row"><button class="b g" id="itAdd">항목 추가 (예: 세특: 역사)</button><button class="b g" id="ruleOut">규칙 파일 내보내기</button><label class="b g" style="cursor:pointer">규칙 파일 등록<input type="file" id="ruleIn" accept=".json" hidden></label></div>'
+    +'<table style="margin-top:8px"><tr><th class="l">항목 이름</th><th>한도(바이트)</th><th>한글 기준</th><th>입력 대상(%)</th><th>내 담당</th><th></th></tr>'+S.items.map((it,i)=>'<tr><td class="l"><input type="text" data-it="'+i+'" data-f="name" value="'+esc(it.name)+'" style="width:100%"></td><td><input type="number" min="1" data-it="'+i+'" data-f="limit" value="'+esc(it.limit)+'" style="width:90px"></td><td>'+Math.floor(it.limit/3)+'자</td><td><input type="number" min="1" max="100" data-it="'+i+'" data-f="ratio" value="'+ratioOf(it)+'" style="width:70px"></td><td><input type="checkbox" data-it="'+i+'" data-f="mine"'+(it.mine!==false?' checked':'')+'></td><td><button class="b r s" data-itdel="'+i+'">삭제</button></td></tr>').join('')+'</table>'
+    +'<div class="hint">입력 대상(%): 그 영역을 학생의 몇 %에게 쓰는지입니다. 100이면 전원, 세특은 기본 30(이름이 "세특"으로 시작하면 자동 30). 학교 학업성적관리위원회가 정한 비율로 고치세요. "내 담당"을 끄면 빠진 입력 목록과 현황 전송에서 빠집니다.</div><div class="row"><button class="b g" id="itAdd">항목 추가 (예: 세특: 역사)</button><button class="b g" id="ruleOut">규칙 파일 내보내기</button><label class="b g" style="cursor:pointer">규칙 파일 등록<input type="file" id="ruleIn" accept=".json" hidden></label></div>'
     +'<div class="row"><label>엔터(줄바꿈) 1개 = <select id="stEnter"><option value="2"'+(st.enterBytes===2?' selected':'')+'>2바이트(안전)</option><option value="1"'+(st.enterBytes===1?' selected':'')+'>1바이트(기재요령 표기)</option></select></label><label><input type="checkbox" id="stNL"'+(st.stripNL?' checked':'')+'> 복사할 때 줄바꿈을 띄어쓰기로 바꾸기</label></div></div>';
   h+='<div class="box"><h2>자동 교정</h2><div class="row"><label><input type="checkbox" id="stSpell"'+(st.autoSpell?' checked':'')+'> 맞춤법·띄어쓰기 사전 규칙 자동 적용 (끄면 공백·기호 정리만 합니다)</label></div>'
     +'<h3>내 교정 규칙 ('+S.rules.length+'개)</h3><div class="chips">'+(S.rules.map((r,i)=>'<span>'+esc(r.from)+' → '+esc(r.to)+'<b data-ruledel="'+i+'">×</b></span>').join('')||'<span class="hint">없음</span>')+'</div><div class="row"><input type="text" id="ruleFrom" placeholder="틀린 표현"><span>→</span><input type="text" id="ruleTo" placeholder="고칠 표현"><button class="b g" id="ruleAdd">추가</button></div>'
@@ -832,7 +880,7 @@ M.addEventListener('change',e=>{
   if(t.dataset.zr!==undefined){ const r=Z.rows[+t.dataset.zr], f=t.dataset.f; if(!r) return; if(f==='name') r.name=t.value; else if(f==='target') r.target=t.value===''?'':+t.value; else if(f==='adj') r.adj=+t.value||0; else r.w[+f.slice(1)]=Math.max(0,+t.value||0); save(); keep(renderSisu); return; }
   if(t.id==='clubTarget'){ Z.clubTarget=t.value===''?'':+t.value; save(); renderSisu(); return; }
   if(t.dataset.clubh){ const x=Z.club.find(o=>o.date===t.dataset.clubh); if(x){ x.hours=Math.max(0,+t.value||0); save(); keep(renderSisu); } return; }
-  if(t.dataset.it!==undefined){ const it=S.items[+t.dataset.it], f=t.dataset.f; if(!it) return; if(f==='name'){ if(t.value.trim()) it.name=t.value.trim(); } else if(f==='limit'){ if(+t.value>0) it.limit=Math.floor(+t.value); } else it.mine=t.checked; save(); keep(renderSet); return; }
+  if(t.dataset.it!==undefined){ const it=S.items[+t.dataset.it], f=t.dataset.f; if(!it) return; if(f==='name'){ if(t.value.trim()) it.name=t.value.trim(); } else if(f==='limit'){ if(+t.value>0) it.limit=Math.floor(+t.value); } else if(f==='ratio'){ const v=Math.round(+t.value); if(v>=1&&v<=100) it.ratio=v; } else it.mine=t.checked; save(); keep(renderSet); return; }
   if(t.id==='stEnter'){ st.enterBytes=+t.value; save(); return; }
   if(t.id==='stNL'){ st.stripNL=t.checked; save(); return; }
   if(t.id==='stSpell'){ st.autoSpell=t.checked; save(); return; }
@@ -865,7 +913,9 @@ M.addEventListener('click',async e=>{
   if(t.dataset.pick){ UI.sid=t.dataset.pick; renderSearch(); return; }
   const pc=t.closest('[data-cls]'); if(pc){ UI.cls=pc.dataset.cls; renderWrite(); return; }
   const pi=t.closest('[data-itemk]'); if(pi){ UI.item=pi.dataset.itemk; renderWrite(); return; }
+  if(t.dataset.goit){ const c=$('.card[data-ik="'+t.dataset.goit+'"]'); if(c){ c.scrollIntoView({block:'center',behavior:'smooth'}); const ta=$('.ta',c); ta.focus(); } return; }
   if(t.id==='copyAll'){ const s=S.students.find(x=>sid(x)===UI.sid); if(!s) return; const txt=S.items.map(it=>'['+it.name+']\n'+peek(UI.sid,it.key).text).join('\n\n'); toast(await copyText(txt)? '전 항목을 복사했습니다.' : '복사에 실패했습니다.'); return; }
+  const ms=t.closest('[data-miss]'); if(ms){ const p=ms.dataset.miss.split('|'); const st=S.students.find(x=>sid(x)===p[0]); if(st){ UI.cls=clsOf(st); UI.item=p[1]; UI.filter='empty'; go('write'); } return; }
   const j=t.closest('[data-jump]'); if(j){ const p=j.dataset.jump.split('|'); UI.cls=p[0]; UI.item=p[1]; UI.filter='all'; go('write'); return; }
   const js=t.closest('[data-jumps]'); if(js){ const s=S.students.find(x=>sid(x)===js.dataset.jumps); if(s){ UI.q=s.name; UI.sid=sid(s); $('#gsearch').value=s.name; go('search'); } return; }
   if(t.id==='sendNow'){ sendStats(false); return; }
