@@ -142,8 +142,9 @@ footer{text-align:center;color:var(--sub);font-size:12px;padding:18px}
 #mePanel .bar{display:inline-block;width:60px;height:7px;background:#e6e9f0;border-radius:4px;vertical-align:middle;margin-right:4px;overflow:hidden}#mePanel .bar i{display:block;height:100%;background:var(--grn)}
 @media(max-width:640px){#meChip{max-width:60vw}}
 #sheetBtn{background:var(--yel);color:var(--navy);font-weight:700;border-radius:14px;padding:3px 10px;font-size:13px;text-decoration:none;white-space:nowrap}
-#tabHelp{background:#f4f7fc;border-bottom:1px solid var(--line);padding:7px 16px;font-size:13.5px;color:var(--navy)}#tabHelp b{color:var(--navy)}
+#tabHelp{background:#f4f7fc;border-bottom:1px solid var(--line);padding:6px 16px;font-size:13.5px;color:var(--navy);display:flex;gap:10px;align-items:center;justify-content:space-between}#tabHelp.closed{padding:2px 16px;justify-content:flex-end;background:transparent;border-bottom:0}#tabHelp button{border:0;background:none;color:var(--navy2);cursor:pointer;font-size:12.5px;white-space:nowrap}#tabHelp b{color:var(--navy)}
 .welcome{background:linear-gradient(135deg,#fff8e1,#fff);border:2px solid var(--yel)}.welcome ol{margin:6px 0 0 18px;padding:0;line-height:1.9}
+.rqtabs{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 10px}.rqtabs button{border:1px solid var(--line);background:#fff;border-radius:10px;padding:10px 14px;font-size:15px;font-weight:700;color:var(--navy);cursor:pointer}.rqtabs button.on{background:var(--navy);color:#fff;border-color:var(--navy)}.rqtabs .cnt{display:inline-block;min-width:20px;margin-left:6px;padding:0 6px;border-radius:10px;font-size:12px;color:#fff;background:#8a94a6}.rqtabs .cnt.red{background:var(--red)}.rqtabs .cnt.org{background:var(--org)}
 </style>
 </head>
 <body>
@@ -1369,21 +1370,25 @@ function renderReq(){
   const fl=S.reqs.filter(r=>r.failed);
   if(fl.length) h+='<div class="box" style="border:2px solid var(--red)"><h2 class="neg">⚠ 시트에 안 들어간 것 '+fl.length+'건 — 인터넷 확인 후 다시 보내 주세요</h2>'+tbl(fl,r=>'<button class="b s" data-rqresend="'+esc(r.id)+'">다시 보내기</button>')+'</div>';
   // 내 담당
+  const head=h, SEC={}; h='';
   const ds=myDuties();
   h+='<div class="box"'+(!ds.length&&!st.homeroom&&!st.admin?' style="border:2px solid var(--org)"':'')+'><details id="dutyBox"'+((!ds.length&&!st.homeroom&&!st.admin)||UI.dutyOpen?' open':'')+'><summary><b>내 담당</b> — '+(ds.length? ds.map(d=>esc(d.field)+(d.sub?'·'+esc(d.sub):'')).join(', ') : '<span class="neg">아직 안 정함 — 먼저 정해 주세요</span>')+(st.homeroom?' · 담임 '+esc(clsName(st.homeroom)):'')+'</summary>'+dutyHTML()+'</details></div>';
+  SEC.duty=h; h='';
   // ① 내가 고칠 것
   const ib=inbox();
-  h+='<div class="box"><h2>① 내가 고칠 것 — '+ib.length+'건</h2>'+(ib.length? tbl(ib,r=>'<button class="b g s" data-rqgo="'+esc(r.id)+'">고치러 가기</button> <button class="b s" data-rqdone="'+esc(r.id)+'">반영 완료</button>')+'<div class="hint">"고치러 가기" → 그 학생 칸. 고친 뒤 <b>나이스용 복사</b>를 누르면 반영 완료를 바로 묻습니다. 나이스에서 직접 고쳤으면 <b>반영 완료</b>만 누르세요(시트 "담당교사 반영 날짜"에 오늘 날짜가 들어갑니다).</div>' : '<div class="hint">'+(ds.length?'고칠 요청이 없습니다.':'위 "내 담당"을 정하면 내 분야 요청이 여기에 뜹니다.')+'</div>')+'</div>';
+  h+='<div class="box"><h2>🛠 내가 고칠 것 — '+ib.length+'건</h2>'+(ib.length? tbl(ib,r=>'<button class="b g s" data-rqgo="'+esc(r.id)+'">고치러 가기</button> <button class="b s" data-rqdone="'+esc(r.id)+'">✔ 나이스에서 고쳤어요</button>')+'<div class="hint">"고치러 가기" → 그 학생 칸. 고친 뒤 <b>나이스용 복사</b>를 누르면 반영 완료를 바로 묻습니다. 나이스에서 직접 고쳤으면 <b>반영 완료</b>만 누르세요(시트 "담당교사 반영 날짜"에 오늘 날짜가 들어갑니다).</div>' : '<div class="hint">'+(ds.length?'고칠 요청이 없습니다.':'위 "내 담당"을 정하면 내 분야 요청이 여기에 뜹니다.')+'</div>')+'</div>';
+  SEC.fix=h; h='';
   // ② 담임 확인
   if(st.homeroom){ const mine=S.reqs.filter(r=>rqHome(r)&&!isHrField(r)); const wd=mine.filter(rqDone), wo=mine.filter(rqOpen);
-    h+='<div class="box"><h2>② 담임 확인 — '+esc(clsName(st.homeroom))+' · 반영됨(확인 대기) '+wd.length+' · 미반영 '+wo.length+'</h2>'
-      +(wd.length? '<h3>반영됨 — 나이스에서 보고 확인해 주세요</h3>'+tbl(wd,r=>'<button class="b s" data-rqhr="'+esc(r.id)+'">담임 확인</button> <button class="b r s" data-rqre="'+esc(r.id)+'">재요청</button>') : '')
+    h+='<div class="box"><h2>👀 우리 반 확인 — '+esc(clsName(st.homeroom))+' · 반영됨(확인 대기) '+wd.length+' · 미반영 '+wo.length+'</h2>'
+      +(wd.length? '<h3>반영됨 — 나이스에서 보고 확인해 주세요</h3>'+tbl(wd,r=>'<button class="b s" data-rqhr="'+esc(r.id)+'">✔ 우리 반 확인했어요</button> <button class="b r s" data-rqre="'+esc(r.id)+'">재요청</button>') : '')
       +(wo.length? '<h3>아직 반영 안 됨</h3>'+tbl(wo,r=>'<span class="hint">담당: '+esc(responsible(r).join(', ')||'미정')+'</span>') : '')
       +(!wd.length&&!wo.length?'<div class="hint">우리 반 요청이 없습니다.</div>':'')+'</div>'; }
+  SEC.hr=h; h='';
   // ③ 보내기
   const f0=fieldList()[0];
   const RD=roundList(); const rd=RD.includes(st.lastRound)? st.lastRound : RD[0];
-  h+='<div class="box"><h2>③ 점검 요청 보내기 <span class="hint" style="font-weight:400">— 누구나 보낼 수 있습니다. 보낸 사람 이름이 시트 "요청자"에 남고, 반영되면 보낸 사람에게 알림이 옵니다.</span></h2>'
+  h+='<div class="box"><h2>📨 요청 보내기 <span class="hint" style="font-weight:400;cursor:help" title="누구나 보낼 수 있습니다. 보낸 사람 이름이 시트 &quot;요청자&quot;에 남고, 반영되면 보낸 사람에게 알림이 옵니다.">ⓘ 누구나 보낼 수 있어요</span></h2>'
     +'<div class="row" style="margin-bottom:6px"><label>점검 차수 <select id="rqRound">'+RD.map(x=>'<option'+(x===rd?' selected':'')+'>'+esc(x)+'</option>').join('')+'</select></label><span class="hint">비고 칸 앞에 [2차] 처럼 붙습니다.</span>'+(st.admin?'<button class="b g s" id="rdEdit">차수 고치기</button>':'')+'</div>'+(UI.rdEdit&&st.admin?'<div class="box" style="background:var(--yel2)"><b>점검 차수 고치기</b> <span class="hint">한 줄에 하나씩. 모든 선생님 화면에 똑같이 나옵니다. 앞에 "1차"처럼 숫자+차를 쓰면 비고에 [1차]가 붙습니다.</span><textarea id="rdText" rows="5" style="width:100%;margin-top:4px">'+esc(RD.join('\n'))+'</textarea><div class="row"><button class="b s" id="rdSave">저장 (모두에게 적용)</button><button class="b g s" id="rdCancel">취소</button></div></div>':'')+'<div class="rqform">'
     +'<label>학년<input id="rqG" type="number" min="1" max="6"></label><label>반<input id="rqC" type="number" min="1"></label><label>번호<input id="rqN" type="number" min="1"></label>'
     +'<label>이름 (전체면 "전체")<input id="rqName" type="text"></label>'
@@ -1394,19 +1399,22 @@ function renderReq(){
     +'<div class="row"><button class="b" id="rqSend" style="font-size:16px;padding:10px 22px">📨 요청 보내기</button><span class="hint">누르면 담당 선생님에게 알림이 가고, 점검 시트에도 한 줄이 자동으로 적힙니다.</span></div>'
     +'<details><summary>📋 선생님별 담당 보기 (누구에게 보낼지 확인)</summary>'+teamListHTML()+'</details>'
     +'<details><summary>여러 건 한꺼번에 (엑셀에서 붙여넣기)</summary><div class="hint">한 줄에 한 건: <b>학번 · 이름 · 분야 · 상세 분야 · 오류 내용 · 변경 후</b> (엑셀 6칸을 복사해 붙여넣기)</div><textarea id="rqBulk" rows="4"></textarea><div class="row"><button class="b g" id="rqBulkSend">📨 여러 건 한꺼번에 보내기</button></div></details></div>';
+  SEC.send=h; h='';
   // ④ 내가 보낸 요청
   const mine=S.reqs.filter(rqFromMe);
-  if(mine.length) h+='<div class="box"><details><summary><b>④ 내가 보낸 요청 '+mine.length+'건</b> (미반영 '+mine.filter(rqOpen).length+' · 반영 '+mine.filter(rqDone).length+' · 담임 확인 '+mine.filter(rqHr).length+' · 끝 '+mine.filter(rqClosed).length+')</summary>'+tbl(mine,r=>rqDone(r)&&!r.g?'<button class="b r s" data-rqre="'+esc(r.id)+'">재요청</button>':'')+'</details></div>';
+  if(mine.length) h+='<div class="box"><details open><summary><b>📤 내가 보낸 요청 '+mine.length+'건</b> (미반영 '+mine.filter(rqOpen).length+' · 반영 '+mine.filter(rqDone).length+' · 담임 확인 '+mine.filter(rqHr).length+' · 끝 '+mine.filter(rqClosed).length+')</summary>'+tbl(mine,r=>rqDone(r)&&!r.g?'<button class="b r s" data-rqre="'+esc(r.id)+'">재요청</button>':'')+'</details></div>';
+  SEC.sent=h; h='';
   // ⑥ 수정 기록
   const myLog=S.log.filter(l=>l.by===me());
   h+='<div class="box"><details'+(UI.logOpen?' open':'')+' id="logDet"><summary><b>📒 내 수정 기록 '+myLog.length+'건</b> — 언제·무엇을·무엇으로 고쳤고 나이스 저장을 확인했는지 (이 컴퓨터에 보관, 엑셀 백업에 포함)</summary>'
     +'<div class="row"><button class="b g s" id="logXls">수정 기록 엑셀로 내려받기</button><span class="hint">"고치기 전"은 요청이 처음 왔을 때 이 프로그램 칸의 글, "고친 후"는 반영 완료를 누를 때의 글입니다. 나이스 화면 자체를 읽은 것이 아니라 <b>선생님이 체크한 기록</b>입니다.</span></div>'
     +logHTML(myLog,100)+'</details></div>';
+  SEC.log=h; h='';
   // ⑤ 담당자
   if(st.admin) h+=teamHTML();
   if(st.admin){
     const all=S.reqs; const op=all.filter(rqOpen), dn=all.filter(rqDone), hr=all.filter(rqHr), cl=all.filter(rqClosed), sk=all.filter(r=>r.skipDone&&!rqClosed(r));
-    h+='<div class="box"><h2>⑤ 담당자 — 전체 '+all.length+'건 · 미반영 '+op.length+' · 담임 확인 대기 '+dn.length+' · 담당자 확인 대기 '+hr.length+' · 끝 '+cl.length+'</h2>';
+    h+='<div class="box"><h2>🏁 담당자 — 전체 '+all.length+'건 · 미반영 '+op.length+' · 담임 확인 대기 '+dn.length+' · 담당자 확인 대기 '+hr.length+' · 끝 '+cl.length+'</h2>';
     const grp={}; all.forEach(r=>{ const k=r.field+(r.sub?' · '+r.sub:''); (grp[k]=grp[k]||[]).push(r); });
     h+='<table><tr><th class="l">분야 · 상세</th><th class="l">담당교사</th><th>미반영</th><th>담임 대기</th><th>담당자 대기</th><th>끝</th></tr>'+Object.keys(grp).sort((a,b)=>a.localeCompare(b,'ko')).map(k=>{ const x=grp[k]; const o=x.filter(rqOpen).length; return '<tr><td class="l">'+esc(k)+'</td><td class="l">'+esc(responsible(x[0]).join(', ')||'(미정)')+'</td><td class="'+(o?'neg':'')+'">'+o+'</td><td>'+x.filter(rqDone).length+'</td><td>'+x.filter(rqHr).length+'</td><td>'+x.filter(rqClosed).length+'</td></tr>'; }).join('')+'</table>';
     if(all.filter(adminReady).length){ const ready=all.filter(adminReady); h+='<h3>담당자 확인할 것 '+ready.length+'건</h3>'+tbl(ready,r=>'<button class="b s" data-rqad="'+esc(r.id)+'">담당자 확인</button> <button class="b r s" data-rqre="'+esc(r.id)+'">재요청</button>')+'<div class="row"><button class="b g s" id="rqAdAll">'+ready.length+'건 모두 담당자 확인</button></div>'; }
@@ -1415,7 +1423,23 @@ function renderReq(){
     h+='<div class="row" style="margin-top:8px"><button class="b" id="rqNag">미처리 독촉 메시지 복사</button><span class="hint">담당교사별 미반영 + 담임별 확인 대기 목록을 글로 만들어 복사합니다. 업무메신저에 붙여넣으세요.</span></div>'
       +'<h3>개인정보 지우기 (점검 시트)</h3><div class="row"><button class="b r s" id="rqPurgeClosed">끝난 줄 시트에서 지우기</button><button class="b r s" id="rqPurgeAll">점검 줄 전부 지우기</button><span class="hint">점검이 끝나면 학생 이름·오류 내용이 시트에 남지 않게 지우세요. 되돌릴 수 없습니다.</span></div></div>';
   }
-  $('#main').innerHTML=h;
+  SEC.admin=h;
+  $('#main').innerHTML=head+rqTabsHTML(SEC);
+}
+// 수정 요청 탭: 할 일별 작은 탭 — 필요한 것만 한 화면에
+function rqTabsHTML(SEC){
+  const st=S.settings; const nFix=inbox().length;
+  const nHr=st.homeroom? S.reqs.filter(r=>rqHome(r)&&!isHrField(r)&&rqDone(r)).length : 0;
+  const mine=S.reqs.filter(rqFromMe), nSent=mine.filter(r=>!rqClosed(r)).length;
+  const nAd=st.admin? S.reqs.filter(adminReady).length : 0; const noDuty=!myDuties().length && !st.homeroom;
+  const tabs=[['fix','🛠 내가 고칠 것',nFix,'red'],['send','📨 요청 보내기',0,''],['hr','👀 우리 반 확인',nHr,'org']].filter(t=>t[0]!=='hr'||st.homeroom)
+    .concat(mine.length?[['sent','📤 보낸 요청',nSent,'']]:[]).concat([['duty','⚙ 내 담당',noDuty?'!':0,'red']]).concat(st.admin?[['admin','🏁 담당자',nAd,'org']]:[]);
+  if(UI.rqTab==='all') return SEC.duty+SEC.fix+SEC.hr+SEC.send+SEC.sent+SEC.log+SEC.admin; // 점검·시험용: 전부 펼치기
+  let cur=UI.rqTab; if(!tabs.some(t=>t[0]===cur)) cur= noDuty&&!st.admin? 'duty' : nFix? 'fix' : nHr? 'hr' : nAd? 'admin' : 'send';
+  UI.rqTabNow=cur;
+  let h='<div class="rqtabs">'+tabs.map(t=>'<button data-rqtab="'+t[0]+'" class="'+(t[0]===cur?'on':'')+'">'+t[1]+(t[2]?'<span class="cnt '+t[3]+'">'+t[2]+'</span>':'')+'</button>').join('')+'</div>';
+  const body={fix:SEC.fix+SEC.log, send:SEC.send, hr:SEC.hr, sent:SEC.sent, duty:SEC.duty.replace('<details id="dutyBox"','<details id="dutyBox" open'), admin:SEC.admin}[cur]||'';
+  return h+body;
 }
 // 상세 분야 고르기 — 옆에 받는 선생님 이름을 같이 보여 줌
 function rqSubVal(){ const v=($('#rqSub')||{}).value||''; return v==='__type'? (($('#rqSubTxt')||{}).value||'').trim() : v; }
@@ -1445,7 +1469,7 @@ function nagText(){
   let s='[생활기록부 점검 미처리 안내] '+new Date().toLocaleDateString('ko-KR')+'\n';
   if(op.length) s+='\n▶ 반영 안 된 요청 (담당교사)\n'+Object.keys(by).sort((a,b)=>a.localeCompare(b,'ko')).map(t=>'■ '+t+' '+by[t].length+'건\n'+by[t].map(r=>' - '+rqWho(r)+' '+r.area+': '+r.text.slice(0,40)+(r.after?' → '+r.after.slice(0,30):'')).join('\n')).join('\n');
   if(dn.length) s+='\n\n▶ 반영됨 — 담임 확인 기다리는 줄\n'+Object.keys(hb).sort((a,b)=>a.localeCompare(b,'ko')).map(t=>'■ '+t+' '+hb[t].length+'건\n'+hb[t].map(r=>' - '+rqWho(r)+' '+r.area).join('\n')).join('\n');
-  return s+'\n\n생기부 도우미 "수정 요청" 탭에서 반영 완료 / 담임 확인을 눌러 주세요. (시트에 직접 날짜를 적어도 됩니다)';
+  return s+'\n\n생기부 도우미 "수정 요청" 탭에서 [나이스에서 고쳤어요] / [우리 반 확인했어요]를 눌러 주세요. (시트에 직접 날짜를 적어도 됩니다)';
 }
 
 // 담당자 시트를 바꾸면(테스트 → 진짜) 이전 시트에서 받은 수정 요청 기록을 비우고 새로 연결
@@ -1484,17 +1508,18 @@ const TAB_HELP={
   sisu:'🧮 <b>시수</b> — 학사일정으로 수업일수를 셉니다. (2026년부터 중학교 창체 이수시간은 생기부에 적지 않습니다)',
   set:'⚙️ <b>설정·백업</b> — 명단 넣기, 동아리 명단, 엑셀 백업, 학교 시트 연결, 새 학년 초기화.'
 };
-function renderTabHelp(){ const b=$('#tabHelp'); if(b) b.innerHTML=TAB_HELP[UI.tab]||''; const sb=$('#nav [data-tab=sisu]'); if(sb) sb.style.display=S.settings.showSisu?'':'none'; }
+function renderTabHelp(){ const b=$('#tabHelp'); if(b){ const open=!S.settings.helpHide; b.innerHTML=open? '<span>'+(TAB_HELP[UI.tab]||'')+'</span><button id="helpTog" title="설명 접기">접기 ▲</button>' : '<button id="helpTog" title="이 탭 설명 보기">❓ 이 탭은 무엇을 하나요? ▼</button>'; b.classList.toggle('closed',!open); } const sb=$('#nav [data-tab=sisu]'); if(sb) sb.style.display=S.settings.showSisu?'':'none'; }
 function welcomeHTML(){ if(S.settings.welcomeOff) return '';
   const st=S.settings, hasDuty=myDuties().length||st.homeroom;
   const step=(ok,t)=>'<li>'+(ok?'✅ ':'⬜ ')+t+'</li>';
-  return '<div class="box welcome"><div class="row" style="justify-content:space-between"><b style="font-size:16px">처음 쓰시나요? 이 순서대로 하세요</b><button class="b g s" id="welcomeOff">다시 보지 않기</button></div><ol>'
+  const doneN=[!!st.teacher, S.students.length>0, !!hasDuty, (S.groups||[]).length>0, typeof Notification!=='undefined'&&Notification.permission==='granted'].filter(Boolean).length;
+  return '<details class="box welcome"'+(UI.welcomeOpen===false||doneN>=4?'':' open')+' id="welcomeBox"><summary><b style="font-size:15px">📋 처음 쓰는 순서 ('+doneN+'/5 완료)</b> <span class="hint">누르면 펼치기/접기</span></summary><ol>'
     +step(!!st.teacher,'<b>이름 적기</b> — [설정·백업] 맨 위')
     +step(S.students.length>0,'<b>명단 넣기</b> — 명렬표 엑셀을 화면에 끌어다 놓기 (전교생 넣어도 됩니다. 쓸 때는 <u>내 반만</u> 보입니다)')
     +step(!!hasDuty,'<b>내 담당 정하기</b> — [수정 요청 → 내 담당]: 담임은 담임 학급만, 교과는 과목+맡은 반')
     +step((S.groups||[]).length>0,'<b>동아리 명단</b> (동아리 맡은 분만) — [설정·백업 → 동아리 명단]')
     +step(typeof Notification!=='undefined'&&Notification.permission==='granted','<b>알림 켜기</b> — [수정 요청]의 [알림 켜기] → 허용')
-    +'</ol><div class="hint">그다음 <b>영역별 입력</b>에서 내 반 학생을 쓰면 됩니다. 각 탭이 무엇인지는 탭 바로 아래 한 줄 설명을 보세요.</div></div>'; }
+    +'</ol><div class="row" style="justify-content:space-between"><span class="hint">그다음 <b>영역별 입력</b>에서 내 반 학생을 쓰면 됩니다.</span><button class="b g s" id="welcomeOff">다시 보지 않기</button></div></details>'; }
 function go(tab){ UI.tab=tab; render(); window.scrollTo(0,0); }
 $('#dchip').addEventListener('click',()=>go('sched'));
 // 파일을 화면 어디에 끌어다 놓아도: 입력 양식·엑셀 백업이면 내용까지, 명단 파일이면 명단만
@@ -1541,10 +1566,11 @@ function renderMe(){
   p.innerHTML=h;
 }
 $('#meChip').addEventListener('click',e=>{ e.stopPropagation(); const p=$('#mePanel'); p.style.display=p.style.display==='none'?'block':'none'; renderMe(); });
-$('#mePanel').addEventListener('click',e=>{ e.stopPropagation(); const g=e.target.closest('[data-mego]'); if(g){ $('#mePanel').style.display='none'; go(g.dataset.mego); return; }
+$('#mePanel').addEventListener('click',e=>{ e.stopPropagation(); const g=e.target.closest('[data-mego]'); if(g){ $('#mePanel').style.display='none'; if(g.dataset.mego==='req') UI.rqTab='duty'; go(g.dataset.mego); return; }
   const m=e.target.closest('[data-meitem]'); if(m){ $('#mePanel').style.display='none'; UI.item=m.dataset.meitem; if(!UI.cls||(!grpOf(UI.cls)&&!classes().includes(UI.cls))) UI.cls=st0cls(); go('write'); } });
 function st0cls(){ return S.settings.homeroom&&classes().includes(S.settings.homeroom)? S.settings.homeroom : (classes()[0]||''); }
 document.addEventListener('click',()=>{ const p=$('#mePanel'); if(p) p.style.display='none'; });
+$('#tabHelp').addEventListener('click',e=>{ if(e.target.id==='helpTog'){ S.settings.helpHide=!S.settings.helpHide; save(); renderTabHelp(); } });
 // 크롬이 예전에 쓴 글자(다른 사이트 검색어)를 자동으로 채워 넣는 것을 지움
 (function(){ const g=$('#gsearch'); g.value=''; setTimeout(()=>{ if(document.activeElement!==g) g.value=''; },600); window.addEventListener('pageshow',()=>{ if(document.activeElement!==g) g.value=''; }); })();
 $('#lockBtn').addEventListener('click',()=>lockNow());
@@ -1655,6 +1681,7 @@ M.addEventListener('click',async e=>{
   if(t.dataset&&t.dataset.apt!==undefined){ UI.apT=UI.apT===t.dataset.apt?'':t.dataset.apt; renderCheck(); return; }
   if(t.id==='apRefresh'){ await fetchReqs(false); if(UI.tab==='check') renderCheck(); return; }
   if(t.id==='welcomeOff'){ S.settings.welcomeOff=true; save(); render(); return; }
+  const rqt=t.closest&&t.closest('[data-rqtab]'); if(rqt){ UI.rqTab=rqt.dataset.rqtab; renderReq(); return; }
   if(t.id==='togAllCls'){ S.settings.showAllCls=!S.settings.showAllCls; save(); render(); return; }
   if(t.id==='rdEdit'){ UI.rdEdit=!UI.rdEdit; renderReq(); return; }
   if(t.id==='rdCancel'){ UI.rdEdit=false; renderReq(); return; }
