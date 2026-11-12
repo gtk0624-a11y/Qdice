@@ -670,6 +670,7 @@ function cardHTML(s, it, mode){
     +'<div class="chead"><span class="ttl">'+title+'</span><span class="cp"></span><span class="sp"></span>'
     +'<span class="meter"></span>'
     +'<label><input type="checkbox" data-act="done"'+(r.done?' checked':'')+'> 완료</label>'
+    +'<button class="b s" data-act="pnu" title="가장 정확한 부산대(바른한글) 검사기 — 글을 복사하고 검사기를 엽니다">바른한글 검사</button>'
     +'<button class="b g s" data-act="nv">네이버 맞춤법</button>'
     +'<button class="b s" data-act="copy">나이스용 복사</button></div>'
     +'<div class="reqs"></div>'
@@ -1815,6 +1816,9 @@ M.addEventListener('click',async e=>{
   if(t.id==='rqNag'){ const txt=nagText(); if(!txt){ toast('미처리 요청이 없습니다.'); return; } toast(await copyText(txt)? '독촉 메시지를 복사했습니다. 업무메신저에 붙여넣으세요.' : '복사에 실패했습니다.'); return; }
   const card=t.closest('.card');
   if(card && t.dataset.act==='copy'){ onCopy(card); return; }
+  if(card && t.dataset.act==='pnu'){ const ta=card.querySelector('textarea'); const tx=(ta&&ta.value||'').trim(); if(!tx){ toast('먼저 문장을 써 주세요.'); return; }
+    await copyText(tx); window.open('https://nara-speller.co.kr/speller/','_blank','noopener');
+    toast('글을 복사했습니다. 열린 바른한글 검사기 칸에 Ctrl+V로 붙여넣고 [검사하기]를 누르세요. 고친 글은 다시 복사해서 이 칸에 붙여넣으면 됩니다.'); return; }
   if(card && t.dataset.act==='nv'){ toggleNaver(card); return; }
   if(card && t.dataset.act==='nvcopy'){ naverCopy(card,+t.dataset.i); return; }
   if(card && t.dataset.act==='nvapply'){ naverApply(card); return; }
