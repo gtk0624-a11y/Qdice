@@ -69,10 +69,16 @@ footer{text-align:center;color:var(--sub);font-size:12px;padding:18px}
 .nv{border:1px dashed var(--navy);border-radius:8px;padding:8px 10px;margin-top:8px;background:#f7f9fd;font-size:13px}
 .nv .nvrow{margin:6px 0}.nv textarea{font-size:14px;margin-top:4px}
 .pick{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:8px 0}
-.pick .lab{font-weight:700;color:var(--navy);width:48px;font-size:15px}
+.pick .lab{flex:0 0 100%;display:flex;align-items:center;gap:8px;font-weight:800;color:var(--navy);font-size:17px;margin:2px 0 2px}.pick .lab i{font-style:normal;display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:var(--navy);color:#fff;font-size:14px}.pick .lab em{font-style:normal;font-weight:400;font-size:13px;color:var(--sub)}
+.pick+.pick{margin-top:10px;padding-top:10px;border-top:1px dashed var(--line)}
 .pick button{font-family:inherit;font-size:15px;padding:9px 14px;border-radius:9px;border:2px solid var(--line);background:#fff;color:var(--txt);cursor:pointer}
 .pick button:hover{border-color:var(--navy)}
 .pick button.on{background:var(--navy);border-color:var(--navy);color:#fff;font-weight:700}
+.pick button[style*="--pbg"]{background:var(--pbg);border-color:var(--pbd)}
+.pick button[style*="--pbg"].on{background:var(--navy);border-color:var(--navy);box-shadow:inset 0 -6px 0 var(--pbd)}
+.pbar{display:inline-block;width:120px;height:10px;background:#e6e9f0;border-radius:6px;overflow:hidden;vertical-align:middle;margin:0 6px}.pbar i{display:block;height:100%;transition:width .4s}
+@keyframes cheer{0%,100%{transform:rotate(0) scale(1)}15%{transform:rotate(-14deg) scale(1.15)}30%{transform:rotate(12deg) scale(1.2)}45%{transform:rotate(-10deg) scale(1.15)}60%{transform:rotate(8deg) scale(1.1)}75%{transform:rotate(-4deg)}}
+.cheer{animation:cheer 1.4s ease-in-out;transform-origin:50% 80%}
 .pick button small{opacity:.75;margin-left:5px;font-weight:400}
 .now{font-size:17px;font-weight:700;color:var(--navy);margin:4px 0 8px}
 .steps{font-size:16px;line-height:1.9}
@@ -155,6 +161,8 @@ footer{text-align:center;color:var(--sub);font-size:12px;padding:18px}
 .mh summary{cursor:pointer;font-weight:700;color:var(--navy);padding:6px 0;font-size:16px}.mh ol,.mh ul{margin:4px 0 8px 20px;padding:0}.mh li{margin:3px 0}
 .mh .tip{background:#eef6ff;border-radius:8px;padding:6px 10px;font-size:14px}.mh dt{font-weight:700;margin-top:8px}.mh dd{margin:2px 0 0 12px}
 @media print{#manOv{position:static;background:none;padding:0}#manClose{display:none}}
+.stepn{font-style:normal;display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:var(--navy);color:#fff;font-size:14px;margin-right:8px;vertical-align:middle}
+.now{border-top:1px dashed var(--line);padding-top:10px;margin-top:10px;font-size:17px}
 </style>
 </head>
 <body>
@@ -725,7 +733,7 @@ function countChanged(sidv,ik,added){
   const it=itemBy(ik), s=S.students.find(x=>sid(x)===sidv); if(!it||!s) return;
   if(isOut(s)) return; const unit=grpOf(UI.cls)&&UI.tab==='write'? UI.cls : clsOf(s); const st=act(unitStudents(unit)); const w=countWritten(st,ik), need=grpOf(unit)? st.length : needOf(st.length,it), ra=grpOf(unit)? 100 : ratioOf(it);
   if(added){
-    if(w===need) toast('✔ '+unitName(unit)+' '+it.name+' 완료 — '+(ra<100? '입력 대상 '+ra+'%('+need+'명)를 채웠습니다.' : st.length+'명 모두 입력했습니다.'));
+    if(w===need){ dodiCheer(); } if(w===need) toast('🎉 '+unitName(unit)+' '+it.name+' 완료 — '+(ra<100? '입력 대상 '+ra+'%('+need+'명)를 채웠습니다.' : st.length+'명 모두 입력했습니다.'));
     else if(ra<100 && w>need) toast(unitName(unit)+' '+it.name+' — '+ra+'%를 넘었습니다 ('+w+'/'+st.length+'명, '+pct(w,st.length)+'%)');
   }
   const hd=$('#whead'); if(hd && UI.tab==='write') hd.innerHTML=writeHeadHTML();
@@ -786,17 +794,21 @@ function myClassSet(){
 function visClasses(){ const m=myClassSet(); return (m && !S.settings.showAllCls)? m : classes(); }
 function clsToggleHTML(){ const m=myClassSet(); if(!m) return '<button class="b g s" data-go="req" data-rqtab0="duty" style="margin-left:6px">⚙ 담당 반 정하면 내 반만 보여요</button>';
   return '<button class="b g s" id="togAllCls" style="margin-left:6px">'+(S.settings.showAllCls?'내 반만 보기':'전체 학급 보기')+'</button>'; }
+// 진행률 색: 0% 빨강 → 50% 노랑 → 100% 초록
+function pcVar(w,need){ const p=need? Math.min(1,w/need) : 0, h=Math.round(p*125); return ' style="--pbg:hsl('+h+',85%,'+(p>=1?88:92)+'%);--pbd:hsl('+h+',62%,42%)"'; }
+function pcBar(w,need){ const p=need? Math.min(100,Math.round(w/need*100)) : 0, h=Math.round(p*1.25); return '<span class="pbar"><i style="width:'+p+'%;background:hsl('+h+',62%,45%)"></i></span><b style="color:hsl('+h+',62%,35%)">'+p+'%</b>'; }
+function dodiCheer(){ ['header img','#gbBtn img'].forEach(q=>{ const el=$(q); if(!el) return; el.classList.remove('cheer'); void el.offsetWidth; el.classList.add('cheer'); setTimeout(()=>el.classList.remove('cheer'),1600); }); }
 function writeHeadHTML(){
   const cl=visClasses(), it=itemBy(UI.item); const mine=act(unitStudents(UI.cls)); const all=mine.length; const isG=!!grpOf(UI.cls);
   const written=countWritten(mine,it.key), need=isG? all : needOf(all,it), ra=isG? 100 : ratioOf(it);
   let done=0, over=0; mine.forEach(s=>{ const r=peek(sid(s),it.key); if(r.done) done++; if(B(r.text)>it.limit) over++; });
   const g=isG? '' : UI.cls.split('-')[0]; const gl=isG? mine : act(S.students.filter(s=>String(s.g)===g)); const gw=countWritten(gl,it.key), gn=needOf(gl.length,it);
   const useSel= cl.length>6 && (!myClassSet()||S.settings.showAllCls);
-  let h='<div class="pick"><span class="lab">학급</span>'+(useSel? '<select id="selCls" style="font-size:15px;padding:6px 10px">'+cl.map(c=>'<option value="'+esc(c)+'"'+(c===UI.cls?' selected':'')+'>'+esc(clsName(c))+'</option>').join('')+'</select>' : '')+(useSel? [] : cl).map(c=>{ const st=act(S.students.filter(s=>clsOf(s)===c)); const ok=st.length && countWritten(st,it.key)>=needOf(st.length,it); return '<button data-cls="'+esc(c)+'" class="'+(c===UI.cls?'on':'')+'">'+esc(clsName(c))+(ok?'<small>✔완료</small>':'')+'</button>'; }).join('')
-    +(S.groups||[]).map(gp=>{ const st=act(grpStudents(gp)); const k=countWritten(st,gp.item); const ok=st.length && k>=st.length; return '<button data-cls="g:'+esc(gp.id)+'" class="'+(UI.cls==='g:'+gp.id?'on':'')+'" style="border-color:#8fe3c0">🎲 '+esc(gp.name)+'<small>'+(ok?'✔완료 ':'')+k+'/'+st.length+'</small></button>'; }).join('')
+  let h='<div class="pick"><span class="lab"><i>1</i>학급 고르기 <em>색: 빨강 → 노랑 → 초록(완료)</em></span>'+(useSel? '<select id="selCls" style="font-size:15px;padding:6px 10px">'+cl.map(c=>'<option value="'+esc(c)+'"'+(c===UI.cls?' selected':'')+'>'+esc(clsName(c))+'</option>').join('')+'</select>' : '')+(useSel? [] : cl).map(c=>{ const st=act(S.students.filter(s=>clsOf(s)===c)); const ok=st.length && countWritten(st,it.key)>=needOf(st.length,it); const cw=countWritten(st,it.key), cn=needOf(st.length,it); return '<button data-cls="'+esc(c)+'" class="'+(c===UI.cls?'on':'')+'"'+pcVar(cw,cn)+'>'+esc(clsName(c))+(ok?'<small>✔완료</small>':'<small>'+cw+'/'+cn+'</small>')+'</button>'; }).join('')
+    +(S.groups||[]).map(gp=>{ const st=act(grpStudents(gp)); const k=countWritten(st,gp.item); const ok=st.length && k>=st.length; return '<button data-cls="g:'+esc(gp.id)+'" class="'+(UI.cls==='g:'+gp.id?'on':'')+'"'+pcVar(k,st.length)+'>🎲 '+esc(gp.name)+'<small>'+(ok?'✔완료 ':'')+k+'/'+st.length+'</small></button>'; }).join('')
     +'<button data-go="set" data-focus="grpName" style="border-style:dashed">＋ 동아리 명단</button>'+clsToggleHTML()+'</div>'
-    +'<div class="pick"><span class="lab">영역</span>'+S.items.map(i=>{ const w=countWritten(mine,i.key), ok=all && w>=needOf(all,i); const rq=S.reqs.filter(r=>rqToMe(r)&&rqOpen(r)&&rqSid(r).indexOf(UI.cls+'-')===0&&rqIk(r)===i.key).length; return '<button data-itemk="'+esc(i.key)+'" class="'+(i.key===UI.item?'on':'')+'">'+esc(i.name)+'<small>'+(ok?'✔완료 ':'')+w+'/'+all+'</small>'+(rq?'<small style="color:var(--red);font-weight:700">🛠'+rq+'</small>':'')+'</button>'; }).join('')+'</div>';
-  h+='<div class="now">'+esc(unitName(UI.cls))+' · '+esc(it.name)+' <span class="hint" style="font-weight:400">한도 '+it.limit.toLocaleString()+'B(한글 약 '+Math.floor(it.limit/3)+'자)'+(over?' · <b style="color:var(--red)">초과 '+over+'</b>':'')+'</span></div>';
+    +'<div class="pick"><span class="lab"><i>2</i>영역 고르기 <em>지금 반에서 영역별 진행 색</em></span>'+S.items.map(i=>{ const w=countWritten(mine,i.key), ok=all && w>=needOf(all,i); const rq=S.reqs.filter(r=>rqToMe(r)&&rqOpen(r)&&rqSid(r).indexOf(UI.cls+'-')===0&&rqIk(r)===i.key).length; return '<button data-itemk="'+esc(i.key)+'" class="'+(i.key===UI.item?'on':'')+'"'+pcVar(w,needOf(all,i))+'>'+esc(i.name)+'<small>'+(ok?'✔완료 ':'')+w+'/'+all+'</small>'+(rq?'<small style="color:var(--red);font-weight:700">🛠'+rq+'</small>':'')+'</button>'; }).join('')+'</div>';
+  h+='<div class="now"><i class="stepn">3</i>'+esc(unitName(UI.cls))+' · '+esc(it.name)+' 쓰기 '+pcBar(written,need)+' <span class="hint" style="font-weight:400">한도 '+it.limit.toLocaleString()+'B(한글 약 '+Math.floor(it.limit/3)+'자)'+(over?' · <b style="color:var(--red)">초과 '+over+'</b>':'')+'</span></div>';
   let msg, cls2;
   if(ra<100){
     if(written>need){ msg='✔ 입력 대상 '+ra+'%를 넘었습니다 — '+written+'/'+all+'명('+pct(written,all)+'%), 목표 '+need+'명보다 '+(written-need)+'명 많음'; cls2='c-mid'; }
@@ -1671,7 +1683,7 @@ function renderMe(){
   let h='<h4>담임</h4><div>'+(st.homeroom? esc(clsName(st.homeroom)) : '<span class="hint">담임 아님 (또는 아직 안 정함)</span>')+'</div>';
   h+='<h4>수정 요청 담당 분야</h4><div>'+(ds.length? ds.map(d=>dutyLabel(d)).join('<br>') : '<span style="color:var(--red)">아직 없음 — 정해야 팝업이 옵니다</span>')+'</div>';
   const pr=meProgress();
-  h+='<h4>내가 입력할 항목 ('+(S.students.length? '학생 '+act(S.students).length+'명' : '명단 없음')+')</h4>'+(pr.length? pr.map(x=>{ const pc=x.n? Math.min(100,Math.round(x.w/x.n*100)) : 0; return '<div class="mrow" data-meitem="'+esc(x.key)+'"><span>'+esc(x.name)+(x.over?' <b style="color:var(--red)">초과 '+x.over+'</b>':'')+'</span><span><span class="bar"><i style="width:'+pc+'%"></i></span>'+x.w+'/'+x.n+'</span></div>'; }).join('') : '<span class="hint">입력할 항목이 없습니다.</span>');
+  h+='<h4>내가 입력할 항목 ('+(S.students.length? '학생 '+act(S.students).length+'명' : '명단 없음')+')</h4>'+(pr.length? pr.map(x=>{ const pc=x.n? Math.min(100,Math.round(x.w/x.n*100)) : 0; return '<div class="mrow" data-meitem="'+esc(x.key)+'"><span>'+esc(x.name)+(x.over?' <b style="color:var(--red)">초과 '+x.over+'</b>':'')+'</span><span><span class="bar"><i style="width:'+pc+'%;background:hsl('+Math.round(pc*1.25)+',62%,45%)"></i></span>'+x.w+'/'+x.n+'</span></div>'; }).join('') : '<span class="hint">입력할 항목이 없습니다.</span>');
   h+='<div class="row" style="margin-top:8px"><button class="b s" data-mego="req">담당 바꾸기</button><button class="b g s" data-mego="set">항목·명단 설정</button></div>';
   p.innerHTML=h;
 }
