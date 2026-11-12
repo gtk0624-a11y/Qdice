@@ -142,6 +142,8 @@ footer{text-align:center;color:var(--sub);font-size:12px;padding:18px}
 #mePanel .bar{display:inline-block;width:60px;height:7px;background:#e6e9f0;border-radius:4px;vertical-align:middle;margin-right:4px;overflow:hidden}#mePanel .bar i{display:block;height:100%;background:var(--grn)}
 @media(max-width:640px){#meChip{max-width:60vw}}
 #sheetBtn{background:var(--yel);color:var(--navy);font-weight:700;border-radius:14px;padding:3px 10px;font-size:13px;text-decoration:none;white-space:nowrap}
+#tabHelp{background:#f4f7fc;border-bottom:1px solid var(--line);padding:7px 16px;font-size:13.5px;color:var(--navy)}#tabHelp b{color:var(--navy)}
+.welcome{background:linear-gradient(135deg,#fff8e1,#fff);border:2px solid var(--yel)}.welcome ol{margin:6px 0 0 18px;padding:0;line-height:1.9}
 </style>
 </head>
 <body>
@@ -166,6 +168,7 @@ footer{text-align:center;color:var(--sub);font-size:12px;padding:18px}
   <button data-tab="sisu">시수</button>
   <button data-tab="set">설정·백업</button>
 </nav>
+<div id="tabHelp"></div>
 <div id="banner"></div>
 <main id="main"></main>
 <footer>© 김정환 · M.A.D.T (Moral And Digital Teacher) — 생기부 내용은 이 컴퓨터의 브라우저 안에만 저장됩니다.</footer>
@@ -638,14 +641,24 @@ function naverApply(card){
 }
 
 // ───────── 5. 화면: 작성 ─────────
+// 내가 맡은 반(담당 학급 + 담임 반). 없으면 null = 전체
+function myClassSet(){
+  const st=S.settings, set=new Set(); const all=classes();
+  myDuties().forEach(d=>clsArr(d.cls).forEach(v=>{ if(/-\*$/.test(v)){ const g=v.split('-')[0]; all.filter(c=>c.split('-')[0]===g).forEach(c=>set.add(c)); } else set.add(v); }));
+  if(st.homeroom) set.add(st.homeroom);
+  const out=all.filter(c=>set.has(c)); return out.length? out : null;
+}
+function visClasses(){ const m=myClassSet(); return (m && !S.settings.showAllCls)? m : classes(); }
+function clsToggleHTML(){ const m=myClassSet(); if(!m) return '<span class="hint" style="margin-left:6px">[수정 요청 → 내 담당]에서 맡은 반을 정하면 내 반만 보입니다.</span>';
+  return '<button class="b g s" id="togAllCls" style="margin-left:6px">'+(S.settings.showAllCls?'내 반만 보기':'전체 학급 보기')+'</button>'; }
 function writeHeadHTML(){
-  const cl=classes(), it=itemBy(UI.item); const mine=act(unitStudents(UI.cls)); const all=mine.length; const isG=!!grpOf(UI.cls);
+  const cl=visClasses(), it=itemBy(UI.item); const mine=act(unitStudents(UI.cls)); const all=mine.length; const isG=!!grpOf(UI.cls);
   const written=countWritten(mine,it.key), need=isG? all : needOf(all,it), ra=isG? 100 : ratioOf(it);
   let done=0, over=0; mine.forEach(s=>{ const r=peek(sid(s),it.key); if(r.done) done++; if(B(r.text)>it.limit) over++; });
   const g=isG? '' : UI.cls.split('-')[0]; const gl=isG? mine : act(S.students.filter(s=>String(s.g)===g)); const gw=countWritten(gl,it.key), gn=needOf(gl.length,it);
-  let h='<div class="pick"><span class="lab">학급</span><button data-go="set" data-focus="roster" title="다른 학년·반 명단 더 넣기" style="border-style:dashed">＋ 명단 더 넣기</button>'+cl.map(c=>{ const st=act(S.students.filter(s=>clsOf(s)===c)); const ok=st.length && countWritten(st,it.key)>=needOf(st.length,it); return '<button data-cls="'+esc(c)+'" class="'+(c===UI.cls?'on':'')+'">'+esc(clsName(c))+(ok?'<small>✔완료</small>':'')+'</button>'; }).join('')
+  let h='<div class="pick"><span class="lab">학급</span>'+cl.map(c=>{ const st=act(S.students.filter(s=>clsOf(s)===c)); const ok=st.length && countWritten(st,it.key)>=needOf(st.length,it); return '<button data-cls="'+esc(c)+'" class="'+(c===UI.cls?'on':'')+'">'+esc(clsName(c))+(ok?'<small>✔완료</small>':'')+'</button>'; }).join('')
     +(S.groups||[]).map(gp=>{ const st=act(grpStudents(gp)); const k=countWritten(st,gp.item); const ok=st.length && k>=st.length; return '<button data-cls="g:'+esc(gp.id)+'" class="'+(UI.cls==='g:'+gp.id?'on':'')+'" style="border-color:#8fe3c0">🎲 '+esc(gp.name)+'<small>'+(ok?'✔완료 ':'')+k+'/'+st.length+'</small></button>'; }).join('')
-    +'<button data-go="set" data-focus="grpName" style="border-style:dashed">＋ 동아리 명단</button></div>'
+    +'<button data-go="set" data-focus="grpName" style="border-style:dashed">＋ 동아리 명단</button>'+clsToggleHTML()+'</div>'
     +'<div class="pick"><span class="lab">영역</span>'+S.items.map(i=>{ const w=countWritten(mine,i.key), ok=all && w>=needOf(all,i); const rq=S.reqs.filter(r=>rqToMe(r)&&rqOpen(r)&&rqSid(r).indexOf(UI.cls+'-')===0&&rqIk(r)===i.key).length; return '<button data-itemk="'+esc(i.key)+'" class="'+(i.key===UI.item?'on':'')+'">'+esc(i.name)+'<small>'+(ok?'✔완료 ':'')+w+'/'+all+'</small>'+(rq?'<small style="color:var(--red);font-weight:700">🛠'+rq+'</small>':'')+'</button>'; }).join('')+'</div>';
   h+='<div class="now">'+esc(unitName(UI.cls))+' · '+esc(it.name)+' <span class="hint" style="font-weight:400">한도 '+it.limit.toLocaleString()+'B(한글 약 '+Math.floor(it.limit/3)+'자)'+(over?' · <b style="color:var(--red)">초과 '+over+'</b>':'')+'</span></div>';
   let msg, cls2;
@@ -664,17 +677,18 @@ function writeHeadHTML(){
   return h;
 }
 function renderWrite(){
-  const cl=classes();
+  const cl=visClasses();
   if(!S.students.length){ $('#main').innerHTML='<div class="box"><h2>처음이시면 학생 명단부터 넣습니다</h2><div class="steps">가장 쉬운 방법: <label class="b" style="cursor:pointer;font-size:16px;padding:9px 16px">명단 엑셀 파일 올리기<input type="file" id="rosterFile0" accept=".xlsx,.xls,.csv" multiple hidden></label><br><b style="color:var(--navy)">또는 엑셀 파일을 이 화면에 끌어다 놓으세요.</b><br><span class="hint">학년·반·번호·이름(또는 학번·이름) 칸이 있는 파일이면 됩니다. 입력 양식에 문장을 써 두었으면 문장까지 같이 들어갑니다. 칸 순서가 달라도, 성별·생년월일 같은 다른 칸이 있어도, 여러 반이 섞여 있어도 알아서 정리합니다. 나이스에서 내려받은 명단도 됩니다.</span><br><a class="b g s" style="text-decoration:none" href="생기부_입력양식.xlsx" download>📄 입력 양식 엑셀 내려받기</a> <span class="hint">엑셀에 명단과 AI로 만든 문장을 정리한 뒤 설정·백업 → 엑셀 백업 불러오기로 한 번에 올릴 수 있습니다.</span><br>또는 엑셀에서 표를 통째로 긁어 복사(Ctrl+C)한 뒤 <b>아래 칸에 붙여넣기(Ctrl+V)만 하면 바로 들어갑니다.</b> 학년별 파일이 따로 있으면 하나씩 이어서 붙여넣으세요(파일 올리기는 여러 개를 한꺼번에 골라도 됩니다).</div><textarea id="roster" rows="6" placeholder="여기에 붙여넣기(Ctrl+V) — 붙이는 순간 명단이 들어갑니다.&#10;예) 학년	반	번호	성명	비고 …"></textarea><div class="row"><button class="b" id="rosterAdd" style="font-size:16px;padding:10px 18px">명단 넣기</button><span class="hint">직접 쳐도 됩니다. 한 줄에 한 명, 칸 사이는 띄어쓰기: 1 1 1 홍길동</span></div></div>'; return; }
   if(!cl.includes(UI.cls) && !grpOf(UI.cls)) UI.cls=cl[0];
   if(!itemBy(UI.item)) UI.item=S.items[0]? S.items[0].key : '';
   const it=itemBy(UI.item); if(!it){ $('#main').innerHTML='<div class="box">설정에서 항목을 하나 이상 만들어 주세요.</div>'; return; }
-  let list=unitStudents(UI.cls);
+  let list=unitStudents(UI.cls); UI.clubHint=/동아리/.test(it.name) && !(S.groups||[]).length && !grpOf(UI.cls);
   const all=list.length; let written=0, done=0, over=0;
   list.forEach(s=>{ const r=peek(sid(s),it.key); if(r.text.trim()) written++; if(r.done) done++; if(B(r.text)>it.limit) over++; });
   list=list.filter(s=>{ const r=peek(sid(s),it.key);
     return UI.filter==='all' || (UI.filter==='req'&&cardReqs(sid(s),it.key).some(rqOpen)) || (UI.filter==='empty'&&!r.text.trim()&&!isOut(s)) || (UI.filter==='over'&&B(r.text)>it.limit) || (UI.filter==='undone'&&!r.done) || (UI.filter==='uncopied'&&r.text.trim()&&!r.copied); });
-  let h='<div class="box" id="whead">'+writeHeadHTML()+'</div>';
+  let h=welcomeHTML()+'<div class="box" id="whead">'+writeHeadHTML()+'</div>';
+  if(UI.clubHint) h+='<div class="box" style="border-left:4px solid var(--org)"><b>동아리활동은 부원 명단을 따로 넣어야 합니다.</b> 동아리 부원은 여러 반에 흩어져 있어서, 반 명단만으로는 누가 내 동아리인지 알 수 없습니다. <button class="b s" data-go="set" data-focus="grpName">＋ 동아리 명단 넣기</button></div>';
   h+= list.length? list.map(s=>cardHTML(s,it,'byItem')).join('') : '<div class="box hint">조건에 맞는 학생이 없습니다.</div>';
   $('#main').innerHTML=h; $$('#main .card').forEach(c=>refreshCard(c));
 }
@@ -739,9 +753,9 @@ function allProgressHTML(){
   return h+'<div class="row" style="margin-top:6px"><button class="b g s" id="apRefresh">새로 불러오기</button><span class="hint">선생님 사이트가 열려 있을 때 자동으로 보내집니다. 사이트를 안 쓰는 선생님은 여기 나오지 않습니다.</span></div></div>';
 }
 function renderCheck(){
-  const rows=stats(), cl=classes();
+  const rows=stats(), cl=visClasses();
   let h=S.settings.admin? allProgressHTML() : '';
-  h+='<div class="box"><h2>'+(S.settings.admin?'내 ':'')+'입력 현황 (작성 수 / 학생 수)</h2>';
+  h+='<div class="box"><h2>'+(S.settings.admin?'내 ':'')+'입력 현황 (작성 수 / 학생 수) '+clsToggleHTML()+'</h2>';
   if(!cl.length) h+='<div class="hint">학생 명단이 없습니다.</div>';
   else{
     h+='<div style="overflow-x:auto"><table><tr><th>학급</th>'+S.items.map(i=>'<th>'+esc(i.name)+'</th>').join('')+'</tr>';
@@ -950,7 +964,7 @@ function renderSet(){
   h+='<div class="box"><h2>담당자 시트 연결 — 입력 현황 + 수정 요청(생기부 메신저)</h2><div class="hint" style="margin-bottom:6px">학교 선생님 모두가 <b>같은 웹앱 주소와 암호</b>를 넣어야 수정 요청이 오갑니다. <b>교사 이름</b>은 받는 사람을 찾는 기준이니 정확히(띄어쓰기 없이) 적어 주세요.</div><div class="row"><label>교사 이름 <input type="text" id="stTeacher" value="'+esc(st.teacher)+'" placeholder="예: 김정환"></label><label>학년도 <input class="num" type="number" id="stYear" value="'+esc(st.year)+'" style="width:80px"></label></div>'
     +'<div class="row"><label style="flex:1">웹앱 주소 <input class="wide" type="url" id="stUrl" value="'+esc(st.sheetUrl)+'" placeholder="https://script.google.com/macros/s/.../exec"></label></div>'
     +'<div class="row"><label>암호 <input type="text" id="stKey" value="'+esc(st.sheetKey)+'" placeholder="스크립트에 적은 암호"></label><label style="flex:1">현황판 시트 주소(보기용) <input class="wide" type="url" id="stView" value="'+esc(st.sheetView)+'" placeholder="https://docs.google.com/spreadsheets/..."></label></div>'
-    +'<div class="row"><label><input type="checkbox" id="stAuto"'+(st.autoSend?' checked':'')+'> 내용이 바뀌면 2분 뒤 자동으로 현황 전송</label></div>'
+    +'<div class="row"><label><input type="checkbox" id="stAuto"'+(st.autoSend?' checked':'')+'> 내용이 바뀌면 2분 뒤 자동으로 현황 전송</label> <label><input type="checkbox" id="stSisu"'+(st.showSisu?' checked':'')+'> 시수 탭 보이기 (학사일정·수업일수 계산용, 보통은 안 써도 됩니다)</label> <label><input type="checkbox" id="stWelcome"'+(st.welcomeOff?'':' checked')+'> 처음 쓰는 순서 안내 보이기</label></div>'
     +'<div class="row"><label><input type="checkbox" id="stAsk"'+(st.askDone?' checked':'')+'> 수정 요청이 있는 칸에서 "나이스용 복사"를 누르면 반영 완료를 적을지 묻기</label></div>'
     +'<div class="row"><label><input type="checkbox" id="stAdmin"'+(st.admin?' checked':'')+'> 담당자 모드 — 점검 시트 전체 현황, 담당자 확인, 독촉 메시지, 시트 기록 지우기</label></div>'
     +'<h3>내 담당 (분야·상세 분야·담임 학급)</h3>'+dutyHTML()
@@ -1273,10 +1287,11 @@ function pickedCls(){ const out=[]; document.querySelectorAll('#dClsBox [data-dg
 function dutyHTML(){
   const st=S.settings, ds=myDuties(); const cls=Array.from(new Set(classes().concat(['1-1','1-2','1-3','2-1','2-2','2-3','3-1','3-2','3-3'])));
   const f0=fieldList().find(f=>DEFAULT_SUBS[f])||fieldList()[0];
-  let h='<table class="dtab"><tr><th style="width:110px">담임 학급</th><td class="l"><select id="dHome"><option value="">담임 아님</option>'+cls.map(c=>'<option value="'+c+'"'+(st.homeroom===c?' selected':'')+'>'+esc(clsName(c))+'</option>').join('')+'</select> <span class="hint">담임항목 요청과 "담임 확인" 알림이 이 반으로 옵니다.</span></td></tr>';
+  let h='<table class="dtab"><tr><th style="width:110px">담임 학급</th><td class="l"><select id="dHome"><option value="">담임 아님</option>'+cls.map(c=>'<option value="'+c+'"'+(st.homeroom===c?' selected':'')+'>'+esc(clsName(c))+'</option>').join('')+'</select> <span class="hint"><b>담임이면 여기만 고르면 됩니다.</b> 자율·자치, 진로, 행동특성 요청과 "담임 확인" 알림이 이 반으로 옵니다.</span></td></tr>';
   h+='<tr><th>내 담당 분야</th><td class="l">'+(ds.length? '<table class="dlist"><tr><th>분야</th><th>상세 분야</th><th>담당 학급</th><th></th></tr>'+ds.map((d,i)=>'<tr'+(d.sub&&(d.cls||!/세특|교과/.test(d.field))?'':' style="background:#fff3f0"')+'><td>'+esc(d.field)+'</td><td>'+(d.sub? esc(d.sub) : '<b style="color:var(--red)">⚠ 전부</b> <span class="hint">이 분야 요청이 모두 옵니다</span>')+'</td><td>'+(d.cls? esc(clsLabel(d.cls)) : (/세특|교과/.test(d.field)?'<b style="color:var(--red)">⚠ 전체 학급</b> <span class="hint">맡은 반만 고르세요</span>':'전체 학급'))+'</td><td><button class="b g s" data-ddel="'+i+'">빼기</button></td></tr>').join('')+'</table>' : '<span class="hint" style="color:var(--red)">아직 없습니다. 아래에서 추가해 주세요. 담당이 없으면 수정 요청 팝업이 오지 않습니다.</span>')+'</td></tr>';
   h+='<tr><th>담당 추가</th><td class="l"><div class="row" style="margin:0"><select id="dField">'+fieldList().map(f=>'<option'+(f===f0?' selected':'')+'>'+esc(f)+'</option>').join('')+'</select><span id="dSubBox">'+dSubSelHTML(f0)+'</span><input id="dSub" placeholder="직접 쓰기 (시트에 적힌 이름 그대로)" style="display:none;min-width:200px"><button class="b s" id="dAdd">＋ 추가</button>'+(suggestDuties().length?'<button class="b g s" id="dAuto">내 입력 영역으로 자동 채우기</button>':'')+'</div>'
-    +clsPickHTML()+'<div class="hint">과목·동아리·주제마다 한 줄씩 추가하세요. 같은 과목이라도 맡은 반만 고르면 그 반 요청만 옵니다. (예: 교과세특 · 도덕 · 1학년 전체 + 2학년 1·2반)</div></td></tr></table>';
+    +clsPickHTML()+'<div id="dHrHint" class="hint" style="display:none;color:var(--org);font-weight:700">자율·자치, 진로, 행동특성은 따로 추가하지 않아도 됩니다. 위 <u>담임 학급</u>만 고르면 그 반 요청이 자동으로 옵니다.</div>'
+    +'<div class="hint">과목·동아리·주제마다 한 줄씩 추가하세요. 같은 과목이라도 맡은 반만 고르면 그 반 요청만 옵니다. (예: 교과세특 · 도덕 · 1학년 전체 + 2학년 1·2반)</div></td></tr></table>';
   return h+'<div class="hint">점검 시트의 <b>오류(확인) 분야 · 상세 분야</b>가 내 담당과 같은 줄이 "내가 고칠 것"으로 옵니다.</div>';
 }
 // 담당자용: 사이트에 들어온 선생님 · 연결 상태 · 담임 · 담당 분야
@@ -1433,9 +1448,29 @@ function applyLinkFromUrl(){
 function render(){
   $$('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.tab===UI.tab));
   ({write:renderWrite,search:renderSearch,req:renderReq,check:renderCheck,sched:renderSched,sisu:renderSisu,set:renderSet})[UI.tab]();
-  renderBanner();
+  renderBanner(); renderTabHelp();
 }
 function keep(fn){ setTimeout(()=>{ const a=document.activeElement; let sel=null; if(a&&a.dataset){ if(a.dataset.zr!==undefined) sel='[data-zr="'+a.dataset.zr+'"][data-f="'+a.dataset.f+'"]'; else if(a.dataset.it!==undefined) sel='[data-it="'+a.dataset.it+'"][data-f="'+a.dataset.f+'"]'; else if(a.id) sel='#'+a.id; } fn(); if(sel){ const n=$(sel); if(n){ n.focus(); if(n.select&&n.type!=='checkbox') n.select(); } } },0); }
+const TAB_HELP={
+  write:'✏️ <b>영역별 입력</b> — 내가 맡은 반 학생들의 생기부를 영역(세특·자율·동아리…)별로 씁니다. 글자 수·맞춤법을 확인하고 나이스로 복사합니다.',
+  search:'🔍 <b>학생별 입력</b> — 학생 한 명의 모든 영역을 한 화면에서 보고 고칩니다.',
+  req:'📨 <b>수정 요청</b> — 점검하다 고칠 곳을 찾으면 담당 선생님께 알림을 보냅니다. 나에게 온 요청도 여기서 처리합니다.',
+  check:'📊 <b>점검·현황</b> — 내 반의 입력 진행 상황과 빠진 학생·글자 초과를 봅니다.',
+  sched:'📅 <b>일정</b> — 생기부 마감·점검 일정과 디데이. 점검 일정 PDF를 끌어다 놓으면 자동으로 들어갑니다.',
+  sisu:'🧮 <b>시수</b> — 학사일정으로 수업일수를 셉니다. (2026년부터 중학교 창체 이수시간은 생기부에 적지 않습니다)',
+  set:'⚙️ <b>설정·백업</b> — 명단 넣기, 동아리 명단, 엑셀 백업, 학교 시트 연결, 새 학년 초기화.'
+};
+function renderTabHelp(){ const b=$('#tabHelp'); if(b) b.innerHTML=TAB_HELP[UI.tab]||''; const sb=$('#nav [data-tab=sisu]'); if(sb) sb.style.display=S.settings.showSisu?'':'none'; }
+function welcomeHTML(){ if(S.settings.welcomeOff) return '';
+  const st=S.settings, hasDuty=myDuties().length||st.homeroom;
+  const step=(ok,t)=>'<li>'+(ok?'✅ ':'⬜ ')+t+'</li>';
+  return '<div class="box welcome"><div class="row" style="justify-content:space-between"><b style="font-size:16px">처음 쓰시나요? 이 순서대로 하세요</b><button class="b g s" id="welcomeOff">다시 보지 않기</button></div><ol>'
+    +step(!!st.teacher,'<b>이름 적기</b> — [설정·백업] 맨 위')
+    +step(S.students.length>0,'<b>명단 넣기</b> — 명렬표 엑셀을 화면에 끌어다 놓기 (전교생 넣어도 됩니다. 쓸 때는 <u>내 반만</u> 보입니다)')
+    +step(!!hasDuty,'<b>내 담당 정하기</b> — [수정 요청 → 내 담당]: 담임은 담임 학급만, 교과는 과목+맡은 반')
+    +step((S.groups||[]).length>0,'<b>동아리 명단</b> (동아리 맡은 분만) — [설정·백업 → 동아리 명단]')
+    +step(typeof Notification!=='undefined'&&Notification.permission==='granted','<b>알림 켜기</b> — [수정 요청]의 [알림 켜기] → 허용')
+    +'</ol><div class="hint">그다음 <b>영역별 입력</b>에서 내 반 학생을 쓰면 됩니다. 각 탭이 무엇인지는 탭 바로 아래 한 줄 설명을 보세요.</div></div>'; }
 function go(tab){ UI.tab=tab; render(); window.scrollTo(0,0); }
 $('#dchip').addEventListener('click',()=>go('sched'));
 // 파일을 화면 어디에 끌어다 놓아도: 입력 양식·엑셀 백업이면 내용까지, 명단 파일이면 명단만
@@ -1538,11 +1573,13 @@ M.addEventListener('change',e=>{
   if(t.id==='stKey'){ st.sheetKey=t.value.trim(); save(); renderSet(); return; }
   if(t.id==='stView'){ const v=t.value.trim(); st.sheetView=/^https:\/\//.test(v)? v : ''; save(); return; }
   if(t.id==='stAuto'){ st.autoSend=t.checked; save(); return; }
+  if(t.id==='stSisu'){ st.showSisu=t.checked; save(); renderTabHelp(); return; }
+  if(t.id==='stWelcome'){ st.welcomeOff=!t.checked; save(); return; }
   if(t.id==='rqField'){ const b=$('#rqSubBox'); if(b) b.innerHTML=rqSubSelHTML(t.value); rqAutofill(); return; }
   if(t.dataset&&t.dataset.dg!==undefined){ document.querySelectorAll('#dClsBox [data-dc^="'+t.dataset.dg+'-"]').forEach(x=>{ x.checked=t.checked; }); return; }
   if(t.id==='rqRound'){ st.lastRound=t.value; save(); return; }
   if(t.id==='rqSub'){ const ip=$('#rqSubTxt'); if(ip){ ip.style.display=t.value==='__type'?'':'none'; if(t.value==='__type') ip.focus(); } rqAutofill(); return; }
-  if(t.id==='dField'){ const b=$('#dSubBox'); if(b) b.innerHTML=dSubSelHTML(t.value); const ip=$('#dSub'); if(ip){ ip.style.display='none'; ip.value=''; } return; }
+  if(t.id==='dField'){ const hh=$('#dHrHint'); if(hh) hh.style.display=/담임/.test(t.value)?'':'none'; const b=$('#dSubBox'); if(b) b.innerHTML=dSubSelHTML(t.value); const ip=$('#dSub'); if(ip){ ip.style.display='none'; ip.value=''; } return; }
   if(t.id==='dSubSel'){ const ip=$('#dSub'); if(ip){ ip.style.display=t.value==='__type'?'':'none'; if(t.value==='__type') ip.focus(); } return; }
   if(t.id==='dHome'){ st.homeroom=t.value; saveDuty(); UI.dutyOpen=true; if(UI.tab==='req') renderReq(); toast(t.value? clsName(t.value)+' 담임으로 정했습니다.' : '담임 아님으로 정했습니다.'); return; }
   if(t.id==='stAsk'){ st.askDone=t.checked; save(); return; }
@@ -1593,6 +1630,8 @@ M.addEventListener('click',async e=>{
   if(t.id==='logXls'){ if(!S.log.length){ toast('아직 수정 기록이 없습니다.'); return; } exportLog().catch(()=>toast('엑셀을 만들지 못했습니다.')); return; }
   if(t.dataset&&t.dataset.apt!==undefined){ UI.apT=UI.apT===t.dataset.apt?'':t.dataset.apt; renderCheck(); return; }
   if(t.id==='apRefresh'){ await fetchReqs(false); if(UI.tab==='check') renderCheck(); return; }
+  if(t.id==='welcomeOff'){ S.settings.welcomeOff=true; save(); render(); return; }
+  if(t.id==='togAllCls'){ S.settings.showAllCls=!S.settings.showAllCls; save(); render(); return; }
   if(t.id==='rdEdit'){ UI.rdEdit=!UI.rdEdit; renderReq(); return; }
   if(t.id==='rdCancel'){ UI.rdEdit=false; renderReq(); return; }
   if(t.id==='rdSave'){ const a=String($('#rdText').value).split('\n').map(x=>x.trim()).filter(Boolean).slice(0,12); if(!a.length){ toast('차수를 한 줄 이상 적어 주세요.'); return; }
