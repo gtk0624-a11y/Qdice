@@ -17,6 +17,7 @@
  * © 김정환 · M.A.D.T (Moral And Digital Teacher)
  */
 var KEY = '여기에암호';   // ← 원하는 암호로 바꾸세요. 학교 전용 링크에 함께 들어갑니다.
+var ADMIN_KEY = '여기에담당자암호';  // ← 담당자만 아는 암호. 학교 디데이 보내기·점검 차수 고치기에 필요합니다.
 
 var STD_HEAD = ['점검일자', '학번', '이름', '오류(확인) 분야', '상세 분야', '오류(확인) 내용', '변경 후',
                 '담당교사 반영 날짜', '담임 반영 확인', '생기부 담당자 확인', '비고'];
@@ -37,7 +38,8 @@ function doGet(e) {
     return json_({ ok: true, now: today_(), sheet: info.sh.getName(), rows: listReqs_(info),
                    meta: meta_(info), who: who_(), duties: duties_(), seen: seen_(),
                    link: SpreadsheetApp.getActiveSpreadsheet().getUrl() + '#gid=' + info.sh.getSheetId(), rounds: rounds_(),
-                   roster: p.roster === '1' ? roster_() : undefined, clubs: p.roster === '1' ? clubs_() : undefined });
+                   roster: p.roster === '1' ? roster_() : undefined, clubs: p.roster === '1' ? clubs_() : undefined,
+                   sched: sched_(), adminOk: p.admin ? String(p.admin) === ADMIN_KEY : undefined });
   }
   return ContentService.createTextOutput('생기부 도우미 담당자 시트가 작동 중입니다.');
 }
@@ -55,6 +57,8 @@ function doPost(e) {
     if (['done', 'hrok', 'adminok', 'reopen'].indexOf(d.action) >= 0) return out_(updReq_(teacher, d));
     if (d.action === 'roster') return out_(saveRoster_(d.rows));
     if (d.action === 'purge') return out_(purge_(d.mode === 'all'));
+    if (d.action === 'sched') { if (String(d.admin) !== ADMIN_KEY) return out_('담당자 암호 불일치'); return out_(saveSched_(d.items)); }
+    if (d.action === 'rounds' && String(d.admin) !== ADMIN_KEY) return out_('담당자 암호 불일치');
     if (d.action === 'rounds') { var rs = (Array.isArray(d.rounds) ? d.rounds : []).slice(0, 12).map(function (x) { return clean_(x, 40); }).filter(function (x) { return x; }); PropertiesService.getScriptProperties().setProperty('rounds', JSON.stringify(rs)); return out_('ok'); }
     if (Array.isArray(d.duties)) saveDuties_(teacher, d.duties, d.homeroom);
     return out_(saveStats_(teacher, d.rows));
@@ -299,6 +303,15 @@ function saveRoster_(rows) {
     .filter(function (r) { return r[3]; });
   if (data.length) sh.getRange(2, 1, data.length, 5).setNumberFormat('@').setValues(data);
   return 'ok ' + data.length;
+}
+// 학교 디데이: 담당자가 보낸 일정(모든 선생님 화면에 뜸). 스크립트 속성에 보관.
+function sched_() { try { return JSON.parse(PropertiesService.getScriptProperties().getProperty('sched') || '[]'); } catch (e) { return []; } }
+function saveSched_(items) {
+  var list = (Array.isArray(items) ? items : []).slice(0, 60).map(function (x) {
+    return { id: clean_(x.id, 20), date: clean_(x.date, 10), title: clean_(x.title, 60), note: clean_(x.note, 120) };
+  }).filter(function (x) { return /^\d{4}-\d{2}-\d{2}$/.test(x.date) && x.title; });
+  PropertiesService.getScriptProperties().setProperty('sched', JSON.stringify(list));
+  return 'ok ' + list.length;
 }
 function rounds_() { try { return JSON.parse(PropertiesService.getScriptProperties().getProperty('rounds') || '[]'); } catch (e) { return []; } }
 function seen_() {

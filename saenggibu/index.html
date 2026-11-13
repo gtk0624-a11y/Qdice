@@ -104,6 +104,7 @@ footer{text-align:center;color:var(--sub);font-size:12px;padding:18px}
 .cal td:hover{background:var(--yel2)}.cal td.out{background:#f6f7f9;cursor:default}
 .cal td.today{box-shadow:inset 0 0 0 2px var(--navy)}
 .cal .dn{font-weight:700;font-size:13px}.cal .sun{color:var(--red)}.cal .sat{color:var(--navy2)}
+.cal .ev.evs{background:#c0392b}
 .cal .ev{display:block;background:var(--navy);color:#fff;border-radius:4px;padding:0 4px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .cal .ev.fin{background:#9aa5b5;text-decoration:line-through}
 .cal .hol{display:block;color:var(--red);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -1033,9 +1034,11 @@ async function sendStats(silent){
 // ───────── 8. 화면: 일정 ─────────
 function dday(date){ const t=toDate(date); if(!t) return null; const n=new Date(); const today=new Date(n.getFullYear(),n.getMonth(),n.getDate()); return Math.round((t-today)/86400000); }
 function ddayText(n){ return n===0?'오늘':(n>0?'D-'+n:'D+'+(-n)+' 지남'); }
+// 일정 = 내 일정(이 컴퓨터) + 학교 일정(담당자가 보냄, 🏫). 학교 일정의 '끝남'은 이 컴퓨터에만 표시.
+function allScheds(){ const fin=S.schoolFin||{}; return S.schedules.concat((S.schoolSched||[]).map(x=>Object.assign({},x,{school:true,title:'🏫 '+x.title,fin:!!fin[x.id]}))); }
 function renderBanner(){ try{ renderMe(); }catch(e){}
-  const up=S.schedules.map(x=>({x,n:dday(x.date)})).filter(o=>o.n!==null&&o.n>=0&&o.n<=3&&!o.x.fin).sort((a,b)=>a.n-b.n);
-  const nx=S.schedules.map(x=>({x,n:dday(x.date)})).filter(o=>o.n!==null&&o.n>=0&&!o.x.fin).sort((a,b)=>a.n-b.n)[0];
+  const up=allScheds().map(x=>({x,n:dday(x.date)})).filter(o=>o.n!==null&&o.n>=0&&o.n<=3&&!o.x.fin).sort((a,b)=>a.n-b.n);
+  const nx=allScheds().map(x=>({x,n:dday(x.date)})).filter(o=>o.n!==null&&o.n>=0&&!o.x.fin).sort((a,b)=>a.n-b.n)[0];
   const chip=$('#dchip'); if(nx){ chip.style.display='inline-block'; chip.textContent=ddayText(nx.n)+' '+(nx.x.title.length>8? nx.x.title.slice(0,8)+'…' : nx.x.title); chip.title=nx.x.title+' ('+nx.x.date+')'; } else chip.style.display='none';
   const b=$('#banner'); const parts=[];
   if(up.length) parts.push('⏰ 곧 마감: '+up.map(o=>'<b>'+ddayText(o.n)+'</b> '+esc(o.x.title)+' ('+esc(o.x.date.slice(5))+')').join(' · '));
@@ -1046,6 +1049,7 @@ function notifyDue(){
   if(!('Notification' in window) || Notification.permission!=='granted') return;
   const today=ymd(new Date()); let changed=false;
   S.schedules.forEach(x=>{ const n=dday(x.date); if(n!==null&&n>=0&&n<=3&&!x.fin&&x.notified!==today){ try{ new Notification('생기부 일정 '+ddayText(n),{body:x.title+' ('+x.date+')'}); }catch(e){} x.notified=today; changed=true; } });
+  S.schoolNoti=S.schoolNoti||{}; (S.schoolSched||[]).forEach(x=>{ const n=dday(x.date); if(n!==null&&n>=0&&n<=3&&!(S.schoolFin||{})[x.id]&&S.schoolNoti[x.id]!==today){ try{ new Notification('🏫 학교 일정 '+ddayText(n),{body:x.title+' ('+x.date+')'}); }catch(e){} S.schoolNoti[x.id]=today; changed=true; } });
   if(changed) save();
 }
 function calHTML(){
@@ -1053,7 +1057,7 @@ function calHTML(){
   const y=+UI.cal.slice(0,4), m=+UI.cal.slice(5,7); const first=new Date(y,m-1,1), last=new Date(y,m,0).getDate(), today=ymd(now);
   const hol={}; S.sisu.holidays.forEach(x=>{ hol[x.date]=x.name||'휴업일'; });
   const club={}; S.sisu.club.forEach(x=>{ club[x.date]=x.hours; });
-  const ev={}; S.schedules.forEach(x=>{ (ev[x.date]=ev[x.date]||[]).push(x); });
+  const ev={}; allScheds().forEach(x=>{ (ev[x.date]=ev[x.date]||[]).push(x); });
   let h='<div class="row"><button class="b g s" data-cal="-1">◀ 이전 달</button><b style="font-size:17px;color:var(--navy)">'+y+'년 '+m+'월</b><button class="b g s" data-cal="1">다음 달 ▶</button><button class="b g s" data-cal="0">오늘</button><span class="hint">날짜를 누르면 아래 등록 칸에 그 날짜가 들어갑니다. 빨강=휴업일, 초록=동아리(시수 탭에서 넣은 것)</span></div>';
   h+='<table class="cal"><tr>'+['일','월','화','수','목','금','토'].map((d,i)=>'<th class="'+(i===0?'sun':(i===6?'sat':''))+'">'+d+'</th>').join('')+'</tr><tr>';
   for(let i=0;i<first.getDay();i++) h+='<td class="out"></td>';
@@ -1061,7 +1065,7 @@ function calHTML(){
     h+='<td data-day="'+ds+'" class="'+(ds===today?'today':'')+'"><span class="dn '+((w===0||hol[ds])?'sun':(w===6?'sat':''))+'">'+d+'</span>'
       +(hol[ds]? '<span class="hol">'+esc(hol[ds])+'</span>':'')
       +(club[ds]? '<span class="clb">동아리 '+esc(club[ds])+'시간</span>':'')
-      +(ev[ds]||[]).map(x=>'<span class="ev'+(x.fin?' fin':'')+'" title="'+esc(x.title)+'">'+esc(x.title)+'</span>').join('')+'</td>';
+      +(ev[ds]||[]).map(x=>'<span class="ev'+(x.fin?' fin':'')+(x.school?' evs':'')+'" title="'+esc(x.title)+'">'+esc(x.title)+'</span>').join('')+'</td>';
     if(w===6 && d<last) h+='</tr><tr>'; }
   for(let i=new Date(y,m-1,last).getDay();i<6;i++) h+='<td class="out"></td>';
   return h+'</tr></table>';
@@ -1069,14 +1073,30 @@ function calHTML(){
 function renderSched(){
   const list=S.schedules.slice().sort((a,b)=>a.date.localeCompare(b.date));
   const perm=('Notification' in window)? Notification.permission : 'none';
-  const up=list.map(x=>({x,n:dday(x.date)})).filter(o=>o.n!==null&&o.n>=0&&!o.x.fin).slice(0,4);
+  const up=allScheds().sort((a,b)=>a.date.localeCompare(b.date)).map(x=>({x,n:dday(x.date)})).filter(o=>o.n!==null&&o.n>=0&&!o.x.fin).slice(0,4);
   let h='<div class="box"><h2>디데이</h2>'+(up.length? '<div class="dd">'+up.map(o=>'<div class="'+(o.n<=3?'hot':'')+'"><b>'+(o.n===0?'D-DAY':'D-'+o.n)+'</b>'+esc(o.x.title)+'<br><small>'+esc(o.x.date)+' ('+'일월화수목금토'[toDate(o.x.date).getDay()]+')'+(o.x.note? ' · '+esc(o.x.note):'')+'</small></div>').join('')+'</div>' : '<div class="hint">다가오는 일정이 없습니다. 아래에서 등록하면 여기와 화면 맨 위에 디데이가 표시됩니다.</div>')+'</div>';
+  h+=schoolSchedHTML();
   h+='<div class="box"><h2>달력</h2>'+calHTML()+'</div>';
-  h+='<div class="box"><h2>일정 등록</h2><div class="row"><input id="scTitle" type="text" placeholder="예: 2학년 세특 입력 마감" style="flex:1;min-width:200px"><input id="scDate" type="date" value="'+esc(UI.selDate||'')+'"><input id="scNote" type="text" placeholder="메모(선택)"><button class="b" id="scAdd">등록</button></div>';
+  h+='<div class="box"><h2>📌 내 일정 등록 <span class="hint" style="font-weight:400">나만 보입니다</span></h2><div class="row"><input id="scTitle" type="text" placeholder="예: 2학년 세특 입력 마감" style="flex:1;min-width:200px"><input id="scDate" type="date" value="'+esc(UI.selDate||'')+'"><input id="scNote" type="text" placeholder="메모(선택)"><button class="b" id="scAdd">등록</button></div>';
   h+='<div class="row"><button class="b g s" id="scNoti">'+(perm==='granted'?'알림 켜져 있음':'브라우저 알림 켜기')+'</button><button class="b g s" id="scIcs">캘린더 파일(.ics)로 내보내기</button><span class="hint">알림은 이 화면을 열어 둔 동안 마감 3일 전부터 하루 한 번 뜹니다. 휴대폰 알림이 필요하면 .ics 파일을 캘린더 앱에 넣으세요(하루 전 오전 9시 알림 포함).</span></div>';
   if(!list.length) h+='<div class="hint">등록된 일정이 없습니다.</div>';
   else h+='<table><tr><th>날짜</th><th>남은 날</th><th class="l">일정</th><th class="l">메모</th><th>끝남</th><th></th></tr>'+list.map(x=>{ const n=dday(x.date); return '<tr'+(x.fin?' style="opacity:.5"':'')+'><td>'+esc(x.date)+'</td><td class="'+(n<=3?'neg':'')+'">'+(x.fin?'-':ddayText(n))+'</td><td class="l">'+esc(x.title)+'</td><td class="l">'+esc(x.note||'')+'</td><td><input type="checkbox" data-scfin="'+esc(x.id)+'"'+(x.fin?' checked':'')+'></td><td><button class="b r s" data-scdel="'+esc(x.id)+'">삭제</button></td></tr>'; }).join('')+'</table>';
   h+='</div>'; $('#main').innerHTML=h;
+}
+function schoolSchedHTML(){
+  const st=S.settings, adm=st.admin&&st.adminKey, fin=S.schoolFin||{};
+  const list=(S.schoolSched||[]).slice().sort((a,b)=>a.date.localeCompare(b.date));
+  let h='<div class="box" style="border-left:5px solid #c0392b"><h2>🏫 학교 일정 <span class="hint" style="font-weight:400">'+(adm?'선생님(담당자)이 정하면 모든 선생님 화면에 디데이로 뜹니다':'생기부 담당자가 보낸 일정입니다. 모든 선생님께 똑같이 보입니다')+'</span></h2>';
+  if(!st.sheetUrl) h+='<div class="hint">학교 링크로 연결하면 담당자가 보낸 일정이 여기에 뜹니다.</div>';
+  else if(!list.length) h+='<div class="hint">아직 담당자가 보낸 학교 일정이 없습니다.</div>';
+  else h+='<table><tr><th>날짜</th><th>남은 날</th><th class="l">일정</th><th class="l">메모</th><th>'+(adm?'':'끝남')+'</th></tr>'+list.map(x=>{ const n=dday(x.date); return '<tr'+(fin[x.id]?' style="opacity:.5"':'')+'><td>'+esc(x.date)+'</td><td class="'+(n<=3?'neg':'')+'">'+ddayText(n)+'</td><td class="l"><b>'+esc(x.title)+'</b></td><td class="l hint">'+esc(x.note||'')+'</td><td>'+(adm?'<button class="b r s" data-ssdel="'+esc(x.id)+'">지우기</button>':'<input type="checkbox" data-ssfin="'+esc(x.id)+'"'+(fin[x.id]?' checked':'')+'>')+'</td></tr>'; }).join('')+'</table>';
+  if(adm) h+='<div class="row" style="margin-top:8px"><input id="ssTitle" type="text" placeholder="예: 1차 점검 출력물 제출" style="flex:1;min-width:200px"><input id="ssDate" type="date" value="'+esc(UI.selDate||'')+'"><input id="ssNote" type="text" placeholder="메모(선택)"><button class="b" id="ssAdd" style="background:#c0392b">모든 선생님께 보내기</button></div><span class="hint">보낸 일정은 선생님들 화면에 1~2분 안에 뜹니다(다음 새로 고침 때).</span>';
+  return h+'</div>';
+}
+async function pushSchoolSched(list){
+  const st=S.settings; S.schoolSched=list; save(); renderSched(); renderBanner();
+  try{ await rqPost({action:'sched', items:list, admin:st.adminKey||''}); toast('학교 일정을 모든 선생님께 보냈습니다.'); setTimeout(()=>fetchReqs(true),4000); }
+  catch(e){ toast('시트에 보내지 못했습니다. 인터넷을 확인해 주세요.'); }
 }
 function exportIcs(){
   if(!S.schedules.length){ toast('내보낼 일정이 없습니다.'); return; }
@@ -1382,7 +1402,7 @@ function sheetReady(silent){
   if(!/^https:\/\/script\.google\.com\//.test(st.sheetUrl)){ if(!silent) toast('웹앱 주소는 https://script.google.com/ 으로 시작해야 합니다.'); return false; }
   return true;
 }
-function rqUrl(q){ const st=S.settings; const u=new URL(st.sheetUrl); Object.entries(Object.assign({key:st.sheetKey,teacher:st.teacher,t:Date.now()},q)).forEach(([k,v])=>u.searchParams.set(k,v)); return u.toString(); }
+function rqUrl(q){ const st=S.settings; const u=new URL(st.sheetUrl); Object.entries(Object.assign({key:st.sheetKey,teacher:st.teacher,t:Date.now()},(st.admin&&st.adminKey)?{admin:st.adminKey}:{},q)).forEach(([k,v])=>u.searchParams.set(k,v)); return u.toString(); }
 function rqPost(body){ const st=S.settings; return fetch(st.sheetUrl,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(Object.assign({key:st.sheetKey,teacher:st.teacher},body))}); }
 function hakSplit(h){ const d=String(h||'').replace(/\D/g,''); if(d.length===5) return [+d[0],+d.slice(1,3),+d.slice(3)]; if(d.length===4) return [+d[0],+d[1],+d.slice(2)]; return [0,0,0]; }
 function rowStatus(r){ return (r.adminAt || /오류\s*아님/.test(r.memo))? '확인' : r.hrAt? '담임 확인' : r.doneAt? '수정 완료' : (/\[재요청/.test(r.memo)? '재요청' : '요청'); }
@@ -1392,14 +1412,14 @@ function normRow(x){ const [g,c,n]=hakSplit(x.hak);
   r.area=(r.field+' '+r.sub).trim(); r.status=rowStatus(r); r.skipDone=!r.doneAt && !!(r.hrAt||r.adminAt) && !/오류\s*아님/.test(r.memo); return r; }
 async function fetchReqs(silent){
   if(!sheetReady(silent) || RQ.busy) return;
-  RQ.busy=true;
+  RQ.busy=true; const st0=S.settings;
   try{
     const res=await fetch(rqUrl({action:'list'}));
     const txt=await res.text(); let d;
     try{ d=JSON.parse(txt); }catch(e){ throw new Error('old'); }
     if(!d.ok){ RQ.err=d.msg||'오류'; if(!silent) toast('수정 요청을 불러오지 못했습니다: '+RQ.err); return; }
     if(!Array.isArray(d.rows) || !d.meta){ throw new Error('old'); }
-    RQ.err=''; S.reqWho=Array.isArray(d.who)? d.who : []; S.reqDuties=Array.isArray(d.duties)? d.duties : []; S.reqSeenT=Array.isArray(d.seen)? d.seen : []; if(d.link && /^https:\/\/docs\.google\.com\//.test(d.link)) S.reqSheetLink=d.link; if(Array.isArray(d.rounds)) S.reqRounds=d.rounds; S.reqMeta=d.meta||{fields:[],subs:{}}; S.reqSheetName=d.sheet||'';
+    RQ.err=''; S.reqWho=Array.isArray(d.who)? d.who : []; S.reqDuties=Array.isArray(d.duties)? d.duties : []; S.reqSeenT=Array.isArray(d.seen)? d.seen : []; if(d.link && /^https:\/\/docs\.google\.com\//.test(d.link)) S.reqSheetLink=d.link; if(Array.isArray(d.rounds)) S.reqRounds=d.rounds; if(Array.isArray(d.sched)) S.schoolSched=d.sched; if(st0.admin && d.adminOk===false){ st0.admin=false; st0.adminKey=''; toast('담당자 암호가 맞지 않아 담당자 모드를 껐습니다.'); } else if(st0.admin && d.adminOk) S.adminOk=true; S.reqMeta=d.meta||{fields:[],subs:{}}; S.reqSheetName=d.sheet||'';
     mergeServer(d.rows);
     S.settings.lastReqFetch=Date.now(); save();
     if(!silent) toast('새로 불러왔습니다. 고칠 것 '+inbox().length+'건, 확인할 것 '+waitConfirm().length+'건');
@@ -1866,7 +1886,7 @@ M.addEventListener('change',e=>{
   if(t.id==='dHome'){ st.homeroom=t.value; saveDuty(); UI.dutyOpen=true; if(UI.tab==='req') renderReq(); toast(t.value? clsName(t.value)+' 담임으로 정했습니다.' : '담임 아님으로 정했습니다.'); return; }
   if(t.id==='stAsk'){ st.askDone=t.checked; save(); return; }
   if(t.id==='stAutoLock'){ st.autoLock=+t.value; save(); return; }
-  if(t.id==='stAdmin'){ st.admin=t.checked; save(); fetchReqs(true); return; }
+  if(t.id==='stAdmin'){ if(t.checked){ const k=prompt('담당자 암호를 넣어 주세요.\n(생기부 담당자만 압니다. 학교 디데이 보내기·점검 차수 고치기에 쓰입니다.)',st.adminKey||''); if(!k){ t.checked=false; return; } st.adminKey=k.trim(); } st.admin=t.checked; save(); fetchReqs(true); return; }
   if(t.id==='readFile' && t.files[0]){ planReading(t.files[0]).catch(()=>toast('독서기록 파일을 읽지 못했습니다. 엑셀(.xlsx)이나 CSV 파일인지 확인해 주세요.')); return; }
   if(t.id==='grpFile' && t.files[0]){ const isPdf=/\.pdf$/i.test(t.files[0].name); needXLSX().then(()=>readFile(t.files[0])).then(async buf=>{ let rows; if(isPdf){ const r=await pdfLines(buf); if(r.chars<20){ toast('이 PDF는 글자를 읽을 수 없습니다(스캔 그림). 엑셀로 올려 주세요.'); return; } rows=rosterRowsFromText(r.lines.join('\n')); } else { const wb=XLSX.read(buf,{type:'array'}); rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,raw:false,defval:''}); } const nm=$('#grpName').value.trim()||t.files[0].name.replace(/\.[^.]+$/,''); const gp=makeGroup(rows,nm,$('#grpItem').value); if(gp){ UI.cls='g:'+gp.id; UI.item=gp.item; renderSet(); } }).catch(()=>toast('부원 명단 파일을 읽지 못했습니다.')); return; }
   if(t.id==='xlsIn' && t.files[0]){ importXlsx(t.files[0]).catch(()=>toast('엑셀 파일을 읽지 못했습니다.')); return; }
@@ -1920,7 +1940,7 @@ M.addEventListener('click',async e=>{
   if(t.id==='rdEdit'){ UI.rdEdit=!UI.rdEdit; renderReq(); return; }
   if(t.id==='rdCancel'){ UI.rdEdit=false; renderReq(); return; }
   if(t.id==='rdSave'){ const a=String($('#rdText').value).split('\n').map(x=>x.trim()).filter(Boolean).slice(0,12); if(!a.length){ toast('차수를 한 줄 이상 적어 주세요.'); return; }
-    S.reqRounds=a; save(); UI.rdEdit=false; renderReq(); try{ await rqPost({action:'rounds', rounds:a}); toast('점검 차수를 바꿨습니다. 다른 선생님 화면에도 곧 바뀝니다.'); setTimeout(()=>fetchReqs(true),4000); }catch(e){ toast('시트에 저장하지 못했습니다. 인터넷을 확인해 주세요.'); } return; }
+    S.reqRounds=a; save(); UI.rdEdit=false; renderReq(); try{ await rqPost({action:'rounds', rounds:a, admin:S.settings.adminKey||''}); toast('점검 차수를 바꿨습니다. 다른 선생님 화면에도 곧 바뀝니다.'); setTimeout(()=>fetchReqs(true),4000); }catch(e){ toast('시트에 저장하지 못했습니다. 인터넷을 확인해 주세요.'); } return; }
   if(t.id==='rqNag'){ const txt=nagText(); if(!txt){ toast('미처리 요청이 없습니다.'); return; } toast(await copyText(txt)? '독촉 메시지를 복사했습니다. 업무메신저에 붙여넣으세요.' : '복사에 실패했습니다.'); return; }
   const card=t.closest('.card');
   if(card && t.dataset.act==='copy'){ onCopy(card); return; }
@@ -1966,6 +1986,9 @@ M.addEventListener('click',async e=>{
   if(t.dataset.gadd){ UI.gAdd=t.dataset.gadd; const gp=S.groups.find(x=>x.id===UI.gAdd); const ta=$('#grpRoster'); if(ta){ ta.placeholder=gp.name+'에 더할 부원 명단을 붙여넣고 [동아리 만들기]를 누르세요'; ta.focus(); } $('#grpName').value=gp.name; return; }
   if(t.dataset.gdel){ const gp=S.groups.find(x=>x.id===t.dataset.gdel); if(gp && confirm('"'+gp.name+'" 동아리 묶음을 지웁니다. 학생과 써 둔 내용은 그대로 남습니다. 지울까요?')){ S.groups=S.groups.filter(x=>x!==gp); if(UI.cls==='g:'+gp.id) UI.cls=''; save(); renderSet(); } return; }
   if(t.id==='rosterPull'){ fetchRoster(true); return; }
+  if(t.id==='ssAdd'){ const ti=$('#ssTitle').value.trim(), da=$('#ssDate').value, no=$('#ssNote').value.trim(); if(!ti||!/^\d{4}-\d{2}-\d{2}$/.test(da)){ toast('일정 이름과 날짜를 넣어 주세요.'); return; } pushSchoolSched((S.schoolSched||[]).concat([{id:'ss'+Date.now().toString(36),date:da,title:ti,note:no}])); return; }
+  if(t.dataset && t.dataset.ssdel){ const x=(S.schoolSched||[]).find(y=>y.id===t.dataset.ssdel); if(x && confirm('「'+x.title+'」을(를) 모든 선생님 화면에서 지웁니다. 지울까요?')) pushSchoolSched(S.schoolSched.filter(y=>y!==x)); return; }
+  if(t.dataset && t.dataset.ssfin){ S.schoolFin=S.schoolFin||{}; S.schoolFin[t.dataset.ssfin]=t.checked; save(); renderSched(); renderBanner(); return; }
   { const sb=t.closest&&t.closest('[data-sclub]'); if(sb){ const gp=importClub(sb.dataset.sclub); if(gp){ UI.cls='g:'+gp.id; UI.item=gp.item; render(); } return; } }
   if(t.id==='rosterAdd'){ if(addRoster(rosterRowsFromText($('#roster').value))) render(); return; }
   if(t.closest('[data-stunote]') && !t.dataset.studel){ const k=t.closest('[data-stunote]').dataset.stunote; const st0=S.students.find(x=>sid(x)===k); if(!st0) return;
