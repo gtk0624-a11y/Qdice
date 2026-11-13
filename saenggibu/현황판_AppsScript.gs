@@ -23,8 +23,10 @@ var STD_HEAD = ['점검일자', '학번', '이름', '오류(확인) 분야', '�
 var STAT_NAME = '현황', STAT_HEAD = ['교사', '학급', '항목', '학생 수', '작성', '완료', '초과', '작성률', '갱신 시각'];
 var DUTY_NAME = '담당교사', DUTY_HEAD = ['교사', '분야', '상세 분야', '담임 학급', '갱신 시각', '담당 학급'];
 var SEEN_NAME = '접속', SEEN_HEAD = ['교사', '마지막 접속', '처음 접속'];
+var ROSTER_NAME = '명단', ROSTER_HEAD = ['학년', '반', '번호', '이름', '비고'];
+var CLUB_NAME = '동아리', CLUB_HEAD = ['동아리', '학년', '반', '번호', '이름'];  // 동아리 부원 명단(담당자가 붙여넣음). 동아리 선생님 화면에 자동으로 들어감.  // 학교 전체 명단(담당자가 고침). 사이트가 처음 열릴 때 자동으로 받아 감.
 
-function setup() { reqInfo_(); statSheet_(); dutySheet_(); }
+function setup() { reqInfo_(); statSheet_(); dutySheet_(); headSheet_(ROSTER_NAME, ROSTER_HEAD); headSheet_(CLUB_NAME, CLUB_HEAD); }
 
 function doGet(e) {
   var p = (e && e.parameter) || {};
@@ -34,7 +36,8 @@ function doGet(e) {
     if (p.teacher) touch_(clean_(p.teacher, 40));
     return json_({ ok: true, now: today_(), sheet: info.sh.getName(), rows: listReqs_(info),
                    meta: meta_(info), who: who_(), duties: duties_(), seen: seen_(),
-                   link: SpreadsheetApp.getActiveSpreadsheet().getUrl() + '#gid=' + info.sh.getSheetId(), rounds: rounds_() });
+                   link: SpreadsheetApp.getActiveSpreadsheet().getUrl() + '#gid=' + info.sh.getSheetId(), rounds: rounds_(),
+                   roster: p.roster === '1' ? roster_() : undefined, clubs: p.roster === '1' ? clubs_() : undefined });
   }
   return ContentService.createTextOutput('생기부 도우미 담당자 시트가 작동 중입니다.');
 }
@@ -50,6 +53,7 @@ function doPost(e) {
   try {
     if (d.action === 'request') return out_(addReqs_(teacher, d.items));
     if (['done', 'hrok', 'adminok', 'reopen'].indexOf(d.action) >= 0) return out_(updReq_(teacher, d));
+    if (d.action === 'roster') return out_(saveRoster_(d.rows));
     if (d.action === 'purge') return out_(purge_(d.mode === 'all'));
     if (d.action === 'rounds') { var rs = (Array.isArray(d.rounds) ? d.rounds : []).slice(0, 12).map(function (x) { return clean_(x, 40); }).filter(function (x) { return x; }); PropertiesService.getScriptProperties().setProperty('rounds', JSON.stringify(rs)); return out_('ok'); }
     if (Array.isArray(d.duties)) saveDuties_(teacher, d.duties, d.homeroom);
@@ -275,6 +279,26 @@ function touch_(teacher) {
     for (var i = 0; i < v.length; i++) if (String(v[i][0]) === teacher) { sh.getRange(i + 2, 2, 1, 1).setNumberFormat('@').setValue(now); return; }
     var r0 = sh.getLastRow() + 1; sh.getRange(r0, 1, 1, 3).setNumberFormat('@').setValues([[teacher, now, now]]);
   } finally { lock.releaseLock(); }
+}
+// 학교 명단: '명단' 탭(학년·반·번호·이름·비고). 탭이 비어 있을 때만 사이트에서 한 번 채울 수 있음(덮어쓰기 방지). 전학 등은 시트에서 직접 고치세요.
+function roster_() {
+  var sh = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(ROSTER_NAME);
+  if (!sh || sh.getLastRow() < 2) return [];
+  return sh.getRange(2, 1, sh.getLastRow() - 1, 5).getDisplayValues().filter(function (r) { return String(r[3]).trim(); });
+}
+function clubs_() {
+  var sh = headSheet_(CLUB_NAME, CLUB_HEAD);
+  if (sh.getLastRow() < 2) return [];
+  return sh.getRange(2, 1, sh.getLastRow() - 1, 5).getDisplayValues().filter(function (r) { return String(r[0]).trim() && String(r[4]).trim(); });
+}
+function saveRoster_(rows) {
+  if (!Array.isArray(rows) || !rows.length) return '내용 없음';
+  var sh = headSheet_(ROSTER_NAME, ROSTER_HEAD);
+  if (sh.getLastRow() > 1) return '이미 명단이 있습니다(시트에서 직접 고치세요)';
+  var data = rows.slice(0, 2000).map(function (r) { return [clean_(r[0], 2), clean_(r[1], 3), clean_(r[2], 3), clean_(r[3], 30), clean_(r[4], 60)]; })
+    .filter(function (r) { return r[3]; });
+  if (data.length) sh.getRange(2, 1, data.length, 5).setNumberFormat('@').setValues(data);
+  return 'ok ' + data.length;
 }
 function rounds_() { try { return JSON.parse(PropertiesService.getScriptProperties().getProperty('rounds') || '[]'); } catch (e) { return []; } }
 function seen_() {
