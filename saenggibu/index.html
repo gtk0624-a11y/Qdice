@@ -163,6 +163,7 @@ footer{text-align:center;color:var(--sub);font-size:12px;padding:18px}
 @media print{#manOv{position:static;background:none;padding:0}#manClose{display:none}}
 .stepn{font-style:normal;display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:var(--navy);color:#fff;font-size:14px;margin-right:8px;vertical-align:middle}
 .now{border-top:1px dashed var(--line);padding-top:10px;margin-top:10px;font-size:17px}
+.xrow{display:flex;flex-wrap:wrap;gap:6px;align-items:center;background:#eefaf3;border:1px solid #bfe8cf;border-radius:10px;padding:8px 10px;margin-top:10px}
 </style>
 </head>
 <body>
@@ -220,7 +221,7 @@ footer{text-align:center;color:var(--sub);font-size:12px;padding:18px}
 <li>붙여넣으면 <b>자동 교정</b>이 됩니다: 띄어쓰기·맞춤법(안/않, 되/돼, 할 수 있다 등), AI 꾸밈 기호(**, #) 지우기. 마음에 안 들면 [되돌리기].</li>
 <li><b>글자 수</b>가 칸마다 보입니다. 넘으면 빨갛게 표시됩니다.</li>
 <li>띄어쓰기·문맥이 애매하면 <b>[바른한글 검사]</b>를 누릅니다. 글이 복사되고 부산대 검사기가 열리니 Ctrl+V → [검사하기]. 고친 글을 다시 붙여넣으면 됩니다. (네이버 맞춤법 단추도 있습니다)</li>
-<li>[나이스용 복사] → 나이스 칸에 붙여넣기 → 다 했으면 [완료] 체크.</li>
+<li><b>한 번에 붙이기</b>: [📥 이 반 ○○ 엑셀 받기] → 엑셀의 "나이스에 붙일 내용" 칸(C열)을 위에서부터 드래그해 복사 → 나이스 같은 반 첫 학생 칸에 붙여넣기. 번호 순서가 나이스와 같은지 꼭 확인하세요. (한 명씩은 [나이스용 복사])</li><li>다 했으면 [완료] 체크.</li>
 </ol>
 <p class="tip">💡 다른 반을 볼 때는 [전체 학급 보기]. 학생 한 명의 모든 영역을 보려면 위 검색칸에 이름을 쓰세요.</p>
 </details>
@@ -839,6 +840,39 @@ function clsToggleHTML(){ const m=myClassSet(); if(!m) return '<button class="b 
 function pcVar(w,need){ const p=need? Math.min(1,w/need) : 0, h=Math.round(p*125); return ' style="--pbg:hsl('+h+',85%,'+(p>=1?88:92)+'%);--pbd:hsl('+h+',62%,42%)"'; }
 function pcBar(w,need){ const p=need? Math.min(100,Math.round(w/need*100)) : 0, h=Math.round(p*1.25); return '<span class="pbar"><i style="width:'+p+'%;background:hsl('+h+',62%,45%)"></i></span><b style="color:hsl('+h+',62%,35%)">'+p+'%</b>'; }
 function dodiCheer(){ ['header img','#gbBtn img'].forEach(q=>{ const el=$(q); if(!el) return; el.classList.remove('cheer'); void el.offsetWidth; el.classList.add('cheer'); setTimeout(()=>el.classList.remove('cheer'),1600); }); }
+// 영역별 엑셀 받기: 지금 영역을 반마다 한 시트로 → 엑셀에서 "나이스에 붙일 내용" 칸을 통째로 복사해 나이스에 붙임
+async function exportItemXlsx(scope){
+  const it=itemBy(UI.item); if(!it){ toast('영역을 먼저 고르세요.'); return; }
+  await needXLSX();
+  const units= scope==='cls'? [UI.cls] : visClasses().concat((S.groups||[]).filter(g=>g.item===it.key||!g.item).map(g=>'g:'+g.id));
+  const wb=XLSX.utils.book_new(), used=new Set(); let total=0, filled=0, over=0;
+  const guide=[['도디쌤의 생기발랄 — '+it.name+' 나이스 붙여넣기용'],[''],['쓰는 법'],
+    ['1. 아래 시트(반 이름)를 엽니다. 나이스에서도 같은 반을 엽니다.'],
+    ['2. "나이스에 붙일 내용" 칸(C열)을 학생 순서대로 위에서부터 드래그해 복사(Ctrl+C)합니다.'],
+    ['3. 나이스 같은 칸 첫 학생에 붙여넣기(Ctrl+V) 합니다. 번호·이름이 나이스와 같은 순서인지 꼭 확인하세요.'],
+    ['4. 빨간 "초과"가 있으면 사이트에서 줄인 뒤 다시 받으세요.'],
+    ['※ 전출·학업중단 학생은 맨 아래에 따로 적었습니다(나이스 목록에 없으면 붙이지 마세요).'],
+    ['※ 한도: '+it.limit+'바이트(한글 약 '+Math.floor(it.limit/3)+'자) · 받은 시각: '+new Date().toLocaleString('ko-KR')]];
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(guide),'안내');
+  units.forEach(u=>{
+    const g=grpOf(u); const list=unitStudents(u).slice().sort((a,b)=>a.g-b.g||a.c-b.c||a.n-b.n);
+    const act1=list.filter(x=>!isOut(x)), out=list.filter(isOut);
+    const rows=[g? ['학년','반','번호','이름','나이스에 붙일 내용','바이트','상태'] : ['번호','이름','나이스에 붙일 내용','바이트','상태']];
+    const line=(x,mark)=>{ let t=(rec(sid(x),it.key).text||'').trim(); if(S.settings.stripNL) t=t.replace(/\s*\n\s*/g,' ').trim();
+      const b=byteLen(t,S.settings.enterBytes); total++; if(t) filled++; if(b>it.limit) over++;
+      const st=mark? mark : !t? '빈칸' : b>it.limit? '초과 '+(b-it.limit)+'B' : '';
+      return g? [x.g,x.c,x.n,x.name,t,b,st] : [x.n,x.name,t,b,st]; };
+    act1.forEach(x=>rows.push(line(x,'')));
+    if(out.length){ rows.push([]); rows.push(['— 전출·학업중단 등 (나이스 목록에 없으면 붙이지 마세요) —']); out.forEach(x=>rows.push(line(x,x.note||'특이'))); }
+    const ws=XLSX.utils.aoa_to_sheet(rows);
+    ws['!cols']= g? [{wch:5},{wch:5},{wch:5},{wch:9},{wch:90},{wch:7},{wch:12}] : [{wch:5},{wch:9},{wch:90},{wch:7},{wch:12}];
+    let name=(g? g.name : clsName(u)).replace(/[\\/?*\[\]:]/g,'').slice(0,28); let nm=name, k=2; while(used.has(nm)) nm=name.slice(0,26)+'_'+(k++); used.add(nm);
+    XLSX.utils.book_append_sheet(wb,ws,nm);
+  });
+  const fname=it.name.replace(/[\\/:*?"<>|\s]/g,'')+'_'+(scope==='cls'? unitName(UI.cls).replace(/[\s🎲]/g,'') : '내반전체')+'_'+stamp()+'.xlsx';
+  XLSX.writeFile(wb,fname);
+  toast('📥 '+fname+' — '+filled+'/'+total+'명 입력'+(over?' · 초과 '+over+'명(빨리 줄이세요)':'')+'. 엑셀의 C열을 복사해 나이스에 붙이세요.');
+}
 function writeHeadHTML(){
   const cl=visClasses(), it=itemBy(UI.item); const mine=act(unitStudents(UI.cls)); const all=mine.length; const isG=!!grpOf(UI.cls);
   const written=countWritten(mine,it.key), need=isG? all : needOf(all,it), ra=isG? 100 : ratioOf(it);
@@ -849,6 +883,7 @@ function writeHeadHTML(){
     +(S.groups||[]).map(gp=>{ const st=act(grpStudents(gp)); const k=countWritten(st,gp.item); const ok=st.length && k>=st.length; return '<button data-cls="g:'+esc(gp.id)+'" class="'+(UI.cls==='g:'+gp.id?'on':'')+'"'+pcVar(k,st.length)+'>🎲 '+esc(gp.name)+'<small>'+(ok?'✔완료 ':'')+k+'/'+st.length+'</small></button>'; }).join('')
     +'<button data-go="set" data-focus="grpName" style="border-style:dashed">＋ 동아리 명단</button>'+clsToggleHTML()+'</div>'
     +'<div class="pick"><span class="lab"><i>2</i>영역 고르기 <em>지금 반에서 영역별 진행 색</em></span>'+S.items.map(i=>{ const w=countWritten(mine,i.key), ok=all && w>=needOf(all,i); const rq=S.reqs.filter(r=>rqToMe(r)&&rqOpen(r)&&rqSid(r).indexOf(UI.cls+'-')===0&&rqIk(r)===i.key).length; return '<button data-itemk="'+esc(i.key)+'" class="'+(i.key===UI.item?'on':'')+'"'+pcVar(w,needOf(all,i))+'>'+esc(i.name)+'<small>'+(ok?'✔완료 ':'')+w+'/'+all+'</small>'+(rq?'<small style="color:var(--red);font-weight:700">🛠'+rq+'</small>':'')+'</button>'; }).join('')+'</div>';
+  h+='<div class="xrow"><b>📥 나이스에 한 번에 붙이기</b> <button class="b s" id="xItemCls">이 반 '+esc(it.name)+' 엑셀 받기</button><button class="b g s" id="xItemAll">내 반 전부 (반마다 시트)</button><span class="hint">엑셀의 "나이스에 붙일 내용" 칸을 통째로 복사해 나이스에 붙이면 됩니다.</span></div>';
   h+='<div class="now"><i class="stepn">3</i>'+esc(unitName(UI.cls))+' · '+esc(it.name)+' 쓰기 '+pcBar(written,need)+' <span class="hint" style="font-weight:400">한도 '+it.limit.toLocaleString()+'B(한글 약 '+Math.floor(it.limit/3)+'자)'+(over?' · <b style="color:var(--red)">초과 '+over+'</b>':'')+'</span></div>';
   let msg, cls2;
   if(ra<100){
@@ -1848,6 +1883,8 @@ M.addEventListener('click',async e=>{
   if(t.id==='apRefresh'){ await fetchReqs(false); if(UI.tab==='check') renderCheck(); return; }
   if(t.id==='welcomeOff'){ S.settings.welcomeOff=true; save(); render(); return; }
   const rqt=t.closest&&t.closest('[data-rqtab]'); if(rqt){ UI.rqTab=rqt.dataset.rqtab; renderReq(); return; }
+  if(t.id==='xItemCls'){ exportItemXlsx('cls'); return; }
+  if(t.id==='xItemAll'){ exportItemXlsx('all'); return; }
   if(t.id==='togAllCls'){ S.settings.showAllCls=!S.settings.showAllCls; save(); render(); return; }
   if(t.id==='rdEdit'){ UI.rdEdit=!UI.rdEdit; renderReq(); return; }
   if(t.id==='rdCancel'){ UI.rdEdit=false; renderReq(); return; }
