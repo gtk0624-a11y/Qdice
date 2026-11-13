@@ -1622,7 +1622,7 @@ function renderReq(){
       +'<h3>개인정보 지우기 (점검 시트)</h3><div class="row"><button class="b r s" id="rqPurgeClosed">끝난 줄 시트에서 지우기</button><button class="b r s" id="rqPurgeAll">점검 줄 전부 지우기</button><span class="hint">점검이 끝나면 학생 이름·오류 내용이 시트에 남지 않게 지우세요. 되돌릴 수 없습니다.</span></div></div>';
   }
   SEC.admin=h;
-  $('#main').innerHTML=head+rqTabsHTML(SEC);
+  $('#main').innerHTML='<div class="box" style="border-left:5px solid var(--red);background:#fff4f2;font-weight:700;color:var(--red)">⚠ 이 사이트에서 고쳐도 나이스는 바뀌지 않습니다. 반드시 <u>나이스에서 고치고 [저장]</u>까지 한 뒤 [나이스에서 고쳤어요]를 누르세요.</div>'+head+rqTabsHTML(SEC);
 }
 // 수정 요청 탭: 할 일별 작은 탭 — 필요한 것만 한 화면에
 function rqTabsHTML(SEC){
