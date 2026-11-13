@@ -227,6 +227,11 @@ th,td{border-color:var(--line);padding:7px 9px}
 .mh .lead{background:var(--yel2)}.mh .tip{background:#eef2f0}
 #manOv .manbox{border-radius:12px}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+#dodiSay{position:fixed;right:22px;bottom:92px;z-index:72;max-width:280px;background:#fff;color:var(--txt);border:2px solid var(--yel);border-radius:12px;padding:10px 14px;font-size:14.5px;font-weight:700;line-height:1.5;box-shadow:0 8px 24px rgba(30,61,53,.2);opacity:0;transform:translateY(8px);pointer-events:none;transition:opacity .25s,transform .25s}
+#dodiSay.on{opacity:1;transform:none}
+#dodiSay::after{content:'';position:absolute;right:38px;bottom:-9px;width:14px;height:14px;background:#fff;border-right:2px solid var(--yel);border-bottom:2px solid var(--yel);transform:rotate(45deg)}
+#dodiSay small{display:block;font-weight:600;color:var(--grn);font-size:12px;margin-bottom:2px}
+@media print{#dodiSay{display:none}}
 </style>
 </head>
 <body>
@@ -838,7 +843,7 @@ function countChanged(sidv,ik,added){
   const it=itemBy(ik), s=S.students.find(x=>sid(x)===sidv); if(!it||!s) return;
   if(isOut(s)) return; const unit=grpOf(UI.cls)&&UI.tab==='write'? UI.cls : clsOf(s); const st=act(unitStudents(unit)); const w=countWritten(st,ik), need=grpOf(unit)? st.length : needOf(st.length,it), ra=grpOf(unit)? 100 : ratioOf(it);
   if(added){
-    if(w===need){ dodiCheer(); } if(w===need) toast('🎉 '+unitName(unit)+' '+it.name+' 완료 — '+(ra<100? '입력 대상 '+ra+'%('+need+'명)를 채웠습니다.' : st.length+'명 모두 입력했습니다.'));
+    if(w===need){ dodiCheer(unitName(unit)+' '+it.name); } if(w===need) toast('🎉 '+unitName(unit)+' '+it.name+' 완료 — '+(ra<100? '입력 대상 '+ra+'%('+need+'명)를 채웠습니다.' : st.length+'명 모두 입력했습니다.'));
     else if(ra<100 && w>need) toast(unitName(unit)+' '+it.name+' — '+ra+'%를 넘었습니다 ('+w+'/'+st.length+'명, '+pct(w,st.length)+'%)');
   }
   const hd=$('#whead'); if(hd && UI.tab==='write') hd.innerHTML=writeHeadHTML();
@@ -902,7 +907,11 @@ function clsToggleHTML(){ const m=myClassSet(); if(!m) return '<button class="b 
 // 진행률 색: 0% 빨강 → 50% 노랑 → 100% 초록
 function pcVar(w,need){ const p=need? Math.min(1,w/need) : 0, h=Math.round(p*125); return ' style="--pbg:hsl('+h+',85%,'+(p>=1?88:92)+'%);--pbd:hsl('+h+',62%,42%)"'; }
 function pcBar(w,need){ const p=need? Math.min(100,Math.round(w/need*100)) : 0, h=Math.round(p*1.25); return '<span class="pbar"><i style="width:'+p+'%;background:hsl('+h+',62%,45%)"></i></span><b style="color:hsl('+h+',62%,35%)">'+p+'%</b>'; }
-function dodiCheer(){ ['header img','#gbBtn img'].forEach(q=>{ const el=$(q); if(!el) return; el.classList.remove('cheer'); void el.offsetWidth; el.classList.add('cheer'); setTimeout(()=>el.classList.remove('cheer'),1600); }); }
+const PRAISE=['와, 벌써 다 쓰셨어요? 역시 우리 선생님! 👏','한 반 끝! 오늘 퇴근길이 가벼워지겠네요 😊','꼼꼼함이 글에서 보여요. 수고 많으셨어요!','이 속도면 마감 걱정 없겠는데요? 🎉','아이들 한 명 한 명 다 챙기셨네요. 멋져요!','완료! 커피 한 잔 하고 오셔도 됩니다 ☕','생기부 장인 등장! 다음 반도 화이팅 💪','오늘의 할 일 하나 끝! 정말 잘하셨어요 🌟'];
+function dodiCheer(what){ ['header img','#gbBtn img'].forEach(q=>{ const el=$(q); if(!el) return; el.classList.remove('cheer'); void el.offsetWidth; el.classList.add('cheer'); setTimeout(()=>el.classList.remove('cheer'),1600); });
+  let b=document.getElementById('dodiSay'); if(!b){ b=document.createElement('div'); b.id='dodiSay'; b.setAttribute('role','status'); document.body.appendChild(b); }
+  b.innerHTML=(what?'<small>'+esc(what)+' 완료</small>':'')+esc(PRAISE[Math.floor(Math.random()*PRAISE.length)]);
+  b.classList.remove('on'); void b.offsetWidth; b.classList.add('on'); clearTimeout(b._t); b._t=setTimeout(()=>b.classList.remove('on'),4500); }
 // 영역별 엑셀 받기: 지금 영역을 반마다 한 시트로 → 엑셀에서 "나이스에 붙일 내용" 칸을 통째로 복사해 나이스에 붙임
 async function exportItemXlsx(scope){
   const it=itemBy(UI.item); if(!it){ toast('영역을 먼저 고르세요.'); return; }
