@@ -737,12 +737,34 @@ function autoFix(card){
   refreshCard(card, '✔ 자동 교정: '+parts.join(' / ')+' <button class="b g s" data-act="undo">되돌리기</button>');
   save(); return true;
 }
+// 쓰는 중에도 고치기: 띄어쓰기·문장부호를 친 뒤 잠깐 멈추면 맞춤법만 고침(커서 위치 유지)
+let liveTimers=new WeakMap();
+function scheduleLiveFix(card){
+  if(!S.settings.autoSpell) return;
+  const ta=card.querySelector('textarea.ta'); if(!ta) return;
+  const last=ta.value.slice(Math.max(0,ta.selectionStart-1),ta.selectionStart);
+  clearTimeout(liveTimers.get(card));
+  liveTimers.set(card,setTimeout(()=>liveFix(card), /[\s.,!?]/.test(last)? 500 : 1800));
+}
+function liveFix(card){
+  const {sidv,ik,ta}=cardCtx(card); const key=sidv+'|'+ik; if(noFix.has(key)) return;
+  const t0=ta.value; if(!t0.trim()) return;
+  const pos=ta.selectionStart, before=t0.slice(0,pos), after=t0.slice(pos);
+  const fb=spellFix(before,S.rules), fa=spellFix(after,S.rules);
+  const t1=fb.text+fa.text; if(t1===t0) return;
+  undoMap.set(key,t0); ta.value=t1;
+  if(document.activeElement===ta){ try{ ta.selectionStart=ta.selectionEnd=fb.text.length; }catch(e){} }
+  const r=rec(sidv,ik); r.text=t1; r.updated=Date.now(); r.copied=0;
+  const seen=new Set(), parts=[]; fb.changes.concat(fa.changes).forEach(c=>{ const k=c.from+'→'+c.to; if(!seen.has(k)){ seen.add(k); parts.push(esc(c.from)+' → <b>'+esc(c.to)+'</b>'); } });
+  refreshCard(card,'✔ 바로 고침: '+parts.join(' / ')+' <button class="b g s" data-act="undo">되돌리기</button>'); save();
+}
 let lintTimers=new WeakMap();
 function onCardInput(card){
   const {sidv,ik,ta}=cardCtx(card); const r=rec(sidv,ik);
   const was=!!r.text.trim();
   r.text=ta.value; r.updated=Date.now(); r.copied=0; noFix.delete(sidv+'|'+ik);
   clearTimeout(lintTimers.get(card)); lintTimers.set(card,setTimeout(()=>refreshCard(card),250));
+  scheduleLiveFix(card);
   const now=!!r.text.trim();
   if(was!==now) countChanged(sidv,ik,now);
   save();
