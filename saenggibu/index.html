@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>도디쌤의 생기발랄 (생기부 도우미)</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <style>
 :root{--navy:#1f3a68;--navy2:#2d4f8a;--yel:#f9cf7a;--yel2:#fdeec9;--mint:#8fe3c0;--bg:#f4f6fa;--line:#d9dee8;--red:#d93025;--org:#e08a00;--grn:#1a8f55;--txt:#1c2533;--sub:#667085}
 *{box-sizing:border-box}
@@ -165,6 +166,67 @@ footer{text-align:center;color:var(--sub);font-size:12px;padding:18px}
 .stepn{font-style:normal;display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:var(--navy);color:#fff;font-size:14px;margin-right:8px;vertical-align:middle}
 .now{border-top:1px dashed var(--line);padding-top:10px;margin-top:10px;font-size:17px}
 .xrow{display:flex;flex-wrap:wrap;gap:6px;align-items:center;background:#eefaf3;border:1px solid #bfe8cf;border-radius:10px;padding:8px 10px;margin-top:10px}
+
+/* ───── 테마: 교무수첩(칠판 초록 · 형광펜 · 빨간펜) ───── */
+:root{--navy:#1e3d35;--navy2:#2c5a4e;--yel:#f3d54e;--yel2:#fbf4cf;--mint:#bfe3cf;--bg:#f2f4f3;--line:#dde3e0;--red:#c23b2e;--org:#c9791a;--grn:#2e7d4f;--txt:#1c2421;--sub:#65726d}
+body{font-family:"Pretendard Variable","Pretendard","Malgun Gothic","맑은 고딕","Apple SD Gothic Neo",sans-serif;font-size:15px;line-height:1.6;letter-spacing:-.005em;-webkit-font-smoothing:antialiased}
+:focus-visible{outline:2px solid var(--navy);outline-offset:2px}
+header{padding:10px 18px;gap:14px;box-shadow:0 1px 0 rgba(0,0,0,.25)}
+header img{width:40px;height:40px;border:2px solid var(--yel);background:#fff}
+header h1{font-size:19px;font-weight:800;letter-spacing:-.03em}
+#gsearch{border-radius:8px;background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.25)}
+#gsearch::placeholder{color:rgba(255,255,255,.65)}
+#gsearch:focus{background:#fff;color:var(--txt);outline:none}
+nav{padding:0 14px;gap:4px;box-shadow:0 1px 0 var(--line)}
+nav button{padding:12px 12px 11px;color:var(--sub);font-weight:600;border-bottom:0}
+nav button:hover{color:var(--txt)}
+nav button.on{color:var(--txt);font-weight:800;border-bottom:0;background:linear-gradient(transparent 52%,var(--yel) 52%,var(--yel) 78%,transparent 78%)}
+#tabHelp{background:#fff;color:var(--sub);border-bottom:1px solid var(--line)}
+main{max-width:1080px;padding:20px 18px 40px}
+.box{border-radius:8px;padding:18px 20px;margin-bottom:16px}
+.box h2{font-size:17px;font-weight:800;color:var(--txt);letter-spacing:-.02em;margin-bottom:12px}
+.box h3{color:var(--txt);font-weight:700}
+select,input[type=text],input[type=date],input[type=number],input[type=url],input[type=password],textarea{border-radius:8px;border-color:#cfd8d4;padding:8px 10px}
+select:focus,input:focus,textarea:focus{outline:none;border-color:var(--navy);box-shadow:0 0 0 3px rgba(243,213,78,.55)}
+button.b{border-radius:8px;padding:8px 14px;font-weight:600;transition:background .15s}
+button.b.g{border-color:#cfd8d4;color:var(--txt)}
+button.b.g:hover{background:#eef2f0;border-color:var(--navy2)}
+button.b.r:hover{background:#fbeceb}
+button.b.s{padding:5px 10px}
+.card{border-radius:8px;padding:12px 14px}
+.card.done{border-left:4px solid var(--grn)}
+.card.over{box-shadow:0 0 0 2px #f3d2ce}
+.bar{height:4px;background:#e6ebe8}
+th{background:#eef2f0;color:var(--txt);font-size:13px;font-weight:700}
+th,td{border-color:var(--line);padding:7px 9px}
+.tag{background:#e6f2ea}.tag.c{background:#e7eeeb;color:var(--navy)}
+.chips span{background:#eef2f0}
+#toast{background:var(--txt);border-radius:10px;box-shadow:0 6px 20px rgba(0,0,0,.18)}
+.pick .lab{font-size:16px;color:var(--txt)}
+.pick button{border-radius:8px;border-width:1.5px;padding:8px 13px}
+.pick button.on,.pick button[style*="--pbg"].on{background:var(--navy);border-color:var(--navy)}
+.stepn{background:var(--yel);color:var(--txt);font-weight:800}
+.now{color:var(--txt)}
+.xrow{background:#fff;border:1px solid var(--line);border-left:4px solid var(--grn);border-radius:8px}
+.welcome{background:var(--yel2);border:1px solid #ecd98a}
+.rq{border-radius:8px;background:#fff7ea}
+.dd div{border-radius:8px;background:#fff;border:1px solid var(--line);border-top:4px solid var(--yel)}
+.dd div.hot{background:#fff;border-top-color:var(--red);border-color:#efc9c4}
+.dd b{color:var(--txt);font-weight:800;letter-spacing:-.02em}
+.cal td.today{box-shadow:inset 0 0 0 2px var(--yel)}
+.cal .ev{border-radius:3px}
+#dchip,#sheetBtn{border-radius:8px}
+#meChip{border-radius:8px}
+#manBtn{border-radius:8px}
+#gbBtn{border-radius:12px;box-shadow:0 6px 20px rgba(30,61,53,.28)}
+#gbPanel{border-radius:12px;box-shadow:0 14px 40px rgba(0,0,0,.18)}
+.gbc{border-left-color:var(--yel);background:#fff}
+.gbp{background:var(--txt)}
+.gbchips button{border-color:#cfd8d4;color:var(--txt);border-radius:8px}
+.gbx mark,.gbw mark{background:var(--yel)}
+.mh .lead{background:var(--yel2)}.mh .tip{background:#eef2f0}
+#manOv .manbox{border-radius:12px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
