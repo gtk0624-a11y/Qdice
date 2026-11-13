@@ -1209,7 +1209,7 @@ function renderSet(){
     +'<div class="row"><label>암호 <input type="text" id="stKey" value="'+esc(st.sheetKey)+'" placeholder="스크립트에 적은 암호"></label><label style="flex:1">현황판 시트 주소(보기용) <input class="wide" type="url" id="stView" value="'+esc(st.sheetView)+'" placeholder="https://docs.google.com/spreadsheets/..."></label></div>'
     +'<div class="row"><label><input type="checkbox" id="stAuto"'+(st.autoSend?' checked':'')+'> 내용이 바뀌면 2분 뒤 자동으로 현황 전송</label> <label><input type="checkbox" id="stSisu"'+(st.showSisu?' checked':'')+'> 시수 탭 보이기 (학사일정·수업일수 계산용, 보통은 안 써도 됩니다)</label> <label><input type="checkbox" id="stWelcome"'+(st.welcomeOff?'':' checked')+'> 처음 쓰는 순서 안내 보이기</label></div>'
     +'<div class="row"><label><input type="checkbox" id="stAsk"'+(st.askDone?' checked':'')+'> 수정 요청이 있는 칸에서 "나이스용 복사"를 누르면 반영 완료를 적을지 묻기</label></div>'
-    +'<div class="row"><label><input type="checkbox" id="stAdmin"'+(st.admin?' checked':'')+'> 담당자 모드 — 점검 시트 전체 현황, 담당자 확인, 독촉 메시지, 시트 기록 지우기</label></div>'
+    +'<div class="row" style="border:1px dashed var(--line);border-radius:8px;padding:8px 10px"><b>🔐 담당자 모드</b> <span class="hint">생기부 담당자만 — 전체 현황·담당자 확인·독촉·학교 디데이 보내기·점검 차수 고치기</span><br>'+(st.admin? '<b style="color:var(--grn,#1a8f55)">✔ 켜져 있음</b> <button class="b g s" id="stAdminOff">끄기</button>' : '<input type="password" id="stAdminPw" placeholder="담당자 암호" autocomplete="off" style="width:140px"> <button class="b s" id="stAdminOn">켜기</button> <span class="hint">암호를 모르면 켤 수 없습니다.</span>')+'</div>'
     +'<h3>내 담당 (분야·상세 분야·담임 학급)</h3>'+dutyHTML()
     +'<div class="row"><button class="b g" id="rqTest">연결 시험</button>'+(st.sheetUrl&&st.sheetKey?'<button class="b g" id="linkCopy">학교 전용 링크 복사 (담당자용)</button>':'')+'</div>'
     +(st.sheetUrl&&st.sheetKey?'<div class="hint">학교 전용 링크 = 이 프로그램 주소 + 담당자 시트 주소·암호. 선생님들이 이 링크로 열면 자동으로 연결되고 이름만 적으면 됩니다. 진짜 시트로 바꿀 때는 새 링크를 다시 보내면 모두 새 시트로 넘어갑니다. <b>링크에 암호가 들어 있으니 교직원에게만</b> 보내세요.</div>':'')+'</div>';
@@ -1419,7 +1419,7 @@ async function fetchReqs(silent){
     try{ d=JSON.parse(txt); }catch(e){ throw new Error('old'); }
     if(!d.ok){ RQ.err=d.msg||'오류'; if(!silent) toast('수정 요청을 불러오지 못했습니다: '+RQ.err); return; }
     if(!Array.isArray(d.rows) || !d.meta){ throw new Error('old'); }
-    RQ.err=''; S.reqWho=Array.isArray(d.who)? d.who : []; S.reqDuties=Array.isArray(d.duties)? d.duties : []; S.reqSeenT=Array.isArray(d.seen)? d.seen : []; if(d.link && /^https:\/\/docs\.google\.com\//.test(d.link)) S.reqSheetLink=d.link; if(Array.isArray(d.rounds)) S.reqRounds=d.rounds; if(Array.isArray(d.sched)) S.schoolSched=d.sched; if(st0.admin && d.adminOk===false){ st0.admin=false; st0.adminKey=''; toast('담당자 암호가 맞지 않아 담당자 모드를 껐습니다.'); } else if(st0.admin && d.adminOk) S.adminOk=true; S.reqMeta=d.meta||{fields:[],subs:{}}; S.reqSheetName=d.sheet||'';
+    RQ.err=''; S.reqWho=Array.isArray(d.who)? d.who : []; S.reqDuties=Array.isArray(d.duties)? d.duties : []; S.reqSeenT=Array.isArray(d.seen)? d.seen : []; if(d.link && /^https:\/\/docs\.google\.com\//.test(d.link)) S.reqSheetLink=d.link; if(Array.isArray(d.rounds)) S.reqRounds=d.rounds; if(Array.isArray(d.sched)) S.schoolSched=d.sched; if(st0.admin && d.adminOk!==true){ st0.admin=false; st0.adminKey=''; S.adminOk=false; toast('담당자 모드는 담당자 암호가 있어야 켜집니다. 설정에서 다시 켜고 암호를 넣어 주세요.'); render(); } else if(st0.admin && d.adminOk) S.adminOk=true; S.reqMeta=d.meta||{fields:[],subs:{}}; S.reqSheetName=d.sheet||'';
     mergeServer(d.rows);
     S.settings.lastReqFetch=Date.now(); save();
     if(!silent) toast('새로 불러왔습니다. 고칠 것 '+inbox().length+'건, 확인할 것 '+waitConfirm().length+'건');
@@ -1886,7 +1886,6 @@ M.addEventListener('change',e=>{
   if(t.id==='dHome'){ st.homeroom=t.value; saveDuty(); UI.dutyOpen=true; if(UI.tab==='req') renderReq(); toast(t.value? clsName(t.value)+' 담임으로 정했습니다.' : '담임 아님으로 정했습니다.'); return; }
   if(t.id==='stAsk'){ st.askDone=t.checked; save(); return; }
   if(t.id==='stAutoLock'){ st.autoLock=+t.value; save(); return; }
-  if(t.id==='stAdmin'){ if(t.checked){ const k=prompt('담당자 암호를 넣어 주세요.\n(생기부 담당자만 압니다. 학교 디데이 보내기·점검 차수 고치기에 쓰입니다.)',st.adminKey||''); if(!k){ t.checked=false; return; } st.adminKey=k.trim(); } st.admin=t.checked; save(); fetchReqs(true); return; }
   if(t.id==='readFile' && t.files[0]){ planReading(t.files[0]).catch(()=>toast('독서기록 파일을 읽지 못했습니다. 엑셀(.xlsx)이나 CSV 파일인지 확인해 주세요.')); return; }
   if(t.id==='grpFile' && t.files[0]){ const isPdf=/\.pdf$/i.test(t.files[0].name); needXLSX().then(()=>readFile(t.files[0])).then(async buf=>{ let rows; if(isPdf){ const r=await pdfLines(buf); if(r.chars<20){ toast('이 PDF는 글자를 읽을 수 없습니다(스캔 그림). 엑셀로 올려 주세요.'); return; } rows=rosterRowsFromText(r.lines.join('\n')); } else { const wb=XLSX.read(buf,{type:'array'}); rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,raw:false,defval:''}); } const nm=$('#grpName').value.trim()||t.files[0].name.replace(/\.[^.]+$/,''); const gp=makeGroup(rows,nm,$('#grpItem').value); if(gp){ UI.cls='g:'+gp.id; UI.item=gp.item; renderSet(); } }).catch(()=>toast('부원 명단 파일을 읽지 못했습니다.')); return; }
   if(t.id==='xlsIn' && t.files[0]){ importXlsx(t.files[0]).catch(()=>toast('엑셀 파일을 읽지 못했습니다.')); return; }
@@ -1986,6 +1985,8 @@ M.addEventListener('click',async e=>{
   if(t.dataset.gadd){ UI.gAdd=t.dataset.gadd; const gp=S.groups.find(x=>x.id===UI.gAdd); const ta=$('#grpRoster'); if(ta){ ta.placeholder=gp.name+'에 더할 부원 명단을 붙여넣고 [동아리 만들기]를 누르세요'; ta.focus(); } $('#grpName').value=gp.name; return; }
   if(t.dataset.gdel){ const gp=S.groups.find(x=>x.id===t.dataset.gdel); if(gp && confirm('"'+gp.name+'" 동아리 묶음을 지웁니다. 학생과 써 둔 내용은 그대로 남습니다. 지울까요?')){ S.groups=S.groups.filter(x=>x!==gp); if(UI.cls==='g:'+gp.id) UI.cls=''; save(); renderSet(); } return; }
   if(t.id==='rosterPull'){ fetchRoster(true); return; }
+  if(t.id==='stAdminOn'){ const k=($('#stAdminPw').value||'').trim(); if(!k){ toast('담당자 암호를 넣어 주세요.'); return; } if(!S.settings.sheetUrl){ toast('학교 링크로 먼저 연결해 주세요.'); return; } S.settings.adminKey=k; S.settings.admin=true; save(); toast('암호를 확인하는 중입니다…'); fetchReqs(true).then(()=>{ if(S.settings.admin) toast('✔ 담당자 모드가 켜졌습니다.'); render(); }); return; }
+  if(t.id==='stAdminOff'){ S.settings.admin=false; S.settings.adminKey=''; save(); render(); toast('담당자 모드를 껐습니다.'); return; }
   if(t.id==='ssAdd'){ const ti=$('#ssTitle').value.trim(), da=$('#ssDate').value, no=$('#ssNote').value.trim(); if(!ti||!/^\d{4}-\d{2}-\d{2}$/.test(da)){ toast('일정 이름과 날짜를 넣어 주세요.'); return; } pushSchoolSched((S.schoolSched||[]).concat([{id:'ss'+Date.now().toString(36),date:da,title:ti,note:no}])); return; }
   if(t.dataset && t.dataset.ssdel){ const x=(S.schoolSched||[]).find(y=>y.id===t.dataset.ssdel); if(x && confirm('「'+x.title+'」을(를) 모든 선생님 화면에서 지웁니다. 지울까요?')) pushSchoolSched(S.schoolSched.filter(y=>y!==x)); return; }
   if(t.dataset && t.dataset.ssfin){ S.schoolFin=S.schoolFin||{}; S.schoolFin[t.dataset.ssfin]=t.checked; save(); renderSched(); renderBanner(); return; }
@@ -2034,6 +2035,7 @@ window.addEventListener('beforeunload',()=>{ flush(); });
     refreshReqUI(); fetchReqs(true); setInterval(()=>{ if(!document.hidden) fetchReqs(true); },90000);
     ['click','keydown','input'].forEach(ev=>document.addEventListener(ev,()=>{ LOCK.last=Date.now(); },true));
     setInterval(()=>{ const m=+S.settings.autoLock; if(LOCK.key && m>0 && Date.now()-LOCK.last>m*60000) lockNow(); },30000);
+    if(S.settings.admin && !S.settings.adminKey){ S.settings.admin=false; save(); }
     if(!/#link=/.test(location.hash)) fetchRoster(false);
     applyLinkFromUrl(); };
   const load=x=>{ if(x && Array.isArray(x.students) && x.records){ S=Object.assign(freshState(),x); S.settings=Object.assign(freshState().settings,x.settings||{}); S.sisu=Object.assign(freshState().sisu,x.sisu||{}); } };
