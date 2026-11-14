@@ -168,6 +168,7 @@ footer{text-align:center;color:var(--sub);font-size:12px;padding:18px}
 .xrow{display:flex;flex-wrap:wrap;gap:6px;align-items:center;background:#eefaf3;border:1px solid #bfe8cf;border-radius:10px;padding:8px 10px;margin-top:10px}
 
 /* ───── 테마: 교무수첩(칠판 초록 · 형광펜 · 빨간펜) ───── */
+.xlbox summary{cursor:pointer;list-style:revert}.xlbox label.b{display:inline-block;padding:9px 14px;border-radius:7px;background:var(--navy);color:#fff;font-size:14px;font-weight:700}.xlwarn{background:var(--yel2);border:1px solid var(--yel);border-radius:8px;padding:8px 12px;margin:8px 0;font-size:14px}.xlwarn ol{margin:4px 0 0;padding-left:20px}.xlwarn li{margin:3px 0}.xlbox .xlsteps{margin:10px 0 6px;padding-left:22px}.xlbox .xlsteps li{margin:8px 0}.xlbox .xlsteps .hint{margin-top:3px}
 :root{--navy:#1e3d35;--navy2:#2c5a4e;--yel:#f3d54e;--yel2:#fbf4cf;--mint:#bfe3cf;--bg:#f2f4f3;--line:#dde3e0;--red:#c23b2e;--org:#c9791a;--grn:#2e7d4f;--txt:#1c2421;--sub:#65726d}
 body{font-family:"Pretendard Variable","Pretendard","Malgun Gothic","맑은 고딕","Apple SD Gothic Neo",sans-serif;font-size:15px;line-height:1.6;letter-spacing:-.005em;-webkit-font-smoothing:antialiased}
 :focus-visible{outline:2px solid var(--navy);outline-offset:2px}
@@ -399,6 +400,7 @@ img.ggs{width:22px;height:22px;object-fit:contain;vertical-align:-5px;margin-rig
 
 <details><summary>⑪ 자주 묻는 질문</summary>
 <dl>
+<dt>엑셀에 써 둔 초안을 한 번에 올릴 수 있나요?</dt><dd>네. [영역별 입력] 맨 위 <b>[엑셀로 한 번에 올리기]</b>에서 ① 우리 반 명단이 든 양식 받기 → ② 엑셀 내용 칸에 초안 붙여 넣기 → ③ [다 쓴 양식 올리기]. 올리는 순간 띄어쓰기·맞춤법이 정리되어 학생별 칸에 들어갑니다. 꼭 지킬 것: <b>사이트에서 받은 양식에만 쓰기</b>(따로 만든 엑셀은 양식에 복사해 붙이기), <b>칸 제목 고치지 않기</b>(전체 양식은 "세특: 과목명"만 내 과목으로), <b>엑셀 백업 파일은 여기서 올리지 않기</b>, <b>올린 뒤 번호·이름·바이트 확인</b>.</dd>
 <dt>맞춤법 교정은 믿을 만한가요?</dt><dd>국립국어원 「한글 맞춤법·표준어 규정 해설」(2018)과 「문장 부호 해설」(2014)을 바탕으로 만들었습니다. 다른 뜻의 바른 낱말까지 바꾸지 않도록 하나하나 골라 넣었고, 바른 문장이 바뀌지 않는지 시험을 거쳤습니다. 다만 문맥을 알아야 하는 것(-로서/-로써 등)은 [바른한글 검사]로 한 번 더 확인하세요.</dd>
 <dt>스페이스를 두 번 눌렀는데 한 칸이 됐어요.</dt><dd>정상입니다. 생기부에는 두 칸 띄어쓰기가 없어서 쓰는 순간 한 칸으로 정리합니다. 줄바꿈(엔터)은 그대로 둡니다.</dd>
 <dt>팝업(알림)이 안 와요.</dt><dd>① 사이트 창이 열려 있나요? (닫지 말고 작게 내려 두세요) ② [알림 켜기]를 허용했나요? ③ 내 담당이 맞게 정해져 있나요? 알림은 1~2분 안에 옵니다.</dd>
@@ -1060,11 +1062,33 @@ function renderWrite(){
   list=list.filter(s=>{ const r=peek(sid(s),it.key);
     return UI.filter==='all' || (UI.filter==='req'&&cardReqs(sid(s),it.key).some(rqOpen)) || (UI.filter==='empty'&&!r.text.trim()&&!isOut(s)) || (UI.filter==='over'&&B(r.text)>it.limit) || (UI.filter==='undone'&&!r.done) || (UI.filter==='uncopied'&&r.text.trim()&&!r.copied); });
   let h=welcomeHTML()+'<div class="box" id="whead">'+writeHeadHTML()+'</div>';
+  { const unitName=grpOf(UI.cls)? grpOf(UI.cls).name : UI.cls+'반';
+    h+='<details class="box xlbox"'+(written?'':' open')+'><summary><b>엑셀로 한 번에 올리기</b> <span class="hint">초안을 엑셀에 모아 쓰셨다면 이게 제일 편합니다</span></summary>'
+     +'<ol class="xlsteps"><li><button class="b" id="tplOut">'+esc(unitName)+' · '+esc(it.name)+' 양식 받기</button><div class="hint">우리 반 명단이 이미 들어 있습니다. 써 둔 내용도 함께 들어갑니다.</div></li>'
+     +'<li>엑셀에서 <b>'+esc(it.name)+'</b> 칸에 초안을 붙여 넣습니다.<div class="hint">학년·반·번호·이름 칸과 제목 줄은 고치지 마세요. 칸 안 줄바꿈은 Alt+Enter.</div></li>'
+     +'<li><label class="b" style="cursor:pointer">다 쓴 양식 올리기<input type="file" id="xlsIn2" accept=".xlsx,.xls" hidden></label><div class="hint">올리는 순간 띄어쓰기·맞춤법·AI 꾸밈 기호가 자동으로 정리되고, 학생별 칸에 한 번에 들어갑니다. 이미 써 둔 칸과 다르면 덮어쓸지 먼저 묻습니다.</div></li></ol>'
+     +'<div class="xlwarn"><b>꼭 지켜 주세요</b><ol>'
+     +'<li><b>꼭 이 사이트에서 받은 양식에 쓰세요.</b> 선생님이 따로 만든 엑셀(번호·이름·내용만 있는 파일)은 그대로 올리면 들어가지 않습니다. 양식을 받아 내용 칸에 복사해 붙여 넣으면 됩니다.</li>'
+     +'<li><b>칸 제목은 고치지 마세요.</b> 학년·반·번호·이름과 영역 이름이 사이트와 같아야 제자리에 들어갑니다. 전체 양식에서는 "세특: 과목명"만 "세특: 국어"처럼 내 과목으로 고칩니다. 다른 제목을 바꾸면 새 영역이 따로 생깁니다.</li>'
+     +'<li><b>엑셀 백업 파일은 여기서 올리지 마세요.</b> 백업은 올리는 순간 그때 상태로 전부 되돌아가, 그 뒤에 사이트에서 고친 내용이 사라질 수 있습니다. 백업은 [설정·백업]에서만 불러옵니다.</li>'
+     +'<li><b>올린 뒤 꼭 한 번 훑어보세요.</b> 번호와 이름이 맞는 학생에게만 들어갑니다. 바이트가 넘은 칸은 빨갛게 표시되니 나이스에 붙이기 전에 줄여 주세요.</li></ol></div>'
+     +'<div class="hint">여러 영역을 한 파일에 쓰려면 <a href="생기부_입력양식.xlsx" download>전체 입력 양식</a>을 받으세요.</div></details>'; }
   if(UI.clubHint) h+='<div class="box" style="border-left:4px solid var(--org)"><b>동아리활동은 반이 아니라 동아리별로 씁니다.</b> '+(schoolClubList().length? '<div class="row" style="margin-top:6px">'+schoolClubList().map(x=>'<button class="b" data-sclub="'+esc(x.name)+'">🎲 '+esc(x.name)+' ('+x.rows.length+'명)</button>').join(' ')+'</div><span class="hint">학교에서 올려 둔 동아리 명단입니다. 누르면 그 부원들이 바로 들어옵니다. 설정의 내 담당에 동아리를 정해 두면 다음부터는 자동입니다.</span>' : '<div class="row" style="margin-top:6px"><button class="b" data-go="set" data-focus="grpName">＋ 내 동아리 명단 넣기</button><span class="hint">동아리 부원 명단을 엑셀·PDF로 올리거나, 표를 복사해 붙여 넣으면 됩니다. 한 번만 넣으면 다음부터 동아리 단추로 바로 씁니다.</span></div>')+'</div>';
   h+= list.length? list.map(s=>cardHTML(s,it,'byItem')).join('') : '<div class="box hint">조건에 맞는 학생이 없습니다.</div>';
   $('#main').innerHTML=h; $$('#main .card').forEach(c=>refreshCard(c));
 }
 
+// 이 반(동아리)·이 영역 입력 양식: 명단과 써 둔 내용을 넣은 엑셀 → 선생님이 채워 [다 쓴 양식 올리기]로 한 번에
+async function tplOut(){
+  const it=itemBy(UI.item); if(!it) return; await needXLSX();
+  const g=grpOf(UI.cls), list=unitStudents(UI.cls).filter(s=>!isOut(s)), unitName=g? g.name : UI.cls+'반';
+  const rows=[['학년','반','번호','이름',it.name]].concat(list.map(s=>[s.g,s.c,s.n,s.name,peek(sid(s),it.key).text]));
+  const ws=XLSX.utils.aoa_to_sheet(rows); ws['!cols']=[{wch:5},{wch:5},{wch:5},{wch:10},{wch:90}];
+  const guide=[['도디쌤의 생기발랄 — '+unitName+' · '+it.name+' 입력 양식'],[''],['1. [생기부] 탭의 "'+it.name+'" 칸(E열)에 학생별 초안을 붙여 넣습니다.'],['2. 학년·반·번호·이름 칸과 첫 줄 제목은 고치지 마세요. 칸 안 줄바꿈은 Alt+Enter.'],['3. 저장한 뒤 생기발랄 [영역별 입력] → [다 쓴 양식 올리기]로 올리면 한 번에 들어갑니다.'],['4. 올리는 순간 띄어쓰기·맞춤법·AI 꾸밈 기호가 자동으로 정리됩니다.'],[''],['한도: '+it.limit+'바이트(한글 약 '+Math.floor(it.limit/3)+'자). 바이트는 사이트에서 정확히 셉니다.'],[''],['개인정보: 학생 이름과 생기부 내용이 들어 있습니다. 업무용 PC에만 보관하세요.'],['© 김정환 · M.A.D.T']];
+  const wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,'생기부'); const gs=XLSX.utils.aoa_to_sheet(guide); gs['!cols']=[{wch:90}]; XLSX.utils.book_append_sheet(wb,gs,'안내');
+  XLSX.writeFile(wb,('생기부초안_'+unitName+'_'+it.name).replace(/[\\/:*?"<>|]/g,' ')+'.xlsx');
+  toast(unitName+' '+list.length+'명 명단이 든 양식을 받았습니다. 채운 뒤 [다 쓴 양식 올리기]로 올리세요.');
+}
 // ───────── 6. 화면: 학생별 보기 ─────────
 function renderSearch(){
   const q=UI.q.trim();
@@ -1733,7 +1757,7 @@ function saveDuty(){ if(S.schoolClubs){ const mk=autoClubs(); if(mk.length) setT
 // 브라우저 탭 제목에 숫자 표시 + 다른 탭을 보고 있을 때 새 알림이 오면 깜박임
 const BASE_TITLE='도디쌤의 생기발랄';
 // 새 버전 알림: 사이트가 고쳐져 올라오면 화면 위에 띠를 띄움(브라우저가 예전 화면을 기억하는 문제 해결)
-const BUILD_V='20261114-155520';
+const BUILD_V='20261114-155956';
 async function checkNewVersion(){ if(!/^https?:/.test(location.protocol)) return; try{ const r=await fetch('version.json?t='+Date.now(),{cache:'no-store'}); if(!r.ok) return; const j=await r.json();
   if(j && j.v && j.v!==BUILD_V && !document.getElementById('newVer')){ const d=document.createElement('div'); d.id='newVer'; d.innerHTML='✨ 생기발랄 새 버전이 나왔어요. <button class="b s" id="newVerGo">새로 고침</button> <span style="font-weight:600">또는 키보드 <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>R</kbd></span> <span class="hint" style="color:inherit;opacity:.8">· 써 둔 내용은 그대로 남아요</span>'; document.body.prepend(d); document.getElementById('newVerGo').onclick=()=>{ flush().finally(()=>{ location.replace(location.pathname+'?v='+encodeURIComponent(j.v)+location.hash); }); }; } }catch(e){} }
 const SUB_DEFAULT='선생님을 잇는 생기부 플랫폼';
@@ -2069,6 +2093,7 @@ M.addEventListener('change',e=>{
   if(t.id==='stAutoLock'){ st.autoLock=+t.value; save(); return; }
   if(t.id==='readFile' && t.files[0]){ planReading(t.files[0]).catch(()=>toast('독서기록 파일을 읽지 못했습니다. 엑셀(.xlsx)이나 CSV 파일인지 확인해 주세요.')); return; }
   if(t.id==='grpFile' && t.files[0]){ const isPdf=/\.pdf$/i.test(t.files[0].name); needXLSX().then(()=>readFile(t.files[0])).then(async buf=>{ let rows; if(isPdf){ const r=await pdfLines(buf); if(r.chars<20){ toast('이 PDF는 글자를 읽을 수 없습니다(스캔 그림). 엑셀로 올려 주세요.'); return; } rows=rosterRowsFromText(r.lines.join('\n')); } else { const wb=XLSX.read(buf,{type:'array'}); rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,raw:false,defval:''}); } const nm=$('#grpName').value.trim()||t.files[0].name.replace(/\.[^.]+$/,''); const gp=makeGroup(rows,nm,$('#grpItem').value); if(gp){ UI.cls='g:'+gp.id; UI.item=gp.item; renderSet(); } }).catch(()=>toast('부원 명단 파일을 읽지 못했습니다.')); return; }
+  if(t.id==='xlsIn2' && t.files[0]){ const f=t.files[0]; t.value=''; needXLSX().then(()=>readFile(f)).then(buf=>{ const wb=XLSX.read(buf,{type:'array'}); if(wb.Sheets['_복원용']){ toast('이 파일은 엑셀 백업입니다. 백업은 [설정·백업 → 엑셀 백업 불러오기]에서 올려 주세요.'); return; } return importXlsx({__buf:buf}); }).catch(()=>toast('엑셀 파일을 읽지 못했습니다.')); return; }
   if(t.id==='xlsIn' && t.files[0]){ importXlsx(t.files[0]).catch(()=>toast('엑셀 파일을 읽지 못했습니다.')); return; }
   if((t.id==='rosterFile'||t.id==='rosterFile0') && t.files.length){ const fs=Array.from(t.files); (async()=>{ for(const f of fs){ await importAny(f); } })().then(()=>{ render(); if(fs.length>1) toast(fs.length+'개 파일에서 명단을 넣었습니다 · 전체 '+S.students.length+'명 ('+classes().length+'개 학급)'); }).catch(()=>toast('명단 파일을 읽지 못했습니다. 엑셀(.xlsx)이나 CSV인지 확인해 주세요.')); return; }
   if(t.id==='jsonIn' && t.files[0]){ t.files[0].text().then(txt=>{ const d=JSON.parse(txt); if(!d||!Array.isArray(d.students)||!d.records||!Array.isArray(d.items)) throw 0; if(!confirm('지금 자료를 모두 지우고 이 파일 내용으로 바꿉니다. 계속할까요?')) return; S=Object.assign(freshState(),d); S.settings=Object.assign(freshState().settings,d.settings||{}); S.sisu=Object.assign(freshState().sisu,d.sisu||{}); save(); toast('불러왔습니다.'); render(); }).catch(()=>toast('이 프로그램의 백업 파일이 아닙니다.')); return; }
@@ -2161,6 +2186,7 @@ M.addEventListener('click',async e=>{
   if(t.id==='readApply'){ applyReading(); return; }
   if(t.id==='readCancel'){ UI.readPlan=null; renderSet(); return; }
   if(t.id==='xlsOut'){ exportXlsx().catch(()=>{}); return; }
+  if(t.id==='tplOut'){ tplOut().catch(()=>toast('양식을 만들지 못했습니다. 인터넷 연결을 확인해 주세요.')); return; }
   if(t.id==='jsonOut'){ download('생기부도우미_전체백업_'+stamp()+'.json', new Blob([JSON.stringify(S)],{type:'application/json'})); S.settings.lastBackup=Date.now(); flush(); return; }
   if(t.id==='grpMake'){ const gp=makeGroup(rosterRowsFromText($('#grpRoster').value), $('#grpName').value, $('#grpItem').value); if(gp){ UI.cls='g:'+gp.id; UI.item=gp.item; renderSet(); } return; }
   if(t.dataset.gadd){ UI.gAdd=t.dataset.gadd; const gp=S.groups.find(x=>x.id===UI.gAdd); const ta=$('#grpRoster'); if(ta){ ta.placeholder=gp.name+'에 더할 부원 명단을 붙여넣고 [동아리 만들기]를 누르세요'; ta.focus(); } $('#grpName').value=gp.name; return; }
