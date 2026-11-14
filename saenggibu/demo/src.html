@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- 체험판 안전장치: 바깥으로 어떤 요청도 보내지 못하게 막음(connect-src 'none'). 글꼴·이미지만 허용 -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline' https://cdn.jsdelivr.net; font-src https://cdn.jsdelivr.net; img-src 'self' data:; connect-src 'none'; form-action 'none'; base-uri 'none'">
+<title>도디쌤의 생기발랄 — 체험판</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+:root{--ink:#1e3d35;--ink2:#2c5a4e;--yel:#f3d54e;--yel2:#fbf4cf;--mint:#bfe3cf;--bg:#f2f4f3;--line:#dde3e0;--red:#c23b2e;--org:#c9791a;--grn:#2e7d4f;--txt:#1c2421;--sub:#65726d}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{animation:none!important;transition:none!important}}
+body{margin:0;font-family:"Pretendard","Malgun Gothic","맑은 고딕","Apple SD Gothic Neo",sans-serif;background:var(--bg);color:var(--txt);font-size:16px;line-height:1.65;word-break:keep-all}
+a{color:var(--ink)}
+button{font-family:inherit}
+:focus-visible{outline:3px solid var(--yel);outline-offset:2px}
+.wrap{max-width:1040px;margin:0 auto;padding:0 20px}
+.mark{background:linear-gradient(transparent 58%,var(--yel) 58%);padding:0 2px}
+
+/* 상단 띠: 체험판 안내 */
+.demo-strip{background:var(--red);color:#fff;font-size:14px;text-align:center;padding:7px 12px}
+.demo-strip b{color:#fff}
+
+/* 첫 화면 */
+.hero{background:var(--ink);color:#fff;padding:56px 0 64px;position:relative;overflow:hidden}
+.hero:after{content:"";position:absolute;left:0;right:0;bottom:0;height:10px;background:repeating-linear-gradient(90deg,var(--yel) 0 40px,transparent 40px 56px);opacity:.9}
+.hero .wrap{display:grid;grid-template-columns:1.25fr .75fr;gap:40px;align-items:center}
+.brand{display:flex;align-items:center;gap:12px;margin-bottom:22px}
+.brand img{width:56px;height:56px;border-radius:50%;border:3px solid var(--yel);background:var(--yel)}
+.brand span{font-size:15px;opacity:.85}
+.brand strong{display:block;font-size:22px;letter-spacing:-.01em}
+.hero h1{font-size:clamp(30px,4.4vw,48px);line-height:1.25;margin:0 0 18px;letter-spacing:-.02em;font-weight:800}
+.hero h1 em{font-style:normal;color:var(--yel)}
+.hero p.lead{font-size:18px;opacity:.9;margin:0 0 26px;max-width:34em}
+.cta{display:flex;gap:10px;flex-wrap:wrap}
+.btn{display:inline-block;border:0;border-radius:10px;padding:13px 20px;font-size:16px;font-weight:700;cursor:pointer;text-decoration:none}
+.btn.y{background:var(--yel);color:var(--ink)}
+.btn.o{background:transparent;color:#fff;border:2px solid rgba(255,255,255,.6)}
+.btn.k{background:var(--ink);color:#fff}
+.btn.w{background:#fff;color:var(--ink);border:1px solid var(--line)}
+.btn.s{padding:8px 13px;font-size:14px;border-radius:8px}
+.btn:disabled{opacity:.45;cursor:default}
+/* 첫 화면 오른쪽: 메신저 아수라장 */
+.chaos{background:#fff;color:var(--txt);border-radius:14px;padding:14px;box-shadow:0 18px 40px rgba(0,0,0,.25);transform:rotate(1.2deg)}
+.chaos .t{font-size:12px;color:var(--sub);margin-bottom:8px;display:flex;justify-content:space-between}
+.bub{background:#eef1ef;border-radius:12px;padding:8px 11px;margin:6px 0;font-size:14px;max-width:88%}
+.bub.me{background:var(--yel2);margin-left:auto}
+.bub small{display:block;color:var(--sub);font-size:11px}
+.chaos .x{margin-top:10px;font-size:13px;color:var(--red);font-weight:700;text-align:center}
+
+section{padding:64px 0}
+section h2{font-size:clamp(24px,3vw,32px);line-height:1.3;margin:0 0 10px;letter-spacing:-.02em;color:var(--ink)}
+section .sub{color:var(--sub);margin:0 0 28px;max-width:40em}
+
+/* 불편 */
+.pain{background:#fff}
+.pain .cols{display:grid;grid-template-columns:1fr 1fr;gap:28px}
+.pain h3{font-size:18px;margin:0 0 12px;color:var(--red)}
+.pain ul{list-style:none;margin:0;padding:0}
+.pain li{border-top:1px solid var(--line);padding:12px 0}
+.pain li b{display:block;font-size:16px}
+.pain li span{color:var(--sub);font-size:15px}
+.verdict{margin-top:30px;background:var(--ink);color:#fff;border-radius:14px;padding:22px 24px;font-size:18px}
+.verdict b{color:var(--yel)}
+
+/* 체험 */
+.try .tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:0}
+.try .tabs button{border:1px solid var(--line);border-bottom:0;background:#e6ebe8;color:var(--ink);padding:11px 16px;border-radius:10px 10px 0 0;font-size:15px;font-weight:700;cursor:pointer}
+.try .tabs button[aria-selected="true"]{background:#fff}
+.panel{background:#fff;border:1px solid var(--line);border-radius:0 12px 12px 12px;padding:24px}
+.panel[hidden]{display:none}
+.panel h3{margin:0 0 6px;font-size:19px;color:var(--ink)}
+.panel .hint{color:var(--sub);font-size:14px;margin:0 0 16px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+label.f{display:block;font-size:13px;color:var(--sub);margin:10px 0 4px}
+select,input[type=text],input[type=date],textarea{width:100%;font:inherit;font-size:15px;padding:9px 11px;border:1px solid #c9d2cd;border-radius:8px;background:#fff;color:var(--txt)}
+textarea{min-height:150px;resize:vertical;line-height:1.7}
+.meter{display:flex;align-items:center;gap:10px;margin-top:8px;font-size:14px}
+.meter .bar{flex:1;height:8px;background:#e6ebe8;border-radius:5px;overflow:hidden}
+.meter .bar i{display:block;height:100%;background:var(--grn);transition:width .2s}
+.meter.over b{color:var(--red)}
+.meter.over .bar i{background:var(--red)}
+.fixlog{margin-top:10px;font-size:14px;background:var(--yel2);border-radius:8px;padding:10px 12px;display:none}
+.fixlog.on{display:block}
+.fixlog .c{display:inline-block;margin:2px 6px 2px 0;padding:1px 7px;background:#fff;border-radius:5px;border:1px solid #eadfa6}
+.fixlog .c s{color:var(--sub)}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:12px}
+.who{font-size:14px;margin-top:6px;padding:7px 10px;border-radius:8px;background:var(--mint)}
+.note{white-space:pre-wrap;font-size:14px;background:#fffbe6;border:1px dashed #d9bf3d;border-radius:10px;padding:12px;margin-top:12px;display:none}
+.note.on{display:block}
+.note b{display:block;color:var(--ink);margin-bottom:4px}
+/* 흐름 */
+.flow{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:18px 0 6px}
+.st{border:2px solid var(--line);border-radius:10px;padding:10px;font-size:13px;min-height:84px;background:#fafbfa}
+.st b{display:block;font-size:14px;color:var(--sub)}
+.st time{display:block;color:var(--sub);font-size:12px;margin-top:4px}
+.st.now{border-color:var(--yel);background:var(--yel2)}
+.st.now b{color:var(--ink)}
+.st.done{border-color:var(--grn);background:#eaf5ee}
+.st.done b{color:var(--grn)}
+.screens{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:14px}
+.scr{border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.scr h4{margin:0;font-size:13px;background:var(--ink);color:#fff;padding:7px 10px}
+.scr .in{padding:10px;font-size:14px;min-height:120px}
+.scr .badge{display:inline-block;background:var(--red);color:#fff;border-radius:10px;font-size:12px;padding:0 7px;margin-left:4px}
+.scr .empty{color:var(--sub);font-size:13px}
+.warn{font-size:13px;color:var(--red);margin-top:6px}
+/* 담당자 */
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 14px}
+.chip{border-radius:20px;padding:5px 12px;font-size:14px;font-weight:700}
+.chip.sch{background:#fde3e0;color:var(--red);border:1px solid #f1b2aa}
+.chip.sch.hot{background:var(--red);color:#fff}
+.chip.me{background:var(--yel2);color:#7a5b00;border:1px solid #eadfa6}
+table.stat{width:100%;border-collapse:collapse;font-size:14px}
+table.stat th,table.stat td{border-bottom:1px solid var(--line);padding:7px 6px;text-align:left}
+table.stat th{color:var(--sub);font-weight:600}
+.pb{display:inline-block;width:90px;height:7px;background:#e6ebe8;border-radius:4px;vertical-align:middle;overflow:hidden;margin-right:6px}
+.pb i{display:block;height:100%}
+.late{color:var(--red);font-weight:700}
+
+/* 기능 */
+.feat{background:#fff}
+.fgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border-top:2px solid var(--ink)}
+.fgrid div{padding:18px 18px 18px 0;border-bottom:1px solid var(--line)}
+.fgrid h3{margin:0 0 6px;font-size:17px;color:var(--ink)}
+.fgrid p{margin:0;font-size:15px;color:var(--sub)}
+.safe{margin-top:28px;display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.safe div{border-left:4px solid var(--grn);padding:4px 0 4px 14px}
+.safe b{color:var(--grn)}
+
+/* 시작하기 */
+.start ol{counter-reset:s;list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.start li{counter-increment:s;background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px;font-size:15px}
+.start li:before{content:counter(s);display:inline-grid;place-items:center;width:30px;height:30px;border-radius:50%;background:var(--yel);color:var(--ink);font-weight:800;margin-bottom:8px}
+.start li b{display:block;margin-bottom:4px}
+.start .row{margin-top:22px}
+footer{background:var(--ink);color:#cfe0d8;font-size:13px;padding:26px 0;text-align:center}
+
+/* 알림·칭찬 */
+#toast{position:fixed;right:18px;bottom:18px;max-width:360px;background:#fff7cf;border:2px solid var(--yel);border-radius:14px;padding:12px 14px 12px 12px;box-shadow:0 10px 30px rgba(0,0,0,.18);display:flex;gap:10px;align-items:center;font-size:14px;transform:translateY(140%);transition:transform .3s;z-index:50}
+#toast.on{transform:none}
+#toast img{width:46px;height:46px;flex:none}
+#cheer{position:fixed;left:50%;top:22%;transform:translate(-50%,-10px);background:#fff;border:3px solid var(--yel);border-radius:18px;padding:16px 20px;max-width:420px;box-shadow:0 14px 40px rgba(0,0,0,.2);display:flex;gap:12px;align-items:center;opacity:0;pointer-events:none;transition:.3s;z-index:60}
+#cheer.on{opacity:1;transform:translate(-50%,0)}
+#cheer img{width:58px;height:58px;border-radius:50%;flex:none}
+#cheer small{display:block;color:var(--sub);font-size:12px}
+
+@media (max-width:820px){
+ .hero .wrap,.pain .cols,.grid2,.safe{grid-template-columns:1fr}
+ .chaos{transform:none}
+ .fgrid{grid-template-columns:1fr 1fr}
+ .screens,.flow{grid-template-columns:1fr 1fr}
+ .start ol{grid-template-columns:1fr 1fr}
+}
+@media (max-width:520px){ .fgrid,.start ol,.screens,.flow{grid-template-columns:1fr} }
+</style>
+</head>
+<body>
+<div class="demo-strip"><b>체험판입니다.</b> 여기서 쓴 내용은 어디에도 저장되지 않고, 어떤 학교 시트에도 보내지지 않습니다. 새로 고침하면 처음으로 돌아갑니다.</div>
+
+<header class="hero">
+ <div class="wrap">
+  <div>
+   <div class="brand"><img src="__DODI__" alt="도디쌤"><div><strong>도디쌤의 생기발랄</strong><span>생기부 소통 플랫폼</span></div></div>
+   <h1>생기부는 선생님이 씁니다.<br><em>묻고, 찾고, 확인하는 일</em>은<br>생기발랄이 합니다.</h1>
+   <p class="lead">점검 기간의 피로는 글을 쓰는 데서가 아니라 묻고, 찾고, 다시 묻는 데서 생깁니다. 3분만 직접 눌러 보세요.</p>
+   <div class="cta"><a class="btn y" href="#try">바로 체험하기</a><a class="btn o" href="#start">우리 학교에서 쓰기</a></div>
+  </div>
+  <div class="chaos" aria-label="점검 기간 메신저 예시">
+   <div class="t"><span>업무 메신저 · 점검 기간</span><span>쪽지 47개</span></div>
+   <div class="bub">2-3반 7번 진로 바이트 넘었어요<small>오후 4:12</small></div>
+   <div class="bub me">어느 시트 몇 번째 줄이요?<small>오후 4:40</small></div>
+   <div class="bub">혹시 그 건 고치셨나요?<small>다음 날 오전 9:03</small></div>
+   <div class="bub me">보냈다는 쪽지를 못 받았는데요…<small>오전 11:26</small></div>
+   <div class="bub">마감 내일입니다. 미처리 목록 보내 드려요<small>오후 10:51</small></div>
+   <div class="x">이 대화, 이번 점검 기간엔 없어집니다.</div>
+  </div>
+ </div>
+</header>
+
+<section class="pain" id="pain">
+ <div class="wrap">
+  <h2>이런 적, 한 번쯤 있으시죠</h2>
+  <p class="sub">구글 시트와 메신저만으로 점검하면 같은 일이 매 학기 되풀이됩니다.</p>
+  <div class="cols">
+   <div>
+    <h3>구글 시트로 점검하면</h3>
+    <ul>
+     <li><b>내 줄을 찾다가 하루가 갑니다.</b><span>수백 줄 속에서 Ctrl+F로 내 이름, 내 과목, 내 반을 찾습니다. 하나 놓치면 마감 날까지 아무도 모릅니다.</span></li>
+     <li><b>시트는 아무것도 알려 주지 않습니다.</b><span>새 요청이 왔는지 알려면 하루에도 몇 번씩 직접 열어 봐야 합니다.</span></li>
+     <li><b>한 사람이 건드리면 모두가 흔들립니다.</b><span>필터 하나, 정렬 한 번에 모든 선생님 화면이 바뀝니다.</span></li>
+     <li><b>'고쳤다'의 기준이 사람마다 다릅니다.</b><span>날짜, '완료', 빈칸. 빈칸이 고친 건지 잊은 건지 알 수 없습니다.</span></li>
+     <li><b>지금 누구 차례인지 보이지 않습니다.</b><span>모두가 남의 차례라고 생각하는 사이 시간만 흐릅니다.</span></li>
+    </ul>
+   </div>
+   <div>
+    <h3>소통이 끊기면</h3>
+    <ul>
+     <li><b>"보냈는데요." "못 받았는데요."</b><span>메신저로 보낸 요청은 다른 쪽지 사이에 묻힙니다.</span></li>
+     <li><b>같은 말을 세 번 합니다.</b><span>시트에 적고, 메신저로 알리고, 복도에서 다시 말합니다.</span></li>
+     <li><b>서로 핑퐁을 칩니다.</b><span>점검자, 교과 선생님, 담임, 담당자가 누가 고칠지 묻고 되묻습니다.</span></li>
+     <li><b>담임은 우리 반이 고쳐졌는지 모릅니다.</b><span>결국 나이스를 열어 한 명씩 다시 확인합니다.</span></li>
+     <li><b>담당자는 탐정이 됩니다.</b><span>마감 전날 밤, 미처리 목록을 손으로 만듭니다.</span></li>
+    </ul>
+   </div>
+  </div>
+  <div class="verdict">그 끝은 늘 같습니다. <b>마감 직전의 몰아치기, 야근, 그리고 서로에게 쌓이는 서운함.</b></div>
+ </div>
+</section>
+
+<section class="try" id="try">
+ <div class="wrap">
+  <h2>직접 눌러 보세요</h2>
+  <p class="sub">실제 생기발랄과 같은 맞춤법 규칙, 같은 쪽지 만들기로 돌아갑니다. 학생 이름은 모두 가짜입니다.</p>
+  <div class="tabs" role="tablist">
+   <button role="tab" id="t1" aria-controls="p1" aria-selected="true">① 쓰는 순간 다듬기</button>
+   <button role="tab" id="t2" aria-controls="p2" aria-selected="false">② 요청 보내고 끝까지</button>
+   <button role="tab" id="t3" aria-controls="p3" aria-selected="false">③ 담당자 화면</button>
+  </div>
+
+  <div class="panel" role="tabpanel" id="p1" aria-labelledby="t1">
+   <h3>틀린 글을 그대로 붙여 넣어 보세요</h3>
+   <p class="hint">스페이스를 두 번 눌러 보세요. 바로 한 칸이 됩니다. 아래 예시 글에는 AI 꾸밈 기호와 자주 틀리는 맞춤법이 들어 있습니다.</p>
+   <div class="grid2">
+    <div>
+     <label class="f" for="w1">교과세특 · 국어 · 2학년 3반 7번 김체험 (한도 1,500바이트)</label>
+     <textarea id="w1"></textarea>
+     <div class="meter" id="m1"><div class="bar"><i></i></div><b>0</b>&nbsp;/ 1,500바이트</div>
+     <div class="row"><button class="btn k s" id="fix1">맞춤법 고치기</button><button class="btn w s" id="undo1" disabled>되돌리기</button><button class="btn w s" id="reset1">예시 다시 넣기</button><button class="btn y s" id="done1">완료</button></div>
+     <div class="fixlog" id="log1"></div>
+    </div>
+    <div>
+     <label class="f">이런 것을 쓰는 동안 바로 잡습니다</label>
+     <ul style="margin:0;padding-left:18px;font-size:15px">
+      <li>두 칸 이상 띄어쓰기 → 한 칸 (쓰는 즉시)</li>
+      <li>마침표 뒤에 붙여 쓴 글 → 한 칸 띄움 (쓰는 즉시)</li>
+      <li>AI 글의 **, #, 글머리표 → 지움</li>
+      <li>되야 → 돼야, 몇일 → 며칠 같은 맞춤법 (국립국어원 자료 바탕)</li>
+      <li>바이트 계산과 초과 표시 (엔터는 2바이트로 안전하게)</li>
+     </ul>
+     <p class="hint" style="margin-top:14px">[완료]를 누르면 도디쌤이 칭찬 한마디를 건넵니다. 실제 사이트에는 500여 가지 문구가 겹치지 않게 들어 있습니다.</p>
+    </div>
+   </div>
+  </div>
+
+  <div class="panel" role="tabpanel" id="p2" aria-labelledby="t2" hidden>
+   <h3>점검하다 고칠 곳을 찾았다면</h3>
+   <p class="hint">받는 사람을 찾을 필요가 없습니다. 분야와 학생만 고르면 맡은 선생님이 정해집니다. 보내는 순간 메신저 쪽지도 만들어집니다.</p>
+   <div class="grid2">
+    <div>
+     <label class="f" for="rStu">학생</label>
+     <select id="rStu"></select>
+     <label class="f" for="rField">분야 · 상세 분야</label>
+     <select id="rField"></select>
+     <div class="who" id="rWho"></div>
+     <label class="f" for="rText">오류 내용</label>
+     <input type="text" id="rText" value="바이트 초과(1,563/1,500), 마지막 문장 잘림">
+     <label class="f" for="rAfter">변경 후 (선택)</label>
+     <input type="text" id="rAfter" value="마지막 문장을 줄여 1,500바이트 안으로">
+     <div class="row"><button class="btn k" id="rSend">요청 보내기</button><span class="hint" style="margin:0">누르는 순간 메신저용 쪽지가 복사됩니다</span></div>
+     <div class="note" id="rNote"></div>
+    </div>
+    <div>
+     <label class="f">이 요청이 지금 어디에 있나요?</label>
+     <div class="flow" id="flow"></div>
+     <p class="hint" id="flowHint">왼쪽에서 요청을 보내 보세요. 세 사람의 화면이 차례로 바뀝니다.</p>
+    </div>
+   </div>
+   <div class="screens">
+    <div class="scr"><h4 id="sTeachH">교과 선생님 화면</h4><div class="in" id="sTeach"><span class="empty">아직 받은 요청이 없습니다.</span></div></div>
+    <div class="scr"><h4>담임 선생님 화면</h4><div class="in" id="sHome"><span class="empty">우리 반 학생이 고쳐지면 여기 알림이 옵니다.</span></div></div>
+    <div class="scr"><h4>생기부 담당자 화면</h4><div class="in" id="sAdmin"><span class="empty">담임 확인이 끝나면 여기서 마무리합니다.</span></div></div>
+   </div>
+  </div>
+
+  <div class="panel" role="tabpanel" id="p3" aria-labelledby="t3" hidden>
+   <h3>담당자는 앉아서 봅니다</h3>
+   <p class="hint">학교 일정을 보내면 모든 선생님 화면 맨 위에 같은 날짜가 뜹니다. 3일 안으로 다가오면 꽉 찬 빨강으로 바뀝니다.</p>
+   <div class="grid2">
+    <div>
+     <label class="f">선생님 화면 맨 위 (미리 보기)</label>
+     <div class="chips" id="chips"></div>
+     <label class="f" for="sTitle">학교 일정 이름</label>
+     <input type="text" id="sTitle" value="1차 점검 출력물 제출">
+     <label class="f" for="sDate">날짜</label>
+     <input type="date" id="sDate">
+     <div class="row"><button class="btn k" id="sSend">모든 선생님께 보내기</button></div>
+     <div class="note" id="sNote"></div>
+    </div>
+    <div>
+     <label class="f">선생님별 입력 현황 (숫자만 모입니다. 생기부 문장은 보이지 않습니다)</label>
+     <table class="stat" id="stat"></table>
+     <div class="row"><button class="btn w s" id="nudge">안 고친 선생님 독촉 쪽지 만들기</button></div>
+     <div class="note" id="nNote"></div>
+    </div>
+   </div>
+  </div>
+ </div>
+</section>
+
+<section class="feat" id="feat">
+ <div class="wrap">
+  <h2>그 밖에도 이만큼 대신 합니다</h2>
+  <p class="sub">한 번 쓰고 나면 시트와 메신저만으로는 돌아가기 어렵습니다.</p>
+  <div class="fgrid">
+   <div><h3>메신저 쪽지 자동 생성</h3><p>요청, 학교 일정, 독촉 목록까지. 메신저에 Ctrl+V만 하면 됩니다.</p></div>
+   <div><h3>받는 사람 자동 지정</h3><p>분야와 학급만 고르면 맡은 선생님 이름이 바로 뜹니다.</p></div>
+   <div><h3>꿈송이 알림과 경고</h3><p>새 요청은 화면 구석 알림으로, 이틀 묵힌 요청은 빨간 경고로 다시 떠오릅니다.</p></div>
+   <div><h3>고친 날짜 자동 기록</h3><p>점검 → 수정 → 담임 확인 → 담당자 확인. 누가 언제 했는지 남습니다.</p></div>
+   <div><h3>나이스에 한 번에</h3><p>반 전체를 엑셀로 받아 나이스에 통째로 붙입니다. 한 명은 [나이스용 복사]로.</p></div>
+   <div><h3>기재요령 챗봇</h3><p>기재요령·길라잡이·점검표에서 근거 원문과 쪽수까지 찾아 줍니다.</p></div>
+   <div><h3>학교 일정과 내 일정</h3><p>담당자의 마감은 모두에게, 내 마감은 나에게만. 점검 일정 PDF를 끌어다 놓으면 날짜를 찾아 줍니다.</p></div>
+   <div><h3>명단 자동, 동아리도</h3><p>학교 링크만 누르면 학생 명단이 들어옵니다. 동아리 명단은 엑셀·PDF·붙여넣기로.</p></div>
+   <div><h3>백업, 잠금, 새 학년</h3><p>엑셀 백업·불러오기로 다른 컴퓨터에서도 이어 쓰고, 공용 컴퓨터는 잠급니다.</p></div>
+  </div>
+  <div class="safe">
+   <div><b>학생 생기부 문장은 선생님 컴퓨터에만 남습니다.</b><br>학교 시트로 가는 것은 입력 개수와 수정 요청뿐입니다.</div>
+   <div><b>시트도 그대로 씁니다.</b><br>시트에 직접 적는 선생님의 내용도 생기발랄에 똑같이 반영됩니다.</div>
+  </div>
+ </div>
+</section>
+
+<section class="start" id="start">
+ <div class="wrap">
+  <h2>우리 학교에서 쓰려면, 담당자 한 분이 10분</h2>
+  <p class="sub">코드를 만질 일은 없습니다. 비용도 없습니다. 구글 계정 하나면 됩니다.</p>
+  <ol>
+   <li><b>견본 시트 복사</b>아래 [견본 시트 복사하기]를 누르고 [사본 만들기].</li>
+   <li><b>암호 정하기</b>시트 메뉴 [생기발랄 → ① 처음 설정]에서 학교 암호와 담당자 암호를 넣습니다.</li>
+   <li><b>웹 앱 배포</b>[확장 프로그램 → Apps Script] → [배포 → 새 배포 → 웹 앱], 액세스는 모든 사용자.</li>
+   <li><b>링크 보내기</b>시트 메뉴 [② 학교 링크 만들기]로 받은 링크를 선생님들께 메신저로 보냅니다.</li>
+  </ol>
+  <div class="row">
+   <a class="btn k" href="https://docs.google.com/spreadsheets/d/1wL7EGuOet2ik9WSDDNgl5sTOgIrnUXFxyhd-VR4tL70/copy" target="_blank" rel="noopener">견본 시트 복사하기</a>
+   <a class="btn w" href="생기발랄_다른학교_사용설명서.hwpx" download>설명서 받기 (한글 파일)</a>
+  </div>
+  <p class="hint" style="margin-top:14px;color:var(--sub);font-size:14px">학교 링크에는 학교 암호가 들어 있습니다. 우리 학교 선생님께만 보내 주세요.</p>
+ </div>
+</section>
+
+<footer>ⓒ 김정환 · M.A.D.T (Moral And Digital Teacher) · 캐릭터 '꿈송이' ⓒ 김정환 · 체험판은 아무것도 저장하지 않습니다</footer>
+
+<div id="toast" role="status" aria-live="polite"><img src="__GGS__" alt=""><div id="toastT"></div></div>
+<div id="cheer" role="status" aria-live="polite"><img src="__DODI__" alt=""><div id="cheerT"></div></div>
+
+<script>
+'use strict';
+/* 체험판 원칙: 브라우저 저장소·쿠키·네트워크를 쓰지 않는다. 모든 상태는 아래 변수에만 있고 새로 고침하면 사라진다. */
+/*CORE*/
+/*PRAISE*/
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let deck=[];
+function nextPraise(){ if(!deck.length){ deck=PRAISE.map((_,i)=>i); for(let i=deck.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [deck[i],deck[j]]=[deck[j],deck[i]]; } } return PRAISE[deck.pop()]; }
+function cheer(what){ const b=$('#cheer'); $('#cheerT').innerHTML='<small>'+esc(what)+' 완료</small>'+esc(nextPraise()); b.classList.add('on'); clearTimeout(b._t); b._t=setTimeout(()=>b.classList.remove('on'),5000); }
+function toast(html){ const t=$('#toast'); $('#toastT').innerHTML=html; t.classList.add('on'); clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove('on'),5000); }
+async function copyText(s){ try{ await navigator.clipboard.writeText(s); return true; }catch(e){ try{ const ta=document.createElement('textarea'); ta.value=s; ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.select(); const ok=document.execCommand('copy'); ta.remove(); return ok; }catch(e2){ return false; } } }
+function nowStr(){ const d=new Date(); return (d.getMonth()+1)+'/'+d.getDate()+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'); }
+
+/* 탭 */
+document.querySelectorAll('[role=tab]').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('[role=tab]').forEach(x=>{ const on=x===b; x.setAttribute('aria-selected',on); $('#'+x.getAttribute('aria-controls')).hidden=!on; });
+}));
+
+/* ① 쓰는 순간 다듬기 — 실제 사이트와 같은 규칙(byteLen, mechFix, spellFix) */
+const SAMPLE='**국어 수업 태도**\n# 세특\n- 문학 작품을 읽고  자기 생각을 논리적으로 표현하는 능력이 뛰어남.특히 소설의 갈등 구조를 분석하는 활동에서  친구들과 의견을 나누며 몇일 동안 자료를 찾아봄. 앞으로도 꾸준히 노력해야 되겠다는 다짐을 보임.';
+const w1=$('#w1'); let before1=null;
+function tidyNow(ta){ const v=ta.value, pos=ta.selectionStart;
+  const tidy=x=>x.replace(/[ 　\t]/g,' ').replace(/ {2,}/g,' ').replace(/([가-힣)\]"”’])([.!?])(?=[가-힣A-Za-z0-9("“‘\[])/g,'$1$2 ');
+  const b=tidy(v.slice(0,pos)), a=tidy(v.slice(pos)); let nv=b+a; if(b.endsWith(' ')&&a.startsWith(' ')) nv=b+a.slice(1); nv=nv.replace(/ {2,}/g,' ');
+  if(nv===v) return false; ta.value=nv; try{ ta.selectionStart=ta.selectionEnd=Math.min(b.length,nv.length); }catch(e){} return true; }
+function meter(){ const n=byteLen(w1.value,2), m=$('#m1'); m.querySelector('b').textContent=n.toLocaleString(); m.querySelector('i').style.width=Math.min(100,n/1500*100)+'%'; m.classList.toggle('over',n>1500); }
+function logShow(items){ const l=$('#log1'); if(!items.length){ l.className='fixlog on'; l.innerHTML='고칠 곳이 없습니다. 잘 쓰셨어요.'; return; }
+  l.className='fixlog on'; l.innerHTML='<b>바로 고친 곳</b><br>'+items.map(c=>'<span class="c">'+c+'</span>').join(''); }
+w1.addEventListener('input',e=>{ const was=w1.value; if(e.inputType!=='insertFromPaste' && tidyNow(w1)){ const l=$('#log1'); l.className='fixlog on'; l.innerHTML='<b>쓰는 즉시 정리</b><br><span class="c">두 칸 띄어쓰기 → 한 칸</span>'; } meter(); });
+w1.addEventListener('paste',()=>setTimeout(()=>{ tidyNow(w1); meter(); },0));
+$('#fix1').addEventListener('click',()=>{
+  before1=w1.value; const a=mechFix(w1.value), b=spellFix(a.text);
+  w1.value=b.text; meter(); $('#undo1').disabled=(before1===w1.value);
+  const seen=new Set(), items=[]; a.notes.forEach(n=>{ if(n!=='앞뒤 공백'&&n!=='줄바꿈 정리') items.push(esc(n)); });
+  b.changes.forEach(c=>{ const k=c.from+'→'+c.to; if(!seen.has(k)){ seen.add(k); items.push('<s>'+esc(c.from)+'</s> → <b>'+esc(c.to)+'</b>'); } });
+  logShow(items);
+});
+$('#undo1').addEventListener('click',()=>{ if(before1==null) return; w1.value=before1; before1=null; $('#undo1').disabled=true; meter(); $('#log1').className='fixlog on'; $('#log1').innerHTML='되돌렸습니다.'; });
+$('#reset1').addEventListener('click',()=>{ w1.value=SAMPLE; before1=null; $('#undo1').disabled=true; $('#log1').className='fixlog'; meter(); });
+$('#done1').addEventListener('click',()=>cheer('국어 세특 2학년 3반'));
+w1.value=SAMPLE; meter();
+
+/* ② 요청 보내고 끝까지 */
+const STU=[['2-3','7','김체험'],['2-3','12','이맛보기'],['1-2','4','박미리'],['3-1','19','최예시']];
+const HOME={'2-3':'정담임','1-2':'한담임','3-1':'오담임'};
+const FIELDS=[['교과세특','국어','김국어'],['교과세특','수학','이수학'],['진로','','(담임)'],['행동특성','','(담임)'],['창체동아리','방송부','윤동아']];
+STU.forEach((s,i)=>$('#rStu').insertAdjacentHTML('beforeend','<option value="'+i+'">'+s[0]+'반 '+s[1]+'번 '+s[2]+'</option>'));
+FIELDS.forEach((f,i)=>$('#rField').insertAdjacentHTML('beforeend','<option value="'+i+'">'+f[0]+(f[1]?' · '+f[1]:'')+'</option>'));
+function target(){ const s=STU[+$('#rStu').value], f=FIELDS[+$('#rField').value]; return f[2]==='(담임)'? HOME[s[0]] : f[2]; }
+function showWho(){ $('#rWho').innerHTML='받는 선생님: <b>'+esc(target())+' 선생님</b> (내 담당에 맞춰 자동으로 정해짐)'; }
+$('#rStu').addEventListener('change',showWho); $('#rField').addEventListener('change',showWho); showWho();
+let R=null;
+const STEPS=['점검 요청','교과 수정','담임 확인','담당자 확인'];
+function drawFlow(){ const el=$('#flow'); el.innerHTML=STEPS.map((s,i)=>{ const st=!R?'':(i<R.step?'done':(i===R.step?'now':'')); return '<div class="st '+st+'"><b>'+(i+1)+'. '+s+'</b>'+(R&&R.at[i]?'<time>'+R.at[i]+'</time>':'')+(R&&i===R.step&&R.step<4?'<span>지금 여기</span>':'')+'</div>'; }).join('');
+  if(R&&R.step>=4) $('#flowHint').textContent='끝났습니다. 누가, 언제 처리했는지 날짜가 자동으로 남았습니다. "고쳤나요?"를 물을 일이 없습니다.'; }
+function screens(){
+  const s=R.s, who=s[0]+'반 '+s[1]+'번 '+s[2];
+  $('#sTeachH').innerHTML=esc(R.to)+' 선생님 화면'+(R.step===1?'<span class="badge">1</span>':'');
+  $('#sTeach').innerHTML= R.step===1
+    ? '<b>내가 고칠 것</b><br>'+esc(who)+' · '+esc(R.field)+'<br><span style="color:var(--sub)">'+esc(R.text)+'</span><div class="row"><button class="btn y s" id="goFix">나이스에서 고쳤어요</button></div><div class="warn">이 사이트에서 고쳐도 나이스는 바뀌지 않습니다. 나이스에서 고치고 저장한 뒤 누르세요.</div>'
+    : (R.step>1? '<span style="color:var(--grn)">고쳤다고 알렸습니다 ('+R.at[1]+')</span>' : '<span class="empty">아직 받은 요청이 없습니다.</span>');
+  $('#sHome').innerHTML= R.step===2
+    ? '<b>우리 반 확인</b><br>'+esc(who)+' · '+esc(R.field)+' 항목이 고쳐졌습니다.<div class="row"><button class="btn y s" id="goHome">우리 반 확인했어요</button><button class="btn w s" id="goRe">재요청</button></div>'
+    : (R.step>2? '<span style="color:var(--grn)">확인했습니다 ('+R.at[2]+')</span>' : '<span class="empty">우리 반 학생이 고쳐지면 여기 알림이 옵니다.</span>');
+  $('#sAdmin').innerHTML= R.step===3
+    ? '<b>담당자 확인 대기</b><br>'+esc(who)+' · '+esc(R.field)+'<div class="row"><button class="btn y s" id="goAdmin">담당자 확인</button></div>'
+    : (R.step>3? '<span style="color:var(--grn)">끝 ('+R.at[3]+')</span>' : '<span class="empty">담임 확인이 끝나면 여기서 마무리합니다.</span>');
+  drawFlow();
+}
+function noteFor(r){ const s=r.s; return '[생기발랄] '+r.to+' 선생님, 생기부 수정 요청 1건 보냈습니다.\n· '+r.field+' — '+s[0]+' '+s[1]+'번 '+s[2]+'\n생기발랄 [수정 요청] 탭에서 확인 후, 나이스에서 고치고 [나이스에서 고쳤어요]를 눌러 주세요. 감사합니다. — 체험하는 선생님'; }
+$('#rSend').addEventListener('click',async()=>{
+  const s=STU[+$('#rStu').value], f=FIELDS[+$('#rField').value];
+  R={s, to:target(), field:f[0]+(f[1]?' '+f[1]:''), text:$('#rText').value.trim()||'오류 내용', step:1, at:[nowStr()]};
+  const n=noteFor(R); const ok=await copyText(n);
+  const el=$('#rNote'); el.className='note on'; el.innerHTML='<b>'+(ok?'메신저용 쪽지가 복사됐습니다. 메신저에 Ctrl+V 하면 끝.':'메신저용 쪽지 (복사가 막힌 브라우저라 직접 복사해 주세요)')+'</b>'+esc(n);
+  screens();
+  setTimeout(()=>toast('<b>'+esc(R.to)+' 선생님께 수정 요청이 도착했습니다.</b><br>'+esc(s[0]+'반 '+s[1]+'번 '+s[2])+' · '+esc(R.field)),700);
+});
+document.addEventListener('click',e=>{
+  if(!R) return; const id=e.target.id;
+  if(id==='goFix'&&R.step===1){ R.step=2; R.at[1]=nowStr(); screens(); toast('<b>'+esc(HOME[R.s[0]])+' 선생님께 알림 ('+esc(R.s[0])+' 담임)</b><br>우리 반 학생 생기부가 고쳐졌습니다.'); }
+  else if(id==='goHome'&&R.step===2){ R.step=3; R.at[2]=nowStr(); screens(); }
+  else if(id==='goRe'&&R.step===2){ R.step=1; R.at[1]=null; screens(); toast('<b>재요청을 보냈습니다.</b><br>다시 '+esc(R.to)+' 선생님 화면으로 돌아갔습니다.'); }
+  else if(id==='goAdmin'&&R.step===3){ R.step=4; R.at[3]=nowStr(); screens(); cheer('수정 요청 1건'); }
+});
+drawFlow();
+
+/* ③ 담당자 화면 */
+const pad2=n=>String(n).padStart(2,'0');
+const today=new Date(); const in2=new Date(today.getFullYear(),today.getMonth(),today.getDate()+2);
+$('#sDate').value=in2.getFullYear()+'-'+pad2(in2.getMonth()+1)+'-'+pad2(in2.getDate());
+let sched=null;
+function dday(ymd){ const [y,m,d]=ymd.split('-').map(Number); const t=new Date(y,m-1,d), z=new Date(today.getFullYear(),today.getMonth(),today.getDate()); return Math.round((t-z)/864e5); }
+function chips(){ let h=''; if(sched){ const n=dday(sched.date); h+='<span class="chip sch'+(n<=3?' hot':'')+'">학교 '+(n===0?'D-DAY':(n>0?'D-'+n:'D+'+(-n)))+' '+esc(sched.title)+'</span>'; }
+  h+='<span class="chip me">내 일정 D-6 국어 세특 마무리</span>'; $('#chips').innerHTML=h; }
+chips();
+$('#sSend').addEventListener('click',async()=>{
+  const title=$('#sTitle').value.trim()||'학교 일정', date=$('#sDate').value; if(!date) return;
+  sched={title,date}; chips(); const n=dday(date), [y,m,d]=date.split('-').map(Number);
+  const msg='[생기발랄] 학교 일정 안내\n· '+m+'월 '+d+'일 '+title+(n>=0?' (D-'+n+')':'')+'\n생기발랄 화면 맨 위 빨간 칸에서도 확인하실 수 있습니다. 감사합니다.';
+  const ok=await copyText(msg); const el=$('#sNote'); el.className='note on'; el.innerHTML='<b>'+(ok?'모든 선생님 화면에 떴습니다. 메신저 안내문도 복사됐습니다.':'모든 선생님 화면에 떴습니다. 아래 안내문을 복사해 주세요.')+'</b>'+esc(msg);
+});
+const ST=[['김국어','교과세특 국어',78,'0'],['이수학','교과세특 수학',100,'0'],['정담임','2-3 담임',64,'2'],['윤동아','방송부',31,'1'],['한담임','1-2 담임',92,'0']];
+$('#stat').innerHTML='<tr><th>선생님</th><th>담당</th><th>작성률</th><th>미처리 요청</th></tr>'+ST.map(r=>{ const h=Math.round(r[2]*1.25); return '<tr><td>'+r[0]+'</td><td>'+r[1]+'</td><td><span class="pb"><i style="width:'+r[2]+'%;background:hsl('+h+',62%,45%)"></i></span>'+r[2]+'%</td><td'+(r[3]!=='0'?' class="late"':'')+'>'+(r[3]==='0'?'-':r[3]+'건'+(r[3]==='2'?' (2일 넘음)':''))+'</td></tr>'; }).join('');
+$('#nudge').addEventListener('click',async()=>{
+  const late=ST.filter(r=>r[3]!=='0'); const msg='[생기발랄] 아직 반영되지 않은 수정 요청 안내\n'+late.map(r=>'· '+r[0]+' 선생님 '+r[3]+'건 ('+r[1]+')').join('\n')+'\n생기발랄 [수정 요청 → 내가 고칠 것]에서 확인 부탁드립니다.';
+  const ok=await copyText(msg); const el=$('#nNote'); el.className='note on'; el.innerHTML='<b>'+(ok?'독촉 쪽지가 복사됐습니다.':'아래 쪽지를 복사해 주세요.')+'</b>'+esc(msg);
+});
+</script>
+</body>
+</html>
