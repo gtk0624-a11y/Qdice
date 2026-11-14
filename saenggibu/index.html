@@ -168,7 +168,7 @@ footer{text-align:center;color:var(--sub);font-size:12px;padding:18px}
 .xrow{display:flex;flex-wrap:wrap;gap:6px;align-items:center;background:#eefaf3;border:1px solid #bfe8cf;border-radius:10px;padding:8px 10px;margin-top:10px}
 
 /* ───── 테마: 교무수첩(칠판 초록 · 형광펜 · 빨간펜) ───── */
-.xlbox summary{cursor:pointer;list-style:revert}.xlbox label.b{display:inline-block;padding:9px 14px;border-radius:7px;background:var(--navy);color:#fff;font-size:14px;font-weight:700}.xlwarn{background:var(--yel2);border:1px solid var(--yel);border-radius:8px;padding:8px 12px;margin:8px 0;font-size:14px}.xlwarn ol{margin:4px 0 0;padding-left:20px}.xlwarn li{margin:3px 0}.xlbox .xlsteps{margin:10px 0 6px;padding-left:22px}.xlbox .xlsteps li{margin:8px 0}.xlbox .xlsteps .hint{margin-top:3px}
+.xlbox summary{cursor:pointer;list-style:revert}.xlgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:10px 0}.xlstep{border:1px solid var(--line,#dde3e0);border-radius:10px;padding:12px;background:#fff;display:flex;flex-direction:column;gap:6px}.xlstep p{margin:0;font-size:14px}.xlh{font-weight:800;font-size:16px;color:var(--navy);display:flex;align-items:center;gap:8px}.xln{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:50%;background:var(--yel);color:var(--navy);font-weight:800}.xlw{width:100%;text-align:left}.xlstep.up{border:2px solid var(--yel);background:var(--yel2,#fbf4cf)}.xlbox label.xlup{display:block;text-align:center;padding:14px;border-radius:9px;background:var(--navy);color:#fff;font-size:17px;font-weight:800;cursor:pointer;box-shadow:0 2px 0 rgba(0,0,0,.15)}.xlbox label.xlup:hover{filter:brightness(1.15)}@media(max-width:820px){.xlgrid{grid-template-columns:1fr}}.xlbox label.b{display:inline-block;padding:9px 14px;border-radius:7px;background:var(--navy);color:#fff;font-size:14px;font-weight:700}.xlwarn{background:var(--yel2);border:1px solid var(--yel);border-radius:8px;padding:8px 12px;margin:8px 0;font-size:14px}.xlwarn ol{margin:4px 0 0;padding-left:20px}.xlwarn li{margin:3px 0}.xlbox .xlsteps{margin:10px 0 6px;padding-left:22px}.xlbox .xlsteps li{margin:8px 0}.xlbox .xlsteps .hint{margin-top:3px}
 :root{--navy:#1e3d35;--navy2:#2c5a4e;--yel:#f3d54e;--yel2:#fbf4cf;--mint:#bfe3cf;--bg:#f2f4f3;--line:#dde3e0;--red:#c23b2e;--org:#c9791a;--grn:#2e7d4f;--txt:#1c2421;--sub:#65726d}
 body{font-family:"Pretendard Variable","Pretendard","Malgun Gothic","맑은 고딕","Apple SD Gothic Neo",sans-serif;font-size:15px;line-height:1.6;letter-spacing:-.005em;-webkit-font-smoothing:antialiased}
 :focus-visible{outline:2px solid var(--navy);outline-offset:2px}
@@ -400,7 +400,7 @@ img.ggs{width:22px;height:22px;object-fit:contain;vertical-align:-5px;margin-rig
 
 <details><summary>⑪ 자주 묻는 질문</summary>
 <dl>
-<dt>엑셀에 써 둔 초안을 한 번에 올릴 수 있나요?</dt><dd>네. [영역별 입력] 맨 위 <b>[엑셀로 한 번에 올리기]</b>에서 ① 양식 받기(이 반 · 내 반 전체 · 이 반 모든 영역 중 고르기, 명단이 이미 들어 있음) → ② 엑셀 내용 칸에 초안 붙여 넣기 → ③ [다 쓴 양식 올리기]. 올리는 순간 띄어쓰기·맞춤법이 정리되어 학생별 칸에 들어갑니다. 꼭 지킬 것: <b>사이트에서 받은 양식에만 쓰기</b>(따로 만든 엑셀은 양식에 복사해 붙이기), <b>칸 제목 고치지 않기</b>(전체 양식은 "세특: 과목명"만 내 과목으로), <b>엑셀 백업 파일은 여기서 올리지 않기</b>, <b>올린 뒤 번호·이름·바이트 확인</b>.</dd>
+<dt>엑셀에 써 둔 초안을 한 번에 올릴 수 있나요?</dt><dd>네. [영역별 입력] 맨 위 <b>[엑셀로 한 번에 올리기]</b>에서 ① 양식 받기(이 반 · 내 반 전체 · 이 반 모든 영역 중 고르기, 명단이 이미 들어 있음) → ② 엑셀 내용 칸에 초안 붙여 넣기 → ③ [3. 다 쓴 엑셀 파일 고르기]. 올리는 순간 띄어쓰기·맞춤법이 정리되어 학생별 칸에 들어갑니다. 꼭 지킬 것: <b>사이트에서 받은 양식에만 쓰기</b>(따로 만든 엑셀은 양식에 복사해 붙이기), <b>칸 제목 고치지 않기</b>(전체 양식은 "세특: 과목명"만 내 과목으로), <b>엑셀 백업 파일은 여기서 올리지 않기</b>, <b>올린 뒤 번호·이름·바이트 확인</b>.</dd>
 <dt>맞춤법 교정은 믿을 만한가요?</dt><dd>국립국어원 「한글 맞춤법·표준어 규정 해설」(2018)과 「문장 부호 해설」(2014)을 바탕으로 만들었습니다. 다른 뜻의 바른 낱말까지 바꾸지 않도록 하나하나 골라 넣었고, 바른 문장이 바뀌지 않는지 시험을 거쳤습니다. 다만 문맥을 알아야 하는 것(-로서/-로써 등)은 [바른한글 검사]로 한 번 더 확인하세요.</dd>
 <dt>스페이스를 두 번 눌렀는데 한 칸이 됐어요.</dt><dd>정상입니다. 생기부에는 두 칸 띄어쓰기가 없어서 쓰는 순간 한 칸으로 정리합니다. 줄바꿈(엔터)은 그대로 둡니다.</dd>
 <dt>팝업(알림)이 안 와요.</dt><dd>① 사이트 창이 열려 있나요? (닫지 말고 작게 내려 두세요) ② [알림 켜기]를 허용했나요? ③ 내 담당이 맞게 정해져 있나요? 알림은 1~2분 안에 옵니다.</dd>
@@ -1064,13 +1064,18 @@ function renderWrite(){
   let h=welcomeHTML()+'<div class="box" id="whead">'+writeHeadHTML()+'</div>';
   { const unitName=grpOf(UI.cls)? grpOf(UI.cls).name : UI.cls+'반';
     h+='<details class="box xlbox"'+(written?'':' open')+'><summary><b>엑셀로 한 번에 올리기</b> <span class="hint">초안을 엑셀에 모아 쓰셨다면 이게 제일 편합니다</span>'+(!/동아리/.test(it.name)&&!myClassSet()?' <span style="color:var(--org);font-weight:700;font-size:13px">· 내 담당을 먼저 정하세요</span>':'')+'</summary>'
-     +'<ol class="xlsteps"><li><div class="row" style="gap:6px"><button class="b" id="tplOut">'+esc(unitName)+' · '+esc(it.name)+' 양식 받기</button>'
-     +'<button class="b g" id="tplAllCls">'+(/동아리/.test(it.name)?'내 동아리 전체':'내 반 전체')+' · '+esc(it.name)+(!/동아리/.test(it.name)&&!myClassSet()?' (내 담당 먼저)':'')+'</button>'
-     +(/동아리/.test(it.name)||grpOf(UI.cls)?'':'<button class="b g" id="tplAllItems">'+esc(unitName)+' · 모든 영역</button>')+'</div>'
+     +'<div class="xlgrid">'
+     +'<div class="xlstep"><div class="xlh"><span class="xln">1</span>빈 양식 받기</div><p>명단이 미리 들어 있는 엑셀 파일을 받습니다. 하나를 고르세요.</p>'
+     +'<button class="b xlw" id="tplOut">'+esc(unitName)+' · '+esc(it.name)+'</button>'
+     +'<button class="b g xlw" id="tplAllCls">'+(/동아리/.test(it.name)?'내 동아리 전체':'내 반 전체')+' · '+esc(it.name)+(!/동아리/.test(it.name)&&!myClassSet()?' (내 담당 먼저)':'')+'</button>'
+     +(/동아리/.test(it.name)||grpOf(UI.cls)?'':'<button class="b g xlw" id="tplAllItems">'+esc(unitName)+' · 모든 영역 (담임용)</button>')
+     +'<p class="hint">여러 반을 가르치면 <b>내 반 전체</b>, 담임은 <b>모든 영역</b>이 편합니다.</p></div>'
+     +'<div class="xlstep"><div class="xlh"><span class="xln">2</span>엑셀에서 쓰기</div><p>받은 파일을 엑셀로 열어 학생 줄마다 초안을 붙여 넣고 <b>저장</b>합니다.</p><p class="hint">학년·반·번호·이름 칸과 첫 줄 제목은 그대로 두세요. 칸 안에서 줄을 바꾸려면 Alt+Enter.</p></div>'
+     +'<div class="xlstep up"><div class="xlh"><span class="xln">3</span>다 쓴 파일 올리기</div><p>저장한 엑셀 파일을 사이트에 넣으면 <b>학생별 칸에 한 번에</b> 들어갑니다.</p>'
+     +'<label class="b xlup">다 쓴 엑셀 파일 고르기<input type="file" id="xlsIn2" accept=".xlsx,.xls" hidden></label>'
+     +'<p class="hint">파일을 이 화면에 끌어다 놓아도 됩니다. 띄어쓰기·맞춤법은 들어가면서 자동으로 정리되고, 이미 써 둔 칸과 다르면 덮어쓸지 먼저 묻습니다.</p></div>'
+     +'</div>'
      +(!/동아리/.test(it.name)&&!myClassSet()?'<div class="xlwarn" style="border-color:var(--org)"><b>아직 내 담당을 정하지 않으셨습니다.</b> 그래서 [내 반 전체]를 받으면 학교 전체 학생이 들어갑니다. 내가 맡은 반만 받으려면 먼저 내 담당을 정해 주세요. <button class="b s" id="goDuty">내 담당 정하러 가기</button></div>':'')
-     +'<div class="hint">명단이 이미 들어 있고, 써 둔 내용도 함께 들어갑니다. 여러 반을 가르치면 <b>내 반 전체</b>, 담임이 우리 반 자율·진로·행특을 한꺼번에 쓰려면 <b>모든 영역</b>을 받으세요.</div></li>'
-     +'<li>엑셀에서 <b>'+esc(it.name)+'</b> 칸에 초안을 붙여 넣습니다.<div class="hint">학년·반·번호·이름 칸과 제목 줄은 고치지 마세요. 칸 안 줄바꿈은 Alt+Enter.</div></li>'
-     +'<li><label class="b" style="cursor:pointer">다 쓴 양식 올리기<input type="file" id="xlsIn2" accept=".xlsx,.xls" hidden></label><div class="hint">올리는 순간 띄어쓰기·맞춤법·AI 꾸밈 기호가 자동으로 정리되고, 학생별 칸에 한 번에 들어갑니다. 이미 써 둔 칸과 다르면 덮어쓸지 먼저 묻습니다.</div></li></ol>'
      +'<div class="xlwarn"><b>꼭 지켜 주세요</b><ol>'
      +'<li><b>꼭 이 사이트에서 받은 양식에 쓰세요.</b> 선생님이 따로 만든 엑셀(번호·이름·내용만 있는 파일)은 그대로 올리면 들어가지 않습니다. 양식을 받아 내용 칸에 복사해 붙여 넣으면 됩니다.</li>'
      +'<li><b>칸 제목은 고치지 마세요.</b> 학년·반·번호·이름과 영역 이름이 사이트와 같아야 제자리에 들어갑니다. 전체 양식에서는 "세특: 과목명"만 "세특: 국어"처럼 내 과목으로 고칩니다. 다른 제목을 바꾸면 새 영역이 따로 생깁니다.</li>'
@@ -1082,7 +1087,7 @@ function renderWrite(){
   $('#main').innerHTML=h; $$('#main .card').forEach(c=>refreshCard(c));
 }
 
-// 이 반(동아리)·이 영역 입력 양식: 명단과 써 둔 내용을 넣은 엑셀 → 선생님이 채워 [다 쓴 양식 올리기]로 한 번에
+// 이 반(동아리)·이 영역 입력 양식: 명단과 써 둔 내용을 넣은 엑셀 → 선생님이 채워 [3. 다 쓴 엑셀 파일 고르기]로 한 번에
 async function tplOut(mode){
   const it=itemBy(UI.item); if(!it) return; await needXLSX();
   const g=grpOf(UI.cls), club=/동아리/.test(it.name);
@@ -1098,10 +1103,10 @@ async function tplOut(mode){
   if(!list.length){ toast('양식에 넣을 학생이 없습니다. 명단을 먼저 확인해 주세요.'); return; }
   const rows=[['학년','반','번호','이름'].concat(items.map(x=>x.name))].concat(list.map(s=>[s.g,s.c,s.n,s.name].concat(items.map(x=>peek(sid(s),x.key).text))));
   const ws=XLSX.utils.aoa_to_sheet(rows); ws['!cols']=[{wch:5},{wch:5},{wch:5},{wch:10}].concat(items.map(()=>({wch:items.length>1?50:90})));
-  const guide=[['도디쌤의 생기발랄 — '+label.replace('_',' · ')+' 입력 양식'],[''],['1. [생기부] 탭의 영역 칸('+items.map(x=>x.name).join(', ')+')에 학생별 초안을 붙여 넣습니다.'],['2. 학년·반·번호·이름 칸과 첫 줄 제목은 고치지 마세요. 칸 안 줄바꿈은 Alt+Enter.'],['3. 쓰지 않을 영역 칸은 비워 두면 됩니다(지워도 됩니다).'],['4. 저장한 뒤 생기발랄 [영역별 입력] → [다 쓴 양식 올리기]로 올리면 학생별·영역별로 한 번에 들어갑니다.'],['5. 올리는 순간 띄어쓰기·맞춤법·AI 꾸밈 기호가 자동으로 정리됩니다.'],[''],['한도(바이트): '+items.map(x=>x.name+' '+x.limit).join(' / ')],[''],['개인정보: 학생 이름과 생기부 내용이 들어 있습니다. 업무용 PC에만 보관하세요.'],['© 김정환 · M.A.D.T']];
+  const guide=[['도디쌤의 생기발랄 — '+label.replace('_',' · ')+' 입력 양식'],[''],['1. [생기부] 탭의 영역 칸('+items.map(x=>x.name).join(', ')+')에 학생별 초안을 붙여 넣습니다.'],['2. 학년·반·번호·이름 칸과 첫 줄 제목은 고치지 마세요. 칸 안 줄바꿈은 Alt+Enter.'],['3. 쓰지 않을 영역 칸은 비워 두면 됩니다(지워도 됩니다).'],['4. 저장한 뒤 생기발랄 [영역별 입력] → [3. 다 쓴 엑셀 파일 고르기]로 올리면 학생별·영역별로 한 번에 들어갑니다.'],['5. 올리는 순간 띄어쓰기·맞춤법·AI 꾸밈 기호가 자동으로 정리됩니다.'],[''],['한도(바이트): '+items.map(x=>x.name+' '+x.limit).join(' / ')],[''],['개인정보: 학생 이름과 생기부 내용이 들어 있습니다. 업무용 PC에만 보관하세요.'],['© 김정환 · M.A.D.T']];
   const wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,'생기부'); const gs=XLSX.utils.aoa_to_sheet(guide); gs['!cols']=[{wch:100}]; XLSX.utils.book_append_sheet(wb,gs,'안내');
   XLSX.writeFile(wb,('생기부초안_'+label).replace(/[\\/:*?"<>|]/g,' ')+'.xlsx');
-  toast(list.length+'명 명단이 든 양식을 받았습니다. 채운 뒤 [다 쓴 양식 올리기]로 올리세요.');
+  toast(list.length+'명 명단이 든 양식을 받았습니다. 채운 뒤 [3. 다 쓴 엑셀 파일 고르기]로 올리세요.');
 }
 // ───────── 6. 화면: 학생별 보기 ─────────
 function renderSearch(){
@@ -1771,7 +1776,7 @@ function saveDuty(){ if(S.schoolClubs){ const mk=autoClubs(); if(mk.length) setT
 // 브라우저 탭 제목에 숫자 표시 + 다른 탭을 보고 있을 때 새 알림이 오면 깜박임
 const BASE_TITLE='도디쌤의 생기발랄';
 // 새 버전 알림: 사이트가 고쳐져 올라오면 화면 위에 띠를 띄움(브라우저가 예전 화면을 기억하는 문제 해결)
-const BUILD_V='20261114-182819';
+const BUILD_V='20261114-183234';
 async function checkNewVersion(){ if(!/^https?:/.test(location.protocol)) return; try{ const r=await fetch('version.json?t='+Date.now(),{cache:'no-store'}); if(!r.ok) return; const j=await r.json();
   if(j && j.v && j.v!==BUILD_V && !document.getElementById('newVer')){ const d=document.createElement('div'); d.id='newVer'; d.innerHTML='✨ 생기발랄 새 버전이 나왔어요. <button class="b s" id="newVerGo">새로 고침</button> <span style="font-weight:600">또는 키보드 <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>R</kbd></span> <span class="hint" style="color:inherit;opacity:.8">· 써 둔 내용은 그대로 남아요</span>'; document.body.prepend(d); document.getElementById('newVerGo').onclick=()=>{ flush().finally(()=>{ location.replace(location.pathname+'?v='+encodeURIComponent(j.v)+location.hash); }); }; } }catch(e){} }
 const SUB_DEFAULT='선생님을 잇는 생기부 플랫폼';
