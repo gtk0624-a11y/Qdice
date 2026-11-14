@@ -1063,10 +1063,11 @@ function renderWrite(){
     return UI.filter==='all' || (UI.filter==='req'&&cardReqs(sid(s),it.key).some(rqOpen)) || (UI.filter==='empty'&&!r.text.trim()&&!isOut(s)) || (UI.filter==='over'&&B(r.text)>it.limit) || (UI.filter==='undone'&&!r.done) || (UI.filter==='uncopied'&&r.text.trim()&&!r.copied); });
   let h=welcomeHTML()+'<div class="box" id="whead">'+writeHeadHTML()+'</div>';
   { const unitName=grpOf(UI.cls)? grpOf(UI.cls).name : UI.cls+'반';
-    h+='<details class="box xlbox"'+(written?'':' open')+'><summary><b>엑셀로 한 번에 올리기</b> <span class="hint">초안을 엑셀에 모아 쓰셨다면 이게 제일 편합니다</span></summary>'
+    h+='<details class="box xlbox"'+(written?'':' open')+'><summary><b>엑셀로 한 번에 올리기</b> <span class="hint">초안을 엑셀에 모아 쓰셨다면 이게 제일 편합니다</span>'+(!/동아리/.test(it.name)&&!myClassSet()?' <span style="color:var(--org);font-weight:700;font-size:13px">· 내 담당을 먼저 정하세요</span>':'')+'</summary>'
      +'<ol class="xlsteps"><li><div class="row" style="gap:6px"><button class="b" id="tplOut">'+esc(unitName)+' · '+esc(it.name)+' 양식 받기</button>'
-     +'<button class="b g" id="tplAllCls">'+(/동아리/.test(it.name)?'내 동아리 전체':'내 반 전체')+' · '+esc(it.name)+'</button>'
+     +'<button class="b g" id="tplAllCls">'+(/동아리/.test(it.name)?'내 동아리 전체':'내 반 전체')+' · '+esc(it.name)+(!/동아리/.test(it.name)&&!myClassSet()?' (내 담당 먼저)':'')+'</button>'
      +(/동아리/.test(it.name)||grpOf(UI.cls)?'':'<button class="b g" id="tplAllItems">'+esc(unitName)+' · 모든 영역</button>')+'</div>'
+     +(!/동아리/.test(it.name)&&!myClassSet()?'<div class="xlwarn" style="border-color:var(--org)"><b>아직 내 담당을 정하지 않으셨습니다.</b> 그래서 [내 반 전체]를 받으면 학교 전체 학생이 들어갑니다. 내가 맡은 반만 받으려면 먼저 내 담당을 정해 주세요. <button class="b s" id="goDuty">내 담당 정하러 가기</button></div>':'')
      +'<div class="hint">명단이 이미 들어 있고, 써 둔 내용도 함께 들어갑니다. 여러 반을 가르치면 <b>내 반 전체</b>, 담임이 우리 반 자율·진로·행특을 한꺼번에 쓰려면 <b>모든 영역</b>을 받으세요.</div></li>'
      +'<li>엑셀에서 <b>'+esc(it.name)+'</b> 칸에 초안을 붙여 넣습니다.<div class="hint">학년·반·번호·이름 칸과 제목 줄은 고치지 마세요. 칸 안 줄바꿈은 Alt+Enter.</div></li>'
      +'<li><label class="b" style="cursor:pointer">다 쓴 양식 올리기<input type="file" id="xlsIn2" accept=".xlsx,.xls" hidden></label><div class="hint">올리는 순간 띄어쓰기·맞춤법·AI 꾸밈 기호가 자동으로 정리되고, 학생별 칸에 한 번에 들어갑니다. 이미 써 둔 칸과 다르면 덮어쓸지 먼저 묻습니다.</div></li></ol>'
@@ -1770,7 +1771,7 @@ function saveDuty(){ if(S.schoolClubs){ const mk=autoClubs(); if(mk.length) setT
 // 브라우저 탭 제목에 숫자 표시 + 다른 탭을 보고 있을 때 새 알림이 오면 깜박임
 const BASE_TITLE='도디쌤의 생기발랄';
 // 새 버전 알림: 사이트가 고쳐져 올라오면 화면 위에 띠를 띄움(브라우저가 예전 화면을 기억하는 문제 해결)
-const BUILD_V='20261114-182610';
+const BUILD_V='20261114-182819';
 async function checkNewVersion(){ if(!/^https?:/.test(location.protocol)) return; try{ const r=await fetch('version.json?t='+Date.now(),{cache:'no-store'}); if(!r.ok) return; const j=await r.json();
   if(j && j.v && j.v!==BUILD_V && !document.getElementById('newVer')){ const d=document.createElement('div'); d.id='newVer'; d.innerHTML='✨ 생기발랄 새 버전이 나왔어요. <button class="b s" id="newVerGo">새로 고침</button> <span style="font-weight:600">또는 키보드 <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>R</kbd></span> <span class="hint" style="color:inherit;opacity:.8">· 써 둔 내용은 그대로 남아요</span>'; document.body.prepend(d); document.getElementById('newVerGo').onclick=()=>{ flush().finally(()=>{ location.replace(location.pathname+'?v='+encodeURIComponent(j.v)+location.hash); }); }; } }catch(e){} }
 const SUB_DEFAULT='선생님을 잇는 생기부 플랫폼';
@@ -2199,6 +2200,8 @@ M.addEventListener('click',async e=>{
   if(t.id==='readApply'){ applyReading(); return; }
   if(t.id==='readCancel'){ UI.readPlan=null; renderSet(); return; }
   if(t.id==='xlsOut'){ exportXlsx().catch(()=>{}); return; }
+  if(t.id==='goDuty'){ UI.rqTab='duty'; UI.dutyOpen=true; go('req'); return; }
+  if(t.id==='tplAllCls'){ const it=itemBy(UI.item); if(it && !/동아리/.test(it.name) && !myClassSet()){ const n=S.students.filter(s=>!isOut(s)).length; if(!confirm('아직 내 담당을 정하지 않아 학교 전체 학생('+n+'명)이 양식에 들어갑니다.\n\n[확인] 그래도 전체 받기\n[취소] 내 담당 먼저 정하러 가기')){ UI.rqTab='duty'; UI.dutyOpen=true; go('req'); return; } } }
   if(t.id==='tplAllCls'||t.id==='tplAllItems'){ tplOut(t.id==='tplAllCls'?'allcls':'allitems').catch(()=>toast('양식을 만들지 못했습니다. 인터넷 연결을 확인해 주세요.')); return; }
   if(t.id==='tplOut'){ tplOut().catch(()=>toast('양식을 만들지 못했습니다. 인터넷 연결을 확인해 주세요.')); return; }
   if(t.id==='jsonOut'){ download('생기부도우미_전체백업_'+stamp()+'.json', new Blob([JSON.stringify(S)],{type:'application/json'})); S.settings.lastBackup=Date.now(); flush(); return; }
