@@ -1783,7 +1783,8 @@ function renderReq(){
     +'<label>상세 분야 → 받는 선생님<span id="rqSubBox">'+rqSubSelHTML(f0)+'</span></label></div>'
     +'<div class="hint" id="rqToHint" style="color:var(--org)"></div>'
     +'<div class="rqform" style="grid-template-columns:2fr 2fr 1fr"><label>오류(확인) 내용<input id="rqText" type="text" placeholder="예: 억혀"></label><label>변경 후<input id="rqAfter" type="text" placeholder="예: 얽혀 (오타)"></label><label>비고<input id="rqMemo" type="text" placeholder="예: 3학년 2반도 해당"></label></div>'
-    +'<div class="row"><button class="b" id="rqSend" style="font-size:16px;padding:10px 22px">📨 요청 보내기</button><span class="hint">누르면 담당 선생님에게 알림이 가고, 점검 시트에도 한 줄이 자동으로 적힙니다.</span></div>'
+    +'<div class="row"><button class="b" id="rqSend" style="font-size:16px;padding:10px 22px">📨 요청 보내기</button><span class="hint">누르면 담당 선생님에게 알림이 가고, 점검 시트에도 한 줄이 자동으로 적힙니다.<br><b style="color:var(--grn)">📋 누르는 순간 메신저용 쪽지가 자동으로 복사됩니다 — 메신저에 Ctrl+V</b></span></div>'
+    +'<details style="margin:4px 0 8px"><summary class="hint" style="cursor:pointer">📋 메신저용 쪽지는 어떻게 쓰나요? (눌러서 보기)</summary><ol style="margin:6px 0 4px 18px;font-size:14px;line-height:1.8"><li><b>[📨 요청 보내기]</b>를 누르는 순간 쪽지가 <b>자동으로 만들어지고 복사</b>됩니다. 따로 누를 단추는 없어요.</li><li>아래에 "📋 메신저용 쪽지가 복사됐어요" 알림이 뜹니다.</li><li>이 탭 <b>맨 위</b>에 쪽지 미리 보기와 [📋 다시 복사] 단추가 생깁니다.</li><li>경기도 메신저 쪽지 창에 <b>Ctrl+V</b> 하면 끝!</li></ol><div class="hint">※ 경기도 메신저는 바깥 사이트와 연결되지 않아 자동 발송은 안 됩니다. 받는 선생님 이름은 그 선생님이 "내 담당"을 정해 두어야 쪽지에 들어갑니다.</div></details>'
     +'<details><summary>📋 선생님별 담당 보기 (누구에게 보낼지 확인)</summary>'+teamListHTML()+'</details>'
     +'<details><summary>여러 건 한꺼번에 (엑셀에서 붙여넣기)</summary><div class="hint">한 줄에 한 건: <b>학번 · 이름 · 분야 · 상세 분야 · 오류 내용 · 변경 후</b> (엑셀 6칸을 복사해 붙여넣기)</div><textarea id="rqBulk" rows="4"></textarea><div class="row"><button class="b g" id="rqBulkSend">📨 여러 건 한꺼번에 보내기</button></div></details></div>';
   SEC.send=h; h='';
