@@ -234,6 +234,10 @@ th,td{border-color:var(--line);padding:7px 9px}
 @media print{#dodiSay{display:none}}
 #schip{background:#fff;color:#a93226;border:2px solid #c0392b;font-weight:800;border-radius:8px;padding:2px 10px;font-size:13px;white-space:nowrap;display:none;cursor:pointer}
 #schip.hot{background:#c0392b;color:#fff}
+#toast.req{background:#fff8d6;color:#1c2421;border:2px solid var(--yel);font-weight:700;font-size:15px;padding:10px 18px 10px 10px;display:flex;align-items:center;gap:10px;box-shadow:0 10px 28px rgba(30,61,53,.25);opacity:0}
+#toast.req.on{opacity:1}
+#toast.req img{width:44px;height:44px;object-fit:contain;flex:none}
+img.ggs{width:22px;height:22px;object-fit:contain;vertical-align:-5px;margin-right:2px}
 </style>
 </head>
 <body>
@@ -307,10 +311,10 @@ th,td{border-color:var(--line);padding:7px 9px}
 <p class="tip">💡 받는 사람이 "담당 미정"이면 그 선생님이 아직 담당을 안 정한 것입니다. 보내기 전에 연락해 주세요.</p>
 </details>
 
-<details><summary>④ 나에게 수정 요청이 왔을 때 — 🛠 내가 고칠 것</summary>
+<details><summary>④ 나에게 수정 요청이 왔을 때 — <img class="ggs" src="ggumsong.png" alt=""> 내가 고칠 것</summary>
 <ol>
 <li>팝업이 뜨거나 [수정 요청] 탭에 빨간 숫자가 보입니다.</li>
-<li>[🛠 내가 고칠 것] → [고치러 가기]로 그 학생 칸에 가서 고칩니다.</li>
+<li>[<img class="ggs" src="ggumsong.png" alt=""> 내가 고칠 것] → [고치러 가기]로 그 학생 칸에 가서 고칩니다.</li>
 <li><b>나이스에서 고치고 [저장]까지</b> 합니다.</li>
 <li><b>[✔ 나이스에서 고쳤어요]</b>를 누릅니다. "나이스 저장했나요?"에 [확인].</li>
 </ol>
@@ -733,7 +737,8 @@ const $=(s,r)=> (r||document).querySelector(s);
 const $$=(s,r)=> Array.from((r||document).querySelectorAll(s));
 function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 let toastTimer=null;
-function toast(msg){ const t=$('#toast'); t.textContent=msg; t.classList.add('on'); clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('on'),2600); }
+function reqToast(msg){ const t=$('#toast'); t.innerHTML='<img src="ggumsong.png" alt=""><span>'+esc(msg)+'</span>'; t.classList.add('on','req'); clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('on','req'),5000); }
+function toast(msg){ const t=$('#toast'); t.classList.remove('req'); t.textContent=msg; t.classList.add('on'); clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('on'),2600); }
 function sid(s){ return s.g+'-'+s.c+'-'+s.n; }
 function clsOf(s){ return s.g+'-'+s.c; }
 function classes(){ return Array.from(new Set(S.students.map(clsOf))).sort((a,b)=>a.localeCompare(b,'ko',{numeric:true})); }
@@ -787,7 +792,7 @@ function refreshCard(card, fixHTML){
   if(fixHTML!==undefined) card.dataset.fix=fixHTML;
   if(card.dataset.fix) h+='<div class="m-fix">'+card.dataset.fix+'</div>';
   const rb=$('.reqs',card); if(rb){ const rs=cardReqs(sidv,ik); const op=rs.filter(rqOpen), dn=rs.filter(r=>!rqOpen(r));
-    rb.innerHTML=op.map(r=>'<div class="rq"><b>🛠 수정 요청</b> · '+esc(r.area)+' · '+esc(r.date||'')+(r.from?' · '+esc(r.from):'')+(r.status==='재요청'?' <span class="st open">재요청</span>':'')+'<div class="rqt">'+rqTxt(r)+(r.memo?'<div class="hint">'+esc(r.memo)+'</div>':'')+'</div><button class="b s" data-rqdone="'+esc(r.id)+'">고쳤어요 — 반영 완료</button></div>').join('')
+    rb.innerHTML=op.map(r=>'<div class="rq"><b><img class="ggs" src="ggumsong.png" alt=""> 수정 요청</b> · '+esc(r.area)+' · '+esc(r.date||'')+(r.from?' · '+esc(r.from):'')+(r.status==='재요청'?' <span class="st open">재요청</span>':'')+'<div class="rqt">'+rqTxt(r)+(r.memo?'<div class="hint">'+esc(r.memo)+'</div>':'')+'</div><button class="b s" data-rqdone="'+esc(r.id)+'">고쳤어요 — 반영 완료</button></div>').join('')
       +dn.slice(-2).map(r=>'<div class="rq ok">✔ '+stTag(r)+pendNote(r)+' · '+esc(r.text.slice(0,60))+'</div>').join('');
     card.classList.toggle('hasreq',op.length>0); }
   if(over){ const ci=cutIndex(t,lim,S.settings.enterBytes); const tail=t.slice(ci); h+='<div class="m-over">✂ 나이스에서 잘리는 부분: <span>'+esc(tail.length>120? tail.slice(0,120)+'…':tail)+'</span></div>'; }
@@ -977,7 +982,7 @@ function writeHeadHTML(){
   let h='<div class="pick"><span class="lab"><i>1</i>'+(clubIt?'동아리 고르기 <em>동아리활동은 반이 아니라 동아리별로 씁니다</em>':'학급 고르기 <em>색: 빨강 → 노랑 → 초록(완료)</em>')+'</span>'+(useSel&&!clubIt? '<select id="selCls" style="font-size:15px;padding:6px 10px">'+cl.map(c=>'<option value="'+esc(c)+'"'+(c===UI.cls?' selected':'')+'>'+esc(clsName(c))+'</option>').join('')+'</select>' : '')+(useSel||clubIt? [] : cl).map(c=>{ const st=act(S.students.filter(s=>clsOf(s)===c)); const ok=st.length && countWritten(st,it.key)>=needOf(st.length,it); const cw=countWritten(st,it.key), cn=needOf(st.length,it); return '<button data-cls="'+esc(c)+'" class="'+(c===UI.cls?'on':'')+'"'+pcVar(cw,cn)+'>'+esc(clsName(c))+(ok?'<small>✔완료</small>':'<small>'+cw+'/'+cn+'</small>')+'</button>'; }).join('')
     +(S.groups||[]).map(gp=>{ const st=act(grpStudents(gp)); const k=countWritten(st,gp.item); const ok=st.length && k>=st.length; return '<button data-cls="g:'+esc(gp.id)+'" class="'+(UI.cls==='g:'+gp.id?'on':'')+'"'+pcVar(k,st.length)+'>🎲 '+esc(gp.name)+'<small>'+(ok?'✔완료 ':'')+k+'/'+st.length+'</small></button>'; }).join('')
     +sc.map(x=>'<button data-sclub="'+esc(x.name)+'" style="border-style:dashed">＋ '+esc(x.name)+' <small>'+x.rows.length+'명 가져오기</small></button>').join('')+'<button data-go="set" data-focus="grpName" style="border-style:dashed">＋ 동아리 명단 직접 넣기</button>'+(clubIt?'':clsToggleHTML())+'</div>'
-    +'<div class="pick"><span class="lab"><i>2</i>영역 고르기 <em>지금 반에서 영역별 진행 색</em></span>'+S.items.map(i=>{ const w=countWritten(mine,i.key), ok=all && w>=needOf(all,i); const rq=S.reqs.filter(r=>rqToMe(r)&&rqOpen(r)&&rqSid(r).indexOf(UI.cls+'-')===0&&rqIk(r)===i.key).length; return '<button data-itemk="'+esc(i.key)+'" class="'+(i.key===UI.item?'on':'')+'"'+pcVar(w,needOf(all,i))+'>'+esc(i.name)+'<small>'+(ok?'✔완료 ':'')+w+'/'+all+'</small>'+(rq?'<small style="color:var(--red);font-weight:700">🛠'+rq+'</small>':'')+'</button>'; }).join('')+'</div>';
+    +'<div class="pick"><span class="lab"><i>2</i>영역 고르기 <em>지금 반에서 영역별 진행 색</em></span>'+S.items.map(i=>{ const w=countWritten(mine,i.key), ok=all && w>=needOf(all,i); const rq=S.reqs.filter(r=>rqToMe(r)&&rqOpen(r)&&rqSid(r).indexOf(UI.cls+'-')===0&&rqIk(r)===i.key).length; return '<button data-itemk="'+esc(i.key)+'" class="'+(i.key===UI.item?'on':'')+'"'+pcVar(w,needOf(all,i))+'>'+esc(i.name)+'<small>'+(ok?'✔완료 ':'')+w+'/'+all+'</small>'+(rq?'<small style="color:var(--red);font-weight:700"><img class="ggs" src="ggumsong.png" alt="">'+rq+'</small>':'')+'</button>'; }).join('')+'</div>';
   h+='<div class="xrow"><b>📥 나이스에 한 번에 붙이기</b> <button class="b s" id="xItemCls">이 반 '+esc(it.name)+' 엑셀 받기</button><button class="b g s" id="xItemAll">내 반 전부 (반마다 시트)</button><span class="hint">엑셀의 "나이스에 붙일 내용" 칸을 통째로 복사해 나이스에 붙이면 됩니다.</span></div>';
   h+='<div class="now"><i class="stepn">3</i>'+esc(unitName(UI.cls))+' · '+esc(it.name)+' 쓰기 '+pcBar(written,need)+' <span class="hint" style="font-weight:400">한도 '+it.limit.toLocaleString()+'B(한글 약 '+Math.floor(it.limit/3)+'자)'+(over?' · <b style="color:var(--red)">초과 '+over+'</b>':'')+'</span></div>';
   let msg, cls2;
@@ -1551,16 +1556,16 @@ function mergeServer(rows){
       S.reqSeen[r.id]=key; } });
   S.reqs=next;
   next.forEach(r=>{ if(rqToMe(r) && rqOpen(r) && S.reqSnap[r.id]===undefined){ const it=matchItem(r.area); if(it && r.g) S.reqSnap[r.id]=peek(rqSid(r),it.key).text; } });
-  if(first){ S.reqInit=true; const a=inbox().length, b=waitConfirm().length; if(a||b) toast('🛠 고칠 요청 '+a+'건, 확인할 것 '+b+'건이 있습니다.'); return; }
+  if(first){ S.reqInit=true; const a=inbox().length, b=waitConfirm().length; if(a||b) reqToast('고칠 요청 '+a+'건, 확인할 것 '+b+'건이 있습니다.'); return; }
   notifyReqs(news,fixed);
 }
 function notifyReqs(news,fixed){
-  const pop=(title,body)=>{ if('Notification' in window && Notification.permission==='granted'){ try{ new Notification(title,{body}); }catch(e){} } };
-  if(news.length){ const r=news[0]; toast('🛠 새 수정 요청 '+news.length+'건 — '+rqWho(r)+' '+r.area+': '+r.text.slice(0,30));
+  const pop=(title,body)=>{ if('Notification' in window && Notification.permission==='granted'){ try{ new Notification(title,{body,icon:'ggumsong.png'}); }catch(e){} } };
+  if(news.length){ const r=news[0]; reqToast('새 수정 요청 '+news.length+'건 — '+rqWho(r)+' '+r.area+': '+r.text.slice(0,30));
     blinkTitle('새 수정 요청 '+news.length+'건');
     news.slice(0,3).forEach(x=>pop('생기부 수정 요청', rqWho(x)+' · '+x.area+'\n'+x.text.slice(0,60)+(x.after?' → '+x.after.slice(0,40):''))); { const nb=$('#nav [data-tab=req]'); if(nb) nb.classList.add('flash'); } }
   if(fixed.length){ const r=fixed[0]; const who=rqHr(r)? '담임 확인' : '반영 완료'; const msg='✔ '+who+' '+fixed.length+'건 — '+rqWho(r)+' '+r.area+(rqHr(r)?' (담당자 확인해 주세요)':' (담임 확인해 주세요)');
-    setTimeout(()=>toast(msg), news.length?2800:0); blinkTitle((rqHr(r)?'담당자 확인 ':'반영 완료 ')+fixed.length+'건'); fixed.slice(0,3).forEach(x=>pop('생기부 '+(rqHr(x)?'담임 확인':'반영 완료'), rqWho(x)+' · '+x.area+(rqHr(x)?' — 담당자 확인 차례':' — 담임 확인 차례'))); $('#rchip').classList.add('flash'); }
+    setTimeout(()=>reqToast(msg), news.length?5200:0); blinkTitle((rqHr(r)?'담당자 확인 ':'반영 완료 ')+fixed.length+'건'); fixed.slice(0,3).forEach(x=>pop('생기부 '+(rqHr(x)?'담임 확인':'반영 완료'), rqWho(x)+' · '+x.area+(rqHr(x)?' — 담당자 확인 차례':' — 담임 확인 차례'))); $('#rchip').classList.add('flash'); }
 }
 async function rqAct(r, action, body, status){
   const prev=r.status; r.status=status; r.pend={action,status,prev,at:Date.now(),body:Object.assign({action,id:r.id},body)}; r.failed=false;
@@ -1678,8 +1683,8 @@ function teamHTML(){
 function saveDuty(){ if(S.schoolClubs){ const mk=autoClubs(); if(mk.length) setTimeout(()=>toast('🎲 내 동아리 명단이 자동으로 들어왔습니다: '+mk.join(', ')),1800); } S.reqs.forEach(r=>{ S.reqSeen[r.id]=r.status+'|'+r.text.length+'|'+r.memo.length; }); S.reqInit=true; save(); if(S.settings.sheetUrl&&S.settings.teacher) sendStats(true); refreshReqUI(); }
 // 브라우저 탭 제목에 숫자 표시 + 다른 탭을 보고 있을 때 새 알림이 오면 깜박임
 const BASE_TITLE='도디쌤의 생기발랄'; let blinkT=null;
-function setTitle(){ const k=inbox().length+waitConfirm().length; if(!blinkT) document.title=(k?'('+k+') 🛠 ':'')+BASE_TITLE; }
-function blinkTitle(msg){ if(!document.hidden) return; clearInterval(blinkT); let on=false; blinkT=setInterval(()=>{ on=!on; document.title= on? '🔔 '+msg : '('+(inbox().length+waitConfirm().length)+') 🛠 '+BASE_TITLE; },1000); }
+function setTitle(){ const k=inbox().length+waitConfirm().length; if(!blinkT) document.title=(k?'('+k+') 📩 ':'')+BASE_TITLE; }
+function blinkTitle(msg){ if(!document.hidden) return; clearInterval(blinkT); let on=false; blinkT=setInterval(()=>{ on=!on; document.title= on? '🔔 '+msg : '('+(inbox().length+waitConfirm().length)+') 📩 '+BASE_TITLE; },1000); }
 document.addEventListener('visibilitychange',()=>{ if(!document.hidden && blinkT){ clearInterval(blinkT); blinkT=null; setTitle(); } });
 function refreshReqUI(){
   setTitle(); try{ renderMe(); renderBanner(); }catch(e){}
@@ -1711,7 +1716,7 @@ function renderReq(){
   SEC.duty=h; h='';
   // ① 내가 고칠 것
   const ib=inbox();
-  h+='<div class="box"><h2>🛠 내가 고칠 것 — '+ib.length+'건</h2>'+(ib.length? tbl(ib,r=>'<button class="b g s" data-rqgo="'+esc(r.id)+'">고치러 가기</button> <button class="b s" data-rqdone="'+esc(r.id)+'">✔ 나이스에서 고쳤어요</button>')+'<div class="hint">"고치러 가기" → 그 학생 칸. 고친 뒤 <b>나이스용 복사</b>를 누르면 반영 완료를 바로 묻습니다. 나이스에서 직접 고쳤으면 <b>반영 완료</b>만 누르세요(시트 "담당교사 반영 날짜"에 오늘 날짜가 들어갑니다).</div>' : '<div class="hint">'+(ds.length?'고칠 요청이 없습니다.':'위 "내 담당"을 정하면 내 분야 요청이 여기에 뜹니다.')+'</div>')+'</div>';
+  h+='<div class="box"><h2><img class="ggs" src="ggumsong.png" alt=""> 내가 고칠 것 — '+ib.length+'건</h2>'+(ib.length? tbl(ib,r=>'<button class="b g s" data-rqgo="'+esc(r.id)+'">고치러 가기</button> <button class="b s" data-rqdone="'+esc(r.id)+'">✔ 나이스에서 고쳤어요</button>')+'<div class="hint">"고치러 가기" → 그 학생 칸. 고친 뒤 <b>나이스용 복사</b>를 누르면 반영 완료를 바로 묻습니다. 나이스에서 직접 고쳤으면 <b>반영 완료</b>만 누르세요(시트 "담당교사 반영 날짜"에 오늘 날짜가 들어갑니다).</div>' : '<div class="hint">'+(ds.length?'고칠 요청이 없습니다.':'위 "내 담당"을 정하면 내 분야 요청이 여기에 뜹니다.')+'</div>')+'</div>';
   SEC.fix=h; h='';
   // ② 담임 확인
   if(st.homeroom){ const mine=S.reqs.filter(r=>rqHome(r)&&!isHrField(r)); const wd=mine.filter(rqDone), wo=mine.filter(rqOpen);
@@ -1767,7 +1772,7 @@ function rqTabsHTML(SEC){
   const nHr=st.homeroom? S.reqs.filter(r=>rqHome(r)&&!isHrField(r)&&rqDone(r)).length : 0;
   const mine=S.reqs.filter(rqFromMe), nSent=mine.filter(r=>!rqClosed(r)).length;
   const nAd=st.admin? S.reqs.filter(adminReady).length : 0; const noDuty=!myDuties().length && !st.homeroom;
-  const tabs=[['fix','🛠 내가 고칠 것',nFix,'red'],['send','📨 요청 보내기',0,''],['hr','👀 우리 반 확인',nHr,'org']].filter(t=>t[0]!=='hr'||st.homeroom)
+  const tabs=[['fix','<img class="ggs" src="ggumsong.png" alt=""> 내가 고칠 것',nFix,'red'],['send','📨 요청 보내기',0,''],['hr','👀 우리 반 확인',nHr,'org']].filter(t=>t[0]!=='hr'||st.homeroom)
     .concat(mine.length?[['sent','📤 보낸 요청',nSent,'']]:[]).concat([['duty','⚙ 내 담당',noDuty?'!':0,'red']]).concat(st.admin?[['admin','🏁 담당자',nAd,'org']]:[]);
   if(UI.rqTab==='all') return SEC.duty+SEC.fix+SEC.hr+SEC.send+SEC.sent+SEC.log+SEC.admin; // 점검·시험용: 전부 펼치기
   let cur=UI.rqTab; if(!tabs.some(t=>t[0]===cur)) cur= noDuty&&!st.admin? 'duty' : nFix? 'fix' : nHr? 'hr' : nAd? 'admin' : 'send';
