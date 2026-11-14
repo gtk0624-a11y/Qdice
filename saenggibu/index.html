@@ -232,6 +232,8 @@ th,td{border-color:var(--line);padding:7px 9px}
 #dodiSay::after{content:'';position:absolute;right:38px;bottom:-9px;width:14px;height:14px;background:#fff;border-right:2px solid var(--yel);border-bottom:2px solid var(--yel);transform:rotate(45deg)}
 #dodiSay small{display:block;font-weight:600;color:var(--grn);font-size:12px;margin-bottom:2px}
 @media print{#dodiSay{display:none}}
+#schip{background:#fff;color:#a93226;border:2px solid #c0392b;font-weight:800;border-radius:8px;padding:2px 10px;font-size:13px;white-space:nowrap;display:none;cursor:pointer}
+#schip.hot{background:#c0392b;color:#fff}
 </style>
 </head>
 <body>
@@ -243,7 +245,8 @@ th,td{border-color:var(--line);padding:7px 9px}
   <span id="meWrap" style="position:relative"><button id="meChip" title="내 담임·담당·입력할 항목 보기"></button><div id="mePanel" style="display:none"></div></span>
   <span class="sp"></span>
   <span id="rchip" title="수정 요청 탭으로 이동"></span>
-  <span id="dchip" title="일정 탭으로 이동"></span>
+  <span id="schip" title="담당자가 보낸 학교 일정 · 일정 탭으로 이동"></span>
+  <span id="dchip" title="내 일정 · 일정 탭으로 이동"></span>
   <span id="savest"></span>
   <button id="lockBtn" class="b g s" style="display:none" title="지금 잠그기">🔒 잠그기</button>
   <input id="gsearch" type="search" name="dodi-student-q" placeholder="🔍 학생 이름 검색" title="학생 이름을 쓰면 그 학생의 모든 영역을 한 화면에서 보고 고칠 수 있습니다" autocomplete="off" autocorrect="off" spellcheck="false" readonly onfocus="this.removeAttribute('readonly')">
@@ -1128,8 +1131,11 @@ function ddayText(n){ return n===0?'오늘':(n>0?'D-'+n:'D+'+(-n)+' 지남'); }
 function allScheds(){ const fin=S.schoolFin||{}; return S.schedules.concat((S.schoolSched||[]).map(x=>Object.assign({},x,{school:true,title:'🏫 '+x.title,fin:!!fin[x.id]}))); }
 function renderBanner(){ try{ renderMe(); }catch(e){}
   const up=allScheds().map(x=>({x,n:dday(x.date)})).filter(o=>o.n!==null&&o.n>=0&&o.n<=3&&!o.x.fin).sort((a,b)=>a.n-b.n);
-  const nx=allScheds().map(x=>({x,n:dday(x.date)})).filter(o=>o.n!==null&&o.n>=0&&!o.x.fin).sort((a,b)=>a.n-b.n)[0];
-  const chip=$('#dchip'); if(nx){ chip.style.display='inline-block'; chip.textContent=ddayText(nx.n)+' '+(nx.x.title.length>8? nx.x.title.slice(0,8)+'…' : nx.x.title); chip.title=nx.x.title+' ('+nx.x.date+')'; } else chip.style.display='none';
+  const near=list=>list.map(x=>({x,n:dday(x.date)})).filter(o=>o.n!==null&&o.n>=0&&!o.x.fin).sort((a,b)=>a.n-b.n)[0];
+  const ns=near(allScheds().filter(x=>x.school)), sc=$('#schip');
+  if(ns){ sc.style.display='inline-block'; const t=ns.x.title.replace(/^🏫\s*/,''); sc.textContent='🏫 '+ddayText(ns.n)+' '+(t.length>9? t.slice(0,9)+'…' : t); sc.title='학교 일정(담당자): '+t+' ('+ns.x.date+')'; sc.classList.toggle('hot',ns.n<=3); } else sc.style.display='none';
+  const nx=near(S.schedules);
+  const chip=$('#dchip'); if(nx){ chip.style.display='inline-block'; chip.textContent='📌 '+ddayText(nx.n)+' '+(nx.x.title.length>8? nx.x.title.slice(0,8)+'…' : nx.x.title); chip.title=nx.x.title+' ('+nx.x.date+')'; } else chip.style.display='none';
   const b=$('#banner'); const parts=[];
   if(up.length) parts.push('⏰ 곧 마감: '+up.map(o=>'<b>'+ddayText(o.n)+'</b> '+esc(o.x.title)+' ('+esc(o.x.date.slice(5))+')').join(' · '));
   if(!parts.length){ b.style.display='none'; return; }
@@ -1860,7 +1866,7 @@ function welcomeHTML(){ if(S.settings.welcomeOff) return '';
     +step(typeof Notification!=='undefined'&&Notification.permission==='granted','<b>알림 켜기</b> — [수정 요청]의 [알림 켜기] → 허용')
     +'</ol><div class="row" style="justify-content:space-between"><span class="hint">그다음 <b>영역별 입력</b>에서 내 반 학생을 쓰면 됩니다. 자세한 건 맨 위 <b>📖 사용설명서</b>.</span><button class="b g s" id="welcomeOff">다시 보지 않기</button></div></details>'; }
 function go(tab){ UI.tab=tab; render(); window.scrollTo(0,0); }
-$('#dchip').addEventListener('click',()=>go('sched'));
+$('#dchip').addEventListener('click',()=>go('sched')); $('#schip').addEventListener('click',()=>go('sched'));
 // 파일을 화면 어디에 끌어다 놓아도: 입력 양식·엑셀 백업이면 내용까지, 명단 파일이면 명단만
 let dragN=0;
 const isFileDrag=e=>e.dataTransfer && Array.from(e.dataTransfer.types||[]).includes('Files');
