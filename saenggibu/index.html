@@ -238,6 +238,10 @@ th,td{border-color:var(--line);padding:7px 9px}
 #toast.req.on{opacity:1}
 #toast.req img{width:44px;height:44px;object-fit:contain;flex:none}
 img.ggs{width:22px;height:22px;object-fit:contain;vertical-align:-5px;margin-right:2px}
+.rqform label>input,.rqform label>select,.rqform #rqSubBox,.rqform #rqSubBox select{width:100%;min-width:0;max-width:100%;box-sizing:border-box}
+.rqform label{min-width:0}
+.rqform.rqtop{grid-template-columns:repeat(3,minmax(58px,.55fr)) minmax(110px,1fr) minmax(120px,1.1fr) minmax(150px,1.5fr)}
+@media(max-width:760px){.rqform.rqtop{grid-template-columns:repeat(3,1fr)}}
 </style>
 </head>
 <body>
@@ -1772,7 +1776,7 @@ function renderReq(){
   const f0=fieldList()[0];
   const RD=roundList(); const rd=RD.includes(st.lastRound)? st.lastRound : RD[0];
   h+='<div class="box"><h2>📨 요청 보내기 <span class="hint" style="font-weight:400;cursor:help" title="누구나 보낼 수 있습니다. 보낸 사람 이름이 시트 &quot;요청자&quot;에 남고, 반영되면 보낸 사람에게 알림이 옵니다.">ⓘ 누구나 보낼 수 있어요</span></h2>'
-    +'<div class="row" style="margin-bottom:6px"><label>점검 차수 <select id="rqRound">'+RD.map(x=>'<option'+(x===rd?' selected':'')+'>'+esc(x)+'</option>').join('')+'</select></label><span class="hint">비고 칸 앞에 [2차] 처럼 붙습니다.</span>'+(st.admin?'<button class="b g s" id="rdEdit">차수 고치기</button>':'')+'</div>'+(UI.rdEdit&&st.admin?'<div class="box" style="background:var(--yel2)"><b>점검 차수 고치기</b> <span class="hint">한 줄에 하나씩. 모든 선생님 화면에 똑같이 나옵니다. 앞에 "1차"처럼 숫자+차를 쓰면 비고에 [1차]가 붙습니다.</span><textarea id="rdText" rows="5" style="width:100%;margin-top:4px">'+esc(RD.join('\n'))+'</textarea><div class="row"><button class="b s" id="rdSave">저장 (모두에게 적용)</button><button class="b g s" id="rdCancel">취소</button></div></div>':'')+'<div class="rqform">'
+    +'<div class="row" style="margin-bottom:6px"><label>점검 차수 <select id="rqRound">'+RD.map(x=>'<option'+(x===rd?' selected':'')+'>'+esc(x)+'</option>').join('')+'</select></label><span class="hint">비고 칸 앞에 [2차] 처럼 붙습니다.</span>'+(st.admin?'<button class="b g s" id="rdEdit">차수 고치기</button>':'')+'</div>'+(UI.rdEdit&&st.admin?'<div class="box" style="background:var(--yel2)"><b>점검 차수 고치기</b> <span class="hint">한 줄에 하나씩. 모든 선생님 화면에 똑같이 나옵니다. 앞에 "1차"처럼 숫자+차를 쓰면 비고에 [1차]가 붙습니다.</span><textarea id="rdText" rows="5" style="width:100%;margin-top:4px">'+esc(RD.join('\n'))+'</textarea><div class="row"><button class="b s" id="rdSave">저장 (모두에게 적용)</button><button class="b g s" id="rdCancel">취소</button></div></div>':'')+'<div class="rqform rqtop">'
     +'<label>학년<input id="rqG" type="number" min="1" max="6"></label><label>반<input id="rqC" type="number" min="1"></label><label>번호<input id="rqN" type="number" min="1"></label>'
     +'<label>이름 (전체면 "전체")<input id="rqName" type="text"></label>'
     +'<label>오류(확인) 분야<select id="rqField">'+fieldList().map(f=>'<option>'+esc(f)+'</option>').join('')+'</select></label>'
