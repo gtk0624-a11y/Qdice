@@ -244,6 +244,7 @@ img.ggs{width:22px;height:22px;object-fit:contain;vertical-align:-5px;margin-rig
 @media(max-width:760px){.rqform.rqtop{grid-template-columns:repeat(3,1fr)}}
 #newVer{position:sticky;top:0;z-index:30;background:var(--yel);color:var(--txt);font-weight:800;text-align:center;padding:8px 12px;font-size:15px;box-shadow:0 2px 8px rgba(0,0,0,.15)}
 #newVer button{margin-left:6px}
+#newVer kbd{display:inline-block;background:#fff;border:1px solid #c9b23c;border-bottom-width:3px;border-radius:5px;padding:0 6px;font:700 13px/1.6 inherit;margin:0 1px}
 </style>
 </head>
 <body>
@@ -1730,9 +1731,9 @@ function saveDuty(){ if(S.schoolClubs){ const mk=autoClubs(); if(mk.length) setT
 // 브라우저 탭 제목에 숫자 표시 + 다른 탭을 보고 있을 때 새 알림이 오면 깜박임
 const BASE_TITLE='도디쌤의 생기발랄';
 // 새 버전 알림: 사이트가 고쳐져 올라오면 화면 위에 띠를 띄움(브라우저가 예전 화면을 기억하는 문제 해결)
-const BUILD_V='20261114-094451';
+const BUILD_V='20261114-094528';
 async function checkNewVersion(){ if(!/^https?:/.test(location.protocol)) return; try{ const r=await fetch('version.json?t='+Date.now(),{cache:'no-store'}); if(!r.ok) return; const j=await r.json();
-  if(j && j.v && j.v!==BUILD_V && !document.getElementById('newVer')){ const d=document.createElement('div'); d.id='newVer'; d.innerHTML='✨ 생기발랄 새 버전이 나왔어요. <button class="b s" id="newVerGo">새로 고침</button> <span class="hint" style="color:inherit;opacity:.8">써 둔 내용은 그대로 남아요</span>'; document.body.prepend(d); document.getElementById('newVerGo').onclick=()=>{ flush().finally(()=>{ location.replace(location.pathname+'?v='+encodeURIComponent(j.v)+location.hash); }); }; } }catch(e){} }
+  if(j && j.v && j.v!==BUILD_V && !document.getElementById('newVer')){ const d=document.createElement('div'); d.id='newVer'; d.innerHTML='✨ 생기발랄 새 버전이 나왔어요. <button class="b s" id="newVerGo">새로 고침</button> <span style="font-weight:600">또는 키보드 <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>R</kbd></span> <span class="hint" style="color:inherit;opacity:.8">· 써 둔 내용은 그대로 남아요</span>'; document.body.prepend(d); document.getElementById('newVerGo').onclick=()=>{ flush().finally(()=>{ location.replace(location.pathname+'?v='+encodeURIComponent(j.v)+location.hash); }); }; } }catch(e){} }
 const SUB_DEFAULT='선생님을 잇는 생기부 플랫폼';
 // 부제: 담당자가 고치면 모든 선생님 화면에 같이 바뀜(시트에 보관). 원제는 고정.
 function applySubtitle(){ const el=document.getElementById('subT'); if(el) el.textContent=(S.subtitle||'').trim()||SUB_DEFAULT; } let blinkT=null;
