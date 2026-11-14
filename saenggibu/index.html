@@ -1731,7 +1731,7 @@ function saveDuty(){ if(S.schoolClubs){ const mk=autoClubs(); if(mk.length) setT
 // 브라우저 탭 제목에 숫자 표시 + 다른 탭을 보고 있을 때 새 알림이 오면 깜박임
 const BASE_TITLE='도디쌤의 생기발랄';
 // 새 버전 알림: 사이트가 고쳐져 올라오면 화면 위에 띠를 띄움(브라우저가 예전 화면을 기억하는 문제 해결)
-const BUILD_V='20261114-094528';
+const BUILD_V='20261114-143913';
 async function checkNewVersion(){ if(!/^https?:/.test(location.protocol)) return; try{ const r=await fetch('version.json?t='+Date.now(),{cache:'no-store'}); if(!r.ok) return; const j=await r.json();
   if(j && j.v && j.v!==BUILD_V && !document.getElementById('newVer')){ const d=document.createElement('div'); d.id='newVer'; d.innerHTML='✨ 생기발랄 새 버전이 나왔어요. <button class="b s" id="newVerGo">새로 고침</button> <span style="font-weight:600">또는 키보드 <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>R</kbd></span> <span class="hint" style="color:inherit;opacity:.8">· 써 둔 내용은 그대로 남아요</span>'; document.body.prepend(d); document.getElementById('newVerGo').onclick=()=>{ flush().finally(()=>{ location.replace(location.pathname+'?v='+encodeURIComponent(j.v)+location.hash); }); }; } }catch(e){} }
 const SUB_DEFAULT='선생님을 잇는 생기부 플랫폼';
@@ -1850,7 +1850,7 @@ function teamListHTML(){
     return '<tr><td class="l"><b>'+esc(n)+'</b></td><td>'+(hm? esc(clsName(hm)) : '-')+'</td><td class="l">'+(fs.length? fs.map(d=>dutyLabel(d)).join('<br>') : '<span class="hint">담임 항목만</span>')+'</td></tr>'; }).join('')+'</table>';
 }
 function roundList(){ const a=(S.reqRounds||[]).filter(Boolean); return a.length? a : ROUND_DEFAULT; }
-// 기본 점검 차수: 「2026학년도 2학기 학교생활기록부 점검표」(곡선중) 순서. 담당자가 설정에서 고치면 모든 선생님께 적용.
+// 기본 점검 차수: 「2026학년도 2학기 학교생활기록부 점검표」 예시 순서. 담당자가 설정에서 고치면 모든 선생님께 적용.
 const ROUND_DEFAULT=['1차 (담임 · 항목별 출력물)','2차 (N-1반 담임 · 항목별 출력물)','3차 (담임 · 항목별 출력물)','4차 (부담임 · 생기부Ⅱ 출력물)','5차 (N-2반 담임 · 생기부Ⅱ 출력물)','기타'];
 function roundTag(){ const v=($('#rqRound')||{}).value||''; const m=v.match(/^\s*(\d+\s*차)/); return m? '['+m[1].replace(/\s/g,'')+'] ' : ''; }
 function rqAutofill(){
@@ -1913,7 +1913,7 @@ function applyLinkFromUrl(){
   const url=decodeURIComponent(m[1]), key=decodeURIComponent(m[2]);
   if(!/^https:\/\/script\.google\.com\//.test(url)){ toast('학교 전용 링크가 올바르지 않습니다. 담당자에게 다시 받아 주세요.'); return; }
   const changed=switchSheet(url,key);
-  fetchRoster(false);
+  fetchRoster(false); if(window.gbLoadSchool) setTimeout(window.gbLoadSchool,1500);
   setTimeout(()=>{ if(!S.settings.teacher){ go('set'); const el=$('#stTeacher'); if(el){ el.focus(); el.scrollIntoView&&el.scrollIntoView({block:'center'}); } toast('담당자 시트에 연결했습니다. 이 칸에 선생님 이름만 적어 주세요.'); }
     else toast(changed? '새 담당자 시트로 연결했습니다. (이전 시트의 수정 요청 기록은 비웠습니다)' : '담당자 시트에 이미 연결되어 있습니다.'); },300);
 }
@@ -2244,7 +2244,7 @@ window.addEventListener('beforeunload',()=>{ flush(); });
 // 기본 자료: 2026 학교생활기록부 기재요령 주요 개정사항(중학교) — 쪽수·근거 원문을 함께 보여 줌
 // 올린 자료: 교사가 PDF를 올리면 이 컴퓨터(브라우저)에만 저장하고 쪽마다 찾음
 (function(){
-const GB={base:[], ups:[], shared:[], packYear:0, open:false, busy:false};
+const GB={base:[], ups:[], shared:[], school:[], packYear:0, open:false, busy:false};
 try{ GB.base=JSON.parse(document.getElementById('guideData').textContent); }catch(e){ GB.base=[]; }
 const BASE_SRC='2026 학교생활기록부 기재요령 주요 개정사항(중학교)';
 const SYN=[
@@ -2312,7 +2312,18 @@ function snippet(txt,toks){
 const BASE_YEAR=2026;
 function curYear(){ try{ return +(S.settings.year)||new Date().getFullYear(); }catch(e){ return new Date().getFullYear(); } }
 function yearOf(name,pages){ const m=String(name).match(/(20\d\d)/) || String((pages||[]).slice(0,3).join(' ')).match(/(20\d\d)\s*학년도/); return m? +m[1] : curYear(); }
-function allDocs(){ return GB.shared.map(d=>Object.assign({kind:'공용'},d)).concat(GB.ups.map(d=>Object.assign({kind:'내 자료'},d))); }
+function allDocs(){ return GB.shared.map(d=>Object.assign({kind:'공용'},d)).concat(GB.school.map(d=>Object.assign({kind:'우리 학교'},d)), GB.ups.map(d=>Object.assign({kind:'내 자료'},d))); }
+// ── 우리 학교 자료: 담당자가 챗봇에 올린 PDF를 우리 학교 시트에 저장 → 우리 학교 선생님 모두의 챗봇에 들어감(다른 학교와 섞이지 않음) ──
+function isAdm(){ return !!(S.settings.admin && S.settings.adminKey && S.settings.sheetUrl && S.settings.sheetKey); }
+async function loadSchool(){ const st=S.settings; if(!st.sheetUrl||!st.sheetKey) return;
+  try{ const d=JSON.parse(await (await fetch(rqUrl({action:'list',guide:'1'}))).text()); if(d && d.ok && Array.isArray(d.guides)){ GB.school=d.guides.filter(x=>x&&x.name&&Array.isArray(x.pages)).map(x=>Object.assign({year:yearOf(x.name,x.pages)},x)); await DB.set('schoolGuides',GB.school); renderUps(); } }catch(e){} }
+async function sendSchool(list,msg){ if(!isAdm()){ toast('담당자 모드에서만 할 수 있습니다. [설정·백업]에서 담당자 암호를 넣어 주세요.'); return; }
+  try{ await rqPost({action:'guides', admin:S.settings.adminKey, docs:list.map(d=>({name:d.name,pages:d.pages}))}); GB.school=list.map(d=>({year:yearOf(d.name,d.pages), name:d.name, pages:d.pages})); await DB.set('schoolGuides',GB.school); renderUps(); bot(msg); setTimeout(loadSchool,4000); }
+  catch(e){ bot('보내지 못했습니다. 인터넷 연결을 확인한 뒤 다시 해 주세요.'); } }
+function shareUp(i){ const d=GB.ups[i]; if(!d) return; if(!confirm('「'+d.name+'」을(를) 우리 학교 선생님 모두의 챗봇에 넣을까요?\n우리 학교 시트에만 저장되고, 다른 학교에는 가지 않습니다.\n학생 이름이 든 자료는 넣지 마세요.')) return;
+  sendSchool(GB.school.filter(x=>x.name!==d.name).concat([d]), '「'+esc(d.name)+'」을(를) <b>우리 학교 전체</b>에 넣었습니다. 우리 학교 선생님들 챗봇에서도 이 자료로 찾아 드립니다.'); }
+function unshareSchool(i){ const d=GB.school[i]; if(!d || !confirm('「'+d.name+'」을(를) 우리 학교 자료에서 뺄까요?')) return;
+  sendSchool(GB.school.filter((_,k)=>k!==i), '「'+esc(d.name)+'」을(를) 우리 학교 자료에서 뺐습니다.'); }
 function liveDocs(){ return allDocs().filter(d=>!d.year || d.year>=curYear()); }
 function baseOn(){ return !(GB.packYear>BASE_YEAR); }
 function search(q){
@@ -2372,8 +2383,8 @@ function renderUps(){
   const b=document.getElementById('gbUps'); if(!b) return; const cy=curYear();
   let h='';
   if(GB.shared.length) h+='공용 자료('+GB.packYear+'): '+GB.shared.map(d=>'<span class="gbup">'+esc(d.name)+'</span>').join(' ')+'<br>';
-  if(GB.ups.length) h+='내 자료: '+GB.ups.map((d,i)=>'<span class="gbup"'+(d.year&&d.year<cy?' style="opacity:.55" title="지난 학년도 자료라 찾지 않습니다"':'')+'>'+esc(d.name)+' ('+d.pages.length+'쪽'+(d.year?', '+d.year+(d.year<cy?' 지난 자료':''):'')+') <button data-gdel="'+i+'" title="이 자료 지우기">✕</button></span>').join(' ')
-    +' <button class="b g s" id="gbPack" title="학교 전체가 쓰는 공용 자료 파일 만들기">공용 자료 파일 만들기</button>';
+  if(GB.school.length) h+='우리 학교 자료: '+GB.school.map((d,i)=>'<span class="gbup">'+esc(d.name)+' ('+d.pages.length+'쪽)'+(isAdm()?' <button data-gsdel="'+i+'" title="우리 학교 자료에서 빼기">✕</button>':'')+'</span>').join(' ')+'<br>';
+  if(GB.ups.length) h+='내 자료: '+GB.ups.map((d,i)=>'<span class="gbup"'+(d.year&&d.year<cy?' style="opacity:.55" title="지난 학년도 자료라 찾지 않습니다"':'')+'>'+esc(d.name)+' ('+d.pages.length+'쪽'+(d.year?', '+d.year+(d.year<cy?' 지난 자료':''):'')+') <button data-gdel="'+i+'" title="이 자료 지우기">✕</button>'+(isAdm()?' <button class="b s" data-gshare="'+i+'" title="우리 학교 선생님 모두의 챗봇에 넣기">우리 학교 전체에 보내기</button>':'')+'</span>').join(' ');
   b.innerHTML=h;
 }
 // ── 일정 자동 넣기: 점검 일정 같은 짧은 자료에서 날짜를 찾아 일정 탭(D-day)에 바로 넣음 ──
@@ -2422,6 +2433,7 @@ async function upload(files){
       GB.ups=GB.ups.filter(d=>d.name!==f.name).concat([{name:f.name, at:Date.now(), year, pages}]);
       await DB.set('guides',GB.ups); renderUps();
       bot('「'+esc(f.name)+'」 '+pages.length+'쪽을 넣었습니다(<b>'+year+'학년도</b> 자료로 표시). 이제 이 자료에서도 찾아 드립니다. 이 컴퓨터에만 저장됩니다.'+(year<curYear()?'<br><b style="color:var(--red)">지난 학년도 자료라서 찾기에서는 빠집니다.</b>':''));
+      if(isAdm()) bot('담당자 모드입니다. 이 자료를 <b>우리 학교 선생님 모두</b>의 챗봇에 넣으려면 <button class="b s" data-gshare="'+(GB.ups.length-1)+'">우리 학교 전체에 보내기</button>를 누르세요. 우리 학교 시트에만 저장되고 다른 학교에는 가지 않습니다.');
       if(year>=curYear()) addScheds(f.name,pages);
     }catch(e){ bot('「'+esc(f.name)+'」을(를) 읽지 못했습니다. 인터넷 연결과 파일을 확인해 주세요.'); }
   }
@@ -2450,9 +2462,10 @@ async function loadPack(){
 function toggle(on){
   GB.open=on==null? !GB.open : on;
   document.getElementById('gbPanel').style.display=GB.open?'flex':'none';
+  if(GB.open){ renderUps(); if(!GB.schoolAt||Date.now()-GB.schoolAt>600000){ GB.schoolAt=Date.now(); loadSchool(); } }
   if(GB.open){ const m=document.getElementById('gbMsgs'); if(!m.childElementCount) bot('안녕하세요, 도디쌤입니다. 생기부 기재 규정을 물어보시면 <b>'+(baseOn()? esc(BASE_SRC) : GB.packYear+'학년도 공용 자료')+'</b>'+(GB.shared.length&&baseOn()?'와 공용 자료':'')+'에서 찾아 <b>쪽수와 근거 원문</b>으로 보여 드립니다.<br>점검 일정 PDF를 올리면 날짜를 찾아 <b>일정(D-day)</b>에 자동으로 넣습니다.<br>예시를 눌러 보셔도 됩니다.'+chipsHTML()); setTimeout(()=>document.getElementById('gbQ').focus(),50); }
 }
-window.GB=GB; window.gbAsk=ask; window.gbSearch=search; window.gbUpload=async fs=>{ toggle(true); await upload(fs); }; window.gbLoadPack=loadPack;
+window.GB=GB; window.gbAsk=ask; window.gbSearch=search; window.gbUpload=async fs=>{ toggle(true); await upload(fs); }; window.gbLoadPack=loadPack; window.gbLoadSchool=loadSchool;
 const btn=document.getElementById('gbBtn'), pan=document.getElementById('gbPanel');
 btn.addEventListener('click',()=>toggle());
 pan.addEventListener('click',e=>{
@@ -2461,6 +2474,8 @@ pan.addEventListener('click',e=>{
   const gg=e.target.closest('[data-gogo]'); if(gg){ go(gg.dataset.gogo); return; }
   const u=e.target.closest('[data-gundo]'); if(u){ const k=removeScheds(u.dataset.gundo); bot('일정 '+k+'개를 뺐습니다.'); u.disabled=true; return; }
   const d=e.target.closest('[data-gdel]'); if(d){ const i=+d.dataset.gdel; const n=GB.ups[i]; if(n && confirm('「'+n.name+'」 자료를 이 컴퓨터에서 지울까요?')){ GB.ups.splice(i,1); DB.set('guides',GB.ups); const has=(S.schedules||[]).some(s=>s.src==='gb:'+n.name&&!s.fin); if(has && confirm('이 자료에서 넣은 일정도 같이 뺄까요?')) removeScheds(n.name); renderUps(); } return; }
+  const sh=e.target.closest('[data-gshare]'); if(sh){ shareUp(+sh.dataset.gshare); return; }
+  const sd=e.target.closest('[data-gsdel]'); if(sd){ unshareSchool(+sd.dataset.gsdel); return; }
   if(e.target.id==='gbPack'){ packMenu(); return; }
   if(e.target.id==='gbPackGo'){ packMake(); return; }
   if(e.target.id==='gbClose') toggle(false);
@@ -2468,7 +2483,7 @@ pan.addEventListener('click',e=>{
 });
 document.getElementById('gbQ').addEventListener('keydown',e=>{ if(e.key==='Enter' && !e.isComposing){ e.preventDefault(); ask(e.target.value); e.target.value=''; } });
 document.getElementById('gbFile').addEventListener('change',async e=>{ const fs=Array.from(e.target.files||[]); e.target.value=''; await upload(fs); });
-(async()=>{ try{ if(!DB.ok) await DB.open(); const g=await DB.get('guides'); if(Array.isArray(g)) GB.ups=g.map(d=>Object.assign({year:yearOf(d.name,d.pages)},d)); renderUps(); }catch(e){} loadPack(); })();
+(async()=>{ try{ if(!DB.ok) await DB.open(); const g=await DB.get('guides'); if(Array.isArray(g)) GB.ups=g.map(d=>Object.assign({year:yearOf(d.name,d.pages)},d)); const sc=await DB.get('schoolGuides'); if(Array.isArray(sc)) GB.school=sc; renderUps(); }catch(e){} loadPack(); loadSchool(); })();
 })();
 </script>
 </body>

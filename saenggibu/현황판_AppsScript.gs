@@ -89,6 +89,8 @@ function makeLink() {
   ui.showModalDialog(html, '② 학교 링크 만들기');
 }
 
+var GUIDE_NAME = '학교자료', GUIDE_HEAD = ['자료이름', '쪽', '내용'];  // 우리 학교 점검표 등(챗봇이 찾음). 담당자가 사이트에서 올림. 학교마다 따로.
+
 function setup() { reqInfo_(); statSheet_(); dutySheet_(); headSheet_(ROSTER_NAME, ROSTER_HEAD); headSheet_(CLUB_NAME, CLUB_HEAD); }
 
 function doGet(e) {
@@ -101,6 +103,7 @@ function doGet(e) {
                    meta: meta_(info), who: who_(), duties: duties_(), seen: seen_(),
                    link: SpreadsheetApp.getActiveSpreadsheet().getUrl() + '#gid=' + info.sh.getSheetId(), rounds: rounds_(),
                    roster: p.roster === '1' ? roster_() : undefined, clubs: p.roster === '1' ? clubs_() : undefined,
+                   guides: p.guide === '1' ? guides_() : undefined,
                    sched: sched_(), subtitle: PropertiesService.getScriptProperties().getProperty('subtitle') || '', adminOk: p.admin ? String(p.admin) === adminKey_() : undefined });
   }
   return ContentService.createTextOutput('생기부 도우미 담당자 시트가 작동 중입니다.');
@@ -119,6 +122,7 @@ function doPost(e) {
     if (['done', 'hrok', 'adminok', 'reopen'].indexOf(d.action) >= 0) return out_(updReq_(teacher, d));
     if (d.action === 'roster') return out_(saveRoster_(d.rows));
     if (d.action === 'purge') return out_(purge_(d.mode === 'all'));
+    if (d.action === 'guides') { if (String(d.admin) !== adminKey_()) return out_('담당자 암호 불일치'); return out_(saveGuides_(d.docs)); }
     if (d.action === 'sched') { if (String(d.admin) !== adminKey_()) return out_('담당자 암호 불일치'); return out_(saveSched_(d.items)); }
     if (d.action === 'subtitle') { if (String(d.admin) !== adminKey_()) return out_('담당자 암호 불일치'); PropertiesService.getScriptProperties().setProperty('subtitle', clean_(d.subtitle, 30)); return out_('ok'); }
     if (d.action === 'rounds' && String(d.admin) !== adminKey_()) return out_('담당자 암호 불일치');
@@ -348,6 +352,30 @@ function touch_(teacher) {
   } finally { lock.releaseLock(); }
 }
 // 학교 명단: '명단' 탭(학년·반·번호·이름·비고). 탭이 비어 있을 때만 사이트에서 한 번 채울 수 있음(덮어쓰기 방지). 전학 등은 시트에서 직접 고치세요.
+// 우리 학교 자료(점검표 등): 한 줄 = 한 쪽
+function guides_() {
+  var sh = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(GUIDE_NAME);
+  if (!sh || sh.getLastRow() < 2) return [];
+  var by = {}, order = [];
+  sh.getRange(2, 1, sh.getLastRow() - 1, 3).getValues().forEach(function (r) {
+    var n = String(r[0]).trim(); if (!n) return;
+    if (!by[n]) { by[n] = []; order.push(n); }
+    by[n].push(String(r[2]));
+  });
+  return order.map(function (n) { return { name: n, pages: by[n] }; });
+}
+function saveGuides_(docs) {
+  if (!Array.isArray(docs)) return '형식 오류';
+  var rows = [];
+  docs.slice(0, 20).forEach(function (d) {
+    var n = clean_(d && d.name, 80); if (!n || !Array.isArray(d.pages)) return;
+    d.pages.slice(0, 300).forEach(function (pg, i) { rows.push([n, i + 1, String(pg).slice(0, 45000)]); });
+  });
+  var sh = headSheet_(GUIDE_NAME, GUIDE_HEAD);
+  if (sh.getLastRow() > 1) sh.getRange(2, 1, sh.getLastRow() - 1, 3).clearContent();
+  if (rows.length) sh.getRange(2, 1, rows.length, 3).setValues(rows);
+  return '저장됨';
+}
 function roster_() {
   var sh = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(ROSTER_NAME);
   if (!sh || sh.getLastRow() < 2) return [];
