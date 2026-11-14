@@ -16,8 +16,8 @@
  *
  * © 김정환 · M.A.D.T (Moral And Digital Teacher)
  */
-var KEY = '여기에암호';   // ← 원하는 암호로 바꾸세요. 학교 전용 링크에 함께 들어갑니다.
-var ADMIN_KEY = '여기에담당자암호';  // ← 담당자만 아는 암호. 학교 디데이 보내기·점검 차수 고치기에 필요합니다.
+var KEY = '여기에암호';   // ← 고치지 않아도 됩니다. 시트 메뉴 [생기발랄 → ① 처음 설정]에서 정한 암호가 우선합니다.
+var ADMIN_KEY = '여기에담당자암호';  // ← 고치지 않아도 됩니다. [① 처음 설정]에서 정한 담당자 암호가 우선합니다.
 
 var STD_HEAD = ['점검일자', '학번', '이름', '오류(확인) 분야', '상세 분야', '오류(확인) 내용', '변경 후',
                 '담당교사 반영 날짜', '담임 반영 확인', '생기부 담당자 확인', '비고'];
@@ -27,19 +27,81 @@ var SEEN_NAME = '접속', SEEN_HEAD = ['교사', '마지막 접속', '처음 접
 var ROSTER_NAME = '명단', ROSTER_HEAD = ['학년', '반', '번호', '이름', '비고'];
 var CLUB_NAME = '동아리', CLUB_HEAD = ['동아리', '학년', '반', '번호', '이름'];  // 동아리 부원 명단(담당자가 붙여넣음). 동아리 선생님 화면에 자동으로 들어감.  // 학교 전체 명단(담당자가 고침). 사이트가 처음 열릴 때 자동으로 받아 감.
 
+// ── 암호: [① 처음 설정]에서 정한 값(스크립트 속성)이 먼저, 없으면 위 var 값. 견본 그대로의 값은 쓰지 않음.
+var SITE_URL = 'https://gtk0624-a11y.github.io/Qdice/saenggibu/';
+function key_() { var v = PropertiesService.getScriptProperties().getProperty('KEY') || KEY; return (v && v !== '여기에암호') ? v : '\u0000없음'; }
+function adminKey_() { var v = PropertiesService.getScriptProperties().getProperty('ADMIN_KEY') || ADMIN_KEY; return (v && v !== '여기에담당자암호') ? v : '\u0000없음'; }
+
+// ── 시트 위 메뉴 [생기발랄]
+function onOpen() {
+  SpreadsheetApp.getUi().createMenu('생기발랄')
+    .addItem('① 처음 설정 (암호 정하기)', 'firstSetup')
+    .addItem('② 학교 링크 만들기', 'makeLink')
+    .addToUi();
+}
+
+function firstSetup() {
+  var ui = SpreadsheetApp.getUi(), pr = PropertiesService.getScriptProperties();
+  var a = ui.prompt('생기발랄 처음 설정 (1/2) — 학교 암호',
+    '우리 학교 선생님 모두가 함께 쓰는 암호입니다. 학교 링크 안에 들어가므로 선생님들이 외울 필요는 없습니다.\n영문·숫자로 6자 이상 (예: ourschool7351)', ui.ButtonSet.OK_CANCEL);
+  if (a.getSelectedButton() !== ui.Button.OK) return;
+  var k = String(a.getResponseText()).trim();
+  if (!/^[A-Za-z0-9_-]{6,40}$/.test(k)) { ui.alert('학교 암호는 영문·숫자로 6자 이상이어야 합니다. 메뉴에서 다시 해 주세요.'); return; }
+  var b = ui.prompt('생기발랄 처음 설정 (2/2) — 담당자 암호',
+    '담당자만 아는 암호입니다. 학교 디데이 보내기, 점검 차수·부제 고치기에 씁니다.\n4자 이상, 학교 암호와 다르게', ui.ButtonSet.OK_CANCEL);
+  if (b.getSelectedButton() !== ui.Button.OK) return;
+  var m = String(b.getResponseText()).trim();
+  if (m.length < 4 || m === k) { ui.alert('담당자 암호는 4자 이상이고 학교 암호와 달라야 합니다. 메뉴에서 다시 해 주세요.'); return; }
+  pr.setProperties({ KEY: k, ADMIN_KEY: m });
+  setup();
+  ui.alert('① 처음 설정 완료',
+    '암호를 저장하고 탭(점검사항·현황·담당교사·명단·동아리)을 만들었습니다.\n담당자 암호는 꼭 따로 적어 두세요.\n\n' +
+    '다음 할 일 — 웹 앱 배포(한 번만)\n' +
+    '1) 위쪽 메뉴 [확장 프로그램 → Apps Script]\n' +
+    '2) 오른쪽 위 파란 단추 [배포 → 새 배포]\n' +
+    '3) 톱니바퀴 → [웹 앱]\n' +
+    '4) 실행: 나 / 액세스 권한: 모든 사용자 → [배포]\n' +
+    '5) 이 시트로 돌아와 [생기발랄 → ② 학교 링크 만들기]', ui.ButtonSet.OK);
+}
+
+function makeLink() {
+  var ui = SpreadsheetApp.getUi(), k = key_();
+  if (k === '\u0000없음') { ui.alert('먼저 [생기발랄 → ① 처음 설정]을 해 주세요.'); return; }
+  var url = '';
+  try { url = ScriptApp.getService().getUrl() || ''; } catch (e) {}
+  if (!/\/exec$/.test(url)) {
+    var r = ui.prompt('웹 앱 주소 넣기',
+      '웹 앱 주소를 자동으로 찾지 못했습니다.\nApps Script에서 [배포 → 배포 관리]를 열면 보이는 웹 앱 URL(…/exec 로 끝남)을 붙여 넣어 주세요.\n아직 배포하지 않았다면 [① 처음 설정] 끝에 나온 순서대로 먼저 배포해 주세요.', ui.ButtonSet.OK_CANCEL);
+    if (r.getSelectedButton() !== ui.Button.OK) return;
+    url = String(r.getResponseText()).trim();
+    if (!/^https:\/\/script\.google\.com\/.+\/exec$/.test(url)) { ui.alert('주소가 맞지 않습니다. https://script.google.com/ 으로 시작하고 /exec 로 끝나야 합니다.'); return; }
+  }
+  var link = SITE_URL + '#link=' + encodeURIComponent(url) + '~' + encodeURIComponent(k);
+  var esc = link.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+  var html = HtmlService.createHtmlOutput(
+    '<div style="font-family:sans-serif;font-size:14px;line-height:1.6">' +
+    '<p><b>우리 학교 전용 링크</b>입니다. 업무 메신저로 선생님들께 보내세요.<br>이 링크를 누르면 학교 시트에 자동으로 연결됩니다.</p>' +
+    '<textarea id="t" readonly style="width:100%;height:110px;font-size:12px">' + esc + '</textarea>' +
+    '<p><button onclick="var t=document.getElementById(\'t\');t.select();document.execCommand(\'copy\');this.textContent=\'복사했습니다 ✓\'" style="font-size:15px;padding:8px 16px">링크 복사</button> ' +
+    '<a href="' + esc + '" target="_blank">지금 열어 보기</a></p>' +
+    '<p style="color:#a33;font-size:12px">학교 암호가 들어 있으니 우리 학교 선생님께만 보내 주세요.</p></div>')
+    .setWidth(520).setHeight(330);
+  ui.showModalDialog(html, '② 학교 링크 만들기');
+}
+
 function setup() { reqInfo_(); statSheet_(); dutySheet_(); headSheet_(ROSTER_NAME, ROSTER_HEAD); headSheet_(CLUB_NAME, CLUB_HEAD); }
 
 function doGet(e) {
   var p = (e && e.parameter) || {};
   if (p.action === 'list') {
-    if (String(p.key) !== KEY) return json_({ ok: false, msg: '암호가 맞지 않습니다.' });
+    if (String(p.key) !== key_()) return json_({ ok: false, msg: '암호가 맞지 않습니다.' });
     var info = reqInfo_();
     if (p.teacher) touch_(clean_(p.teacher, 40));
     return json_({ ok: true, now: today_(), sheet: info.sh.getName(), rows: listReqs_(info),
                    meta: meta_(info), who: who_(), duties: duties_(), seen: seen_(),
                    link: SpreadsheetApp.getActiveSpreadsheet().getUrl() + '#gid=' + info.sh.getSheetId(), rounds: rounds_(),
                    roster: p.roster === '1' ? roster_() : undefined, clubs: p.roster === '1' ? clubs_() : undefined,
-                   sched: sched_(), subtitle: PropertiesService.getScriptProperties().getProperty('subtitle') || '', adminOk: p.admin ? String(p.admin) === ADMIN_KEY : undefined });
+                   sched: sched_(), subtitle: PropertiesService.getScriptProperties().getProperty('subtitle') || '', adminOk: p.admin ? String(p.admin) === adminKey_() : undefined });
   }
   return ContentService.createTextOutput('생기부 도우미 담당자 시트가 작동 중입니다.');
 }
@@ -47,7 +109,7 @@ function doGet(e) {
 function doPost(e) {
   var d;
   try { d = JSON.parse(e.postData.contents); } catch (err) { return out_('형식 오류'); }
-  if (!d || d.key !== KEY) return out_('암호 불일치');
+  if (!d || d.key !== key_()) return out_('암호 불일치');
   var teacher = clean_(d.teacher, 40);
   if (!teacher) return out_('교사 이름 없음');
   var lock = LockService.getScriptLock();
@@ -57,9 +119,9 @@ function doPost(e) {
     if (['done', 'hrok', 'adminok', 'reopen'].indexOf(d.action) >= 0) return out_(updReq_(teacher, d));
     if (d.action === 'roster') return out_(saveRoster_(d.rows));
     if (d.action === 'purge') return out_(purge_(d.mode === 'all'));
-    if (d.action === 'sched') { if (String(d.admin) !== ADMIN_KEY) return out_('담당자 암호 불일치'); return out_(saveSched_(d.items)); }
-    if (d.action === 'subtitle') { if (String(d.admin) !== ADMIN_KEY) return out_('담당자 암호 불일치'); PropertiesService.getScriptProperties().setProperty('subtitle', clean_(d.subtitle, 30)); return out_('ok'); }
-    if (d.action === 'rounds' && String(d.admin) !== ADMIN_KEY) return out_('담당자 암호 불일치');
+    if (d.action === 'sched') { if (String(d.admin) !== adminKey_()) return out_('담당자 암호 불일치'); return out_(saveSched_(d.items)); }
+    if (d.action === 'subtitle') { if (String(d.admin) !== adminKey_()) return out_('담당자 암호 불일치'); PropertiesService.getScriptProperties().setProperty('subtitle', clean_(d.subtitle, 30)); return out_('ok'); }
+    if (d.action === 'rounds' && String(d.admin) !== adminKey_()) return out_('담당자 암호 불일치');
     if (d.action === 'rounds') { var rs = (Array.isArray(d.rounds) ? d.rounds : []).slice(0, 12).map(function (x) { return clean_(x, 40); }).filter(function (x) { return x; }); PropertiesService.getScriptProperties().setProperty('rounds', JSON.stringify(rs)); return out_('ok'); }
     if (Array.isArray(d.duties)) saveDuties_(teacher, d.duties, d.homeroom);
     return out_(saveStats_(teacher, d.rows));
