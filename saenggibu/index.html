@@ -1466,15 +1466,17 @@ async function importXlsx(file){
     if(!it && /^세특/.test(nm)){ const ph=S.items.find(i=>i.name==='세특: 과목명' && !Object.keys(S.records).some(k=>k.endsWith('|'+i.key)&&S.records[k].text.trim())); if(ph){ ph.name=nm; it=ph; if(limits[nm]) ph.limit=limits[nm]; } }
     if(!it){ it={key:'i'+Date.now().toString(36)+j,name:nm,limit:limits[nm]||1500,mine:true}; S.items.push(it); }
     cols.push({j,it}); });
-  let filled=0, conflict=0;
+  let filled=0, conflict=0, tidied=0;
   const plan=[];
+  // 올린 초안도 바로 정리(두 칸 띄어쓰기·AI 꾸밈 기호·맞춤법). 엑셀 백업 되돌리기는 그대로 둠
+  const clean=t=>{ if(restored||!t.trim()) return t; let x=mechFix(t).text; if(S.settings.autoSpell) x=spellFix(x,S.rules).text; return x; };
   rows.slice(1).forEach(r=>{ const g=parseInt(r[ci.g],10), c=parseInt(r[ci.c],10), n=parseInt(r[ci.n],10), name=String(r[ci.name]||'').trim(); if(!(g>0&&c>0&&n>0)||!name) return;
-    plan.push({g,c,n,name,r}); const k=g+'-'+c+'-'+n; cols.forEach(o=>{ const t=String(r[o.j]||''); if(!t.trim()) return; const cur=peek(k,o.it.key).text; if(cur.trim()&&cur!==t) conflict++; }); });
+    plan.push({g,c,n,name,r}); const k=g+'-'+c+'-'+n; cols.forEach(o=>{ const t=clean(String(r[o.j]||'')); if(!t.trim()) return; const cur=peek(k,o.it.key).text; if(cur.trim()&&cur!==t) conflict++; }); });
   if(conflict && !restored && !confirm('이미 써 둔 내용과 다른 칸이 '+conflict+'개 있습니다.\n[확인] 파일 내용으로 덮어쓰기\n[취소] 불러오기 중단')){ return; }
   plan.forEach(p=>{ let s=S.students.find(x=>x.g===p.g&&x.c===p.c&&x.n===p.n); if(!s){ s={g:p.g,c:p.c,n:p.n,name:p.name}; S.students.push(s); } else s.name=p.name;
     if(ci.note>=0){ const nt=String(p.r[ci.note]||'').trim(); if(nt) s.note=(NOTE_LIST.some(n=>nt.indexOf(n)===0)? nt : noteNorm(nt)); }
-    const k=sid(s); cols.forEach(o=>{ const t=String(p.r[o.j]||''); if(!t.trim()) return; const rr=rec(k,o.it.key); if(rr.text!==t){ rr.text=t; rr.updated=Date.now(); rr.copied=0; } if(doneRows[k]&&doneRows[k][o.it.name]) rr.done=true; filled++; }); });
-  sortStudents(); save(); toast((restored?'전부 되돌렸습니다. ':'불러왔습니다. ')+'학생 '+plan.length+'명, 내용 '+filled+'칸'); render();
+    const k=sid(s); cols.forEach(o=>{ const raw=String(p.r[o.j]||''); const t=clean(raw); if(!t.trim()) return; if(t!==raw) tidied++; const rr=rec(k,o.it.key); if(rr.text!==t){ rr.text=t; rr.updated=Date.now(); rr.copied=0; } if(doneRows[k]&&doneRows[k][o.it.name]) rr.done=true; filled++; }); });
+  sortStudents(); save(); toast((restored?'전부 되돌렸습니다. ':'불러왔습니다. ')+'학생 '+plan.length+'명, 내용 '+filled+'칸'+(tidied?' (띄어쓰기·맞춤법 '+tidied+'칸 바로 정리)':'')); render();
 }
 
 // 독서기록 불러오기(학생이 구글 폼으로 입력한 응답 파일)
@@ -1731,7 +1733,7 @@ function saveDuty(){ if(S.schoolClubs){ const mk=autoClubs(); if(mk.length) setT
 // 브라우저 탭 제목에 숫자 표시 + 다른 탭을 보고 있을 때 새 알림이 오면 깜박임
 const BASE_TITLE='도디쌤의 생기발랄';
 // 새 버전 알림: 사이트가 고쳐져 올라오면 화면 위에 띠를 띄움(브라우저가 예전 화면을 기억하는 문제 해결)
-const BUILD_V='20261114-143913';
+const BUILD_V='20261114-155520';
 async function checkNewVersion(){ if(!/^https?:/.test(location.protocol)) return; try{ const r=await fetch('version.json?t='+Date.now(),{cache:'no-store'}); if(!r.ok) return; const j=await r.json();
   if(j && j.v && j.v!==BUILD_V && !document.getElementById('newVer')){ const d=document.createElement('div'); d.id='newVer'; d.innerHTML='✨ 생기발랄 새 버전이 나왔어요. <button class="b s" id="newVerGo">새로 고침</button> <span style="font-weight:600">또는 키보드 <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>R</kbd></span> <span class="hint" style="color:inherit;opacity:.8">· 써 둔 내용은 그대로 남아요</span>'; document.body.prepend(d); document.getElementById('newVerGo').onclick=()=>{ flush().finally(()=>{ location.replace(location.pathname+'?v='+encodeURIComponent(j.v)+location.hash); }); }; } }catch(e){} }
 const SUB_DEFAULT='선생님을 잇는 생기부 플랫폼';
