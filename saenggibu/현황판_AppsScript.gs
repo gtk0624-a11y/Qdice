@@ -39,7 +39,7 @@ function doGet(e) {
                    meta: meta_(info), who: who_(), duties: duties_(), seen: seen_(),
                    link: SpreadsheetApp.getActiveSpreadsheet().getUrl() + '#gid=' + info.sh.getSheetId(), rounds: rounds_(),
                    roster: p.roster === '1' ? roster_() : undefined, clubs: p.roster === '1' ? clubs_() : undefined,
-                   sched: sched_(), adminOk: p.admin ? String(p.admin) === ADMIN_KEY : undefined });
+                   sched: sched_(), subtitle: PropertiesService.getScriptProperties().getProperty('subtitle') || '', adminOk: p.admin ? String(p.admin) === ADMIN_KEY : undefined });
   }
   return ContentService.createTextOutput('생기부 도우미 담당자 시트가 작동 중입니다.');
 }
@@ -58,6 +58,7 @@ function doPost(e) {
     if (d.action === 'roster') return out_(saveRoster_(d.rows));
     if (d.action === 'purge') return out_(purge_(d.mode === 'all'));
     if (d.action === 'sched') { if (String(d.admin) !== ADMIN_KEY) return out_('담당자 암호 불일치'); return out_(saveSched_(d.items)); }
+    if (d.action === 'subtitle') { if (String(d.admin) !== ADMIN_KEY) return out_('담당자 암호 불일치'); PropertiesService.getScriptProperties().setProperty('subtitle', clean_(d.subtitle, 30)); return out_('ok'); }
     if (d.action === 'rounds' && String(d.admin) !== ADMIN_KEY) return out_('담당자 암호 불일치');
     if (d.action === 'rounds') { var rs = (Array.isArray(d.rounds) ? d.rounds : []).slice(0, 12).map(function (x) { return clean_(x, 40); }).filter(function (x) { return x; }); PropertiesService.getScriptProperties().setProperty('rounds', JSON.stringify(rs)); return out_('ok'); }
     if (Array.isArray(d.duties)) saveDuties_(teacher, d.duties, d.homeroom);
