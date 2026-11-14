@@ -400,7 +400,7 @@ img.ggs{width:22px;height:22px;object-fit:contain;vertical-align:-5px;margin-rig
 
 <details><summary>⑪ 자주 묻는 질문</summary>
 <dl>
-<dt>엑셀에 써 둔 초안을 한 번에 올릴 수 있나요?</dt><dd>네. [영역별 입력] 맨 위 <b>[엑셀로 한 번에 올리기]</b>에서 ① 우리 반 명단이 든 양식 받기 → ② 엑셀 내용 칸에 초안 붙여 넣기 → ③ [다 쓴 양식 올리기]. 올리는 순간 띄어쓰기·맞춤법이 정리되어 학생별 칸에 들어갑니다. 꼭 지킬 것: <b>사이트에서 받은 양식에만 쓰기</b>(따로 만든 엑셀은 양식에 복사해 붙이기), <b>칸 제목 고치지 않기</b>(전체 양식은 "세특: 과목명"만 내 과목으로), <b>엑셀 백업 파일은 여기서 올리지 않기</b>, <b>올린 뒤 번호·이름·바이트 확인</b>.</dd>
+<dt>엑셀에 써 둔 초안을 한 번에 올릴 수 있나요?</dt><dd>네. [영역별 입력] 맨 위 <b>[엑셀로 한 번에 올리기]</b>에서 ① 양식 받기(이 반 · 내 반 전체 · 이 반 모든 영역 중 고르기, 명단이 이미 들어 있음) → ② 엑셀 내용 칸에 초안 붙여 넣기 → ③ [다 쓴 양식 올리기]. 올리는 순간 띄어쓰기·맞춤법이 정리되어 학생별 칸에 들어갑니다. 꼭 지킬 것: <b>사이트에서 받은 양식에만 쓰기</b>(따로 만든 엑셀은 양식에 복사해 붙이기), <b>칸 제목 고치지 않기</b>(전체 양식은 "세특: 과목명"만 내 과목으로), <b>엑셀 백업 파일은 여기서 올리지 않기</b>, <b>올린 뒤 번호·이름·바이트 확인</b>.</dd>
 <dt>맞춤법 교정은 믿을 만한가요?</dt><dd>국립국어원 「한글 맞춤법·표준어 규정 해설」(2018)과 「문장 부호 해설」(2014)을 바탕으로 만들었습니다. 다른 뜻의 바른 낱말까지 바꾸지 않도록 하나하나 골라 넣었고, 바른 문장이 바뀌지 않는지 시험을 거쳤습니다. 다만 문맥을 알아야 하는 것(-로서/-로써 등)은 [바른한글 검사]로 한 번 더 확인하세요.</dd>
 <dt>스페이스를 두 번 눌렀는데 한 칸이 됐어요.</dt><dd>정상입니다. 생기부에는 두 칸 띄어쓰기가 없어서 쓰는 순간 한 칸으로 정리합니다. 줄바꿈(엔터)은 그대로 둡니다.</dd>
 <dt>팝업(알림)이 안 와요.</dt><dd>① 사이트 창이 열려 있나요? (닫지 말고 작게 내려 두세요) ② [알림 켜기]를 허용했나요? ③ 내 담당이 맞게 정해져 있나요? 알림은 1~2분 안에 옵니다.</dd>
@@ -1064,7 +1064,10 @@ function renderWrite(){
   let h=welcomeHTML()+'<div class="box" id="whead">'+writeHeadHTML()+'</div>';
   { const unitName=grpOf(UI.cls)? grpOf(UI.cls).name : UI.cls+'반';
     h+='<details class="box xlbox"'+(written?'':' open')+'><summary><b>엑셀로 한 번에 올리기</b> <span class="hint">초안을 엑셀에 모아 쓰셨다면 이게 제일 편합니다</span></summary>'
-     +'<ol class="xlsteps"><li><button class="b" id="tplOut">'+esc(unitName)+' · '+esc(it.name)+' 양식 받기</button><div class="hint">우리 반 명단이 이미 들어 있습니다. 써 둔 내용도 함께 들어갑니다.</div></li>'
+     +'<ol class="xlsteps"><li><div class="row" style="gap:6px"><button class="b" id="tplOut">'+esc(unitName)+' · '+esc(it.name)+' 양식 받기</button>'
+     +'<button class="b g" id="tplAllCls">'+(/동아리/.test(it.name)?'내 동아리 전체':'내 반 전체')+' · '+esc(it.name)+'</button>'
+     +(/동아리/.test(it.name)||grpOf(UI.cls)?'':'<button class="b g" id="tplAllItems">'+esc(unitName)+' · 모든 영역</button>')+'</div>'
+     +'<div class="hint">명단이 이미 들어 있고, 써 둔 내용도 함께 들어갑니다. 여러 반을 가르치면 <b>내 반 전체</b>, 담임이 우리 반 자율·진로·행특을 한꺼번에 쓰려면 <b>모든 영역</b>을 받으세요.</div></li>'
      +'<li>엑셀에서 <b>'+esc(it.name)+'</b> 칸에 초안을 붙여 넣습니다.<div class="hint">학년·반·번호·이름 칸과 제목 줄은 고치지 마세요. 칸 안 줄바꿈은 Alt+Enter.</div></li>'
      +'<li><label class="b" style="cursor:pointer">다 쓴 양식 올리기<input type="file" id="xlsIn2" accept=".xlsx,.xls" hidden></label><div class="hint">올리는 순간 띄어쓰기·맞춤법·AI 꾸밈 기호가 자동으로 정리되고, 학생별 칸에 한 번에 들어갑니다. 이미 써 둔 칸과 다르면 덮어쓸지 먼저 묻습니다.</div></li></ol>'
      +'<div class="xlwarn"><b>꼭 지켜 주세요</b><ol>'
@@ -1079,15 +1082,25 @@ function renderWrite(){
 }
 
 // 이 반(동아리)·이 영역 입력 양식: 명단과 써 둔 내용을 넣은 엑셀 → 선생님이 채워 [다 쓴 양식 올리기]로 한 번에
-async function tplOut(){
+async function tplOut(mode){
   const it=itemBy(UI.item); if(!it) return; await needXLSX();
-  const g=grpOf(UI.cls), list=unitStudents(UI.cls).filter(s=>!isOut(s)), unitName=g? g.name : UI.cls+'반';
-  const rows=[['학년','반','번호','이름',it.name]].concat(list.map(s=>[s.g,s.c,s.n,s.name,peek(sid(s),it.key).text]));
-  const ws=XLSX.utils.aoa_to_sheet(rows); ws['!cols']=[{wch:5},{wch:5},{wch:5},{wch:10},{wch:90}];
-  const guide=[['도디쌤의 생기발랄 — '+unitName+' · '+it.name+' 입력 양식'],[''],['1. [생기부] 탭의 "'+it.name+'" 칸(E열)에 학생별 초안을 붙여 넣습니다.'],['2. 학년·반·번호·이름 칸과 첫 줄 제목은 고치지 마세요. 칸 안 줄바꿈은 Alt+Enter.'],['3. 저장한 뒤 생기발랄 [영역별 입력] → [다 쓴 양식 올리기]로 올리면 한 번에 들어갑니다.'],['4. 올리는 순간 띄어쓰기·맞춤법·AI 꾸밈 기호가 자동으로 정리됩니다.'],[''],['한도: '+it.limit+'바이트(한글 약 '+Math.floor(it.limit/3)+'자). 바이트는 사이트에서 정확히 셉니다.'],[''],['개인정보: 학생 이름과 생기부 내용이 들어 있습니다. 업무용 PC에만 보관하세요.'],['© 김정환 · M.A.D.T']];
-  const wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,'생기부'); const gs=XLSX.utils.aoa_to_sheet(guide); gs['!cols']=[{wch:90}]; XLSX.utils.book_append_sheet(wb,gs,'안내');
-  XLSX.writeFile(wb,('생기부초안_'+unitName+'_'+it.name).replace(/[\\/:*?"<>|]/g,' ')+'.xlsx');
-  toast(unitName+' '+list.length+'명 명단이 든 양식을 받았습니다. 채운 뒤 [다 쓴 양식 올리기]로 올리세요.');
+  const g=grpOf(UI.cls), club=/동아리/.test(it.name);
+  let list, items=[it], label;
+  if(mode==='allcls'){ // 내 반(동아리) 전체 · 이 영역
+    const units= club? (S.groups||[]).filter(x=>x.item===it.key).map(x=>'g:'+x.id) : visClasses();
+    const seen=new Set(); list=[]; units.forEach(u=>unitStudents(u).forEach(s=>{ const k=sid(s); if(!seen.has(k)){ seen.add(k); list.push(s); } }));
+    list.sort((a,b)=>a.g-b.g||a.c-b.c||a.n-b.n); label=(club?'내 동아리 전체':'내 반 전체')+'_'+it.name;
+  } else if(mode==='allitems'){ // 이 반 · 모든 영역(동아리 영역 제외)
+    list=unitStudents(UI.cls).slice(); items=S.items.filter(x=>!/동아리/.test(x.name)); label=(g? g.name : UI.cls+'반')+'_모든 영역';
+  } else { list=unitStudents(UI.cls).slice(); label=(g? g.name : UI.cls+'반')+'_'+it.name; }
+  list=list.filter(s=>!isOut(s));
+  if(!list.length){ toast('양식에 넣을 학생이 없습니다. 명단을 먼저 확인해 주세요.'); return; }
+  const rows=[['학년','반','번호','이름'].concat(items.map(x=>x.name))].concat(list.map(s=>[s.g,s.c,s.n,s.name].concat(items.map(x=>peek(sid(s),x.key).text))));
+  const ws=XLSX.utils.aoa_to_sheet(rows); ws['!cols']=[{wch:5},{wch:5},{wch:5},{wch:10}].concat(items.map(()=>({wch:items.length>1?50:90})));
+  const guide=[['도디쌤의 생기발랄 — '+label.replace('_',' · ')+' 입력 양식'],[''],['1. [생기부] 탭의 영역 칸('+items.map(x=>x.name).join(', ')+')에 학생별 초안을 붙여 넣습니다.'],['2. 학년·반·번호·이름 칸과 첫 줄 제목은 고치지 마세요. 칸 안 줄바꿈은 Alt+Enter.'],['3. 쓰지 않을 영역 칸은 비워 두면 됩니다(지워도 됩니다).'],['4. 저장한 뒤 생기발랄 [영역별 입력] → [다 쓴 양식 올리기]로 올리면 학생별·영역별로 한 번에 들어갑니다.'],['5. 올리는 순간 띄어쓰기·맞춤법·AI 꾸밈 기호가 자동으로 정리됩니다.'],[''],['한도(바이트): '+items.map(x=>x.name+' '+x.limit).join(' / ')],[''],['개인정보: 학생 이름과 생기부 내용이 들어 있습니다. 업무용 PC에만 보관하세요.'],['© 김정환 · M.A.D.T']];
+  const wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,'생기부'); const gs=XLSX.utils.aoa_to_sheet(guide); gs['!cols']=[{wch:100}]; XLSX.utils.book_append_sheet(wb,gs,'안내');
+  XLSX.writeFile(wb,('생기부초안_'+label).replace(/[\\/:*?"<>|]/g,' ')+'.xlsx');
+  toast(list.length+'명 명단이 든 양식을 받았습니다. 채운 뒤 [다 쓴 양식 올리기]로 올리세요.');
 }
 // ───────── 6. 화면: 학생별 보기 ─────────
 function renderSearch(){
@@ -1757,7 +1770,7 @@ function saveDuty(){ if(S.schoolClubs){ const mk=autoClubs(); if(mk.length) setT
 // 브라우저 탭 제목에 숫자 표시 + 다른 탭을 보고 있을 때 새 알림이 오면 깜박임
 const BASE_TITLE='도디쌤의 생기발랄';
 // 새 버전 알림: 사이트가 고쳐져 올라오면 화면 위에 띠를 띄움(브라우저가 예전 화면을 기억하는 문제 해결)
-const BUILD_V='20261114-155956';
+const BUILD_V='20261114-182610';
 async function checkNewVersion(){ if(!/^https?:/.test(location.protocol)) return; try{ const r=await fetch('version.json?t='+Date.now(),{cache:'no-store'}); if(!r.ok) return; const j=await r.json();
   if(j && j.v && j.v!==BUILD_V && !document.getElementById('newVer')){ const d=document.createElement('div'); d.id='newVer'; d.innerHTML='✨ 생기발랄 새 버전이 나왔어요. <button class="b s" id="newVerGo">새로 고침</button> <span style="font-weight:600">또는 키보드 <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>R</kbd></span> <span class="hint" style="color:inherit;opacity:.8">· 써 둔 내용은 그대로 남아요</span>'; document.body.prepend(d); document.getElementById('newVerGo').onclick=()=>{ flush().finally(()=>{ location.replace(location.pathname+'?v='+encodeURIComponent(j.v)+location.hash); }); }; } }catch(e){} }
 const SUB_DEFAULT='선생님을 잇는 생기부 플랫폼';
@@ -2186,6 +2199,7 @@ M.addEventListener('click',async e=>{
   if(t.id==='readApply'){ applyReading(); return; }
   if(t.id==='readCancel'){ UI.readPlan=null; renderSet(); return; }
   if(t.id==='xlsOut'){ exportXlsx().catch(()=>{}); return; }
+  if(t.id==='tplAllCls'||t.id==='tplAllItems'){ tplOut(t.id==='tplAllCls'?'allcls':'allitems').catch(()=>toast('양식을 만들지 못했습니다. 인터넷 연결을 확인해 주세요.')); return; }
   if(t.id==='tplOut'){ tplOut().catch(()=>toast('양식을 만들지 못했습니다. 인터넷 연결을 확인해 주세요.')); return; }
   if(t.id==='jsonOut'){ download('생기부도우미_전체백업_'+stamp()+'.json', new Blob([JSON.stringify(S)],{type:'application/json'})); S.settings.lastBackup=Date.now(); flush(); return; }
   if(t.id==='grpMake'){ const gp=makeGroup(rosterRowsFromText($('#grpRoster').value), $('#grpName').value, $('#grpItem').value); if(gp){ UI.cls='g:'+gp.id; UI.item=gp.item; renderSet(); } return; }
