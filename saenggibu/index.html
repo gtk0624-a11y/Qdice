@@ -1186,7 +1186,7 @@ function schoolSchedHTML(){
   if(!st.sheetUrl) h+='<div class="hint">학교 링크로 연결하면 담당자가 보낸 일정이 여기에 뜹니다.</div>';
   else if(!list.length) h+='<div class="hint">아직 담당자가 보낸 학교 일정이 없습니다.</div>';
   else h+='<table><tr><th>날짜</th><th>남은 날</th><th class="l">일정</th><th class="l">메모</th><th>'+(adm?'':'끝남')+'</th></tr>'+list.map(x=>{ const n=dday(x.date); return '<tr'+(fin[x.id]?' style="opacity:.5"':'')+'><td>'+esc(x.date)+'</td><td class="'+(n<=3?'neg':'')+'">'+ddayText(n)+'</td><td class="l"><b>'+esc(x.title)+'</b></td><td class="l hint">'+esc(x.note||'')+'</td><td>'+(adm?'<button class="b r s" data-ssdel="'+esc(x.id)+'">지우기</button>':'<input type="checkbox" data-ssfin="'+esc(x.id)+'"'+(fin[x.id]?' checked':'')+'>')+'</td></tr>'; }).join('')+'</table>';
-  if(adm && list.length) h+='<div class="row" style="margin-top:6px"><button class="b g s" id="ssMsg">📋 메신저용 일정 안내 복사</button><span class="hint">남은 학교 일정을 디데이와 함께 한 번에 복사합니다. 경기도 메신저 전체 쪽지에 붙여 넣으세요.</span></div>';
+  if(adm && list.length) h+='<div class="row" style="margin-top:6px"><button class="b g s" id="ssMsg">📋 메신저용 복사 (남은 학교 일정 전체)</button></div>';
   if(adm) h+='<div class="row" style="margin-top:8px"><input id="ssTitle" type="text" placeholder="예: 1차 점검 출력물 제출" style="flex:1;min-width:200px"><input id="ssDate" type="date" value="'+esc(UI.selDate||'')+'"><input id="ssNote" type="text" placeholder="메모(선택)"><button class="b" id="ssAdd" style="background:#c0392b">모든 선생님께 보내기</button></div><span class="hint">보낸 일정은 선생님들 화면에 1~2분 안에 뜹니다(다음 새로 고침 때).</span>';
   return h+'</div>';
 }
@@ -1608,8 +1608,8 @@ async function sendReqs(items){
   const at=Date.now(); rows.forEach(r=>{ r.pend={action:'request',status:'요청',at,body}; S.reqSeen[r.id]=r.status+'|'+r.text.length+'|'+r.memo.length; S.reqs.push(r); });
   save(); refreshReqUI();
   const nobody=rows.filter(r=>!responsible(r).length).length;
-  UI.msgNote=messengerNote(rows);
-  try{ await rqPost(body); rows.forEach(r=>logAdd('요청 보냄', r, {memo:r.memo})); if(UI.tab==='req') renderReq(); toast('점검 요청 '+rows.length+'건을 시트에 적었습니다. 메신저로도 알리려면 [📋 메신저용 쪽지 복사]를 누르세요.'+(nobody?' ('+nobody+'건은 담당교사를 아직 모릅니다 — 그 선생님이 "내 담당"을 정하면 보입니다)':'')); setTimeout(()=>fetchReqs(true),4000); }
+  UI.msgNote=messengerNote(rows); const copiedP=copyText(UI.msgNote);
+  try{ await rqPost(body); rows.forEach(r=>logAdd('요청 보냄', r, {memo:r.memo})); if(UI.tab==='req') renderReq(); const cp=await copiedP; toast('점검 요청 '+rows.length+'건을 보냈습니다.'+(cp?' 📋 메신저용 쪽지가 복사됐어요 — 메신저에 Ctrl+V 하세요.':'')+(nobody?' ('+nobody+'건은 담당교사를 아직 모릅니다 — 그 선생님이 "내 담당"을 정하면 보입니다)':'')); setTimeout(()=>fetchReqs(true),4000); }
   catch(e){ rows.forEach(r=>r.failed=true); refreshReqUI(); toast('보내지 못했습니다. 인터넷 연결을 확인한 뒤 다시 보내 주세요.'); }
 }
 function fieldList(){ const f=(S.reqMeta&&S.reqMeta.fields)||[]; return f.length? f : ['자율·자치','진로','교과세특','자유학기','스포츠동아리','창체동아리','행동특성','독서','출결','수상']; }
@@ -1743,11 +1743,11 @@ function renderReq(){
     if(all.filter(adminReady).length){ const ready=all.filter(adminReady); h+='<h3>담당자 확인할 것 '+ready.length+'건</h3>'+tbl(ready,r=>'<button class="b s" data-rqad="'+esc(r.id)+'">담당자 확인</button> <button class="b r s" data-rqre="'+esc(r.id)+'">재요청</button>')+'<div class="row"><button class="b g s" id="rqAdAll">'+ready.length+'건 모두 담당자 확인</button></div>'; }
     if(sk.length) h+='<h3 class="neg">담당교사 반영 체크 없이 넘어간 줄 '+sk.length+'건</h3>'+tbl(sk,()=>'' );
     if(op.length) h+='<h3>미반영 '+op.length+'건</h3>'+tbl(op,r=>'<span class="hint">'+esc(responsible(r).join(', ')||'담당 미정')+'</span>');
-    h+='<div class="row" style="margin-top:8px"><button class="b" id="rqNag">미처리 독촉 메시지 복사</button><span class="hint">담당교사별 미반영 + 담임별 확인 대기 목록을 글로 만들어 복사합니다. 업무메신저에 붙여넣으세요.</span></div>'
+    h+='<div class="row" style="margin-top:8px"><button class="b" id="rqNag">📋 메신저용 복사 (미처리 독촉)</button><span class="hint">담당교사별 미반영 + 담임별 확인 대기 목록을 글로 만들어 복사합니다. 업무메신저에 붙여넣으세요.</span></div>'
       +'<h3>개인정보 지우기 (점검 시트)</h3><div class="row"><button class="b r s" id="rqPurgeClosed">끝난 줄 시트에서 지우기</button><button class="b r s" id="rqPurgeAll">점검 줄 전부 지우기</button><span class="hint">점검이 끝나면 학생 이름·오류 내용이 시트에 남지 않게 지우세요. 되돌릴 수 없습니다.</span></div></div>';
   }
   SEC.admin=h;
-  $('#main').innerHTML=(UI.msgNote?'<div class="box" style="border-left:5px solid var(--yel)"><b>📨 방금 보낸 요청 — 메신저로도 알리기</b> <span class="hint">경기도 메신저는 자동 발송이 안 됩니다. 복사해서 메신저 쪽지에 붙여 넣으세요.</span><pre style="white-space:pre-wrap;font-family:inherit;background:#f7f8f7;border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin:8px 0">'+esc(UI.msgNote)+'</pre><div class="row"><button class="b s" id="msgCopy">📋 메신저용 쪽지 복사</button><button class="b g s" id="msgClose">닫기</button></div></div>':'')+'<div class="box" style="border-left:5px solid var(--red);background:#fff4f2;font-weight:700;color:var(--red)">⚠ 이 사이트에서 고쳐도 나이스는 바뀌지 않습니다. 반드시 <u>나이스에서 고치고 [저장]</u>까지 한 뒤 [나이스에서 고쳤어요]를 누르세요.</div>'+head+rqTabsHTML(SEC);
+  $('#main').innerHTML=(UI.msgNote?'<div class="box" style="border-left:5px solid var(--yel)"><b>📋 메신저용 쪽지</b> <span class="hint">이미 복사됐습니다. 메신저에 Ctrl+V 하세요.</span><pre style="white-space:pre-wrap;font-family:inherit;background:#f7f8f7;border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin:8px 0">'+esc(UI.msgNote)+'</pre><div class="row"><button class="b s" id="msgCopy">📋 다시 복사</button><button class="b g s" id="msgClose">닫기</button></div></div>':'')+'<div class="box" style="border-left:5px solid var(--red);background:#fff4f2;font-weight:700;color:var(--red)">⚠ 이 사이트에서 고쳐도 나이스는 바뀌지 않습니다. 반드시 <u>나이스에서 고치고 [저장]</u>까지 한 뒤 [나이스에서 고쳤어요]를 누르세요.</div>'+head+rqTabsHTML(SEC);
 }
 // 수정 요청 탭: 할 일별 작은 탭 — 필요한 것만 한 화면에
 function rqTabsHTML(SEC){
@@ -2097,7 +2097,7 @@ M.addEventListener('click',async e=>{
     copyText(txt).then(ok=>toast(ok?'복사했습니다. 메신저 쪽지에 Ctrl+V 하세요.':'복사에 실패했습니다.')); return; }
   if(t.id==='stAdminOn'){ const k=($('#stAdminPw').value||'').trim(); if(!k){ toast('담당자 암호를 넣어 주세요.'); return; } if(!S.settings.sheetUrl){ toast('학교 링크로 먼저 연결해 주세요.'); return; } S.settings.adminKey=k; S.settings.admin=true; save(); toast('암호를 확인하는 중입니다…'); fetchReqs(true).then(()=>{ if(S.settings.admin) toast('✔ 담당자 모드가 켜졌습니다.'); render(); }); return; }
   if(t.id==='stAdminOff'){ S.settings.admin=false; S.settings.adminKey=''; save(); render(); toast('담당자 모드를 껐습니다.'); return; }
-  if(t.id==='ssAdd'){ const ti=$('#ssTitle').value.trim(), da=$('#ssDate').value, no=$('#ssNote').value.trim(); if(!ti||!/^\d{4}-\d{2}-\d{2}$/.test(da)){ toast('일정 이름과 날짜를 넣어 주세요.'); return; } pushSchoolSched((S.schoolSched||[]).concat([{id:'ss'+Date.now().toString(36),date:da,title:ti,note:no}])); return; }
+  if(t.id==='ssAdd'){ const ti=$('#ssTitle').value.trim(), da=$('#ssDate').value, no=$('#ssNote').value.trim(); if(!ti||!/^\d{4}-\d{2}-\d{2}$/.test(da)){ toast('일정 이름과 날짜를 넣어 주세요.'); return; } const yo='일월화수목금토'; const msg='[생기발랄] 생기부 학교 일정 안내\n· '+(+da.slice(5,7))+'/'+(+da.slice(8,10))+'('+yo[toDate(da).getDay()]+') '+ti+' — '+ddayText(dday(da))+(no?' ('+no+')':'')+'\n생기발랄 화면 맨 위 🏫 칸에도 디데이로 떠 있습니다. — '+(me()||'생기부 담당'); copyText(msg); pushSchoolSched((S.schoolSched||[]).concat([{id:'ss'+Date.now().toString(36),date:da,title:ti,note:no}])); setTimeout(()=>toast('학교 일정을 보냈고, 📋 메신저용 안내문이 복사됐어요 — 메신저에 Ctrl+V 하세요.'),2500); return; }
   if(t.dataset && t.dataset.ssdel){ const x=(S.schoolSched||[]).find(y=>y.id===t.dataset.ssdel); if(x && confirm('「'+x.title+'」을(를) 모든 선생님 화면에서 지웁니다. 지울까요?')) pushSchoolSched(S.schoolSched.filter(y=>y!==x)); return; }
   if(t.dataset && t.dataset.ssfin){ S.schoolFin=S.schoolFin||{}; S.schoolFin[t.dataset.ssfin]=t.checked; save(); renderSched(); renderBanner(); return; }
   { const sb=t.closest&&t.closest('[data-sclub]'); if(sb){ const gp=importClub(sb.dataset.sclub); if(gp){ UI.cls='g:'+gp.id; UI.item=gp.item; render(); } return; } }
