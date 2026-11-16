@@ -1755,7 +1755,7 @@ async function sendReqs(items){
   try{ await rqPost(body); rows.forEach(r=>logAdd('요청 보냄', r, {memo:r.memo})); render(); const cp=await copiedP; toast('점검 요청 '+rows.length+'건을 보냈습니다.'+(cp?' 📋 메신저용 쪽지가 복사됐어요 — 메신저에 Ctrl+V 하세요.':'')+(nobody?' ('+nobody+'건은 담당교사를 아직 모릅니다 — 그 선생님이 "내 담당"을 정하면 보입니다)':'')); setTimeout(()=>fetchReqs(true),4000); }
   catch(e){ rows.forEach(r=>r.failed=true); refreshReqUI(); toast('보내지 못했습니다. 인터넷 연결을 확인한 뒤 다시 보내 주세요.'); }
 }
-function fieldList(){ const f=(S.reqMeta&&S.reqMeta.fields)||[]; return f.length? f : ['자율·자치','진로','교과세특','자유학기','스포츠동아리','창체동아리','행동특성','독서','출결','수상']; }
+function fieldList(){ const base=['자율·자치','진로','교과세특','자유학기','스포츠동아리','창체동아리','행동특성','독서','출결','수상']; const f=((S.reqMeta&&S.reqMeta.fields)||[]).map(x=>String(x).trim()).filter(Boolean); const k=x=>x.replace(/[\s·.]/g,''); return base.concat(f.filter(x=>!base.some(b=>k(b)===k(x)))); }
 function subList(field){ const m=(S.reqMeta&&S.reqMeta.subs)||{}; const a=(m[field]||[]).slice(); if(/세특|교과/.test(field)) S.items.filter(i=>/^세특/.test(i.name)).forEach(i=>{ const s=i.name.replace(/^세특\s*:?\s*/,''); if(s&&s!=='과목명'&&!a.includes(s)) a.push(s); }); return a; }
 function suggestDuties(){ const out=[]; const fs=fieldList(); const fSe=fs.find(f=>/세특|교과/.test(f))||'교과세특'; const fFree=fs.find(f=>/자유학기/.test(f));
   (S.groups||[]).forEach(gp=>{ const f=fs.find(f=>subList(f).some(x=>areaSame(x,gp.name)))||fs.find(f=>/동아리/.test(f)); if(f) out.push({field:f, sub:gp.name.replace(/반$/,'')}); });
@@ -1810,7 +1810,7 @@ function saveDuty(){ if(S.schoolClubs){ const mk=autoClubs(); if(mk.length) setT
 // 브라우저 탭 제목에 숫자 표시 + 다른 탭을 보고 있을 때 새 알림이 오면 깜박임
 const BASE_TITLE='도디쌤의 생기발랄';
 // 새 버전 알림: 사이트가 고쳐져 올라오면 화면 위에 띠를 띄움(브라우저가 예전 화면을 기억하는 문제 해결)
-const BUILD_V='20261116-130829';
+const BUILD_V='20261116-132036';
 async function checkNewVersion(){ if(!/^https?:/.test(location.protocol)) return; try{ const r=await fetch('version.json?t='+Date.now(),{cache:'no-store'}); if(!r.ok) return; const j=await r.json();
   if(j && j.v && j.v!==BUILD_V && !document.getElementById('newVer')){ const d=document.createElement('div'); d.id='newVer'; d.innerHTML='✨ 생기발랄 새 버전이 나왔어요. <button class="b s" id="newVerGo">새로 고침</button> <span style="font-weight:600">또는 키보드 <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>R</kbd></span> <span class="hint" style="color:inherit;opacity:.8">· 써 둔 내용은 그대로 남아요</span>'; document.body.prepend(d); document.getElementById('newVerGo').onclick=()=>{ flush().finally(()=>{ location.replace(location.pathname+'?v='+encodeURIComponent(j.v)+location.hash); }); }; } }catch(e){} }
 const SUB_DEFAULT='선생님을 잇는 생기부 플랫폼';
