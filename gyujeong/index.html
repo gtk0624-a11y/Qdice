@@ -149,6 +149,22 @@ ol.steps li{margin:3px 0}
 .sv .sx{font-size:13px;color:#344054;white-space:pre-wrap;max-height:4.8em;overflow:hidden}
 .sv textarea{min-height:44px;margin-top:6px;font-size:13px}
 .copy{font-size:11.5px;color:var(--sub);text-align:center;margin-top:18px}
+ #pv{position:fixed;inset:0;z-index:30;background:#525659;display:flex;flex-direction:column}
+#pv[hidden]{display:none}
+.pvh{display:flex;align-items:center;gap:4px;padding:6px 6px;background:var(--navy);color:#fff;flex:none}
+.pvt{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.2;padding:0 4px}
+.pvt b{font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pvt span{font-size:11.5px;opacity:.85;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pvb{border:0;background:rgba(255,255,255,.16);color:#fff;border-radius:8px;min-width:32px;height:32px;font-size:15px;flex:none}
+.pvb:hover{background:rgba(255,255,255,.3)}
+#pvNo{font-size:12.5px;min-width:52px;text-align:center;flex:none}
+#pvBody{flex:1;overflow:auto;padding:10px 8px}
+.pvp{position:relative;margin:0 auto 10px;flex:none;background:#fff;box-shadow:0 1px 6px rgba(0,0,0,.35)}
+.pvp canvas{display:block;width:100%;height:100%}
+.pvp .pvl{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#98a2b3;font-size:13px}
+.pvp .hl{position:absolute;background:rgba(255,213,0,.45);mix-blend-mode:multiply;border-radius:2px;pointer-events:none}
+.pvp.tg{outline:3px solid #f59e0b}
+.pvp .pvn{position:absolute;right:6px;bottom:4px;font-size:11px;color:#667085;background:rgba(255,255,255,.8);padding:0 4px;border-radius:4px}
 #drop{position:fixed;inset:0;background:rgba(31,58,104,.88);color:#fff;z-index:40;display:none;align-items:center;justify-content:center;font-size:20px;font-weight:700;text-align:center;padding:20px}
 #drop.on{display:flex}
 #toast{position:fixed;left:50%;bottom:76px;transform:translateX(-50%);background:#222c3d;color:#fff;border-radius:10px;padding:8px 14px;font-size:13.5px;z-index:50;opacity:0;pointer-events:none;transition:opacity .2s;max-width:90%;text-align:center}
@@ -253,6 +269,20 @@ ol.steps li{margin:3px 0}
   </div>
 </div>
 
+<!-- 원문 PDF 보기 창 -->
+<div id="pv" hidden>
+  <div class="pvh">
+    <button type="button" class="pvb" data-act="pvClose" aria-label="닫기">✕</button>
+    <div class="pvt"><b id="pvName"></b><span id="pvInfo"></span></div>
+    <button type="button" class="pvb" data-act="pvGo" data-d="-1" aria-label="이전 쪽">◀</button>
+    <span id="pvNo">-</span>
+    <button type="button" class="pvb" data-act="pvGo" data-d="1" aria-label="다음 쪽">▶</button>
+    <button type="button" class="pvb" data-act="pvZoom" data-d="-1" aria-label="작게">－</button>
+    <button type="button" class="pvb" data-act="pvZoom" data-d="1" aria-label="크게">＋</button>
+    <button type="button" class="pvb" data-act="pvNew" title="크롬 PDF 보기로 새 창에서 열기" aria-label="새 창">⧉</button>
+  </div>
+  <div id="pvBody"></div>
+</div>
 <div id="drop">📄 여기에 놓으면 문서를 넣습니다</div>
 <input type="file" id="file" accept=".pdf,application/pdf" multiple hidden>
 <input type="file" id="filePack" accept=".json,application/json" hidden>
@@ -600,7 +630,7 @@ return {itemsToLines,splitSheet,buildPages,chunkPages,compact,parseSyn,queryGrou
 /* ===== 화면 동작 ===== */
 (function(){
 'use strict';
-const APP_VER='v1.4';
+const APP_VER='v1.5';
 const PACK_ID='dodi-gyujeong';
 
 /* ===== [자주 고칠 곳 ①] 기본 동의어 사전: 한 줄에 한 묶음 ===== */
@@ -827,7 +857,7 @@ function ask(q){
   const words=[]; hits.slice(0,40).forEach(h=>h.words.forEach(w=>{ if(!words.includes(w)) words.push(w); }));
   const R={re:Engine.hlRegex(words),re2:Engine.answerRegex(r.intents)};
   addRecent(q);
-  const id='a'+(++S.seq); S.answers[id]={all:diversify(hits),hits:null,R,shown:0,q}; S.answers[id].hits=S.answers[id].all;
+  const id='a'+(++S.seq); S.answers[id]={all:diversify(hits),hits:null,R,shown:0,q,words}; S.answers[id].hits=S.answers[id].all;
   const syn=[]; r.groups.forEach(g=>g.cands.forEach(cd=>{ if(cd.syn && words.includes(cd.w) && !syn.includes(cd.w)) syn.push(cd.w); }));
   const weak=hits[0].matched<r.total || miss.length>0;
   let h=(weak?'질문 낱말이 <b>모두 들어 있는 곳은 없습니다.</b> 일부만 맞는 곳 ':'가장 가까운 곳 ')+'<b>'+Math.min(3,hits.length)+'건</b>입니다'+(hits.length>3?' (모두 '+hits.length+'건)':'')+'. <b>원문을 꼭 확인해 주세요.</b>';
@@ -889,6 +919,72 @@ function fpOf(chunks){
 }
 function fpDoc(d){ if(!d.fp) d.fp=fpOf(d.chunks||[]); return d.fp; }
 function dupOf(fp,exceptName){ return S.docs.find(d=>d.name!==exceptName && fpDoc(d)===fp); }
+
+/* ===== 원문 PDF 보기 창: 줍줍이 안에서 PDF를 펼치고 그 쪽으로 이동, 찾은 낱말에 형광펜 ===== */
+const PV={pdf:null,blob:null,doc:null,n:0,cur:1,zoom:1,words:[],target:1,obs:null,done:{},busy:{}};
+async function openViewer(doc,blob,page,ch,words){
+  try{ await needPDF(); }catch(e){ toast('PDF 보기 부품을 불러오지 못했어요. 인터넷 연결을 확인해 주세요.'); return; }
+  closeViewer(true);
+  PV.doc=doc; PV.blob=blob; PV.zoom=1; PV.done={}; PV.busy={}; PV.target=page;
+  PV.words=(words||[]).filter(w=>w&&w.length>=2).slice(0,12);
+  $('pvName').textContent=doc.name; $('pvInfo').textContent=(ch?ch.pg+' · '+(ch.t||''):'')+' — 노란 표시가 찾은 곳';
+  $('pv').hidden=false; $('pvBody').innerHTML='<p style="color:#fff;text-align:center;margin-top:30px">원문을 펼치는 중…</p>';
+  try{
+    const data=new Uint8Array(await blob.arrayBuffer());
+    PV.pdf=await window.pdfjsLib.getDocument({data,cMapUrl:'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/cmaps/',cMapPacked:true}).promise;
+  }catch(e){ $('pvBody').innerHTML='<p style="color:#fff;text-align:center;margin-top:30px">원문 PDF를 열지 못했어요. PDF를 다시 넣어 주세요.</p>'; return; }
+  PV.n=PV.pdf.numPages; if(page>PV.n) page=PV.n; PV.target=page;
+  // 한 장에 두 쪽씩 인쇄된 가로 PDF는 글자가 작으니 처음부터 크게 보여 줌
+  try{ const v=(await PV.pdf.getPage(page)).getViewport({scale:1}); if(v.width>v.height*1.15) PV.zoom=1.9; }catch(e){}
+  await layoutViewer();
+  goPage(page,true);
+}
+async function layoutViewer(){
+  const body=$('pvBody'); const W=Math.min(body.clientWidth-16,1100)*PV.zoom;
+  const first=await PV.pdf.getPage(1); const vp=first.getViewport({scale:1}); const ratio=vp.height/vp.width;
+  PV.done={};
+  if(PV.obs) PV.obs.disconnect();
+  let html=''; for(let i=1;i<=PV.n;i++) html+='<div class="pvp'+(i===PV.target?' tg':'')+'" data-p="'+i+'" style="width:'+Math.round(W)+'px;height:'+Math.round(W*ratio)+'px"><div class="pvl">'+i+'쪽</div><span class="pvn">'+i+' / '+PV.n+'</span></div>';
+  body.innerHTML=html;
+  PV.obs=new IntersectionObserver(ents=>{ ents.forEach(en=>{ if(en.isIntersecting) renderPage(+en.target.dataset.p); }); },{root:body,rootMargin:'800px 0px'});
+  body.querySelectorAll('.pvp').forEach(el=>PV.obs.observe(el));
+  body.onscroll=()=>{ const els=body.querySelectorAll('.pvp'); const top=body.scrollTop+body.clientHeight*0.35; let c=1; for(const el of els){ if(el.offsetTop<=top) c=+el.dataset.p; else break; } if(c!==PV.cur){ PV.cur=c; $('pvNo').textContent=c+' / '+PV.n; } };
+}
+async function renderPage(i){
+  if(PV.done[i]||PV.busy[i]||!PV.pdf) return; PV.busy[i]=true;
+  const box=$('pvBody').querySelector('.pvp[data-p="'+i+'"]'); if(!box){ PV.busy[i]=false; return; }
+  try{
+    const pg=await PV.pdf.getPage(i); const vp1=pg.getViewport({scale:1});
+    const W=box.clientWidth; box.style.height=Math.round(W*vp1.height/vp1.width)+'px';
+    const dpr=Math.min(window.devicePixelRatio||1,2); const vp=pg.getViewport({scale:W/vp1.width*dpr});
+    const cv=document.createElement('canvas'); cv.width=Math.round(vp.width); cv.height=Math.round(vp.height);
+    await pg.render({canvasContext:cv.getContext('2d'),viewport:vp}).promise;
+    box.querySelector('.pvl')&&box.querySelector('.pvl').remove(); box.prepend(cv);
+    if(PV.words.length){
+      const tc=await pg.getTextContent(); const vpc=pg.getViewport({scale:W/vp1.width});
+      const keys=PV.words.map(w=>Engine.compact(w));
+      tc.items.forEach(it=>{
+        const s=Engine.compact(it.str); if(!s) return;
+        if(!keys.some(k=>s.includes(k)||(k.length>=3&&s.length>=2&&k.includes(s)&&s.length>=Math.min(3,k.length)))) return;
+        const r=vpc.convertToViewportRectangle([it.transform[4],it.transform[5]-(it.height||10)*0.25,it.transform[4]+it.width,it.transform[5]+(it.height||10)*0.95]);
+        const d=document.createElement('div'); d.className='hl';
+        d.style.left=Math.min(r[0],r[2])+'px'; d.style.top=Math.min(r[1],r[3])+'px'; d.style.width=Math.abs(r[2]-r[0])+'px'; d.style.height=Math.abs(r[3]-r[1])+'px';
+        box.appendChild(d);
+      });
+    }
+    PV.done[i]=true;
+  }catch(e){} PV.busy[i]=false;
+}
+function goPage(p,first){
+  p=Math.max(1,Math.min(PV.n,p)); const el=$('pvBody').querySelector('.pvp[data-p="'+p+'"]'); if(!el) return;
+  $('pvBody').scrollTop=el.offsetTop-8; PV.cur=p; $('pvNo').textContent=p+' / '+PV.n;
+  if(first){ renderPage(p).then(()=>{ const hl=el.querySelector('.hl'); if(hl){ const B=$('pvBody'); const y=el.offsetTop+hl.offsetTop-B.clientHeight*0.3; B.scrollTop=Math.max(el.offsetTop-8,y); B.scrollLeft=Math.max(0,el.offsetLeft+hl.offsetLeft-B.clientWidth*0.15); } }); }
+}
+function closeViewer(silent){
+  if(PV.obs){ PV.obs.disconnect(); PV.obs=null; }
+  if(PV.pdf){ try{ PV.pdf.destroy(); }catch(e){} PV.pdf=null; }
+  $('pvBody').innerHTML=''; $('pv').hidden=true;
+}
 
 /* ===== PDF 읽기 ===== */
 let pdfP=null;
@@ -1061,7 +1157,7 @@ function guideHTML(){
    +'<li><details><summary><b>내 업무 규정을 PDF로 준비해요</b></summary><div class=\"gd\">선생님 업무에 맞는 규정집·길라잡이·지침이면 무엇이든 됩니다. (학교 규정, 학폭·교권·안전 길라잡이, 교육청 지침 등)<br>· 한글(.hwp) 파일은 한글에서 <b>[파일] → [PDF로 저장하기]</b><br>· 이미 PDF면 그대로 쓰면 돼요<br>· 스캔한 그림 PDF(글자를 드래그해 복사할 수 없는 것)는 찾을 수 없어요</div></details></li>'
    +'<li><details><summary><b>PDF를 넣어요</b></summary><div class=\"gd\">이 창에 <b>끌어다 놓거나</b> 아래 [📄 PDF 넣기]를 눌러요. 여러 개를 한 번에 넣어도 돼요. 처음 한 번만 하면 됩니다.</div></details></li>'
    +(inst?'<li><details><summary><b>화면 맨 아래 작업표시줄에 꽂아 둬요</b></summary><div class=\"gd\">입력창 바로 위의 <b>[📌 작업표시줄에 꽂아 두기]</b>를 누르면 방법이 나와요. 끝나면 <b>화면 맨 아래 작업표시줄</b>에 꿈송이가 생겨요. 한글·나이스를 쓰다가도 그 꿈송이만 누르면 바로 꺼내 볼 수 있어요.</div></details></li>':'')
-   +'<li><details><summary><b>궁금한 것을 물어봐요</b></summary><div class=\"gd\">예) "출석정지는 며칠까지야?", "위원회 위원은 몇 명?", "재심의 신청 기간"<br>문서에 적힌 원문을 <b>쪽수와 함께</b> 찾아 드려요.</div></details></li>'
+   +'<li><details><summary><b>궁금한 것을 물어봐요</b></summary><div class=\"gd\">예) "출석정지는 며칠까지야?", "위원회 위원은 몇 명?", "재심의 신청 기간"<br>문서에 적힌 원문을 <b>쪽수와 함께</b> 찾아 드려요.<br><b>[📄 원문 PDF]</b>를 누르면 원본 PDF가 <b>그 쪽으로 펼쳐지고</b> 찾은 낱말에 노란 형광펜이 칠해져요.</div></details></li>'
    +'<li><details><summary><b>모아 보고 다시 찾기</b></summary><div class=\"gd\"><b>📑 색인</b>: 넣은 문서의 목차와 가나다순 찾아보기<br><b>⭐ 저장함</b>: 결과의 [⭐ 저장]으로 모은 조항과 메모, 최근 검색</div></details></li>'
    +'</ol><div class="w">화면이 길어지면 입력창 왼쪽 <b>↺</b>를 누르세요. 대화만 지워지고 넣어 둔 문서는 그대로예요.</div>';
 }
@@ -1088,16 +1184,16 @@ document.addEventListener('click',async e=>{
   else if(act==='docs'){ openPanel('pDocs'); }
   else if(act==='set'){ openPanel('pSet'); }
   else if(act==='install'){ doInstall(); }
+  else if(act==='pvClose'){ closeViewer(); }
+  else if(act==='pvGo'){ goPage(PV.cur+(+t.dataset.d)); }
+  else if(act==='pvZoom'){ const z=Math.max(0.6,Math.min(2.5,PV.zoom+(+t.dataset.d)*0.25)); if(z===PV.zoom) return; const keep=PV.cur; PV.zoom=z; await layoutViewer(); goPage(keep); }
+  else if(act==='pvNew'){ if(!PV.blob) return; const url=URL.createObjectURL(PV.blob)+'#page='+PV.cur; const w=window.open(url,'_blank'); if(!w) toast('새 창이 막혔어요. 이 창에서 보시면 돼요.'); }
   else if(act==='pdf'){ const c=t.closest('.c'); const doc=c&&S.docs.find(d=>d.id===c.dataset.doc); const ch=doc&&doc.chunks[+c.dataset.i];
     if(!doc){ bot('이 조항의 원본 문서가 이 컴퓨터에 없어요. 같은 PDF를 다시 넣으면 원문을 열 수 있어요.'); return; }
     let blob=null; try{ blob=await DB.getPdf(doc.id); }catch(e){}
-    if(!blob){ bot('「'+esc(doc.name)+'」은 <b>원본 PDF가 이 컴퓨터에 저장되어 있지 않아요.</b> (묶음으로 가져왔거나, 원문 보기 기능이 생기기 전에 넣은 문서예요)<br>[📚 내 문서]에서 <b>같은 PDF를 한 번 더 넣으면</b> 그다음부터 원문이 바로 열려요.<div class="row"><button class="b s" type="button" data-act="pick">📄 PDF 다시 넣기</button></div>'); return; }
-    const pageNo=(ch&&ch.sh)||1;
-    const url=URL.createObjectURL(blob)+'#page='+pageNo;
-    const w=window.open(url,'_blank');
-    if(!w) bot('새 창이 막혔어요. <a href="'+url+'" target="_blank" rel="noopener"><b>여기를 눌러 원문 PDF '+pageNo+'번째 쪽 열기</b></a>');
-    else toast('원문 PDF를 '+(ch?ch.pg:'')+' 쪽으로 열었어요.');
-    if(ch && !ch.sh) toast('예전에 넣은 문서라 첫 쪽이 열려요. PDF를 다시 넣으면 그 쪽으로 바로 열려요.'); }
+    if(!blob){ bot('「'+esc(doc.name)+'」은 <b>원본 PDF가 이 컴퓨터에 저장되어 있지 않아요.</b> (묶음으로 가져왔거나, 원문 보기 기능이 생기기 전에 넣은 문서예요)<br><b>같은 PDF를 한 번 더 넣으면</b> 그다음부터 원문이 바로 열려요. 검색·저장함은 그대로예요.<div class="row"><button class="b s" type="button" data-act="pick">📄 PDF 다시 넣기</button></div>'); return; }
+    const list=c.closest('[data-ans]'); const a=list?S.answers[list.dataset.ans]:null;
+    const hit=a&&a.all.find(x=>x.e.c===ch); openViewer(doc,blob,(ch&&ch.sh)||1,ch,hit?hit.words:(a?a.words:[])); }
   else if(act==='save'){ const f=findCard(t); if(!f) return; if(savedKey(f.doc,f.ch)){ toast('이미 저장했어요.'); return; }
     const list=f.el.closest('[data-ans]'); const a=list?S.answers[list.dataset.ans]:null;
     S.saved.push({id:'s'+Date.now().toString(36)+Math.random().toString(36).slice(2,5),docId:f.doc.id,doc:f.doc.name,i:f.ch.i,t:f.ch.t,up:f.ch.up||'',pg:f.ch.pg,x:f.ch.x,q:a&&a.q||'',memo:'',at:Date.now()});
@@ -1151,7 +1247,7 @@ $('idxDoc').addEventListener('change',()=>renderIdx());
 $('btnPin').addEventListener('click',()=>{ if(S.installEvt) doInstall(); else bot(pinHelp()); });
 function showPin(){ $('btnPin').hidden = standalone() || isMobile || isKakao; }
 $('dz').addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); $('file').click(); } });
-document.addEventListener('keydown',e=>{ if(e.key==='Escape') closePanels(); });
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ if(!$('pv').hidden) closeViewer(); else closePanels(); } if(!$('pv').hidden){ if(e.key==='PageDown'||e.key==='ArrowRight'&&e.altKey){ e.preventDefault(); goPage(PV.cur+1); } if(e.key==='PageUp'||e.key==='ArrowLeft'&&e.altKey){ e.preventDefault(); goPage(PV.cur-1); } } });
 let dragN=0;
 const hasFiles=e=>e.dataTransfer && Array.from(e.dataTransfer.types||[]).includes('Files');
 window.addEventListener('dragenter',e=>{ if(!hasFiles(e)) return; e.preventDefault(); dragN++; $('drop').classList.add('on'); });
