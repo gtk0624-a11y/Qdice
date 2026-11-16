@@ -337,6 +337,7 @@ function buildPages(sheets){
   return pages.map(p=>({
     label: p.no!==null ? 'p.'+p.no : ('PDF '+p.sheet+'번째 쪽'+(p.half?'('+p.half+')':'')),
     printed: p.no!==null,
+    sheet: p.sheet,
     lines: p.lines.filter(l=>!l.drop).map(l=>l.s.replace(/[ \t]{3,}/g,'  ').trim()).filter(Boolean)
   }));
 }
@@ -359,10 +360,11 @@ function chunkPages(pages){
   const raw=[]; let cur=null;
   const st={l0:'',l1:'',l2:'',reg:'',lastN:0,style:'',romanSince:false,lastJo:0,inJo:false,inForm:false,prevLine:''};
   const path=(...a)=>a.filter(Boolean).join(' › ');
-  const start=(t,up,label,kind)=>{ cur={t,up,pg:label,x:[],kind:kind||''}; raw.push(cur); };
+  let curSheet=1;
+  const start=(t,up,label,kind)=>{ cur={t,up,pg:label,sh:curSheet,x:[],kind:kind||''}; raw.push(cur); };
   const size=c=>c.x.reduce((a,b)=>a+b.length+1,0);
   const clean=s=>s.replace(/\s{2,}/g,' ').trim();
-  pages.forEach(pg=>{
+  pages.forEach(pg=>{ curSheet=pg.sheet||curSheet;
     for(let li=0;li<pg.lines.length;li++){
       const line=pg.lines[li]; let m;
       // (1) 조항
@@ -434,7 +436,7 @@ function chunkPages(pages){
       const parent=(prev.up?prev.up+' › ':'')+prev.t.replace(/ \(이어서\)$/,'');
       if(c.up===parent || (c.up===prev.up && (prev.kind!=='top' || prev.x))){ prev.x+=(prev.x?'\n':'')+c.t+(body?'\n'+body:''); return; }
     }
-    out.push({t:c.t,up:c.up,pg:c.pg,x:body,kind:c.kind});
+    out.push({t:c.t,up:c.up,pg:c.pg,sh:c.sh,x:body,kind:c.kind});
   });
   out=out.filter(c=>!(c.kind==='top' && !c.x));
   out.forEach((c,i)=>{ c.i=i; if(!c.t) c.t=c.pg; if(c.kind==='form') c.f=1; delete c.kind; });
@@ -598,7 +600,7 @@ return {itemsToLines,splitSheet,buildPages,chunkPages,compact,parseSyn,queryGrou
 /* ===== 화면 동작 ===== */
 (function(){
 'use strict';
-const APP_VER='v1.2';
+const APP_VER='v1.3';
 const PACK_ID='dodi-gyujeong';
 
 /* ===== [자주 고칠 곳 ①] 기본 동의어 사전: 한 줄에 한 묶음 ===== */
@@ -631,8 +633,8 @@ const standalone=()=>window.matchMedia('(display-mode: standalone)').matches || 
 /* ===== 저장소(이 컴퓨터의 브라우저 안, IndexedDB) ===== */
 const DB={db:null,
   open(){ return new Promise(res=>{ try{
-      const r=indexedDB.open('dodi-gyujeong',1);
-      r.onupgradeneeded=()=>{ const d=r.result; if(!d.objectStoreNames.contains('docs')) d.createObjectStore('docs',{keyPath:'id'}); if(!d.objectStoreNames.contains('kv')) d.createObjectStore('kv'); };
+      const r=indexedDB.open('dodi-gyujeong',2);
+      r.onupgradeneeded=()=>{ const d=r.result; if(!d.objectStoreNames.contains('docs')) d.createObjectStore('docs',{keyPath:'id'}); if(!d.objectStoreNames.contains('kv')) d.createObjectStore('kv'); if(!d.objectStoreNames.contains('pdfs')) d.createObjectStore('pdfs'); };
       r.onsuccess=()=>{ DB.db=r.result; res(true); }; r.onerror=()=>res(false); r.onblocked=()=>res(false);
     }catch(e){ res(false); } }); },
   tx(store,mode,fn){ return new Promise((res,rej)=>{ if(!DB.db){ res(undefined); return; }
@@ -642,7 +644,10 @@ const DB={db:null,
   delDoc(id){ return DB.tx('docs','readwrite',o=>o.delete(id)); },
   get(k){ return DB.tx('kv','readonly',o=>o.get(k)); },
   set(k,v){ return DB.tx('kv','readwrite',o=>o.put(v,k)); },
-  clear(){ return Promise.all([DB.tx('docs','readwrite',o=>o.clear()),DB.tx('kv','readwrite',o=>o.clear())]); }
+  putPdf(id,b){ return DB.tx('pdfs','readwrite',o=>o.put(b,id)); },
+  getPdf(id){ return DB.tx('pdfs','readonly',o=>o.get(id)); },
+  delPdf(id){ return DB.tx('pdfs','readwrite',o=>o.delete(id)); },
+  clear(){ return Promise.all([DB.tx('docs','readwrite',o=>o.clear()),DB.tx('kv','readwrite',o=>o.clear()),DB.tx('pdfs','readwrite',o=>o.clear())]); }
 };
 async function saveDoc(d){ try{ await DB.putDoc(d); }catch(e){ S.saveOk=false; toast('저장 공간이 부족해 이 문서는 창을 닫으면 사라집니다.'); } }
 
@@ -734,7 +739,7 @@ function card(doc,c,R,tag){
     +(c.t && c.t!==c.pg?'<div class="ct">'+hl(c.t,re)+'</div>':'')
     +'<div class="cx'+(sn.cut?' cut':'')+'">'+(c.x?hl(sn.t,re):'<span style="color:var(--sub)">(제목만 있고 본문이 없는 부분입니다. [뒤 내용]을 눌러 보세요.)</span>')+'</div>'
     +'<div class="cb">'+(sn.cut?'<button class="b g s" type="button" data-act="full">전체 보기</button>':'')
-    +'<button class="b g s" type="button" data-act="adj" data-dir="-1">◀ 앞 내용</button><button class="b g s" type="button" data-act="adj" data-dir="1">뒤 내용 ▶</button><button class="b g s" type="button" data-act="copy">복사</button>'+(savedKey(doc,c)?'<button class="b s" type="button" data-act="save" disabled>★ 저장됨</button>':'<button class="b g s" type="button" data-act="save">⭐ 저장</button>')+'</div></div>';
+    +'<button class="b g s" type="button" data-act="adj" data-dir="-1">◀ 앞 내용</button><button class="b g s" type="button" data-act="adj" data-dir="1">뒤 내용 ▶</button><button class="b s" type="button" data-act="pdf">📄 원문 PDF</button><button class="b g s" type="button" data-act="copy">복사</button>'+(savedKey(doc,c)?'<button class="b s" type="button" data-act="save" disabled>★ 저장됨</button>':'<button class="b g s" type="button" data-act="save">⭐ 저장</button>')+'</div></div>';
   return h;
 }
 
@@ -918,6 +923,7 @@ async function addFiles(files){
       const old=S.docs.find(d=>d.name===name);
       const doc={id:old?old.id:('d'+Date.now().toString(36)+Math.random().toString(36).slice(2,6)),name,addedAt:Date.now(),sheets:r.sheets,pages:r.pages,chars:r.chars,chunks:r.chunks,on:true};
       if(old) S.docs[S.docs.indexOf(old)]=doc; else S.docs.push(doc);
+      try{ await DB.putPdf(doc.id,new Blob([f],{type:'application/pdf'})); doc.hasPdf=true; }catch(e){ doc.hasPdf=false; }
       await saveDoc(doc); rebuild(); renderDocs();
       const jo=doc.chunks.filter(c=>/^제\s?\d+\s?조/.test(c.t)).length;
       bot('「'+esc(name)+'」을(를) '+(old?'새로 바꿔 ':'')+'넣었습니다. ('+r.pages+'쪽, '+doc.chunks.length+'개 부분'+(jo>=3?', 조항 '+jo+'개':'')+', '+Math.max(1,Math.round((Date.now()-t0)/1000))+'초)<br>이제 궁금한 것을 물어보세요.'
@@ -939,7 +945,7 @@ function renderDocs(){
   if(!S.docs.length){ b.innerHTML='<p class="hint" style="text-align:center;margin-top:14px">아직 넣은 문서가 없습니다.</p>'; return; }
   b.innerHTML=S.docs.map(d=>'<div class="doc'+(d.on===false?' off':'')+'" data-id="'+esc(d.id)+'">'
     +'<label class="sw" title="켜면 이 문서에서 찾습니다"><input type="checkbox" data-act="toggle"'+(d.on===false?'':' checked')+'><i></i></label>'
-    +'<div class="dn"><b>'+esc(d.name)+'</b><span>'+d.pages+'쪽 · '+d.chunks.length+'개 부분 · '+new Date(d.addedAt).toLocaleDateString('ko-KR')+' 넣음'+(d.on===false?' · 꺼짐':'')+'</span></div>'
+    +'<div class="dn"><b>'+esc(d.name)+'</b><span>'+d.pages+'쪽 · '+d.chunks.length+'개 부분 · '+(d.hasPdf?'원본 PDF 있음 · ':'<b style="color:#b54708">원본 PDF 없음</b> · ')+new Date(d.addedAt).toLocaleDateString('ko-KR')+' 넣음'+(d.on===false?' · 꺼짐':'')+'</span></div>'
     +'<button class="b r s" type="button" data-act="del">지우기</button></div>').join('');
 }
 
@@ -1064,6 +1070,16 @@ document.addEventListener('click',async e=>{
   else if(act==='docs'){ openPanel('pDocs'); }
   else if(act==='set'){ openPanel('pSet'); }
   else if(act==='install'){ doInstall(); }
+  else if(act==='pdf'){ const c=t.closest('.c'); const doc=c&&S.docs.find(d=>d.id===c.dataset.doc); const ch=doc&&doc.chunks[+c.dataset.i];
+    if(!doc){ bot('이 조항의 원본 문서가 이 컴퓨터에 없어요. 같은 PDF를 다시 넣으면 원문을 열 수 있어요.'); return; }
+    let blob=null; try{ blob=await DB.getPdf(doc.id); }catch(e){}
+    if(!blob){ bot('「'+esc(doc.name)+'」은 <b>원본 PDF가 이 컴퓨터에 저장되어 있지 않아요.</b> (묶음으로 가져왔거나, 원문 보기 기능이 생기기 전에 넣은 문서예요)<br>[📚 내 문서]에서 <b>같은 PDF를 한 번 더 넣으면</b> 그다음부터 원문이 바로 열려요.<div class="row"><button class="b s" type="button" data-act="pick">📄 PDF 다시 넣기</button></div>'); return; }
+    const pageNo=(ch&&ch.sh)||1;
+    const url=URL.createObjectURL(blob)+'#page='+pageNo;
+    const w=window.open(url,'_blank');
+    if(!w) bot('새 창이 막혔어요. <a href="'+url+'" target="_blank" rel="noopener"><b>여기를 눌러 원문 PDF '+pageNo+'번째 쪽 열기</b></a>');
+    else toast('원문 PDF를 '+(ch?ch.pg:'')+' 쪽으로 열었어요.');
+    if(ch && !ch.sh) toast('예전에 넣은 문서라 첫 쪽이 열려요. PDF를 다시 넣으면 그 쪽으로 바로 열려요.'); }
   else if(act==='save'){ const f=findCard(t); if(!f) return; if(savedKey(f.doc,f.ch)){ toast('이미 저장했어요.'); return; }
     const list=f.el.closest('[data-ans]'); const a=list?S.answers[list.dataset.ans]:null;
     S.saved.push({id:'s'+Date.now().toString(36)+Math.random().toString(36).slice(2,5),docId:f.doc.id,doc:f.doc.name,i:f.ch.i,t:f.ch.t,up:f.ch.up||'',pg:f.ch.pg,x:f.ch.x,q:a&&a.q||'',memo:'',at:Date.now()});
@@ -1091,7 +1107,7 @@ document.addEventListener('click',async e=>{
     const d=bot((+t.dataset.dir<0?'바로 <b>앞</b>':'바로 <b>뒤</b>')+' 내용입니다.<div data-list="x"'+(f.el.closest('[data-ans]')?' data-ans="'+f.el.closest('[data-ans]').dataset.ans+'"':'')+'>'+card(f.doc,n,f.re,'')+'</div>'); const x=d.querySelector('.cx'); if(x && n.x){ x.classList.remove('cut'); x.innerHTML=hl(reflow(n.x),f.re); const fb=d.querySelector('[data-act="full"]'); if(fb) fb.remove(); } }
   else if(act==='del'){ const row=t.closest('.doc');
     if(t.dataset.sure!=='1'){ t.dataset.sure='1'; t.textContent='정말 지우기'; setTimeout(()=>{ if(t.isConnected){ t.dataset.sure=''; t.textContent='지우기'; } },3500); return; }
-    const id=row.dataset.id; S.docs=S.docs.filter(d=>d.id!==id); await DB.delDoc(id).catch(()=>{}); rebuild(); renderDocs(); toast('문서를 지웠습니다.'); }
+    const id=row.dataset.id; S.docs=S.docs.filter(d=>d.id!==id); await DB.delDoc(id).catch(()=>{}); await DB.delPdf(id).catch(()=>{}); rebuild(); renderDocs(); toast('문서를 지웠습니다.'); }
   else if(act==='synSave'){ S.syn=$('synBox').value; await DB.set('syn',S.syn).catch(()=>{}); rebuild(); toast('같은 뜻 낱말 '+S.synGroups.length+'묶음을 저장했습니다.'); }
   else if(act==='synReset'){ $('synBox').value=DEFAULT_SYN; toast('기본값을 불러왔습니다. [저장]을 눌러야 적용됩니다.'); }
   else if(act==='packOut'){ packOut(); }
