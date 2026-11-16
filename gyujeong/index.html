@@ -520,7 +520,7 @@ return {itemsToLines,splitSheet,buildPages,chunkPages,compact,parseSyn,queryGrou
 /* ===== 화면 동작 ===== */
 (function(){
 'use strict';
-const APP_VER='v0.6 시제품';
+const APP_VER='v0.7 시제품';
 const PACK_ID='dodi-gyujeong';
 
 /* ===== [자주 고칠 곳 ①] 기본 동의어 사전: 한 줄에 한 묶음 ===== */
@@ -836,6 +836,7 @@ function pinHelp(){
          :'주소창 <b>오른쪽 끝의 설치 아이콘</b>(모니터에 ↓ 모양)을 누르세요.<br>안 보이면 오른쪽 위 <b>⋮</b> → <b>[전송, 저장, 공유]</b> → <b>[페이지를 앱으로 설치…]</b> → [설치]<br>메뉴 이름이 <b>[바로가기 만들기]</b>로 보이면 그것을 누르고 <b>[창으로 열기]</b>에 체크한 뒤 [만들기]')
    +'</li><li><b>작업표시줄에 고정</b><br>설치하면 작은 창이 새로 떠요. 아래 작업표시줄에 생긴 <b>꿈송이 아이콘</b>을 <b>마우스 오른쪽 단추</b>로 누르고 <b>[작업 표시줄에 고정]</b>.</li>'
    +'<li><b>다음부터</b><br>작업표시줄의 꿈송이 아이콘만 누르면 바로 열려요. 넣어 둔 문서도 그대로 있어요.</li></ol>'
+   +'<div class="w"><b>⋮ 메뉴에 설치가 아예 없으면</b> (학교 PC 등)<br>① 바탕화면 빈 곳에서 마우스 오른쪽 → [새로 만들기] → [바로 가기]<br>② 항목 위치 칸에 아래 글을 그대로 붙여넣고 [다음]<div class="row"><button class="b s" type="button" data-act="copyApp">붙여넣을 글 복사</button></div>③ 이름에 <b>규정줍줍</b> → [마침]<br>④ 바탕화면에 생긴 아이콘을 마우스 오른쪽 → [작업 표시줄에 고정] (안 보이면 [추가 옵션 표시] 안에 있어요)</div>'
    +'<div class="w">이미 설치했다면 설치 메뉴가 안 보여요. 그때는 시작 메뉴에서 <b>"규정줍줍"</b>을 찾아 실행한 뒤 2번만 하면 돼요.<br>학교 PC에 따라 앱 설치가 막혀 있을 수 있어요. 그럴 땐 이 주소를 <b>즐겨찾기</b>에 넣어 쓰세요.</div>';
   return h;
 }
@@ -883,6 +884,7 @@ document.addEventListener('click',async e=>{
   else if(act==='pin'){ if(S.installEvt) doInstall(); else bot(pinHelp()); }
   else if(act==='guide'){ closePanels(); bot('<b>📖 사용법</b>'+guideHTML()+'<div class="w">같은 업무 선생님께 문서를 그대로 넘기고 싶으면 [⚙ 설정] → [묶음 내보내기]를 쓰세요.</div>'); }
   else if(act==='copyUrl'){ copyText(location.href); }
+  else if(act==='copyApp'){ copyText('"C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe" --app='+location.origin+location.pathname); }
   else if(act==='more'){ showMore(t.dataset.id,5); }
   else if(act==='bydoc'){ byDoc(t.dataset.id,t.dataset.doc,t); }
   else if(act==='full'){ const f=findCard(t); if(f){ const x=f.el.querySelector('.cx'); x.classList.remove('cut'); x.innerHTML=hl(f.ch.x,f.re); t.remove(); } }
