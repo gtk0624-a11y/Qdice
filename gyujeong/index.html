@@ -600,7 +600,7 @@ return {itemsToLines,splitSheet,buildPages,chunkPages,compact,parseSyn,queryGrou
 /* ===== 화면 동작 ===== */
 (function(){
 'use strict';
-const APP_VER='v1.3';
+const APP_VER='v1.3.1';
 const PACK_ID='dodi-gyujeong';
 
 /* ===== [자주 고칠 곳 ①] 기본 동의어 사전: 한 줄에 한 묶음 ===== */
@@ -1052,7 +1052,8 @@ function hello(){
   const has=S.docs.length>0;
   let h='<div class="hello"><img src="ggumsong.png" alt="꿈송이"><div>안녕하세요, <b>꿈송이</b>예요. '
     +(has?'넣어 둔 문서 <b>'+S.docs.length+'개</b>에서 찾아 드릴게요. 궁금한 것을 물어보세요.':'선생님 업무의 <b>규정집·길라잡이</b>를 PDF로 넣어 주시면, 질문에 맞는 곳을 <b>원문 그대로 쪽수와 함께</b> 찾아 드려요. 이렇게 시작해요.')+'</div></div>';
-  if(!has){ h+=guideHTML()+'<div class="row"><button class="b" type="button" data-act="pick">📄 PDF 넣기</button>'+((!standalone()&&!isMobile&&!isKakao)?'<button class="b g" type="button" data-act="pin" id="helloInst">📌 작업표시줄(화면 맨 아래)에 꽂기</button>':'')+'</div>'; }
+  h+=guideHTML();
+  if(!has){ h+='<div class="row"><button class="b" type="button" data-act="pick">📄 PDF 넣기</button>'+((!standalone()&&!isMobile&&!isKakao)?'<button class="b g" type="button" data-act="pin" id="helloInst">📌 작업표시줄(화면 맨 아래)에 꽂기</button>':'')+'</div>'; }
   else if(!standalone() && !isMobile && !isKakao) h+='<div class="row"><button class="b g s" type="button" data-act="pin" id="helloInst">📌 작업표시줄(화면 맨 아래)에 꽂기</button><button class="b g s" type="button" data-act="guide">📖 사용법</button></div>';
   else h+='<div class="row"><button class="b g s" type="button" data-act="guide">📖 사용법</button></div>';
   h+=mineHTML()+mustHTML();
