@@ -743,12 +743,15 @@ const DEFAULT_ITEMS=[
 ];
 // 예전에 만든 자료에도 담임 칸(출결·독서)을 더함
 function ensureItems(){ let n=0;
+  if(!S.pickInit){ S.pickInit=true; if(S.items.some(i=>i.mine===false && !['free','chul','dokseo'].includes(i.key))) S.items.forEach(i=>{ i.pick=i.mine!==false; }); n++; }
   // 전체 양식을 올리다 생긴 빈 "세특: 과목명"이 내 세특과 함께 두 개로 보이면 빈 것을 지움
   const se=S.items.filter(i=>/^세특/.test(i.name)), ph=se.find(i=>i.name==='세특: 과목명');
   if(ph && se.length>1 && !Object.keys(S.records).some(k=>k.endsWith('|'+ph.key)&&String(S.records[k].text||'').trim())){ S.items=S.items.filter(i=>i!==ph); if(UI.item===ph.key) UI.item=se.find(i=>i!==ph).key; n++; } DEFAULT_ITEMS.filter(x=>x.key==='chul'||x.key==='dokseo').forEach(x=>{ if(!S.items.some(i=>i.key===x.key||i.name===x.name)){ S.items.push(Object.assign({},x,{mine:!!S.settings.homeroom})); n++; } }); if(n) save(); }
 // 영역별 입력: 이 반에서 내가 쓰는 영역만 (담임 반 = 자율·진로·행특·출결·독서(+1학년 자유학기), 그 밖은 [내 담당]에 넣은 분야·반)
 const HR_ITEM=/^(자율|진로|행동|출결|독서)/;
-function itemOkFor(it,c){ if(!it) return false; const st=S.settings, ds=myDuties(); if(st.showAllItems || (!ds.length && !st.homeroom)) return true;
+function itemOkFor(it,c){ if(!it) return false; const st=S.settings, ds=myDuties(); if(st.showAllItems) return true;
+  if(typeof it.pick==='boolean'){ if(!it.pick) return false; if(/동아리/.test(it.name)) return true; if(isGrp(c)) return false; const m=myClassSet(); return !m || m.includes(c); }
+  if(!ds.length && !st.homeroom) return true;
   if(/동아리/.test(it.name)) return ds.some(d=>/동아리/.test(d.field||'')) || (S.groups||[]).length>0;
   if(isGrp(c)) return false;
   const g=String(c).split('-')[0];
@@ -1419,7 +1422,7 @@ function renderSet(){
     h+='<div class="row">'+(P.per.length? '<button class="b" id="readApply">이대로 넣기</button>':'<span class="hint">새로 넣을 책이 없습니다.</span>')+'<button class="b g" id="readCancel">취소</button></div>'; }
   h+='</div>';
   h+='<div class="box"><h2>기재요령 규칙 (항목별 한도)</h2><div class="hint">기본값은 2026학년도 기준으로 넣어 두었습니다(창체 영역·세특 500자=1,500B, 자유학기 1,000자=3,000B, 행특 300자=900B). <b>반드시 2026 기재요령 "영역별 입력 가능 최대 글자수" 표와 실제 나이스 화면으로 확인</b>하고 다르면 아래에서 고치세요. <a href="https://star.moe.go.kr/web/contents/m21100.do" target="_blank" rel="noopener">기재요령 최신판 내려받기(학교생활기록부 종합지원포털)</a></div>'
-    +'<table style="margin-top:8px"><tr><th class="l">항목 이름</th><th>한도(바이트)</th><th>한글 기준</th><th>입력 대상(%)</th><th>내 담당</th><th></th></tr>'+S.items.map((it,i)=>'<tr><td class="l"><input type="text" data-it="'+i+'" data-f="name" value="'+esc(it.name)+'" style="width:100%"></td><td><input type="number" min="1" data-it="'+i+'" data-f="limit" value="'+esc(it.limit)+'" style="width:90px"></td><td>'+Math.floor(it.limit/3)+'자</td><td><input type="number" min="1" max="100" data-it="'+i+'" data-f="ratio" value="'+ratioOf(it)+'" style="width:70px"></td><td><input type="checkbox" data-it="'+i+'" data-f="mine"'+(it.mine!==false?' checked':'')+'></td><td><button class="b r s" data-itdel="'+i+'">삭제</button></td></tr>').join('')+'</table>'
+    +'<table style="margin-top:8px"><tr><th class="l">항목 이름</th><th>한도(바이트)</th><th>한글 기준</th><th>입력 대상(%)</th><th>내가 쓰는 영역<br><small>(영역별 입력에 보임)</small></th><th></th></tr>'+S.items.map((it,i)=>'<tr><td class="l"><input type="text" data-it="'+i+'" data-f="name" value="'+esc(it.name)+'" style="width:100%"></td><td><input type="number" min="1" data-it="'+i+'" data-f="limit" value="'+esc(it.limit)+'" style="width:90px"></td><td>'+Math.floor(it.limit/3)+'자</td><td><input type="number" min="1" max="100" data-it="'+i+'" data-f="ratio" value="'+ratioOf(it)+'" style="width:70px"></td><td><input type="checkbox" data-it="'+i+'" data-f="mine"'+(it.mine!==false?' checked':'')+'></td><td><button class="b r s" data-itdel="'+i+'">삭제</button></td></tr>').join('')+'</table>'
     +'<div class="hint">입력 대상(%): 그 영역을 학생의 몇 %에게 쓰는지입니다. 100이면 전원, 세특은 기본 30(이름이 "세특"으로 시작하면 자동 30). 학교 학업성적관리위원회가 정한 비율로 고치세요. "내 담당"을 끄면 빠진 입력 목록과 현황 전송에서 빠집니다.</div><div class="row"><button class="b g" id="itAdd">항목 추가 (예: 세특: 역사)</button><button class="b g" id="ruleOut">규칙 파일 내보내기</button><label class="b g" style="cursor:pointer">규칙 파일 등록<input type="file" id="ruleIn" accept=".json" hidden></label></div>'
     +'<div class="row"><label>엔터(줄바꿈) 1개 = <select id="stEnter"><option value="2"'+(st.enterBytes===2?' selected':'')+'>2바이트(안전)</option><option value="1"'+(st.enterBytes===1?' selected':'')+'>1바이트(기재요령 표기)</option></select></label><label><input type="checkbox" id="stNL"'+(st.stripNL?' checked':'')+'> 복사할 때 줄바꿈을 띄어쓰기로 바꾸기</label></div></div>';
   h+='<div class="box"><h2>자동 교정</h2><div class="row"><label><input type="checkbox" id="stSpell"'+(st.autoSpell?' checked':'')+'> 맞춤법·띄어쓰기 사전 규칙 자동 적용 (끄면 공백·기호 정리만 합니다)</label></div>'
@@ -1807,7 +1810,7 @@ function saveDuty(){ if(S.schoolClubs){ const mk=autoClubs(); if(mk.length) setT
 // 브라우저 탭 제목에 숫자 표시 + 다른 탭을 보고 있을 때 새 알림이 오면 깜박임
 const BASE_TITLE='도디쌤의 생기발랄';
 // 새 버전 알림: 사이트가 고쳐져 올라오면 화면 위에 띠를 띄움(브라우저가 예전 화면을 기억하는 문제 해결)
-const BUILD_V='20261116-124931';
+const BUILD_V='20261116-125505';
 async function checkNewVersion(){ if(!/^https?:/.test(location.protocol)) return; try{ const r=await fetch('version.json?t='+Date.now(),{cache:'no-store'}); if(!r.ok) return; const j=await r.json();
   if(j && j.v && j.v!==BUILD_V && !document.getElementById('newVer')){ const d=document.createElement('div'); d.id='newVer'; d.innerHTML='✨ 생기발랄 새 버전이 나왔어요. <button class="b s" id="newVerGo">새로 고침</button> <span style="font-weight:600">또는 키보드 <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>R</kbd></span> <span class="hint" style="color:inherit;opacity:.8">· 써 둔 내용은 그대로 남아요</span>'; document.body.prepend(d); document.getElementById('newVerGo').onclick=()=>{ flush().finally(()=>{ location.replace(location.pathname+'?v='+encodeURIComponent(j.v)+location.hash); }); }; } }catch(e){} }
 const SUB_DEFAULT='선생님을 잇는 생기부 플랫폼';
@@ -2120,7 +2123,7 @@ M.addEventListener('change',e=>{
   if(t.dataset.zr!==undefined){ const r=Z.rows[+t.dataset.zr], f=t.dataset.f; if(!r) return; if(f==='name') r.name=t.value; else if(f==='target') r.target=t.value===''?'':+t.value; else if(f==='adj') r.adj=+t.value||0; else r.w[+f.slice(1)]=Math.max(0,+t.value||0); save(); keep(renderSisu); return; }
   if(t.id==='clubTarget'){ Z.clubTarget=t.value===''?'':+t.value; save(); renderSisu(); return; }
   if(t.dataset.clubh){ const x=Z.club.find(o=>o.date===t.dataset.clubh); if(x){ x.hours=Math.max(0,+t.value||0); save(); keep(renderSisu); } return; }
-  if(t.dataset.it!==undefined){ const it=S.items[+t.dataset.it], f=t.dataset.f; if(!it) return; if(f==='name'){ if(t.value.trim()) it.name=t.value.trim(); } else if(f==='limit'){ if(+t.value>0) it.limit=Math.floor(+t.value); } else if(f==='ratio'){ const v=Math.round(+t.value); if(v>=1&&v<=100) it.ratio=v; } else it.mine=t.checked; save(); keep(renderSet); return; }
+  if(t.dataset.it!==undefined){ const it=S.items[+t.dataset.it], f=t.dataset.f; if(!it) return; if(f==='name'){ if(t.value.trim()) it.name=t.value.trim(); } else if(f==='limit'){ if(+t.value>0) it.limit=Math.floor(+t.value); } else if(f==='ratio'){ const v=Math.round(+t.value); if(v>=1&&v<=100) it.ratio=v; } else { if(!S.items.some(i=>typeof i.pick==='boolean')) S.items.forEach(i=>{ i.pick=i.mine!==false; }); it.mine=t.checked; it.pick=t.checked; } save(); keep(renderSet); return; }
   if(t.id==='stEnter'){ st.enterBytes=+t.value; save(); return; }
   if(t.id==='stNL'){ st.stripNL=t.checked; save(); return; }
   if(t.id==='stSpell'){ st.autoSpell=t.checked; save(); return; }
