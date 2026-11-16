@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>도디쌤의 규정줍줍</title>
-<meta name="description" content="규정집·길라잡이 PDF에서 원문을 쪽수와 함께 찾아 주는 학교 업무용 프로그램">
+<meta name="description" content="규정·길라잡이·각종 계획서에서 근거를 찾아 드립니다.">
 <meta name="theme-color" content="#1f3a68">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png">
@@ -18,7 +18,9 @@ body{font-family:"Pretendard","Malgun Gothic","맑은 고딕","Apple SD Gothic N
 button{font:inherit;cursor:pointer}
 header.top{display:flex;align-items:center;gap:6px;padding:9px 10px;background:var(--navy);color:#fff;flex:none}
 .ava{width:38px;height:38px;border-radius:50%;background:#fff;flex:none;object-fit:cover}
-.ttl{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.25}
+.ttl{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.25;cursor:pointer;border-radius:8px}
+.ttl:hover{background:rgba(255,255,255,.1)}
+.tin{width:100%;border:1.5px solid var(--line);border-radius:9px;padding:7px 10px;font:inherit;font-size:14px;margin-top:4px}
 .ttl b{font-size:15.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ttl span{font-size:11.5px;opacity:.82;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .hb{position:relative;border:0;background:rgba(255,255,255,.14);color:#fff;border-radius:10px;min-width:36px;height:38px;font-size:17px;padding:0 6px;flex:none}
@@ -176,7 +178,7 @@ ol.steps li{margin:3px 0}
 
 <header class="top">
   <img class="ava" src="dodi.jpg" alt="도디쌤">
-  <div class="ttl"><b>도디쌤의 규정줍줍</b><span>규정·길라잡이에서 근거를 찾아 드립니다</span></div>
+  <div class="ttl" id="ttlBox" title="눌러서 제목·부제 바꾸기" role="button" tabindex="0"><b id="tMain">도디쌤의 규정줍줍</b><span id="tSub">규정·길라잡이·각종 계획서에서 근거를 찾아 드립니다.</span></div>
   <button class="hb" id="btnIdx" type="button" title="색인(목차·가나다)" aria-label="색인">📑</button>
   <button class="hb" id="btnSaved" type="button" title="저장함" aria-label="저장함">⭐<i id="savCnt" hidden>0</i></button>
   <button class="hb" id="btnDocs" type="button" title="문서 넣기·관리" aria-label="문서 넣기·관리">📚<i id="docCnt">0</i></button>
@@ -243,6 +245,11 @@ ol.steps li{margin:3px 0}
     <div class="sb">
       <div class="row" style="margin-top:0"><button class="b g s" type="button" data-act="guide">📖 사용법 보기</button></div>
       <div id="mineBox"></div>
+      <h3 id="tHead">🏷 제목·부제 바꾸기</h3>
+      <p class="hint">위쪽 띠에 보이는 제목과 부제를 내 업무에 맞게 바꿀 수 있어요. (이 컴퓨터에만 적용)</p>
+      <label class="hint">제목</label><input id="tMainIn" class="tin" maxlength="30" placeholder="도디쌤의 규정줍줍">
+      <label class="hint">부제</label><input id="tSubIn" class="tin" maxlength="60" placeholder="규정·길라잡이·각종 계획서에서 근거를 찾아 드립니다.">
+      <div class="row"><button class="b s" type="button" data-act="tSave">저장</button><button class="b g s" type="button" data-act="tReset">처음 제목으로</button></div>
       <h3>📌 화면 맨 아래 작업표시줄에 꽂아 두기</h3>
       <div id="installBox"></div>
 
@@ -630,7 +637,7 @@ return {itemsToLines,splitSheet,buildPages,chunkPages,compact,parseSyn,queryGrou
 /* ===== 화면 동작 ===== */
 (function(){
 'use strict';
-const APP_VER='v1.5';
+const APP_VER='v1.6';
 const PACK_ID='dodi-gyujeong';
 
 /* ===== [자주 고칠 곳 ①] 기본 동의어 사전: 한 줄에 한 묶음 ===== */
@@ -657,7 +664,7 @@ const DEFAULT_SYN=[
 
 const $=id=>document.getElementById(id);
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const S={saved:[],recent:[],memoT:null,docs:[],syn:DEFAULT_SYN,synGroups:[],synLabel:{},corpus:[],saveOk:true,installEvt:null,answers:{},seq:0,busy:false};
+const S={tMain:'',tSub:'',saved:[],recent:[],memoT:null,docs:[],syn:DEFAULT_SYN,synGroups:[],synLabel:{},corpus:[],saveOk:true,installEvt:null,answers:{},seq:0,busy:false};
 const standalone=()=>window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone===true;
 
 /* ===== 저장소(이 컴퓨터의 브라우저 안, IndexedDB) ===== */
@@ -686,7 +693,7 @@ let toastT=null;
 function toast(t){ const e=$('toast'); e.textContent=t; e.classList.add('on'); clearTimeout(toastT); toastT=setTimeout(()=>e.classList.remove('on'),2600); }
 function bot(html){ const d=document.createElement('div'); d.className='m bot'; d.innerHTML='<img class="a" src="ggumsong.png" alt="꿈송이"><div class="bb">'+html+'</div>'; $('msgs').appendChild(d); d.scrollIntoView({block:'start',behavior:'smooth'}); return d; }
 function me(text){ const d=document.createElement('div'); d.className='m me'; d.innerHTML='<div class="bb">'+esc(text)+'</div>'; $('msgs').appendChild(d); d.scrollIntoView({block:'end'}); }
-function openPanel(id){ $(id).classList.add('on'); if(id==='pSet') $('mineBox').innerHTML=mineHTML(); if(id==='pIdx') renderIdx(); if(id==='pSaved') renderSaved(); if(id==='pSet'){ $('synBox').value=S.syn; renderInstall(); renderPack(); } if(id==='pDocs') renderDocs(); }
+function openPanel(id){ $(id).classList.add('on'); if(id==='pSet') fillTitleInputs(); if(id==='pSet') $('mineBox').innerHTML=mineHTML(); if(id==='pIdx') renderIdx(); if(id==='pSaved') renderSaved(); if(id==='pSet'){ $('synBox').value=S.syn; renderInstall(); renderPack(); } if(id==='pDocs') renderDocs(); }
 function closePanels(){ document.querySelectorAll('.panel.on').forEach(p=>p.classList.remove('on')); }
 function liveDocs(){ return S.docs.filter(d=>d.on!==false); }
 function rebuild(){
@@ -833,6 +840,11 @@ function renderIdx(){
   $('idxList').innerHTML=html;
 }
 function initial(s){ const c=s.charCodeAt(0); if(c>=0xAC00&&c<=0xD7A3){ return 'ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍㅎ'[Math.floor((c-0xAC00)/588)]; } return /[0-9]/.test(s[0])?'0-9':/[A-Za-z]/.test(s[0])?'A-Z':'기타'; }
+
+/* ===== 제목·부제 바꾸기 (이 컴퓨터에만 저장) ===== */
+const T_MAIN='도디쌤의 규정줍줍', T_SUB='규정·길라잡이·각종 계획서에서 근거를 찾아 드립니다.';
+function applyTitle(){ const m=(S.tMain||'').trim()||T_MAIN, s=(S.tSub||'').trim()||T_SUB; $('tMain').textContent=m; $('tSub').textContent=s; document.title=m; }
+function fillTitleInputs(){ $('tMainIn').value=S.tMain||''; $('tSubIn').value=S.tSub||''; }
 
 /* ===== 질문 → 찾기 → 답 ===== */
 function ask(q){
@@ -1184,6 +1196,8 @@ document.addEventListener('click',async e=>{
   else if(act==='docs'){ openPanel('pDocs'); }
   else if(act==='set'){ openPanel('pSet'); }
   else if(act==='install'){ doInstall(); }
+  else if(act==='tSave'){ S.tMain=$('tMainIn').value.trim(); S.tSub=$('tSubIn').value.trim(); await DB.set('title',{m:S.tMain,s:S.tSub}).catch(()=>{}); applyTitle(); toast('제목을 바꿨어요.'); }
+  else if(act==='tReset'){ S.tMain=''; S.tSub=''; await DB.set('title',{m:'',s:''}).catch(()=>{}); fillTitleInputs(); applyTitle(); toast('처음 제목으로 되돌렸어요.'); }
   else if(act==='pvClose'){ closeViewer(); }
   else if(act==='pvGo'){ goPage(PV.cur+(+t.dataset.d)); }
   else if(act==='pvZoom'){ const z=Math.max(0.6,Math.min(2.5,PV.zoom+(+t.dataset.d)*0.25)); if(z===PV.zoom) return; const keep=PV.cur; PV.zoom=z; await layoutViewer(); goPage(keep); }
@@ -1240,6 +1254,9 @@ document.addEventListener('change',async e=>{
 $('ask').addEventListener('submit',e=>{ e.preventDefault(); const v=$('q').value; $('q').value=''; ask(v); });
 $('btnDocs').addEventListener('click',()=>openPanel('pDocs'));
 $('btnSet').addEventListener('click',()=>openPanel('pSet'));
+function editTitle(){ openPanel('pSet'); setTimeout(()=>{ $('tHead').scrollIntoView({block:'start'}); $('tMainIn').focus(); },50); }
+$('ttlBox').addEventListener('click',editTitle);
+$('ttlBox').addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); editTitle(); } });
 $('btnIdx').addEventListener('click',()=>openPanel('pIdx'));
 $('btnSaved').addEventListener('click',()=>openPanel('pSaved'));
 $('idxQ').addEventListener('input',()=>renderIdx());
@@ -1262,12 +1279,13 @@ window.addEventListener('appinstalled',()=>{ S.installEvt=null; renderInstall();
 (async function init(){
   $('ver').textContent=APP_VER;
   const ok=await DB.open();
-  if(ok){ try{ S.docs=(await DB.allDocs()).sort((a,b)=>a.addedAt-b.addedAt); const s=await DB.get('syn'); if(typeof s==='string' && s.trim()) S.syn=s; const sv=await DB.get('saved'); if(Array.isArray(sv)) S.saved=sv; const rc=await DB.get('recent'); if(Array.isArray(rc)) S.recent=rc; }catch(e){} }
+  if(ok){ try{ S.docs=(await DB.allDocs()).sort((a,b)=>a.addedAt-b.addedAt); const s=await DB.get('syn'); if(typeof s==='string' && s.trim()) S.syn=s; const tt=await DB.get('title'); if(tt&&typeof tt==='object'){ S.tMain=String(tt.m||''); S.tSub=String(tt.s||''); } const sv=await DB.get('saved'); if(Array.isArray(sv)) S.saved=sv; const rc=await DB.get('recent'); if(Array.isArray(rc)) S.recent=rc; }catch(e){} }
   else S.saveOk=false;
   saveSaved();
   rebuild();
   if(isKakao){ const w=$('warn'); w.hidden=false; w.innerHTML='카카오톡 화면에서는 설치와 저장이 잘 되지 않습니다. <b>PC의 크롬</b>에서 열어 주세요. <button class="b g s" type="button" data-act="copyUrl">주소 복사</button>'; }
   else if(!ok){ const w=$('warn'); w.hidden=false; w.textContent='이 브라우저에서는 문서 저장이 되지 않습니다(시크릿 창 등). 창을 닫으면 넣은 문서가 사라집니다.'; }
+  applyTitle();
   showPin();
   hello();
   // 설치된 창으로 처음 열릴 때 한 번만 좁고 길게 맞춤(브라우저가 막으면 그대로 둠)
