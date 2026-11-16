@@ -1748,7 +1748,7 @@ async function sendReqs(items){
   save(); refreshReqUI();
   const nobody=rows.filter(r=>!responsible(r).length).length;
   UI.msgNote=messengerNote(rows); const copiedP=copyText(UI.msgNote);
-  try{ await rqPost(body); rows.forEach(r=>logAdd('요청 보냄', r, {memo:r.memo})); if(UI.tab==='req') renderReq(); const cp=await copiedP; toast('점검 요청 '+rows.length+'건을 보냈습니다.'+(cp?' 📋 메신저용 쪽지가 복사됐어요 — 메신저에 Ctrl+V 하세요.':'')+(nobody?' ('+nobody+'건은 담당교사를 아직 모릅니다 — 그 선생님이 "내 담당"을 정하면 보입니다)':'')); setTimeout(()=>fetchReqs(true),4000); }
+  try{ await rqPost(body); rows.forEach(r=>logAdd('요청 보냄', r, {memo:r.memo})); render(); const cp=await copiedP; toast('점검 요청 '+rows.length+'건을 보냈습니다.'+(cp?' 📋 메신저용 쪽지가 복사됐어요 — 메신저에 Ctrl+V 하세요.':'')+(nobody?' ('+nobody+'건은 담당교사를 아직 모릅니다 — 그 선생님이 "내 담당"을 정하면 보입니다)':'')); setTimeout(()=>fetchReqs(true),4000); }
   catch(e){ rows.forEach(r=>r.failed=true); refreshReqUI(); toast('보내지 못했습니다. 인터넷 연결을 확인한 뒤 다시 보내 주세요.'); }
 }
 function fieldList(){ const f=(S.reqMeta&&S.reqMeta.fields)||[]; return f.length? f : ['자율·자치','진로','교과세특','자유학기','스포츠동아리','창체동아리','행동특성','독서','출결','수상']; }
@@ -1806,7 +1806,7 @@ function saveDuty(){ if(S.schoolClubs){ const mk=autoClubs(); if(mk.length) setT
 // 브라우저 탭 제목에 숫자 표시 + 다른 탭을 보고 있을 때 새 알림이 오면 깜박임
 const BASE_TITLE='도디쌤의 생기발랄';
 // 새 버전 알림: 사이트가 고쳐져 올라오면 화면 위에 띠를 띄움(브라우저가 예전 화면을 기억하는 문제 해결)
-const BUILD_V='20261116-121419';
+const BUILD_V='20261116-123615';
 async function checkNewVersion(){ if(!/^https?:/.test(location.protocol)) return; try{ const r=await fetch('version.json?t='+Date.now(),{cache:'no-store'}); if(!r.ok) return; const j=await r.json();
   if(j && j.v && j.v!==BUILD_V && !document.getElementById('newVer')){ const d=document.createElement('div'); d.id='newVer'; d.innerHTML='✨ 생기발랄 새 버전이 나왔어요. <button class="b s" id="newVerGo">새로 고침</button> <span style="font-weight:600">또는 키보드 <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>R</kbd></span> <span class="hint" style="color:inherit;opacity:.8">· 써 둔 내용은 그대로 남아요</span>'; document.body.prepend(d); document.getElementById('newVerGo').onclick=()=>{ flush().finally(()=>{ location.replace(location.pathname+'?v='+encodeURIComponent(j.v)+location.hash); }); }; } }catch(e){} }
 const SUB_DEFAULT='선생님을 잇는 생기부 플랫폼';
@@ -2137,7 +2137,7 @@ M.addEventListener('change',e=>{
   if(t.id==='rqSub'){ const ip=$('#rqSubTxt'); if(ip){ ip.style.display=t.value==='__type'?'':'none'; if(t.value==='__type') ip.focus(); } rqAutofill(); return; }
   if(t.id==='dField'){ const hh=$('#dHrHint'); if(hh) hh.style.display=/담임/.test(t.value)?'':'none'; const b=$('#dSubBox'); if(b) b.innerHTML=dSubSelHTML(t.value); const ip=$('#dSub'); if(ip){ ip.style.display='none'; ip.value=''; } return; }
   if(t.id==='dSubSel'){ const ip=$('#dSub'); if(ip){ ip.style.display=t.value==='__type'?'':'none'; if(t.value==='__type') ip.focus(); } return; }
-  if(t.id==='dHome'){ st.homeroom=t.value; saveDuty(); UI.dutyOpen=true; if(UI.tab==='req') renderReq(); toast(t.value? clsName(t.value)+' 담임으로 정했습니다.' : '담임 아님으로 정했습니다.'); return; }
+  if(t.id==='dHome'){ st.homeroom=t.value; saveDuty(); UI.dutyOpen=true; render(); toast(t.value? clsName(t.value)+' 담임으로 정했습니다.' : '담임 아님으로 정했습니다.'); return; }
   if(t.id==='stAsk'){ st.askDone=t.checked; save(); return; }
   if(t.id==='stAutoLock'){ st.autoLock=+t.value; save(); return; }
   if(t.id==='readFile' && t.files[0]){ planReading(t.files[0]).catch(()=>toast('독서기록 파일을 읽지 못했습니다. 엑셀(.xlsx)이나 CSV 파일인지 확인해 주세요.')); return; }
@@ -2163,9 +2163,9 @@ M.addEventListener('click',async e=>{
   if(t.id==='rqAdAll'){ const ready=S.reqs.filter(adminReady); if(!ready.length||!confirm(ready.length+'건을 모두 담당자 확인으로 적을까요?')) return; for(const r of ready) await adminOk(r.id,true); toast(ready.length+'건 담당자 확인을 적었습니다.'); return; }
   if(t.id==='dAdd'){ const f=$('#dField').value, sv=($('#dSubSel')||{}).value||''; let sb=''; if(sv==='__type') sb=$('#dSub').value.trim(); else if(sv==='__all') sb=''; else sb=sv;
     if(sv===''){ toast('상세 분야(과목·동아리·주제)를 골라 주세요.'); return; } if(sv==='__type'&&!sb){ toast('상세 분야 이름을 적어 주세요.'); $('#dSub').focus(); return; } if(sv==='__all'&&!confirm(f+' 분야의 요청이 전부 옵니다. 정말 이렇게 할까요?')) return; const cl=pickedCls(); if(/세특|교과/.test(f) && !cl && !confirm('담당 학급을 고르지 않았습니다. '+f+(sb?' · '+sb:'')+'의 모든 반 요청이 옵니다. 이대로 할까요?')) return;
-    S.settings.duties=myDuties().filter(x=>!(x.field===f&&x.sub===sb)).concat([{field:f,sub:sb,cls:cl}]); saveDuty(); toast('담당을 더했습니다: '+f+(sb?' · '+sb:'')+' · '+clsLabel(cl)); UI.dutyOpen=true; if(UI.tab==='req') renderReq(); return; }
-  if(t.id==='dAuto'){ S.settings.duties=myDuties().concat(suggestDuties()).filter((d,i,a)=>a.findIndex(x=>x.field===d.field&&x.sub===d.sub)===i); saveDuty(); toast('내 영역에서 담당을 정했습니다. 동아리 담당이면 직접 더해 주세요.'); UI.dutyOpen=true; if(UI.tab==='req') renderReq(); return; }
-  if(t.dataset.ddel!==undefined){ const ds=myDuties().slice(); ds.splice(+t.dataset.ddel,1); S.settings.duties=ds; saveDuty(); UI.dutyOpen=true; if(UI.tab==='req') renderReq(); return; }
+    S.settings.duties=myDuties().filter(x=>!(x.field===f&&x.sub===sb)).concat([{field:f,sub:sb,cls:cl}]); saveDuty(); toast('담당을 더했습니다: '+f+(sb?' · '+sb:'')+' · '+clsLabel(cl)); UI.dutyOpen=true; render(); return; }
+  if(t.id==='dAuto'){ S.settings.duties=myDuties().concat(suggestDuties()).filter((d,i,a)=>a.findIndex(x=>x.field===d.field&&x.sub===d.sub)===i); saveDuty(); toast('내 영역에서 담당을 정했습니다. 동아리 담당이면 직접 더해 주세요.'); UI.dutyOpen=true; render(); return; }
+  if(t.dataset.ddel!==undefined){ const ds=myDuties().slice(); ds.splice(+t.dataset.ddel,1); S.settings.duties=ds; saveDuty(); UI.dutyOpen=true; render(); return; }
   if(t.dataset.rqre){ reopenReq(t.dataset.rqre); return; }
   if(t.dataset.rqgo){ const r=S.reqs.find(x=>x.id===t.dataset.rqgo); const it=r&&matchItem(r.area); const s=r&&S.students.find(x=>sid(x)===rqSid(r));
     if(!s){ toast('내 명단에 없는 학생입니다. 나이스에서 고친 뒤 [수정 완료]를 눌러 주세요.'); return; }
