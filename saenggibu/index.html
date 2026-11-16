@@ -755,6 +755,10 @@ function itemOkFor(it,c){ if(!it) return false; const st=S.settings, ds=myDuties
     const pairs=[[/자유학기/,/^자유학기/],[/자율/,/^자율/],[/진로/,/^진로/],[/행동|종합/,/^행동/],[/출결/,/^출결/],[/독서/,/^독서/]];
     return pairs.some(([pf,pi])=>pf.test(f)&&pi.test(it.name)); }); }
 function itemsFor(c){ return S.items.filter(i=>itemOkFor(i,c)); }
+// 영역 단추에 보일 영역: 반이면 그 반 것, 동아리를 보고 있으면 내 반들 영역 + 동아리(다른 영역을 눌러 반으로 돌아갈 수 있게)
+function itemsShown(){ if(!isGrp(UI.cls)) return itemsFor(UI.cls); const keys=new Set(); visClasses().concat([UI.cls]).forEach(c=>itemsFor(c).forEach(i=>keys.add(i.key))); return S.items.filter(i=>keys.has(i.key)); }
+// 동아리에서 다른 영역을 누르면 돌아갈 반
+function backCls(it){ const v=visClasses(); if(UI.lastCls && !isGrp(UI.lastCls) && v.includes(UI.lastCls) && itemOkFor(it,UI.lastCls)) return UI.lastCls; return v.find(c=>itemOkFor(it,c)) || (UI.lastCls&&!isGrp(UI.lastCls)? UI.lastCls : v[0]); }
 function freshState(){
   return { v:1,
     settings:{teacher:'', year:new Date().getMonth()<2? new Date().getFullYear()-1 : new Date().getFullYear(),
@@ -1038,7 +1042,7 @@ async function exportItemXlsx(scope){
   toast('📥 '+fname+' — '+filled+'/'+total+'명 입력'+(over?' · 초과 '+over+'명(빨리 줄이세요)':'')+'. 엑셀의 C열을 복사해 나이스에 붙이세요.');
 }
 function writeHeadHTML(){
-  { const ok=itemsFor(UI.cls); if(ok.length && !ok.some(i=>i.key===UI.item)) UI.item=ok[0].key; }
+  { if(isGrp(UI.cls)){ const gp=grpOf(UI.cls); if(gp && itemBy(gp.item)) UI.item=gp.item; } else { UI.lastCls=UI.cls; const ok=itemsFor(UI.cls); if(ok.length && !ok.some(i=>i.key===UI.item)) UI.item=ok[0].key; } }
   const cl=visClasses(), it=itemBy(UI.item); const mine=act(unitStudents(UI.cls)); const all=mine.length; const isG=!!grpOf(UI.cls);
   const written=countWritten(mine,it.key), need=isG? all : needOf(all,it), ra=isG? 100 : ratioOf(it);
   let done=0, over=0; mine.forEach(s=>{ const r=peek(sid(s),it.key); if(r.done) done++; if(B(r.text)>it.limit) over++; });
@@ -1048,7 +1052,7 @@ function writeHeadHTML(){
   let h='<div class="pick"><span class="lab"><i>1</i>'+(clubIt?'동아리 고르기 <em>동아리활동은 반이 아니라 동아리별로 씁니다</em>':'학급 고르기 <em>색: 빨강 → 노랑 → 초록(완료)</em>')+'</span>'+(useSel&&!clubIt? '<select id="selCls" style="font-size:15px;padding:6px 10px">'+cl.map(c=>'<option value="'+esc(c)+'"'+(c===UI.cls?' selected':'')+'>'+esc(clsName(c))+'</option>').join('')+'</select>' : '')+(useSel||clubIt? [] : cl).map(c=>{ const st=act(S.students.filter(s=>clsOf(s)===c)); const ok=st.length && countWritten(st,it.key)>=needOf(st.length,it); const cw=countWritten(st,it.key), cn=needOf(st.length,it); return '<button data-cls="'+esc(c)+'" class="'+(c===UI.cls?'on':'')+'"'+pcVar(cw,cn)+'>'+esc(clsName(c))+(ok?'<small>✔완료</small>':'<small>'+cw+'/'+cn+'</small>')+'</button>'; }).join('')
     +(S.groups||[]).map(gp=>{ const st=act(grpStudents(gp)); const k=countWritten(st,gp.item); const ok=st.length && k>=st.length; return '<button data-cls="g:'+esc(gp.id)+'" class="'+(UI.cls==='g:'+gp.id?'on':'')+'"'+pcVar(k,st.length)+'>🎲 '+esc(gp.name)+'<small>'+(ok?'✔완료 ':'')+k+'/'+st.length+'</small></button>'; }).join('')
     +sc.map(x=>'<button data-sclub="'+esc(x.name)+'" style="border-style:dashed">＋ '+esc(x.name)+' <small>'+x.rows.length+'명 가져오기</small></button>').join('')+'<button data-go="set" data-focus="grpName" style="border-style:dashed">＋ 동아리 명단 직접 넣기</button>'+(clubIt?'':clsToggleHTML())+'</div>'
-    +'<div class="pick"><span class="lab"><i>2</i>영역 고르기 <em>'+((myDuties().length||S.settings.homeroom)&&!S.settings.showAllItems?'이 반에서 내가 쓰는 영역만 보입니다':'지금 반에서 영역별 진행 색')+'</em>'+((myDuties().length||S.settings.homeroom)?' <button class="b g s" id="togAllItems">'+(S.settings.showAllItems?'내 영역만 보기':'전체 영역 보기')+'</button>':'')+'</span>'+itemsFor(UI.cls).map(i=>{ const w=countWritten(mine,i.key), ok=all && w>=needOf(all,i); const rq=S.reqs.filter(r=>rqToMe(r)&&rqOpen(r)&&rqSid(r).indexOf(UI.cls+'-')===0&&rqIk(r)===i.key).length; return '<button data-itemk="'+esc(i.key)+'" class="'+(i.key===UI.item?'on':'')+'"'+pcVar(w,needOf(all,i))+'>'+esc(i.name)+'<small>'+(ok?'✔완료 ':'')+w+'/'+all+'</small>'+(rq?'<small style="color:var(--red);font-weight:700"><img class="ggs" src="ggumsong.png" alt="">'+rq+'</small>':'')+'</button>'; }).join('')+'</div>';
+    +'<div class="pick"><span class="lab"><i>2</i>영역 고르기 <em>'+((myDuties().length||S.settings.homeroom)&&!S.settings.showAllItems?'이 반에서 내가 쓰는 영역만 보입니다':'지금 반에서 영역별 진행 색')+'</em>'+((myDuties().length||S.settings.homeroom)?' <button class="b g s" id="togAllItems">'+(S.settings.showAllItems?'내 영역만 보기':'전체 영역 보기')+'</button>':'')+'</span>'+itemsShown().map(i=>{ const w=countWritten(mine,i.key), ok=all && w>=needOf(all,i); const rq=S.reqs.filter(r=>rqToMe(r)&&rqOpen(r)&&rqSid(r).indexOf(UI.cls+'-')===0&&rqIk(r)===i.key).length; return '<button data-itemk="'+esc(i.key)+'" class="'+(i.key===UI.item?'on':'')+'"'+pcVar(w,needOf(all,i))+'>'+esc(i.name)+'<small>'+(ok?'✔완료 ':'')+w+'/'+all+'</small>'+(rq?'<small style="color:var(--red);font-weight:700"><img class="ggs" src="ggumsong.png" alt="">'+rq+'</small>':'')+'</button>'; }).join('')+'</div>';
   h+='<div class="xrow"><b>📥 나이스에 한 번에 붙이기</b> <button class="b s" id="xItemCls">이 반 '+esc(it.name)+' 엑셀 받기</button><button class="b g s" id="xItemAll">내 반 전부 (반마다 시트)</button><span class="hint">엑셀의 "나이스에 붙일 내용" 칸을 통째로 복사해 나이스에 붙이면 됩니다.</span></div>';
   h+='<div class="now"><i class="stepn">3</i>'+esc(unitName(UI.cls))+' · '+esc(it.name)+' 쓰기 '+pcBar(written,need)+' <span class="hint" style="font-weight:400">한도 '+it.limit.toLocaleString()+'B(한글 약 '+Math.floor(it.limit/3)+'자)'+(over?' · <b style="color:var(--red)">초과 '+over+'</b>':'')+'</span></div>';
   let msg, cls2;
@@ -1796,7 +1800,7 @@ function saveDuty(){ if(S.schoolClubs){ const mk=autoClubs(); if(mk.length) setT
 // 브라우저 탭 제목에 숫자 표시 + 다른 탭을 보고 있을 때 새 알림이 오면 깜박임
 const BASE_TITLE='도디쌤의 생기발랄';
 // 새 버전 알림: 사이트가 고쳐져 올라오면 화면 위에 띠를 띄움(브라우저가 예전 화면을 기억하는 문제 해결)
-const BUILD_V='20261116-105517';
+const BUILD_V='20261116-115357';
 async function checkNewVersion(){ if(!/^https?:/.test(location.protocol)) return; try{ const r=await fetch('version.json?t='+Date.now(),{cache:'no-store'}); if(!r.ok) return; const j=await r.json();
   if(j && j.v && j.v!==BUILD_V && !document.getElementById('newVer')){ const d=document.createElement('div'); d.id='newVer'; d.innerHTML='✨ 생기발랄 새 버전이 나왔어요. <button class="b s" id="newVerGo">새로 고침</button> <span style="font-weight:600">또는 키보드 <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>R</kbd></span> <span class="hint" style="color:inherit;opacity:.8">· 써 둔 내용은 그대로 남아요</span>'; document.body.prepend(d); document.getElementById('newVerGo').onclick=()=>{ flush().finally(()=>{ location.replace(location.pathname+'?v='+encodeURIComponent(j.v)+location.hash); }); }; } }catch(e){} }
 const SUB_DEFAULT='선생님을 잇는 생기부 플랫폼';
@@ -2198,7 +2202,7 @@ M.addEventListener('click',async e=>{
   if(card && t.dataset.act==='undo'){ const c=cardCtx(card), k=c.sidv+'|'+c.ik; if(undoMap.has(k)){ c.ta.value=undoMap.get(k); const r=rec(c.sidv,c.ik); r.text=c.ta.value; r.updated=Date.now(); undoMap.delete(k); noFix.add(k); save(); refreshCard(card,''); toast('되돌렸습니다. 이 칸은 다시 고칠 때까지 자동 교정을 하지 않습니다.'); } return; }
   if(t.dataset.pick){ UI.sid=t.dataset.pick; renderSearch(); return; }
   const pc=t.closest('[data-cls]'); if(pc){ UI.cls=pc.dataset.cls; const gp=grpOf(UI.cls); if(gp && itemBy(gp.item)) UI.item=gp.item; renderWrite(); return; }
-  const pi=t.closest('[data-itemk]'); if(pi){ UI.item=pi.dataset.itemk; renderWrite(); return; }
+  const pi=t.closest('[data-itemk]'); if(pi){ const it2=itemBy(pi.dataset.itemk); if(!it2) return; UI.item=it2.key; if(isGrp(UI.cls) && !/동아리/.test(it2.name)){ const b=backCls(it2); if(b) UI.cls=b; } renderWrite(); return; }
   if(t.dataset.goit){ const c=$('.card[data-ik="'+t.dataset.goit+'"]'); if(c){ c.scrollIntoView({block:'center',behavior:'smooth'}); const ta=$('.ta',c); ta.focus(); } return; }
   if(t.id==='copyAll'){ const s=S.students.find(x=>sid(x)===UI.sid); if(!s) return; const txt=S.items.map(it=>'['+it.name+']\n'+peek(UI.sid,it.key).text).join('\n\n'); toast(await copyText(txt)? '전 항목을 복사했습니다.' : '복사에 실패했습니다.'); return; }
   const gm=t.closest('[data-gmiss]'); if(gm){ UI.cls=gm.dataset.gmiss; const gp=grpOf(UI.cls); if(gp) UI.item=gp.item; UI.filter='empty'; go('write'); return; }
