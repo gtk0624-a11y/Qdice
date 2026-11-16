@@ -35,8 +35,10 @@ header.top{display:flex;align-items:center;gap:6px;padding:9px 10px;background:v
 .m.me .bb{background:var(--navy);color:#fff;border-color:var(--navy);border-radius:14px 4px 14px 14px;max-width:84%}
 .hello{display:flex;gap:10px;align-items:center}
 .hello img{width:74px;height:auto;flex:none}
-.note{font-size:12.5px;color:var(--sub);margin:7px 0 0;padding-left:1.1em}
-.note li{margin:2px 0}
+.note{font-size:13.5px;color:#3b2a00;margin:10px 0 0;padding:9px 12px 9px 28px;background:#fff4d6;border:1.5px solid #f1c96b;border-radius:10px;font-weight:600;line-height:1.6}
+.note b{color:#b42318}
+.note li{margin:3px 0}
+.note li::marker{color:#d97706}
 .mine{border:1px solid #f1d58a;background:#fffaf0;border-radius:10px;padding:8px 10px;margin-top:9px;font-size:13px;line-height:1.6}
 .mine b:first-child{color:#7a4b00}
 .mine ul{margin:4px 0 0;padding-left:1.1em}
@@ -582,7 +584,7 @@ return {itemsToLines,splitSheet,buildPages,chunkPages,compact,parseSyn,queryGrou
 /* ===== 화면 동작 ===== */
 (function(){
 'use strict';
-const APP_VER='v1.0.1';
+const APP_VER='v1.1';
 const PACK_ID='dodi-gyujeong';
 
 /* ===== [자주 고칠 곳 ①] 기본 동의어 사전: 한 줄에 한 묶음 ===== */
@@ -685,7 +687,31 @@ function snippet(text,R){
   let e=Math.min(text.length,s+380); const nl2=text.indexOf('\n',e); if(nl2>0 && nl2-e<60) e=nl2;
   return {t:(s>0?'… ':'')+text.slice(s,e)+(e<text.length?' …':''),cut:true};
 }
+/* ===== 줄바꿈 다듬기: PDF가 쪽 폭 때문에 끊어 놓은 줄을 문장으로 다시 이어 붙임 (저장된 원문은 그대로) ===== */
+const RF_START=/^(?:[가-하]\)|[가-하]\.\s|\d{1,2}\)|\d{1,2}\.\s|\(\d{1,2}\)|\([가-하]\)|[①-⑳]|[ⓐ-ⓩ]|[○●◦■□▢▪▶►◆◇※＊*·ㆍ•\-–—]|제\s?\d+\s?[조장절항호]|[ⅠⅡⅢⅣⅤⅥⅦⅧⅨⅩ]+[\.\s]|Q\s?\d*[\.\):]|A\s?[\.\):]|<|\[|【|〔|「)/;
+const RF_END=/(?:다\.?\s*|[요음함임됨것]\.\s*|[\.\?!:;。]|[\)）\]】〕」』>]\s*)$/;
+const ONE=new Set('및등수것각그이또더할될본위후전중내외간별시와과의를을은는에도로만'.split(''));
+function reflow(x){
+  const L=String(x||'').split('\n'); if(L.length<2) return x||'';
+  const out=[L[0]];
+  for(let k=1;k<L.length;k++){
+    const prev=out[out.length-1], cur=L[k], p=prev.trim(), c=cur.trim();
+    // "설치 / ·운영"처럼 가운뎃점으로 이어지는 말은 글머리표가 아니라 이어지는 말로 봄
+    const midDot=/^[·ㆍ]\s*[가-힣]/.test(c) && !RF_END.test(p) && p.length>=20;
+    if(midDot){ out[out.length-1]=prev.replace(/\s+$/,'')+'·'+c.replace(/^[·ㆍ]\s*/,''); continue; }
+    if(!p || !c || RF_START.test(c) || RF_END.test(p) || (cur.match(/\S\s{2,}\S/g)||[]).length>=2 || (prev.match(/\S\s{2,}\S/g)||[]).length>=2){ out.push(cur); continue; }
+    // 끊긴 자리: 앞줄 끝이 한 글자짜리 조각이면(예: "보 / 호자와") 붙여 쓰고, 아니면 띄어 씀
+    const last=(p.match(/(\S+)$/)||['',''])[1];
+    const first=(c.match(/^(\S+)/)||['',''])[1];
+    const glue= ( (/위$/.test(p) && /^(?:하여|한|해|함|하)/.test(c))
+              || (last.length===1 && /[가-힣]/.test(last) && !ONE.has(last) && /^[가-힣]/.test(c))
+              || (first.length===1 && /[가-힣]/.test(first) && !ONE.has(first) && /[가-힣]$/.test(p) && p.length>=20) ) ? '' : ' ';
+    out[out.length-1]=prev.replace(/\s+$/,'')+glue+cur.replace(/^\s+/,'');
+  }
+  return out.join('\n');
+}
 function card(doc,c,R,tag){
+  c=Object.assign({},c,{x:reflow(c.x)});
   const sn=snippet(c.x||'',R); const re=R;
   const src=c.pg+(/^p\./.test(c.pg)?'':'');
   let h='<div class="c'+(c.f?' f':'')+'" data-doc="'+esc(doc.id)+'" data-i="'+c.i+'">'
@@ -707,7 +733,7 @@ function renderSaved(){
   $('savedList').innerHTML= S.saved.length ? S.saved.slice().reverse().map(s=>'<div class="sv" data-sid="'+esc(s.id)+'">'
     +'<div class="ch"><span class="pg">'+esc(s.pg)+'</span><span>'+esc(s.doc)+'</span>'+(s.q?'<span>· 검색: '+esc(s.q)+'</span>':'')+'</div>'
     +(s.t&&s.t!==s.pg?'<div class="st">'+esc(s.t)+'</div>':'')
-    +'<div class="sx">'+esc((s.x||'').slice(0,160))+'</div>'
+    +'<div class="sx">'+esc(reflow(s.x||'').slice(0,160))+'</div>'
     +'<textarea data-act="memo" placeholder="메모 (예: 학운위 안건에 넣을 조항) · 학생 이름은 적지 마세요">'+esc(s.memo||'')+'</textarea>'
     +'<div class="cb"><button class="b s" type="button" data-act="openSaved">보기</button><button class="b g s" type="button" data-act="copySaved">복사</button><button class="b r s" type="button" data-act="delSaved">지우기</button></div></div>').join('') : '<p class="hint">아직 저장한 조항이 없어요.</p>';
 }
@@ -1024,13 +1050,13 @@ document.addEventListener('click',async e=>{
     S.saved.push({id:'s'+Date.now().toString(36)+Math.random().toString(36).slice(2,5),docId:f.doc.id,doc:f.doc.name,i:f.ch.i,t:f.ch.t,up:f.ch.up||'',pg:f.ch.pg,x:f.ch.x,q:a&&a.q||'',memo:'',at:Date.now()});
     saveSaved(); t.textContent='★ 저장됨'; t.classList.remove('g'); t.disabled=true; toast('⭐ 저장함에 넣었어요.'); }
   else if(act==='openSaved'){ const s=S.saved.find(x=>x.id===t.closest('.sv').dataset.sid); if(s){ closePanels(); openSaved(s); } }
-  else if(act==='copySaved'){ const s=S.saved.find(x=>x.id===t.closest('.sv').dataset.sid); if(s) copyText('「'+s.doc+'」 '+s.pg+'\n'+(s.up?s.up+' › ':'')+(s.t!==s.pg?s.t:'')+'\n'+s.x+(s.memo?'\n[메모] '+s.memo:'')); }
+  else if(act==='copySaved'){ const s=S.saved.find(x=>x.id===t.closest('.sv').dataset.sid); if(s) copyText('「'+s.doc+'」 '+s.pg+'\n'+(s.up?s.up+' › ':'')+(s.t!==s.pg?s.t:'')+'\n'+reflow(s.x)+(s.memo?'\n[메모] '+s.memo:'')); }
   else if(act==='delSaved'){ if(t.dataset.sure!=='1'){ t.dataset.sure='1'; t.textContent='정말 지우기'; setTimeout(()=>{ if(t.isConnected){ t.dataset.sure=''; t.textContent='지우기'; } },3000); return; }
     const id=t.closest('.sv').dataset.sid; S.saved=S.saved.filter(x=>x.id!==id); saveSaved(); renderSaved(); toast('저장한 조항을 지웠어요.'); }
   else if(act==='clrRecent'){ S.recent=[]; DB.set('recent',S.recent).catch(()=>{}); renderSaved(); }
   else if(act==='idxMode'){ IX.mode=t.dataset.m; renderIdx(); }
   else if(act==='ixOpen'){ const d=S.docs.find(x=>x.id===t.dataset.doc); const c=d&&d.chunks[+t.dataset.i]; if(!c) return; closePanels();
-    const box=bot('📑 색인에서 연 곳이에요.<div>'+card(d,c,null,'')+'</div>'); const x=box.querySelector('.cx'); if(x&&c.x){ x.classList.remove('cut'); x.textContent=c.x; const fb=box.querySelector('[data-act="full"]'); if(fb) fb.remove(); } }
+    const box=bot('📑 색인에서 연 곳이에요.<div>'+card(d,c,null,'')+'</div>'); const x=box.querySelector('.cx'); if(x&&c.x){ x.classList.remove('cut'); x.textContent=reflow(c.x); const fb=box.querySelector('[data-act="full"]'); if(fb) fb.remove(); } }
   else if(act==='clearChat'){ $('msgs').innerHTML=''; S.answers={}; closePanels(); hello(); toast('대화를 지웠어요. 넣어 둔 문서는 그대로예요.'); $('q').focus(); }
   else if(act==='pin'){ if(S.installEvt) doInstall(); else bot(pinHelp()); }
   else if(act==='guide'){ closePanels(); bot('<b>📖 사용법</b>'+guideHTML()+mineHTML()+'<div class="w">같은 업무 선생님께 문서를 그대로 넘기고 싶으면 [⚙ 설정] → [묶음 내보내기]를 쓰세요.</div>'); }
@@ -1039,11 +1065,11 @@ document.addEventListener('click',async e=>{
   else if(act==='copyApp'){ copyText('"C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe" --app='+location.origin+location.pathname); }
   else if(act==='more'){ showMore(t.dataset.id,5); }
   else if(act==='bydoc'){ byDoc(t.dataset.id,t.dataset.doc,t); }
-  else if(act==='full'){ const f=findCard(t); if(f){ const x=f.el.querySelector('.cx'); x.classList.remove('cut'); x.innerHTML=hl(f.ch.x,f.re); t.remove(); } }
-  else if(act==='copy'){ const f=findCard(t); if(f) copyText('「'+f.doc.name+'」 '+f.ch.pg+'\n'+(f.ch.up?f.ch.up+' › ':'')+(f.ch.t!==f.ch.pg?f.ch.t:'')+'\n'+f.ch.x); }
+  else if(act==='full'){ const f=findCard(t); if(f){ const x=f.el.querySelector('.cx'); x.classList.remove('cut'); x.innerHTML=hl(reflow(f.ch.x),f.re); t.remove(); } }
+  else if(act==='copy'){ const f=findCard(t); if(f) copyText('「'+f.doc.name+'」 '+f.ch.pg+'\n'+(f.ch.up?f.ch.up+' › ':'')+(f.ch.t!==f.ch.pg?f.ch.t:'')+'\n'+reflow(f.ch.x)); }
   else if(act==='adj'){ const f=findCard(t); if(!f) return; const n=f.doc.chunks[f.ch.i+(+t.dataset.dir)];
     if(!n){ toast(+t.dataset.dir<0?'문서의 맨 처음입니다.':'문서의 맨 끝입니다.'); return; }
-    const d=bot((+t.dataset.dir<0?'바로 <b>앞</b>':'바로 <b>뒤</b>')+' 내용입니다.<div data-list="x"'+(f.el.closest('[data-ans]')?' data-ans="'+f.el.closest('[data-ans]').dataset.ans+'"':'')+'>'+card(f.doc,n,f.re,'')+'</div>'); const x=d.querySelector('.cx'); if(x && n.x){ x.classList.remove('cut'); x.innerHTML=hl(n.x,f.re); const fb=d.querySelector('[data-act="full"]'); if(fb) fb.remove(); } }
+    const d=bot((+t.dataset.dir<0?'바로 <b>앞</b>':'바로 <b>뒤</b>')+' 내용입니다.<div data-list="x"'+(f.el.closest('[data-ans]')?' data-ans="'+f.el.closest('[data-ans]').dataset.ans+'"':'')+'>'+card(f.doc,n,f.re,'')+'</div>'); const x=d.querySelector('.cx'); if(x && n.x){ x.classList.remove('cut'); x.innerHTML=hl(reflow(n.x),f.re); const fb=d.querySelector('[data-act="full"]'); if(fb) fb.remove(); } }
   else if(act==='del'){ const row=t.closest('.doc');
     if(t.dataset.sure!=='1'){ t.dataset.sure='1'; t.textContent='정말 지우기'; setTimeout(()=>{ if(t.isConnected){ t.dataset.sure=''; t.textContent='지우기'; } },3500); return; }
     const id=row.dataset.id; S.docs=S.docs.filter(d=>d.id!==id); await DB.delDoc(id).catch(()=>{}); rebuild(); renderDocs(); toast('문서를 지웠습니다.'); }
