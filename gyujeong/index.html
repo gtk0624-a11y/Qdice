@@ -77,6 +77,8 @@ ol.guide li b:first-child{color:var(--navy)}
 .c.f{border-left-color:#98a2b3}
 .ch{display:flex;flex-wrap:wrap;gap:5px;align-items:center;font-size:12px;color:var(--sub)}
 .pg{background:var(--yel);color:#3b2a00;font-weight:700;border-radius:6px;padding:1px 7px;font-size:12px;white-space:nowrap}
+.src{margin:5px 0 3px;font-size:14.5px;font-weight:800;color:#0b2a5b;background:#eaf1ff;border-left:4px solid var(--navy);border-radius:6px;padding:4px 8px;line-height:1.4;overflow-wrap:anywhere}
+.c.f .src{background:#f2f4f7;border-left-color:#98a2b3}
 .up{font-size:11.5px;color:var(--sub);margin-top:3px}
 .ct{font-weight:700;font-size:14.5px;margin:2px 0 4px;color:var(--navy)}
 .cx{white-space:pre-wrap;font-size:14px;line-height:1.6}
@@ -649,7 +651,7 @@ return {itemsToLines,splitSheet,buildPages,chunkPages,compact,parseSyn,queryGrou
 /* ===== 화면 동작 ===== */
 (function(){
 'use strict';
-const APP_VER='v1.7.1';
+const APP_VER='v1.8';
 const PACK_ID='dodi-gyujeong';
 
 /* ===== [자주 고칠 곳 ①] 기본 동의어 사전: 한 줄에 한 묶음 ===== */
@@ -783,7 +785,8 @@ function card(doc,c,R,tag){
   const sn=snippet(c.x||'',R); const re=R;
   const src=c.pg+(/^p\./.test(c.pg)?'':'');
   let h='<div class="c'+(c.f?' f':'')+'" data-doc="'+esc(doc.id)+'" data-i="'+c.i+'">'
-    +'<div class="ch"><span class="pg">'+esc(src)+'</span><span>'+esc(doc.name)+'</span>'+(tag?'<b>· '+esc(tag)+'</b>':'')+'</div>'
+    +'<div class="ch"><span class="pg">'+esc(src)+'</span>'+(tag?'<b>· '+esc(tag)+'</b>':'')+'</div>'
+    +'<div class="src">📘 근거: 「'+esc(doc.name)+'」 '+esc(src)+'</div>'
     +(c.up?'<div class="up">'+esc(c.up)+'</div>':'')
     +(c.t && c.t!==c.pg?'<div class="ct">'+hl(c.t,re)+'</div>':'')
     +'<div class="cx'+(sn.cut?' cut':'')+'">'+(c.x?hl(sn.t,re):'<span style="color:var(--sub)">(제목만 있고 본문이 없는 부분입니다. [뒤 내용]을 눌러 보세요.)</span>')+'</div>'
