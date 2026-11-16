@@ -161,6 +161,12 @@ ol.steps li{margin:3px 0}
 .pvb:hover{background:rgba(255,255,255,.3)}
 #pvNo{font-size:12.5px;min-width:52px;text-align:center;flex:none}
 #pvBody{flex:1;overflow:auto;padding:10px 8px}
+#pvMenu{position:absolute;right:6px;top:46px;z-index:2;background:#fff;border-radius:12px;box-shadow:0 6px 24px rgba(0,0,0,.35);padding:6px;display:flex;flex-direction:column;min-width:230px}
+#pvMenu[hidden]{display:none}
+#pvMenu button{border:0;background:none;text-align:left;padding:9px 10px;border-radius:8px;font-size:14px;color:var(--txt);font-weight:600}
+#pvMenu button:hover{background:var(--yel2)}
+#pvMenu small{display:block;font-weight:400;font-size:11.5px;color:var(--sub)}
+#pv{position:fixed}
 .pvp{position:relative;margin:0 auto 10px;flex:none;background:#fff;box-shadow:0 1px 6px rgba(0,0,0,.35)}
 .pvp canvas{display:block;width:100%;height:100%}
 .pvp .pvl{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#98a2b3;font-size:13px}
@@ -286,7 +292,13 @@ ol.steps li{margin:3px 0}
     <button type="button" class="pvb" data-act="pvGo" data-d="1" aria-label="다음 쪽">▶</button>
     <button type="button" class="pvb" data-act="pvZoom" data-d="-1" aria-label="작게">－</button>
     <button type="button" class="pvb" data-act="pvZoom" data-d="1" aria-label="크게">＋</button>
+    <button type="button" class="pvb" data-act="pvPrintMenu" title="인쇄" aria-label="인쇄">🖨</button>
     <button type="button" class="pvb" data-act="pvNew" title="크롬 PDF 보기로 새 창에서 열기" aria-label="새 창">⧉</button>
+  </div>
+  <div id="pvMenu" hidden>
+    <button type="button" data-act="pvPrint" data-m="hit">🖍 찾은 부분만 인쇄<small>형광펜이 있는 부분과 앞뒤 몇 줄</small></button>
+    <button type="button" data-act="pvPrint" data-m="half">📄 그 쪽만 인쇄<small>한 장에 두 쪽이면 찾은 쪽 한 면만</small></button>
+    <button type="button" data-act="pvPrint" data-m="page">🗒 지금 보이는 장 전체 인쇄</button>
   </div>
   <div id="pvBody"></div>
 </div>
@@ -637,7 +649,7 @@ return {itemsToLines,splitSheet,buildPages,chunkPages,compact,parseSyn,queryGrou
 /* ===== 화면 동작 ===== */
 (function(){
 'use strict';
-const APP_VER='v1.6';
+const APP_VER='v1.7';
 const PACK_ID='dodi-gyujeong';
 
 /* ===== [자주 고칠 곳 ①] 기본 동의어 사전: 한 줄에 한 묶음 ===== */
@@ -937,7 +949,7 @@ const PV={pdf:null,blob:null,doc:null,n:0,cur:1,zoom:1,words:[],target:1,obs:nul
 async function openViewer(doc,blob,page,ch,words){
   try{ await needPDF(); }catch(e){ toast('PDF 보기 부품을 불러오지 못했어요. 인터넷 연결을 확인해 주세요.'); return; }
   closeViewer(true);
-  PV.doc=doc; PV.blob=blob; PV.zoom=1; PV.done={}; PV.busy={}; PV.target=page;
+  PV.doc=doc; PV.ch=ch; PV.blob=blob; PV.zoom=1; PV.done={}; PV.busy={}; PV.target=page;
   PV.words=(words||[]).filter(w=>w&&w.length>=2).slice(0,12);
   $('pvName').textContent=doc.name; $('pvInfo').textContent=(ch?ch.pg+' · '+(ch.t||''):'')+' — 노란 표시가 찾은 곳';
   $('pv').hidden=false; $('pvBody').innerHTML='<p style="color:#fff;text-align:center;margin-top:30px">원문을 펼치는 중…</p>';
@@ -992,7 +1004,46 @@ function goPage(p,first){
   $('pvBody').scrollTop=el.offsetTop-8; PV.cur=p; $('pvNo').textContent=p+' / '+PV.n;
   if(first){ renderPage(p).then(()=>{ const hl=el.querySelector('.hl'); if(hl){ const B=$('pvBody'); const y=el.offsetTop+hl.offsetTop-B.clientHeight*0.3; B.scrollTop=Math.max(el.offsetTop-8,y); B.scrollLeft=Math.max(0,el.offsetLeft+hl.offsetLeft-B.clientWidth*0.15); } }); }
 }
+/* ===== 원문 인쇄: 찾은 부분 / 그 쪽 / 장 전체 ===== */
+async function printFromViewer(mode){
+  $('pvMenu').hidden=true;
+  if(!PV.pdf) return;
+  const p=PV.cur; const box=$('pvBody').querySelector('.pvp[data-p="'+p+'"]'); if(!box) return;
+  toast('인쇄할 그림을 만드는 중이에요…');
+  if(!PV.done[p]) await renderPage(p);
+  const pg=await PV.pdf.getPage(p); const vp1=pg.getViewport({scale:1});
+  const scale=Math.min(3, 2400/Math.max(vp1.width,vp1.height)*1.4);
+  const vp=pg.getViewport({scale}); const cv=document.createElement('canvas'); cv.width=Math.round(vp.width); cv.height=Math.round(vp.height);
+  await pg.render({canvasContext:cv.getContext('2d'),viewport:vp}).promise;
+  // 형광펜 위치(화면 기준) → 인쇄 그림 기준
+  const k=cv.width/box.clientWidth; const hls=[...box.querySelectorAll('.hl')].map(d=>({x:d.offsetLeft*k,y:d.offsetTop*k,w:d.offsetWidth*k,h:d.offsetHeight*k}));
+  let x0=0,y0=0,x1=cv.width,y1=cv.height;
+  const wide=vp1.width>vp1.height*1.15;
+  if(mode!=='page' && wide){ // 한 장에 두 쪽: 형광펜이 많은 쪽 면만
+    const mid=cv.width/2; const L=hls.filter(r=>r.x+r.w/2<mid).length, Rn=hls.length-L;
+    if(Rn>L){ x0=mid; } else { x1=mid; }
+  }
+  const inHalf=hls.filter(r=>r.x+r.w/2>=x0 && r.x+r.w/2<=x1);
+  if(mode==='hit'){
+    if(!inHalf.length){ toast('이 장에는 형광펜이 없어서 그 쪽 전체를 인쇄해요.'); }
+    else { const pad=(y1-y0)*0.07; y0=Math.max(0,Math.min(...inHalf.map(r=>r.y))-pad*1.6); y1=Math.min(cv.height,Math.max(...inHalf.map(r=>r.y+r.h))+pad*2.2); }
+  }
+  // 형광펜도 인쇄에 같이
+  const out=document.createElement('canvas'); out.width=Math.round(x1-x0); out.height=Math.round(y1-y0);
+  const g=out.getContext('2d'); g.fillStyle='#fff'; g.fillRect(0,0,out.width,out.height); g.drawImage(cv,x0,y0,x1-x0,y1-y0,0,0,out.width,out.height);
+  g.globalCompositeOperation='multiply'; g.fillStyle='rgba(255,213,0,.45)'; inHalf.forEach(r=>g.fillRect(r.x-x0,r.y-y0,r.w,r.h));
+  const img=out.toDataURL('image/png');
+  const land= out.width>out.height*1.15;
+  const ch=PV.ch; const head=esc(PV.doc.name)+(ch?' · '+esc(ch.pg)+(ch.t&&ch.t!==ch.pg?' · '+esc(ch.t):''):'')+' · PDF '+p+'번째 장';
+  const html='<!DOCTYPE html><html><head><meta charset="utf-8"><title>'+esc(PV.doc.name)+'</title><style>@page{size:A4 '+(land?'landscape':'portrait')+';margin:12mm}body{margin:0;font-family:"Malgun Gothic",sans-serif}h1{font-size:11pt;margin:0 0 6px;color:#333}img{width:100%;'+(mode==='hit'?'':'max-height:'+(land?'175mm':'260mm')+';object-fit:contain;')+'border:1px solid #ccc}p{font-size:8pt;color:#888;margin:4px 0 0}</style></head><body><h1>'+head+'</h1><img src="'+img+'"><p>도디쌤의 규정줍줍에서 인쇄 · 원문 확인용</p></body></html>';
+  const fr=document.createElement('iframe'); fr.style.cssText='position:fixed;right:0;bottom:0;width:0;height:0;border:0'; document.body.appendChild(fr);
+  const d=fr.contentDocument; d.open(); d.write(html); d.close();
+  const im=d.querySelector('img');
+  const go=()=>{ try{ fr.contentWindow.focus(); fr.contentWindow.print(); }catch(e){ toast('인쇄 창을 열지 못했어요.'); } setTimeout(()=>fr.remove(),60000); };
+  if(im.complete) setTimeout(go,100); else im.onload=()=>setTimeout(go,100);
+}
 function closeViewer(silent){
+  $('pvMenu').hidden=true;
   if(PV.obs){ PV.obs.disconnect(); PV.obs=null; }
   if(PV.pdf){ try{ PV.pdf.destroy(); }catch(e){} PV.pdf=null; }
   $('pvBody').innerHTML=''; $('pv').hidden=true;
@@ -1187,6 +1238,7 @@ function hello(){
 
 /* ===== 누르기·끌어다 놓기 ===== */
 document.addEventListener('click',async e=>{
+  if(!$('pvMenu').hidden && !e.target.closest('#pvMenu') && !e.target.closest('[data-act="pvPrintMenu"]')) $('pvMenu').hidden=true;
   const qb=e.target.closest('[data-q]'); if(qb){ ask(qb.dataset.q); return; }
   if(e.target.classList.contains('panel')){ closePanels(); return; }
   const t=e.target.closest('[data-act]'); if(!t) return;
@@ -1199,6 +1251,8 @@ document.addEventListener('click',async e=>{
   else if(act==='tSave'){ S.tMain=$('tMainIn').value.trim(); S.tSub=$('tSubIn').value.trim(); await DB.set('title',{m:S.tMain,s:S.tSub}).catch(()=>{}); applyTitle(); toast('제목을 바꿨어요.'); }
   else if(act==='tReset'){ S.tMain=''; S.tSub=''; await DB.set('title',{m:'',s:''}).catch(()=>{}); fillTitleInputs(); applyTitle(); toast('처음 제목으로 되돌렸어요.'); }
   else if(act==='pvClose'){ closeViewer(); }
+  else if(act==='pvPrintMenu'){ $('pvMenu').hidden=!$('pvMenu').hidden; }
+  else if(act==='pvPrint'){ printFromViewer(t.dataset.m); }
   else if(act==='pvGo'){ goPage(PV.cur+(+t.dataset.d)); }
   else if(act==='pvZoom'){ const z=Math.max(0.6,Math.min(2.5,PV.zoom+(+t.dataset.d)*0.25)); if(z===PV.zoom) return; const keep=PV.cur; PV.zoom=z; await layoutViewer(); goPage(keep); }
   else if(act==='pvNew'){ if(!PV.blob) return; const url=URL.createObjectURL(PV.blob)+'#page='+PV.cur; const w=window.open(url,'_blank'); if(!w) toast('새 창이 막혔어요. 이 창에서 보시면 돼요.'); }
