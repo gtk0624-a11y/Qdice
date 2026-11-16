@@ -649,7 +649,7 @@ return {itemsToLines,splitSheet,buildPages,chunkPages,compact,parseSyn,queryGrou
 /* ===== 화면 동작 ===== */
 (function(){
 'use strict';
-const APP_VER='v1.7';
+const APP_VER='v1.7.1';
 const PACK_ID='dodi-gyujeong';
 
 /* ===== [자주 고칠 곳 ①] 기본 동의어 사전: 한 줄에 한 묶음 ===== */
@@ -1220,7 +1220,7 @@ function guideHTML(){
    +'<li><details><summary><b>내 업무 규정을 PDF로 준비해요</b></summary><div class=\"gd\">선생님 업무에 맞는 규정집·길라잡이·지침이면 무엇이든 됩니다. (학교 규정, 학폭·교권·안전 길라잡이, 교육청 지침 등)<br>· 한글(.hwp) 파일은 한글에서 <b>[파일] → [PDF로 저장하기]</b><br>· 이미 PDF면 그대로 쓰면 돼요<br>· 스캔한 그림 PDF(글자를 드래그해 복사할 수 없는 것)는 찾을 수 없어요</div></details></li>'
    +'<li><details><summary><b>PDF를 넣어요</b></summary><div class=\"gd\">이 창에 <b>끌어다 놓거나</b> 아래 [📄 PDF 넣기]를 눌러요. 여러 개를 한 번에 넣어도 돼요. 처음 한 번만 하면 됩니다.</div></details></li>'
    +(inst?'<li><details><summary><b>화면 맨 아래 작업표시줄에 꽂아 둬요</b></summary><div class=\"gd\">입력창 바로 위의 <b>[📌 작업표시줄에 꽂아 두기]</b>를 누르면 방법이 나와요. 끝나면 <b>화면 맨 아래 작업표시줄</b>에 꿈송이가 생겨요. 한글·나이스를 쓰다가도 그 꿈송이만 누르면 바로 꺼내 볼 수 있어요.</div></details></li>':'')
-   +'<li><details><summary><b>궁금한 것을 물어봐요</b></summary><div class=\"gd\">예) "출석정지는 며칠까지야?", "위원회 위원은 몇 명?", "재심의 신청 기간"<br>문서에 적힌 원문을 <b>쪽수와 함께</b> 찾아 드려요.<br><b>[📄 원문 PDF]</b>를 누르면 원본 PDF가 <b>그 쪽으로 펼쳐지고</b> 찾은 낱말에 노란 형광펜이 칠해져요.</div></details></li>'
+   +'<li><details><summary><b>궁금한 것을 물어봐요</b></summary><div class=\"gd\">예) "출석정지는 며칠까지야?", "위원회 위원은 몇 명?", "재심의 신청 기간"<br>문서에 적힌 원문을 <b>쪽수와 함께</b> 찾아 드려요.<br><b>[📄 원문 PDF]</b>를 누르면 원본 PDF가 <b>그 쪽으로 펼쳐지고</b> 찾은 낱말에 노란 형광펜이 칠해져요.<br>펼쳐진 창의 <b>🖨 인쇄</b>로 <b>찾은 부분만</b>, <b>그 쪽만</b>, <b>장 전체</b> 중 골라 인쇄할 수 있어요. 형광펜도 같이 인쇄돼요.</div></details></li>'
    +'<li><details><summary><b>모아 보고 다시 찾기</b></summary><div class=\"gd\"><b>📑 색인</b>: 넣은 문서의 목차와 가나다순 찾아보기<br><b>⭐ 저장함</b>: 결과의 [⭐ 저장]으로 모은 조항과 메모, 최근 검색</div></details></li>'
    +'</ol><div class="w">화면이 길어지면 입력창 왼쪽 <b>↺</b>를 누르세요. 대화만 지워지고 넣어 둔 문서는 그대로예요.</div>';
 }
