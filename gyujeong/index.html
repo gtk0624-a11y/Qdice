@@ -43,6 +43,20 @@ header.top{display:flex;align-items:center;gap:6px;padding:9px 10px;background:v
 .mine b:first-child{color:#7a4b00}
 .mine ul{margin:4px 0 0;padding-left:1.1em}
 .mine li{margin:2px 0}
+.must{margin-top:10px;border:2.5px solid #d92d20;background:#fef3f2;border-radius:12px;padding:10px 12px 10px 12px}
+.must .mt{font-size:15.5px;font-weight:800;color:#b42318;margin-bottom:4px}
+.must ul{margin:0;padding-left:1.2em;font-size:15px;line-height:1.65;color:#55160c;font-weight:600}
+.must li{margin:4px 0}
+.must li::marker{color:#d92d20}
+.must b{color:#b42318}
+ol.guide.tg{padding-left:1.5em}
+ol.guide.tg li{margin:0 0 4px}
+ol.guide.tg summary{cursor:pointer;padding:5px 2px;list-style:none}
+ol.guide.tg summary::-webkit-details-marker{display:none}
+ol.guide.tg summary::after{content:' ▾';color:var(--sub);font-size:12px}
+ol.guide.tg details[open] summary::after{content:' ▴'}
+ol.guide.tg summary:hover{background:var(--yel2);border-radius:6px}
+ol.guide.tg .gd{padding:2px 0 6px 2px;color:#344054}
 .pinbox{border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin-top:8px;background:#fbfcfe}
 .pinbox>b:first-child{color:var(--navy)}
 ol.guide{margin:6px 0 0;padding-left:1.4em;font-size:13.5px;line-height:1.6}
@@ -584,7 +598,7 @@ return {itemsToLines,splitSheet,buildPages,chunkPages,compact,parseSyn,queryGrou
 /* ===== 화면 동작 ===== */
 (function(){
 'use strict';
-const APP_VER='v1.1';
+const APP_VER='v1.2';
 const PACK_ID='dodi-gyujeong';
 
 /* ===== [자주 고칠 곳 ①] 기본 동의어 사전: 한 줄에 한 묶음 ===== */
@@ -789,7 +803,7 @@ function initial(s){ const c=s.charCodeAt(0); if(c>=0xAC00&&c<=0xD7A3){ return '
 function ask(q){
   q=String(q||'').trim(); if(!q) return;
   me(q);
-  if(/^(사용법|도움말|도움|help|\?|어떻게 써|어떻게 써\?|사용 방법)$/i.test(q.replace(/\s+/g,' '))){ bot('<b>📖 사용법</b>'+guideHTML()+mineHTML()); return; }
+  if(/^(사용법|도움말|도움|help|\?|어떻게 써|어떻게 써\?|사용 방법)$/i.test(q.replace(/\s+/g,' '))){ bot('<b>📖 사용법</b>'+guideHTML()+mineHTML()+mustHTML()); return; }
   if(!S.docs.length){ bot('아직 넣은 문서가 없습니다. 먼저 규정집이나 길라잡이 PDF를 넣어 주세요.<div class="row"><button class="b" type="button" data-act="pick">📄 PDF 넣기</button></div>'); return; }
   if(!liveDocs().length){ bot('문서가 모두 <b>꺼져</b> 있습니다. [📚 내 문서]에서 찾을 문서를 켜 주세요.<div class="row"><button class="b g s" type="button" data-act="docs">내 문서 열기</button></div>'); return; }
   const r=Engine.search(q,S.corpus,S.synGroups);
@@ -1013,14 +1027,19 @@ function mineHTML(){
    +'<li>여러 선생님이 같이 쓰는 <b>공용 PC</b>에서는 줍줍이도 같이 쓰게 되니 피해 주세요.</li>'
    +'<li>크롬의 <b>[인터넷 사용 기록 삭제]</b>에서 쿠키·사이트 데이터를 지우거나, 학교 PC가 초기화되면 넣은 문서가 사라져요. 가끔 <b>[⚙ 설정 → 묶음 내보내기]</b>로 백업해 두세요.</li></ul></div>';
 }
+function mustHTML(){
+  return '<div class="must"><div class="mt">⚠️ 꼭 알아 두세요</div><ul>'
+   +'<li><b>AI가 아니에요.</b> 문서에 <u>적힌 낱말</u>로 찾아요. 답은 <b>꼭 원문으로 확인</b>해 주세요.</li>'
+   +'<li><b>학생 이름·개인정보</b>가 든 문서는 <b>넣지 마세요.</b></li></ul></div>';
+}
 function guideHTML(){
   const inst=!standalone() && !isMobile && !isKakao;
-  return '<ol class="guide">'
-   +'<li><b>내 업무 규정을 PDF로 준비해요</b><br>선생님 업무에 맞는 규정집·길라잡이·지침이면 무엇이든 됩니다. (학교 규정, 학폭·교권·안전 길라잡이, 교육청 지침 등)<br>· 한글(.hwp) 파일은 한글에서 <b>[파일] → [PDF로 저장하기]</b><br>· 이미 PDF면 그대로 쓰면 돼요<br>· 스캔한 그림 PDF(글자를 드래그해 복사할 수 없는 것)는 찾을 수 없어요</li>'
-   +'<li><b>PDF를 넣어요</b><br>이 창에 <b>끌어다 놓거나</b> 아래 [📄 PDF 넣기]를 눌러요. 여러 개를 한 번에 넣어도 돼요. 처음 한 번만 하면 됩니다.</li>'
-   +(inst?'<li><b>화면 맨 아래 작업표시줄에 꽂아 둬요</b><br>입력창 바로 위의 <b>[📌 작업표시줄에 꽂아 두기]</b>를 누르면 방법이 나와요. 끝나면 <b>화면 맨 아래 작업표시줄</b>에 꿈송이가 생겨요. 한글·나이스를 쓰다가도 그 꿈송이만 누르면 바로 꺼내 볼 수 있어요.</li>':'')
-   +'<li><b>궁금한 것을 물어봐요</b><br>예) "출석정지는 며칠까지야?", "위원회 위원은 몇 명?", "재심의 신청 기간"<br>문서에 적힌 원문을 <b>쪽수와 함께</b> 찾아 드려요.</li>'
-   +'<li><b>모아 보고 다시 찾기</b><br><b>📑 색인</b>: 넣은 문서의 목차와 가나다순 찾아보기<br><b>⭐ 저장함</b>: 결과의 [⭐ 저장]으로 모은 조항과 메모, 최근 검색</li>'
+  return '<div class="hint" style="margin-top:6px">▸ 단계를 누르면 자세한 설명이 펼쳐져요.</div><ol class="guide tg">'
+   +'<li><details><summary><b>내 업무 규정을 PDF로 준비해요</b></summary><div class=\"gd\">선생님 업무에 맞는 규정집·길라잡이·지침이면 무엇이든 됩니다. (학교 규정, 학폭·교권·안전 길라잡이, 교육청 지침 등)<br>· 한글(.hwp) 파일은 한글에서 <b>[파일] → [PDF로 저장하기]</b><br>· 이미 PDF면 그대로 쓰면 돼요<br>· 스캔한 그림 PDF(글자를 드래그해 복사할 수 없는 것)는 찾을 수 없어요</div></details></li>'
+   +'<li><details><summary><b>PDF를 넣어요</b></summary><div class=\"gd\">이 창에 <b>끌어다 놓거나</b> 아래 [📄 PDF 넣기]를 눌러요. 여러 개를 한 번에 넣어도 돼요. 처음 한 번만 하면 됩니다.</div></details></li>'
+   +(inst?'<li><details><summary><b>화면 맨 아래 작업표시줄에 꽂아 둬요</b></summary><div class=\"gd\">입력창 바로 위의 <b>[📌 작업표시줄에 꽂아 두기]</b>를 누르면 방법이 나와요. 끝나면 <b>화면 맨 아래 작업표시줄</b>에 꿈송이가 생겨요. 한글·나이스를 쓰다가도 그 꿈송이만 누르면 바로 꺼내 볼 수 있어요.</div></details></li>':'')
+   +'<li><details><summary><b>궁금한 것을 물어봐요</b></summary><div class=\"gd\">예) "출석정지는 며칠까지야?", "위원회 위원은 몇 명?", "재심의 신청 기간"<br>문서에 적힌 원문을 <b>쪽수와 함께</b> 찾아 드려요.</div></details></li>'
+   +'<li><details><summary><b>모아 보고 다시 찾기</b></summary><div class=\"gd\"><b>📑 색인</b>: 넣은 문서의 목차와 가나다순 찾아보기<br><b>⭐ 저장함</b>: 결과의 [⭐ 저장]으로 모은 조항과 메모, 최근 검색</div></details></li>'
    +'</ol><div class="w">화면이 길어지면 입력창 왼쪽 <b>↺</b>를 누르세요. 대화만 지워지고 넣어 둔 문서는 그대로예요.</div>';
 }
 function hello(){
@@ -1030,7 +1049,7 @@ function hello(){
   if(!has){ h+=guideHTML()+'<div class="row"><button class="b" type="button" data-act="pick">📄 PDF 넣기</button>'+((!standalone()&&!isMobile&&!isKakao)?'<button class="b g" type="button" data-act="pin" id="helloInst">📌 작업표시줄(화면 맨 아래)에 꽂기</button>':'')+'</div>'; }
   else if(!standalone() && !isMobile && !isKakao) h+='<div class="row"><button class="b g s" type="button" data-act="pin" id="helloInst">📌 작업표시줄(화면 맨 아래)에 꽂기</button><button class="b g s" type="button" data-act="guide">📖 사용법</button></div>';
   else h+='<div class="row"><button class="b g s" type="button" data-act="guide">📖 사용법</button></div>';
-  h+=mineHTML()+'<ul class="note"><li>AI가 아니에요. 문서에 <b>적힌 낱말</b>로 찾아요. 답은 꼭 원문으로 확인해 주세요.</li><li>학생 이름·개인정보가 든 문서는 넣지 마세요.</li></ul>';
+  h+=mineHTML()+mustHTML();
   bot(h);
 }
 
@@ -1059,7 +1078,7 @@ document.addEventListener('click',async e=>{
     const box=bot('📑 색인에서 연 곳이에요.<div>'+card(d,c,null,'')+'</div>'); const x=box.querySelector('.cx'); if(x&&c.x){ x.classList.remove('cut'); x.textContent=reflow(c.x); const fb=box.querySelector('[data-act="full"]'); if(fb) fb.remove(); } }
   else if(act==='clearChat'){ $('msgs').innerHTML=''; S.answers={}; closePanels(); hello(); toast('대화를 지웠어요. 넣어 둔 문서는 그대로예요.'); $('q').focus(); }
   else if(act==='pin'){ if(S.installEvt) doInstall(); else bot(pinHelp()); }
-  else if(act==='guide'){ closePanels(); bot('<b>📖 사용법</b>'+guideHTML()+mineHTML()+'<div class="w">같은 업무 선생님께 문서를 그대로 넘기고 싶으면 [⚙ 설정] → [묶음 내보내기]를 쓰세요.</div>'); }
+  else if(act==='guide'){ closePanels(); bot('<b>📖 사용법</b>'+guideHTML()+mineHTML()+mustHTML()+'<div class="w">같은 업무 선생님께 문서를 그대로 넘기고 싶으면 [⚙ 설정] → [묶음 내보내기]를 쓰세요.</div>'); }
   else if(act==='copyUrl'){ copyText(location.href); }
   else if(act==='copyApp86'){ copyText('"C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe" --app='+location.origin+location.pathname); }
   else if(act==='copyApp'){ copyText('"C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe" --app='+location.origin+location.pathname); }
