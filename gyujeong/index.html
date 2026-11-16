@@ -600,7 +600,7 @@ return {itemsToLines,splitSheet,buildPages,chunkPages,compact,parseSyn,queryGrou
 /* ===== 화면 동작 ===== */
 (function(){
 'use strict';
-const APP_VER='v1.3.1';
+const APP_VER='v1.4';
 const PACK_ID='dodi-gyujeong';
 
 /* ===== [자주 고칠 곳 ①] 기본 동의어 사전: 한 줄에 한 묶음 ===== */
@@ -880,6 +880,16 @@ function copyText(t){
   function fallback(){ const ta=document.createElement('textarea'); ta.value=t; ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.select(); try{ document.execCommand('copy'); done(); }catch(e){ toast('복사하지 못했습니다. 글자를 직접 드래그해 복사해 주세요.'); } ta.remove(); }
 }
 
+/* ===== 중복 걸러내기: 문서 글자로 만든 지문(내용이 같으면 같은 값) ===== */
+function fpOf(chunks){
+  // FNV-1a 두 갈래(52비트쯤) — 띄어쓰기는 무시하고 글자만 봄
+  let a=0x811c9dc5, b=0x01000193^0x5bd1e995;
+  for(const c of chunks){ const s=c.x||''; for(let i=0;i<s.length;i++){ const k=s.charCodeAt(i); if(k===32||k===10||k===9) continue; a^=k; a=Math.imul(a,16777619)>>>0; b^=k; b=Math.imul(b,0x5bd1e995)>>>0; b^=b>>>15; } }
+  return a.toString(36)+'-'+b.toString(36)+'-'+chunks.length;
+}
+function fpDoc(d){ if(!d.fp) d.fp=fpOf(d.chunks||[]); return d.fp; }
+function dupOf(fp,exceptName){ return S.docs.find(d=>d.name!==exceptName && fpDoc(d)===fp); }
+
 /* ===== PDF 읽기 ===== */
 let pdfP=null;
 function needPDF(){
@@ -920,12 +930,16 @@ async function addFiles(files){
       const t0=Date.now();
       const r=await readPDF(f,(p,n)=>{ setProg('<div class="prog">'+nth+'「'+esc(name)+'」 <b>'+n+'장 중 '+p+'장</b> 읽는 중…<div class="bar"><i style="width:'+Math.round(p/n*100)+'%"></i></div></div>'); });
       if(r.chars<12*r.sheets){ bot('「'+esc(f.name)+'」은 <b>글자를 읽을 수 없는 PDF</b>입니다. 스캔한 그림 PDF로 보입니다.<br>PDF를 열어 글자가 마우스로 드래그되는지 확인해 주세요. 드래그되지 않으면 원본 한글 파일을 PDF로 다시 저장해 넣어야 합니다.'); continue; }
+      const fp=fpOf(r.chunks); const twin=dupOf(fp,name);
+      if(twin){ bot('「'+esc(f.name)+'」은 이미 넣은 <b>「'+esc(twin.name)+'」</b>와 내용이 똑같아서 <b>넣지 않았어요.</b><div class="w">같은 문서가 두 번 들어가면 검색 결과에 같은 조항이 겹쳐 나와요. 이름만 바꾸고 싶으면 「'+esc(twin.name)+'」을 지우고 다시 넣어 주세요.</div>'); continue; }
       const old=S.docs.find(d=>d.name===name);
-      const doc={id:old?old.id:('d'+Date.now().toString(36)+Math.random().toString(36).slice(2,6)),name,addedAt:Date.now(),sheets:r.sheets,pages:r.pages,chars:r.chars,chunks:r.chunks,on:true};
+      const same=old && fpDoc(old)===fp;
+      const doc={fp,id:old?old.id:('d'+Date.now().toString(36)+Math.random().toString(36).slice(2,6)),name,addedAt:Date.now(),sheets:r.sheets,pages:r.pages,chars:r.chars,chunks:r.chunks,on:true};
       if(old) S.docs[S.docs.indexOf(old)]=doc; else S.docs.push(doc);
       try{ await DB.putPdf(doc.id,new Blob([f],{type:'application/pdf'})); doc.hasPdf=true; }catch(e){ doc.hasPdf=false; }
       await saveDoc(doc); rebuild(); renderDocs();
       const jo=doc.chunks.filter(c=>/^제\s?\d+\s?조/.test(c.t)).length;
+      if(same){ bot('「'+esc(name)+'」은 이미 똑같은 문서가 있어서 <b>새로 넣지 않고</b> 원본 PDF만 다시 저장했어요.'+(doc.hasPdf?' 이제 [📄 원문 PDF]가 열려요.':'')); continue; }
       bot('「'+esc(name)+'」을(를) '+(old?'새로 바꿔 ':'')+'넣었습니다. ('+r.pages+'쪽, '+doc.chunks.length+'개 부분'+(jo>=3?', 조항 '+jo+'개':'')+', '+Math.max(1,Math.round((Date.now()-t0)/1000))+'초)<br>이제 궁금한 것을 물어보세요.'
         +(r.pages!==r.sheets?'<div class="w">한 장에 두 쪽씩 인쇄된 PDF라서 왼쪽·오른쪽을 나눠 읽었습니다.</div>':'')
         +(S.saveOk&&DB.db?'':'<div class="w"><b>이 브라우저에서는 저장이 되지 않아</b> 창을 닫으면 문서가 사라집니다.</div>'));
@@ -941,12 +955,14 @@ async function addFiles(files){
 
 /* ===== 문서 목록 ===== */
 function renderDocs(){
+  const seen={};
   const b=$('docList');
   if(!S.docs.length){ b.innerHTML='<p class="hint" style="text-align:center;margin-top:14px">아직 넣은 문서가 없습니다.</p>'; return; }
-  b.innerHTML=S.docs.map(d=>'<div class="doc'+(d.on===false?' off':'')+'" data-id="'+esc(d.id)+'">'
+  b.innerHTML=S.docs.map(d=>{ const f=fpDoc(d), first=seen[f]; if(!first) seen[f]=d.name; return '<div class="doc'+(d.on===false?' off':'')+'" data-id="'+esc(d.id)+'">'
     +'<label class="sw" title="켜면 이 문서에서 찾습니다"><input type="checkbox" data-act="toggle"'+(d.on===false?'':' checked')+'><i></i></label>'
-    +'<div class="dn"><b>'+esc(d.name)+'</b><span>'+d.pages+'쪽 · '+d.chunks.length+'개 부분 · '+(d.hasPdf?'원본 PDF 있음 · ':'<b style="color:#b54708">원본 PDF 없음</b> · ')+new Date(d.addedAt).toLocaleDateString('ko-KR')+' 넣음'+(d.on===false?' · 꺼짐':'')+'</span></div>'
-    +'<button class="b r s" type="button" data-act="del">지우기</button></div>').join('');
+    +'<div class="dn"><b>'+esc(d.name)+'</b><span>'+d.pages+'쪽 · '+d.chunks.length+'개 부분 · '+(d.hasPdf?'원본 PDF 있음 · ':'<b style="color:#b54708">원본 PDF 없음</b> · ')+new Date(d.addedAt).toLocaleDateString('ko-KR')+' 넣음'+(d.on===false?' · 꺼짐':'')+'</span>'
+    +(first?'<div style="color:#b42318;font-size:12.5px;font-weight:700;margin-top:2px">⚠ 「'+esc(first)+'」와 내용이 똑같아요. 하나를 지워 주세요.</div>':'')+'</div>'
+    +'<button class="b r s" type="button" data-act="del">지우기</button></div>'; }).join('');
 }
 
 /* ===== 문서 묶음 내보내기·가져오기 ===== */
@@ -967,19 +983,20 @@ async function importPack(file){
   try{
     const p=JSON.parse(await file.text());
     if(!p || p.app!==PACK_ID || !Array.isArray(p.docs)) throw new Error('fmt');
-    let n=0;
+    let n=0, skip=0;
     for(const d of p.docs){
       if(!d || typeof d.name!=='string' || !Array.isArray(d.chunks)) continue;
-      const chunks=d.chunks.filter(c=>c && typeof c.x==='string').map((c,i)=>({t:String(c.t||''),up:String(c.up||''),pg:String(c.pg||''),x:c.x,i,...(c.f?{f:1}:{})}));
+      const chunks=d.chunks.filter(c=>c && typeof c.x==='string').map((c,i)=>({t:String(c.t||''),up:String(c.up||''),pg:String(c.pg||''),sh:+c.sh||0,x:c.x,i,...(c.f?{f:1}:{})}));
+      const fp=fpOf(chunks); if(dupOf(fp,d.name)){ skip++; continue; }
       const old=S.docs.find(x=>x.name===d.name);
-      const doc={id:old?old.id:('d'+Date.now().toString(36)+Math.random().toString(36).slice(2,6)),name:d.name,addedAt:+d.addedAt||Date.now(),sheets:+d.sheets||0,pages:+d.pages||0,chars:+d.chars||0,chunks,on:true};
+      const doc={id:old?old.id:('d'+Date.now().toString(36)+Math.random().toString(36).slice(2,6)),fp,hasPdf:!!(old&&old.hasPdf),name:d.name,addedAt:+d.addedAt||Date.now(),sheets:+d.sheets||0,pages:+d.pages||0,chars:+d.chars||0,chunks,on:true};
       if(old) S.docs[S.docs.indexOf(old)]=doc; else S.docs.push(doc);
       await saveDoc(doc); n++;
     }
     // 동의어는 내 것에 없는 줄만 더함
     if(typeof p.syn==='string'){ const mine=new Set(S.syn.split('\n').map(l=>l.trim())); const add=p.syn.split('\n').map(l=>l.trim()).filter(l=>l && !mine.has(l)); if(add.length){ S.syn=S.syn.trim()+'\n'+add.join('\n'); await DB.set('syn',S.syn).catch(()=>{}); } }
     rebuild(); renderDocs(); closePanels();
-    bot('묶음에서 문서 <b>'+n+'개</b>를 가져왔습니다. 이제 궁금한 것을 물어보세요.');
+    bot('묶음에서 문서 <b>'+n+'개</b>를 가져왔습니다.'+(skip?' (이미 있는 문서와 내용이 같은 '+skip+'개는 건너뛰었어요)':'')+' 이제 궁금한 것을 물어보세요.');
   }catch(e){ bot('이 파일은 「규정줍줍」의 문서 묶음이 아닙니다. [묶음 내보내기]로 만든 <b>규정묶음_날짜.json</b> 파일을 골라 주세요.'); }
 }
 
