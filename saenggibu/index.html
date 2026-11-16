@@ -737,8 +737,24 @@ const DEFAULT_ITEMS=[
   {key:'jinro', name:'진로활동', limit:1500, mine:true},
   {key:'seteuk1', name:'세특: 과목명', limit:1500, mine:true, ratio:30},
   {key:'free',  name:'자유학기 활동', limit:3000, mine:false},
-  {key:'haeng', name:'행동특성 및 종합의견', limit:900, mine:true}
+  {key:'haeng', name:'행동특성 및 종합의견', limit:900, mine:true},
+  {key:'chul',  name:'출결상황 특기사항', limit:1500, mine:true},
+  {key:'dokseo', name:'독서활동상황', limit:1500, mine:true, ratio:30}
 ];
+// 예전에 만든 자료에도 담임 칸(출결·독서)을 더함
+function ensureItems(){ let n=0; DEFAULT_ITEMS.filter(x=>x.key==='chul'||x.key==='dokseo').forEach(x=>{ if(!S.items.some(i=>i.key===x.key||i.name===x.name)){ S.items.push(Object.assign({},x,{mine:!!S.settings.homeroom})); n++; } }); if(n) save(); }
+// 영역별 입력: 이 반에서 내가 쓰는 영역만 (담임 반 = 자율·진로·행특·출결·독서(+1학년 자유학기), 그 밖은 [내 담당]에 넣은 분야·반)
+const HR_ITEM=/^(자율|진로|행동|출결|독서)/;
+function itemOkFor(it,c){ if(!it) return false; const st=S.settings, ds=myDuties(); if(st.showAllItems || (!ds.length && !st.homeroom)) return true;
+  if(/동아리/.test(it.name)) return ds.some(d=>/동아리/.test(d.field||'')) || (S.groups||[]).length>0;
+  if(isGrp(c)) return false;
+  const g=String(c).split('-')[0];
+  if(st.homeroom===c && (HR_ITEM.test(it.name) || (/^자유학기/.test(it.name) && g==='1'))) return true;
+  return ds.some(d=>{ const a=clsArr(d.cls); if(a.length && !a.includes(c) && !a.includes(g+'-*')) return false; const f=d.field||'';
+    if(/세특|교과/.test(f)) return /^세특/.test(it.name) && (!d.sub || areaSame(it.name.replace(/^세특\s*:?\s*/,''),d.sub));
+    const pairs=[[/자유학기/,/^자유학기/],[/자율/,/^자율/],[/진로/,/^진로/],[/행동|종합/,/^행동/],[/출결/,/^출결/],[/독서/,/^독서/]];
+    return pairs.some(([pf,pi])=>pf.test(f)&&pi.test(it.name)); }); }
+function itemsFor(c){ return S.items.filter(i=>itemOkFor(i,c)); }
 function freshState(){
   return { v:1,
     settings:{teacher:'', year:new Date().getMonth()<2? new Date().getFullYear()-1 : new Date().getFullYear(),
@@ -1022,6 +1038,7 @@ async function exportItemXlsx(scope){
   toast('📥 '+fname+' — '+filled+'/'+total+'명 입력'+(over?' · 초과 '+over+'명(빨리 줄이세요)':'')+'. 엑셀의 C열을 복사해 나이스에 붙이세요.');
 }
 function writeHeadHTML(){
+  { const ok=itemsFor(UI.cls); if(ok.length && !ok.some(i=>i.key===UI.item)) UI.item=ok[0].key; }
   const cl=visClasses(), it=itemBy(UI.item); const mine=act(unitStudents(UI.cls)); const all=mine.length; const isG=!!grpOf(UI.cls);
   const written=countWritten(mine,it.key), need=isG? all : needOf(all,it), ra=isG? 100 : ratioOf(it);
   let done=0, over=0; mine.forEach(s=>{ const r=peek(sid(s),it.key); if(r.done) done++; if(B(r.text)>it.limit) over++; });
@@ -1031,7 +1048,7 @@ function writeHeadHTML(){
   let h='<div class="pick"><span class="lab"><i>1</i>'+(clubIt?'동아리 고르기 <em>동아리활동은 반이 아니라 동아리별로 씁니다</em>':'학급 고르기 <em>색: 빨강 → 노랑 → 초록(완료)</em>')+'</span>'+(useSel&&!clubIt? '<select id="selCls" style="font-size:15px;padding:6px 10px">'+cl.map(c=>'<option value="'+esc(c)+'"'+(c===UI.cls?' selected':'')+'>'+esc(clsName(c))+'</option>').join('')+'</select>' : '')+(useSel||clubIt? [] : cl).map(c=>{ const st=act(S.students.filter(s=>clsOf(s)===c)); const ok=st.length && countWritten(st,it.key)>=needOf(st.length,it); const cw=countWritten(st,it.key), cn=needOf(st.length,it); return '<button data-cls="'+esc(c)+'" class="'+(c===UI.cls?'on':'')+'"'+pcVar(cw,cn)+'>'+esc(clsName(c))+(ok?'<small>✔완료</small>':'<small>'+cw+'/'+cn+'</small>')+'</button>'; }).join('')
     +(S.groups||[]).map(gp=>{ const st=act(grpStudents(gp)); const k=countWritten(st,gp.item); const ok=st.length && k>=st.length; return '<button data-cls="g:'+esc(gp.id)+'" class="'+(UI.cls==='g:'+gp.id?'on':'')+'"'+pcVar(k,st.length)+'>🎲 '+esc(gp.name)+'<small>'+(ok?'✔완료 ':'')+k+'/'+st.length+'</small></button>'; }).join('')
     +sc.map(x=>'<button data-sclub="'+esc(x.name)+'" style="border-style:dashed">＋ '+esc(x.name)+' <small>'+x.rows.length+'명 가져오기</small></button>').join('')+'<button data-go="set" data-focus="grpName" style="border-style:dashed">＋ 동아리 명단 직접 넣기</button>'+(clubIt?'':clsToggleHTML())+'</div>'
-    +'<div class="pick"><span class="lab"><i>2</i>영역 고르기 <em>지금 반에서 영역별 진행 색</em></span>'+S.items.map(i=>{ const w=countWritten(mine,i.key), ok=all && w>=needOf(all,i); const rq=S.reqs.filter(r=>rqToMe(r)&&rqOpen(r)&&rqSid(r).indexOf(UI.cls+'-')===0&&rqIk(r)===i.key).length; return '<button data-itemk="'+esc(i.key)+'" class="'+(i.key===UI.item?'on':'')+'"'+pcVar(w,needOf(all,i))+'>'+esc(i.name)+'<small>'+(ok?'✔완료 ':'')+w+'/'+all+'</small>'+(rq?'<small style="color:var(--red);font-weight:700"><img class="ggs" src="ggumsong.png" alt="">'+rq+'</small>':'')+'</button>'; }).join('')+'</div>';
+    +'<div class="pick"><span class="lab"><i>2</i>영역 고르기 <em>'+((myDuties().length||S.settings.homeroom)&&!S.settings.showAllItems?'이 반에서 내가 쓰는 영역만 보입니다':'지금 반에서 영역별 진행 색')+'</em>'+((myDuties().length||S.settings.homeroom)?' <button class="b g s" id="togAllItems">'+(S.settings.showAllItems?'내 영역만 보기':'전체 영역 보기')+'</button>':'')+'</span>'+itemsFor(UI.cls).map(i=>{ const w=countWritten(mine,i.key), ok=all && w>=needOf(all,i); const rq=S.reqs.filter(r=>rqToMe(r)&&rqOpen(r)&&rqSid(r).indexOf(UI.cls+'-')===0&&rqIk(r)===i.key).length; return '<button data-itemk="'+esc(i.key)+'" class="'+(i.key===UI.item?'on':'')+'"'+pcVar(w,needOf(all,i))+'>'+esc(i.name)+'<small>'+(ok?'✔완료 ':'')+w+'/'+all+'</small>'+(rq?'<small style="color:var(--red);font-weight:700"><img class="ggs" src="ggumsong.png" alt="">'+rq+'</small>':'')+'</button>'; }).join('')+'</div>';
   h+='<div class="xrow"><b>📥 나이스에 한 번에 붙이기</b> <button class="b s" id="xItemCls">이 반 '+esc(it.name)+' 엑셀 받기</button><button class="b g s" id="xItemAll">내 반 전부 (반마다 시트)</button><span class="hint">엑셀의 "나이스에 붙일 내용" 칸을 통째로 복사해 나이스에 붙이면 됩니다.</span></div>';
   h+='<div class="now"><i class="stepn">3</i>'+esc(unitName(UI.cls))+' · '+esc(it.name)+' 쓰기 '+pcBar(written,need)+' <span class="hint" style="font-weight:400">한도 '+it.limit.toLocaleString()+'B(한글 약 '+Math.floor(it.limit/3)+'자)'+(over?' · <b style="color:var(--red)">초과 '+over+'</b>':'')+'</span></div>';
   let msg, cls2;
@@ -1097,7 +1114,7 @@ async function tplOut(mode){
     const seen=new Set(); list=[]; units.forEach(u=>unitStudents(u).forEach(s=>{ const k=sid(s); if(!seen.has(k)){ seen.add(k); list.push(s); } }));
     list.sort((a,b)=>a.g-b.g||a.c-b.c||a.n-b.n); label=(club?'내 동아리 전체':'내 반 전체')+'_'+it.name;
   } else if(mode==='allitems'){ // 이 반 · 모든 영역(동아리 영역 제외)
-    list=unitStudents(UI.cls).slice(); items=S.items.filter(x=>!/동아리/.test(x.name)); label=(g? g.name : UI.cls+'반')+'_모든 영역';
+    list=unitStudents(UI.cls).slice(); items=itemsFor(UI.cls).filter(x=>!/동아리/.test(x.name)); label=(g? g.name : UI.cls+'반')+'_모든 영역';
   } else { list=unitStudents(UI.cls).slice(); label=(g? g.name : UI.cls+'반')+'_'+it.name; }
   list=list.filter(s=>!isOut(s));
   if(!list.length){ toast('양식에 넣을 학생이 없습니다. 명단을 먼저 확인해 주세요.'); return; }
@@ -1568,7 +1585,10 @@ function clsLabel(x){ const a=clsArr(x); if(!a.length) return '전체 학급'; c
 function dutyLabel(d){ return esc(d.field)+' · '+(d.sub? esc(d.sub) : '<b class="neg">전부</b>')+(d.field&&!isHrField(d)? ' · <span style="color:var(--navy2)">'+esc(clsLabel(d.cls))+'</span>' : ''); }
 function dutyHit(d,r){ return !!d.field && normArea(d.field)===normArea(r.field) && (!d.sub || !r.sub || areaSame(d.sub,r.sub)) && clsHit(d,r); }
 function myDuties(){ return S.settings.duties||[]; }
-function isHrField(r){ return /담임/.test(r.field||''); }
+// 담임이 받는 분야: 이름에 '담임'이 있거나, 자율·진로·행특·출결·독서·수상인데 따로 맡은 선생님(내 담당)이 없으면 담임에게
+const HR_RE=/담임|자율|진로|행동|종합|출결|독서|수상/;
+function isHrField(r){ const f=r.field||''; if(/담임/.test(f)) return true; if(!HR_RE.test(f)) return false; if(!r.g) return true;
+  return !((S.reqDuties||[]).some(d=>d.field&&dutyHit(d,r)) || myDuties().some(d=>dutyHit(d,r))); }
 function rqToMe(r){ return (isHrField(r) && rqHome(r)) || myDuties().some(d=>dutyHit(d,r)); }
 function rqHome(r){ const h=S.settings.homeroom; return !!h && r.g>0 && (r.g+'-'+r.c)===h; }
 function rqFromMe(r){ return !!me() && r.from===me(); }
@@ -1744,7 +1764,7 @@ function pickedCls(){ const out=[]; document.querySelectorAll('#dClsBox [data-dg
 function dutyHTML(){
   const st=S.settings, ds=myDuties(); const cls=Array.from(new Set(classes().concat(['1-1','1-2','1-3','2-1','2-2','2-3','3-1','3-2','3-3'])));
   const f0=fieldList().find(f=>DEFAULT_SUBS[f])||fieldList()[0];
-  let h='<table class="dtab"><tr><th style="width:110px">담임 학급</th><td class="l"><select id="dHome"><option value="">담임 아님</option>'+cls.map(c=>'<option value="'+c+'"'+(st.homeroom===c?' selected':'')+'>'+esc(clsName(c))+'</option>').join('')+'</select> <span class="hint"><b>담임이면 여기만 고르면 됩니다.</b> 자율·자치, 진로, 행동특성 요청과 "담임 확인" 알림이 이 반으로 옵니다.</span></td></tr>';
+  let h='<table class="dtab"><tr><th style="width:110px">담임 학급</th><td class="l"><select id="dHome"><option value="">담임 아님</option>'+cls.map(c=>'<option value="'+c+'"'+(st.homeroom===c?' selected':'')+'>'+esc(clsName(c))+'</option>').join('')+'</select> <span class="hint"><b>담임이면 여기만 고르면 됩니다.</b> 자율·자치, 진로, 행동특성, 출결, 독서, 수상 요청과 "담임 확인" 알림이 이 반으로 오고, [영역별 입력]에 출결상황 특기사항·독서활동상황 칸도 생깁니다. (따로 맡은 선생님이 있으면 그 선생님께 갑니다)</span></td></tr>';
   h+='<tr><th>내 담당 분야</th><td class="l">'+(ds.length? '<table class="dlist"><tr><th>분야</th><th>상세 분야</th><th>담당 학급</th><th></th></tr>'+ds.map((d,i)=>'<tr'+(d.sub&&(d.cls||!/세특|교과/.test(d.field))?'':' style="background:#fff3f0"')+'><td>'+esc(d.field)+'</td><td>'+(d.sub? esc(d.sub) : '<b style="color:var(--red)">⚠ 전부</b> <span class="hint">이 분야 요청이 모두 옵니다</span>')+'</td><td>'+(d.cls? esc(clsLabel(d.cls)) : (/세특|교과/.test(d.field)?'<b style="color:var(--red)">⚠ 전체 학급</b> <span class="hint">맡은 반만 고르세요</span>':'전체 학급'))+'</td><td><button class="b g s" data-ddel="'+i+'">빼기</button></td></tr>').join('')+'</table>' : '<span class="hint" style="color:var(--red)">아직 없습니다. 아래에서 추가해 주세요. 담당이 없으면 수정 요청 팝업이 오지 않습니다.</span>')+'</td></tr>';
   h+='<tr><th>담당 추가</th><td class="l"><div class="row" style="margin:0"><select id="dField">'+fieldList().map(f=>'<option'+(f===f0?' selected':'')+'>'+esc(f)+'</option>').join('')+'</select><span id="dSubBox">'+dSubSelHTML(f0)+'</span><input id="dSub" placeholder="직접 쓰기 (시트에 적힌 이름 그대로)" style="display:none;min-width:200px"><button class="b s" id="dAdd">＋ 추가</button>'+(suggestDuties().length?'<button class="b g s" id="dAuto">내 입력 영역으로 자동 채우기</button>':'')+'</div>'
     +clsPickHTML()+'<div id="dHrHint" class="hint" style="display:none;color:var(--org);font-weight:700">자율·자치, 진로, 행동특성은 따로 추가하지 않아도 됩니다. 위 <u>담임 학급</u>만 고르면 그 반 요청이 자동으로 옵니다.</div>'
@@ -1776,7 +1796,7 @@ function saveDuty(){ if(S.schoolClubs){ const mk=autoClubs(); if(mk.length) setT
 // 브라우저 탭 제목에 숫자 표시 + 다른 탭을 보고 있을 때 새 알림이 오면 깜박임
 const BASE_TITLE='도디쌤의 생기발랄';
 // 새 버전 알림: 사이트가 고쳐져 올라오면 화면 위에 띠를 띄움(브라우저가 예전 화면을 기억하는 문제 해결)
-const BUILD_V='20261114-183234';
+const BUILD_V='20261116-105517';
 async function checkNewVersion(){ if(!/^https?:/.test(location.protocol)) return; try{ const r=await fetch('version.json?t='+Date.now(),{cache:'no-store'}); if(!r.ok) return; const j=await r.json();
   if(j && j.v && j.v!==BUILD_V && !document.getElementById('newVer')){ const d=document.createElement('div'); d.id='newVer'; d.innerHTML='✨ 생기발랄 새 버전이 나왔어요. <button class="b s" id="newVerGo">새로 고침</button> <span style="font-weight:600">또는 키보드 <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>R</kbd></span> <span class="hint" style="color:inherit;opacity:.8">· 써 둔 내용은 그대로 남아요</span>'; document.body.prepend(d); document.getElementById('newVerGo').onclick=()=>{ flush().finally(()=>{ location.replace(location.pathname+'?v='+encodeURIComponent(j.v)+location.hash); }); }; } }catch(e){} }
 const SUB_DEFAULT='선생님을 잇는 생기부 플랫폼';
@@ -2160,6 +2180,7 @@ M.addEventListener('click',async e=>{
   const rqt=t.closest&&t.closest('[data-rqtab]'); if(rqt){ UI.rqTab=rqt.dataset.rqtab; renderReq(); return; }
   if(t.id==='xItemCls'){ exportItemXlsx('cls'); return; }
   if(t.id==='xItemAll'){ exportItemXlsx('all'); return; }
+  if(t.id==='togAllItems'){ S.settings.showAllItems=!S.settings.showAllItems; save(); render(); return; }
   if(t.id==='togAllCls'){ S.settings.showAllCls=!S.settings.showAllCls; save(); render(); return; }
   if(t.id==='rdEdit'){ UI.rdEdit=!UI.rdEdit; renderReq(); return; }
   if(t.id==='rdCancel'){ UI.rdEdit=false; renderReq(); return; }
@@ -2266,7 +2287,7 @@ window.addEventListener('beforeunload',()=>{ flush(); });
 (async function init(){
   await DB.open();
   const d=await DB.get('state');
-  const start=()=>{ $('#lockScr').style.display='none'; $('#lockBtn').style.display=LOCK.key?'inline-block':'none';
+  const start=()=>{ ensureItems(); $('#lockScr').style.display='none'; $('#lockBtn').style.display=LOCK.key?'inline-block':'none';
     $('#savest').textContent=(LOCK.key?'🔒 ':'')+'자료 불러옴'+backupNote();
     render(); notifyDue(); setInterval(()=>{ renderBanner(); notifyDue(); },3600000);
     refreshReqUI(); fetchReqs(true); setInterval(()=>{ if(!document.hidden) fetchReqs(true); },90000);
