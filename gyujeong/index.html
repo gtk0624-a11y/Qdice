@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>도디쌤의 규정줍줍</title>
-<meta name="description" content="규정집·길라잡이 PDF를 넣으면 원문 그대로 찾아 주는 학교 업무용 챗봇">
+<meta name="description" content="규정집·길라잡이 PDF에서 원문을 쪽수와 함께 찾아 주는 학교 업무용 프로그램">
 <meta name="theme-color" content="#1f3a68">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png">
@@ -24,8 +24,6 @@ header.top{display:flex;align-items:center;gap:6px;padding:9px 10px;background:v
 .hb{position:relative;border:0;background:rgba(255,255,255,.14);color:#fff;border-radius:10px;min-width:36px;height:38px;font-size:17px;padding:0 6px;flex:none}
 .hb:hover{background:rgba(255,255,255,.26)}
 .hb i[hidden]{display:none}
-.hb.pin{background:var(--yel);color:#3b2a00;animation:pinb 1.6s ease-in-out 3}
-@keyframes pinb{50%{transform:scale(1.12)}}
 .hb i{position:absolute;right:-3px;top:-4px;background:var(--yel);color:#222;font-style:normal;font-size:11px;font-weight:700;border-radius:9px;min-width:18px;height:18px;line-height:18px;text-align:center;padding:0 4px}
 #warn{background:#fff4e5;border-bottom:1px solid #f1c27d;color:#7a4b00;font-size:13px;padding:8px 12px;flex:none}
 #warn button{margin-left:6px}
@@ -76,6 +74,10 @@ mark.a{background:#bff0dc;font-weight:700}
 .w{font-size:12px;color:var(--sub);margin-top:8px}
 .w b{color:#7a4b00}
 /* 추천 질문 */
+#btnPin.pinbar{display:flex;align-items:center;gap:4px;width:calc(100% - 20px);margin:4px 10px 0;border:1.5px dashed #e3b453;background:#fff7e3;color:#5c3d00;border-radius:10px;padding:6px 10px;font-size:13px;flex:none;text-align:left}
+#btnPin.pinbar span{margin-left:auto;font-weight:700}
+#btnPin.pinbar:hover{background:var(--yel2)}
+#btnPin.pinbar[hidden]{display:none}
 #chips{display:flex;gap:6px;overflow-x:auto;padding:6px 10px 2px;flex:none;scrollbar-width:thin}
 #chips:empty{display:none}
 #chips button{flex:none;border:1px solid var(--line);background:#fff;border-radius:16px;padding:4px 11px;font-size:12.5px;color:var(--navy);white-space:nowrap}
@@ -143,7 +145,6 @@ ol.steps li{margin:3px 0}
 <header class="top">
   <img class="ava" src="dodi.jpg" alt="도디쌤">
   <div class="ttl"><b>도디쌤의 규정줍줍</b><span>규정·길라잡이에서 근거를 찾아 드립니다</span></div>
-  <button class="hb pin" id="btnPin" type="button" title="작업표시줄에 두기" aria-label="작업표시줄에 두기" hidden>📌</button>
   <button class="hb" id="btnIdx" type="button" title="색인(목차·가나다)" aria-label="색인">📑</button>
   <button class="hb" id="btnSaved" type="button" title="저장함" aria-label="저장함">⭐<i id="savCnt" hidden>0</i></button>
   <button class="hb" id="btnDocs" type="button" title="문서 넣기·관리" aria-label="문서 넣기·관리">📚<i id="docCnt">0</i></button>
@@ -152,6 +153,7 @@ ol.steps li{margin:3px 0}
 <div id="warn" hidden></div>
 
 <main id="msgs" aria-live="polite"></main>
+<button type="button" id="btnPin" class="pinbar" hidden>📌 화면 맨 아래 <b>작업표시줄</b>에 꽂아 두기 <span>›</span></button>
 <div id="chips"></div>
 <form id="ask" autocomplete="off">
   <button type="button" id="btnClear" class="clr" data-act="clearChat" title="대화 초기화 (넣은 문서는 그대로)" aria-label="대화 초기화">↺</button>
@@ -209,7 +211,7 @@ ol.steps li{margin:3px 0}
     <div class="sb">
       <div class="row" style="margin-top:0"><button class="b g s" type="button" data-act="guide">📖 사용법 보기</button></div>
       <div id="mineBox"></div>
-      <h3>📌 작업표시줄에 꽂아 두고 쓰기</h3>
+      <h3>📌 화면 맨 아래 작업표시줄에 꽂아 두기</h3>
       <div id="installBox"></div>
 
       <h3>🔁 같은 뜻 낱말 (동의어 사전)</h3>
@@ -580,7 +582,7 @@ return {itemsToLines,splitSheet,buildPages,chunkPages,compact,parseSyn,queryGrou
 /* ===== 화면 동작 ===== */
 (function(){
 'use strict';
-const APP_VER='v1.0';
+const APP_VER='v1.0.1';
 const PACK_ID='dodi-gyujeong';
 
 /* ===== [자주 고칠 곳 ①] 기본 동의어 사전: 한 줄에 한 묶음 ===== */
@@ -951,12 +953,12 @@ function pinHelp(){
   const ua=navigator.userAgent, edge=/Edg\//.test(ua);
   if(isKakao) return '<b>카카오톡 화면에서는 안 돼요.</b><br>아래 버튼으로 주소를 복사해서 <b>PC 크롬</b>에 붙여넣어 주세요.<div class="row"><button class="b s" type="button" data-act="copyUrl">주소 복사</button></div>';
   if(isMobile) return '작업표시줄은 <b>PC</b>에서만 만들 수 있어요.';
-  return '<b>📌 작업표시줄에 꽂기</b> — 둘 중 하나만 하면 돼요'
+  return '<b>📌 화면 맨 아래 작업표시줄에 꽂기</b> — 둘 중 하나만 하면 돼요'
    +'<div class="pinbox"><b>방법 1</b> (메뉴가 보이면 이게 제일 쉬워요)'
    +'<ol class="guide">'
-   +(edge?'<li>오른쪽 위 <b>⋯</b> 누르기</li><li><b>[앱]</b> → <b>[이 사이트를 앱으로 설치]</b> → <b>[설치]</b></li>'
-         :'<li>오른쪽 위 <b>⋮</b>(점 세 개) 누르기</li><li><b>[전송, 저장, 공유]</b> → <b>[페이지를 앱으로 설치]</b> → <b>[설치]</b></li>')
-   +'<li>아래 작업표시줄에 생긴 <b>꿈송이</b>를 <b>오른쪽 클릭</b> → <b>[작업 표시줄에 고정]</b></li></ol></div>'
+   +(edge?'<li>엣지 창 오른쪽 위 <b>⋯</b> 누르기</li><li><b>[앱]</b> → <b>[이 사이트를 앱으로 설치]</b> → <b>[설치]</b></li>'
+         :'<li>크롬 창 오른쪽 위 <b>⋮</b>(점 세 개) 누르기</li><li><b>[전송, 저장, 공유]</b> → <b>[페이지를 앱으로 설치]</b> → <b>[설치]</b></li>')
+   +'<li><b>화면 맨 아래 작업표시줄</b>에 생긴 <b>꿈송이</b>를 <b>오른쪽 클릭</b> → <b>[작업 표시줄에 고정]</b></li></ol></div>'
    +'<div class="pinbox"><b>방법 2</b> (메뉴에 설치가 없을 때)'
    +'<ol class="guide">'
    +'<li>아래 <b>[글 복사]</b> 누르기<div class="row"><button class="b s" type="button" data-act="copyApp">글 복사</button></div></li>'
@@ -964,9 +966,9 @@ function pinHelp(){
    +'<li>칸에 <b>Ctrl+V</b>(붙여넣기) → <b>[다음]</b> → 이름 <b>규정줍줍</b> → <b>[마침]</b></li>'
    +'<li>바탕화면에 생긴 아이콘 <b>오른쪽 클릭</b> → <b>[작업 표시줄에 고정]</b><br><span class="hint">안 보이면 [추가 옵션 표시] 안에 있어요</span></li></ol>'
    +'<div class="hint">[다음]에서 "찾을 수 없습니다"가 뜨면 → <button class="b g s" type="button" data-act="copyApp86">다른 글 복사</button> 후 다시 붙여넣기</div></div>'
-   +'<div class="w">끝나면 아래 줄의 꿈송이만 누르면 바로 열려요. 넣어 둔 문서도 그대로예요.</div>';
+   +'<div class="w">끝나면 <b>화면 맨 아래 작업표시줄</b>의 꿈송이만 누르면 바로 열려요. 넣어 둔 문서도 그대로예요.</div>';
 }
-function pinSteps(){ return '<ol class="steps"><li>설치하면 새 창이 뜨고 작업표시줄에 <b>꿈송이 아이콘</b>이 생깁니다.</li><li>그 아이콘을 <b>마우스 오른쪽 단추</b>로 누르고 <b>[작업 표시줄에 고정]</b>을 누릅니다.</li><li>다음부터는 아이콘만 누르면 됩니다. 창 크기는 모서리를 끌어 좁게 맞추세요.</li></ol>'; }
+function pinSteps(){ return '<ol class="steps"><li>설치하면 새 창이 뜨고 <b>화면 맨 아래 작업표시줄</b>에 <b>꿈송이 아이콘</b>이 생깁니다.</li><li>그 아이콘을 <b>마우스 오른쪽 단추</b>로 누르고 <b>[작업 표시줄에 고정]</b>을 누릅니다.</li><li>다음부터는 아이콘만 누르면 됩니다. 창 크기는 모서리를 끌어 좁게 맞추세요.</li></ol>'; }
 function renderInstall(){ $('installBox').innerHTML= standalone()? installHTML() : (S.installEvt? installHTML() : pinHelp()); }
 async function doInstall(){
   const ev=S.installEvt; if(!ev){ openPanel('pSet'); return; }
@@ -990,7 +992,7 @@ function guideHTML(){
   return '<ol class="guide">'
    +'<li><b>내 업무 규정을 PDF로 준비해요</b><br>선생님 업무에 맞는 규정집·길라잡이·지침이면 무엇이든 됩니다. (학교 규정, 학폭·교권·안전 길라잡이, 교육청 지침 등)<br>· 한글(.hwp) 파일은 한글에서 <b>[파일] → [PDF로 저장하기]</b><br>· 이미 PDF면 그대로 쓰면 돼요<br>· 스캔한 그림 PDF(글자를 드래그해 복사할 수 없는 것)는 찾을 수 없어요</li>'
    +'<li><b>PDF를 넣어요</b><br>이 창에 <b>끌어다 놓거나</b> 아래 [📄 PDF 넣기]를 눌러요. 여러 개를 한 번에 넣어도 돼요. 처음 한 번만 하면 됩니다.</li>'
-   +(inst?'<li><b>작업표시줄에 꽂아 둬요</b><br>위쪽 노란 <b>📌</b>을 눌러 설치하고, 작업표시줄의 제 아이콘을 <b>마우스 오른쪽 단추 → [작업 표시줄에 고정]</b>. 한글·나이스를 쓰다가도 아이콘만 누르면 바로 꺼내 볼 수 있어요.</li>':'')
+   +(inst?'<li><b>화면 맨 아래 작업표시줄에 꽂아 둬요</b><br>입력창 바로 위의 <b>[📌 작업표시줄에 꽂아 두기]</b>를 누르면 방법이 나와요. 끝나면 <b>화면 맨 아래 작업표시줄</b>에 꿈송이가 생겨요. 한글·나이스를 쓰다가도 그 꿈송이만 누르면 바로 꺼내 볼 수 있어요.</li>':'')
    +'<li><b>궁금한 것을 물어봐요</b><br>예) "출석정지는 며칠까지야?", "위원회 위원은 몇 명?", "재심의 신청 기간"<br>문서에 적힌 원문을 <b>쪽수와 함께</b> 찾아 드려요.</li>'
    +'<li><b>모아 보고 다시 찾기</b><br><b>📑 색인</b>: 넣은 문서의 목차와 가나다순 찾아보기<br><b>⭐ 저장함</b>: 결과의 [⭐ 저장]으로 모은 조항과 메모, 최근 검색</li>'
    +'</ol><div class="w">화면이 길어지면 입력창 왼쪽 <b>↺</b>를 누르세요. 대화만 지워지고 넣어 둔 문서는 그대로예요.</div>';
@@ -999,8 +1001,8 @@ function hello(){
   const has=S.docs.length>0;
   let h='<div class="hello"><img src="ggumsong.png" alt="꿈송이"><div>안녕하세요, <b>꿈송이</b>예요. '
     +(has?'넣어 둔 문서 <b>'+S.docs.length+'개</b>에서 찾아 드릴게요. 궁금한 것을 물어보세요.':'선생님 업무의 <b>규정집·길라잡이</b>를 PDF로 넣어 주시면, 질문에 맞는 곳을 <b>원문 그대로 쪽수와 함께</b> 찾아 드려요. 이렇게 시작해요.')+'</div></div>';
-  if(!has){ h+=guideHTML()+'<div class="row"><button class="b" type="button" data-act="pick">📄 PDF 넣기</button>'+((!standalone()&&!isMobile&&!isKakao)?'<button class="b g" type="button" data-act="pin" id="helloInst">📌 작업표시줄에 꽂기</button>':'')+'</div>'; }
-  else if(!standalone() && !isMobile && !isKakao) h+='<div class="row"><button class="b g s" type="button" data-act="pin" id="helloInst">📌 작업표시줄에 꽂기 (꺼내 보기 쉬워요)</button><button class="b g s" type="button" data-act="guide">📖 사용법</button></div>';
+  if(!has){ h+=guideHTML()+'<div class="row"><button class="b" type="button" data-act="pick">📄 PDF 넣기</button>'+((!standalone()&&!isMobile&&!isKakao)?'<button class="b g" type="button" data-act="pin" id="helloInst">📌 작업표시줄(화면 맨 아래)에 꽂기</button>':'')+'</div>'; }
+  else if(!standalone() && !isMobile && !isKakao) h+='<div class="row"><button class="b g s" type="button" data-act="pin" id="helloInst">📌 작업표시줄(화면 맨 아래)에 꽂기</button><button class="b g s" type="button" data-act="guide">📖 사용법</button></div>';
   else h+='<div class="row"><button class="b g s" type="button" data-act="guide">📖 사용법</button></div>';
   h+=mineHTML()+'<ul class="note"><li>AI가 아니에요. 문서에 <b>적힌 낱말</b>로 찾아요. 답은 꼭 원문으로 확인해 주세요.</li><li>학생 이름·개인정보가 든 문서는 넣지 마세요.</li></ul>';
   bot(h);
@@ -1079,7 +1081,7 @@ window.addEventListener('dragleave',e=>{ if(!hasFiles(e)) return; dragN=Math.max
 window.addEventListener('drop',e=>{ if(!hasFiles(e)) return; e.preventDefault(); dragN=0; $('drop').classList.remove('on'); addFiles(e.dataTransfer.files); });
 
 window.addEventListener('beforeinstallprompt',e=>{ e.preventDefault(); S.installEvt=e; renderInstall(); const b=$('helloInst'); if(b) b.dataset.act='install'; });
-window.addEventListener('appinstalled',()=>{ S.installEvt=null; renderInstall(); $('btnPin').hidden=true; bot('<b>설치되었습니다.</b> 새로 뜬 창의 작업표시줄 아이콘(꿈송이)을 <b>마우스 오른쪽 단추</b>로 누르고 <b>[작업 표시줄에 고정]</b>을 눌러 두세요. 다음부터는 그 아이콘만 누르면 됩니다.'); });
+window.addEventListener('appinstalled',()=>{ S.installEvt=null; renderInstall(); $('btnPin').hidden=true; bot('<b>설치되었습니다.</b> <b>화면 맨 아래 작업표시줄</b>에 생긴 꿈송이 아이콘을 <b>마우스 오른쪽 단추</b>로 누르고 <b>[작업 표시줄에 고정]</b>을 눌러 두세요. 다음부터는 그 아이콘만 누르면 됩니다.'); });
 
 /* ===== 시작 ===== */
 (async function init(){
