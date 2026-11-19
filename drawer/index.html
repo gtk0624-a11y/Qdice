@@ -30,7 +30,8 @@ header{position:sticky;top:0;z-index:5;background:var(--brand);color:#fff;paddin
 .tabs::-webkit-scrollbar{display:none}
 .chip{flex:none;border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:99px;padding:6px 12px;font-size:13px;font-family:inherit;cursor:pointer}
 .chip.on{background:var(--brand2);border-color:var(--brand2);color:#fff}
-main{flex:1;padding:4px 12px 90px}
+main{flex:1;padding:4px 12px 120px}
+.wm{position:fixed;left:0;right:0;bottom:0;z-index:7;text-align:center;font-size:11px;color:var(--sub);background:var(--bg);border-top:1px solid var(--line);padding:7px 8px;letter-spacing:-.2px;pointer-events:none;user-select:none}
 .sec{margin:14px 2px 6px;font-size:12px;font-weight:700;color:var(--sub);letter-spacing:.3px}
 .row{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:9px 10px;margin-bottom:6px;cursor:pointer;user-select:none}
 .row:hover,.row:focus{border-color:var(--brand2);outline:0;box-shadow:0 0 0 2px rgba(37,99,235,.15)}
@@ -47,7 +48,7 @@ main{flex:1;padding:4px 12px 90px}
 .del{font-size:14px}
 .del:hover{color:var(--new)}
 .empty{text-align:center;color:var(--sub);padding:40px 10px;line-height:1.7}
-.fab{position:fixed;right:max(14px,calc(50% - 266px));bottom:16px;border:0;background:var(--brand2);color:#fff;border-radius:99px;padding:12px 18px;font-size:15px;font-weight:700;font-family:inherit;box-shadow:0 6px 18px rgba(30,58,138,.35);cursor:pointer;z-index:6}
+.fab{position:fixed;right:max(14px,calc(50% - 266px));bottom:44px;border:0;background:var(--brand2);color:#fff;border-radius:99px;padding:12px 18px;font-size:15px;font-weight:700;font-family:inherit;box-shadow:0 6px 18px rgba(30,58,138,.35);cursor:pointer;z-index:6}
 .fab:hover{background:var(--brand)}
 dialog{border:0;border-radius:18px;padding:18px;width:min(92vw,380px);box-shadow:0 20px 50px rgba(0,0,0,.3);font-family:inherit;color:var(--ink)}
 dialog::backdrop{background:rgba(0,0,0,.4)}
@@ -65,7 +66,7 @@ input[type=text],input[type=url],select{width:100%;border:1px solid var(--line);
 .seg input{display:none}
 .seg input:checked+span{color:var(--brand2)}
 .seg label:has(input:checked){border-color:var(--brand2);background:#eff4ff}
-#toast{position:fixed;left:50%;bottom:78px;transform:translateX(-50%);background:#111827;color:#fff;padding:10px 16px;border-radius:10px;font-size:13px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:20;max-width:88vw;text-align:center}
+#toast{position:fixed;left:50%;bottom:108px;transform:translateX(-50%);background:#111827;color:#fff;padding:10px 16px;border-radius:10px;font-size:13px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:20;max-width:88vw;text-align:center}
 #toast.show{opacity:.95}
 </style>
 </head>
@@ -86,6 +87,7 @@ input[type=text],input[type=url],select{width:100%;border:1px solid var(--line);
   <main id="list"></main>
 </div>
 <button class="fab" id="btnAdd">＋ 추가</button>
+<div class="wm">© 김정환 · M.A.D.T (Moral And Digital Teacher)</div>
 <div id="toast"></div>
 
 <!-- 추가 창 -->
