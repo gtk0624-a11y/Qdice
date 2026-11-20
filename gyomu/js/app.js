@@ -23,6 +23,7 @@ function upcoming(n) { const seen = new Set(); return allEvents().filter(e => !e
 function periodInfo() {
   const p = S.profile, [h, m] = p.start.split(':').map(Number), now = new Date(), mins = now.getHours() * 60 + now.getMinutes(), st = h * 60 + m;
   let cur = 0, next = 0;
+  if (p.bell && p.bell.length) { p.bell.forEach(x => { if (mins >= x.s && mins < x.e) cur = x.p; else if (mins < x.s && !next) next = x.p; }); return { dow: now.getDay(), cur, next }; }
   for (let i = 1; i <= 7; i++) { const a = st + (i - 1) * (+p.classMin + +p.breakMin), b = a + +p.classMin; if (mins >= a && mins < b) cur = i; else if (mins < a && !next) next = i; }
   return { dow: now.getDay(), cur, next };
 }
@@ -75,7 +76,7 @@ function todayView() {
   /* 일과 */
   {
     const has = Object.keys(S.timetable).some(k => S.timetable[k]);
-    let st = '시간표를 먼저 넣어 주세요 (수업·평가 → 시간표)', due = '';
+    let st = '시간표가 비어 있습니다 → 수업·평가에서 "컴시간에서 가져오기"', due = '';
     if (has) {
       if (P.dow === 0 || P.dow === 6) st = '주말입니다';
       else if (P.cur) { st = `${P.cur}교시 ${esc(tt(P.dow, P.cur) || '공강')} 진행 중`; due = P.cur < 7 ? '다음 ' + (P.cur + 1) + '교시' : ''; }
@@ -173,7 +174,7 @@ function calView() {
   return `<div class="bh"><h2>캘린더</h2><span class="mu">평가·예산·연수 기한이 자동으로 모입니다.</span></div>
   <div class="calh"><button class="btn sm" data-act="calMove" data-d="-1" aria-label="이전 달">‹</button><b class="calt">${Y}년 ${M}월</b><button class="btn sm" data-act="calMove" data-d="1" aria-label="다음 달">›</button><button class="btn sm" data-act="calMove" data-d="0">오늘</button></div>
   <div class="calw">${DOW.map(d => `<span>${d}</span>`).join('')}</div><div class="cal">${cells}</div>
-  <div class="tools"><label class="btn file">학사일정 파일 올리기<input type="file" id="schedUp" accept=".txt,.csv,.xlsx,.xls,.pdf" hidden></label><button class="btn" data-act="schedPaste">학사일정 붙여넣기</button></div><p class="mu">학사일정(PDF·엑셀·텍스트, 또는 나이스·홈페이지에서 복사한 글)을 넣으면 날짜와 행사를 찾아 캘린더에 한꺼번에 넣어 드립니다. 「3/2 입학식」「7.21~8.20 여름방학」 같은 줄을 알아봅니다.</p>
+  <div class="tools"><label class="btn file">학사일정 파일 올리기<input type="file" id="schedUp" accept=".txt,.csv,.xlsx,.xls,.pdf,.hwp,.hwpx,.docx" hidden></label><button class="btn" data-act="schedPaste">학사일정 붙여넣기</button></div><p class="mu">학사일정(PDF·엑셀·텍스트, 또는 나이스·홈페이지에서 복사한 글)을 넣으면 날짜와 행사를 찾아 캘린더에 한꺼번에 넣어 드립니다. 「3/2 입학식」「7.21~8.20 여름방학」 같은 줄을 알아봅니다.</p>
   <h3 class="h3">${md(UI.day)} (${DOW[new Date(UI.day + 'T00:00:00').getDay()]})</h3>${list}
   <form class="inl" data-form="evt"><input name="title" placeholder="일정·할 일 추가" required aria-label="내용"><select name="cat" aria-label="종류"><option value="event">일정</option><option value="todo">할 일</option></select><button class="btn">추가</button></form>`;
 }
@@ -184,7 +185,7 @@ function classView() {
   for (let p = 1; p <= 7; p++) { t += `<tr><th>${p}</th>` + [1, 2, 3, 4, 5].map(d => `<td><input data-tt="${d}-${p}" value="${esc(tt(d, p))}" aria-label="${DOW[d]} ${p}교시"></td>`).join('') + '</tr>'; }
   t += '</tbody></table>';
   return `<div class="bh"><h2>수업·평가</h2><span class="mu">시간표 · 진도 · 수행평가를 한곳에서 고칩니다.</span></div>
-  <h3 class="h3">시간표</h3><p class="mu">컴시간알리미 화면을 보고 반 이름만 적으세요 (예: 2-1 도덕). 빈칸은 공강입니다.</p>${t}
+  <h3 class="h3">시간표 · 일과표</h3><div class="tools"><button class="btn pri" data-act="comci">컴시간알리미에서 자동으로 가져오기</button><label class="btn file">시간표 파일 올리기<input type="file" id="ttUp" accept=".hwp,.hwpx,.docx,.xlsx,.xls,.csv,.txt,.pdf" hidden></label><button class="btn" data-act="ttPaste">시간표 붙여넣기</button><label class="btn file">일과표 파일 올리기<input type="file" id="bellUp" accept=".hwp,.hwpx,.docx,.xlsx,.xls,.csv,.txt,.pdf" hidden></label><button class="btn" data-act="bellPaste">일과표 붙여넣기</button></div><p class="mu">컴시간 연동은 설정한 내 이름(예: 김정*)으로 선생님 수업만 골라 자동으로 채웁니다. 한글·엑셀·PDF 파일을 올리거나 표를 복사해 붙여도 알아서 칸을 채웁니다. 고칠 때는 아래 칸에 직접 적으세요. 빈칸은 공강입니다.</p>${S.profile.bell && S.profile.bell.length ? `<p class="mu">적용된 일과표: ${S.profile.bell.map(x => `${x.p}교시 ${hm(x.s)}~${hm(x.e)}`).join(' · ')}</p>` : ''}${t}
   <h3 class="h3">수업 진도</h3>${S.lessons.map(l => `<div class="ls"><span class="lc">${esc(l.cls)}</span><span class="lu">${esc(l.unit)}</span>${bar(lessonPct(l))}<span class="num">${l.done}/${l.total}</span><button class="x" data-act="edit_lessons" data-id="${l.id}">수정</button>${xbtn('del_lessons', l.id)}</div>`).join('')}<button class="btn sm" data-act="add_lessons">+ 진도 추가</button><button class="btn sm" data-act="lessonAll">반 6개 한 번에 만들기</button>
   <h3 class="h3">수행평가</h3>${[...S.assess].map(a => `<div class="as"><div class="ah"><b>${esc(a.title)}</b> <span class="mu">${esc(a.grade || '')} ${a.due ? '· 입력기한 ' + md(a.due) : ''}</span> <button class="x" data-act="edit_assess" data-id="${a.id}">수정</button>${xbtn('del_assess', a.id)}</div><div class="steps">${ASSESS_STEPS.map((s, i) => `<button class="stp1 ${i === (a.step || 0) ? 'on' : ''} ${i < (a.step || 0) ? 'past' : ''}" data-act="assessStep" data-id="${a.id}" data-s="${i}">${s}</button>`).join('')}</div></div>`).join('')}<button class="btn sm" data-act="add_assess">+ 수행평가 추가</button>`;
 }
@@ -206,7 +207,7 @@ function budgetView() {
   }).join('');
   return `<div class="bh"><h2>예산 장부</h2><span class="mu">총액을 넣고 쓴 돈을 하나씩 넣으면 집행률·잔액이 저절로 나옵니다.</span></div>
   <div class="sum"><div><span>전체 총액</span><b class="num">${won(T.a)}</b></div><div><span>전체 집행</span><b class="num">${won(T.s)}</b></div><div><span>전체 잔액</span><b class="num hot2">${won(T.b)}</b></div><div><span>집행률</span><b class="num">${T.a ? Math.round(T.s / T.a * 1000) / 10 : 0}%</b></div></div>
-  <div class="tools"><button class="btn" data-act="projAdd">+ 사업(부서) 만들기</button><label class="btn file">계획서 올려 예산 뽑기<input type="file" id="planUp" accept=".txt,.csv,.xlsx,.xls,.pdf" hidden></label><button class="btn" data-act="budgetCsv">엑셀(CSV)로 내보내기</button></div>
+  <div class="tools"><button class="btn" data-act="projAdd">+ 사업(부서) 만들기</button><label class="btn file">계획서 올려 예산 뽑기<input type="file" id="planUp" accept=".txt,.csv,.xlsx,.xls,.pdf,.hwp,.hwpx,.docx" hidden></label><button class="btn" data-act="budgetCsv">엑셀(CSV)로 내보내기</button></div>
   <p class="mu">계획서(PDF·엑셀·텍스트)를 올리면 항목·금액·기한 후보를 찾아 보여 드립니다. 확인하고 체크한 것만 장부에 들어갑니다. 한글(hwp) 파일은 PDF로 저장해서 올려 주세요.</p>${projs || '<p class="mu">아직 사업이 없습니다. “사업 만들기”를 눌러 시작하세요.</p>'}`;
 }
 
@@ -232,11 +233,11 @@ function libView() {
   const C = S.contacts.filter(c => !q || norm(c.dept + c.name + c.ext + c.phone).includes(q));
   return `<div class="bh"><h2>자료·연락</h2><span class="mu">여기에 올린 모든 내용은 꿈송이가 찾아 줍니다.</span></div>
   <h3 class="h3">업무 분장표</h3><table class="tbl"><thead><tr><th>부서</th><th>업무</th><th>담당</th><th></th></tr></thead><tbody>${S.duties.map(d => `<tr class="${d.mine ? 'mine' : ''}"><td>${esc(d.dept)}</td><td>${esc(d.work)}</td><td>${esc(d.who)}${d.mine ? ' <b class="hot">나</b>' : ''}</td><td class="act"><button class="x" data-act="edit_duties" data-id="${d.id}">수정</button>${xbtn('del_duties', d.id)}</td></tr>`).join('')}</tbody></table>
-  <div class="tools"><button class="btn sm" data-act="add_duties">+ 한 줄 추가</button><label class="btn sm file">표 파일로 한 번에 넣기<input type="file" data-import="duties" accept=".csv,.xlsx,.xls,.txt" hidden></label></div><p class="mu">표 파일은 열 순서가 부서 · 업무 · 담당자입니다. 첫 줄 제목은 알아서 건너뜁니다.</p>
+  <div class="tools"><button class="btn sm" data-act="add_duties">+ 한 줄 추가</button><label class="btn sm file">표 파일로 한 번에 넣기<input type="file" data-import="duties" accept=".csv,.xlsx,.xls,.txt,.hwp,.hwpx,.docx" hidden></label></div><p class="mu">표 파일은 열 순서가 부서 · 업무 · 담당자입니다. 첫 줄 제목은 알아서 건너뜁니다.</p>
   <h3 class="h3">교내 연락망</h3><input class="srch" id="cq" placeholder="이름·부서·내선 검색" value="${esc(UI.q)}" aria-label="연락망 검색"><table class="tbl"><thead><tr><th>부서</th><th>이름</th><th>내선</th><th>전화</th><th></th></tr></thead><tbody>${C.map(c => `<tr><td>${esc(c.dept)}</td><td>${esc(c.name)}</td><td>${esc(c.ext)}</td><td>${esc(c.phone)}</td><td class="act"><button class="x" data-act="edit_contacts" data-id="${c.id}">수정</button>${xbtn('del_contacts', c.id)}</td></tr>`).join('')}</tbody></table>
-  <div class="tools"><button class="btn sm" data-act="add_contacts">+ 한 줄 추가</button><label class="btn sm file">표 파일로 한 번에 넣기<input type="file" data-import="contacts" accept=".csv,.xlsx,.xls,.txt" hidden></label></div><p class="mu">열 순서: 부서 · 이름 · 내선 · 전화. 개인 전화번호는 이 기기·내 계정에만 저장됩니다.</p>
-  <h3 class="h3">자료실 (계획서·회의록·규정·교육과정)</h3><div class="tools"><select id="upk" aria-label="자료 종류"><option>계획서</option><option>회의록</option><option>규정</option><option>교육과정</option><option>기타</option></select><label class="btn file">파일 올리기<input type="file" id="docUp" accept=".txt,.csv,.md,.xlsx,.xls,.pdf" multiple hidden></label></div><p class="mu">PDF·엑셀·텍스트를 읽어 글자를 뽑아 둡니다(원본 파일은 저장하지 않음). 한글(hwp)·워드는 PDF로 저장해 올려 주세요.</p>
-  ${LIB.map(d => `<details class="doc"><summary><b>${esc(d.name)}</b> <span class="mu">${esc(d.kind)} · ${d.text.length.toLocaleString()}자 · ${d.added}</span></summary><pre>${esc(d.text.slice(0, 1800))}${d.text.length > 1800 ? '\n…' : ''}</pre><button class="btn sm" data-act="docBudget" data-id="${d.id}">예산 후보 뽑기</button><button class="x" data-act="docDel" data-id="${d.id}">삭제</button></details>`).join('') || '<p class="mu">아직 올린 자료가 없습니다.</p>'}`;
+  <div class="tools"><button class="btn sm" data-act="add_contacts">+ 한 줄 추가</button><label class="btn sm file">표 파일로 한 번에 넣기<input type="file" data-import="contacts" accept=".csv,.xlsx,.xls,.txt,.hwp,.hwpx,.docx" hidden></label></div><p class="mu">열 순서: 부서 · 이름 · 내선 · 전화. 개인 전화번호는 이 기기·내 계정에만 저장됩니다.</p>
+  <h3 class="h3">자료실 (계획서·회의록·규정·교육과정)</h3><div class="tools"><select id="upk" aria-label="자료 종류"><option>계획서</option><option>회의록</option><option>규정</option><option>교육과정</option><option>기타</option></select><label class="btn file">파일 올리기<input type="file" id="docUp" accept=".txt,.csv,.md,.xlsx,.xls,.pdf,.hwp,.hwpx,.docx" multiple hidden></label></div><p class="mu">한글(hwp·hwpx)·워드·PDF·엑셀·텍스트를 읽어 글자를 뽑아 저장합니다(원본 파일은 저장하지 않음). 아래 목록에서 펼치면 제목·표·목록이 보기 편하게 정리되어 나옵니다.</p>
+  ${LIB.map(d => `<details class="doc"><summary><b>${esc(d.name)}</b> <span class="mu">${esc(d.kind)} · ${d.text.length.toLocaleString()}자 · ${d.added}</span></summary><div class="rd">${readable(d.text.slice(0, 60000))}</div><button class="btn sm" data-act="docBudget" data-id="${d.id}">예산 후보 뽑기</button><button class="x" data-act="docDel" data-id="${d.id}">삭제</button></details>`).join('') || '<p class="mu">아직 올린 자료가 없습니다.</p>'}`;
 }
 
 /* ---------- 설정 ---------- */

@@ -295,7 +295,7 @@ async function readFile(f) {
     for (let i = 1; i <= pdf.numPages; i++) { const pg = await pdf.getPage(i); const c = await pg.getTextContent(); out += c.items.map(x => x.str).join(' ') + '\n\f'; }
     return out;
   }
-  throw new Error('이 파일 형식은 읽지 못합니다. 한글(hwp)·워드는 PDF로 저장해서 올려 주세요.');
+  throw new Error('이 파일 형식은 읽지 못합니다. 한글(hwp·hwpx)·워드(docx)·PDF·엑셀·텍스트 파일을 올려 주세요.');
 }
 function download(name, text, mime) {
   const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([text], { type: mime || 'text/plain;charset=utf-8' })); a.download = name; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500);

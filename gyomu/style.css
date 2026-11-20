@@ -393,3 +393,4 @@ html[data-dens=w] body{line-height:1.95}html[data-dens=w] .row>summary{padding:2
 html[data-nav=left] .spread,html[data-nav=right] .spread{grid-template-columns:minmax(0,1fr)}html[data-nav=left] .pgL,html[data-nav=right] .pgL{position:static}
 html[data-nav=left] .mcal,html[data-nav=right] .mcal{max-width:420px}
 #app{min-width:0}main{min-width:0}
+.rd{max-height:520px;overflow:auto;padding:10px 14px;background:var(--card2);border:1px solid var(--rule);border-radius:8px;font-size:17px;line-height:1.8}.rd h4{margin:16px 0 4px;padding:4px 10px;border-left:5px solid var(--red);background:color-mix(in srgb,var(--red) 8%,var(--card2));font-size:18px}.rd p{margin:4px 0}.rd p.bl{padding-left:1.1em;text-indent:-1.1em}.rd .tbl td{border:1px solid var(--rule);padding:5px 8px;font-size:15px}.rd hr.pgb{border:0;border-top:2px dashed var(--rule);margin:14px 0}
