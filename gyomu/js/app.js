@@ -146,6 +146,7 @@ function todayView() {
   {
     const mine = S.duties.filter(d => d.mine);
     rows.push(row('r9', '학교', '업무 분장표', S.duties.length ? `내 업무 ${mine.length}건${mine[0] ? ' · ' + esc(mine[0].work) : ''}` : '업무 분장표를 올려 보세요', '', mine.map(d => `<div class="nl"><span>${esc(d.dept)} · ${esc(d.work)}</span></div>`).join('') + '<a class="btn sm" href="#/lib">분장표 열기</a>'));
+    rows.push(typeof mineRow === 'function' ? mineRow() : '');
     rows.push(row('r10', '학교', '교내 연락망', S.contacts.length ? `교직원 ${S.contacts.length}명 · 이름·부서·내선 검색` : '연락망을 올려 보세요', '', '<a class="btn sm" href="#/lib">연락망 열기</a>'));
   }
   S.pages.filter(p => p.pin).forEach(p => {
@@ -232,7 +233,7 @@ function libView() {
   const q = norm(UI.q);
   const C = S.contacts.filter(c => !q || norm(c.dept + c.name + c.ext + c.phone).includes(q));
   return `<div class="bh"><h2>자료·연락</h2><span class="mu">여기에 올린 모든 내용은 꿈송이가 찾아 줍니다.</span></div>
-  <h3 class="h3">업무 분장표</h3><table class="tbl"><thead><tr><th>부서</th><th>업무</th><th>담당</th><th></th></tr></thead><tbody>${S.duties.map(d => `<tr class="${d.mine ? 'mine' : ''}"><td>${esc(d.dept)}</td><td>${esc(d.work)}</td><td>${esc(d.who)}${d.mine ? ' <b class="hot">나</b>' : ''}</td><td class="act"><button class="x" data-act="edit_duties" data-id="${d.id}">수정</button>${xbtn('del_duties', d.id)}</td></tr>`).join('')}</tbody></table>
+  ${typeof mineBody === 'function' ? '<h3 class="h3">내 업무</h3>' + mineBody() : ''}<h3 class="h3">업무 분장표</h3><table class="tbl"><thead><tr><th>부서</th><th>업무</th><th>담당</th><th></th></tr></thead><tbody>${S.duties.map(d => `<tr class="${d.mine ? 'mine' : ''}"><td>${esc(d.dept)}</td><td>${esc(d.work)}</td><td>${esc(d.who)}${d.mine ? ' <b class="hot">나</b>' : ''}</td><td class="act"><button class="x" data-act="edit_duties" data-id="${d.id}">수정</button>${xbtn('del_duties', d.id)}</td></tr>`).join('')}</tbody></table>
   <div class="tools"><button class="btn sm" data-act="add_duties">+ 한 줄 추가</button><label class="btn sm file">표 파일로 한 번에 넣기<input type="file" data-import="duties" accept=".csv,.xlsx,.xls,.txt,.hwp,.hwpx,.docx" hidden></label></div><p class="mu">표 파일은 열 순서가 부서 · 업무 · 담당자입니다. 첫 줄 제목은 알아서 건너뜁니다.</p>
   <h3 class="h3">교내 연락망</h3><input class="srch" id="cq" placeholder="이름·부서·내선 검색" value="${esc(UI.q)}" aria-label="연락망 검색"><table class="tbl"><thead><tr><th>부서</th><th>이름</th><th>내선</th><th>전화</th><th></th></tr></thead><tbody>${C.map(c => `<tr><td>${esc(c.dept)}</td><td>${esc(c.name)}</td><td>${esc(c.ext)}</td><td>${esc(c.phone)}</td><td class="act"><button class="x" data-act="edit_contacts" data-id="${c.id}">수정</button>${xbtn('del_contacts', c.id)}</td></tr>`).join('')}</tbody></table>
   <div class="tools"><button class="btn sm" data-act="add_contacts">+ 한 줄 추가</button><label class="btn sm file">표 파일로 한 번에 넣기<input type="file" data-import="contacts" accept=".csv,.xlsx,.xls,.txt,.hwp,.hwpx,.docx" hidden></label></div><p class="mu">열 순서: 부서 · 이름 · 내선 · 전화. 개인 전화번호는 이 기기·내 계정에만 저장됩니다.</p>
@@ -248,7 +249,7 @@ function archView(id) {
   return `<div class="bh"><h2>${esc(a.label)} <span class="mu">(읽기 전용)</span></h2></div><p class="mu">지금 데이터와 섞이지 않는 보관본입니다. 꿈송이에게 "${esc(a.label)} 예산 뭐였지"처럼 물어도 찾아 줍니다.</p>` + (keys.length ? keys.map(k => `<details class="tg"><summary>${esc(k)} <span class="mu">${g[k].length}건</span></summary><div class="tgb">${g[k].map(t => `<p>${esc(t).replace(/\n/g, '<br>')}</p>`).join('')}</div></details>`).join('') : '<p class="mu">내용이 없습니다.</p>');
 }
 function setView() {
-  const p = S.profile, sy = TF.sync.info, rowsT = [['r1', '일과'], ['r2', '할 일'], ['r3', '공문'], ['r4', '수업 진도'], ['r5', '수행평가'], ['r6', '예산'], ['r7', '연수'], ['r8', '기록'], ['r9', '업무 분장표'], ['r10', '교내 연락망']];
+  const p = S.profile, sy = TF.sync.info, rowsT = [['r1', '일과'], ['r2', '할 일'], ['r3', '공문'], ['r4', '수업 진도'], ['r5', '수행평가'], ['r6', '예산'], ['r7', '연수'], ['r8', '기록'], ['r9', '업무 분장표'], ['r10', '교내 연락망'], ['r11', '내 업무']];
   return `<div class="bh"><h2>설정</h2></div>
   <form data-form="profile" class="fm"><h3 class="h3">내 정보</h3><label>이름<input name="name" value="${esc(p.name)}"></label><label>학교<input name="school" value="${esc(p.school)}"></label><label>교과<input name="subject" value="${esc(p.subject)}"></label><label>담당 반 (쉼표로)<input name="classes" value="${esc(p.classes.join(', '))}"></label><label>1교시 시작<input name="start" type="time" value="${p.start}"></label><label>수업 시간(분)<input name="classMin" type="number" value="${p.classMin}"></label><label>쉬는 시간(분)<input name="breakMin" type="number" value="${p.breakMin}"></label><label>개발 연수 목표(시간)<input name="devTarget" type="number" value="${p.devTarget}"></label><button class="btn pri">저장</button></form>
   <h3 class="h3">오늘 게시판에 보일 줄</h3><div class="hides">${rowsT.map(([k, v]) => `<label class="chk"><input type="checkbox" data-hide="${k}" ${S.hide[k] ? '' : 'checked'}> ${v}</label>`).join('')}</div>
@@ -346,7 +347,7 @@ const A = {
   wmToggle() { S.profile.wm = S.profile.wm === false; commit(); },
   wmEdit() { ask('워터마크 글자', [{ k: 't', label: '비우면 "제목 · 이름"이 자동으로 들어갑니다', val: S.profile.wmText || '' }], o => { S.profile.wmText = (o.t || '').trim(); commit(); }, '저장'); },
   logoDel() { LOGO = ''; idb.set('logo', ''); render(); },
-  newYear() { sure('새 학년도를 시작할까요? 먼저 백업 파일을 받고, 시간표·일정·진도·평가·예산·연수·공문·업무분장·연락망을 비웁니다. 메모·페이지·서랍·자료실은 남습니다.', () => { A.backup(); ['timetable'].forEach(k => S[k] = {}); ['items', 'lessons', 'assess', 'budget', 'training', 'duties', 'contacts'].forEach(k => S[k] = []); S.docs = {}; commit(); toast('새 학년도로 비웠습니다. 학교·교과를 확인하고 학사일정을 올려 주세요.'); }); },
+  newYear() { sure('새 학년도를 시작할까요? 먼저 백업 파일을 받고, 시간표·일정·진도·평가·예산·연수·공문·업무분장·연락망을 비웁니다. 메모·페이지·서랍·자료실은 남습니다.', () => { A.backup(); ['timetable'].forEach(k => S[k] = {}); ['items', 'lessons', 'assess', 'budget', 'training', 'duties', 'mine', 'contacts'].forEach(k => S[k] = []); S.docs = {}; commit(); toast('새 학년도로 비웠습니다. 학교·교과를 확인하고 학사일정을 올려 주세요.'); }); },
   backup() { download('업무파탈_백업_' + today() + '.json', JSON.stringify({ S, LIB }), 'application/json'); },
   sample() { sampleData(); },
   reset() { sure('이 기기의 모든 데이터를 지우고 처음부터 시작할까요? (되돌릴 수 없습니다)', async () => { localStorage.removeItem(KEY); await idb.del('lib'); await idb.del('mascot'); location.hash = ''; location.reload(); }); }

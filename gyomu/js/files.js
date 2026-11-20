@@ -10,7 +10,17 @@ function zipIndex(buf) {
 async function zipRead(z, name) { const e = z.out[name], nl = z.dv.getUint16(e.off + 26, true), el = z.dv.getUint16(e.off + 28, true), st = e.off + 30 + nl + el, d = z.u8.subarray(st, st + e.csz); return e.method === 0 ? d : inflateRaw(d); }
 const xmlText = x => x.replace(/<\/(hp:p|w:p)>\s*<\/(hp:tc|w:tc)>/g, '</$2>').replace(/<\/(hp:tc|w:tc)>/g, ' | ').replace(/<\/(hp:tr|w:tr|hp:p|w:p)>/g, '\n').replace(/<(hp:tab|w:tab)\s*\/>/g, '\t').replace(/<[^>]+>/g, '').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&apos;/g, "'").replace(/&amp;/g, '&');
 function hwpPara(b) { let s = ''; for (let i = 0; i + 1 < b.length;) { const c = b[i] | (b[i + 1] << 8); if (c < 32) { if ([1, 2, 3, 11, 12, 14, 15, 16, 17, 18, 21, 22, 23].includes(c)) { i += 16; continue; } if (c === 10 || c === 13) s += '\n'; else if (c === 9) s += '\t'; i += 2; continue; } s += String.fromCharCode(c); i += 2; } return s.replace(/\n+$/, '') + '\n'; }
-function hwpRecords(u8) { const dv = new DataView(u8.buffer, u8.byteOffset, u8.byteLength); let p = 0, out = ''; while (p + 4 <= u8.length) { const h = dv.getUint32(p, true); p += 4; const tag = h & 0x3ff; let size = (h >>> 20) & 0xfff; if (size === 0xfff) { size = dv.getUint32(p, true); p += 4; } if (tag === 67) out += hwpPara(u8.subarray(p, p + size)); p += size; } return out; }
+function hwpRecords(u8) {
+  const dv = new DataView(u8.buffer, u8.byteOffset, u8.byteLength); let p = 0, out = '', cl = -1, lastRow = -1;
+  while (p + 4 <= u8.length) {
+    const h = dv.getUint32(p, true); p += 4; const tag = h & 0x3ff, lvl = (h >>> 10) & 0x3ff; let size = (h >>> 20) & 0xfff; if (size === 0xfff) { size = dv.getUint32(p, true); p += 4; }
+    if (tag === 66 && cl >= 0 && lvl < cl) { cl = -1; lastRow = -1; out = out.replace(/ $/, '') + '\n'; }
+    if (tag === 72 && size >= 10) { const row = dv.getUint16(p + 8, true); if (cl >= 0) out = out.replace(/ $/, '') + (row !== lastRow ? '\n' : ' | '); cl = lvl; lastRow = row; }
+    else if (tag === 67) { let t = hwpPara(u8.subarray(p, p + size)); if (cl >= 0) t = t.replace(/\n+$/, '').replace(/\n/g, ' ') + ' '; out += t; }
+    p += size;
+  }
+  return out;
+}
 async function readHwp(buf) {
   await loadScript('https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js');
   const cfb = XLSX.CFB.read(new Uint8Array(buf), { type: 'array' }), fh = XLSX.CFB.find(cfb, '/FileHeader');

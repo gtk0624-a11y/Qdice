@@ -23,6 +23,7 @@ function archGroups(a) {
 function buildChunksCur() {
   const c = []; const add = (type, src, text, ref, priv) => c.push({ type, src, text, ref, priv });
   S.duties.forEach(d => add('duty', '업무 분장표 · ' + d.dept, `${d.dept} 업무: ${d.work} / 담당: ${d.who}`, '#/lib'));
+  (S.mine || []).forEach(m => add('duty', '내 업무 · ' + m.cat, `내 업무(${m.cat}): ${m.title}${m.memo ? ' / 메모: ' + m.memo : ''}${m.done ? ' (완료)' : ''}`, '#/'));
   S.contacts.forEach(d => add('contact', '교내 연락망 · ' + d.dept, `${d.dept} ${d.name} 내선 ${d.ext || '-'} 전화 ${d.phone || '-'}`, '#/lib'));
   S.notes.forEach(n => {
     const head = `회의·연수 노트 · ${n.date} ${n.title}`;
@@ -147,7 +148,9 @@ function direct(q) {
   }
   if (/(내|제|나의).*(업무|담당)|내가\s*맡/.test(q)) {
     const m = S.duties.filter(d => d.mine);
-    if (m.length) out.push({ src: '업무 분장표(내 업무)', text: m.map(d => `${d.dept}: ${d.work}`).join(' / '), ref: '#/lib' });
+    const mm = S.mine || [];
+    if (mm.length) out.push({ src: '내 업무', text: mm.map(x => `${x.cat}: ${x.title}${x.done ? '(완료)' : ''}`).join(' / '), ref: '#/' });
+    else if (m.length) out.push({ src: '업무 분장표(내 업무)', text: m.map(d => `${d.dept}: ${d.work}`).join(' / '), ref: '#/lib' });
   }
   return out;
 }

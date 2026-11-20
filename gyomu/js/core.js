@@ -48,7 +48,7 @@ const KEY = 'travailfatal.v1';
 const DEF = () => ({
   v: 1, updatedAt: 0, setup: false,
   profile: { name: '', school: '', subject: '', classes: ['1-1', '1-2', '1-3', '2-1', '2-2', '2-3'], start: '09:00', classMin: 45, breakMin: 10, devTarget: 30 },
-  timetable: {}, items: [], lessons: [], assess: [], budget: [], training: [], notes: [], docs: {}, stk: {}, duties: [], contacts: [], links: [], pages: [], hide: {}
+  timetable: {}, items: [], lessons: [], assess: [], budget: [], training: [], notes: [], docs: {}, stk: {}, duties: [], mine: [], contacts: [], links: [], pages: [], hide: {}
 });
 let S;
 try { S = Object.assign(DEF(), JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (e) { S = DEF(); }
