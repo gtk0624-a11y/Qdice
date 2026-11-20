@@ -135,7 +135,7 @@ form#ask button.clr:hover{background:var(--yel2);border-color:var(--yel)}
 .sw input:checked+i:after{left:21px}
 h3{font-size:14.5px;margin:18px 0 6px;color:var(--navy)}
 h3:first-child{margin-top:0}
-.ai{background:#eef6ff;border:1px solid #b9d4f5;border-radius:10px;padding:8px 10px;margin-bottom:8px;font-size:14px}.ai .ait{margin:4px 0;line-height:1.6;font-size:15px}.aiw{font-size:12px;color:var(--sub);font-weight:400}
+.ai{background:#eef6ff;border:1px solid #b9d4f5;border-radius:10px;padding:8px 10px;margin-bottom:8px;font-size:14px}.ai .ait{margin:4px 0;line-height:1.7;font-size:15px;white-space:pre-line}.aiw{font-size:12px;color:var(--sub);font-weight:400}
 .hint{font-size:12.5px;color:var(--sub);margin:4px 0}
 textarea{width:100%;min-height:150px;border:1.5px solid var(--line);border-radius:10px;padding:8px 10px;font:inherit;font-size:13.5px;line-height:1.6;resize:vertical}
 ol.steps{margin:6px 0 0;padding-left:1.3em;font-size:13.5px}
@@ -918,11 +918,11 @@ function aiState(){ const e=$('aiState'); if(e) e.textContent= aiKey()? '✅ 키
 async function aiAsk(q,hits,id){
   const key=aiKey(); if(!key) return;
   const box=document.querySelector('[data-ai="'+id+'"]'); if(!box) return;
-  const top=hits.slice(0,6);
+  const top=hits.slice(0,8);
   const ctx=top.map((h,i)=>'['+(i+1)+'] 「'+h.e.doc.name+'」 '+h.e.c.pg+'\n'+String(h.e.c.x||'').replace(/\s+/g,' ').slice(0,900)).join('\n\n');
   try{
     const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'content-type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-      body:JSON.stringify({model:'claude-haiku-5-5',max_tokens:600,system:'당신은 학교 교사의 규정 안내 비서입니다. 아래 [자료] 안의 내용만 근거로 질문에 존댓말로 2~4문장 이내로 답하세요. 근거는 [1]처럼 번호로 표시하세요. 자료에 답이 없으면 "찾은 자료에는 답이 없습니다"라고 말하세요. 추측하지 마세요.',messages:[{role:'user',content:'[질문]\n'+q+'\n\n[자료]\n'+ctx}]})});
+      body:JSON.stringify({model:'claude-haiku-5-5',max_tokens:800,system:'당신은 학교 교사의 규정 안내 비서입니다. 아래 [자료](선생님이 올린 학교 내규·규정) 안의 내용만 근거로 답하세요. 존댓말로 쓰고, 근거는 [1]처럼 번호로 표시하세요. 형식: ①첫 줄에 결론 한 문장. ②처리해야 하는 일이면 "해야 할 일"을 1. 2. 3. 단계로(해당 없으면 생략). ③기한·제출 서류·담당 부서가 자료에 있으면 한 줄씩. 전체 8줄 이내. 자료에 답이 없으면 "찾은 자료에는 답이 없습니다"라고만 하고 어떤 낱말로 다시 물어보면 좋을지 한 줄 제안하세요. 자료에 없는 내용을 지어내거나 추측하지 마세요.',messages:[{role:'user',content:'[질문]\n'+q+'\n\n[자료]\n'+ctx}]})});
     if(!r.ok) throw new Error(r.status===401?'키가 올바르지 않습니다':r.status===400||r.status===402?'잔액(크레딧)이 부족할 수 있습니다':'응답 오류 '+r.status);
     const j=await r.json(); const t=(j.content||[]).map(x=>x.text||'').join('').trim();
     const refs=top.map((h,i)=>'['+(i+1)+'] '+esc(h.e.doc.name)+' '+esc(h.e.c.pg)).join(' · ');
