@@ -237,13 +237,13 @@ function themeApply() {
   const m = document.querySelector('meta[name=theme-color]'); if (m) m.content = d1;
 }
 const titleOf = () => (S.profile.title || '업무파탈').trim();
-const wmUrl = () => { const t = (S.profile.wmText || (titleOf() + ' · ' + (S.profile.name || S.profile.school || ''))).replace(/[<>&]/g, ''); return 'url("data:image/svg+xml;utf8,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="340" height="220"><text x="170" y="115" text-anchor="middle" transform="rotate(-24 170 110)" font-family="Noto Serif KR,serif" font-size="22" font-weight="700" fill="${(THEMES.find(x => x[0] === (S.profile.theme || 'classic')) || THEMES[0])[11] ? '#ffffff' : '#1B1613'}" fill-opacity="0.045">${t}</text></svg>`) + '")'; };
+const wmUrl = () => { const t = (titleOf() + ' · ' + (S.profile.name || S.profile.school || '')).replace(/[<>&]/g, ''); return 'url("data:image/svg+xml;utf8,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="340" height="220"><text x="170" y="115" text-anchor="middle" transform="rotate(-24 170 110)" font-family="Noto Serif KR,serif" font-size="22" font-weight="700" fill="${(THEMES.find(x => x[0] === (S.profile.theme || 'classic')) || THEMES[0])[11] ? '#ffffff' : '#1B1613'}" fill-opacity="0.045">${t}</text></svg>`) + '")'; };
 function applyBrand() {
   themeApply();
   document.title = titleOf() + ' · ' + (S.profile.sub || 'Travail Fatal');
   let w = document.getElementById('wm');
   if (!w) { w = document.createElement('div'); w.id = 'wm'; w.setAttribute('aria-hidden', 'true'); document.body.appendChild(w); }
-  w.style.backgroundImage = S.profile.wm === false ? 'none' : wmUrl();
+  w.style.backgroundImage = wmUrl(); /* 워터마크는 작품 표시 — 끄거나 고칠 수 없음 */
 }
 const saveLib = () => idb.set('lib', LIB);
 const saveArch = () => idb.set('arch', ARCH);
