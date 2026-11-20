@@ -3,7 +3,7 @@ const PMEMO = [['today', '오늘'], ['cal', '캘린더'], ['class', '수업·평
 function pageMemo(page) {
   const hit = PMEMO.find(x => x[0] === page); if (!hit) return '';
   const v = (S.pmemo || {})[page] || '';
-  return `<details class="pmemo" ${v ? 'open' : ''}><summary>📝 ${esc(hit[1])} 메모 <small>${v ? v.length + '자' : '이 페이지에서 잊지 말 것을 적어 두세요'}</small></summary><textarea data-pmemo="${page}" rows="4" placeholder="${esc(hit[1])} 페이지 메모 (쓰면 바로 저장됩니다)">${esc(v)}</textarea></details>`;
+  return `<details class="pmemo" ${v ? 'open' : ''}><summary>📝 ${esc(hit[1])} 메모 <small>${v ? v.length + '자' : '이 페이지에서 잊지 말 것을 적어 두세요'}</small></summary><textarea data-pmemo="${page}" rows="4" placeholder="${esc(hit[1])} 페이지 메모 (쓰면 바로 저장됩니다)">${esc(v)}</textarea><button class="btn sm" data-act="memoPick">🎨 메모 디자인</button></details>`;
 }
 let _pmt;
 document.addEventListener('input', e => {
@@ -41,7 +41,7 @@ document.addEventListener('change', e => {
 /* 캘린더 날짜별 메모 */
 function dayMemoBox(ds) {
   const v = (S.dayMemo || {})[ds] || '';
-  return `<div class="dmemo"><label>📝 ${md(ds)} 메모<textarea data-dmemo="${ds}" rows="3" placeholder="이 날 기억할 것·준비물·회의 내용 (쓰면 바로 저장됩니다)">${esc(v)}</textarea></label></div>`;
+  return `<div class="dmemo"><label>📝 ${md(ds)} 메모<textarea data-dmemo="${ds}" rows="3" placeholder="이 날 기억할 것·준비물·회의 내용 (쓰면 바로 저장됩니다)">${esc(v)}</textarea><button class="btn sm" data-act="memoPick">🎨 메모 디자인</button></label></div>`;
 }
 let _dmt;
 document.addEventListener('input', e => {

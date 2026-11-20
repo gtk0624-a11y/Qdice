@@ -9,31 +9,7 @@
   "theme_color": "#F2EBDD",
   "lang": "ko",
   "icons": [
-    {
-      "src": "icons/icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "icons/icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
-    }
-  ],
-  "shortcuts": [
-    {
-      "name": "위젯 열기",
-      "short_name": "위젯",
-      "description": "디데이·기한 임박·오늘 할 일",
-      "url": "./widget.html",
-      "icons": [
-        {
-          "src": "icons/icon-192.png",
-          "sizes": "192x192"
-        }
-      ]
-    }
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
   ]
 }

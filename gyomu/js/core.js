@@ -219,7 +219,7 @@ function frameThumb(a) {
   return `<svg viewBox="0 0 120 80" width="100%">${s}</svg>`;
 }
 function themeApply() {
-  const id = (S && S.profile && S.profile.theme) || 'classic', t = THEMES.find(x => x[0] === id) || THEMES[0], r = document.documentElement.style, dark = !!t[11];
+  const id = (S && S.profile && S.profile.theme) || 'mint', t = THEMES.find(x => x[0] === id) || THEMES[0], r = document.documentElement.style, dark = !!t[11];
   const [, , , d1, d2, paper, ink, acc, line, tabs, font] = t, F = FONTS[font];
   const set = (k, v) => r.setProperty(k, v);
   set('--desk', d1); set('--desk2', d2); set('--paper2', paper); set('--paper', paper); set('--ink', ink); set('--red', acc); set('--cover', acc);
@@ -230,8 +230,9 @@ function themeApply() {
   set('--hf', F[0]); set('--hw', F[1]); set('--hs', F[2]); set('--note', dark ? '#E9D98A' : `color-mix(in srgb,#FFF3A0 70%,${paper})`);
   for (let i = 1; i <= 8; i++) set('--t' + i, tabs === 'rb' ? `color-mix(in srgb,${RB[i - 1]} 62%,${paper})` : `color-mix(in srgb,${acc} ${dark ? 55 - i * 3 : 10 + i * 5}%,${paper})`);
   const bf = FONTS50.find(x => x[0] === S.profile.bfont), hf = FONTS50.find(x => x[0] === S.profile.hfont);
-  if (bf) { loadFont(bf); set('--sans', fontCss(bf)); set('--serif', fontCss(bf)); } else { r.removeProperty('--sans'); r.removeProperty('--serif'); }
-  if (hf) { loadFont(hf); set('--hf', fontCss(hf)); set('--hw', '400'); set('--hs', '.8'); }
+  const SYS = "system-ui,-apple-system,'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif";
+  if (bf) { loadFont(bf); set('--sans', fontCss(bf)); set('--serif', fontCss(bf)); } else { set('--sans', SYS); set('--serif', SYS); }
+  if (hf) { loadFont(hf); set('--hf', fontCss(hf)); set('--hw', '400'); set('--hs', '.8'); } else { set('--hf', SYS); set('--hw', '800'); set('--hs', '1'); }
   frameApply();
   const m = document.querySelector('meta[name=theme-color]'); if (m) m.content = d1;
 }
