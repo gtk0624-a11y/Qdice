@@ -1,7 +1,7 @@
 /* 도디쌤 서랍 - 서비스워커
    네트워크를 먼저 시도하고(항상 최신 목록), 인터넷이 안 될 때만 저장된 복사본을 보여줍니다. */
-const CACHE = "dosam-drawer-v1";
-const SHELL = ["./", "./index.html", "./apps.json", "./manifest.json", "./icon-32.png", "./icon-192.png", "./icon-512.png"];
+const CACHE = "dosam-drawer-v2";
+const SHELL = ["./", "./index.html", "./manifest.json", "./icon-32.png", "./icon-192.png", "./icon-512.png"];
 
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL).catch(() => {})).then(() => self.skipWaiting()));
@@ -23,12 +23,12 @@ self.addEventListener("fetch", e => {
     fetch(req).then(res => {
       if(res && res.ok){
         const copy = res.clone();
-        const key = url.pathname.endsWith("apps.json") ? "./apps.json" : req;   // 주소 뒤 ?t= 값 무시
+        const key = req;
         caches.open(CACHE).then(c => c.put(key, copy)).catch(() => {});
       }
       return res;
     }).catch(() => {
-      const key = url.pathname.endsWith("apps.json") ? "./apps.json" : req;
+      const key = req;
       return caches.match(key).then(r => r || caches.match("./index.html"));
     })
   );

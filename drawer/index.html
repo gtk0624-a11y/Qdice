@@ -75,7 +75,6 @@ input[type=text],input[type=url],select{width:100%;border:1px solid var(--line);
   <header>
     <div class="top">
       <h1>🗄️ 도디쌤 서랍</h1>
-      <span class="modebadge" id="modeBadge"></span>
       <button class="iconbtn" id="btnSet" title="설정" aria-label="설정">⚙️</button>
     </div>
     <div class="search">
@@ -90,9 +89,9 @@ input[type=text],input[type=url],select{width:100%;border:1px solid var(--line);
 <div class="wm">© 김정환 · M.A.D.T (Moral And Digital Teacher)</div>
 <div id="toast"></div>
 
-<!-- 추가 창 -->
+<!-- 추가·수정 창 -->
 <dialog id="dlgAdd">
-  <h2>＋ 사이트 추가</h2>
+  <h2 id="addTitle">＋ 사이트 추가</h2>
   <label for="fUrl">주소(링크) *</label>
   <input id="fUrl" type="text" placeholder="https://..." autocomplete="off">
   <label for="fName">이름 (비우면 사이트 주소로 표시)</label>
@@ -101,24 +100,21 @@ input[type=text],input[type=url],select{width:100%;border:1px solid var(--line);
   <input id="fIcon" type="text" placeholder="예: 📝" maxlength="4" autocomplete="off">
   <label for="fCat">분류</label>
   <select id="fCat"></select>
-  <div class="hint">※ 여기서 추가한 것은 이 컴퓨터(이 브라우저)에만 저장됩니다. 선생님들과 같이 쓰려면 apps.json에 추가하세요.</div>
   <div class="btns"><button class="no" id="addCancel" type="button">취소</button><button class="ok" id="addOk" type="button">추가</button></div>
 </dialog>
 
 <!-- 설정 창 -->
 <dialog id="dlgSet">
   <h2>⚙️ 설정</h2>
-  <label>보기 모드</label>
-  <div class="seg">
-    <label><input type="radio" name="mode" value="teacher"><span>👩‍🏫 교사용</span></label>
-    <label><input type="radio" name="mode" value="student"><span>🧑‍🎓 학생용</span></label>
-  </div>
-  <div class="hint">학생용: 학생·공통으로 지정된 항목만 보입니다.</div>
   <label class="opt"><input type="checkbox" id="optClose"> 사이트를 연 뒤 서랍 창 자동으로 닫기</label>
-  <div class="btns">
-    <button class="no" id="btnReload" type="button">목록 새로고침</button>
-    <button class="ok" id="setOk" type="button">확인</button>
+  <label>백업 (다른 컴퓨터로 옮기거나, 만일을 대비할 때)</label>
+  <div class="btns" style="margin-top:4px">
+    <button class="no" id="btnExport" type="button">📤 백업 저장</button>
+    <button class="no" id="btnImport" type="button">📥 백업 불러오기</button>
   </div>
+  <input type="file" id="fileImport" accept="application/json,.json" style="display:none">
+  <div class="hint">내 사이트 목록은 이 컴퓨터(이 브라우저)에만 저장됩니다. 다른 사람이 같은 주소로 열어도 내 목록은 보이지 않습니다.</div>
+  <div class="btns"><button class="ok" id="setOk" type="button">확인</button></div>
 </dialog>
 
 <script>
@@ -126,32 +122,29 @@ input[type=text],input[type=url],select{width:100%;border:1px solid var(--line);
 /* ====== 기본 설정 ====== */
 const CATS = ["수업","업무","개인","기타"];
 const CAT_COLOR = {"수업":"#2563eb","업무":"#059669","개인":"#ea580c","기타":"#6b7280"};
-const LS = {fav:"drawer.fav", recent:"drawer.recent", mine:"drawer.mine", mode:"drawer.mode", closeAfter:"drawer.closeAfter", sized:"drawer.sized"};
-const NEW_DAYS = 14;      // 추가일로부터 며칠 동안 NEW 표시
+const LS = {fav:"drawer.fav", recent:"drawer.recent", mine:"drawer.mine", closeAfter:"drawer.closeAfter", sized:"drawer.sized"};
 const RECENT_MAX = 3;     // 최근 사용 표시 개수
+const MAX_ITEMS = 500;    // 가져오기 때 최대 개수 (안전장치)
 
 /* ====== 저장소 도우미 (실패해도 앱이 멈추지 않게) ====== */
 function load(k, d){ try{ const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; }catch(e){ return d; } }
-function save(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+function save(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){ toast("⚠ 저장하지 못했습니다. 브라우저 저장 공간을 확인해 주세요."); } }
 
 /* ====== 상태 ====== */
-let shared = [];                         // apps.json 항목
-let mine = load(LS.mine, []);            // 이 컴퓨터에서 추가한 항목
+let mine = load(LS.mine, []);                 // 내가 넣은 사이트 (이 컴퓨터에만 저장)
+if(!Array.isArray(mine)) mine = [];
 let fav = new Set(load(LS.fav, []));
 let recent = load(LS.recent, []);
-let mode = load(LS.mode, "teacher");
+if(!Array.isArray(recent)) recent = [];
 let closeAfter = load(LS.closeAfter, false);
 let tab = "전체";
 let q = "";
-let loadError = "";
-
-const urlMode = new URLSearchParams(location.search).get("mode");
-if(urlMode === "student" || urlMode === "teacher"){ mode = urlMode; save(LS.mode, mode); }
+let editIdx = -1;                             // -1 이면 '추가', 0 이상이면 '수정'
 
 /* ====== 유틸 ====== */
 const $ = id => document.getElementById(id);
 function el(tag, cls, text){ const e = document.createElement(tag); if(cls) e.className = cls; if(text != null) e.textContent = text; return e; }
-function toast(msg){ const t = $("toast"); t.textContent = msg; t.classList.add("show"); clearTimeout(toast._t); toast._t = setTimeout(()=>t.classList.remove("show"), 2200); }
+function toast(msg){ const t = $("toast"); t.textContent = msg; t.classList.add("show"); clearTimeout(toast._t); toast._t = setTimeout(()=>t.classList.remove("show"), 2400); }
 function safeUrl(u){
   u = String(u||"").trim();
   if(!u) return "";
@@ -159,32 +152,19 @@ function safeUrl(u){
   try{ const p = new URL(u); return (p.protocol === "http:" || p.protocol === "https:") ? p.href : ""; }catch(e){ return ""; }
 }
 function hostOf(u){ try{ return new URL(u).hostname.replace(/^www\./,""); }catch(e){ return u; } }
-function normalize(o, isMine){
+function normalize(o, idx){
   const url = safeUrl(o["주소"]);
   const name = String(o["이름"] || (url ? hostOf(url) : "이름없음")).trim();
-  const cat = CATS.includes(o["분류"]) ? o["분류"] : "기타";
-  const target = ["교사","학생","공통"].includes(o["대상"]) ? o["대상"] : "교사";
   return {
-    id: (isMine ? "m:" : "s:") + (url || name),
-    name, url, cat, target, mine: !!isMine,
-    icon: String(o["아이콘"] || "").trim(),
-    desc: String(o["설명"] || "").trim(),
-    added: String(o["추가일"] || "").trim()
+    id: "m:" + url, idx, url, name,
+    cat: CATS.includes(o["분류"]) ? o["분류"] : "기타",
+    icon: String(o["아이콘"] || "").trim()
   };
 }
-function isNew(it){
-  if(!it.added) return false;
-  const t = Date.parse(it.added);
-  return !isNaN(t) && (Date.now() - t) < NEW_DAYS * 86400000 && Date.now() >= t - 86400000;
-}
-function allItems(){
-  const a = shared.map(o => normalize(o, false)).concat(mine.map(o => normalize(o, true)));
-  return mode === "student" ? a.filter(it => it.target === "학생" || it.target === "공통") : a;
-}
+function allItems(){ return mine.map((o, i) => normalize(o, i)).filter(it => it.url); }
 
-/* ====== 열기 ====== */
+/* ====== 동작 ====== */
 function openItem(it){
-  if(!it.url){ toast("⚠ 주소가 비어 있습니다. apps.json에 주소를 넣어 주세요."); return; }
   recent = [it.id].concat(recent.filter(x => x !== it.id)).slice(0, RECENT_MAX);
   save(LS.recent, recent);
   window.open(it.url, "_blank", "noopener");
@@ -198,44 +178,55 @@ function toggleFav(it){
   save(LS.fav, Array.from(fav));
   render();
 }
-function removeMine(it){
-  if(!confirm("'" + it.name + "' 을(를) 내 목록에서 삭제할까요?")) return;
-  mine = mine.filter(o => ("m:" + (safeUrl(o["주소"]) || o["이름"])) !== it.id);
-  save(LS.mine, mine);
-  fav.delete(it.id); save(LS.fav, Array.from(fav));
-  render();
+function removeItem(it){
+  if(!confirm("'" + it.name + "' 을(를) 서랍에서 뺄까요?")) return;
+  mine.splice(it.idx, 1);
+  fav.delete(it.id);
+  recent = recent.filter(x => x !== it.id);
+  save(LS.mine, mine); save(LS.fav, Array.from(fav)); save(LS.recent, recent);
+  render(); toast("뺐습니다.");
+}
+function openForm(it){
+  editIdx = it ? it.idx : -1;
+  $("addTitle").textContent = it ? "✎ 사이트 수정" : "＋ 사이트 추가";
+  $("addOk").textContent = it ? "저장" : "추가";
+  $("fUrl").value = it ? it.url : "";
+  $("fName").value = it ? (mine[it.idx]["이름"] || "") : "";
+  $("fIcon").value = it ? it.icon : "";
+  $("fCat").value = it ? it.cat : "기타";
+  $("dlgAdd").showModal(); $("fUrl").focus();
 }
 
 /* ====== 화면 그리기 ====== */
 function makeRow(it){
-  const r = el("div", "row" + (it.url ? "" : " nourl"));
+  const r = el("div", "row");
   r.tabIndex = 0; r.setAttribute("role", "button");
-  r.title = it.url || "주소 없음";
+  r.title = it.url;
   const ic = el("div", "ic", it.icon || Array.from(it.name)[0] || "?");
   ic.style.background = CAT_COLOR[it.cat];
   const info = el("div", "info");
   info.appendChild(el("div", "name", it.name));
-  info.appendChild(el("div", "desc", it.url ? (it.desc || hostOf(it.url)) : "⚠ 주소 입력 필요 (apps.json)"));
+  info.appendChild(el("div", "desc", hostOf(it.url)));
   r.appendChild(ic); r.appendChild(info);
-  if(isNew(it)) r.appendChild(el("span", "tag", "NEW"));
-  if(it.target === "교사" && mode === "teacher") r.appendChild(el("span", "lock", "🔒"));
+
   const st = el("button", "star" + (fav.has(it.id) ? " on" : ""), fav.has(it.id) ? "★" : "☆");
-  st.type = "button"; st.setAttribute("aria-label", "즐겨찾기");
+  st.type = "button"; st.setAttribute("aria-label", "즐겨찾기"); st.title = "즐겨찾기";
   st.addEventListener("click", e => { e.stopPropagation(); toggleFav(it); });
-  r.appendChild(st);
-  if(it.mine){
-    const d = el("button", "del", "✕"); d.type = "button"; d.setAttribute("aria-label", "삭제");
-    d.addEventListener("click", e => { e.stopPropagation(); removeMine(it); });
-    r.appendChild(d);
-  }
+  const ed = el("button", "del", "✎");
+  ed.type = "button"; ed.setAttribute("aria-label", "수정"); ed.title = "수정";
+  ed.addEventListener("click", e => { e.stopPropagation(); openForm(it); });
+  const de = el("button", "del", "✕");
+  de.type = "button"; de.setAttribute("aria-label", "빼기"); de.title = "서랍에서 빼기";
+  de.addEventListener("click", e => { e.stopPropagation(); removeItem(it); });
+  r.appendChild(st); r.appendChild(ed); r.appendChild(de);
+
   r.addEventListener("click", () => openItem(it));
   r.addEventListener("keydown", e => { if(e.key === "Enter" || e.key === " "){ e.preventDefault(); openItem(it); } });
   return r;
 }
 function matches(it){
   if(!q) return true;
-  const s = (it.name + " " + it.desc + " " + it.url).toLowerCase();
-  return s.includes(q.toLowerCase());
+  return (it.name + " " + it.url).toLowerCase().includes(q.toLowerCase());
 }
 function renderTabs(items){
   const box = $("tabs"); box.textContent = "";
@@ -248,28 +239,28 @@ function renderTabs(items){
     box.appendChild(b);
   });
 }
+function emptyMsg(text){
+  const d = el("div", "empty", text); d.style.whiteSpace = "pre-line"; return d;
+}
 function render(){
-  $("modeBadge").textContent = mode === "student" ? "학생용" : "교사용";
   const items = allItems();
   if(tab !== "전체" && tab !== "즐겨찾기" && !items.some(i => i.cat === tab)) tab = "전체";
   renderTabs(items);
   const box = $("list"); box.textContent = "";
   $("qclear").style.display = q ? "block" : "none";
 
-  if(loadError){ box.appendChild(el("div", "empty", loadError)); }
-
+  if(!items.length){
+    box.appendChild(emptyMsg("🗄️ 서랍이 비어 있습니다.\n\n아래 ＋ 추가 버튼을 눌러\n자주 가는 사이트의 주소를 넣어 보세요."));
+    return;
+  }
   let pool = items.filter(matches);
   if(tab === "즐겨찾기") pool = pool.filter(i => fav.has(i.id));
   else if(tab !== "전체") pool = pool.filter(i => i.cat === tab);
 
-  if(!pool.length && !loadError){
-    box.appendChild(el("div", "empty",
-      tab === "즐겨찾기" ? "⭐ 즐겨찾기가 비어 있습니다.\n항목 오른쪽의 ☆ 를 눌러 보세요." :
-      q ? "검색 결과가 없습니다." : "표시할 항목이 없습니다."));
-    box.lastChild.style.whiteSpace = "pre-line";
+  if(!pool.length){
+    box.appendChild(emptyMsg(tab === "즐겨찾기" && !q ? "⭐ 즐겨찾기가 비어 있습니다.\n항목 오른쪽의 ☆ 를 눌러 보세요." : "검색 결과가 없습니다."));
     return;
   }
-
   if(tab === "전체" && !q){
     const fv = pool.filter(i => fav.has(i.id));
     if(fv.length){ box.appendChild(el("div", "sec", "⭐ 즐겨찾기")); fv.forEach(i => box.appendChild(makeRow(i))); }
@@ -287,28 +278,10 @@ function render(){
   }
 }
 
-/* ====== 목록 불러오기 ====== */
-async function loadShared(showMsg){
-  try{
-    const res = await fetch("apps.json?t=" + Date.now(), {cache:"no-store"});
-    if(!res.ok) throw new Error("HTTP " + res.status);
-    const data = await res.json();
-    if(!Array.isArray(data)) throw new Error("목록 형식 오류");
-    shared = data; loadError = "";
-    if(showMsg) toast("목록을 새로 불러왔습니다.");
-  }catch(e){
-    loadError = "⚠ 공용 목록(apps.json)을 불러오지 못했습니다.\n파일로 직접 열지 말고 깃허브 페이지 주소로 열어 주세요.\n(아래는 이 컴퓨터에 추가한 항목만 표시됩니다.)";
-  }
-  render();
-}
-
-/* ====== 이벤트 ====== */
+/* ====== 검색 ====== */
 $("q").addEventListener("input", e => { q = e.target.value; render(); });
 $("q").addEventListener("keydown", e => {
-  if(e.key === "Enter"){
-    const first = $("list").querySelector(".row:not(.nourl)");
-    if(first) first.click();
-  }
+  if(e.key === "Enter"){ const first = $("list").querySelector(".row"); if(first) first.click(); }
   if(e.key === "Escape"){ q = ""; e.target.value = ""; render(); }
 });
 $("qclear").addEventListener("click", () => { q = ""; $("q").value = ""; render(); $("q").focus(); });
@@ -316,40 +289,78 @@ document.addEventListener("keydown", e => {
   if(e.key === "/" && document.activeElement !== $("q") && !document.querySelector("dialog[open]")){ e.preventDefault(); $("q").focus(); }
 });
 
-/* 추가 */
+/* ====== 추가 · 수정 ====== */
 CATS.forEach(c => { const o = el("option", "", c); o.value = c; $("fCat").appendChild(o); });
-$("btnAdd").addEventListener("click", () => {
-  $("fUrl").value = ""; $("fName").value = ""; $("fIcon").value = ""; $("fCat").value = "기타";
-  $("dlgAdd").showModal(); $("fUrl").focus();
-});
+$("btnAdd").addEventListener("click", () => openForm(null));
 $("addCancel").addEventListener("click", () => $("dlgAdd").close());
 $("addOk").addEventListener("click", () => {
   const url = safeUrl($("fUrl").value);
   if(!url){ toast("올바른 주소를 입력해 주세요. (예: https://example.com)"); return; }
-  const id = "m:" + url;
-  if(allItems().some(i => i.id === id) || mine.some(o => safeUrl(o["주소"]) === url)){ toast("이미 추가된 주소입니다."); return; }
-  mine.push({"이름": $("fName").value.trim(), "주소": url, "분류": $("fCat").value, "아이콘": $("fIcon").value.trim(), "대상": "교사", "추가일": new Date().toISOString().slice(0,10)});
+  if(mine.some((o, i) => i !== editIdx && safeUrl(o["주소"]) === url)){ toast("이미 들어 있는 주소입니다."); return; }
+  const obj = {"이름": $("fName").value.trim(), "주소": url, "분류": $("fCat").value, "아이콘": $("fIcon").value.trim()};
+  if(editIdx >= 0){
+    const oldId = "m:" + safeUrl(mine[editIdx]["주소"]);
+    mine[editIdx] = obj;
+    if(oldId !== "m:" + url){
+      if(fav.has(oldId)){ fav.delete(oldId); fav.add("m:" + url); }
+      recent = recent.map(x => x === oldId ? "m:" + url : x);
+      save(LS.fav, Array.from(fav)); save(LS.recent, recent);
+    }
+  }else{
+    mine.push(obj);
+  }
   save(LS.mine, mine);
-  $("dlgAdd").close(); tab = "전체"; render(); toast("추가했습니다.");
+  $("dlgAdd").close(); tab = "전체"; render();
+  toast(editIdx >= 0 ? "저장했습니다." : "넣었습니다.");
 });
 
-/* 설정 */
-$("btnSet").addEventListener("click", () => {
-  document.querySelectorAll('input[name="mode"]').forEach(r => r.checked = (r.value === mode));
-  $("optClose").checked = !!closeAfter;
-  $("dlgSet").showModal();
-});
+/* ====== 설정 · 백업 ====== */
+$("btnSet").addEventListener("click", () => { $("optClose").checked = !!closeAfter; $("dlgSet").showModal(); });
 $("setOk").addEventListener("click", () => {
-  const m = document.querySelector('input[name="mode"]:checked');
-  mode = m ? m.value : "teacher"; closeAfter = $("optClose").checked;
-  save(LS.mode, mode); save(LS.closeAfter, closeAfter);
-  $("dlgSet").close(); tab = "전체"; render();
+  closeAfter = $("optClose").checked; save(LS.closeAfter, closeAfter);
+  $("dlgSet").close();
 });
-$("btnReload").addEventListener("click", () => { $("dlgSet").close(); loadShared(true); });
+$("btnExport").addEventListener("click", () => {
+  const data = {app: "도디쌤서랍", version: 1, mine: mine, fav: Array.from(fav)};
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type: "application/json"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = "도디쌤서랍-백업.json";
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  toast("백업 파일을 저장했습니다.");
+});
+$("btnImport").addEventListener("click", () => $("fileImport").click());
+$("fileImport").addEventListener("change", e => {
+  const f = e.target.files && e.target.files[0];
+  e.target.value = "";
+  if(!f) return;
+  const rd = new FileReader();
+  rd.onload = () => {
+    try{
+      const data = JSON.parse(String(rd.result));
+      if(!data || !Array.isArray(data.mine)) throw new Error("형식 오류");
+      let added = 0;
+      data.mine.slice(0, MAX_ITEMS).forEach(o => {
+        if(!o || typeof o !== "object") return;
+        const url = safeUrl(o["주소"]);
+        if(!url || mine.some(x => safeUrl(x["주소"]) === url)) return;
+        mine.push({"이름": String(o["이름"] || "").trim().slice(0, 60), "주소": url, "분류": CATS.includes(o["분류"]) ? o["분류"] : "기타", "아이콘": String(o["아이콘"] || "").trim().slice(0, 4)});
+        added++;
+      });
+      if(Array.isArray(data.fav)) data.fav.forEach(x => { if(typeof x === "string" && x.startsWith("m:")) fav.add(x); });
+      save(LS.mine, mine); save(LS.fav, Array.from(fav));
+      $("dlgSet").close(); tab = "전체"; render();
+      toast("백업에서 " + added + "개를 불러왔습니다.");
+    }catch(err){
+      toast("⚠ 백업 파일을 읽을 수 없습니다. 서랍에서 저장한 백업 파일인지 확인해 주세요.");
+    }
+  };
+  rd.readAsText(f);
+});
 
 /* ====== 시작 ====== */
 render();
-loadShared(false);
+try{ if(navigator.storage && navigator.storage.persist) navigator.storage.persist(); }catch(e){}   // 브라우저가 내 목록을 함부로 지우지 않도록 요청
 
 /* 설치형 앱으로 처음 열렸을 때 작은 창으로 한 번만 줄이기 (지원 안 하면 조용히 무시) */
 try{
