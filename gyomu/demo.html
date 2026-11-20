@@ -602,6 +602,39 @@ html[data-skin="planner"] nav.nav{border:0!important;border-bottom:0!important}h
 .ckb{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:6px 10px;background:#fff8e6;border-top:1px solid #f0dca8;font-size:12px}.ckb.on{background:#eef8f0;border-color:#cfe8d5}.ckb span{flex:1 1 100%}.ckb.on span{flex:1}.ckb input{flex:1;min-width:0;padding:6px 8px;border:1px solid var(--line,#ddd);border-radius:8px}
 @media(max-width:560px){#chatbox:has(#chatpan:not([hidden])) #chatfab{display:none}}
 #demostrip{position:sticky;top:0;z-index:70;background:#d9534f;color:#fff;font-size:13px;text-align:center;padding:6px 10px;line-height:1.5}#demostrip a{color:#fff;font-weight:800;margin-left:8px;text-decoration:underline}@media print{#demostrip{display:none}}
+
+/* ===== 소개 페이지 디자인을 기본 화면으로: 크림색 줄노트 + 굵은 선·딱지 그림자 + 파스텔 카드 (플래너 기본 스킨 덮어쓰기) ===== */
+html[data-skin="planner"]{--ink2:#2b2a33;--pk:#ffd9e0;--sk:#d6e8ff;--lm:#fff2b8;--lv:#e6dcff;--mt:#cfeee3;--mt2:#9bd8c2}
+html[data-skin="planner"] body{background:#fffdf6 linear-gradient(#e6e0cf 1px,transparent 1px) 0 0/100% 34px fixed!important;color:var(--ink2);word-break:keep-all;line-height:1.7}
+html[data-skin="planner"] #app{background:transparent!important;box-shadow:none!important;border-radius:0!important;max-width:1100px}
+html[data-skin="planner"] h1,html[data-skin="planner"] h2,html[data-skin="planner"] .mast1 h1,html[data-skin="planner"] .bh h2{font-weight:900!important;letter-spacing:-.03em}
+html[data-skin="planner"] .h3,html[data-skin="planner"] h3.h3{font-weight:900!important;letter-spacing:-.02em}
+html[data-skin="planner"] .h3::before{width:14px;height:14px;background:var(--mt2);border:2px solid var(--ink2)}
+html[data-skin="planner"] .mast2,html[data-skin="planner"] .mast2 .dt{background:var(--lm)!important;border:2px solid var(--ink2)!important;border-radius:12px!important;box-shadow:3px 3px 0 var(--ink2)!important;transform:rotate(-.6deg)}
+html[data-skin="planner"] .nav a{background:#fff!important;border:2px solid var(--ink2)!important;box-shadow:2px 2px 0 var(--ink2);font-weight:800!important;color:var(--ink2)!important}
+html[data-skin="planner"] .nav a[aria-current]{background:var(--mt2)!important;color:var(--ink2)!important}
+html[data-skin="planner"] .nav .nvx{background:#ffb4ab!important;color:var(--ink2)!important}
+html[data-skin="planner"] .row,html[data-skin="planner"] .mcal,html[data-skin="planner"] .sbanner,html[data-skin="planner"] .dw,html[data-skin="planner"] .pmemo,html[data-skin="planner"] .soon,html[data-skin="planner"] .drawer,html[data-skin="planner"] .qk,html[data-skin="planner"] .agc,html[data-skin="planner"] .docdlg{border:2px solid var(--ink2)!important;border-radius:18px!important;box-shadow:4px 4px 0 rgba(43,42,51,.92)!important}
+html[data-skin="planner"] .row{background:#fff!important}
+html[data-skin="planner"] .row:nth-of-type(4n+1){background:var(--mt)!important}
+html[data-skin="planner"] .row:nth-of-type(4n+2){background:var(--sk)!important}
+html[data-skin="planner"] .row:nth-of-type(4n+3){background:var(--lm)!important}
+html[data-skin="planner"] .row:nth-of-type(4n){background:var(--pk)!important}
+html[data-skin="planner"] .row[open]{outline:0;background:#fff!important}
+html[data-skin="planner"] .mcal,html[data-skin="planner"] .dw,html[data-skin="planner"] .soon{background:#fff!important}
+html[data-skin="planner"] .sbanner{background:var(--lv)!important}
+html[data-skin="planner"] .bh>.mu{background:var(--lm)!important;border:2px solid var(--ink2)!important;border-radius:12px!important}
+html[data-skin="planner"] .cat{background:var(--lv)!important;border:1.5px solid var(--ink2);font-weight:800}
+html[data-skin="planner"] .btn{background:#fff!important;border:2px solid var(--ink2)!important;border-radius:14px!important;box-shadow:3px 3px 0 var(--ink2);color:var(--ink2)!important;font-weight:800!important;transition:transform .12s,box-shadow .12s}
+html[data-skin="planner"] .btn:hover{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--ink2);filter:none}
+html[data-skin="planner"] .btn.pri{background:var(--mt2)!important;color:var(--ink2)!important}
+html[data-skin="planner"] input:not([type=checkbox]):not([type=radio]),html[data-skin="planner"] select,html[data-skin="planner"] textarea{border:2px solid var(--ink2)!important;border-radius:12px!important}
+html[data-skin="planner"] .tbl th{background:var(--lm)!important}
+html[data-skin="planner"] .tbl td,html[data-skin="planner"] .tbl th{border-color:var(--ink2)!important}
+html[data-skin="planner"] #wm{opacity:.22}
+html[data-skin="planner"] #chatpan{border:2px solid var(--ink2);box-shadow:6px 6px 0 var(--ink2)}
+@media(prefers-reduced-motion:reduce){html[data-skin="planner"] .btn{transition:none}}
+html[data-skin="planner"] .mast2 .dt{border:0!important;box-shadow:none!important;transform:none;background:transparent!important}
 </style>
 </head>
 <body>
@@ -848,7 +881,7 @@ function themeApply() {
   const bf = FONTS50.find(x => x[0] === S.profile.bfont), hf = FONTS50.find(x => x[0] === S.profile.hfont);
   const SYS = "system-ui,-apple-system,'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif";
   if (bf) { loadFont(bf); set('--sans', fontCss(bf)); set('--serif', fontCss(bf)); } else { set('--sans', SYS); set('--serif', SYS); }
-  if (hf) { loadFont(hf); set('--hf', fontCss(hf)); set('--hw', '400'); set('--hs', '.8'); } else { set('--hf', SYS); set('--hw', '800'); set('--hs', '1'); }
+  if (hf) { loadFont(hf); set('--hf', fontCss(hf)); set('--hw', '400'); set('--hs', '.8'); } else { set('--hf', SYS); set('--hw', '900'); set('--hs', '1'); }
   frameApply();
   const m = document.querySelector('meta[name=theme-color]'); if (m) m.content = d1;
 }

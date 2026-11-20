@@ -233,7 +233,7 @@ function themeApply() {
   const bf = FONTS50.find(x => x[0] === S.profile.bfont), hf = FONTS50.find(x => x[0] === S.profile.hfont);
   const SYS = "system-ui,-apple-system,'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif";
   if (bf) { loadFont(bf); set('--sans', fontCss(bf)); set('--serif', fontCss(bf)); } else { set('--sans', SYS); set('--serif', SYS); }
-  if (hf) { loadFont(hf); set('--hf', fontCss(hf)); set('--hw', '400'); set('--hs', '.8'); } else { set('--hf', SYS); set('--hw', '800'); set('--hs', '1'); }
+  if (hf) { loadFont(hf); set('--hf', fontCss(hf)); set('--hw', '400'); set('--hs', '.8'); } else { set('--hf', SYS); set('--hw', '900'); set('--hs', '1'); }
   frameApply();
   const m = document.querySelector('meta[name=theme-color]'); if (m) m.content = d1;
 }
