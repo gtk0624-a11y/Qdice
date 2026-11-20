@@ -62,6 +62,14 @@ function footer() {
 }
 
 /* ---------- 오늘 ---------- */
+function miniCal() {
+  const [Y, M] = UI.cal.split('-').map(Number), first = new Date(Y, M - 1, 1), n = new Date(Y, M, 0).getDate(), by = {};
+  allEvents().forEach(e => (by[e.date] = by[e.date] || []).push(e));
+  let cells = ''; for (let i = 0; i < first.getDay(); i++) cells += '<span class="mc e"></span>';
+  for (let d = 1; d <= n; d++) { const ds = `${Y}-${pad(M)}-${pad(d)}`, c = (by[ds] || []).length, w = new Date(Y, M - 1, d).getDay(); cells += `<button class="mc ${ds === today() ? 'tdy' : ''} ${ds === UI.day ? 'sel' : ''} ${w === 0 ? 'sun' : ''}" data-act="calDay" data-d="${ds}" aria-label="${M}월 ${d}일"><span>${d}</span>${c ? `<i>${'●'.repeat(Math.min(c, 3))}</i>` : ''}</button>`; }
+  const day = by[UI.day] || [];
+  return `<section class="mcal"><div class="calh"><button class="btn sm" data-act="calMove" data-d="-1" aria-label="이전 달">‹</button><b class="calt">${Y}년 ${M}월</b><button class="btn sm" data-act="calMove" data-d="1" aria-label="다음 달">›</button><button class="btn sm" data-act="calMove" data-d="0">오늘</button></div><div class="calw">${DOW.map(d => `<span>${d}</span>`).join('')}</div><div class="mgrid">${cells}</div><div class="mday"><b>${md(UI.day)} (${DOW[new Date(UI.day + 'T00:00:00').getDay()]})</b>${day.length ? day.map(e => `<p class="${e.done ? 'dn' : ''}">· ${esc(e.t)} <span class="mu">${e.kind || ''}</span></p>`).join('') : '<p class="mu">이 날 일정이 없습니다.</p>'}<a href="#/cal" class="btn sm">달력에서 일정 추가·학사일정 올리기</a></div></section>`;
+}
 function todayView() {
   const t = today(), P = periodInfo(), rows = [];
   /* 일과 */
@@ -146,8 +154,8 @@ function todayView() {
   });
   const up = upcoming(7);
   return `<div class="bh"><h2>오늘의 게시판</h2><span class="mu">줄을 누르면 펼쳐지고, 접어 두어도 현황이 보입니다.</span></div>
-  <div class="cols"><span>분류</span><span>제목</span><span>현황</span><span class="r">기한</span><span></span></div>${rows.join('')}
-  ${up.length ? `<p class="soon"><b>이번 주 기한</b> ${up.slice(0, 5).map(e => `${md(e.date)} ${esc(e.t)}`).join(' · ')}</p>` : ''}`;
+  <div class="spread"><div class="pgL">${miniCal()}${up.length ? `<p class="soon"><b>이번 주 기한</b><br>${up.slice(0, 6).map(e => `${md(e.date)} ${esc(e.t)}`).join('<br>')}</p>` : ''}</div>
+  <div class="pgR"><div class="cols"><span>분류</span><span>제목</span><span>현황</span><span class="r">기한</span><span></span></div>${rows.join('')}</div></div>`;
 }
 
 /* ---------- 캘린더 ---------- */
