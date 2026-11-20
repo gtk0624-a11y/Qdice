@@ -450,6 +450,9 @@ function scheduleDialog(text) {
 /* ---------- 꿈송이 챗봇 ---------- */
 const CH = [{ role: 'bot', blocks: [], text: '안녕하세요, 꿈송이입니다. 올려 두신 계획서·예산·회의록·업무 분장·연락망·규정 안에서 찾아 드립니다. 말이 대충이어도 괜찮아요.' }];
 let chatOpen = false, busy = false;
+function openChat() { if (chatOpen) return; chatOpen = true; try { history.pushState({ tfChat: 1 }, '', location.href); } catch (e) { } renderChat(); setTimeout(() => { const q = $('#chq'); q && q.focus(); }, 50); }
+function closeChat(viaLink) { if (!chatOpen) return; chatOpen = false; renderChat(); if (!viaLink && history.state && history.state.tfChat) history.back(); }
+window.addEventListener('popstate', e => { if (chatOpen) { chatOpen = false; renderChat(); } else if (e.state && e.state.tfChat) history.back(); });
 function renderChatFab() {
   const b = $('#chatfab'); b.innerHTML = `<img src="${mas()}" alt="꿈송이">`;
   if (!$('#chatbub')) { const u = document.createElement('button'); u.id = 'chatbub'; u.textContent = '무엇이든 물어보세요!'; u.addEventListener('click', () => $('#chatfab').click()); b.parentNode.insertBefore(u, b); }
@@ -475,9 +478,9 @@ async function ask1(q) {
 function plain(m) { return [m.text, ...(m.blocks || []).map((b, i) => `${i + 1}. ${b.text}\n   출처: ${b.src}`)].filter(Boolean).join('\n'); }
 document.addEventListener('click', async e => {
   const b = e.target.closest('[data-chat]'); if (!b) return; const k = b.dataset.chat;
-  if (k === 'close') { chatOpen = false; renderChat(); }
+  if (k === 'close') { closeChat(); }
   else if (k === 'ask') ask1(b.dataset.q);
-  else if (k === 'go') { chatOpen = false; renderChat(); }
+  else if (k === 'go') { closeChat(true); }
   else if (k === 'copy') { try { await navigator.clipboard.writeText(plain(CH[+b.dataset.i])); toast('복사했습니다.'); } catch (er) { toast('복사하지 못했습니다.'); } }
   else if (k === 'print') { const m = CH[+b.dataset.i], html = `<html><meta charset="utf-8"><title>꿈송이가 찾은 내용</title><body style="font-family:sans-serif;line-height:1.7"><h2>꿈송이가 찾은 내용</h2><p>질문: ${esc(m.q || '')} · ${today()}</p>${m.text ? `<p>${esc(m.text).replace(/\n/g, '<br>')}</p>` : ''}${(m.blocks || []).map((x, i) => `<p>${i + 1}. ${esc(x.text).replace(/\n/g, '<br>')}<br><small>출처: ${esc(x.src)}</small></p>`).join('')}</body></html>`; const f = document.createElement('iframe'); f.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0'; document.body.appendChild(f); f.contentDocument.write(html); f.contentDocument.close(); setTimeout(() => { try { f.contentWindow.focus(); f.contentWindow.print(); } catch (er) { toast('인쇄 창을 열지 못했습니다. 문서로 내보내기를 써 주세요.'); } setTimeout(() => f.remove(), 3000); }, 300); }
   else if (k === 'export') { const m = CH[+b.dataset.i]; download('꿈송이_찾은내용_' + today() + '.doc', `<html><meta charset="utf-8"><body><h2>꿈송이가 찾은 내용</h2><p>질문: ${esc(m.q || '')}</p>${m.text ? `<p>${esc(m.text).replace(/\n/g, '<br>')}</p>` : ''}${(m.blocks || []).map((x, i) => `<p>${i + 1}. ${esc(x.text)}<br><small>출처: ${esc(x.src)}</small></p>`).join('')}</body></html>`, 'application/msword'); }
@@ -508,7 +511,7 @@ function sampleData() {
 (async function () {
   await loadBig();
   const cb = document.createElement('div'); cb.id = 'chatbox'; cb.innerHTML = '<div id="chatpan" hidden></div><button id="chatfab" aria-label="꿈송이에게 물어보기"></button>'; document.body.appendChild(cb);
-  $('#chatfab').addEventListener('click', () => { chatOpen = !chatOpen; renderChat(); if (chatOpen) setTimeout(() => { const q = $('#chq'); q && q.focus(); }, 50); });
+  $('#chatfab').addEventListener('click', () => { if (chatOpen) closeChat(); else openChat(); });
   render();
   TF.sync.start().catch(e => console.warn('동기화 시작 실패', e));
   if ('serviceWorker' in navigator && /^https?:/.test(location.protocol)) navigator.serviceWorker.register('sw.js').catch(() => { });
