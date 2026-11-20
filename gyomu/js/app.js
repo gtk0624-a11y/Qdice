@@ -9,13 +9,17 @@ const OPEN = new Set(JSON.parse(localStorage.getItem('tf.open') || '["r1","r2"]'
 function btot() { let a = 0, s = 0; S.budget.forEach(p => { a += projAlloc(p); s += projSpent(p); }); return { a, s, b: a - s }; }
 function allEvents() {
   const e = [];
-  S.items.forEach(i => { if (i.date) e.push({ date: i.date, t: i.title, kind: i.cat === 'todo' ? '할 일' : '일정', id: i.id, done: i.done }); });
+  S.items.forEach(i => {
+    if (!i.date) return; const kind = i.cat === 'todo' ? '할 일' : (i.src === '학사' ? '학사' : '일정');
+    if (i.end && i.end > i.date) { const a = new Date(i.date + 'T00:00:00'), b = new Date(i.end + 'T00:00:00'); for (let k = 0, d = new Date(a); d <= b && k < 70; k++, d.setDate(d.getDate() + 1)) e.push({ date: ymd(d), t: `${i.title} (${md(i.date)}~${md(i.end)})`, kind, id: i.id, done: i.done, span: true }); }
+    else e.push({ date: i.date, t: i.title, kind, id: i.id, done: i.done });
+  });
   S.assess.forEach(a => { if (a.due) e.push({ date: a.due, t: a.title + ' (수행평가)', kind: '평가', done: (a.step || 0) >= 5 }); });
   S.budget.forEach(p => p.lines.forEach(l => { if (l.deadline && (l.alloc - spentOf(l)) > 0) e.push({ date: l.deadline, t: `${p.name} ${l.item} 집행 (잔액 ${won(l.alloc - spentOf(l))}원)`, kind: '예산', done: false }); }));
   S.training.forEach(t => { if (t.due) e.push({ date: t.due, t: t.title + ' (연수)', kind: '연수', done: !!t.done }); });
   return e;
 }
-function upcoming(n) { return allEvents().filter(e => !e.done && dd(e.date) !== null && dd(e.date) >= 0 && dd(e.date) <= n).sort((a, b) => a.date.localeCompare(b.date)); }
+function upcoming(n) { const seen = new Set(); return allEvents().filter(e => !e.done && dd(e.date) !== null && dd(e.date) >= 0 && dd(e.date) <= n).sort((a, b) => a.date.localeCompare(b.date)).filter(e => { if (!e.span) return true; if (seen.has(e.id)) return false; seen.add(e.id); return true; }); }
 function periodInfo() {
   const p = S.profile, [h, m] = p.start.split(':').map(Number), now = new Date(), mins = now.getHours() * 60 + now.getMinutes(), st = h * 60 + m;
   let cur = 0, next = 0;
@@ -160,6 +164,7 @@ function calView() {
   return `<div class="bh"><h2>캘린더</h2><span class="mu">평가·예산·연수 기한이 자동으로 모입니다.</span></div>
   <div class="calh"><button class="btn sm" data-act="calMove" data-d="-1" aria-label="이전 달">‹</button><b class="calt">${Y}년 ${M}월</b><button class="btn sm" data-act="calMove" data-d="1" aria-label="다음 달">›</button><button class="btn sm" data-act="calMove" data-d="0">오늘</button></div>
   <div class="calw">${DOW.map(d => `<span>${d}</span>`).join('')}</div><div class="cal">${cells}</div>
+  <div class="tools"><label class="btn file">학사일정 파일 올리기<input type="file" id="schedUp" accept=".txt,.csv,.xlsx,.xls,.pdf" hidden></label><button class="btn" data-act="schedPaste">학사일정 붙여넣기</button></div><p class="mu">학사일정(PDF·엑셀·텍스트, 또는 나이스·홈페이지에서 복사한 글)을 넣으면 날짜와 행사를 찾아 캘린더에 한꺼번에 넣어 드립니다. 「3/2 입학식」「7.21~8.20 여름방학」 같은 줄을 알아봅니다.</p>
   <h3 class="h3">${md(UI.day)} (${DOW[new Date(UI.day + 'T00:00:00').getDay()]})</h3>${list}
   <form class="inl" data-form="evt"><input name="title" placeholder="일정·할 일 추가" required aria-label="내용"><select name="cat" aria-label="종류"><option value="event">일정</option><option value="todo">할 일</option></select><button class="btn">추가</button></form>`;
 }
@@ -208,7 +213,7 @@ function notesView(id) {
   <div id="inkbox" hidden><div class="inkbar"><button class="btn sm" data-ink="pen">펜</button><button class="btn sm" data-ink="red">붉은 펜</button><button class="btn sm" data-ink="erase">지우개</button><button class="btn sm" data-ink="thin">가늘게</button><button class="btn sm" data-ink="thick">굵게</button><button class="btn sm" data-ink="undo">되돌리기</button><button class="btn sm" data-ink="clear">모두 지우기</button><button class="btn sm" data-ink="png">그림 저장</button></div><canvas id="ink" aria-label="필기 영역"></canvas><p class="mu">펜을 쓰면 손바닥 터치는 무시합니다. 손글씨 그림은 이 기기에만 저장됩니다.</p></div></div>
   <aside class="npan"><h3 class="h3">정리</h3><label>결정한 일<textarea data-note="decisions" rows="5" placeholder="한 줄에 하나씩">${esc(n.decisions)}</textarea></label><label>후속 조치(내가 할 일)<textarea data-note="followups" rows="5" placeholder="한 줄에 하나씩">${esc(n.followups)}</textarea></label>
   <form class="inl" data-form="toTodo" data-id="${n.id}"><input type="date" name="date" value="${today()}" aria-label="기한"><button class="btn pri">후속 조치를 할 일로 보내기</button></form>
-  <label class="chk"><input type="checkbox" data-note="lock" ${n.lock ? 'checked' : ''}> 이 기기에만 보관 (클라우드 동기화·챗봇 AI 전송 제외, 학생 이름이 있을 때)</label>
+  ${linksHtml('note', n)}<label class="chk"><input type="checkbox" data-note="lock" ${n.lock ? 'checked' : ''}> 이 기기에만 보관 (클라우드 동기화·챗봇 AI 전송 제외, 학생 이름이 있을 때)</label>
   <button class="btn" data-act="noteExport" data-id="${n.id}">내보내기(워드)</button><button class="x" data-act="noteDel" data-id="${n.id}">노트 삭제</button></aside></div>`;
 }
 
@@ -313,6 +318,7 @@ const A = {
   docDel(el) { sure('이 자료를 지울까요?', () => { LIB = LIB.filter(d => d.id !== el.dataset.id); saveLib(); render(); }); },
   manageLinks() { ask('뺄 사이트', [{ k: 'id', label: '고르세요', type: 'select', opts: S.links.map(l => l.name) }], o => { S.links = S.links.filter(l => l.name !== o.id); commit(); }, '빼기'); },
   /* 설정 */
+  schedPaste() { ask('학사일정 붙여넣기', [{ k: 'text', label: '학사일정 글 (한 줄에 날짜와 행사)', type: 'textarea', rows: 10, req: 1 }], o => scheduleDialog(o.text), '일정 찾기'); },
   masDel() { MASCOT = ''; idb.del('mascot'); render(); },
   login() { TF.sync.login(); }, logout() { TF.sync.logout(); },
   backup() { download('업무파탈_백업_' + today() + '.json', JSON.stringify({ S, LIB }), 'application/json'); },
@@ -357,6 +363,7 @@ document.addEventListener('change', async e => {
   else if (t.dataset.hide) { S.hide[t.dataset.hide] = !t.checked; commit(); }
   else if (t.dataset.note === 'kind' || t.dataset.note === 'date' || t.dataset.note === 'lock') { const n = find('notes', location.hash.split('/')[2]); if (n) { n[t.dataset.note] = t.type === 'checkbox' ? t.checked : t.value; commit(); } }
   else if (t.id === 'docUp') { const kind = $('#upk').value; for (const f of t.files) { try { toast(f.name + ' 읽는 중…'); const text = await readFile(f); LIB.push({ id: uid(), name: f.name, kind, text, added: today() }); } catch (er) { toast(er.message); } } await saveLib(); toast('올렸습니다. 꿈송이가 이제 이 자료도 찾습니다.'); render(); }
+  else if (t.id === 'schedUp') { const f = t.files[0]; if (!f) return; try { toast('학사일정 읽는 중…'); scheduleDialog(await readFile(f)); } catch (er) { toast(er.message); } }
   else if (t.id === 'planUp') { const f = t.files[0]; if (!f) return; try { toast('계획서 읽는 중…'); const text = await readFile(f); LIB.push({ id: uid(), name: f.name, kind: '계획서', text, added: today() }); await saveLib(); budgetDialog(text); } catch (er) { toast(er.message); } }
   else if (t.dataset.import) {
     const f = t.files[0]; if (!f) return; try {
@@ -386,6 +393,27 @@ function budgetDialog(text) {
       if (!p) { p = { id: uid(), name: fd.get('newname') || '새 사업', total: 0, lines: [], spends: [] }; S.budget.push(p); }
       let n = 0; c.forEach((x, i) => { if (fd.get('c' + i)) { p.lines.push({ id: uid(), item: x.item, alloc: x.alloc, deadline: x.deadline, spends: [] }); n++; } });
       commit(); toast(n + '건을 넣었습니다.'); if (location.hash !== '#/budget') location.hash = '#/budget';
+    }
+    d.remove();
+  });
+  d.showModal();
+}
+
+/* 학사일정 → 캘린더 확인 창 */
+function scheduleDialog(text) {
+  const sy = schoolYearNow(), c = extractSchedule(text, sy);
+  if (!c.length) return toast('날짜가 있는 줄을 찾지 못했습니다. 「3/2 입학식」 모양으로 한 줄씩 적어 보세요.');
+  c.forEach(x => { x.dup = S.items.some(i => i.date === x.date && i.title === x.title); x.on = !x.dup; });
+  const d = document.createElement('dialog'); d.className = 'dlg wide';
+  d.innerHTML = `<form method="dialog"><h3>학사일정 ${c.length}건을 찾았습니다</h3><p class="mu">${sy}학년도(${sy}.3~${sy + 1}.2) 기준으로 연도를 짐작했습니다. 맞는 것만 체크하고, 날짜·이름은 바로 고칠 수 있습니다. 이미 있는 일정은 체크가 꺼져 있습니다.</p>
+  <table class="tbl"><thead><tr><th></th><th>시작</th><th>끝(선택)</th><th>행사</th></tr></thead><tbody>${c.map((x, i) => `<tr><td><input type="checkbox" name="c${i}" ${x.on ? 'checked' : ''} aria-label="넣기"></td><td><input type="date" name="d${i}" value="${x.date}"></td><td><input type="date" name="e${i}" value="${x.end}"></td><td><input name="t${i}" value="${esc(x.title)}">${x.dup ? '<span class="mu"> 이미 있음</span>' : ''}</td></tr>`).join('')}</tbody></table>
+  <div class="btns"><button value="ok" class="pri">체크한 일정 캘린더에 넣기</button><button value="cancel" formnovalidate>취소</button></div></form>`;
+  document.body.appendChild(d);
+  d.addEventListener('close', () => {
+    if (d.returnValue === 'ok') {
+      const fd = new FormData(d.querySelector('form')); let n = 0;
+      c.forEach((x, i) => { if (!fd.get('c' + i)) return; const date = fd.get('d' + i), title = String(fd.get('t' + i) || '').trim(); if (!date || !title) return; const end = fd.get('e' + i); if (S.items.some(k => k.date === date && k.title === title)) return; S.items.push({ id: uid(), title, date, end: end && end > date ? end : '', cat: 'event', src: '학사', done: false }); n++; });
+      if (n) { const ds = c.filter((x, i) => fd.get('c' + i)).map(x => x.date.slice(0, 7)); UI.cal = ds.includes(today().slice(0, 7)) ? today().slice(0, 7) : (ds[0] || UI.cal); location.hash = '#/cal'; } commit(); toast(n + '건을 캘린더에 넣었습니다.');
     }
     d.remove();
   });

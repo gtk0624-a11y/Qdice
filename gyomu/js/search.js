@@ -12,6 +12,7 @@ function buildChunks() {
   S.contacts.forEach(d => add('contact', '교내 연락망 · ' + d.dept, `${d.dept} ${d.name} 내선 ${d.ext || '-'} 전화 ${d.phone || '-'}`, '#/lib'));
   S.notes.forEach(n => {
     const head = `회의·연수 노트 · ${n.date} ${n.title}`;
+    (n.links || []).forEach(k => { const r = resolve(k); if (r) add('note', head + ' · 연결', '연결: ' + r.label, '#/note/' + n.id, n.lock); });
     if (n.decisions) add('note', head + ' · 결정', n.decisions, '#/note/' + n.id, n.lock);
     if (n.followups) add('note', head + ' · 후속 조치', n.followups, '#/note/' + n.id, n.lock);
     String(n.body || '').split(/\n{1,}/).filter(x => x.trim()).forEach(p => add('note', head, p, '#/note/' + n.id, n.lock));
@@ -30,7 +31,8 @@ function buildChunks() {
   S.training.forEach(t => add('training', '연수', `${t.title} ${t.type} ${t.hours}시간 ${t.done ? '이수' : '미이수'} 기한 ${t.due || '없음'}`, '#/today'));
   S.lessons.forEach(l => add('lesson', '수업 진도', `${l.cls} ${l.unit} ${l.done}/${l.total}차시`, '#/class'));
   S.pages.forEach(pg => {
-    const lines = (pg.blocks || []).map(b => b.t === 'table' ? (b.rows || []).map(r => r.join(' | ')).join('\n') : b.t === 'todo' ? (b.done ? '[완료] ' : '[할 일] ') + b.x : b.t === 'toggle' ? b.x + ' ' + (b.y || '') : b.t === 'link' ? b.x + ' ' + (b.u || '') : b.x || '').filter(x => String(x).trim());
+    const lines = (pg.blocks || []).map(b => b.t === 'table' ? (b.rows || []).map(r => r.join(' | ')).join('\n') : b.t === 'todo' ? (b.done ? '[완료] ' : '[할 일] ') + b.x : b.t === 'toggle' ? b.x + ' ' + (b.y || '') : b.t === 'link' ? b.x + ' ' + (b.u || '') : b.t === 'ref' ? '연결: ' + ((resolve(b.u) || {}).label || '') : b.x || '').filter(x => String(x).trim());
+    (pg.links || []).forEach(k => { const r = resolve(k); if (r) lines.push('연결: ' + r.label); });
     let buf = ''; const flush = () => { if (buf.trim()) add('page', '내 페이지 · ' + (pg.title || '제목 없음'), buf.trim(), '#/page/' + pg.id, pg.lock); buf = ''; };
     lines.forEach(l => { if ((buf + ' ' + l).length > 380) flush(); buf += (buf ? '\n' : '') + l; }); flush();
     if (!lines.length) add('page', '내 페이지', pg.title || '제목 없음', '#/page/' + pg.id, pg.lock);
@@ -150,4 +152,27 @@ function extractBudget(text) {
     out.push({ item, alloc: amt, deadline: dl, on: true });
   });
   return out.slice(0, 40);
+}
+
+/* 6) 학사일정 글에서 '날짜(또는 기간) + 행사 이름' 뽑기 — 연도가 없으면 학년도(3월~다음해 2월)로 추정 */
+function schoolYearNow() { const n = new Date(); return n.getMonth() + 1 >= 3 ? n.getFullYear() : n.getFullYear() - 1; }
+function extractSchedule(text, sy) {
+  const yr = m => (m >= 3 ? sy : sy + 1), out = [];
+  const W = '\\s*(?:\\([월화수목금토일]\\))?';
+  const re = new RegExp('(?:(20\\d\\d)\\s*[.\\-/년]\\s*)?(\\d{1,2})\\s*[.\\-/월]\\s*(\\d{1,2})\\s*일?' + W + '(?:\\s*[~∼～–\\-]\\s*(?:(20\\d\\d)\\s*[.\\-/년]\\s*)?(?:(\\d{1,2})\\s*[.\\-/월]\\s*)?(\\d{1,2})\\s*일?' + W + ')?', 'g');
+  const clean = s => s.replace(/[|]+/g, ' ').replace(/^[\s:：,.\-–·•○▪■※*)\]]+/, '').replace(/[\s,;]+$/, '').replace(/\s+[월화수목금토일]$/, '').replace(/\s+/g, ' ').trim();
+  text.split(/\n|\f/).forEach(line => {
+    line = line.trim(); if (!line) return;
+    const ms = [...line.matchAll(re)].filter(m => +m[2] >= 1 && +m[2] <= 12 && +m[3] >= 1 && +m[3] <= 31);
+    ms.forEach((m, i) => {
+      const next = ms[i + 1], seg = line.slice(m.index + m[0].length, next ? next.index : line.length);
+      let title = clean(seg); if (!title && i === 0) title = clean(line.slice(0, m.index));
+      if (title.length < 2 || /^[\d\s.]+$/.test(title)) return;
+      const sm = +m[2], sd = +m[3], sY = m[1] ? +m[1] : yr(sm);
+      const date = `${sY}-${pad(sm)}-${pad(sd)}`; let end = '';
+      if (m[6]) { const em = m[5] ? +m[5] : sm, ed = +m[6]; if (em >= 1 && em <= 12 && ed >= 1 && ed <= 31) { const eY = m[4] ? +m[4] : (m[5] ? yr(em) : sY); end = `${eY}-${pad(em)}-${pad(ed)}`; if (end <= date) end = ''; } }
+      out.push({ on: true, date, end, title: title.slice(0, 60), dup: false });
+    });
+  });
+  return out.slice(0, 200);
 }

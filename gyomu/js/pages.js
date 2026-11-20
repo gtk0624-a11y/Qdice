@@ -1,7 +1,7 @@
 'use strict';
 /* ===== 업무파탈 pages.js : 내 페이지 (노션처럼 직접 만드는 블록 페이지) =====
    app.js 뒤에 불러옵니다. 블록 종류: 글·큰제목·작은제목·목록·체크·토글·인용·표·링크·구분선 */
-const BT = [['p', '글'], ['h1', '큰 제목'], ['h2', '작은 제목'], ['bullet', '목록'], ['todo', '체크'], ['toggle', '토글'], ['quote', '인용'], ['table', '표'], ['link', '링크'], ['divider', '구분선']];
+const BT = [['p', '글'], ['h1', '큰 제목'], ['h2', '작은 제목'], ['bullet', '목록'], ['todo', '체크'], ['toggle', '토글'], ['quote', '인용'], ['table', '표'], ['link', '링크'], ['ref', '연결'], ['divider', '구분선']];
 const newBlock = (t, x) => ({ id: uid(), t, x: x || '', y: '', u: '', done: false, open: false, rows: t === 'table' ? [['', '', ''], ['', '', '']] : undefined });
 const TEMPLATES = {
   '빈 페이지': () => [newBlock('p')],
@@ -31,6 +31,7 @@ function blockHtml(b) {
     case 'quote': body = ta('x', '인용·강조할 말'); break;
     case 'divider': body = '<hr>'; break;
     case 'link': body = `<input data-bf="x" data-b="${id}" value="${esc(b.x)}" placeholder="이름" aria-label="링크 이름"><input data-bf="u" data-b="${id}" value="${esc(b.u)}" placeholder="https://…" aria-label="링크 주소">${b.u ? `<a class="btn sm" href="${esc(/^https?:/.test(b.u) ? b.u : 'https://' + b.u)}" target="_blank" rel="noopener">열기</a>` : ''}`; break;
+    case 'ref': { const r = b.u && resolve(b.u); body = `<span class="mu">연결</span>${b.u ? (r ? `<span class="lk"><a href="${esc(r.href)}">${esc(r.label)}</a></span>` : '<span class="mu">(삭제된 항목)</span>') : '<span class="mu">아직 대상이 없습니다</span>'}<button class="btn sm" data-act="bRef" data-b="${id}">대상 고르기</button>`; break; }
     case 'table': body = `<div class="tw"><table class="tbl pt"><tbody>${(b.rows || []).map((r, ri) => `<tr>${r.map((c, ci) => `<td><input data-bc="${id}" data-r="${ri}" data-c="${ci}" value="${esc(c)}" aria-label="${ri + 1}행 ${ci + 1}열"></td>`).join('')}</tr>`).join('')}</tbody></table><div><button class="x" data-act="tbl" data-op="addRow" data-b="${id}">+ 행</button><button class="x" data-act="tbl" data-op="addCol" data-b="${id}">+ 열</button><button class="x" data-act="tbl" data-op="delRow" data-b="${id}">− 행</button><button class="x" data-act="tbl" data-op="delCol" data-b="${id}">− 열</button></div></div>`; break;
     default: body = ta('x', '글을 쓰세요. 엔터를 누르면 다음 블록이 생깁니다.');
   }
@@ -44,6 +45,7 @@ function pagesView(id) {
   <div class="ned"><input class="ptitle" data-pg="title" value="${esc(pg.title)}" placeholder="제목 없는 페이지" aria-label="페이지 제목">
   <div class="tools"><button class="btn sm" data-act="pageSub">+ 하위 페이지</button><button class="btn sm" data-act="pagePin">${pg.pin ? '오늘 게시판 고정 풀기' : '오늘 게시판에 고정'}</button><button class="btn sm" data-act="pageExport">내보내기(워드)</button><label class="chk"><input type="checkbox" data-pg="lock" ${pg.lock ? 'checked' : ''}> 이 기기에만 보관</label><button class="x" data-act="pageDel">페이지 삭제</button></div>
   <div class="blocks">${(pg.blocks || []).map(blockHtml).join('')}</div>
+  ${linksHtml('page', pg)}
   <div class="addb"><span class="mu">블록 추가</span>${BT.map(([k, v]) => `<button class="chip" data-act="bAddT" data-t="${k}">${v}</button>`).join('')}</div></div></div>`;
 }
 function autosize(t) { t.style.height = 'auto'; t.style.height = t.scrollHeight + 'px'; }
@@ -62,7 +64,7 @@ Object.assign(A, {
   pageDel() { const pg = curPage(); sure('이 페이지와 하위 페이지를 지울까요?', () => { const ids = [pg.id, ...pageDescendants(pg.id)]; S.pages = S.pages.filter(p => !ids.includes(p.id)); save(); location.hash = '#/pages'; }); },
   pageExport() {
     const pg = curPage();
-    const h = (pg.blocks || []).map(b => ({ h1: `<h1>${esc(b.x)}</h1>`, h2: `<h2>${esc(b.x)}</h2>`, bullet: `<ul><li>${esc(b.x)}</li></ul>`, todo: `<p>${b.done ? '☑' : '☐'} ${esc(b.x)}</p>`, toggle: `<p><b>${esc(b.x)}</b><br>${esc(b.y)}</p>`, quote: `<blockquote>${esc(b.x)}</blockquote>`, divider: '<hr>', link: `<p><a href="${esc(b.u)}">${esc(b.x || b.u)}</a></p>`, table: `<table border="1" cellpadding="4">${(b.rows || []).map(r => `<tr>${r.map(c => `<td>${esc(c)}</td>`).join('')}</tr>`).join('')}</table>` }[b.t] || `<p>${esc(b.x).replace(/\n/g, '<br>')}</p>`)).join('');
+    const h = (pg.blocks || []).map(b => ({ h1: `<h1>${esc(b.x)}</h1>`, h2: `<h2>${esc(b.x)}</h2>`, bullet: `<ul><li>${esc(b.x)}</li></ul>`, todo: `<p>${b.done ? '☑' : '☐'} ${esc(b.x)}</p>`, toggle: `<p><b>${esc(b.x)}</b><br>${esc(b.y)}</p>`, quote: `<blockquote>${esc(b.x)}</blockquote>`, divider: '<hr>', link: `<p><a href="${esc(b.u)}">${esc(b.x || b.u)}</a></p>`, ref: `<p>→ ${esc((resolve(b.u) || {}).label || '')}</p>`, table: `<table border="1" cellpadding="4">${(b.rows || []).map(r => `<tr>${r.map(c => `<td>${esc(c)}</td>`).join('')}</tr>`).join('')}</table>` }[b.t] || `<p>${esc(b.x).replace(/\n/g, '<br>')}</p>`)).join('');
     download((pg.title || '페이지') + '.doc', `<html><meta charset="utf-8"><body><h1>${esc(pg.title)}</h1>${h}</body></html>`, 'application/msword');
   },
   bAddT(el) { const pg = curPage(), b = newBlock(el.dataset.t); pg.blocks.push(b); PF = b.id; commit(); },
@@ -73,6 +75,37 @@ Object.assign(A, {
   tbl(el) { const b = blk(el.dataset.b), r = b.rows, op = el.dataset.op; if (op === 'addRow') r.push(r[0].map(() => '')); else if (op === 'addCol') r.forEach(x => x.push('')); else if (op === 'delRow' && r.length > 1) r.pop(); else if (op === 'delCol' && r[0].length > 1) r.forEach(x => x.pop()); commit(); }
 });
 
+/* ---- 연결: 페이지·노트에서 다른 항목으로 잇기 + 되돌아오는 링크 ---- */
+function targets(excl) {
+  const t = [], add = (key, label, href) => { if (key !== excl) t.push({ key, label, href }); };
+  S.pages.forEach(p => add('page:' + p.id, '[페이지] ' + (p.title || '제목 없음'), '#/page/' + p.id));
+  S.notes.forEach(n => add('note:' + n.id, '[노트] ' + md(n.date) + ' ' + (n.title || '제목 없음'), '#/note/' + n.id));
+  S.budget.forEach(p => add('budget:' + p.id, '[예산] ' + p.name, '#/budget'));
+  S.assess.forEach(a => add('assess:' + a.id, '[수행평가] ' + a.title, '#/class'));
+  S.lessons.forEach(l => add('lesson:' + l.id, '[진도] ' + l.cls + ' ' + l.unit, '#/class'));
+  S.training.forEach(x => add('training:' + x.id, '[연수] ' + x.title, '#/today'));
+  S.items.forEach(i => add('item:' + i.id, '[일정] ' + (i.date ? md(i.date) + ' ' : '') + i.title, '#/cal'));
+  LIB.forEach(d => add('doc:' + d.id, '[자료] ' + d.name, '#/lib'));
+  return t;
+}
+const resolve = key => targets().find(t => t.key === key);
+const ownerOf = key => { const [k, id] = String(key).split(':'); return k === 'page' ? find('pages', id) : find('notes', id); };
+function linksHtml(kind, o) {
+  const me = kind + ':' + o.id;
+  const ls = (o.links || []).map(k => { const r = resolve(k); return `<span class="lk">${r ? `<a href="${esc(r.href)}">${esc(r.label)}</a>` : '<span class="mu">(삭제된 항목)</span>'}<button class="x" data-act="linkDel" data-o="${me}" data-k="${esc(k)}" aria-label="연결 끊기">×</button></span>`; }).join('');
+  const back = [['page', S.pages], ['note', S.notes]].flatMap(([k, arr]) => arr.filter(x => x.id !== o.id && ((x.links || []).includes(me) || (x.blocks || []).some(b => b.t === 'ref' && b.u === me))).map(x => `<a href="#/${k}/${x.id}">${esc(x.title || '제목 없음')}</a>`));
+  return `<div class="links"><h3 class="h3">연결</h3>${ls || '<p class="mu">연결한 항목이 없습니다. 관련 페이지·노트·예산·수행평가·일정을 이어 두세요.</p>'}<button class="btn sm" data-act="linkAdd" data-o="${me}">+ 연결 추가</button>${back.length ? `<p class="mu">이 곳을 연결한 글: ${back.join(' · ')}</p>` : ''}</div>`;
+}
+function pickTarget(excl, ok) {
+  const T = targets(excl), seen = {}, labels = T.map(x => { seen[x.label] = (seen[x.label] || 0) + 1; return seen[x.label] > 1 ? x.label + ' #' + seen[x.label] : x.label; });
+  if (!T.length) return toast('연결할 항목이 아직 없습니다.');
+  ask('무엇과 연결할까요?', [{ k: 't', label: '연결할 항목', type: 'select', opts: labels }], o => ok(T[labels.indexOf(o.t)].key), '연결');
+}
+Object.assign(A, {
+  linkAdd(el) { const o = ownerOf(el.dataset.o); pickTarget(el.dataset.o, key => { o.links = o.links || []; if (!o.links.includes(key)) o.links.push(key); commit(); }); },
+  linkDel(el) { const o = ownerOf(el.dataset.o); o.links = (o.links || []).filter(k => k !== el.dataset.k); commit(); },
+  bRef(el) { const b = blk(el.dataset.b), pg = curPage(); pickTarget('page:' + pg.id, key => { b.u = key; commit(); }); }
+});
 const onPage = () => /^#\/page\//.test(location.hash);
 let pt;
 document.addEventListener('input', e => {
