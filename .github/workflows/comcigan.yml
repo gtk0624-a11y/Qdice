@@ -1,4 +1,4 @@
-name: 컴시간 시간표 가져오기
+name: 컴시간·급식 가져오기
 on:
   schedule:
     - cron: '0 20 * * 0-4'   # 한국시간 월~금 새벽 5시
@@ -15,6 +15,10 @@ jobs:
           node-version: 22
       - run: npm i parse-comcigan --no-save
       - run: node gyomu/tools/comcigan.js /tmp/comcigan.json
+      - run: node gyomu/tools/neis.js /tmp/neis.json
+        env:
+          NEIS_KEY: ${{ secrets.NEIS_KEY }}
+        continue-on-error: true
       - name: data 가지에 저장
         run: |
           git config user.name "github-actions"
@@ -22,6 +26,7 @@ jobs:
           git fetch origin data || true
           if git rev-parse --verify origin/data >/dev/null 2>&1; then git checkout -B data origin/data; else git checkout --orphan data && git rm -rf . >/dev/null 2>&1 || true; fi
           cp /tmp/comcigan.json comcigan.json
-          git add comcigan.json
+          [ -f /tmp/neis.json ] && cp /tmp/neis.json neis.json
+          git add comcigan.json neis.json 2>/dev/null || git add comcigan.json
           git diff --cached --quiet || git commit -m "컴시간 시간표 갱신"
           git push origin data
