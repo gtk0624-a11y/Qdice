@@ -53,6 +53,7 @@ const DEF = () => ({
 let S;
 try { S = Object.assign(DEF(), JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (e) { S = DEF(); }
 S.profile = Object.assign(DEF().profile, S.profile);
+let ARCH = [];
 let LIB = []; // 업로드 문서 [{id,name,kind,text,added}]
 let MASCOT = ''; // 꿈송이 그림(dataURL)
 
@@ -66,8 +67,10 @@ function commit() { save(); TF.render && TF.render(); }
 async function loadBig() {
   LIB = (await idb.get('lib')) || [];
   MASCOT = (await idb.get('mascot')) || '';
+  ARCH = (await idb.get('arch')) || [];
 }
 const saveLib = () => idb.set('lib', LIB);
+const saveArch = () => idb.set('arch', ARCH);
 
 /* ---- 알림 ---- */
 let toastT;

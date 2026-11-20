@@ -7,6 +7,20 @@ const projAlloc = p => (+p.total > 0 ? +p.total : p.lines.reduce((a, l) => a + (
 
 /* 1) 사이트에 들어간 모든 내용을 '조각'으로 만든다 */
 function buildChunks() {
+  const cur = buildChunksCur(), out = cur.slice();
+  ARCH.forEach(a => {
+    const s0 = S, l0 = LIB;
+    try { S = Object.assign(DEF(), a.S); LIB = a.LIB || []; buildChunksCur().forEach(c => out.push(Object.assign({}, c, { type: c.type, src: `[${a.label}] ${c.src}`, ref: '#/arch/' + a.id, arch: a.id }))); }
+    catch (e) { } finally { S = s0; LIB = l0; }
+  });
+  return out;
+}
+function archGroups(a) {
+  const s0 = S, l0 = LIB, g = {};
+  try { S = Object.assign(DEF(), a.S); LIB = a.LIB || []; buildChunksCur().forEach(c => (g[c.src] = g[c.src] || []).push(c.text)); } catch (e) { } finally { S = s0; LIB = l0; }
+  return g;
+}
+function buildChunksCur() {
   const c = []; const add = (type, src, text, ref, priv) => c.push({ type, src, text, ref, priv });
   S.duties.forEach(d => add('duty', '업무 분장표 · ' + d.dept, `${d.dept} 업무: ${d.work} / 담당: ${d.who}`, '#/lib'));
   S.contacts.forEach(d => add('contact', '교내 연락망 · ' + d.dept, `${d.dept} ${d.name} 내선 ${d.ext || '-'} 전화 ${d.phone || '-'}`, '#/lib'));

@@ -232,6 +232,12 @@ function libView() {
 }
 
 /* ---------- 설정 ---------- */
+function archView(id) {
+  const a = ARCH.find(x => x.id === id);
+  if (!a) return `<div class="bh"><h2>지난 학년도</h2></div><p class="mu">보관함이 비어 있습니다. 설정에서 지난 학년도 백업 파일을 넣어 주세요.</p>`;
+  const g = archGroups(a), keys = Object.keys(g);
+  return `<div class="bh"><h2>${esc(a.label)} <span class="mu">(읽기 전용)</span></h2></div><p class="mu">지금 데이터와 섞이지 않는 보관본입니다. 꿈송이에게 "${esc(a.label)} 예산 뭐였지"처럼 물어도 찾아 줍니다.</p>` + (keys.length ? keys.map(k => `<details class="tg"><summary>${esc(k)} <span class="mu">${g[k].length}건</span></summary><div class="tgb">${g[k].map(t => `<p>${esc(t).replace(/\n/g, '<br>')}</p>`).join('')}</div></details>`).join('') : '<p class="mu">내용이 없습니다.</p>');
+}
 function setView() {
   const p = S.profile, sy = TF.sync.info, rowsT = [['r1', '일과'], ['r2', '할 일'], ['r3', '공문'], ['r4', '수업 진도'], ['r5', '수행평가'], ['r6', '예산'], ['r7', '연수'], ['r8', '기록'], ['r9', '업무 분장표'], ['r10', '교내 연락망']];
   return `<div class="bh"><h2>설정</h2></div>
@@ -240,7 +246,7 @@ function setView() {
   <h3 class="h3">꿈송이</h3><div class="tools"><div class="mas">${MASCOT ? `<img src="${MASCOT}" alt="꿈송이">` : '<span>그림 없음</span>'}</div><label class="btn file">꿈송이 그림 올리기<input type="file" id="masUp" accept="image/*" hidden></label>${MASCOT ? '<button class="btn" data-act="masDel">그림 빼기</button>' : ''}</div>
   <form data-form="claude" class="fm"><label>Claude 열쇠(선택) — 넣으면 꿈송이가 찾은 자료를 문장으로 다듬어 답합니다<input name="key" type="password" value="${esc(localStorage.getItem('tf.claudeKey') || '')}" placeholder="sk-ant-…" autocomplete="off"></label><p class="mu">열쇠는 이 기기에만 저장됩니다. 켜면 "질문 + 찾은 자료 조각"이 Anthropic 서버로 전송됩니다(잠금 노트는 제외). 학생 이름이 든 자료는 올리지 마세요.</p><button class="btn">저장</button></form>
   <h3 class="h3">여러 기기 동기화</h3><p>${esc(sy.msg)}</p>${sy.on ? (sy.user ? '<button class="btn" data-act="logout">로그아웃</button>' : '<button class="btn pri" data-act="login">구글로 로그인</button>') : '<p class="mu">설정 방법은 안내 문서(STRUCTURE.md)의 “동기화 켜기”를 보세요.</p>'}
-  <h3 class="h3">백업</h3><div class="tools"><button class="btn" data-act="backup">백업 파일 받기</button><label class="btn file">백업 파일 불러오기<input type="file" id="restore" accept=".json" hidden></label><button class="btn" data-act="sample">예시 데이터 채우기</button><button class="btn" data-act="reset">모두 지우고 처음부터</button></div><h3 class="h3">새 학년도</h3><p class="mu">학년도가 바뀌면 이 버튼을 누르세요. 자동으로 백업 파일을 받은 뒤, 시간표·일정·진도·평가·예산·연수·공문·업무분장·연락망을 비웁니다. 내 정보, 메모, 내 페이지, 서랍, 자료실은 그대로 남습니다.</p><div class="tools"><button class="btn pri" data-act="newYear">새 학년도 시작하기</button></div><p class="mu">브라우저 기록을 지우면 이 기기의 데이터가 사라질 수 있으니 가끔 백업 파일을 받아 두세요.</p>`;
+  <h3 class="h3">백업</h3><div class="tools"><button class="btn" data-act="backup">백업 파일 받기</button><label class="btn file">백업 파일 불러오기<input type="file" id="restore" accept=".json" hidden></label><button class="btn" data-act="sample">예시 데이터 채우기</button><button class="btn" data-act="reset">모두 지우고 처음부터</button></div><h3 class="h3">지난 학년도 보관함</h3><p class="mu">지난해 백업 파일을 넣어 두면 지금 데이터를 건드리지 않고 읽기만 할 수 있고, 꿈송이도 함께 찾아 줍니다.</p><div class="tools"><label class="btn file">지난 학년도 백업 넣기<input type="file" id="archUp" accept=".json" hidden></label>${ARCH.map(a => `<a class="btn" href="#/arch/${a.id}">${esc(a.label)} 보기</a><button class="btn" data-act="archDel" data-id="${a.id}">삭제</button>`).join('')}</div><h3 class="h3">새 학년도</h3><p class="mu">학년도가 바뀌면 이 버튼을 누르세요. 자동으로 백업 파일을 받은 뒤, 시간표·일정·진도·평가·예산·연수·공문·업무분장·연락망을 비웁니다. 내 정보, 메모, 내 페이지, 서랍, 자료실은 그대로 남습니다.</p><div class="tools"><button class="btn pri" data-act="newYear">새 학년도 시작하기</button></div><p class="mu">브라우저 기록을 지우면 이 기기의 데이터가 사라질 수 있으니 가끔 백업 파일을 받아 두세요.</p>`;
 }
 function welcome() {
   return `<div class="wel"><h1>업무파탈</h1><div class="fr">Travail Fatal</div><p>나만의 디지털 교무수첩입니다. 몇 가지만 적으면 바로 시작합니다. 모든 내용은 나중에 설정에서 고칠 수 있습니다.</p>
@@ -254,7 +260,7 @@ function render() {
   if (!S.setup) { app.innerHTML = welcome(); $('#chatbox').hidden = true; return; }
   $('#chatbox').hidden = false;
   const [, page = 'today', arg] = (location.hash || '#/today').split('/');
-  const body = { today: todayView, cal: calView, class: classView, budget: budgetView, notes: () => notesView(), note: () => notesView(arg), pages: () => pagesView(), page: () => pagesView(arg), lib: libView, set: setView }[page] || todayView;
+  const body = { today: todayView, cal: calView, class: classView, budget: budgetView, notes: () => notesView(), note: () => notesView(arg), pages: () => pagesView(), page: () => pagesView(arg), lib: libView, set: setView, arch: () => archView(arg) }[page] || todayView;
   app.innerHTML = masthead() + nav(page) + `<main>${body()}</main>` + footer();
   if (page === 'note') mountNote(arg);
   if (page === 'page') mountPage();
@@ -322,6 +328,7 @@ const A = {
   schedPaste() { ask('학사일정 붙여넣기', [{ k: 'text', label: '학사일정 글 (한 줄에 날짜와 행사)', type: 'textarea', rows: 10, req: 1 }], o => scheduleDialog(o.text), '일정 찾기'); },
   masDel() { MASCOT = ''; idb.del('mascot'); render(); },
   login() { TF.sync.login(); }, logout() { TF.sync.logout(); },
+  archDel(el) { sure('이 보관본을 지울까요?', async () => { ARCH = ARCH.filter(x => x.id !== el.dataset.id); await saveArch(); render(); toast('지웠습니다.'); }); },
   newYear() { sure('새 학년도를 시작할까요? 먼저 백업 파일을 받고, 시간표·일정·진도·평가·예산·연수·공문·업무분장·연락망을 비웁니다. 메모·페이지·서랍·자료실은 남습니다.', () => { A.backup(); ['timetable'].forEach(k => S[k] = {}); ['items', 'lessons', 'assess', 'budget', 'training', 'duties', 'contacts'].forEach(k => S[k] = []); S.docs = {}; commit(); toast('새 학년도로 비웠습니다. 학교·교과를 확인하고 학사일정을 올려 주세요.'); }); },
   backup() { download('업무파탈_백업_' + today() + '.json', JSON.stringify({ S, LIB }), 'application/json'); },
   sample() { sampleData(); },
@@ -377,6 +384,7 @@ document.addEventListener('change', async e => {
     } catch (er) { toast(er.message); }
   }
   else if (t.id === 'masUp') { const f = t.files[0]; if (!f) return; const im = new Image(); im.onload = async () => { const c = document.createElement('canvas'), s = 256 / Math.max(im.width, im.height, 256) * (im.width > 256 || im.height > 256 ? 1 : 1); const r = Math.min(1, 256 / Math.max(im.width, im.height)); c.width = Math.round(im.width * r); c.height = Math.round(im.height * r); c.getContext('2d').drawImage(im, 0, 0, c.width, c.height); MASCOT = c.toDataURL('image/png'); await idb.set('mascot', MASCOT); render(); }; im.src = URL.createObjectURL(f); }
+  else if (t.id === 'archUp') { const f = t.files[0]; if (!f) return; try { const j = JSON.parse(await f.text()); if (!j.S) throw 0; const yr = (j.S.updatedAt ? new Date(j.S.updatedAt) : new Date()), sy0 = yr.getMonth() + 1 >= 3 ? yr.getFullYear() : yr.getFullYear() - 1; ask('보관함 이름', [{ k: 'n', label: '이름', val: sy0 + '학년도' }], async v => { ARCH.push({ id: uid(), label: (v.n || sy0 + '학년도').trim(), at: today(), S: j.S, LIB: j.LIB || [] }); await saveArch(); render(); toast('보관함에 넣었습니다. 지금 데이터는 그대로입니다.'); }, '넣기'); } catch (er) { toast('백업 파일이 아닙니다.'); } t.value = ''; }
   else if (t.id === 'restore') { const f = t.files[0]; if (!f) return; try { const j = JSON.parse(await f.text()); if (!j.S) throw 0; sure('백업으로 덮어쓸까요? 지금 내용은 사라집니다.', async () => { S = Object.assign(DEF(), j.S); LIB = j.LIB || []; await saveLib(); commit(); toast('불러왔습니다.'); }); } catch (er) { toast('백업 파일이 아닙니다.'); } }
 });
 
