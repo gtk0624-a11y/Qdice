@@ -403,3 +403,75 @@ html[data-nav=left] .mcal,html[data-nav=right] .mcal{max-width:420px}
 .mi .mt{flex:3 1 12rem}.mi .mc{flex:1 1 6rem}.mi .mm{flex:1.4 1 7rem}
 .mi.dn .mt{text-decoration:line-through;opacity:.55}
 .mpv{max-height:46vh;overflow:auto}.mpv .mi small{opacity:.65}
+
+/* ===== 화면 크기별 맞춤 (폰 · 태블릿 · 컴퓨터) — 마지막에 두어 앞의 틀보다 우선 ===== */
+html{-webkit-text-size-adjust:100%}
+img,video,canvas,svg{max-width:100%}
+.tbl,table{max-width:100%}
+.tw,.rd,.tblw{overflow-x:auto;-webkit-overflow-scrolling:touch}
+/* 컴퓨터(1101px~): 가운데 정렬, 너무 퍼지지 않게 */
+@media(min-width:1101px){html[data-page] #app{max-width:1180px}}
+/* 태블릿(601~1100px): 2단은 유지하되 간격·글자 키움 */
+@media(min-width:601px) and (max-width:1100px){
+  html[data-page] #app{margin-left:auto;margin-right:auto;max-width:980px;padding-left:max(34px,4vw);padding-right:max(30px,3.5vw)}
+  .nav a{font-size:18px;padding:9px 16px 8px}
+  .btn,.btns button,.tab{min-height:44px}
+  .mast1 h1{font-size:calc(46px*var(--hs,1))}
+  #app::after{display:none!important}
+  .spread{grid-template-columns:1fr}
+}
+/* 폰(600px 이하): 머리를 줄이고 탭은 한 줄로 밀어 넘기기, 모든 건 한 칸씩 */
+@media(max-width:600px){
+  body{font-size:17px;line-height:1.6}
+  html[data-page] #app{padding:10px 12px 110px 22px!important;margin:0!important;border-radius:0}
+  html[data-page=notebook] #app{background:linear-gradient(90deg,transparent 12px,var(--margin) 12px,var(--margin) 14px,transparent 14px),var(--paper2)!important}
+  #app::before,#app::after{display:none!important}
+  /* 머리 */
+  .mast{padding:4px 0 8px!important;gap:6px;flex-direction:column!important;align-items:stretch!important}
+  .mast1{gap:8px!important;flex-wrap:nowrap!important;align-items:center}
+  .mast1 h1{font-size:calc(26px*var(--hs,1))!important;line-height:1.15;min-width:0;overflow-wrap:anywhere}
+  .mast1 .fr{font-size:15px!important}
+  img.logo{width:42px!important;height:42px!important;flex:none}
+  .mast2{transform:none!important;align-self:flex-start;padding:4px 10px!important;font-size:13px!important;box-shadow:none!important;text-align:left!important}
+  .dt{font-size:13px!important;letter-spacing:.06em}
+  /* 탭: 한 줄 가로 스크롤 + 화면 위에 붙이기 */
+  .nav{flex-wrap:nowrap!important;overflow-x:auto;gap:4px!important;margin:4px -12px 0 -8px!important;padding:6px 12px 0 8px!important;position:sticky;top:0;z-index:20;background:var(--paper2);scrollbar-width:none;-webkit-overflow-scrolling:touch}
+  .nav::-webkit-scrollbar{display:none}
+  .nav a{flex:none;font-size:16px!important;padding:8px 14px 7px!important;white-space:nowrap}
+  /* 제목·구역 */
+  h2{font-size:23px!important;margin-top:6px}.h3{font-size:18px!important;margin:18px 0 6px}
+  main>p.mu,.sub{font-size:14px}
+  /* 줄(게시판) */
+  .row>summary{padding:11px 0!important;min-height:52px;gap:2px 10px!important}
+  .row .ttl{font-size:18px!important}.row .st{font-size:15px!important;line-height:1.45;overflow-wrap:anywhere}.row .due{font-size:13px!important}
+  .rb{padding:2px 0 12px!important}
+  /* 누르기 편하게 */
+  .btn,.btns button,button.x,.tab,select{min-height:44px;font-size:16px}
+  .tools{display:flex;flex-wrap:wrap;gap:8px}.tools .btn{flex:1 1 calc(50% - 8px);justify-content:center;text-align:center}
+  input,select,textarea{font-size:16px!important;max-width:100%}
+  label.chk{padding:6px 0}
+  /* 표는 옆으로 밀기, 가운데 정렬 깨지지 않게 */
+  .tbl{display:block;overflow-x:auto;white-space:nowrap}
+  .tbl td,.tbl th{padding:8px 10px}
+  .fgrid,.thm{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  .spread{grid-template-columns:1fr!important}
+  .mcal{max-width:none!important}
+  /* 내 업무·목록 입력 줄 */
+  .mi .mt{flex:1 1 100%}.mi .mc,.mi .mm{flex:1 1 40%}
+  /* 알림·창 */
+  #toast{left:12px!important;right:96px;bottom:20px!important;transform:none!important;max-width:none!important;font-size:15px!important;text-align:left}
+  #toast.show{transform:none!important}
+  .dlg,.dlg.wide{width:94vw!important;max-height:92dvh;overflow:auto;padding:16px}
+  .btns{flex-wrap:wrap}.btns button{flex:1 1 40%}
+  #chatbub{max-width:60vw}
+}
+/* 아주 좁은 폰(380px 이하) */
+@media(max-width:380px){
+  .mast1 h1{font-size:calc(22px*var(--hs,1))!important}
+  .nav a{font-size:15px!important;padding:7px 11px 6px!important}
+  .tools .btn{flex:1 1 100%}
+}
+/* 가로로 눕힌 폰 */
+@media(max-height:480px) and (orientation:landscape){
+  .nav{position:static!important}#chatpan{height:100dvh}
+}
