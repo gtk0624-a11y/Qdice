@@ -155,7 +155,7 @@ function todayView() {
     rows.push(row('pg' + p.id, '페이지', esc(p.title || '제목 없음'), st, '', todos.map(b => `<div class="td ${b.done ? 'dn' : ''}"><button class="ck" data-act="bTodo" data-p="${p.id}" data-b="${b.id}" aria-pressed="${!!b.done}" aria-label="완료 표시"></button><span class="tl">${esc(b.x)}</span><span class="stamp">완료</span></div>`).join('') + `<a class="btn sm" href="#/page/${p.id}">페이지 열기</a>`));
   });
   const up = upcoming(7);
-  return `${typeof schoolBanner === 'function' ? schoolBanner() : ''}<div class="bh"><h2>오늘의 게시판</h2><span class="mu">줄을 누르면 펼쳐집니다.</span><button class="btn sm" data-act="rowPick">☑ 보일 줄 고르기</button></div>
+  return `${typeof schoolBanner === 'function' ? schoolBanner() : ''}<div class="bh"><h2>오늘의 게시판</h2><span class="mu">줄을 누르면 펼쳐집니다.</span><button class="btn sm" data-act="ibx">📨 메신저 붙여넣기</button><button class="btn sm" data-act="rowPick">☑ 보일 줄 고르기</button></div>
   <div class="spread"><div class="pgL">${miniCal()}${up.length ? `<p class="soon"><b>이번 주 기한</b><br>${up.slice(0, 6).map(e => `${md(e.date)} ${esc(e.t)}`).join('<br>')}</p>` : ''}</div>
   <div class="pgR"><div class="cols"><span>분류</span><span>제목</span><span>현황</span><span class="r">기한</span><span></span></div>${rows.join('')}</div></div>`;
 }
