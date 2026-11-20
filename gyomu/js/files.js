@@ -73,7 +73,7 @@ async function comciSync(silent) {
   try {
     const r = await fetch(COMCI_URL, { cache: 'no-store' }); if (!r.ok) throw new Error('none'); const j = await r.json();
     const key = nm.slice(0, 2) + '*', G = {};
-    (j.lessons || []).filter(l => l.t === key || l.t === nm).forEach(l => { const k = l.d + '-' + l.p; if (!G[k]) G[k] = `${l.g}-${l.c} ${l.s}`.trim(); });
+    (j.lessons || []).filter(l => l.t === key || l.t === nm || l.t === nm.slice(0, 2)).forEach(l => { const k = l.d + '-' + l.p; if (!G[k]) G[k] = `${l.g}-${l.c} ${l.s}`.trim(); });
     if (!Object.keys(G).length) { if (!silent) toast(`컴시간에서 "${key}" 선생님 수업을 찾지 못했습니다. 설정의 이름을 확인해 주세요.`); return; }
     const same = JSON.stringify(G) === JSON.stringify(S.timetable); S.timetable = G; S.profile.comci = Date.now();
     if (!same) { commit(); if (!silent) toast(`컴시간 시간표 ${Object.keys(G).length}칸을 가져왔습니다. (${(j.updated || '').slice(0, 10)} 기준)`); } else if (!silent) toast('이미 최신 시간표입니다.');
