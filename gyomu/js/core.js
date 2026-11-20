@@ -142,6 +142,82 @@ function loadFont(f) {
   if (f[1] === 'ff') { const s = document.createElement('style'); s.textContent = `@font-face{font-family:'${f[3]}';src:url('${f[2]}');font-display:swap}`; document.head.appendChild(s); return; }
   const l = document.createElement('link'); l.rel = 'stylesheet'; l.href = f[1] === 'g' ? `https://fonts.googleapis.com/css2?family=${f[2]}&display=swap` : f[2]; document.head.appendChild(l);
 }
+/* ---- 디자인 틀 50가지: 메뉴 위치 · 종이 모양 · 줄 모양 · 머리글 · 책상 무늬 · 모서리 · 간격 ---- */
+const FRAMES = [
+  ['01', '정통 교무수첩', 'tabs notebook card notebook grad 12 n'],
+  ['02', '스프링 스테노', 'tabs steno card notebook grad 12 n'],
+  ['03', '플랫 문서', 'bar plain line bar none 0 n'],
+  ['04', '카드 대시보드', 'pills card shadow bar dots 18 n'],
+  ['05', '사이드바 앱', 'left card card bar none 12 n'],
+  ['06', '오른쪽 인덱스', 'right notebook card notebook grad 12 n'],
+  ['07', '하단 탭 앱', 'bottom full card bar none 12 n'],
+  ['08', '윈도우 창', 'bar window card bar none 12 n'],
+  ['09', '회계 장부', 'bar sheet table notebook lines 0 n'],
+  ['10', '신문 1면', 'box sheet line center none 0 n'],
+  ['11', '포스트잇 보드', 'pills card note center dots 12 n'],
+  ['12', '미니멀 화이트', 'dots plain line center none 0 c'],
+  ['13', '둥근 알약', 'pills card pill center grad 18 n'],
+  ['14', '한 줄 리스트', 'bar plain line mini none 0 n'],
+  ['15', '배너 헤더', 'tabs sheet bar band grad 6 n'],
+  ['16', '센터 타이틀', 'tabs card card center dots 12 n'],
+  ['17', '모눈 노트', 'tabs notebook card notebook grid 6 n'],
+  ['18', '점선 다이어리', 'pills notebook note notebook dots 18 n'],
+  ['19', '줄무늬 책상', 'bar sheet card bar stripe 12 n'],
+  ['20', '풀스크린 플랫', 'bar full line bar none 0 n'],
+  ['21', '사이드 레일 노트', 'left notebook line notebook grad 12 n'],
+  ['22', '오른쪽 사이드 카드', 'right card shadow bar grid 18 n'],
+  ['23', '하단 알약 앱', 'bottom card pill center none 18 n'],
+  ['24', '박스 메뉴 문서', 'box plain card bar none 6 n'],
+  ['25', '도트 메뉴 갤러리', 'dots card shadow center dots 18 w'],
+  ['26', '에디토리얼', 'dots sheet line center lines 0 w'],
+  ['27', '레트로 윈도', 'box window table bar stripe 0 n'],
+  ['28', '스테노 라인', 'bar steno line notebook none 6 n'],
+  ['29', '컴팩트 업무', 'bar plain table bar none 0 c'],
+  ['30', '넓은 여유', 'pills card shadow center grad 18 w'],
+  ['31', '라운드 팝', 'pills card bar mini dots 18 n'],
+  ['32', '각진 오피스', 'box plain table bar none 0 n'],
+  ['33', '사이드 윈도우', 'left window card bar none 12 n'],
+  ['34', '하단 스테노', 'bottom steno card notebook grad 12 n'],
+  ['35', '배너 노트', 'tabs notebook bar band grad 12 n'],
+  ['36', '센터 카드', 'box card shadow center none 12 n'],
+  ['37', '알약 풀폭', 'pills full pill bar none 18 n'],
+  ['38', '사이드 장부', 'left sheet table bar lines 0 n'],
+  ['39', '오른쪽 장부', 'right sheet table notebook none 0 n'],
+  ['40', '박스 센터', 'box card line center dots 6 n'],
+  ['41', '도트 노트', 'tabs notebook line notebook dots 12 n'],
+  ['42', '모눈 사이드', 'left card card bar grid 6 n'],
+  ['43', '스트라이프 카드', 'pills card card center stripe 12 n'],
+  ['44', '컴팩트 하단', 'bottom plain line bar none 0 c'],
+  ['45', '컴팩트 사이드', 'left plain line bar none 0 c'],
+  ['46', '큼직 알약', 'pills plain pill center none 18 w'],
+  ['47', '윈도우 사이드', 'right window card bar none 12 n'],
+  ['48', '스테노 박스', 'box steno note notebook grad 12 n'],
+  ['49', '시트 도트', 'dots sheet note center dots 12 n'],
+  ['50', '풀 배너 사이드', 'left full bar band none 0 n']
+];
+const frameOf = () => { const id = (S.profile && S.profile.frame) || '01'; return FRAMES.find(f => f[0] === id) || FRAMES[0]; };
+function frameApply() {
+  const [nav, page, row, head, bg, rd, dn] = frameOf()[2].split(' '), h = document.documentElement.dataset;
+  h.nav = nav; h.page = page; h.row = row; h.head = head; h.bg = bg; h.round = rd; h.dens = dn;
+}
+function frameThumb(a) {
+  const [nav, page, row, head, bg, rd, dn] = a.split(' '), c = '#8a7f72', pc = '#fbf6e9';
+  let x = 6, y = 6, w = 108, hh = 68, s = `<rect width="120" height="80" rx="6" fill="#3d4a44"/>`;
+  if (page === 'full' || page === 'plain') { x = page === 'full' ? 0 : 10; w = page === 'full' ? 120 : 100; y = 0; hh = 80; }
+  s += `<rect x="${x}" y="${y}" width="${w}" height="${hh}" rx="${rd === '0' ? 0 : 4}" fill="${pc}" stroke="${page === 'window' ? '#222' : 'none'}"/>`;
+  if (page === 'notebook') s += [0, 1, 2, 3, 4].map(i => `<circle cx="${x + 4}" cy="${y + 10 + i * 12}" r="2" fill="#333"/>`).join('');
+  if (page === 'steno') s += [0, 1, 2, 3, 4, 5, 6].map(i => `<circle cx="${x + 12 + i * 14}" cy="${y + 2}" r="2" fill="#333"/>`).join('');
+  if (page === 'window') s += `<rect x="${x}" y="${y}" width="${w}" height="8" fill="#ddd"/><circle cx="${x + 5}" cy="${y + 4}" r="1.5" fill="#e55"/><circle cx="${x + 10}" cy="${y + 4}" r="1.5" fill="#eb4"/>`;
+  const hx = x + 12, hy = y + (page === 'window' ? 12 : 8);
+  s += head === 'band' ? `<rect x="${x}" y="${hy - 2}" width="${w}" height="10" fill="#7a2a3a"/>` : head === 'center' ? `<rect x="${x + w / 2 - 14}" y="${hy}" width="28" height="5" fill="#333"/>` : `<rect x="${hx}" y="${hy}" width="${head === 'bar' || head === 'mini' ? 24 : 34}" height="5" fill="#333"/>`;
+  let bx = hx, by = hy + 14, bw = w - 20;
+  if (nav === 'left') { s += [0, 1, 2, 3].map(i => `<rect x="${x + 4}" y="${hy + 14 + i * 8}" width="18" height="5" rx="2" fill="${i ? '#bbb' : '#7a2a3a'}"/>`).join(''); bx = x + 28; bw = w - 34; }
+  else if (nav === 'right') { s += [0, 1, 2, 3].map(i => `<rect x="${x + w - 22}" y="${hy + 14 + i * 8}" width="18" height="5" rx="2" fill="${i ? '#bbb' : '#7a2a3a'}"/>`).join(''); bw = w - 38; }
+  else if (nav === 'bottom') s += `<rect x="${x}" y="${y + hh - 10}" width="${w}" height="10" fill="#7a2a3a"/>`;
+  else { s += [0, 1, 2, 3, 4].map(i => `<rect x="${hx + i * 17}" y="${hy + 8}" width="14" height="4" rx="${nav === 'pills' ? 2 : 0}" fill="${i ? '#bbb' : '#7a2a3a'}"/>`).join(''); }
+  for (let i = 0; i < 3; i++) s += row === 'line' ? `<rect x="${bx}" y="${by + i * 13 + 8}" width="${bw}" height="1" fill="${c}"/>` : `<rect x="${bx}" y="${by + i * 13}" width="${bw}" height="10" rx="${row === 'pill' ? 5 : 2}" fill="${row === 'note' ? '#f4e7a1' : '#fff'}" stroke="${c}" stroke-width="${row === 'table' ? 1 : .6}"/>`;
+  return `<svg viewBox="0 0 120 80" width="100%">${s}</svg>`;
+}
 function themeApply() {
   const id = (S && S.profile && S.profile.theme) || 'classic', t = THEMES.find(x => x[0] === id) || THEMES[0], r = document.documentElement.style, dark = !!t[11];
   const [, , , d1, d2, paper, ink, acc, line, tabs, font] = t, F = FONTS[font];
@@ -156,6 +232,7 @@ function themeApply() {
   const bf = FONTS50.find(x => x[0] === S.profile.bfont), hf = FONTS50.find(x => x[0] === S.profile.hfont);
   if (bf) { loadFont(bf); set('--sans', fontCss(bf)); set('--serif', fontCss(bf)); } else { r.removeProperty('--sans'); r.removeProperty('--serif'); }
   if (hf) { loadFont(hf); set('--hf', fontCss(hf)); set('--hw', '400'); set('--hs', '.8'); }
+  frameApply();
   const m = document.querySelector('meta[name=theme-color]'); if (m) m.content = d1;
 }
 const titleOf = () => (S.profile.title || '업무파탈').trim();

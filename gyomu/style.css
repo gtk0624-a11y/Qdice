@@ -321,3 +321,75 @@ input,select,textarea{font-size:18px;background:var(--card2);color:var(--ink)}
 .bh>.mu{font-size:16px}
 @media(max-width:860px){body{font-size:18px}#app{background:linear-gradient(90deg,transparent 30px,var(--margin) 30px,var(--margin) 32px,transparent 32px),var(--paper2)}}
 :root{--serif:'Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',sans-serif}
+
+/* ===== 디자인 틀 50가지: html[data-*] 속성으로 모양을 바꿉니다 ===== */
+html{--rr:12px}
+html[data-round="0"]{--rr:0px}html[data-round="6"]{--rr:6px}html[data-round="12"]{--rr:12px}html[data-round="18"]{--rr:22px}
+#app::before{display:none}
+.btn,input,select,textarea{border-radius:min(var(--rr),10px)}
+/* 책상 무늬 */
+html[data-bg=none] body{background:var(--desk)}
+html[data-bg=dots] body{background:radial-gradient(rgba(255,255,255,.2) 1.6px,transparent 1.8px) 0 0/22px 22px,var(--desk)}
+html[data-bg=grid] body{background:linear-gradient(rgba(255,255,255,.09) 1px,transparent 1px) 0 0/28px 28px,linear-gradient(90deg,rgba(255,255,255,.09) 1px,transparent 1px) 0 0/28px 28px,var(--desk)}
+html[data-bg=lines] body{background:repeating-linear-gradient(0deg,rgba(255,255,255,.08) 0 1px,transparent 1px 30px),var(--desk)}
+html[data-bg=stripe] body{background:repeating-linear-gradient(45deg,rgba(255,255,255,.07) 0 14px,transparent 14px 28px),var(--desk)}
+html[data-page=full] body,html[data-page=plain] body{background:var(--paper2)}
+/* 종이 모양 */
+html[data-page=notebook] #app{padding-left:64px;border-radius:6px calc(var(--rr)*1.4) calc(var(--rr)*1.4) 6px;background:linear-gradient(90deg,transparent 44px,var(--margin) 44px,var(--margin) 46px,transparent 46px),var(--paper2)}
+html[data-page=sheet] #app{background:var(--paper2);padding:28px 40px 70px;border-radius:var(--rr)}html[data-page=sheet] #app::after{display:block}
+html[data-page=plain] #app{background:transparent;box-shadow:none;border-radius:0;margin:0 auto;padding:24px 36px 100px;max-width:1100px}
+html[data-page=full] #app{background:transparent;box-shadow:none;border-radius:0;margin:0;padding:24px 28px 100px;max-width:none;min-height:100vh}
+html[data-page=card] #app{background:var(--paper2);padding:28px 40px 70px;border-radius:calc(var(--rr)*1.6);box-shadow:0 14px 40px rgba(0,0,0,.35)}
+html[data-page=window] #app{background:var(--paper2);padding:58px 40px 70px;border:2px solid #1b1b1b;border-radius:var(--rr);box-shadow:6px 8px 0 rgba(0,0,0,.35)}
+html[data-page=window] #app::before{display:block;content:"";position:absolute;left:0;right:0;top:0;bottom:auto;width:auto;height:38px;border-radius:calc(var(--rr) - 2px) calc(var(--rr) - 2px) 0 0;background:radial-gradient(circle at 20px 19px,#ff5f57 6px,transparent 7px),radial-gradient(circle at 42px 19px,#febc2e 6px,transparent 7px),radial-gradient(circle at 64px 19px,#28c840 6px,transparent 7px),color-mix(in srgb,var(--ink) 12%,var(--paper2));border-bottom:1px solid #1b1b1b}
+html[data-page=steno] #app{background:var(--paper2);padding:54px 40px 70px;border-radius:var(--rr)}
+html[data-page=steno] #app::before{display:block;content:"";position:absolute;left:0;right:0;top:-9px;bottom:auto;width:auto;height:30px;background:radial-gradient(circle at 14px 14px,#222 0 5px,#9a9a9a 6px 8px,transparent 9px) 0 0/34px 30px repeat-x}
+html:not([data-page=notebook]):not([data-page=sheet]) #app::after{display:none}
+/* 메뉴 모양 */
+html[data-nav=bar] .nav{gap:2px;border-bottom:1px solid var(--rule)}html[data-nav=bar] .nav a{background:transparent!important;border:0;border-bottom:3px solid transparent;border-radius:0;top:0;padding:9px 14px}html[data-nav=bar] .nav a[aria-current=page]{border-bottom-color:var(--cover);box-shadow:none;background:transparent!important}
+html[data-nav=pills] .nav a{background:color-mix(in srgb,var(--cover) 12%,var(--card2))!important;border:0;border-radius:999px;top:0;margin:6px 2px 8px;padding:7px 17px}html[data-nav=pills] .nav a[aria-current=page]{background:var(--cover)!important;color:var(--paper2)!important;box-shadow:none;padding-top:7px}
+html[data-nav=box] .nav{display:grid;grid-template-columns:repeat(auto-fit,minmax(92px,1fr));border:2px solid var(--ink);gap:0;margin:10px 0}html[data-nav=box] .nav a{border:0;border-right:1px solid var(--ink);border-radius:0;background:var(--card2)!important;text-align:center;top:0;padding:10px 6px}html[data-nav=box] .nav a[aria-current=page]{background:var(--ink)!important;color:var(--paper2)!important;box-shadow:none;padding-top:10px}
+html[data-nav=dots] .nav{gap:0;justify-content:center}html[data-nav=dots] .nav a{background:none!important;border:0;border-radius:0;top:0;padding:7px 10px}html[data-nav=dots] .nav a+a::before{content:"·";margin-right:18px;opacity:.5}html[data-nav=dots] .nav a[aria-current=page]{box-shadow:none;border-bottom:3px solid var(--cover);padding-top:7px}
+html[data-nav=left] #app,html[data-nav=right] #app{display:grid;grid-template-columns:210px minmax(0,1fr);column-gap:30px;align-items:start}
+html[data-nav=right] #app{grid-template-columns:minmax(0,1fr) 210px}
+html[data-nav=left] .mast,html[data-nav=right] .mast{grid-column:1/-1}
+html[data-nav=left] .nav,html[data-nav=right] .nav{flex-direction:column;align-items:stretch;position:sticky;top:12px;gap:6px;margin:6px 0 0}
+html[data-nav=left] .nav{grid-column:1;grid-row:2}html[data-nav=left] main{grid-column:2;grid-row:2;border-top:0;padding-top:0}
+html[data-nav=right] .nav{grid-column:2;grid-row:2}html[data-nav=right] main{grid-column:1;grid-row:2;border-top:0;padding-top:0}
+html[data-nav=left] footer,html[data-nav=right] footer{grid-column:1/-1;grid-row:3}
+html[data-nav=left] .nav a,html[data-nav=right] .nav a{border-radius:12px;border:1px solid rgba(0,0,0,.15);top:0;padding:11px 16px;font-size:18px}
+html[data-nav=left] .nav a[aria-current=page],html[data-nav=right] .nav a[aria-current=page]{background:var(--cover)!important;color:var(--paper2)!important;box-shadow:none;padding-top:11px}
+html[data-nav=bottom] #app{padding-bottom:120px}
+html[data-nav=bottom] .nav{position:fixed;left:0;right:0;bottom:0;z-index:40;background:var(--card2);border-top:2px solid var(--ink);display:flex;flex-wrap:nowrap;overflow-x:auto;gap:2px;margin:0;padding:6px 6px calc(6px + env(safe-area-inset-bottom))}
+html[data-nav=bottom] .nav a{flex:1 0 auto;border:0;border-radius:12px;background:none!important;text-align:center;top:0;padding:10px 12px;white-space:nowrap}
+html[data-nav=bottom] .nav a[aria-current=page]{background:color-mix(in srgb,var(--cover) 20%,var(--card2))!important;box-shadow:none;padding-top:10px;font-weight:800}
+html[data-nav=bottom] #chatfab{bottom:84px}html[data-nav=bottom] #chatbub{bottom:108px}html[data-nav=bottom] #chatpan{bottom:190px}
+html:not([data-nav=tabs]) main{border-top-color:transparent}
+/* 줄(게시판 행) 모양 */
+html[data-row=line] .row{background:transparent;border:0;border-bottom:1px solid var(--rule);border-radius:0;box-shadow:none;margin:0;padding:0 4px}
+html[data-row=table] .row{background:var(--card2);border:1px solid var(--ink);border-radius:0;box-shadow:none;margin:-1px 0 0;padding:0 14px}
+html[data-row=shadow] .row{border:0;border-radius:var(--rr);box-shadow:0 5px 16px rgba(0,0,0,.16);margin:14px 0}
+html[data-row=note] .row{background:color-mix(in srgb,var(--note) 55%,var(--card2));border:1px dashed var(--rule);border-radius:4px;box-shadow:2px 3px 0 rgba(0,0,0,.1);margin:12px 0}
+html[data-row=note] .row:nth-child(even){transform:rotate(.25deg)}html[data-row=note] .row:nth-child(odd){transform:rotate(-.25deg)}
+html[data-row=pill] .row{border-radius:34px;padding:0 28px}
+html[data-row=bar] .row{border:0;border-left:7px solid var(--cover);border-radius:0 var(--rr) var(--rr) 0;box-shadow:0 1px 4px rgba(0,0,0,.12)}
+html[data-row=card] .row{border-radius:var(--rr)}
+/* 머리글 모양 */
+html[data-head=bar] .mast{padding:4px 0 8px;align-items:center}html[data-head=bar] .mast1 h1{font-size:calc(34px*var(--hs))}html[data-head=bar] img.logo{width:42px;height:42px}html[data-head=bar] .mast1 .fr{display:none}html[data-head=bar] .mast2{transform:none;background:none;border:0;box-shadow:none;padding:0}
+html[data-head=mini] .mast{padding:2px 0 6px;align-items:center}html[data-head=mini] .mast1 h1{font-size:calc(26px*var(--hs))}html[data-head=mini] img.logo{width:34px;height:34px;border-width:2px}html[data-head=mini] .mast1 .fr,html[data-head=mini] .mast1 .x{display:none}html[data-head=mini] .mast2{transform:none;background:none;border:0;box-shadow:none;padding:0;font-size:14px}
+html[data-head=center] .mast{flex-direction:column;align-items:center;text-align:center}html[data-head=center] .mast1{justify-content:center}html[data-head=center] .mast2{transform:none;text-align:center;background:none;border:0;box-shadow:none}
+html[data-head=band] .mast{background:var(--cover);border-radius:var(--rr);padding:14px 22px;align-items:center;margin-bottom:8px}html[data-head=band] .mast1 h1,html[data-head=band] .mast1 .fr,html[data-head=band] .mast1 .x,html[data-head=band] .mast2,html[data-head=band] .dt{color:#fff}html[data-head=band] .mast2{transform:none;background:none;border:0;box-shadow:none}html[data-head=band] img.logo{border-color:#fff}
+/* 간격 */
+html[data-dens=c] body{font-size:16px;line-height:1.55}html[data-dens=c] .row>summary{padding:8px 0;min-height:44px}html[data-dens=c] .row .ttl,html[data-dens=c] .ttl{font-size:18px}html[data-dens=c] .mu{font-size:14px}html[data-dens=c] #app{padding-top:16px}
+html[data-dens=w] body{line-height:1.95}html[data-dens=w] .row>summary{padding:24px 0}html[data-dens=w] .row{margin:14px 0}html[data-dens=w] #app{padding-top:40px}
+@media(max-width:860px){
+ html[data-page] #app{margin:0;padding:14px 14px 100px;border-radius:0;max-width:none}
+ html[data-page=notebook] #app{padding-left:30px;background:linear-gradient(90deg,transparent 18px,var(--margin) 18px,var(--margin) 20px,transparent 20px),var(--paper2)}
+ html[data-page=window] #app{padding-top:54px}html[data-page=steno] #app{padding-top:48px}
+ html[data-nav=left] #app,html[data-nav=right] #app{display:block}
+ html[data-nav=left] .nav,html[data-nav=right] .nav{flex-direction:row;flex-wrap:wrap;position:static}
+ html[data-nav=left] .nav a,html[data-nav=right] .nav a{padding:8px 12px;font-size:16px}
+}
+html[data-nav=left] .spread,html[data-nav=right] .spread{grid-template-columns:minmax(0,1fr)}html[data-nav=left] .pgL,html[data-nav=right] .pgL{position:static}
+html[data-nav=left] .mcal,html[data-nav=right] .mcal{max-width:420px}
+#app{min-width:0}main{min-width:0}
