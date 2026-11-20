@@ -141,3 +141,23 @@ button{font-family:inherit;cursor:pointer}
 .grid .th{border-radius:8px}
 .grid .cap{color:#fff;font-size:12px;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .watermark{position:absolute;right:10px;bottom:6px;font-size:11px;color:#9a93bb;z-index:20;pointer-events:none}
+
+/* ---- 모션 ---- */
+.stage.sc-in{animation:scin .55s ease backwards}
+@keyframes scin{from{opacity:0;filter:blur(8px)}to{opacity:1;filter:blur(0)}}
+@keyframes mrise{from{opacity:0;translate:0 calc(var(--pt)*28)}to{opacity:1;translate:0 0}}
+@keyframes mzoom{from{opacity:0;scale:.86}to{opacity:1;scale:1}}
+@keyframes mpop{from{opacity:0;scale:.5}to{opacity:1;scale:1}}
+@keyframes mfloat{from{translate:0 calc(var(--pt)*-8)}to{translate:0 calc(var(--pt)*10)}}
+/* ---- 워드클라우드·패들릿·사이트 ---- */
+.cloud-b{position:absolute;inset:0}
+.cloud-b .cw{position:absolute;font-weight:800;white-space:nowrap;line-height:1.1;animation:pop .6s cubic-bezier(.2,1.5,.4,1) backwards}
+.cloud-b .cl-empty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--mute);font-size:calc(var(--pt)*14)}
+.wall-c{display:grid;grid-template-columns:repeat(var(--n,2),1fr);gap:calc(var(--pt)*8);height:100%}
+.wall-c .col{background:#f6f3fd;border-radius:calc(var(--pt)*10);padding:calc(var(--pt)*6);overflow:hidden;display:flex;flex-direction:column;min-width:0}
+.wall-c .col h4{margin:0 0 calc(var(--pt)*6);color:var(--acc);font-size:calc(var(--pt)*13);flex:none}
+.wall-c .cb{display:flex;flex-direction:column;gap:calc(var(--pt)*6);overflow:hidden}
+.note .nimg{width:100%;max-height:calc(var(--pt)*150);object-fit:cover;border-radius:calc(var(--pt)*6);display:block;margin-bottom:calc(var(--pt)*4)}
+.w .wh .lnk{color:var(--acc);font-size:calc(var(--pt)*12);text-decoration:none;background:#fff;border-radius:999px;padding:0 calc(var(--pt)*10)}
+.tool-x{background:#fff;color:var(--acc);border:0;border-radius:999px;font-weight:800;font-size:calc(var(--pt)*12);padding:calc(var(--pt)*2) calc(var(--pt)*10);cursor:pointer}
+.el.tool{z-index:40;box-shadow:0 calc(var(--pt)*8) calc(var(--pt)*30) rgba(40,20,90,.35)}

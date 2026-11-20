@@ -15,6 +15,8 @@
   let wrap, stage, tab = 'run', panelOpen = false, showRx = true, saveTimer = null, editingText = null;
   const subsRoom = [], subsScene = [], timers = [];
   const wallData = {}, pollData = {}, wsData = {}, rxData = { rx: {}, und: {} };
+  let tool = null;                                   // 🧰 수업 중 꺼낸 도구(저장되지 않고, 현재 장면 위에만 뜸)
+  const elById = (s, id) => s.els.find(x => x.id === id) || (tool && tool.id === id ? tool : null);
   const hist = { u: [], r: [] };
   const clip = { el: null };
 
@@ -54,9 +56,9 @@
     if (!keepSel && mode === 'edit' && !stage.querySelector('.el[data-id="' + sel + '"]')) sel = null;
     clearSceneSubs();
     stage.classList.toggle('edit', mode === 'edit');
-    SL.renderScene(stage, deck, idx, { mode, rev: mode === 'edit' ? 0 : rev, room: room && room.code });
+    SL.renderScene(stage, deck, idx, { mode, rev: mode === 'edit' ? 0 : rev, room: room && room.code, anim: mode === 'view' });
     layout();
-    if (mode === 'view') { mountLive(); }
+    if (mode === 'view') { addToolOverlay(); mountLive(); }
     else { drawSel(); renderProps(); renderStrip(); }
     renderBars(); renderPanel();
     history.replaceState(null, '', location.pathname + '?' + [...[...SL.qs.entries()].filter(([k]) => k !== 's' && k !== 'edit').map(([k, v]) => k + '=' + encodeURIComponent(v)), 's=' + (idx + 1)].join('&'));
@@ -112,7 +114,7 @@
       top.innerHTML = `<button class="btn sm" data-a="home">← 서랍</button><span style="font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:46vw">${esc(deck.title)}</span><span class="sp"></span><span class="sceneno">${idx + 1} / ${n}</span><button class="btn sm" data-a="edit">✏️ 편집</button><button class="btn sm ${panelOpen ? 'on' : ''}" data-a="panel">🎛 교사 패널</button><button class="btn sm" data-a="grid">☰ 목차</button><button class="btn sm" data-a="full">⛶</button>`;
       const rm = SL.revealMax(sc());
       bot.innerHTML = `<button class="btn" data-a="prev">◀ 이전</button><button class="btn pri" data-a="next" style="min-width:120px">${rev < rm ? '답 보기 ' + (rev + 1) + '/' + rm : '다음 ▶'}</button><button class="btn ${blank ? 'on' : ''}" data-a="blank">⬛ 가리기</button>` +
-        (room ? `<button class="btn on" data-a="qr">📱 방 ${esc(room.code)}</button>` : `<button class="btn" data-a="start">🚀 수업 시작</button>`);
+        `<button class="btn ${tool ? 'on' : ''}" data-a="tools">🧰 도구</button>` + (room ? `<button class="btn on" data-a="qr">📱 방 ${esc(room.code)}</button>` : `<button class="btn" data-a="start">🚀 수업 시작</button>`);
     } else {
       top.innerHTML = `<button class="btn sm" data-a="view">▶ 발표 보기</button><button class="btn sm" data-a="addscene">＋ 장면</button><button class="btn sm" data-a="addel">＋ 요소</button><button class="btn sm" data-a="undo">↶</button><button class="btn sm" data-a="redo">↷</button><span class="sp"></span><span id="savest" class="sceneno">${dirty ? '저장 안 됨' : '저장됨'}</span><button class="btn sm pri" data-a="save">💾 저장</button><button class="btn sm" data-a="saveas">📄 다른 이름으로</button>`;
       bot.innerHTML = '';
@@ -123,7 +125,7 @@
     const act = a => ({
       home: () => { if (dirty && !confirm('저장하지 않은 변경이 있습니다. 나갈까요?')) return; dirty = false; location.href = SL.root + 'index.html' + (SL.space !== 'default' ? '?space=' + SL.space : ''); },
       edit: enterEdit, view: exitEdit, panel: togglePanel, grid: showGrid, full: toggleFull,
-      prev, next, blank: () => setBlank(!blank), start: startRoom, qr: showJoinQR,
+      prev, next, blank: () => setBlank(!blank), start: startRoom, qr: showJoinQR, tools: openTools,
       addscene: addSceneMenu, addel: addElMenu, undo, redo, save: () => save(false), saveas: () => save(true)
     }[a] || (() => { }))();
     [$('top'), $('bot')].forEach(b => b.addEventListener('click', e => { const t = e.target.closest('[data-a]'); if (t) { e.stopPropagation(); act(t.dataset.a); } }));
@@ -181,26 +183,119 @@
   function mountLive() {
     const s = sc();
     stage.querySelectorAll('[data-w]').forEach(node => {
-      const el = s.els.find(e => e.id === node.dataset.id); if (!el) return;
+      const el = elById(s, node.dataset.id); if (!el) return;
       if (el.t === 'yt') return mountYT(node, el);
-      if (el.t === 'qr') return;
+      if (el.t === 'qr' || el.t === 'site') return;
       if (!room) { node.classList.add('ph'); node.querySelector('.wb').innerHTML = '수업을 시작하면<br>학생 참여가 여기에 모입니다<br><small>(아래 🚀 수업 시작)</small>'; return; }
-      if (el.t === 'wall') mountWall(node, el); else if (el.t === 'poll') mountPoll(node, el); else if (el.t === 'ws') mountWS(node, el);
+      if (el.t === 'wall') mountWall(node, el); else if (el.t === 'poll') mountPoll(node, el); else if (el.t === 'ws') mountWS(node, el); else if (el.t === 'cloud') mountCloud(node, el);
     });
     if (room) subReactions(s);
   }
   function mountWall(node, el) {
     const g = node.querySelector('.wall-g'), cnt = node.querySelector('.cnt'), seen = new Set();
+    const cols = (el.cols || []).filter(Boolean);
+    const mk = o => {
+      const n = h('div', 'note');
+      if (o.img) { const im = document.createElement('img'); im.className = 'nimg'; im.src = o.img; n.appendChild(im); }
+      if (o.t) { const t = h('div'); t.textContent = o.t; n.appendChild(t); }
+      const sm = h('small'); sm.textContent = (o.n || '') + (el.likes ? '   ❤️ ' + Object.keys(o.lk || {}).length : ''); n.appendChild(sm);
+      if (seen.has(o.k)) n.style.animation = 'none'; seen.add(o.k); return n;
+    };
     sub(live(el) + '/items', v => {
       v = v || {}; wallData[el.id] = v;
       const list = Object.keys(v).map(k => Object.assign({ k }, v[k])).filter(o => el.approve === false || o.ok).sort((a, b) => a.ts - b.ts);
-      g.innerHTML = '';
-      list.forEach(o => { const n = h('div', 'note'); n.textContent = o.t; const sm = h('small'); sm.textContent = o.n || ''; n.appendChild(sm); if (seen.has(o.k)) n.style.animation = 'none'; seen.add(o.k); g.appendChild(n); });
+      g.innerHTML = ''; g.className = cols.length ? 'wall-c' : 'wall-g'; g.style.setProperty('--n', cols.length || 1);
+      if (cols.length) {
+        cols.forEach((name, ci) => { const col = h('div', 'col'); col.innerHTML = '<h4>' + esc(name) + '</h4>'; const b = h('div', 'cb'); list.filter(o => (o.c >= cols.length ? 0 : (o.c || 0)) === ci).forEach(o => b.appendChild(mk(o))); col.appendChild(b); g.appendChild(col); });
+        g.style.display = '';
+      } else {
+        list.forEach(o => g.appendChild(mk(o)));
+        if (!list.length) { g.innerHTML = '<div style="color:#8a8399;font-size:calc(var(--pt)*14);padding:calc(var(--pt)*8)">' + (Object.keys(v).length ? '선생님이 공개하면 여기에 나타납니다 ✨' : '학생이 보낸 생각이 여기에 나타납니다') + '</div>'; g.style.display = 'block'; } else g.style.display = '';
+      }
       cnt.textContent = list.length + '개'; cnt.classList.toggle('hide', !list.length);
-      if (!list.length) { g.innerHTML = '<div style="color:#8a8399;font-size:calc(var(--pt)*14);padding:calc(var(--pt)*8)">' + (Object.keys(v).length ? '선생님이 공개하면 여기에 나타납니다 ✨' : '학생이 보낸 생각이 여기에 나타납니다') + '</div>'; g.style.display = 'block'; } else g.style.display = '';
       renderPanel();
     });
   }
+  /* ☁️ 워드클라우드: 같은 단어는 합쳐 세고, 많이 나온 단어일수록 크게 가운데에 둡니다 */
+  function drawCloud(box, v, seen) {
+    const W = box.clientWidth, H = box.clientHeight; if (!W || !H) return;
+    const map = {};
+    Object.values(v || {}).forEach(o => { const t = (o.t || '').trim(); const k = t.toLowerCase().replace(/\s+/g, ''); if (!k) return; const m = map[k] || (map[k] = { k, c: 0, f: {} }); m.c++; m.f[t] = (m.f[t] || 0) + 1; });
+    const words = Object.values(map).map(m => ({ k: m.k, c: m.c, t: Object.keys(m.f).sort((a, b) => m.f[b] - m.f[a])[0] })).sort((a, b) => b.c - a.c || a.t.localeCompare(b.t));
+    box.innerHTML = '';
+    if (!words.length) { box.innerHTML = '<div class="cl-empty">학생이 낸 단어가 여기에 모입니다 ☁️</div>'; return; }
+    const max = words[0].c, base = Math.min(W, H), cv = document.createElement('canvas').getContext('2d'), placed = [];
+    const pal = ['#6A4BC4', '#2FB594', '#F4705A', '#3C7BD9', '#E0A030', '#B04BC4'];
+    words.forEach((w, wi) => {
+      let fs = base * (0.075 + 0.2 * (w.c / max)), done = false;
+      for (let tries = 0; tries < 14 && !done; tries++, fs *= 0.9) {
+        cv.font = '800 ' + fs + 'px sans-serif'; const tw = cv.measureText(w.t).width + fs * 0.25, th = fs * 1.15;
+        for (let s = 0; s < 900; s++) {
+          const a = s * 0.33, r = s * base / 330, x = W / 2 + r * Math.cos(a) * 1.55 - tw / 2, y = H / 2 + r * Math.sin(a) - th / 2;
+          if (x < 3 || y < 3 || x + tw > W - 3 || y + th > H - 3) { if (r > Math.max(W, H)) break; continue; }
+          if (placed.some(p => x < p.x + p.w + 4 && x + tw + 4 > p.x && y < p.y + p.h + 2 && y + th + 2 > p.y)) continue;
+          placed.push({ x, y, w: tw, h: th });
+          const sp = h('span', 'cw'); sp.textContent = w.t; sp.title = w.c + '명';
+          sp.style.cssText = 'left:' + x + 'px;top:' + y + 'px;font-size:' + fs + 'px;color:' + pal[wi % pal.length];
+          if (seen.has(w.k)) sp.style.animation = 'none'; else sp.style.animationDelay = Math.min(wi * 0.05, 0.8) + 's';
+          box.appendChild(sp); done = true; break;
+        }
+      }
+      seen.add(w.k);
+    });
+  }
+  function mountCloud(node, el) {
+    const box = node.querySelector('.cloud-b'), cnt = node.querySelector('.cnt'), seen = new Set(); let data = {};
+    sub(live(el) + '/items', v => { data = v || {}; wallData[el.id] = data; const n = Object.keys(data).length; cnt.textContent = n + '개'; cnt.classList.toggle('hide', !n); drawCloud(box, data, seen); renderPanel(); });
+    const ro = new ResizeObserver(() => { if (!node.isConnected) return ro.disconnect(); drawCloud(box, data, seen); }); ro.observe(box);
+  }
+  /* 🧰 도구 꺼내기: 저장된 슬라이드를 건드리지 않고, 지금 장면 위에 띄웁니다. 학생 화면에도 같이 뜹니다. */
+  function addToolOverlay() {
+    if (!tool || tool.sc !== sc().id) return;
+    const n = SL.elDOM(tool, { deck, mode: 'view', rev: 0, room: room && room.code }); n.classList.add('tool');
+    const x = h('button', 'tool-x', '✕ 닫기'); x.onclick = closeTool;
+    const hd = n.querySelector('.wh'); if (hd) hd.appendChild(x); stage.appendChild(n);
+  }
+  function closeTool() { tool = null; render(); }
+  function openTools() {
+    if (mode !== 'view') return;
+    const m = h('div', 'modal'), b = h('div', 'box'); m.appendChild(b);
+    const L = [['cloud', '☁️ 워드클라우드', '학생이 낸 단어가 크기로 모여요'], ['board', '📌 패들릿 보드', '열·사진·좋아요가 있는 카드 보드'], ['wall', '💬 질문 월', '생각 카드 모으기'], ['poll', '📊 투표', '3·2·1 결과 공개'], ['site', '🌐 외부 사이트', '패들릿·멘티미터·딜시·모둠 뽑기 등']];
+    b.innerHTML = '<h2>🧰 도구 꺼내기</h2><div class="mute" style="margin-bottom:6px">지금 장면 위에 띄웁니다. 장면을 넘기거나 ✕를 누르면 닫힙니다.</div>' + L.map(i => `<button class="btn" data-k="${i[0]}" style="display:block;width:100%;text-align:left;margin-top:8px;padding:12px">${i[1]} <small style="color:#6E6890">${i[2]}</small></button>`).join('') + '<div class="row"><button class="btn" id="tc">닫기</button>' + (tool ? '<button class="btn bad" id="tx">띄운 도구 닫기</button>' : '') + '</div>';
+    document.body.appendChild(m);
+    b.querySelector('#tc').onclick = () => m.remove(); if (tool) b.querySelector('#tx').onclick = () => { m.remove(); closeTool(); };
+    b.querySelectorAll('[data-k]').forEach(x => x.onclick = () => { m.remove(); toolMake(x.dataset.k); });
+  }
+  async function toolMake(kind) {
+    if (kind !== 'site' && !room) { SL.toast('먼저 🚀 수업 시작을 눌러 주세요.'); return; }
+    const base = { id: SL.rid('t'), sc: sc().id, x: 60, y: 70, w: 840, h: 420 }; let r, e;
+    if (kind === 'cloud') {
+      r = await formDialog('☁️ 워드클라우드', [{ k: 'q', label: '질문', v: '떠오르는 단어를 써 보세요' }, { k: 'm', label: '한 명이 낼 수 있는 단어 수', hint: '1~5', v: '3' }]); if (!r) return;
+      e = Object.assign(base, { t: 'cloud', q: r.q, max: Math.min(5, Math.max(1, parseInt(r.m) || 3)) });
+    } else if (kind === 'board') {
+      r = await formDialog('📌 패들릿 보드', [{ k: 'q', label: '주제', v: '생각을 올려 보세요' }, { k: 'cols', label: '열(칸) 이름', hint: '한 줄에 하나 — 비우면 한 면', type: 'area', rows: 3, v: '생각\n질문' }, { k: 'ph', label: '사진', type: 'check', text: '학생이 사진도 올릴 수 있게', v: true }, { k: 'lk', label: '좋아요', type: 'check', text: '친구 카드에 ❤️ 누르기', v: true }, { k: 'ap', label: '공개 방식', type: 'check', text: '교사가 승인한 카드만 공개', v: false }]); if (!r) return;
+      e = Object.assign(base, { t: 'wall', q: r.q, approve: r.ap, cols: r.cols.split('\n').map(s => s.trim()).filter(Boolean).slice(0, 5), photo: r.ph, likes: r.lk });
+    } else if (kind === 'wall') {
+      r = await formDialog('💬 질문 월', [{ k: 'q', label: '질문', v: '생각을 써 봅시다' }]); if (!r) return; e = Object.assign(base, { t: 'wall', q: r.q, approve: true });
+    } else if (kind === 'poll') {
+      r = await formDialog('📊 투표', [{ k: 'q', label: '질문', v: '여러분의 생각은?' }, { k: 'o', label: '선택지', hint: '한 줄에 하나', type: 'area', rows: 4, v: '찬성\n반대' }]); if (!r) return;
+      const o = r.o.split('\n').map(s => s.trim()).filter(Boolean).slice(0, 8); e = Object.assign(base, { t: 'poll', q: r.q, opts: o.length > 1 ? o : ['찬성', '반대'], delay: true });
+    } else {
+      const P0 = [['패들릿', 'https://padlet.com/'], ['멘티미터', 'https://www.mentimeter.com/'], ['딜시', 'https://gtk0624-a11y.github.io/Qdice/dilsi/'], ['꿈송이 모둠 뽑기', 'https://gtk0624-a11y.github.io/sportslog/modum/']];
+      const pick = await new Promise(res => {
+        const m = h('div', 'modal'), b = h('div', 'box'); m.appendChild(b);
+        b.innerHTML = '<h2>🌐 어떤 사이트를 열까요?</h2>' + P0.map((p0, i) => `<button class="btn" data-i="${i}" style="display:block;width:100%;text-align:left;margin-top:8px;padding:12px">${esc(p0[0])}</button>`).join('') + '<button class="btn" data-i="-1" style="display:block;width:100%;text-align:left;margin-top:8px;padding:12px">✏️ 주소 직접 입력</button><div class="row"><button class="btn" id="pc">취소</button></div>';
+        document.body.appendChild(m); b.querySelector('#pc').onclick = () => { m.remove(); res(null); };
+        b.querySelectorAll('[data-i]').forEach(x => x.onclick = () => { m.remove(); res(+x.dataset.i); });
+      });
+      if (pick == null) return;
+      r = await formDialog('🌐 외부 사이트', [{ k: 'u', label: '주소', hint: '꼭 열리는 주소인지 확인하세요', v: pick >= 0 ? P0[pick][1] : '' }, { k: 't', label: '이름', v: pick >= 0 ? P0[pick][0] : '외부 사이트' }]); if (!r) return;
+      if (!SL.safeUrl(r.u)) { SL.toast('주소를 알아볼 수 없습니다.'); return; }
+      e = Object.assign(base, { t: 'site', url: SL.safeUrl(r.u), title: r.t, x: 40, y: 60, w: 880, h: 440 });
+    }
+    tool = e; render();
+  }
+  function mountSite() { }
   function mountPoll(node, el) {
     const wb = node.querySelector('.wb'), cnt = node.querySelector('.cnt');
     let votes = {}, rv = false;
@@ -343,7 +438,7 @@
     document.body.appendChild(m); b.querySelector('#cl').onclick = () => m.remove(); m.onclick = e => { if (e.target === m) m.remove(); };
     b.querySelector('#cp').onclick = () => { (navigator.clipboard ? navigator.clipboard.writeText(url) : Promise.reject()).then(() => SL.toast('주소를 복사했습니다.')).catch(() => SL.toast('복사할 수 없어요. 주소를 길게 눌러 복사하세요.')); };
   }
-  function publish() { if (!room || !deck) return; db().set(P.room(room.code) + '/state', { sc: sc().id, rev, blank, ts: Date.now() }); }
+  function publish() { if (!room || !deck) return; db().set(P.room(room.code) + '/state', { sc: sc().id, rev, blank, ts: Date.now(), tool: tool && tool.sc === sc().id ? tool : null }); }
   async function togglePanel() {
     if (!panelOpen && !(await SL.askPin())) return;
     panelOpen = !panelOpen; $('panel').classList.toggle('open', panelOpen); renderPanel(); renderBars();
@@ -364,19 +459,22 @@
       const und = { 1: 0, 2: 0, 3: 0 }; Object.values(rxData.und).forEach(v => und[v] != null && und[v]++);
       const tot = und[1] + und[2] + und[3];
       o += `<h3>🙂 이해도 (이 장면)</h3><div class="card">😀 알겠어요 <b>${und[1]}</b> · 😐 반쯤 <b>${und[2]}</b> · 🤔 모르겠어요 <b>${und[3]}</b>${tot ? `<div class="mute">총 ${tot}명 응답</div>` : ''}</div>`;
-      s.els.filter(e => ['wall', 'poll', 'ws'].includes(e.t)).forEach(e => {
+      [...s.els, ...(tool && tool.sc === s.id ? [tool] : [])].filter(e => ['wall', 'poll', 'ws', 'cloud'].includes(e.t)).forEach(e => {
         if (e.t === 'wall') {
           const items = Object.keys(wallData[e.id] || {}).map(k => Object.assign({ k }, wallData[e.id][k])).sort((a, b) => a.ts - b.ts);
           const pend = items.filter(i => !i.ok);
           o += `<h3>💬 ${esc(e.q || '질문 월')}</h3>`;
           if (e.approve !== false) {
             o += `<div class="row"><span class="tag">승인 대기 ${pend.length}</span>${pend.length ? `<button class="btn pri" data-a="okall" data-e="${e.id}">모두 공개</button>` : ''}</div>`;
-            pend.forEach(i => { o += `<div class="card">${esc(i.t)}<div class="mute">${esc(i.n || '')}</div><div class="row"><button class="btn pri" data-a="ok" data-e="${e.id}" data-k="${i.k}">공개</button><button class="btn bad" data-a="rm" data-e="${e.id}" data-k="${i.k}">삭제</button></div></div>`; });
+            pend.forEach(i => { o += `<div class="card">${i.img ? '🖼 ' : ''}${esc(i.t)}<div class="mute">${esc(i.n || '')}</div><div class="row"><button class="btn pri" data-a="ok" data-e="${e.id}" data-k="${i.k}">공개</button><button class="btn bad" data-a="rm" data-e="${e.id}" data-k="${i.k}">삭제</button></div></div>`; });
           }
           const okl = items.filter(i => i.ok); if (okl.length) o += `<div class="mute">공개 중 ${okl.length}개</div>` + okl.map(i => `<div class="card" style="padding:6px 10px">${esc(i.t)} <button class="btn sm bad" data-a="hide" data-e="${e.id}" data-k="${i.k}" style="float:right">숨김</button></div>`).join('');
         } else if (e.t === 'poll') {
           const d = pollData[e.id] || { total: 0, rv: false };
           o += `<h3>📊 ${esc(e.q || '투표')}</h3><div class="card">${d.total}명 투표 · ${d.rv || e.delay === false ? '결과 공개 중' : '결과 비공개'}</div><div class="row">${e.delay === false ? '' : (d.rv ? `<button class="btn" data-a="pollhide" data-e="${e.id}">결과 다시 가리기</button>` : `<button class="btn pri" data-a="pollrv" data-e="${e.id}">결과 공개 ▶</button>`)}<button class="btn bad" data-a="pollclr" data-e="${e.id}">투표 초기화</button></div>`;
+        } else if (e.t === 'cloud') {
+          const its = Object.keys(wallData[e.id] || {}).map(k => Object.assign({ k }, wallData[e.id][k])).sort((a, b) => a.ts - b.ts);
+          o += `<h3>☁️ ${esc(e.q || '워드클라우드')}</h3><div class="card">${its.map(i => `<span class="tag">${esc(i.t)} <a data-a="rm" data-e="${e.id}" data-k="${i.k}" style="cursor:pointer">✕</a></span>`).join(' ') || '아직 없어요'}</div><div class="row"><button class="btn bad" data-a="cloudclr" data-e="${e.id}">전부 비우기</button></div>`;
         } else if (e.t === 'ws') {
           o += `<h3>📝 ${esc(e.title || '모둠 학습지')}</h3><div class="mute">화면의 모둠 칸을 누르면 크게 볼 수 있습니다.</div>`;
         }
@@ -412,12 +510,13 @@
   document.addEventListener('click', async e => {
     const t = e.target.closest('#panel [data-t],#panel [data-a]'); if (!t) return;
     if (t.dataset.t) { if (t.dataset.t === 'x') return togglePanel(); tab = t.dataset.t; return renderPanel(); }
-    const a = t.dataset.a, k = t.dataset.k, el = t.dataset.e && sc().els.find(x => x.id === t.dataset.e), base = el && room ? live(el) : '';
+    const a = t.dataset.a, k = t.dataset.k, el = t.dataset.e && elById(sc(), t.dataset.e), base = el && room ? live(el) : '';
     if (a === 'start') startRoom(); else if (a === 'qr') showJoinQR(); else if (a === 'end') endRoom(); else if (a === 'erase') eraseRoom();
     else if (a === 'blank') setBlank(!blank); else if (a === 'rxtoggle') { showRx = !showRx; drawRxBar(); renderPanel(); }
     else if (a === 'ok') db().update(base + '/items/' + k, { ok: true });
     else if (a === 'hide') db().update(base + '/items/' + k, { ok: false });
     else if (a === 'rm') db().remove(base + '/items/' + k);
+    else if (a === 'cloudclr') { if (await SL.dialog({ title: '워드클라우드를 비울까요?', ok: '비우기' })) db().remove(base + '/items'); }
     else if (a === 'okall') { const v = wallData[el.id] || {}; const u = {}; Object.keys(v).forEach(i => { if (!v[i].ok) u[i + '/ok'] = true; }); db().update(base + '/items', u); }
     else if (a === 'pollrv') revealPoll(el); else if (a === 'pollhide') revealPoll(el, true);
     else if (a === 'pollclr') { if (await SL.dialog({ title: '투표를 초기화할까요?', ok: '초기화' })) { db().remove(base + '/votes'); db().remove(base + '/rv'); } }
@@ -496,7 +595,7 @@
     if (mode !== 'edit') return; const nd = e.target.closest('.el'); if (!nd) return;
     const el = sc().els.find(x => x.id === nd.dataset.id); if (!el) return; sel = el.id;
     if (el.t === 'shape' && (el.tx || true)) return editText(el, nd);
-    if (['yt', 'wall', 'poll', 'ws', 'qr'].includes(el.t)) widgetSettings(el);
+    if (['yt', 'wall', 'poll', 'ws', 'qr', 'cloud', 'site'].includes(el.t)) widgetSettings(el);
     if (el.t === 'img') replaceImage(el);
   }
   function editText(el, nd) {
@@ -522,7 +621,7 @@
       const first = el.tx && el.tx.paras[0] && el.tx.paras[0].runs[0] || {}; const isTx = el.t === 'shape';
       if (isTx) o += `<button data-p="fs-">A−</button><input type="number" id="pFs" value="${Math.round(first.sz || 20)}" min="6" max="200"><button data-p="fs+">A+</button><button data-p="b" style="font-weight:900">B</button><label class="btnl">글자 <input type="color" id="pC" value="#${first.c || '2B2350'}"></label><label class="btnl">채움 <input type="color" id="pF" value="#${el.fill || 'FFFFFF'}"></label><button data-p="nofill">채움 없음</button><button data-p="al">≡ 정렬</button><span class="sep"></span>`;
       if (el.t === 'img') o += `<button data-p="rimg">🖼 사진 바꾸기</button><span class="sep"></span>`;
-      if (['yt', 'wall', 'poll', 'ws', 'qr'].includes(el.t)) o += `<button data-p="set">⚙ 설정</button><span class="sep"></span>`;
+      if (['yt', 'wall', 'poll', 'ws', 'qr', 'cloud', 'site'].includes(el.t)) o += `<button data-p="set">⚙ 설정</button><span class="sep"></span>`;
       o += `<span class="lbl">클릭 순서</span><input type="number" id="pRv" min="0" max="20" value="${el.reveal || 0}" title="0 = 처음부터 보임. 1,2,3… = 클릭할 때마다 차례로 나타남"><span class="sep"></span><button data-p="front">⤒ 앞으로</button><button data-p="back">⤓ 뒤로</button><button data-p="dup">⧉</button><button data-p="del" style="color:#d8566b">🗑</button>`;
     }
     pr.innerHTML = o;
@@ -568,7 +667,7 @@
   }
   function insScene(s) { pushHist(); deck.scenes.splice(idx + 1, 0, s); idx++; sel = null; markDirty(); render(); }
   function addElMenu() {
-    menuAt('[data-a=addel]', [['🔤 글상자', () => addEl(SL.mkText(240, 200, 480, 80, '텍스트를 입력하세요', { sz: 28, anchor: 'm' }))], ['⬛ 도형(사각형)', () => addEl(SL.mkRect(300, 180, 360, 180, { r: 16 }))], ['🖼 사진', () => pickImage(addImageFile)], ['▶ 유튜브 영상', () => { const e = SL.mkYT(130, 90, 700, 380, ''); addEl(e); widgetSettings(e); }], ['📱 입장 QR', () => addEl(SL.mkQR(380, 160, 200, 250))], ['💬 질문 월', () => addEl(SL.mkWall(60, 140, 840, 340, '생각을 써 봅시다'))], ['📊 투표', () => addEl(SL.mkPoll(100, 130, 760, 350, '여러분의 생각은?', ['찬성', '반대']))], ['📝 모둠 학습지', () => { const e = SL.mkWS(60, 140, 840, 340); addEl(e); widgetSettings(e); }]]);
+    menuAt('[data-a=addel]', [['🔤 글상자', () => addEl(SL.mkText(240, 200, 480, 80, '텍스트를 입력하세요', { sz: 28, anchor: 'm' }))], ['⬛ 도형(사각형)', () => addEl(SL.mkRect(300, 180, 360, 180, { r: 16 }))], ['🖼 사진', () => pickImage(addImageFile)], ['▶ 유튜브 영상', () => { const e = SL.mkYT(130, 90, 700, 380, ''); addEl(e); widgetSettings(e); }], ['📱 입장 QR', () => addEl(SL.mkQR(380, 160, 200, 250))], ['💬 질문 월', () => addEl(SL.mkWall(60, 140, 840, 340, '생각을 써 봅시다'))], ['📊 투표', () => addEl(SL.mkPoll(100, 130, 760, 350, '여러분의 생각은?', ['찬성', '반대']))], ['📝 모둠 학습지', () => { const e = SL.mkWS(60, 140, 840, 340); addEl(e); widgetSettings(e); }], ['☁️ 워드클라우드', () => addEl(SL.mkCloud(60, 130, 840, 360))], ['📌 패들릿 보드', () => addEl(SL.mkBoard(48, 130, 864, 370))], ['🌐 외부 사이트', () => { const e = SL.mkSite(40, 90, 880, 410); addEl(e); widgetSettings(e); }]]);
   }
   function addEl(e) { pushHist(); sc().els.push(e); sel = e.id; markDirty(); render(true); }
   function pickImage(cb) { const i = document.createElement('input'); i.type = 'file'; i.accept = 'image/*'; i.multiple = true; i.onchange = () => [...i.files].forEach(cb); i.click(); }
@@ -611,8 +710,14 @@
       if (!r) return; if (r.url && !SL.ytId(r.url)) { SL.toast('유튜브 주소를 알아볼 수 없습니다.'); return; }
       commit(x => { x.url = r.url.trim(); x.start = SL.parseT(r.start); x.end = SL.parseT(r.end); x.pauseAt = r.pa.split('\n').map(l => l.trim()).filter(Boolean).map(l => { const [t, ...m] = l.split('|'); return { t: SL.parseT(t), msg: m.join('|').trim() }; }); });
     } else if (el.t === 'wall') {
-      r = await formDialog('💬 질문 월', [{ k: 'q', label: '질문(제목)', v: el.q }, { k: 'ap', label: '공개 방식', type: 'check', text: '교사가 승인한 글만 화면에 공개', v: el.approve !== false }]);
-      if (r) commit(x => { x.q = r.q; x.approve = r.ap; });
+      r = await formDialog('💬 질문 월 · 📌 패들릿', [{ k: 'q', label: '질문(제목)', v: el.q }, { k: 'ap', label: '공개 방식', type: 'check', text: '교사가 승인한 글만 화면에 공개', v: el.approve !== false }, { k: 'cols', label: '열(패들릿 칸)', hint: '한 줄에 하나 — 비우면 카드가 한 면에 모임', type: 'area', rows: 3, v: (el.cols || []).join('\n') }, { k: 'ph', label: '사진', type: 'check', text: '학생이 사진도 올릴 수 있게', v: !!el.photo }, { k: 'lk', label: '좋아요', type: 'check', text: '친구 카드에 ❤️ 누르기', v: !!el.likes }]);
+      if (r) commit(x => { x.q = r.q; x.approve = r.ap; x.cols = r.cols.split('\n').map(s => s.trim()).filter(Boolean).slice(0, 5); x.photo = r.ph; x.likes = r.lk; });
+    } else if (el.t === 'cloud') {
+      r = await formDialog('☁️ 워드클라우드', [{ k: 'q', label: '질문', v: el.q }, { k: 'm', label: '한 명이 낼 수 있는 단어 수', hint: '1~5', v: String(el.max || 3) }]);
+      if (r) commit(x => { x.q = r.q; x.max = Math.min(5, Math.max(1, parseInt(r.m) || 3)); });
+    } else if (el.t === 'site') {
+      r = await formDialog('🌐 외부 사이트', [{ k: 'u', label: '주소', hint: '패들릿·멘티미터·딜시 등. 막혀 있으면 "↗ 새 창"으로 열립니다', v: el.url }, { k: 't', label: '이름', v: el.title }]);
+      if (r) { if (r.u && !SL.safeUrl(r.u)) { SL.toast('주소를 알아볼 수 없습니다.'); return; } commit(x => { x.url = SL.safeUrl(r.u); x.title = r.t; }); }
     } else if (el.t === 'poll') {
       r = await formDialog('📊 투표', [{ k: 'q', label: '질문', v: el.q }, { k: 'o', label: '선택지', hint: '한 줄에 하나', type: 'area', rows: 4, v: (el.opts || []).join('\n') }, { k: 'd', label: '결과 공개', type: 'check', text: '교사가 "결과 공개"를 누를 때까지 숨기기(3·2·1 연출)', v: el.delay !== false }]);
       if (r) commit(x => { x.q = r.q; x.opts = r.o.split('\n').map(s => s.trim()).filter(Boolean).slice(0, 8); if (x.opts.length < 2) x.opts = ['찬성', '반대']; x.delay = r.d; });

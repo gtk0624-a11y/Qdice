@@ -154,7 +154,8 @@
   const px = n => `calc(var(--pt)*${n})`;
   const rgba = (hex, a) => { const n = parseInt(hex, 16); return `rgba(${n >> 16 & 255},${n >> 8 & 255},${n & 255},${a})`; };
   SL.revealMax = sc => sc.els.reduce((m, e) => Math.max(m, e.reveal || 0), 0);
-  SL.isInteractive = e => ['wall', 'poll', 'ws'].includes(e.t);
+  SL.isInteractive = e => ['wall', 'poll', 'ws', 'cloud'].includes(e.t);
+  SL.safeUrl = s => { s = (s || '').trim(); if (!s) return ''; if (!/^https?:\/\//i.test(s)) s = 'https://' + s; try { const u = new URL(s); return /^https?:$/.test(u.protocol) ? u.href : ''; } catch (x) { return ''; } };
 
   /* 무대 크기 맞추기: 화면에 16:9 가 꽉 차게, 글자 크기 단위(--pt)를 같이 맞춤 */
   SL.fit = function (wrap, stage, deck, inset) {
@@ -244,6 +245,17 @@
       if (!id) d.innerHTML = `<div class="yt-ph"><div style="font-size:${px(40)}">▶</div>유튜브 주소를 붙여 넣으세요<br><small>(편집 → 이 상자를 눌러 주소 입력)</small></div>`;
       else if (!live) d.innerHTML = `<div class="yt-ph" style="background:url(https://i.ytimg.com/vi/${id}/hqdefault.jpg) center/cover"><div style="background:#000a;border-radius:999px;padding:${px(10)} ${px(22)};font-size:${px(26)}">▶ 유튜브 ${SL.fmtT(el.start || 0)}${el.end ? '~' + SL.fmtT(el.end) : ''}</div></div>`;
       else d.innerHTML = '<div id="ytp"></div>';
+    } else if (el.t === 'cloud') {
+      d.classList.add('w');
+      d.innerHTML = `<div class="wh">☁️ <span class="ttl">${SL.esc(el.q || '워드클라우드')}</span><span class="sp"></span><span class="cnt hide"></span></div><div class="wb" style="position:relative"><div class="cloud-b"></div></div>`;
+      if (!live) { d.classList.add('ph'); d.querySelector('.wb').innerHTML = '학생이 낸 단어가<br>구름처럼 모여요 ☁️'; }
+    } else if (el.t === 'site') {
+      d.classList.add('w'); const u = SL.safeUrl(el.url);
+      d.innerHTML = `<div class="wh">🌐 <span class="ttl">${SL.esc(el.title || '외부 사이트')}</span><span class="sp"></span>${u && live ? `<a class="lnk" href="${SL.esc(u)}" target="_blank" rel="noopener">↗ 새 창</a>` : ''}</div><div class="wb" style="padding:0"></div>`;
+      const wb = d.querySelector('.wb');
+      if (!u) { d.classList.add('ph'); wb.innerHTML = '사이트 주소를 넣어 주세요<br><small>(편집 → 이 상자 선택 → ⚙ 설정)</small>'; }
+      else if (!live) { d.classList.add('ph'); wb.innerHTML = SL.esc(u) + '<br><small>발표할 때 이 자리에 사이트가 열립니다</small>'; }
+      else wb.innerHTML = `<iframe src="${SL.esc(u)}" allow="fullscreen; clipboard-write; camera; microphone" referrerpolicy="no-referrer-when-downgrade" style="width:100%;height:100%;border:0"></iframe>`;
     } else if (el.t === 'qr') {
       d.classList.add('qr-box'); d.style.background = '#fff';
       const url = ctx.room ? SL.joinURL(ctx.room) : '';
@@ -256,10 +268,34 @@
   SL.renderScene = function (stage, deck, idx, ctx) {
     ctx = Object.assign({ deck, mode: 'view', rev: 0 }, ctx || {});
     const sc = deck.scenes[idx]; stage.innerHTML = '';
+    const prevScene = stage.dataset.scene;
     stage.dataset.scene = sc ? sc.id : '';
     stage.style.background = '#' + ((sc && sc.bg) || 'FFFFFF');
     if (!sc) return;
     sc.els.forEach(e => stage.appendChild(SL.elDOM(e, ctx)));
+    if (ctx.anim && prevScene !== sc.id) SL.motion(stage, sc);
+  };
+  /* 모션: 장면이 바뀔 때 요소가 차례로 떠오르고, 큰 숫자는 카운트업, 큰 원은 천천히 떠다닙니다. (발표 보기에서만) */
+  SL.motion = function (stage, sc) {
+    stage.classList.remove('sc-in'); void stage.offsetWidth; stage.classList.add('sc-in');
+    let i = 0;
+    [...stage.children].forEach(n => {
+      if (!n.classList.contains('el') || n.classList.contains('rv')) return;
+      const e = sc.els.find(x => x.id === n.dataset.id); if (!e) return;
+      if (e.t === 'shape' && !e.tx && e.w > 600 && e.h > 300) return;
+      if (e.t === 'shape' && e.geom === 'ellipse' && e.w > 250) { n.style.animation = 'mfloat 7s ease-in-out infinite alternate'; return; }
+      const kind = e.t === 'img' ? 'mzoom' : (e.t === 'shape' && !e.tx ? 'mpop' : 'mrise');
+      const delay = Math.min(0.12 + i * 0.08, 1.4); i++;
+      n.style.animation = `${kind} .7s cubic-bezier(.2,.9,.3,1) backwards`; n.style.animationDelay = delay + 's';
+      if (e.tx && e.tx.paras.length === 1 && e.tx.paras[0].runs.length === 1) {
+        const run = e.tx.paras[0].runs[0], m = /^(\d{1,5})(%|명|개|점|쪽)?$/.exec((run.t || '').trim());
+        if (m && +m[1] >= 10 && (run.sz || 0) >= 28) {
+          const tgt = n.querySelector('.p span') || n.querySelector('.p'); if (!tgt) return;
+          const end = +m[1], suf = m[2] || ''; tgt.textContent = '0' + suf;
+          setTimeout(() => { const t0 = performance.now(); (function f(t) { const k = Math.min(1, (t - t0) / 1100); tgt.textContent = Math.round(end * (1 - Math.pow(1 - k, 3))) + suf; if (k < 1) requestAnimationFrame(f); })(t0); }, delay * 1000);
+        }
+      }
+    });
   };
   SL.sceneHasLive = sc => sc.els.some(SL.isInteractive);
 
@@ -309,6 +345,9 @@
   SL.mkImg = (x, y, w, h, src) => ({ id: SL.rid('e'), t: 'img', x, y, w, h, src });
   SL.mkYT = (x, y, w, h, url) => ({ id: SL.rid('e'), t: 'yt', x, y, w, h, url: url || '', start: 0, end: 0, pauseAt: [] });
   SL.mkQR = (x, y, w, h) => ({ id: SL.rid('e'), t: 'qr', x, y, w, h, label: '여기로 들어오세요' });
+  SL.mkCloud = (x, y, w, h, q) => ({ id: SL.rid('e'), t: 'cloud', x, y, w, h, q: q || '떠오르는 단어를 써 보세요', max: 3 });
+  SL.mkSite = (x, y, w, h, url, title) => ({ id: SL.rid('e'), t: 'site', x, y, w, h, url: url || '', title: title || '외부 사이트' });
+  SL.mkBoard = (x, y, w, h, q) => Object.assign(SL.mkWall(x, y, w, h, q || '생각을 올려 보세요'), { cols: ['생각', '질문'], photo: true, likes: true });
   SL.mkWall = (x, y, w, h, q) => ({ id: SL.rid('e'), t: 'wall', x, y, w, h, q: q || '생각을 써 봅시다', approve: true });
   SL.mkPoll = (x, y, w, h, q, opts) => ({ id: SL.rid('e'), t: 'poll', x, y, w, h, q: q || '여러분의 생각은?', opts: opts || ['찬성', '반대'], delay: true });
   SL.mkWS = (x, y, w, h, title, fields) => ({ id: SL.rid('e'), t: 'ws', x, y, w, h, title: title || '모둠 학습지', fields: fields || [{ id: SL.rid('f'), label: '우리 모둠의 생각' }], draw: false, bg: '' });
