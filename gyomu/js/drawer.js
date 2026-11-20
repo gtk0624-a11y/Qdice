@@ -51,3 +51,18 @@ document.addEventListener('change', async e => {
     toast(n + '개를 불러왔습니다.'); commit();
   } catch (er) { toast('백업 파일을 읽지 못했습니다.'); }
 });
+
+/* ---- 연수 사이트 모음 (연수 줄 안에 표시) ---- */
+function trSites() { if (!Array.isArray(S.trSites)) S.trSites = []; return S.trSites; }
+function trUrl(u) { u = String(u || '').trim(); if (!u) return ''; if (!/^https?:\/\//i.test(u)) { if (/^[a-z][a-z0-9+.-]*:/i.test(u)) return ''; u = 'https://' + u; } return u; }
+function trSitesHtml() {
+  const L = trSites();
+  return `<div class="trsites"><h4>연수 사이트 <span class="mu">(자주 가는 연수 사이트를 직접 넣어 두고, 눌러서 바로 여세요)</span></h4><div class="trchips">${L.length ? '' : '<span class="mu">아직 없습니다. 아래 버튼으로 추가하세요.</span>'}${L.map(x => `<span class="trchip"><a href="${esc(x.url)}" target="_blank" rel="noopener">${esc(x.name)} ↗</a><button class="x" data-act="trSiteEdit" data-id="${x.id}" aria-label="${esc(x.name)} 수정">✎</button><button class="x" data-act="trSiteDel" data-id="${x.id}" aria-label="${esc(x.name)} 삭제">✕</button></span>`).join('')}</div><button class="btn sm" data-act="trSiteAdd">+ 연수 사이트 추가</button></div>`;
+}
+const trSiteForm = (x, done) => ask(x ? '연수 사이트 고치기' : '연수 사이트 추가', [{ k: 'name', label: '이름 (예: 경기도교육연수원)', val: x ? x.name : '', req: 1 }, { k: 'url', label: '주소 (https://…)', val: x ? x.url : '' }], o => {
+  const url = trUrl(o.url); if (!o.name.trim() || !url) { toast('이름과 올바른 주소(https://…)를 넣어 주세요.'); return; }
+  done(o.name.trim(), url); commit();
+}, '저장');
+A.trSiteAdd = () => trSiteForm(null, (name, url) => trSites().push({ id: uid(), name, url }));
+A.trSiteEdit = el => { const x = trSites().find(v => v.id === el.dataset.id); if (x) trSiteForm(x, (name, url) => { x.name = name; x.url = url; }); };
+A.trSiteDel = el => { const x = trSites().find(v => v.id === el.dataset.id); if (x) sure('「' + x.name + '」를 목록에서 뺄까요?', () => { S.trSites = trSites().filter(v => v !== x); commit(); }); };

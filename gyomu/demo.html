@@ -635,6 +635,8 @@ html[data-skin="planner"] #wm{opacity:.22}
 html[data-skin="planner"] #chatpan{border:2px solid var(--ink2);box-shadow:6px 6px 0 var(--ink2)}
 @media(prefers-reduced-motion:reduce){html[data-skin="planner"] .btn{transition:none}}
 html[data-skin="planner"] .mast2 .dt{border:0!important;box-shadow:none!important;transform:none;background:transparent!important}
+.trsum{background:#fff8d6;border:2px solid var(--ink,#2b2a33);border-radius:14px;padding:10px 14px;margin:6px 0 10px;position:relative;overflow:hidden}.trsum b{display:block;font-size:19px;font-weight:900}.trsum span{font-size:13.5px;color:var(--mu)}.trsum i{display:block;height:8px;border-radius:99px;background:#fff;border:1.5px solid var(--ink,#2b2a33);margin-top:6px;position:relative}.trsum i::after{content:"";position:absolute;left:0;top:0;bottom:0;width:var(--p);background:#9bd8c2;border-radius:99px}
+.trsites{margin-top:12px;padding-top:10px;border-top:2px dashed var(--rule,#ccc)}.trsites h4{margin:0 0 8px;font-size:16px;font-weight:900}.trchips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px}.trchip{display:inline-flex;align-items:center;gap:2px;background:#d6e8ff;border:2px solid var(--ink,#2b2a33);border-radius:999px;padding:3px 6px 3px 12px;font-weight:800}.trchip a{color:inherit;text-decoration:none}.trchip .x{border:0;background:transparent;padding:2px 5px;cursor:pointer;font-size:13px}
 </style>
 </head>
 <body>
@@ -1345,8 +1347,10 @@ function todayView() {
     const dev = S.training.filter(x => x.type === '개발' && x.done).reduce((a, x) => a + (+x.hours || 0), 0);
     const left = S.training.filter(x => !x.done && x.due).sort((a, b) => a.due.localeCompare(b.due))[0];
     const noNo = S.training.filter(x => x.done && !x.certNo).length;
-    const b = S.training.map(x => `<div class="tr ${x.done ? 'dn' : ''}"><button class="ck" data-act="trToggle" data-id="${x.id}" aria-pressed="${!!x.done}" aria-label="이수 표시"></button><span class="tl">${esc(x.title)}<br><span class="mu">${x.type} ${x.hours}시간 ${x.due ? '· 기한 ' + md(x.due) : ''}${x.done && x.doneDate ? ' · 이수일 ' + md(x.doneDate) : ''}</span></span>${x.done ? `<input class="cert" data-cert="${x.id}" value="${esc(x.certNo || '')}" placeholder="이수번호 입력" aria-label="${esc(x.title)} 이수번호">` : '<span class="mu">다 들으면 이수번호 입력</span>'}<button class="x" data-act="edit_training" data-id="${x.id}">수정</button>${xbtn('del_training', x.id)}</div>`).join('') + `<button class="btn sm" data-act="add_training">+ 연수 추가</button>`;
-    rows.push(row('r7', '연수', '연수 이수', `필수 ${rd}/${req.length} · 개발 ${dev}/${S.profile.devTarget}시간${noNo ? ` · <span class="hot">이수번호 미입력 ${noNo}</span>` : ''}`, left ? md(left.due) + ' ' + ddText(dd(left.due)) : '', b));
+    const hrs = f => S.training.filter(f).reduce((q, x) => q + (+x.hours || 0), 0), totH = hrs(x => x.done), reqH = hrs(x => x.done && x.type === '필수');
+    const sum = `<div class="trsum"><b>이수한 연수 합계 ${totH}시간</b><span>필수 ${reqH}시간 · 개발 ${dev}시간 (목표 ${S.profile.devTarget}시간 중 ${Math.min(100, Math.round(dev / (S.profile.devTarget || 1) * 100))}%)</span><i style="--p:${Math.min(100, Math.round(dev / (S.profile.devTarget || 1) * 100))}%"></i></div>`;
+    const b = sum + S.training.map(x => `<div class="tr ${x.done ? 'dn' : ''}"><button class="ck" data-act="trToggle" data-id="${x.id}" aria-pressed="${!!x.done}" aria-label="이수 표시"></button><span class="tl">${esc(x.title)}<br><span class="mu">${x.type} ${x.hours}시간 ${x.due ? '· 기한 ' + md(x.due) : ''}${x.done && x.doneDate ? ' · 이수일 ' + md(x.doneDate) : ''}</span></span>${x.done ? `<input class="cert" data-cert="${x.id}" value="${esc(x.certNo || '')}" placeholder="이수번호 입력" aria-label="${esc(x.title)} 이수번호">` : '<span class="mu">다 들으면 이수번호 입력</span>'}<button class="x" data-act="edit_training" data-id="${x.id}">수정</button>${xbtn('del_training', x.id)}</div>`).join('') + `<button class="btn sm" data-act="add_training">+ 연수 추가</button>` + (typeof trSitesHtml === 'function' ? trSitesHtml() : '');
+    rows.push(row('r7', '연수', '연수 이수', `이수 합계 ${totH}시간 · 필수 ${rd}/${req.length} · 개발 ${dev}/${S.profile.devTarget}시간${noNo ? ` · <span class="hot">이수번호 미입력 ${noNo}</span>` : ''}`, left ? md(left.due) + ' ' + ddText(dd(left.due)) : '', b));
   }
   /* 기록 */
   {
@@ -2359,6 +2363,21 @@ document.addEventListener('change', async e => {
     toast(n + '개를 불러왔습니다.'); commit();
   } catch (er) { toast('백업 파일을 읽지 못했습니다.'); }
 });
+
+/* ---- 연수 사이트 모음 (연수 줄 안에 표시) ---- */
+function trSites() { if (!Array.isArray(S.trSites)) S.trSites = []; return S.trSites; }
+function trUrl(u) { u = String(u || '').trim(); if (!u) return ''; if (!/^https?:\/\//i.test(u)) { if (/^[a-z][a-z0-9+.-]*:/i.test(u)) return ''; u = 'https://' + u; } return u; }
+function trSitesHtml() {
+  const L = trSites();
+  return `<div class="trsites"><h4>연수 사이트 <span class="mu">(자주 가는 연수 사이트를 직접 넣어 두고, 눌러서 바로 여세요)</span></h4><div class="trchips">${L.length ? '' : '<span class="mu">아직 없습니다. 아래 버튼으로 추가하세요.</span>'}${L.map(x => `<span class="trchip"><a href="${esc(x.url)}" target="_blank" rel="noopener">${esc(x.name)} ↗</a><button class="x" data-act="trSiteEdit" data-id="${x.id}" aria-label="${esc(x.name)} 수정">✎</button><button class="x" data-act="trSiteDel" data-id="${x.id}" aria-label="${esc(x.name)} 삭제">✕</button></span>`).join('')}</div><button class="btn sm" data-act="trSiteAdd">+ 연수 사이트 추가</button></div>`;
+}
+const trSiteForm = (x, done) => ask(x ? '연수 사이트 고치기' : '연수 사이트 추가', [{ k: 'name', label: '이름 (예: 경기도교육연수원)', val: x ? x.name : '', req: 1 }, { k: 'url', label: '주소 (https://…)', val: x ? x.url : '' }], o => {
+  const url = trUrl(o.url); if (!o.name.trim() || !url) { toast('이름과 올바른 주소(https://…)를 넣어 주세요.'); return; }
+  done(o.name.trim(), url); commit();
+}, '저장');
+A.trSiteAdd = () => trSiteForm(null, (name, url) => trSites().push({ id: uid(), name, url }));
+A.trSiteEdit = el => { const x = trSites().find(v => v.id === el.dataset.id); if (x) trSiteForm(x, (name, url) => { x.name = name; x.url = url; }); };
+A.trSiteDel = el => { const x = trSites().find(v => v.id === el.dataset.id); if (x) sure('「' + x.name + '」를 목록에서 뺄까요?', () => { S.trSites = trSites().filter(v => v !== x); commit(); }); };
 
 /* 경기도 메신저 붙여넣기 → 일정·할 일·내 업무로 정리해서 추가 */
 const IBX = { kw: /(까지|마감|제출|기한|회신|신청|보고|입력|취합)/, ev: /(회의|연수|행사|협의회|평가|워크숍|설명회|간담회|공개수업|체육대회|시험|방문|점검|교육|조사기간|기간|실시|운영|개최|일시)/ };

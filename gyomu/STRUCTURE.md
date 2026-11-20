@@ -219,3 +219,7 @@ service cloud.firestore {
 - 기본 화면(플래너 스킨)은 소개 페이지와 같은 디자인: 크림색 줄노트 배경, 2px 진한 선+딱지 그림자, 파스텔 카드, 굵은(900) 제목. 수정은 style.css 맨 아래 "소개 페이지 디자인을 기본 화면으로" 블록.
 - `demo.html`: build.py가 만드는 단일 파일에 `window.TF_DEMO=1`을 넣은 체험판. 저장소 키가 `travailfatal.demo` / IndexedDB `travailfatal-demo`라 **내 수첩 데이터와 완전히 분리**, 예시 데이터로 자동 시작, 기기 연동·서비스워커 꺼짐, 상단에 빨간 체험판 띠(#demostrip).
 - 수정 후 `python3 build.py` → `cp dist/demo.html demo.html`.
+
+## 연수: 이수 시간 합계 · 연수 사이트
+- 연수 줄(r7) 맨 위에 "이수한 연수 합계 N시간(필수·개발 구분, 개발 목표 진행률)" 막대. 계산은 app.js 연수 블록(`totH`, `reqH`, `dev`).
+- 연수 사이트: 사용자가 직접 추가·수정·삭제(기본 목록 없음). 저장 위치 `S.trSites[{id,name,url}]`, 코드는 js/drawer.js 맨 아래(`trSitesHtml`, `A.trSiteAdd/Edit/Del`). 주소는 http(s)만 허용(javascript: 등 차단).
