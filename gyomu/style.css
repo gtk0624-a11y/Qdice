@@ -544,3 +544,10 @@ img,video,canvas,svg{max-width:100%}
 .h3,h3.h3{font-size:calc(26px*var(--hs))}
 }
 .ibx{display:grid;grid-template-columns:auto 140px 1fr 90px;gap:6px;align-items:center;margin:8px 0}.ibx input,.ibx select{min-width:0}@media(max-width:700px){.ibx{grid-template-columns:auto 1fr}.ibx input[name^=t]{grid-column:1/-1}}
+/* 메신저 버튼·꾸미기 바로가기·제목 굵기 */
+.nvx{margin-left:auto;background:var(--red);color:#fff;border:0;padding:8px 16px;font:inherit;font-weight:800;font-size:16px;cursor:pointer;border-radius:999px;white-space:nowrap}
+.nav{align-items:center}
+.qk{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 14px;padding:10px 12px;border:2px solid var(--ink);background:var(--card2)}.qk b{font-size:18px;font-weight:800}.qk .btn{margin:0;text-decoration:none}
+.bh h2,.h3,h3.h3,.row .ttl,.ttl{font-weight:900!important;-webkit-text-stroke:.7px currentColor;color:var(--ink)}
+.bh h2{-webkit-text-stroke:1.2px currentColor}
+@media(max-width:760px){.nvx{margin:6px 0 0;width:100%}}

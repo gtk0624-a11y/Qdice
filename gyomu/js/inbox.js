@@ -61,3 +61,7 @@ function ibxStart() {
   }, '정리하기');
 }
 A.ibx = ibxStart;
+document.addEventListener('click', e => {
+  const a = e.target.closest('[data-go]'); if (!a) return; e.preventDefault();
+  const t = document.getElementById(a.dataset.go); if (t) { t.scrollIntoView({ behavior: 'smooth', block: 'start' }); const d = t.nextElementSibling; if (d && d.tagName === 'DETAILS') d.open = true; }
+});
