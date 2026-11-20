@@ -48,7 +48,7 @@ const KEY = 'travailfatal.v1';
 const DEF = () => ({
   v: 1, updatedAt: 0, setup: false,
   profile: { name: '', school: '', subject: '', classes: ['1-1', '1-2', '1-3', '2-1', '2-2', '2-3'], start: '09:00', classMin: 45, breakMin: 10, devTarget: 30 },
-  timetable: {}, items: [], lessons: [], assess: [], budget: [], training: [], notes: [], docs: {}, duties: [], contacts: [], links: [], pages: [], hide: {}
+  timetable: {}, items: [], lessons: [], assess: [], budget: [], training: [], notes: [], docs: {}, stk: {}, duties: [], contacts: [], links: [], pages: [], hide: {}
 });
 let S;
 try { S = Object.assign(DEF(), JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (e) { S = DEF(); }
@@ -110,6 +110,38 @@ const THEMES = [
   ['creamsoda', '크림 소다', '레트로', '#BFE3DA', '#9CCFC2', '#FFF9EC', '#2E4A44', '#E0674F', '#e0674f24', 'rb', 'gae']
 ];
 const RB = ['#8fc59a', '#f09a8a', '#f2cf5f', '#8fb1e6', '#c59be0', '#6fc8bd', '#e2b27a', '#c9c9c9'];
+/* ---- 글씨체 50가지 (모두 저작권 걱정 없이 쓸 수 있는 무료·오픈 폰트) ---- */
+const GF = n => ['g', n];
+const FONTS50 = [
+  ['Noto Sans KR', ...GF('Noto+Sans+KR:wght@400;700')], ['Noto Serif KR', ...GF('Noto+Serif+KR:wght@400;700')], ['나눔고딕', ...GF('Nanum+Gothic:wght@400;700'), 'Nanum Gothic'], ['나눔명조', ...GF('Nanum+Myeongjo:wght@400;700'), 'Nanum Myeongjo'],
+  ['나눔손글씨 펜', ...GF('Nanum+Pen+Script'), 'Nanum Pen Script'], ['나눔손글씨 붓', ...GF('Nanum+Brush+Script'), 'Nanum Brush Script'], ['나눔고딕코딩', ...GF('Nanum+Gothic+Coding'), 'Nanum Gothic Coding'],
+  ['검은고딕', ...GF('Black+Han+Sans'), 'Black Han Sans'], ['도현', ...GF('Do+Hyeon'), 'Do Hyeon'], ['주아', ...GF('Jua'), 'Jua'], ['고운돋움', ...GF('Gowun+Dodum'), 'Gowun Dodum'], ['고운바탕', ...GF('Gowun+Batang:wght@400;700'), 'Gowun Batang'],
+  ['개구', ...GF('Gaegu:wght@400;700'), 'Gaegu'], ['하이멜로디', ...GF('Hi+Melody'), 'Hi Melody'], ['동해 독도', ...GF('East+Sea+Dokdo'), 'East Sea Dokdo'], ['구기', ...GF('Gugi'), 'Gugi'], ['기랑해랑', ...GF('Kirang+Haerang'), 'Kirang Haerang'],
+  ['싱글데이', ...GF('Single+Day'), 'Single Day'], ['송명', ...GF('Song+Myung'), 'Song Myung'], ['스타일리쉬', ...GF('Stylish'), 'Stylish'], ['해바라기', ...GF('Sunflower:wght@300;500;700'), 'Sunflower'], ['연성', ...GF('Yeon+Sung'), 'Yeon Sung'],
+  ['푸어스토리', ...GF('Poor+Story'), 'Poor Story'], ['귀여운체', ...GF('Cute+Font'), 'Cute Font'], ['독도', ...GF('Dokdo'), 'Dokdo'], ['흑백사진', ...GF('Black+And+White+Picture'), 'Black And White Picture'], ['IBM 플렉스 산스', ...GF('IBM+Plex+Sans+KR:wght@400;700'), 'IBM Plex Sans KR'],
+  ['고딕 A1', ...GF('Gothic+A1:wght@400;700'), 'Gothic A1'], ['함렛', ...GF('Hahmlet:wght@400;700'), 'Hahmlet'], ['동글', ...GF('Dongle:wght@400;700'), 'Dongle'], ['감자꽃', ...GF('Gamja+Flower'), 'Gamja Flower'], ['가색', ...GF('Gasoek+One'), 'Gasoek One'],
+  ['베이글팻', ...GF('Bagel+Fat+One'), 'Bagel Fat One'], ['오빗', ...GF('Orbit'), 'Orbit'], ['모이라이', ...GF('Moirai+One'), 'Moirai One'], ['디필리아', ...GF('Diphylleia'), 'Diphylleia'], ['그랜디플로라', ...GF('Grandiflora+One'), 'Grandiflora One'], ['42dot 산스', ...GF('42dot+Sans:wght@400;700'), '42dot Sans'],
+  ['프리텐다드', 'css', 'https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css', 'Pretendard'],
+  ['스포카 한 산스 네오', 'css', 'https://cdn.jsdelivr.net/gh/spoqa/spoqa-han-sans@latest/css/SpoqaHanSansNeo.css', 'Spoqa Han Sans Neo'],
+  ['나눔스퀘어', 'css', 'https://cdn.jsdelivr.net/gh/moonspam/NanumSquare@2.0/nanumsquare.css', 'NanumSquare'],
+  ['나눔바른고딕', 'css', 'https://cdn.jsdelivr.net/gh/moonspam/NanumBarunGothic@latest/nanumbarungothicsubset.css', 'NanumBarunGothic'],
+  ['마루부리', 'css', 'https://hangeul.pstatic.net/hangeul_static/css/maru-buri.css', 'MaruBuri'],
+  ['지마켓 산스', 'ff', 'https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/GmarketSansMedium.woff', 'GmarketSansMedium'],
+  ['에스코어 드림', 'ff', 'https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_six@1.0/S-CoreDream-4Regular.woff', 'S-CoreDream'],
+  ['둥근모꼴', 'ff', 'https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_six@1.0/DungGeunMo.woff', 'DungGeunMo'],
+  ['아이디어회관', 'ff', 'https://cdn.jsdelivr.net/gh/projectnoonnu/2502-1@1.0/IdeaHwegwan.woff2', 'IdeaHall'],
+  ['삼국지3체', 'ff', 'https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_eight@1.0/Sam3KRFont.woff', 'Sam3KRFont'],
+  ['마이롯데', 'ff', 'https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_six@1.0/MyLotteRegular.woff', 'MyLotte'],
+  ['116 수박체', 'ff', 'https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_six@1.0/116watermelon.woff', '116watermelon']
+];
+FONTS50.forEach(f => { if (!f[3]) f[3] = f[0]; });
+const fontCss = f => `'${f[3]}','Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',sans-serif`;
+const fontLoaded = {};
+function loadFont(f) {
+  if (fontLoaded[f[3]]) return; fontLoaded[f[3]] = 1;
+  if (f[1] === 'ff') { const s = document.createElement('style'); s.textContent = `@font-face{font-family:'${f[3]}';src:url('${f[2]}');font-display:swap}`; document.head.appendChild(s); return; }
+  const l = document.createElement('link'); l.rel = 'stylesheet'; l.href = f[1] === 'g' ? `https://fonts.googleapis.com/css2?family=${f[2]}&display=swap` : f[2]; document.head.appendChild(l);
+}
 function themeApply() {
   const id = (S && S.profile && S.profile.theme) || 'classic', t = THEMES.find(x => x[0] === id) || THEMES[0], r = document.documentElement.style, dark = !!t[11];
   const [, , , d1, d2, paper, ink, acc, line, tabs, font] = t, F = FONTS[font];
@@ -121,6 +153,9 @@ function themeApply() {
   set('--line', line); set('--margin', `color-mix(in srgb,${acc} 55%,transparent)`); set('--edge', `color-mix(in srgb,${paper} 80%,#000)`);
   set('--hf', F[0]); set('--hw', F[1]); set('--hs', F[2]); set('--note', dark ? '#E9D98A' : `color-mix(in srgb,#FFF3A0 70%,${paper})`);
   for (let i = 1; i <= 8; i++) set('--t' + i, tabs === 'rb' ? `color-mix(in srgb,${RB[i - 1]} 62%,${paper})` : `color-mix(in srgb,${acc} ${dark ? 55 - i * 3 : 10 + i * 5}%,${paper})`);
+  const bf = FONTS50.find(x => x[0] === S.profile.bfont), hf = FONTS50.find(x => x[0] === S.profile.hfont);
+  if (bf) { loadFont(bf); set('--sans', fontCss(bf)); set('--serif', fontCss(bf)); } else { r.removeProperty('--sans'); r.removeProperty('--serif'); }
+  if (hf) { loadFont(hf); set('--hf', fontCss(hf)); set('--hw', '400'); set('--hs', '.8'); }
   const m = document.querySelector('meta[name=theme-color]'); if (m) m.content = d1;
 }
 const titleOf = () => (S.profile.title || '업무파탈').trim();

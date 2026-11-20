@@ -1,7 +1,7 @@
 'use strict';
 /* ===== 업무파탈 pages.js : 내 페이지 (노션처럼 직접 만드는 블록 페이지) =====
    app.js 뒤에 불러옵니다. 블록 종류: 글·큰제목·작은제목·목록·체크·토글·인용·표·링크·구분선 */
-const BT = [['p', '글'], ['h1', '큰 제목'], ['h2', '작은 제목'], ['bullet', '목록'], ['todo', '체크'], ['toggle', '토글'], ['quote', '인용'], ['table', '표'], ['link', '링크'], ['ref', '연결'], ['divider', '구분선']];
+const BT = [['p', '글'], ['h1', '큰 제목'], ['h2', '작은 제목'], ['bullet', '목록'], ['todo', '체크'], ['toggle', '토글'], ['quote', '인용'], ['table', '표'], ['link', '링크'], ['ref', '연결'], ['divider', '구분선'], ['sticker', '스티커']];
 const newBlock = (t, x) => ({ id: uid(), t, x: x || '', y: '', u: '', done: false, open: false, rows: t === 'table' ? [['', '', ''], ['', '', '']] : undefined });
 const TEMPLATES = {
   '빈 페이지': () => [newBlock('p')],
@@ -30,6 +30,7 @@ function blockHtml(b) {
     case 'toggle': body = `<details data-tg="${id}" ${b.open ? 'open' : ''}><summary><input class="bh2" data-bf="x" data-b="${id}" value="${esc(b.x)}" placeholder="토글 제목 (눌러서 펼치기)" aria-label="토글 제목"></summary>${ta('y', '펼쳐질 내용')}</details>`; break;
     case 'quote': body = ta('x', '인용·강조할 말'); break;
     case 'divider': body = '<hr>'; break;
+    case 'sticker': body = `<div class="stks">${(b.stk || []).map((s, i) => `<button class="stk" data-act="stkDel" data-b="${id}" data-i="${i}" aria-label="스티커 떼기">${stkHtml(s)}</button>`).join('')}</div><button class="chip" data-act="stkPick" data-b="${id}">+ 스티커 붙이기</button>`; break;
     case 'link': body = `<input data-bf="x" data-b="${id}" value="${esc(b.x)}" placeholder="이름" aria-label="링크 이름"><input data-bf="u" data-b="${id}" value="${esc(b.u)}" placeholder="https://…" aria-label="링크 주소">${b.u ? `<a class="btn sm" href="${esc(/^https?:/.test(b.u) ? b.u : 'https://' + b.u)}" target="_blank" rel="noopener">열기</a>` : ''}`; break;
     case 'ref': { const r = b.u && resolve(b.u); body = `<span class="mu">연결</span>${b.u ? (r ? `<span class="lk"><a href="${esc(r.href)}">${esc(r.label)}</a></span>` : '<span class="mu">(삭제된 항목)</span>') : '<span class="mu">아직 대상이 없습니다</span>'}<button class="btn sm" data-act="bRef" data-b="${id}">대상 고르기</button>`; break; }
     case 'table': body = `<div class="tw"><table class="tbl pt"><tbody>${(b.rows || []).map((r, ri) => `<tr>${r.map((c, ci) => `<td><input data-bc="${id}" data-r="${ri}" data-c="${ci}" value="${esc(c)}" aria-label="${ri + 1}행 ${ci + 1}열"></td>`).join('')}</tr>`).join('')}</tbody></table><div><button class="x" data-act="tbl" data-op="addRow" data-b="${id}">+ 행</button><button class="x" data-act="tbl" data-op="addCol" data-b="${id}">+ 열</button><button class="x" data-act="tbl" data-op="delRow" data-b="${id}">− 행</button><button class="x" data-act="tbl" data-op="delCol" data-b="${id}">− 열</button></div></div>`; break;
