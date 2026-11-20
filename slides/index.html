@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#6A4BC4">
+<title>슬라이드 서랍 — HTML 슬라이드</title>
+<link rel="icon" href="v1/ggumsong.png">
+<link rel="stylesheet" href="v1/engine.css">
+<style>
+  html,body{background:#F7F5FC;height:auto;min-height:100%}
+  body{overflow:auto}
+  header{background:linear-gradient(135deg,#2B2350,#6A4BC4);color:#fff;padding:22px 18px 18px;display:flex;align-items:center;gap:14px}
+  header img{width:64px;height:64px;object-fit:contain}
+  header h1{margin:0;font-size:24px}
+  header p{margin:4px 0 0;color:#d9cffb;font-size:14px}
+  main{max-width:1080px;margin:0 auto;padding:16px 14px 70px}
+  h2{font-size:18px;color:#6A4BC4;margin:26px 0 10px;display:flex;align-items:center;gap:8px}
+  h2 small{font-weight:400;color:#6E6890;font-size:13px}
+  .grid2{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+  .card{background:#fff;border:1.5px solid var(--line);border-radius:16px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 2px 12px rgba(75,58,140,.08)}
+  .card .cv{aspect-ratio:16/9;background:#2B2350;display:flex;align-items:center;justify-content:center;color:#fff;text-align:center;padding:12px;font-weight:800;font-size:17px;line-height:1.3;position:relative;overflow:hidden}
+  .card .cv .stage{width:100%;height:100%;pointer-events:none}
+  .card .cv.tp{background:linear-gradient(135deg,#ECE7FA,#d5c9f7);color:#2B2350;cursor:pointer}
+  .card .cv .em{position:absolute;right:8px;bottom:4px;font-size:30px;opacity:.85}
+  .card .bd{padding:10px 12px 12px;display:flex;flex-direction:column;gap:6px;flex:1}
+  .card .tt{font-weight:800;font-size:16px;line-height:1.3;color:#2B2350}
+  .card .mt{color:#6E6890;font-size:13px}
+  .card .ac{display:flex;gap:6px;flex-wrap:wrap;margin-top:auto}
+  .card button{border:1.5px solid var(--line);background:#fff;color:#6A4BC4;border-radius:10px;padding:7px 11px;font-weight:800;font-size:14px}
+  .card button.pri{background:#6A4BC4;color:#fff;border-color:#6A4BC4}
+  .card button.bad{color:#d8566b}
+  .note{background:#fff8d6;border:1px solid #ffe69c;color:#664d03;border-radius:12px;padding:10px 14px;font-size:14px;margin:12px 0}
+  .empty{color:#6E6890;padding:14px;background:#fff;border:1.5px dashed var(--line);border-radius:14px}
+  footer{text-align:center;color:#9a93bb;font-size:12px;padding:24px}
+  .tag{display:inline-block;background:#ECE7FA;color:#6A4BC4;border-radius:999px;padding:1px 9px;font-size:12px;font-weight:700}
+</style>
+</head>
+<body>
+<header><img src="v1/ggumsong.png" alt=""><div><h1>🗂 슬라이드 서랍</h1><p>수업·회의·발표 슬라이드를 모아 두는 곳 · 클릭 한 번으로 발표, 학생은 QR로 참여</p></div></header>
+<main id="m"><div class="empty">서랍을 여는 중…</div></main>
+<footer>© 김정환 · M.A.D.T (Moral And Digital Teacher) · HTML 슬라이드 엔진 v1</footer>
+<script src="v1/lib/qrcode.js"></script>
+<script src="v1/engine.js"></script>
+<script>
+(async function () {
+  const m = document.getElementById('m'), h = SL.h, esc = SL.esc;
+  const sp = SL.space !== 'default' ? '&space=' + SL.space : '';
+  const play = (k, id, extra) => SL.v1 + 'play.html?deck=' + k + ':' + encodeURIComponent(id) + sp + (extra || '');
+  const EMO = { blank: '⬜', lesson: '📘', meeting: '🧑‍🏫', event: '🏆' };
+
+  async function draw() {
+    let L;
+    try { L = await SL.listDecks(); } catch (e) { console.error(e); m.innerHTML = '<div class="empty">목록을 불러오지 못했습니다. 인터넷 연결을 확인해 주세요.</div>'; return; }
+    m.innerHTML = '';
+    if (SL.DBMODE !== 'live') m.appendChild(h('div', 'note', '⚠️ 체험 모드입니다. 지금 만든 슬라이드는 <b>이 기기·이 브라우저에만</b> 저장됩니다. (인터넷에 연결되면 자동으로 실제 저장소를 씁니다)'));
+
+    m.appendChild(h('h2', '', '✨ 새로 만들기 <small>틀을 고르면 바로 편집 화면이 열려요</small>'));
+    const g1 = h('div', 'grid2'); m.appendChild(g1);
+    Object.keys(SL.tplNames).forEach(k => {
+      const c = h('div', 'card'); c.innerHTML = `<div class="cv tp"><div>${esc(SL.tplNames[k])}</div><span class="em">${EMO[k]}</span></div><div class="bd"><div class="mt">${{ blank: '표지 + 내용 2장', lesson: '목표·질문 월·영상·모둠 학습지·투표·마무리', meeting: '안건·의견 모으기·결정 투표', event: '성과 숫자·사례·질문 QR' }[k]}</div><div class="ac"><button class="pri" data-n="${k}">＋ 만들기</button></div></div>`;
+      c.querySelector('[data-n]').onclick = () => create(k); c.querySelector('.cv').onclick = () => create(k); g1.appendChild(c);
+    });
+
+    m.appendChild(h('h2', '', '📂 내 슬라이드 <small>' + L.mine.length + '개</small>'));
+    if (!L.mine.length) m.appendChild(h('div', 'empty', '아직 없어요. 위에서 새로 만들거나, 아래 기본 틀을 열어 "다른 이름으로 저장"해 보세요.'));
+    const g2 = h('div', 'grid2'); m.appendChild(g2);
+    L.mine.forEach(d => g2.appendChild(card(d)));
+
+    m.appendChild(h('h2', '', '🧩 기본 제공 틀 <small>그대로 열어 발표하거나, 편집 후 "다른 이름으로 저장"하면 내 것이 돼요</small>'));
+    const g3 = h('div', 'grid2'); m.appendChild(g3);
+    L.builtin.forEach(d => g3.appendChild(card(d)));
+  }
+
+  function card(d) {
+    const mine = d.k === 'u'; const c = h('div', 'card');
+    c.innerHTML = `<div class="cv" data-cv>${mine ? `<div>${esc(d.title)}</div>` : ''}</div><div class="bd"><div class="tt">${esc(d.title)}</div><div class="mt">${d.n || '?'}장면 ${mine ? '· ' + new Date(d.updated || 0).toLocaleDateString('ko-KR') : '<span class="tag">기본 틀</span>'}</div><div class="ac"><button class="pri" data-a="play">▶ 발표</button><button data-a="edit">✏️ 편집</button><button data-a="copy">⧉ 복사</button>${mine ? '<button data-a="ren">✎ 이름</button>' : ''}<button data-a="link">🔗</button>${mine ? '<button class="bad" data-a="del">🗑</button>' : ''}</div></div>`;
+    if (!mine) { // 기본 틀은 첫 장면을 미리 보여줌
+      SL.loadDeck('b', d.id).then(dk => { const cv = c.querySelector('[data-cv]'); if (!dk) return; const st = SL.makeStage(dk, 'thumb'); cv.appendChild(st); const w = cv.clientWidth || 250; st.style.width = w + 'px'; st.style.height = (w * 9 / 16) + 'px'; st.style.setProperty('--pt', (w / 960) + 'px'); SL.renderScene(st, dk, 0, { mode: 'thumb', rev: 9 }); }).catch(() => { });
+    }
+    c.querySelector('[data-cv]').style.cursor = 'pointer'; c.querySelector('[data-cv]').onclick = () => location.href = play(d.k, d.id);
+    c.addEventListener('click', async e => {
+      const b = e.target.closest('[data-a]'); if (!b) return; const a = b.dataset.a;
+      if (a === 'play') location.href = play(d.k, d.id);
+      else if (a === 'edit') location.href = play(d.k, d.id, '&edit=1');
+      else if (a === 'link') { const u = new URL(play(d.k, d.id), location.href).href; try { await navigator.clipboard.writeText(u); SL.toast('발표 링크를 복사했습니다.'); } catch (_) { await SL.dialog({ title: '발표 링크', input: 1, value: u, ok: '닫기', cancel: null }); } }
+      else if (a === 'copy') copy(d);
+      else if (a === 'ren') rename(d);
+      else if (a === 'del') del(d);
+    });
+    return c;
+  }
+  async function create(kind) {
+    if (!(await SL.askPin())) return;
+    const t = await SL.dialog({ title: SL.tplNames[kind] + ' 만들기', body: '슬라이드 이름을 정해 주세요.', input: 1, value: '', placeholder: '예: 자연과의 관계 1차시', ok: '만들기' });
+    if (t == null) return;
+    const dk = SL.tpl[kind](t.trim() || '새 슬라이드'); await SL.saveDeck(dk); location.href = play('u', dk.id, '&edit=1');
+  }
+  async function copy(d) {
+    if (!(await SL.askPin())) return;
+    const t = await SL.dialog({ title: '⧉ 복사해서 내 슬라이드로', input: 1, value: d.title + ' (복사)', ok: '복사' }); if (t == null) return;
+    const dk = await SL.loadDeck(d.k, d.id); if (!dk) return SL.toast('불러오지 못했습니다.');
+    const base = dk.base; dk.id = SL.rid('d'); dk.title = t.trim() || d.title; dk.scenes.forEach(s => { s.id = SL.rid('s'); s.els.forEach(e => { e.id = SL.rid('e'); }); });
+    await SL.saveDeck(Object.assign({}, dk, { base })); SL.toast('복사했습니다 ✓'); draw();
+  }
+  async function rename(d) {
+    if (!(await SL.askPin())) return;
+    const t = await SL.dialog({ title: '✎ 이름 바꾸기', input: 1, value: d.title, ok: '저장' }); if (t == null || !t.trim()) return;
+    const dk = await SL.loadDeck('u', d.id); dk.title = t.trim().slice(0, 60); await SL.saveDeck(dk); draw();
+  }
+  async function del(d) {
+    if (!(await SL.askPin())) return;
+    if (!(await SL.dialog({ title: '🗑 삭제할까요?', body: '"' + esc(d.title) + '" 슬라이드가 서랍에서 사라집니다. 되돌릴 수 없어요.', ok: '삭제' }))) return;
+    await SL.deleteDeck(d.id); draw();
+  }
+  draw();
+})();
+</script>
+</body>
+</html>

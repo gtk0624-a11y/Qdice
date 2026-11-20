@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="theme-color" content="#14102b">
+<title>슬라이드 발표·편집</title>
+<link rel="icon" href="ggumsong.png">
+<link rel="stylesheet" href="engine.css">
+<style>
+  body{overflow:hidden;touch-action:manipulation}
+  #fab{position:absolute;left:10px;bottom:10px;z-index:70;width:44px;height:44px;border-radius:50%;border:0;background:#6A4BC4cc;color:#fff;font-size:20px;display:none}
+  @media (hover:none){#fab{display:block}}
+  .loading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:20px;z-index:1;flex-direction:column;gap:10px}
+  .loading img{width:90px;animation:pop .6s}
+  .strip .tools{position:sticky;bottom:-54px;display:flex;gap:4px;flex-wrap:wrap;background:#1c1738;padding:6px 0}
+  .strip .tools button{flex:1;min-width:34px;background:#ffffff22;color:#fff;border:0;border-radius:6px;padding:6px 0;font-size:14px}
+  .editbanner{position:absolute;left:50%;transform:translateX(-50%);top:46px;z-index:66;background:#ffd54f;color:#3a2f00;font-weight:700;border-radius:999px;padding:4px 14px;font-size:13px;max-width:90vw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .menu{position:absolute;z-index:75;background:#fff;color:#2B2350;border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,.4);padding:6px;display:flex;flex-direction:column;min-width:190px}
+  .menu button{border:0;background:none;text-align:left;padding:9px 12px;border-radius:8px;font-size:15px;font-weight:700;color:#2B2350}
+  .menu button:hover{background:#ECE7FA}
+  .shuffle{position:absolute;inset:0;z-index:100;background:#14102bf5;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;overflow:auto;padding:20px}
+  .shuffle img{width:110px;animation:bob .5s infinite alternate}
+  @keyframes bob{to{transform:translateY(-14px) rotate(6deg)}}
+  .gcards{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;max-width:96vw}
+  .gcard{background:#fff;color:#2B2350;border-radius:14px;padding:10px 16px;min-width:130px;animation:pop .5s cubic-bezier(.2,1.5,.4,1)}
+  .gcard h4{margin:0 0 4px;color:#6A4BC4;font-size:18px}
+  .gcard div{font-size:16px;line-height:1.5}
+</style>
+</head>
+<body>
+<div class="stagewrap" id="wrap"><div class="loading" id="loading"><img src="ggumsong.png" alt=""><div>슬라이드를 불러오는 중…</div></div></div>
+<div class="strip hide" id="strip"></div>
+<div class="bar top auto" id="top"></div>
+<div class="bar bot auto" id="bot"></div>
+<div class="prog" id="prog"></div>
+<button id="fab" aria-label="메뉴">☰</button>
+<div class="props hide" id="props"></div>
+<div class="panel" id="panel"></div>
+<script src="lib/qrcode.js"></script>
+<script src="engine.js"></script>
+<script src="play.js"></script>
+</body>
+</html>
