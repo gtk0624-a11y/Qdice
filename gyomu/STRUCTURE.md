@@ -213,3 +213,8 @@ service cloud.firestore {
 - 실패 시(키 오류·잔액 부족·네트워크) 안내 후 기존 찾기 검색으로 자동 전환.
 - 자주 고칠 곳: AG_TOOLS(도구 목록), agPlan(검증·설명 문장), agDo(실제 반영), agContext(AI에 넘기는 현황), system 프롬프트(agentTry).
 - 개인정보: 요청 문장 + 예산/일정 현황이 Anthropic으로 전송됩니다(잠금 노트 제외). 학생 이름 입력 금지.
+
+## 소개 페이지 · 체험판
+- `intro.html`: 업무파탈 소개(이름의 뜻, 기존 교무수첩·노션의 불편, 시그니처 기능, 설치 방법, 한계). 단독 정적 페이지.
+- `demo.html`: build.py가 만드는 단일 파일에 `window.TF_DEMO=1`을 넣은 체험판. 저장소 키가 `travailfatal.demo` / IndexedDB `travailfatal-demo`라 **내 수첩 데이터와 완전히 분리**, 예시 데이터로 자동 시작, 기기 연동·서비스워커 꺼짐, 상단에 빨간 체험판 띠(#demostrip).
+- 수정 후 `python3 build.py` → `cp dist/demo.html demo.html`.

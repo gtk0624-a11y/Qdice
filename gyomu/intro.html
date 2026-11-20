@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>업무파탈 Travail Fatal — 현장 선생님을 위한 디지털 교무수첩</title>
+<meta name="description" content="경기도 메신저 내용을 붙여넣으면 일정·할 일·내 업무로 나눠 주는 디지털 교무수첩. 예산 장부, 회의 기록, AI 비서 꿈송이까지.">
+<style>
+:root{--paper:#fffdf6;--ink:#2b2a33;--sub:#6a6875;--mint:#cfeee3;--mint2:#9bd8c2;--pink:#ffd9e0;--sky:#d6e8ff;--lemon:#fff2b8;--lav:#e6dcff;--red:#e0584f;--line:#e6e0cf;--navy:#2f3f6b}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic","맑은 고딕",sans-serif;font-size:17px;line-height:1.7;word-break:keep-all;
+ background-image:linear-gradient(var(--line) 1px,transparent 1px);background-size:100% 34px}
+.wrap{max-width:980px;margin:0 auto;padding:0 20px}
+a{color:var(--navy)}
+.tape{display:inline-block;background:var(--lemon);padding:2px 12px;transform:rotate(-1.5deg);font-weight:800;border-radius:3px;box-shadow:0 2px 0 rgba(0,0,0,.06)}
+/* 첫 화면 */
+.hero{padding:54px 0 36px}
+.eyebrow{font-weight:800;color:var(--red);letter-spacing:.04em;font-size:14px}
+h1{font-size:clamp(34px,6.4vw,60px);line-height:1.15;margin:8px 0 14px;font-weight:900;letter-spacing:-.03em}
+h1 small{display:block;font-size:.34em;font-weight:700;letter-spacing:.02em;color:var(--sub);margin-top:8px;font-family:Georgia,"Times New Roman",serif;font-style:italic}
+.lead{font-size:clamp(18px,2.6vw,22px);max-width:36em;margin:0 0 26px}
+.cta{display:flex;flex-wrap:wrap;gap:10px}
+.btn{display:inline-block;padding:14px 22px;border-radius:14px;font-weight:800;text-decoration:none;border:2px solid var(--ink);background:#fff;color:var(--ink);box-shadow:4px 4px 0 var(--ink);transition:transform .12s,box-shadow .12s}
+.btn:hover{transform:translate(2px,2px);box-shadow:2px 2px 0 var(--ink)}
+.btn.pri{background:var(--mint2)}
+.btn.sm{padding:9px 16px;font-size:15px;box-shadow:3px 3px 0 var(--ink)}
+section{padding:34px 0}
+h2{font-size:clamp(26px,4.2vw,36px);line-height:1.3;margin:0 0 8px;font-weight:900;letter-spacing:-.02em}
+.sec-sub{color:var(--sub);margin:0 0 22px}
+.card{background:#fff;border:2px solid var(--ink);border-radius:18px;padding:18px 20px;box-shadow:5px 5px 0 rgba(43,42,51,.9)}
+.grid{display:grid;gap:16px}
+.g2{grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
+.g3{grid-template-columns:repeat(auto-fit,minmax(250px,1fr))}
+.card h3{margin:0 0 6px;font-size:20px;line-height:1.35}
+.card p{margin:6px 0 0}
+.c-mint{background:var(--mint)}.c-pink{background:var(--pink)}.c-sky{background:var(--sky)}.c-lemon{background:var(--lemon)}.c-lav{background:var(--lav)}
+.ic{font-size:28px;line-height:1}
+/* 이름 뜻 */
+.name{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:stretch}
+@media(max-width:720px){.name{grid-template-columns:1fr}}
+.eq{font-size:clamp(20px,3.4vw,28px);font-weight:900;line-height:1.5}
+.eq i{font-style:normal;background:linear-gradient(transparent 60%,var(--pink) 60%)}
+/* 문제 */
+.vs{width:100%;border-collapse:separate;border-spacing:0;border:2px solid var(--ink);border-radius:16px;overflow:hidden;background:#fff;font-size:15.5px}
+.vs th,.vs td{padding:11px 14px;text-align:left;vertical-align:top;border-bottom:1px solid var(--line)}
+.vs th{background:var(--ink);color:#fff;font-size:15px}
+.vs tr:last-child td{border-bottom:0}
+.vs td:first-child{font-weight:800;white-space:nowrap}
+.vs td:last-child{background:#f4fbf8}
+.scroll{overflow-x:auto}
+@media(max-width:720px){.vs,.vs tbody,.vs tr,.vs td{display:block;width:100%}.vs tr:first-child{display:none}.vs tr{border-bottom:2px solid var(--ink);padding:6px 0}.vs tr:last-child{border-bottom:0}.vs td{border:0;padding:4px 14px;white-space:normal!important}.vs td:first-child{font-size:17px;padding-top:10px;background:var(--lemon)}.vs td[data-l]:not(:first-child)::before{content:attr(data-l) '  ';display:block;font-size:12.5px;font-weight:900;color:var(--sub)}.vs td:last-child{background:#f4fbf8;padding-bottom:10px}}
+/* 메신저 목업 */
+.mock{display:grid;grid-template-columns:1fr 54px 1fr;gap:10px;align-items:center}
+@media(max-width:720px){.mock{grid-template-columns:1fr}.mock .arrow{transform:rotate(90deg);justify-self:center}}
+.msg{background:#fff;border:2px solid var(--ink);border-radius:14px;padding:14px;font-size:14.5px;line-height:1.6}
+.msg b{display:block;margin-bottom:4px}
+.arrow{font-size:34px;text-align:center;font-weight:900}
+.out{display:flex;flex-direction:column;gap:8px}
+.chip{display:flex;gap:8px;align-items:flex-start;background:#fff;border:2px solid var(--ink);border-radius:12px;padding:9px 12px;font-size:14.5px}
+.tag{flex:none;font-size:12.5px;font-weight:900;border-radius:999px;padding:1px 10px;border:1.5px solid var(--ink)}
+.t-ev{background:var(--sky)}.t-td{background:var(--lemon)}.t-mine{background:var(--pink)}
+/* 스킨 견본 */
+.sw{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.sw span{width:34px;height:34px;border-radius:8px;border:1.5px solid var(--ink)}
+.fonts{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:10px;font-size:18px}
+.steps{counter-reset:s;list-style:none;padding:0;margin:0;display:grid;gap:12px}
+.steps li{counter-increment:s;background:#fff;border:2px solid var(--ink);border-radius:14px;padding:12px 16px 12px 58px;position:relative}
+.steps li::before{content:counter(s);position:absolute;left:14px;top:10px;width:32px;height:32px;border-radius:50%;background:var(--mint2);border:2px solid var(--ink);display:grid;place-items:center;font-weight:900}
+.note{background:#fff;border:2px dashed var(--ink);border-radius:14px;padding:14px 16px;font-size:15.5px}
+.note ul{margin:6px 0 0;padding-left:20px}
+footer{padding:36px 0 60px;text-align:center;color:var(--sub);font-size:14px}
+:focus-visible{outline:3px solid var(--navy);outline-offset:3px}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="hero">
+  <div class="eyebrow">TRAVAIL FATAL · 현장 교사가 직접 만든 교무수첩</div>
+  <h1>업무파탈<small>Travail Fatal</small></h1>
+  <p class="lead">공문과 메신저는 쏟아지고, 마감은 숨어 있고, 예산은 엑셀 어딘가에 있습니다.<br>
+  <span class="tape">메신저 글을 붙여넣으면</span> 일정·할 일·내 업무로 나눠 주는, <b>선생님 한 사람을 위한 디지털 교무수첩</b>입니다.</p>
+  <div class="cta">
+    <a class="btn pri" href="demo.html">▶ 체험판으로 먼저 써 보기</a>
+    <a class="btn" href="./">내 수첩 시작하기</a>
+    <a class="btn" href="#install">설치·고정 방법</a>
+  </div>
+  <p style="font-size:14px;color:var(--sub);margin-top:14px">체험판은 예시 데이터로 열리고, 내 수첩 데이터와 완전히 분리되어 이 브라우저에만 저장됩니다. 가입·설치 없이 바로 열립니다.</p>
+</header>
+
+<section id="name">
+  <h2>이름의 뜻</h2>
+  <p class="sec-sub">옴므파탈·팜므파탈에서 빌려 온 말장난입니다.</p>
+  <div class="name">
+    <div class="card c-pink">
+      <div class="eq"><i>Travail</i> 일 · 노동<br>+ <i>Fatal</i> 치명적인 · 헤어나올 수 없는<br>= <i>업무파탈</i></div>
+    </div>
+    <div class="card">
+      <h3>업무에 치이는 수첩이 아니라, 업무를 사로잡는 수첩</h3>
+      <p>쓰다 보면 헤어나올 수 없을 만큼 편하고 예뻐서 매일 열게 되는 수첩이 목표입니다. 그래서 첫 화면부터 오늘 할 일·마감·예산 잔액이 한눈에 보이게 했습니다.</p>
+    </div>
+  </div>
+</section>
+
+<section id="problem">
+  <h2>기존 교무수첩·노션, 현장에선 이게 불편했습니다</h2>
+  <p class="sec-sub">종이 수첩도, 노션도, 엑셀도 각자 쓸모가 있습니다. 다만 학교 업무에 그대로 쓰기엔 이런 빈틈이 있었습니다.</p>
+  <div class="scroll"><table class="vs">
+    <tr><th>상황</th><th>종이 수첩 · 엑셀</th><th>노션</th><th>업무파탈</th></tr>
+    <tr><td data-l="">메신저 공지 정리</td><td data-l="종이 수첩 · 엑셀">손으로 옮겨 적다 마감을 놓침</td><td data-l="노션">복사해 붙여도 날짜·할 일을 직접 나눠 입력</td><td data-l="업무파탈">붙여넣으면 일정·할 일·내 업무로 나눠 미리보기 후 한 번에 추가</td></tr>
+    <tr><td data-l="">시작의 부담</td><td data-l="종이 수첩 · 엑셀">매년 새로 사고 새로 적음</td><td data-l="노션">구조(데이터베이스·속성)를 직접 설계해야 시작됨</td><td data-l="업무파탈">교무수첩 틀이 이미 짜여 있어 이름만 넣으면 시작</td></tr>
+    <tr><td data-l="">예산</td><td data-l="종이 수첩 · 엑셀">수식·잔액을 직접 계산</td><td data-l="노션">계산·기한 알림이 번거로움</td><td data-l="업무파탈">사업·항목별 집행·잔액 자동 계산, 기한 표시</td></tr>
+    <tr><td data-l="">회의·연수 기록</td><td data-l="종이 수첩 · 엑셀">필기 후 찾기 어려움</td><td data-l="노션">기록은 되지만 결정·후속 조치를 따로 뽑아야 함</td><td data-l="업무파탈">결정·후속 조치를 칸으로 구분해 적고, 꿈송이가 찾아 줌</td></tr>
+    <tr><td data-l="">한글·엑셀 자료</td><td data-l="종이 수첩 · 엑셀">파일이 흩어져 있음</td><td data-l="노션">한글(hwp) 미리보기 안 됨</td><td data-l="업무파탈">올린 원본을 그대로 보관, 내용은 검색되고 원본은 다시 열기</td></tr>
+    <tr><td data-l="">찾기</td><td data-l="종이 수첩 · 엑셀">수첩을 넘겨야 함</td><td data-l="노션">검색은 되나 "그때 그 이야기"는 어려움</td><td data-l="업무파탈">꿈송이에게 대충 물어도 회의록·예산·분장표에서 찾아 줌</td></tr>
+    <tr><td data-l="">학교 PC·폰·태블릿</td><td data-l="종이 수첩 · 엑셀">한 곳에만 있음</td><td data-l="노션">모바일에서 느리게 느끼는 경우가 있음</td><td data-l="업무파탈">가벼운 웹앱, 작업표시줄 고정, 암호로 기기 연동</td></tr>
+  </table></div>
+</section>
+
+<section id="sig">
+  <h2>시그니처 ① 메신저 붙여넣기</h2>
+  <p class="sec-sub">경기도 메신저·공문 내용을 그냥 붙여넣으세요. 날짜와 마감 표현을 읽어서 나눕니다. 이 기능은 인터넷 서버로 보내지 않고 내 기기 안에서 처리됩니다.</p>
+  <div class="mock">
+    <div class="msg"><b>[교무부] 학년말 평가 관련 안내</b>
+      ① 학년말 평가 자료는 12/5(금)까지 제출해 주세요.<br>
+      ② 교직원 전체회의: 11/25(화) 16:00 회의실<br>
+      ③ 학생 인권 실태조사 기간 (~12/4)</div>
+    <div class="arrow">➜</div>
+    <div class="out">
+      <div class="chip"><span class="tag t-td">할 일</span>학년말 평가 자료 제출 · 12/5</div>
+      <div class="chip"><span class="tag t-ev">일정</span>교직원 전체회의 · 11/25</div>
+      <div class="chip"><span class="tag t-mine">내 업무</span>학생 인권 실태조사 · ~12/4</div>
+    </div>
+  </div>
+  <p style="font-size:15px;color:var(--sub)">분류가 틀리면 미리보기 창에서 줄마다 날짜·제목·종류를 고친 뒤 추가합니다. 마음대로 저장되지 않습니다.</p>
+</section>
+
+<section id="ai">
+  <h2>시그니처 ② 꿈송이 — 찾아 주고, 시키면 정리까지</h2>
+  <p class="sec-sub">학교 마스코트 꿈송이가 수첩 안의 모든 기록을 알고 있는 비서입니다.</p>
+  <div class="grid g2">
+    <div class="card c-sky"><div class="ic">🔎</div><h3>찾기 (무료, 키 없이)</h3>
+      <p>"저번 회의에서 체육관 돈 누가 알아본다고 했지?" 처럼 대충 물어도 회의록·계획서·예산·업무 분장표·연락망에서 찾아 출처와 함께 보여 줍니다.</p></div>
+    <div class="card c-lemon"><div class="ic">🪄</div><h3>시키기 (Claude 키 연결 시)</h3>
+      <p>"내일 3시 교직원 회의 일정 넣어줘", "일반수용비에 인쇄비 5만원 집행 추가해줘", "배정액 10만원 늘려줘". 먼저 <b>"이렇게 처리할게요" 카드</b>로 보여 주고, [적용]을 눌러야 반영됩니다. 삭제는 하지 않습니다.</p></div>
+  </div>
+  <div class="note" style="margin-top:14px"><b>AI 사용 시 꼭 알아 두세요</b>
+    <ul>
+      <li>키는 이 기기에만 저장됩니다. 사용료는 쓴 만큼만 내는 방식(저렴한 Haiku 모델 사용)이라, 충전한 금액이 곧 한도입니다.</li>
+      <li>AI를 켜면 "질문 + 일정·예산 현황"이 Anthropic 서버로 전송됩니다. <b>학생 실명·민감정보는 넣지 마세요.</b></li>
+      <li>AI는 틀릴 수 있어서 카드로 확인한 뒤 적용하도록 만들었습니다.</li>
+    </ul></div>
+</section>
+
+<section id="custom">
+  <h2>내 방식대로 꾸미기</h2>
+  <p class="sec-sub">"누구는 예산이 중요하고, 누구는 일정이 중요하다"는 말에서 출발했습니다.</p>
+  <div class="grid g3">
+    <div class="card c-mint"><div class="ic">📒</div><h3>플래너 · 기존 수첩 화면</h3><p>굿노트 같은 플래너 느낌이 기본이고, 버튼 하나로 기존 수첩 스타일로 바꿉니다. 기본 색은 파스텔입니다.</p>
+      <div class="sw"><span style="background:#cfeee3"></span><span style="background:#ffd9e0"></span><span style="background:#d6e8ff"></span><span style="background:#fff2b8"></span><span style="background:#e6dcff"></span></div></div>
+    <div class="card c-pink"><div class="ic">🗒️</div><h3>메모 디자인 100가지</h3><p>포스트잇·줄노트·모눈·색종이 등 10가지 모양 × 10가지 색. 메모·일기·회의 노트마다 고를 수 있습니다.</p></div>
+    <div class="card c-lav"><div class="ic">🔤</div><h3>글씨체 50가지</h3><p>기본은 내 기기 글씨체. 본문·제목을 따로 고르고, 모두 무료 글꼴입니다.</p>
+      <div class="fonts"><span>가나다라</span><b>가나다라</b><span style="font-family:serif">가나다라</span><span style="font-family:monospace">가나다라</span></div></div>
+    <div class="card c-sky"><div class="ic">↕️</div><h3>화면 순서 바꾸기</h3><p>업무 중심·예산 중심·일정 중심·수업 중심 중 고르거나, ▲▼로 첫 화면 줄과 메뉴 순서를 직접 정합니다. 안 쓰는 줄은 숨깁니다.</p></div>
+    <div class="card c-lemon"><div class="ic">💰</div><h3>예산 장부</h3><p>사업·목·항목별 배정, 집행, 잔액을 자동 계산하고 집행 기한을 보여 줍니다. 계획서를 올리면 항목을 정리합니다.</p></div>
+    <div class="card c-mint"><div class="ic">🗂️</div><h3>서랍 · 원본 보관</h3><p>자주 가는 사이트(나이스·에듀파인 등)를 서랍에 모으고, 올린 한글·엑셀 원본은 그대로 보관했다가 다시 엽니다.</p></div>
+  </div>
+</section>
+
+<section id="more">
+  <h2>그 밖에 들어 있는 것</h2>
+  <div class="card">
+    <p style="margin:0">오늘의 일과표(시간표)·학사일정 · 수업 진도와 수행평가 · 회의·연수 기록(결정/후속 조치) · 내 업무와 전교사 업무 분장표 · 교내 연락망 · 필수·개발 연수 이수 현황 · 태블릿 필기 메모 · 암호로 잠기는 기기 연동(컴·폰·태블릿) · 백업 파일 받기/불러오기</p>
+  </div>
+</section>
+
+<section id="install">
+  <h2>설치하고 작업표시줄에 고정하기</h2>
+  <p class="sec-sub">앱 스토어 없이, 주소만 열어 설치합니다.</p>
+  <ol class="steps">
+    <li><b>크롬 또는 엣지</b>로 업무파탈 주소를 엽니다.</li>
+    <li>주소창 오른쪽의 <b>설치(⊕) 아이콘</b>, 또는 메뉴의 <b>"앱으로 설치 / 바로가기 만들기"</b>를 누릅니다.</li>
+    <li>설치된 창이 열리면 작업표시줄의 아이콘을 <b>우클릭 → 작업 표시줄에 고정</b>. 폰은 "홈 화면에 추가"를 쓰세요.</li>
+    <li>윈도우 위젯 패널에는 웹앱을 넣을 수 없어서, <b>작은 창으로 띄워 두는 방식</b>으로 위젯처럼 씁니다.</li>
+  </ol>
+</section>
+
+<section id="honest">
+  <h2>솔직하게 말씀드리는 한계</h2>
+  <div class="note"><ul>
+    <li>웹 페이지는 내 컴퓨터의 한글·엑셀 프로그램을 직접 실행하지 못합니다. 원본을 내려받아 여는 방식입니다.</li>
+    <li>데이터는 기본적으로 <b>이 기기의 브라우저</b>에 저장됩니다. 브라우저 데이터를 지우면 사라지니 가끔 백업하거나 기기 연동을 켜 주세요.</li>
+    <li>학교 내부망에서 NEIS·외부 글꼴 등이 막히면 시간표·급식 연동이 안 될 수 있습니다.</li>
+    <li>학생 개인정보가 들어가는 자료는 올리지 않는 것을 원칙으로 합니다.</li>
+  </ul></div>
+</section>
+
+<section id="start" style="text-align:center">
+  <h2>이름만 넣으면 내 수첩이 됩니다</h2>
+  <p class="sec-sub">빈 틀이라 다른 선생님들도 각자 자기 수첩으로 쓸 수 있습니다.</p>
+  <div class="cta" style="justify-content:center">
+    <a class="btn pri" href="demo.html">▶ 체험판 열기</a>
+    <a class="btn" href="./">내 수첩 시작하기</a>
+  </div>
+</section>
+
+<footer>© 김정환 · M.A.D.T (Moral And Digital Teacher) · 업무파탈 Travail Fatal<br>꿈송이 캐릭터는 곡선중학교 홍보 캐릭터입니다.</footer>
+</div>
+</body>
+</html>

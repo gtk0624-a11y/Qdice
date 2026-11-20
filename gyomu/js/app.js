@@ -528,9 +528,15 @@ function sampleData() {
   await loadBig();
   const cb = document.createElement('div'); cb.id = 'chatbox'; cb.innerHTML = '<div id="chatpan" hidden></div><button id="chatfab" aria-label="꿈송이에게 물어보기"></button>'; document.body.appendChild(cb);
   $('#chatfab').addEventListener('click', () => { if (chatOpen) closeChat(); else openChat(); });
+  if (DEMO) {
+    if (!S.setup) sampleData();
+    const ds = document.createElement('div'); ds.id = 'demostrip';
+    ds.innerHTML = '<b>체험판</b> · 예시 데이터입니다. 내 수첩과 분리되어 이 브라우저에만 저장돼요 <a href="./">내 수첩 시작하기 →</a> <a href="intro.html">소개 보기</a>';
+    document.body.insertBefore(ds, document.body.firstChild);
+  }
   render();
   TF.sync.start().catch(e => console.warn('동기화 시작 실패', e));
-  if ('serviceWorker' in navigator && /^https?:/.test(location.protocol)) navigator.serviceWorker.register('sw.js').catch(() => { });
+  if (!DEMO && 'serviceWorker' in navigator && /^https?:/.test(location.protocol)) navigator.serviceWorker.register('sw.js').catch(() => { });
   setInterval(() => { if (!document.hidden && /today/.test(location.hash || '#/today') && !document.querySelector('dialog[open]') && !(document.activeElement && /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName))) render(); }, 60000);
 })();
 

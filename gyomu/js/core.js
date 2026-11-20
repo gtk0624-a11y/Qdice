@@ -21,7 +21,7 @@ const idb = {
     if (this.p) return this.p;
     this.p = new Promise((res, rej) => {
       try {
-        const r = indexedDB.open('travailfatal', 1);
+        const r = indexedDB.open(window.TF_DEMO ? 'travailfatal-demo' : 'travailfatal', 1);
         r.onupgradeneeded = () => r.result.createObjectStore('kv');
         r.onsuccess = () => res(r.result);
         r.onerror = () => rej(r.error);
@@ -44,7 +44,8 @@ const idb = {
 };
 
 /* ---- 상태 ---- */
-const KEY = 'travailfatal.v1';
+const DEMO = !!window.TF_DEMO; /* 체험판(demo.html): 내 수첩과 완전히 분리된 저장소를 쓴다 */
+const KEY = DEMO ? 'travailfatal.demo' : 'travailfatal.v1';
 const DEF = () => ({
   v: 1, updatedAt: 0, setup: false,
   profile: { name: '', school: '', subject: '', classes: ['1-1', '1-2', '1-3', '2-1', '2-2', '2-3'], start: '09:00', classMin: 45, breakMin: 10, devTarget: 30 },

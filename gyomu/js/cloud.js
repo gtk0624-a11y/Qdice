@@ -3,7 +3,7 @@
    - 서버 주소는 선생님 파이어베이스 프로젝트의 실시간 데이터베이스입니다. 구글 로그인이 필요 없습니다.
    - 가장 나중에 고친 기기의 내용이 이깁니다. */
 const CLOUD_URL = (window.TF_CLOUD_URL || 'https://nation-game-cf684-default-rtdb.asia-southeast1.firebasedatabase.app').replace(/\/$/, '');
-const CLOUD = { pass: localStorage.getItem('tf.cloudPass') || '', info: { state: 'off', msg: '꺼져 있음', at: 0 }, busy: false, id: '', key: null };
+const CLOUD = { pass: window.TF_DEMO ? '' : (localStorage.getItem('tf.cloudPass') || ''), info: { state: 'off', msg: '꺼져 있음', at: 0 }, busy: false, id: '', key: null };
 const _enc = new TextEncoder(), _dec = new TextDecoder();
 const b64 = u8 => { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s); };
 const unb64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
@@ -62,6 +62,7 @@ window.addEventListener('focus', () => cloudTick());
 if (CLOUD.pass) { cloudSet('run', '연결 중…'); setTimeout(() => cloudTick(true), 800); }
 Object.assign(A, {
   cloudOn() {
+    if (window.TF_DEMO) { toast('체험판에서는 기기 연동이 꺼져 있습니다. 내 수첩에서 켜 주세요.'); return; }
     ask('기기 연동 켜기', [{ k: 'p', label: '연동 암호 (8자 이상 · 컴·폰·태블릿에 똑같이 입력)', type: 'password' }], async o => {
       const p = (o.p || '').trim(); if (p.length < 8) return toast('암호를 8자 이상으로 입력해 주세요.');
       CLOUD.pass = p; CLOUD.key = null; await cloudKeys(); cloudSet('run', '확인 중…');
