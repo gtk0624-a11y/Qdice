@@ -169,3 +169,10 @@ service cloud.firestore {
 - 학교 배너(`schoolBanner`): 오늘 화면 맨 위. 누르면 홈페이지 열기·일주일 급식·학급 수·주소가 펼쳐짐.
 - 급식·학교정보 출처: 나이스 교육정보 개방포털. 이 기기에서 먼저 직접 받고(`neisLive`, 설정한 학교 이름 기준), 안 되면 깃허브가 매일 새벽 받아 둔 `neis.json`(`gyomu/tools/neis.js`, 학교는 comcigan-config.json). 인증키 없이는 한 번에 5건만 줘서 4일씩 끊어 받음. 학생 개인별 학적·출결은 공개 연동 불가.
 - 줄 열림 상태는 `tf.open` 에 저장(고치거나 체크해도 다시 안 닫힘).
+
+
+## 서랍 (js/drawer.js)
+- 하단 서랍: 즐겨찾기 ★ 줄 + 펼치면 검색·분류 탭(전체/즐겨찾기/최근/내 분류)·넣기·✎고치기·✕빼기·백업 저장/불러오기.
+- 데이터: `S.links[] = {id,name,url,cat,fav,last}`. 주소만 저장(비밀번호 없음), javascript: 주소는 거부.
+- 자주 고칠 곳: `drawerHtml()`(화면), `A.add_links/dwEdit/dwDel/dwFav`(동작), style.css 끝 `.dw*`.
+- 위험: 브라우저 데이터를 지우면 목록이 사라짐 → 백업 저장 권장. 백업 파일에는 내 사이트 주소가 담김.

@@ -61,7 +61,7 @@ Object.assign(A, {
 });
 /* 게시판 줄을 펼치거나 접은 상태를 기억합니다 (고치거나 체크해도 줄이 다시 닫히지 않게) */
 document.addEventListener('toggle', e => {
-  const d = e.target; if (!d || !d.dataset || !d.dataset.k || !/^(r\d+|sb)$/.test(d.dataset.k)) return;
+  const d = e.target; if (!d || !d.dataset || !d.dataset.k || !/^(r\d+|sb|dw)$/.test(d.dataset.k)) return;
   if (d.open) OPEN.add(d.dataset.k); else OPEN.delete(d.dataset.k);
   try { localStorage.setItem('tf.open', JSON.stringify([...OPEN])); } catch (er) { }
 }, true);
