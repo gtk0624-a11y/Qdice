@@ -205,3 +205,11 @@ service cloud.firestore {
 - 화면 순서: js/order.js. 줄 순서·메뉴 순서는 `S.order`에 저장, 오늘 화면 [↕ 순서 바꾸기]·설정 맨 위. 프리셋(업무·예산·일정·수업 중심) 포함.
 - 자료 원본: js/docs.js. 올린 파일 원본은 IndexedDB(`file:<자료id>`)에 보관 → [원본 열기](PDF는 새 탭, 한글·엑셀은 내려받기 후 열림)·[표로 바로 보기](엑셀)·[크게 보기]. 백업 파일에는 원본이 들어가지 않으니 다른 기기에서는 다시 올려야 함.
 - 꿈송이 AI 정리 모델은 search.js `askClaude`의 `claude-haiku-5-5` (사용자가 설정에 넣은 본인 API 키로 호출, 질문 1회 약 1원).
+
+## 꿈송이 비서 모드 (js/agent.js) — "나만의 자비스"
+- 켜는 법: 꿈송이 채팅창 위의 🔑 칸에 Claude 키(sk-ant-…) 붙여넣기 → 저장 (localStorage `tf.claudeKey`, 설정의 열쇠 칸과 같은 값).
+- 동작: 키가 있고 ① "추가·넣어·집행·수정…" 같은 시키는 말이 있거나 ② 50자 이상 긴 글(메신저)을 넣으면 Haiku 5.5가 도구(tool_use)로 계획을 만들고 **카드로 먼저 보여 준 뒤 [적용]을 눌러야 반영**됩니다. 삭제는 없습니다.
+- 도구: add_event(일정/할 일) · complete_item · add_mine · add_note · add_spend · add_budget_line · edit_budget_line · add_budget_project.
+- 실패 시(키 오류·잔액 부족·네트워크) 안내 후 기존 찾기 검색으로 자동 전환.
+- 자주 고칠 곳: AG_TOOLS(도구 목록), agPlan(검증·설명 문장), agDo(실제 반영), agContext(AI에 넘기는 현황), system 프롬프트(agentTry).
+- 개인정보: 요청 문장 + 예산/일정 현황이 Anthropic으로 전송됩니다(잠금 노트 제외). 학생 이름 입력 금지.

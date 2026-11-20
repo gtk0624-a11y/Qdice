@@ -588,3 +588,6 @@ html[data-skin="planner"] #wm{opacity:.28}
 html[data-skin="planner"] details.sec{border-bottom:1px solid color-mix(in srgb,var(--cover) 14%,#fff)}
 @media(max-width:700px){html[data-skin="planner"] #app{margin:0 auto 70px;padding:14px 14px 50px!important;border-radius:0 0 22px 22px!important}html[data-skin="planner"] .nav a{padding:8px 14px!important;font-size:15px}}
 html[data-skin="planner"] nav.nav{border:0!important;border-bottom:0!important}html[data-skin="planner"] .mcal .wk,html[data-skin="planner"] .mcal thead{border-color:transparent!important}
+.agc{background:#f4f8ff;border:1px solid #b9d4f5;border-radius:14px;padding:10px 12px;margin:6px 0}.agc ul{margin:6px 0;padding-left:18px}.agc li{margin:4px 0;line-height:1.5}.agc li.bad{color:var(--red)}.agd{font-weight:800;margin:6px 0 0}
+.ckb{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:6px 10px;background:#fff8e6;border-top:1px solid #f0dca8;font-size:12px}.ckb.on{background:#eef8f0;border-color:#cfe8d5}.ckb span{flex:1 1 100%}.ckb.on span{flex:1}.ckb input{flex:1;min-width:0;padding:6px 8px;border:1px solid var(--line,#ddd);border-radius:8px}
+@media(max-width:560px){#chatbox:has(#chatpan:not([hidden])) #chatfab{display:none}}

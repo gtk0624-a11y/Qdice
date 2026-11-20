@@ -465,18 +465,25 @@ function renderChatFab() {
   const b = $('#chatfab'); b.innerHTML = `<img src="${mas()}" alt="꿈송이">`;
   if (!$('#chatbub')) { const u = document.createElement('button'); u.id = 'chatbub'; u.textContent = '무엇이든 물어보세요!'; u.addEventListener('click', () => $('#chatfab').click()); b.parentNode.insertBefore(u, b); }
 }
+function chatKeyBar() {
+  const has = !!localStorage.getItem('tf.claudeKey');
+  if (has && !window.__keyEdit) return '<div class="ckb on"><span>🔑 꿈송이 비서 켜짐 — 말로 시키면 정리해 드려요</span><button type="button" class="btn sm" data-chat="keyedit">키 변경</button></div>';
+  return `<form class="ckb" data-chatkey><span>🔑 Claude 키를 넣으면 꿈송이가 말로 일정·예산·업무를 정리해 줘요</span><input name="k" type="password" placeholder="sk-ant-… 붙여넣기" autocomplete="off"><button class="btn pri sm">저장</button>${has ? '<button type="button" class="btn sm" data-chat="keyoff">끄기</button>' : ''}</form>`;
+}
 function renderChat() {
   const p = $('#chatpan'); p.hidden = !chatOpen; if (!chatOpen) return;
   p.style.setProperty('--mas', `url("${mas()}")`);
   p.innerHTML = `<div class="ch-h"><span class="ch-face"><img src="${mas()}" alt=""></span><div><b>꿈송이 · 업무파탈 줍줍</b><span>수첩 안의 모든 기록에서 찾아요</span></div><button class="x" data-chat="close" aria-label="닫기">닫기</button></div>
-  <div class="ch-b" id="chlog">${CH.length ? '' : `<div class="hello"><img src="${mas()}" alt="꿈송이"><div class="bb"><b>안녕하세요, 꿈송이예요!</b><br>회의록·계획서·예산·일정·연락망·연수 이수번호까지, 이 수첩에 적은 건 뭐든 물어보세요. 말을 대충 해도 찾아 드려요.</div></div>`}${CH.map((m, mi) => m.role === 'me' ? `<div class="me">${esc(m.text)}</div>` : `<div class="bot">${m.text ? `<p>${esc(m.text).replace(/\n/g, '<br>')}</p>` : ''}${(m.blocks || []).map((b, i) => `<div class="hit"><span class="no">${i + 1}</span><div><div>${b.html || snippet(b.text, m.q || '')}</div><div class="src">출처: ${esc(b.src)} ${b.ref ? `<a href="${esc(b.ref)}" ${/^http/.test(b.ref) ? 'target="_blank" rel="noopener"' : 'data-chat="go"'}>원문 열기</a>` : ''}</div></div></div>`).join('')}${m.blocks && m.blocks.length || m.text.length > 60 ? `<div class="ch-act"><button class="x" data-chat="copy" data-i="${mi}">복사</button><button class="x" data-chat="export" data-i="${mi}">문서로 내보내기</button><button class="x" data-chat="print" data-i="${mi}">인쇄·PDF</button></div>` : ''}</div>`).join('')}${busy ? '<div class="bot"><p class="mu">찾는 중…</p></div>' : ''}</div>
+  <div class="ch-b" id="chlog">${CH.length ? '' : `<div class="hello"><img src="${mas()}" alt="꿈송이"><div class="bb"><b>안녕하세요, 꿈송이예요!</b><br>회의록·계획서·예산·일정·연락망·연수 이수번호까지, 이 수첩에 적은 건 뭐든 물어보세요. 말을 대충 해도 찾아 드려요.</div></div>`}${CH.map((m, mi) => m.role === 'me' ? `<div class="me">${esc(m.text)}</div>` : `<div class="bot">${m.text ? `<p>${esc(m.text).replace(/\n/g, '<br>')}</p>` : ''}${typeof agentCard === 'function' && m.act ? agentCard(m, mi) : ''}${(m.blocks || []).map((b, i) => `<div class="hit"><span class="no">${i + 1}</span><div><div>${b.html || snippet(b.text, m.q || '')}</div><div class="src">출처: ${esc(b.src)} ${b.ref ? `<a href="${esc(b.ref)}" ${/^http/.test(b.ref) ? 'target="_blank" rel="noopener"' : 'data-chat="go"'}>원문 열기</a>` : ''}</div></div></div>`).join('')}${m.blocks && m.blocks.length || m.text.length > 60 ? `<div class="ch-act"><button class="x" data-chat="copy" data-i="${mi}">복사</button><button class="x" data-chat="export" data-i="${mi}">문서로 내보내기</button><button class="x" data-chat="print" data-i="${mi}">인쇄·PDF</button></div>` : ''}</div>`).join('')}${busy ? '<div class="bot"><p class="mu">찾는 중…</p></div>' : ''}</div>
   <div class="ch-q">${['내 담당 업무', '예산 잔액', '이번 주 마감', '연수 이수 현황'].map(s => `<button class="chip" data-chat="ask" data-q="${s}">${s}</button>`).join('')}</div>
-  <form class="ch-f" data-chatform><label class="sr" for="chq">질문</label><input id="chq" autocomplete="off" placeholder="예: 저번 회의에서 체육관 돈 누가 알아본다고 했지" ><button class="btn pri">묻기</button></form>`;
+  ${chatKeyBar()}
+  <form class="ch-f" data-chatform><label class="sr" for="chq">질문</label><input id="chq" autocomplete="off" placeholder="찾기: 저번 회의에서 체육관 돈 누가… / 시키기(키 필요): 내일 3시 회의 일정 넣어줘" ><button class="btn pri">묻기</button></form>`;
   const l = $('#chlog'); l.scrollTop = l.scrollHeight;
 }
 async function ask1(q) {
   q = q.trim(); if (!q || busy) return;
   CH.push({ role: 'me', text: q }); busy = true; renderChat();
+  if (typeof agentTry === 'function') { let done = false; try { done = await agentTry(q); } catch (e) { done = false; } if (done) { busy = false; renderChat(); return; } }
   const dir = direct(q), hits = search(q), blocks = [...dir.map(d => ({ src: d.src, text: d.text, ref: d.ref })), ...hits.map(h => ({ src: h.c.src, text: h.c.text, ref: h.c.ref }))];
   let text = '';
   if (localStorage.getItem('tf.claudeKey')) { try { const h2 = search(q, true); if (h2.length) text = '꿈송이 정리\n' + await askClaude(q, h2); } catch (e) { text = '(문장 정리는 실패해서 찾은 원문만 보여 드립니다: ' + e.message + ')'; } }
@@ -486,6 +493,8 @@ async function ask1(q) {
 function plain(m) { return [m.text, ...(m.blocks || []).map((b, i) => `${i + 1}. ${b.text}\n   출처: ${b.src}`)].filter(Boolean).join('\n'); }
 document.addEventListener('click', async e => {
   const b = e.target.closest('[data-chat]'); if (!b) return; const k = b.dataset.chat;
+  if (k === 'keyedit') { window.__keyEdit = true; renderChat(); return; }
+  if (k === 'keyoff') { localStorage.removeItem('tf.claudeKey'); window.__keyEdit = false; toast('키를 지웠습니다.'); renderChat(); return; }
   if (k === 'close') { closeChat(); }
   else if (k === 'ask') ask1(b.dataset.q);
   else if (k === 'go') { closeChat(true); }
@@ -493,7 +502,8 @@ document.addEventListener('click', async e => {
   else if (k === 'print') { const m = CH[+b.dataset.i], html = `<html><meta charset="utf-8"><title>꿈송이가 찾은 내용</title><body style="font-family:sans-serif;line-height:1.7"><h2>꿈송이가 찾은 내용</h2><p>질문: ${esc(m.q || '')} · ${today()}</p>${m.text ? `<p>${esc(m.text).replace(/\n/g, '<br>')}</p>` : ''}${(m.blocks || []).map((x, i) => `<p>${i + 1}. ${esc(x.text).replace(/\n/g, '<br>')}<br><small>출처: ${esc(x.src)}</small></p>`).join('')}</body></html>`; const f = document.createElement('iframe'); f.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0'; document.body.appendChild(f); f.contentDocument.write(html); f.contentDocument.close(); setTimeout(() => { try { f.contentWindow.focus(); f.contentWindow.print(); } catch (er) { toast('인쇄 창을 열지 못했습니다. 문서로 내보내기를 써 주세요.'); } setTimeout(() => f.remove(), 3000); }, 300); }
   else if (k === 'export') { const m = CH[+b.dataset.i]; download('꿈송이_찾은내용_' + today() + '.doc', `<html><meta charset="utf-8"><body><h2>꿈송이가 찾은 내용</h2><p>질문: ${esc(m.q || '')}</p>${m.text ? `<p>${esc(m.text).replace(/\n/g, '<br>')}</p>` : ''}${(m.blocks || []).map((x, i) => `<p>${i + 1}. ${esc(x.text)}<br><small>출처: ${esc(x.src)}</small></p>`).join('')}</body></html>`, 'application/msword'); }
 });
-document.addEventListener('submit', e => { if (e.target.matches('[data-chatform]')) { e.preventDefault(); const i = $('#chq'), v = i.value; i.value = ''; ask1(v); } });
+document.addEventListener('submit', e => { if (e.target.matches('[data-chatkey]')) { e.preventDefault(); const k = new FormData(e.target).get('k').trim(); if (k) { localStorage.setItem('tf.claudeKey', k); window.__keyEdit = false; toast('키를 저장했습니다. 이제 말로 시켜 보세요.'); renderChat(); } return; }
+  if (e.target.matches('[data-chatform]')) { e.preventDefault(); const i = $('#chq'), v = i.value; i.value = ''; ask1(v); } });
 
 /* ---------- 예시 데이터 ---------- */
 function sampleData() {
