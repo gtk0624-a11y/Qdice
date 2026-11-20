@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>업무파탈 위젯</title>
+<meta name="theme-color" content="#F2EBDD">
+<link rel="icon" href="icons/icon-192.png">
+<style>
+/* 업무파탈 위젯 — 작고 조용하게: 디데이 · 기한 임박 · 오늘 할 일만 (보기 전용) */
+:root{--paper:#F2EBDD;--card:#fff;--ink:#1B1613;--red:#6E1423;--mu:#4A4036;--rule:#CFC4B0}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 'Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',sans-serif}
+.w{max-width:420px;margin:0 auto;padding:14px 14px 20px}
+.top{display:flex;align-items:baseline;gap:8px;border-bottom:3px solid var(--ink);padding-bottom:8px}
+.top h1{margin:0;font-size:22px;font-weight:800}.top .d{color:var(--mu);font-size:15px}
+.top a{margin-left:auto;font-size:14px;color:var(--ink)}
+h2{margin:18px 0 8px;font-size:16px;font-weight:800;border-left:6px solid var(--red);padding-left:9px;line-height:1.3}
+h2 small{font-weight:400;color:var(--mu);font-size:13px;margin-left:6px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{background:var(--card);border:1px solid var(--rule);border-radius:999px;padding:3px 13px 3px 11px;display:inline-flex;gap:8px;align-items:baseline}
+.chip b{font-size:19px;font-weight:800}.chip.hot b{color:var(--red)}
+.li{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--rule);border-radius:8px;padding:8px 12px;margin:6px 0}
+.li .t{flex:1;min-width:0;font-weight:700;overflow-wrap:anywhere}.li .dt{color:var(--mu);font-size:13px;flex:none}
+.b{flex:none;font-weight:800;font-size:14px;padding:1px 9px;border-radius:999px;background:#E3D9C6}.b.hot{background:var(--red);color:#fff}
+.mu{color:var(--mu);font-size:14px}
+.empty{color:var(--mu);font-size:15px;padding:6px 2px}
+.td .t{font-weight:500}
+.foot{margin-top:18px;color:var(--mu);font-size:12px;text-align:center}
+</style>
+</head>
+<body>
+<div class="w" id="w"><p style="padding:20px">불러오는 중…</p></div>
+<script src="js/core.js"></script>
+<script src="js/widget.js"></script>
+</body>
+</html>

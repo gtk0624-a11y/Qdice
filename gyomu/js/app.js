@@ -17,6 +17,7 @@ function allEvents() {
   S.assess.forEach(a => { if (a.due) e.push({ date: a.due, t: a.title + ' (수행평가)', kind: '평가', done: (a.step || 0) >= 5 }); });
   S.budget.forEach(p => p.lines.forEach(l => { if (l.deadline && (l.alloc - spentOf(l)) > 0) e.push({ date: l.deadline, t: `${p.name} ${l.item} 집행 (잔액 ${won(l.alloc - spentOf(l))}원)`, kind: '예산', done: false }); }));
   S.training.forEach(t => { if (t.due) e.push({ date: t.due, t: t.title + ' (연수)', kind: '연수', done: !!t.done }); });
+  (S.dday || []).forEach(x => { if (x.date) e.push({ date: x.date, t: x.title, kind: '디데이', done: false }); });
   return e;
 }
 function upcoming(n) { const seen = new Set(); return allEvents().filter(e => !e.done && dd(e.date) !== null && dd(e.date) >= 0 && dd(e.date) <= n).sort((a, b) => a.date.localeCompare(b.date)).filter(e => { if (!e.span) return true; if (seen.has(e.id)) return false; seen.add(e.id); return true; }); }
@@ -147,6 +148,7 @@ function todayView() {
     rows.push(row('r9', '학교', '업무 분장표', S.duties.length ? `내 업무 ${mine.length}건${mine[0] ? ' · ' + esc(mine[0].work) : ''}` : '업무 분장표를 올려 보세요', '', mine.map(d => `<div class="nl"><span>${esc(d.dept)} · ${esc(d.work)}</span></div>`).join('') + '<a class="btn sm" href="#/lib">분장표 열기</a>'));
     rows.push(typeof mineRow === 'function' ? mineRow() : '');
     rows.push(typeof mealRow === 'function' ? mealRow() : '');
+    rows.push(typeof ddayRow === 'function' ? ddayRow() : '');
     rows.push(row('r10', '학교', '교내 연락망', S.contacts.length ? `교직원 ${S.contacts.length}명 · 이름·부서·내선 검색` : '연락망을 올려 보세요', '', '<a class="btn sm" href="#/lib">연락망 열기</a>'));
   }
   S.pages.filter(p => p.pin).forEach(p => {
@@ -155,7 +157,7 @@ function todayView() {
     rows.push(row('pg' + p.id, '페이지', esc(p.title || '제목 없음'), st, '', todos.map(b => `<div class="td ${b.done ? 'dn' : ''}"><button class="ck" data-act="bTodo" data-p="${p.id}" data-b="${b.id}" aria-pressed="${!!b.done}" aria-label="완료 표시"></button><span class="tl">${esc(b.x)}</span><span class="stamp">완료</span></div>`).join('') + `<a class="btn sm" href="#/page/${p.id}">페이지 열기</a>`));
   });
   const up = upcoming(7);
-  return `${typeof schoolBanner === 'function' ? schoolBanner() : ''}<div class="bh"><h2>오늘의 게시판</h2><span class="mu">줄을 누르면 펼쳐집니다.</span><button class="btn sm" data-act="ibx">📨 메신저 붙여넣기</button><button class="btn sm" data-act="rowPick">☑ 보일 줄 고르기</button></div>
+  return `${typeof schoolBanner === 'function' ? schoolBanner() : ''}${typeof ddayStrip === 'function' ? ddayStrip() : ''}<div class="bh"><h2>오늘의 게시판</h2><span class="mu">줄을 누르면 펼쳐집니다.</span><button class="btn sm" data-act="ibx">📨 메신저 붙여넣기</button><button class="btn sm" data-act="rowPick">☑ 보일 줄 고르기</button></div>
   <div class="spread"><div class="pgL">${miniCal()}${up.length ? `<p class="soon"><b>이번 주 기한</b><br>${up.slice(0, 6).map(e => `${md(e.date)} ${esc(e.t)}`).join('<br>')}</p>` : ''}</div>
   <div class="pgR"><div class="cols"><span>분류</span><span>제목</span><span>현황</span><span class="r">기한</span><span></span></div>${rows.join('')}</div></div>`;
 }
@@ -250,7 +252,7 @@ function archView(id) {
   return `<div class="bh"><h2>${esc(a.label)} <span class="mu">(읽기 전용)</span></h2></div><p class="mu">지금 데이터와 섞이지 않는 보관본입니다. 꿈송이에게 "${esc(a.label)} 예산 뭐였지"처럼 물어도 찾아 줍니다.</p>` + (keys.length ? keys.map(k => `<details class="tg"><summary>${esc(k)} <span class="mu">${g[k].length}건</span></summary><div class="tgb">${g[k].map(t => `<p>${esc(t).replace(/\n/g, '<br>')}</p>`).join('')}</div></details>`).join('') : '<p class="mu">내용이 없습니다.</p>');
 }
 function setView() {
-  const p = S.profile, sy = TF.sync.info, rowsT = [['r1', '일과'], ['r2', '할 일'], ['r3', '공문'], ['r4', '수업 진도'], ['r5', '수행평가'], ['r6', '예산'], ['r7', '연수'], ['r8', '기록'], ['r9', '업무 분장표'], ['r10', '교내 연락망'], ['r11', '내 업무'], ['r12', '급식'], ['sb', '학교 배너']];
+  const p = S.profile, sy = TF.sync.info, rowsT = [['r1', '일과'], ['r2', '할 일'], ['r3', '공문'], ['r4', '수업 진도'], ['r5', '수행평가'], ['r6', '예산'], ['r7', '연수'], ['r8', '기록'], ['r9', '업무 분장표'], ['r10', '교내 연락망'], ['r11', '내 업무'], ['r12', '급식'], ['r13', '디데이·기한 알림'], ['sb', '학교 배너']];
   return `<div class="bh"><h2>설정</h2></div>
   <div class="qk"><b>꾸미기 바로가기</b><button class="btn" data-act="wmToggle">워터마크 ${S.profile.wm === false ? '켜기' : '끄기'}</button><button class="btn" data-act="wmEdit">워터마크 글자</button><a class="btn" href="#fontsec" data-go="fontsec">글씨체 바꾸기 ↓</a><a class="btn" href="#fontsec" data-go="themesec">디자인·색 ↓</a></div>
   <form data-form="profile" class="fm"><h3 class="h3">내 정보</h3><label>이름<input name="name" value="${esc(p.name)}"></label><label>학교<input name="school" value="${esc(p.school)}"></label><label>교과<input name="subject" value="${esc(p.subject)}"></label><label>담당 반 (쉼표로)<input name="classes" value="${esc(p.classes.join(', '))}"></label><label>1교시 시작<input name="start" type="time" value="${p.start}"></label><label>수업 시간(분)<input name="classMin" type="number" value="${p.classMin}"></label><label>쉬는 시간(분)<input name="breakMin" type="number" value="${p.breakMin}"></label><label>개발 연수 목표(시간)<input name="devTarget" type="number" value="${p.devTarget}"></label><button class="btn pri">저장</button></form>
@@ -270,8 +272,9 @@ function welcome() {
 /* ---------- 화면 그리기 ---------- */
 function render() {
   const app = $('#app'), y = window.scrollY;
-  if (!S.setup) { app.innerHTML = welcome(); $('#chatbox').hidden = true; return; }
-  $('#chatbox').hidden = false;
+  const cbx = $('#chatbox');
+  if (!S.setup) { app.innerHTML = welcome(); if (cbx) cbx.hidden = true; return; }
+  if (cbx) cbx.hidden = false;
   const [, page = 'today', arg] = (location.hash || '#/today').split('/');
   const body = { today: todayView, cal: calView, class: classView, budget: budgetView, notes: () => notesView(), note: () => notesView(arg), pages: () => pagesView(), page: () => pagesView(arg), lib: libView, set: setView, arch: () => archView(arg) }[page] || todayView;
   app.innerHTML = masthead() + nav(page) + `<main>${body()}${typeof pageMemo === 'function' ? pageMemo(page) : ''}</main>` + footer();
@@ -460,7 +463,7 @@ function openChat() { if (chatOpen) return; chatOpen = true; try { history.pushS
 function closeChat(viaLink) { if (!chatOpen) return; chatOpen = false; renderChat(); if (!viaLink && history.state && history.state.tfChat) history.back(); }
 window.addEventListener('popstate', e => { if (chatOpen) { chatOpen = false; renderChat(); } else if (e.state && e.state.tfChat) history.back(); });
 function renderChatFab() {
-  const b = $('#chatfab'); b.innerHTML = `<img src="${mas()}" alt="꿈송이">`;
+  const b = $('#chatfab'); if (!b) return; b.innerHTML = `<img src="${mas()}" alt="꿈송이">`;
   if (!$('#chatbub')) { const u = document.createElement('button'); u.id = 'chatbub'; u.textContent = '무엇이든 물어보세요!'; u.addEventListener('click', () => $('#chatfab').click()); b.parentNode.insertBefore(u, b); }
 }
 function renderChat() {
