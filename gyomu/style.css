@@ -133,3 +133,6 @@ textarea{width:100%;resize:vertical}label{display:block;font-size:13px;color:var
 .links{margin-top:22px}.links .h3{margin-top:0}
 .lk{display:inline-flex;align-items:center;gap:2px;border:1px solid var(--ink);padding:2px 4px 2px 10px;margin:0 6px 6px 0;font-size:13px}.lk a{color:var(--ink);text-decoration:none}.lk a:hover{color:var(--red)}
 .blk-ref{align-items:center;flex-wrap:wrap}.blk-ref .btn{margin:0}
+[hidden]{display:none!important}
+label.btn{display:inline-block;color:var(--ink);margin:6px 6px 0 0}
+label.btn:hover{color:var(--paper)}
