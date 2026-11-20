@@ -33,7 +33,7 @@ const lessonPct = l => (+l.total ? Math.round(+l.done / +l.total * 100) : 0);
 const CFG = {
   duties: { t: '업무 분장', f: i => [{ k: 'dept', label: '부서', val: i.dept, req: 1 }, { k: 'work', label: '업무', val: i.work, req: 1 }, { k: 'who', label: '담당자', val: i.who }, { k: 'mine', label: '내 업무인가요?', type: 'select', opts: ['아니오', '예'], val: i.mine ? '예' : '아니오' }], from: o => ({ dept: o.dept, work: o.work, who: o.who, mine: o.mine === '예' }) },
   contacts: { t: '연락처', f: i => [{ k: 'dept', label: '부서', val: i.dept }, { k: 'name', label: '이름', val: i.name, req: 1 }, { k: 'ext', label: '내선', val: i.ext }, { k: 'phone', label: '전화(선택)', val: i.phone }], from: o => ({ dept: o.dept, name: o.name, ext: o.ext, phone: o.phone }) },
-  training: { t: '연수', f: i => [{ k: 'title', label: '연수 이름', val: i.title, req: 1 }, { k: 'type', label: '종류', type: 'select', opts: ['필수', '개발'], val: i.type || '필수' }, { k: 'hours', label: '시간', type: 'number', val: i.hours ?? 1 }, { k: 'due', label: '기한(선택)', type: 'date', val: i.due }, { k: 'done', label: '이수 여부', type: 'select', opts: ['미이수', '이수'], val: i.done ? '이수' : '미이수' }], from: o => ({ title: o.title, type: o.type, hours: +o.hours || 0, due: o.due, done: o.done === '이수' }) },
+  training: { t: '연수', f: i => [{ k: 'title', label: '연수 이름', val: i.title, req: 1 }, { k: 'type', label: '종류', type: 'select', opts: ['필수', '개발'], val: i.type || '필수' }, { k: 'hours', label: '시간', type: 'number', val: i.hours ?? 1 }, { k: 'due', label: '기한(선택)', type: 'date', val: i.due }, { k: 'done', label: '이수 여부', type: 'select', opts: ['미이수', '이수'], val: i.done ? '이수' : '미이수' }, { k: 'certNo', label: '이수번호 (다 들은 뒤 입력)', val: i.certNo }, { k: 'doneDate', label: '이수일', type: 'date', val: i.doneDate }], from: o => ({ title: o.title, type: o.type, hours: +o.hours || 0, due: o.due, done: o.done === '이수', certNo: (o.certNo || '').trim(), doneDate: o.doneDate }) },
   assess: { t: '수행평가', f: i => [{ k: 'title', label: '평가 이름', val: i.title, req: 1 }, { k: 'grade', label: '학년(예: 2학년)', val: i.grade }, { k: 'due', label: '성적 입력 기한', type: 'date', val: i.due }, { k: 'step', label: '진행 단계', type: 'select', opts: ASSESS_STEPS, val: ASSESS_STEPS[i.step || 0] }], from: o => ({ title: o.title, grade: o.grade, due: o.due, step: ASSESS_STEPS.indexOf(o.step) }) },
   lessons: { t: '수업 진도', f: i => [{ k: 'cls', label: '반', type: 'select', opts: S.profile.classes, val: i.cls }, { k: 'unit', label: '단원', val: i.unit, req: 1 }, { k: 'done', label: '나간 차시', type: 'number', val: i.done ?? 0 }, { k: 'total', label: '전체 차시', type: 'number', val: i.total ?? 10 }], from: o => ({ cls: o.cls, unit: o.unit, done: +o.done || 0, total: +o.total || 0 }) },
   links: { t: '서랍 사이트', f: i => [{ k: 'name', label: '이름', val: i.name, req: 1 }, { k: 'url', label: '주소(https://…)', val: i.url, req: 1 }], from: o => ({ name: o.name, url: /^https?:\/\//.test(o.url) ? o.url : 'https://' + o.url }) }
@@ -121,8 +121,9 @@ function todayView() {
     const req = S.training.filter(x => x.type === '필수'), rd = req.filter(x => x.done).length;
     const dev = S.training.filter(x => x.type === '개발' && x.done).reduce((a, x) => a + (+x.hours || 0), 0);
     const left = S.training.filter(x => !x.done && x.due).sort((a, b) => a.due.localeCompare(b.due))[0];
-    const b = S.training.map(x => `<div class="tr ${x.done ? 'dn' : ''}"><button class="ck" data-act="trToggle" data-id="${x.id}" aria-pressed="${!!x.done}" aria-label="이수 표시"></button><span class="tl">${esc(x.title)}</span><span class="mu">${x.type} ${x.hours}시간 ${x.due ? '· ' + md(x.due) : ''}</span><button class="x" data-act="edit_training" data-id="${x.id}">수정</button>${xbtn('del_training', x.id)}</div>`).join('') + `<button class="btn sm" data-act="add_training">+ 연수 추가</button>`;
-    rows.push(row('r7', '연수', '연수 이수', `필수 ${rd}/${req.length} · 개발 ${dev}/${S.profile.devTarget}시간`, left ? md(left.due) + ' ' + ddText(dd(left.due)) : '', b));
+    const noNo = S.training.filter(x => x.done && !x.certNo).length;
+    const b = S.training.map(x => `<div class="tr ${x.done ? 'dn' : ''}"><button class="ck" data-act="trToggle" data-id="${x.id}" aria-pressed="${!!x.done}" aria-label="이수 표시"></button><span class="tl">${esc(x.title)}<br><span class="mu">${x.type} ${x.hours}시간 ${x.due ? '· 기한 ' + md(x.due) : ''}${x.done && x.doneDate ? ' · 이수일 ' + md(x.doneDate) : ''}</span></span>${x.done ? `<input class="cert" data-cert="${x.id}" value="${esc(x.certNo || '')}" placeholder="이수번호 입력" aria-label="${esc(x.title)} 이수번호">` : '<span class="mu">다 들으면 이수번호 입력</span>'}<button class="x" data-act="edit_training" data-id="${x.id}">수정</button>${xbtn('del_training', x.id)}</div>`).join('') + `<button class="btn sm" data-act="add_training">+ 연수 추가</button>`;
+    rows.push(row('r7', '연수', '연수 이수', `필수 ${rd}/${req.length} · 개발 ${dev}/${S.profile.devTarget}시간${noNo ? ` · <span class="hot">이수번호 미입력 ${noNo}</span>` : ''}`, left ? md(left.due) + ' ' + ddText(dd(left.due)) : '', b));
   }
   /* 기록 */
   {
@@ -239,7 +240,7 @@ function setView() {
   <h3 class="h3">꿈송이</h3><div class="tools"><div class="mas">${MASCOT ? `<img src="${MASCOT}" alt="꿈송이">` : '<span>그림 없음</span>'}</div><label class="btn file">꿈송이 그림 올리기<input type="file" id="masUp" accept="image/*" hidden></label>${MASCOT ? '<button class="btn" data-act="masDel">그림 빼기</button>' : ''}</div>
   <form data-form="claude" class="fm"><label>Claude 열쇠(선택) — 넣으면 꿈송이가 찾은 자료를 문장으로 다듬어 답합니다<input name="key" type="password" value="${esc(localStorage.getItem('tf.claudeKey') || '')}" placeholder="sk-ant-…" autocomplete="off"></label><p class="mu">열쇠는 이 기기에만 저장됩니다. 켜면 "질문 + 찾은 자료 조각"이 Anthropic 서버로 전송됩니다(잠금 노트는 제외). 학생 이름이 든 자료는 올리지 마세요.</p><button class="btn">저장</button></form>
   <h3 class="h3">여러 기기 동기화</h3><p>${esc(sy.msg)}</p>${sy.on ? (sy.user ? '<button class="btn" data-act="logout">로그아웃</button>' : '<button class="btn pri" data-act="login">구글로 로그인</button>') : '<p class="mu">설정 방법은 안내 문서(STRUCTURE.md)의 “동기화 켜기”를 보세요.</p>'}
-  <h3 class="h3">백업</h3><div class="tools"><button class="btn" data-act="backup">백업 파일 받기</button><label class="btn file">백업 파일 불러오기<input type="file" id="restore" accept=".json" hidden></label><button class="btn" data-act="sample">예시 데이터 채우기</button><button class="btn" data-act="reset">모두 지우고 처음부터</button></div><p class="mu">브라우저 기록을 지우면 이 기기의 데이터가 사라질 수 있으니 가끔 백업 파일을 받아 두세요.</p>`;
+  <h3 class="h3">백업</h3><div class="tools"><button class="btn" data-act="backup">백업 파일 받기</button><label class="btn file">백업 파일 불러오기<input type="file" id="restore" accept=".json" hidden></label><button class="btn" data-act="sample">예시 데이터 채우기</button><button class="btn" data-act="reset">모두 지우고 처음부터</button></div><h3 class="h3">새 학년도</h3><p class="mu">학년도가 바뀌면 이 버튼을 누르세요. 자동으로 백업 파일을 받은 뒤, 시간표·일정·진도·평가·예산·연수·공문·업무분장·연락망을 비웁니다. 내 정보, 메모, 내 페이지, 서랍, 자료실은 그대로 남습니다.</p><div class="tools"><button class="btn pri" data-act="newYear">새 학년도 시작하기</button></div><p class="mu">브라우저 기록을 지우면 이 기기의 데이터가 사라질 수 있으니 가끔 백업 파일을 받아 두세요.</p>`;
 }
 function welcome() {
   return `<div class="wel"><h1>업무파탈</h1><div class="fr">Travail Fatal</div><p>나만의 디지털 교무수첩입니다. 몇 가지만 적으면 바로 시작합니다. 모든 내용은 나중에 설정에서 고칠 수 있습니다.</p>
@@ -294,7 +295,7 @@ const A = {
   lessonStep(el) { const l = find('lessons', el.dataset.id); if (l) { l.done = Math.max(0, Math.min(+l.total, +l.done + +el.dataset.d)); commit(); } },
   lessonAll() { S.profile.classes.forEach(c => { if (!S.lessons.some(l => l.cls === c)) S.lessons.push({ id: uid(), cls: c, unit: '1단원', done: 0, total: 10 }); }); commit(); },
   assessStep(el) { const a = find('assess', el.dataset.id); if (a) { a.step = +el.dataset.s; commit(); } },
-  trToggle(el) { const x = find('training', el.dataset.id); if (x) { x.done = !x.done; commit(); } },
+  trToggle(el) { const x = find('training', el.dataset.id); if (x) { x.done = !x.done; x.doneDate = x.done ? today() : ''; commit(); if (x.done) toast('이수 처리했습니다. 이수번호를 입력해 주세요.'); } },
   calDay(el) { UI.day = el.dataset.d; render(); },
   calMove(el) { const d = +el.dataset.d; if (!d) { UI.cal = today().slice(0, 7); UI.day = today(); } else { const [Y, M] = UI.cal.split('-').map(Number), n = new Date(Y, M - 1 + d, 1); UI.cal = `${n.getFullYear()}-${pad(n.getMonth() + 1)}`; } render(); },
   /* 예산 */
@@ -321,6 +322,7 @@ const A = {
   schedPaste() { ask('학사일정 붙여넣기', [{ k: 'text', label: '학사일정 글 (한 줄에 날짜와 행사)', type: 'textarea', rows: 10, req: 1 }], o => scheduleDialog(o.text), '일정 찾기'); },
   masDel() { MASCOT = ''; idb.del('mascot'); render(); },
   login() { TF.sync.login(); }, logout() { TF.sync.logout(); },
+  newYear() { sure('새 학년도를 시작할까요? 먼저 백업 파일을 받고, 시간표·일정·진도·평가·예산·연수·공문·업무분장·연락망을 비웁니다. 메모·페이지·서랍·자료실은 남습니다.', () => { A.backup(); ['timetable'].forEach(k => S[k] = {}); ['items', 'lessons', 'assess', 'budget', 'training', 'duties', 'contacts'].forEach(k => S[k] = []); S.docs = {}; commit(); toast('새 학년도로 비웠습니다. 학교·교과를 확인하고 학사일정을 올려 주세요.'); }); },
   backup() { download('업무파탈_백업_' + today() + '.json', JSON.stringify({ S, LIB }), 'application/json'); },
   sample() { sampleData(); },
   reset() { sure('이 기기의 모든 데이터를 지우고 처음부터 시작할까요? (되돌릴 수 없습니다)', async () => { localStorage.removeItem(KEY); await idb.del('lib'); await idb.del('mascot'); location.hash = ''; location.reload(); }); }
@@ -359,7 +361,8 @@ let nt; document.addEventListener('input', e => {
 });
 document.addEventListener('change', async e => {
   const t = e.target;
-  if (t.dataset.ptotal) { const p = find('budget', t.dataset.ptotal); p.total = Math.max(0, +t.value || 0); commit(); }
+  if (t.dataset.cert) { const x = find('training', t.dataset.cert); x.certNo = t.value.trim(); commit(); toast('이수번호를 저장했습니다.'); }
+  else if (t.dataset.ptotal) { const p = find('budget', t.dataset.ptotal); p.total = Math.max(0, +t.value || 0); commit(); }
   else if (t.dataset.hide) { S.hide[t.dataset.hide] = !t.checked; commit(); }
   else if (t.dataset.note === 'kind' || t.dataset.note === 'date' || t.dataset.note === 'lock') { const n = find('notes', location.hash.split('/')[2]); if (n) { n[t.dataset.note] = t.type === 'checkbox' ? t.checked : t.value; commit(); } }
   else if (t.id === 'docUp') { const kind = $('#upk').value; for (const f of t.files) { try { toast(f.name + ' 읽는 중…'); const text = await readFile(f); LIB.push({ id: uid(), name: f.name, kind, text, added: today() }); } catch (er) { toast(er.message); } } await saveLib(); toast('올렸습니다. 꿈송이가 이제 이 자료도 찾습니다.'); render(); }
@@ -429,8 +432,8 @@ function renderChatFab() {
 function renderChat() {
   const p = $('#chatpan'); p.hidden = !chatOpen; if (!chatOpen) return;
   p.innerHTML = `<div class="ch-h"><span class="ch-face">${MASCOT ? `<img src="${MASCOT}" alt="">` : '<i>그림<br>자리</i>'}</span><div><b>꿈송이 · 줍줍</b><span class="mu">올린 자료 안에서 찾습니다</span></div><button class="x" data-chat="close" aria-label="닫기">닫기</button></div>
-  <div class="ch-b" id="chlog">${CH.map((m, mi) => m.role === 'me' ? `<div class="me">${esc(m.text)}</div>` : `<div class="bot">${m.text ? `<p>${esc(m.text).replace(/\n/g, '<br>')}</p>` : ''}${(m.blocks || []).map((b, i) => `<div class="hit"><span class="no">${i + 1}</span><div><div>${b.html || snippet(b.text, m.q || '')}</div><div class="src">출처: ${esc(b.src)} ${b.ref ? `<a href="${esc(b.ref)}" ${/^http/.test(b.ref) ? 'target="_blank" rel="noopener"' : 'data-chat="go"'}>원문 열기</a>` : ''}</div></div></div>`).join('')}${m.blocks && m.blocks.length || m.text.length > 60 ? `<div class="ch-act"><button class="x" data-chat="copy" data-i="${mi}">복사</button><button class="x" data-chat="export" data-i="${mi}">문서로 내보내기</button></div>` : ''}</div>`).join('')}${busy ? '<div class="bot"><p class="mu">찾는 중…</p></div>' : ''}</div>
-  <div class="ch-q">${['내 담당 업무', '예산 잔액', '이번 주 마감'].map(s => `<button class="chip" data-chat="ask" data-q="${s}">${s}</button>`).join('')}</div>
+  <div class="ch-b" id="chlog">${CH.map((m, mi) => m.role === 'me' ? `<div class="me">${esc(m.text)}</div>` : `<div class="bot">${m.text ? `<p>${esc(m.text).replace(/\n/g, '<br>')}</p>` : ''}${(m.blocks || []).map((b, i) => `<div class="hit"><span class="no">${i + 1}</span><div><div>${b.html || snippet(b.text, m.q || '')}</div><div class="src">출처: ${esc(b.src)} ${b.ref ? `<a href="${esc(b.ref)}" ${/^http/.test(b.ref) ? 'target="_blank" rel="noopener"' : 'data-chat="go"'}>원문 열기</a>` : ''}</div></div></div>`).join('')}${m.blocks && m.blocks.length || m.text.length > 60 ? `<div class="ch-act"><button class="x" data-chat="copy" data-i="${mi}">복사</button><button class="x" data-chat="export" data-i="${mi}">문서로 내보내기</button><button class="x" data-chat="print" data-i="${mi}">인쇄·PDF</button></div>` : ''}</div>`).join('')}${busy ? '<div class="bot"><p class="mu">찾는 중…</p></div>' : ''}</div>
+  <div class="ch-q">${['내 담당 업무', '예산 잔액', '이번 주 마감', '연수 이수 현황'].map(s => `<button class="chip" data-chat="ask" data-q="${s}">${s}</button>`).join('')}</div>
   <form class="ch-f" data-chatform><label class="sr" for="chq">질문</label><input id="chq" autocomplete="off" placeholder="예: 저번 회의에서 체육관 돈 누가 알아본다고 했지" ><button class="btn pri">묻기</button></form>`;
   const l = $('#chlog'); l.scrollTop = l.scrollHeight;
 }
@@ -450,6 +453,7 @@ document.addEventListener('click', async e => {
   else if (k === 'ask') ask1(b.dataset.q);
   else if (k === 'go') { chatOpen = false; renderChat(); }
   else if (k === 'copy') { try { await navigator.clipboard.writeText(plain(CH[+b.dataset.i])); toast('복사했습니다.'); } catch (er) { toast('복사하지 못했습니다.'); } }
+  else if (k === 'print') { const m = CH[+b.dataset.i], html = `<html><meta charset="utf-8"><title>꿈송이가 찾은 내용</title><body style="font-family:sans-serif;line-height:1.7"><h2>꿈송이가 찾은 내용</h2><p>질문: ${esc(m.q || '')} · ${today()}</p>${m.text ? `<p>${esc(m.text).replace(/\n/g, '<br>')}</p>` : ''}${(m.blocks || []).map((x, i) => `<p>${i + 1}. ${esc(x.text).replace(/\n/g, '<br>')}<br><small>출처: ${esc(x.src)}</small></p>`).join('')}</body></html>`; const f = document.createElement('iframe'); f.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0'; document.body.appendChild(f); f.contentDocument.write(html); f.contentDocument.close(); setTimeout(() => { try { f.contentWindow.focus(); f.contentWindow.print(); } catch (er) { toast('인쇄 창을 열지 못했습니다. 문서로 내보내기를 써 주세요.'); } setTimeout(() => f.remove(), 3000); }, 300); }
   else if (k === 'export') { const m = CH[+b.dataset.i]; download('꿈송이_찾은내용_' + today() + '.doc', `<html><meta charset="utf-8"><body><h2>꿈송이가 찾은 내용</h2><p>질문: ${esc(m.q || '')}</p>${m.text ? `<p>${esc(m.text).replace(/\n/g, '<br>')}</p>` : ''}${(m.blocks || []).map((x, i) => `<p>${i + 1}. ${esc(x.text)}<br><small>출처: ${esc(x.src)}</small></p>`).join('')}</body></html>`, 'application/msword'); }
 });
 document.addEventListener('submit', e => { if (e.target.matches('[data-chatform]')) { e.preventDefault(); const i = $('#chq'), v = i.value; i.value = ''; ask1(v); } });
@@ -464,7 +468,7 @@ function sampleData() {
   S.lessons = [['1-1', 72], ['1-2', 72], ['1-3', 64], ['2-1', 80], ['2-2', 80], ['2-3', 76]].map(([c, p]) => ({ id: uid(), cls: c, unit: '2단원', done: Math.round(p / 10), total: 10 }));
   S.assess = [{ id: uid(), title: '질문 만들기 수행평가', grade: '2학년', due: add(5), step: 3 }];
   S.budget = [{ id: uid(), name: '학생인권부 사업', total: 0, spends: [], lines: [{ id: uid(), item: '일반수용비', alloc: 1500000, deadline: add(24), spends: [{ id: uid(), date: add(-9), desc: '인권 교육 자료 인쇄', amt: 720000 }] }, { id: uid(), item: '행사운영비', alloc: 1000000, deadline: add(29), spends: [{ id: uid(), date: add(-4), desc: '캠페인 물품', amt: 580000 }] }] }];
-  S.training = [{ id: uid(), title: '정보보안 연수', type: '필수', hours: 2, due: add(9), done: false }, { id: uid(), title: '학생 인권 연수', type: '필수', hours: 2, done: true }, { id: uid(), title: 'AI 활용 수업 연수', type: '개발', hours: 15, done: true }];
+  S.training = [{ id: uid(), title: '정보보안 연수', type: '필수', hours: 2, due: add(9), done: false }, { id: uid(), title: '학생 인권 연수', type: '필수', hours: 2, done: true, doneDate: add(-6), certNo: '2026-인권-0382' }, { id: uid(), title: 'AI 활용 수업 연수', type: '개발', hours: 15, done: true, doneDate: add(-20), certNo: '' }];
   S.notes = [{ id: uid(), title: '11월 교직원회의', date: t, kind: '회의', body: '체육관 대관 비용은 행정실에서 확인해 알려주기로 함.\n학년말 평가 자료는 다음 달 5일까지 제출.', decisions: '평가 자료 12/5까지 제출\n행사운영비는 행정실 확인 후 집행', followups: '평가 자료 정리\n행정실에 체육관 비용 문의', lock: false }];
   S.duties = [{ id: uid(), dept: '학생인권부', work: '학생 인권 교육·폰프리 운영', who: '예시', mine: true }, { id: uid(), dept: '교무부', work: '학사 일정·시간표', who: '김○○', mine: false }, { id: uid(), dept: '행정실', work: '예산 집행·계약·체육관 대관', who: '이○○ 주무관', mine: false }];
   S.contacts = [{ id: uid(), dept: '교무실', name: '김○○ 교사', ext: '201', phone: '' }, { id: uid(), dept: '행정실', name: '이○○ 주무관', ext: '105', phone: '' }];

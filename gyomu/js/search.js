@@ -17,7 +17,11 @@ function buildChunks() {
     if (n.followups) add('note', head + ' · 후속 조치', n.followups, '#/note/' + n.id, n.lock);
     String(n.body || '').split(/\n{1,}/).filter(x => x.trim()).forEach(p => add('note', head, p, '#/note/' + n.id, n.lock));
   });
-  S.items.forEach(i => add('item', '일정·할 일', `${i.title} ${i.date ? '(' + i.date + ')' : ''} ${i.done ? '완료' : '미완료'}`, '#/cal'));
+  S.items.forEach(i => add('item', i.src === '학사' ? '학사일정' : (i.cat === 'todo' ? '할 일' : '일정'), `${i.title} ${i.date ? i.date : ''}${i.end ? ' ~ ' + i.end : ''} ${i.cat === 'todo' ? (i.done ? '완료' : '미완료') : (i.src === '학사' ? '학사일정' : '일정')}`, '#/cal'));
+  { const dn = ['', '월', '화', '수', '목', '금'];
+    for (let d = 1; d <= 5; d++) { const l = [1, 2, 3, 4, 5, 6, 7].filter(p => S.timetable[d + '-' + p]).map(p => `${p}교시 ${S.timetable[d + '-' + p]}`); if (l.length) add('timetable', '시간표 · ' + dn[d] + '요일', `${dn[d]}요일 시간표 ${l.join(', ')}`, '#/class'); } }
+  Object.keys(S.docs || {}).forEach(k => { const d = S.docs[k]; if (d && (d.recv || d.done)) add('docs', '공문 현황', `${k} 공문 접수 ${d.recv} 처리 ${d.done} 남음 ${d.recv - d.done}`, '#/today'); });
+  add('profile', '내 정보', `이름 ${S.profile.name} 학교 ${S.profile.school} 교과 ${S.profile.subject} 담당 반 ${S.profile.classes.join(', ')} 1교시 시작 ${S.profile.start} 개발 연수 목표 ${S.profile.devTarget}시간`, '#/set');
   S.budget.forEach(p => {
     add('budget', `예산 · ${p.name}`, `${p.name} 총액 ${won(projAlloc(p))}원 집행 ${won(projSpent(p))}원 잔액 ${won(projAlloc(p) - projSpent(p))}원 집행률 ${projAlloc(p) ? Math.round(projSpent(p) / projAlloc(p) * 100) : 0}%`, '#/budget');
     (p.spends || []).forEach(s => add('budget', `예산 · ${p.name} 사용내역`, `${s.date} ${s.desc} ${won(s.amt)}원 (${p.name})`, '#/budget'));
@@ -28,7 +32,7 @@ function buildChunks() {
     (l.spends || []).forEach(s => add('budget', `예산 · ${p.name} · ${l.item} 지출`, `${s.date} ${s.desc} ${won(s.amt)}원 (${p.name} ${l.item})`, '#/budget'));
   }));
   S.assess.forEach(a => add('assess', '수행평가', `${a.title} ${a.grade || ''} 기한 ${a.due || '미정'} 단계 ${ASSESS_STEPS[a.step || 0]}`, '#/class'));
-  S.training.forEach(t => add('training', '연수', `${t.title} ${t.type} ${t.hours}시간 ${t.done ? '이수' : '미이수'} 기한 ${t.due || '없음'}`, '#/today'));
+  S.training.forEach(t => add('training', '연수 · ' + t.title, `${t.title} ${t.type}연수 ${t.hours}시간 ${t.done ? '이수' : '미이수'} 이수번호 ${t.certNo || '미입력'} 이수일 ${t.doneDate || '없음'} 기한 ${t.due || '없음'}`, '#/today'));
   S.lessons.forEach(l => add('lesson', '수업 진도', `${l.cls} ${l.unit} ${l.done}/${l.total}차시`, '#/class'));
   S.pages.forEach(pg => {
     const lines = (pg.blocks || []).map(b => b.t === 'table' ? (b.rows || []).map(r => r.join(' | ')).join('\n') : b.t === 'todo' ? (b.done ? '[완료] ' : '[할 일] ') + b.x : b.t === 'toggle' ? b.x + ' ' + (b.y || '') : b.t === 'link' ? b.x + ' ' + (b.u || '') : b.t === 'ref' ? '연결: ' + ((resolve(b.u) || {}).label || '') : b.x || '').filter(x => String(x).trim());
@@ -71,6 +75,9 @@ function intent(q) {
   if (/회의|결정|협의|말씀|얘기/.test(q)) t.add('note');
   if (/수행|평가|채점|시험/.test(q)) t.add('assess');
   if (/연수|이수/.test(q)) t.add('training');
+  if (/시간표|교시|몇\s*교시|수업\s*시간/.test(q)) t.add('timetable');
+  if (/공문/.test(q)) t.add('docs');
+  if (/학사|방학|개학|행사|시험|입학|졸업/.test(q)) t.add('item');
   if (/진도|차시|단원/.test(q)) t.add('lesson');
   if (/규정|지침|복무|출장|결시|학칙|규칙/.test(q)) t.add('doc');
   return t;
@@ -115,6 +122,14 @@ function direct(q) {
   if (/마감|기한|급한|다가오|이번\s*주/.test(q)) {
     const ev = upcoming(14);
     if (ev.length) out.push({ src: '일정(계산)', text: '14일 안의 기한: ' + ev.slice(0, 6).map(e => `${md(e.date)} ${e.t}(${ddText(dd(e.date))})`).join(' / '), ref: '#/cal' });
+  }
+  if (/이수\s*번호|이수증|연수.*(현황|목록|전부|모두|다)|들은\s*연수/.test(q)) {
+    const T = S.training;
+    if (T.length) out.push({ src: '연수 이수 현황(전체)', text: T.map(t => `${t.title}(${t.type} ${t.hours}시간): ${t.done ? '이수 · 번호 ' + (t.certNo || '미입력') + (t.doneDate ? ' · ' + t.doneDate : '') : '미이수' + (t.due ? ' · 기한 ' + t.due : '')}`).join('\n'), ref: '#/today' });
+  }
+  if (/오늘\s*(수업|시간표)|몇\s*교시|시간표/.test(q)) {
+    const d = new Date().getDay(), l = d >= 1 && d <= 5 ? [1, 2, 3, 4, 5, 6, 7].map(p => `${p}교시 ${S.timetable[d + '-' + p] || '—'}`) : [];
+    if (l.length && Object.keys(S.timetable).some(k => S.timetable[k])) out.push({ src: '시간표(오늘)', text: l.join(' / '), ref: '#/class' });
   }
   if (/(내|제|나의).*(업무|담당)|내가\s*맡/.test(q)) {
     const m = S.duties.filter(d => d.mine);

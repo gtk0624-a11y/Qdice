@@ -189,3 +189,5 @@ body{font-size:17px}
 .cd{min-height:60px}.btn{padding:11px 18px}
 #chatpan{width:calc(100vw - 16px)}
 }
+.cert{width:190px;flex:none}
+.tr{flex-wrap:wrap}
