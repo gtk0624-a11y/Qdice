@@ -78,7 +78,7 @@ const DEFLOGO = 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUE
 const FONTS = { pen: ["'Nanum Pen Script','Noto Serif KR',cursive", 400, 1], jua: ["'Jua','Noto Sans KR',sans-serif", 400, .8], dodum: ["'Gowun Dodum','Noto Sans KR',sans-serif", 400, .8], sans: ["'Noto Sans KR',sans-serif", 700, .72], serif: ["'Noto Serif KR',serif", 700, .74], gae: ["'Gaegu','Noto Sans KR',sans-serif", 700, .95] };
 // [id, 이름, 분위기, 책상1, 책상2, 종이, 글자, 포인트, 줄, 탭방식, 글꼴, 카드(밝기)]
 const THEMES = [
-  ['classic', '교무수첩 클래식', '기본', '#2F3B36', '#232C28', '#FBF6E9', '#1B1613', '#6E1423', '#4664961f', 'rb', 'pen'],
+  ['classic', '교무수첩 클래식', '기본', '#2F3B36', '#232C28', '#FBF6E9', '#1B1613', '#6E1423', '#46649612', 'rb', 'dodum'],
   ['pink', '파스텔 핑크', '큐티', '#F7C6D3', '#EBA6BC', '#FFF3F6', '#4A2A35', '#D9588A', '#d9588a22', 'rb', 'jua'],
   ['strawmilk', '딸기우유', '큐티', '#F3B7C8', '#E58FAB', '#FFF8F2', '#5A2E3C', '#E0527F', '#e0527f20', 'mono', 'jua'],
   ['peach', '복숭아', '큐티', '#F9D0B8', '#EFAE8C', '#FFF6EE', '#5B3A2A', '#E7794F', '#e7794f22', 'rb', 'dodum'],
@@ -159,7 +159,7 @@ function themeApply() {
   const m = document.querySelector('meta[name=theme-color]'); if (m) m.content = d1;
 }
 const titleOf = () => (S.profile.title || '업무파탈').trim();
-const wmUrl = () => { const t = (S.profile.wmText || (titleOf() + ' · ' + (S.profile.name || S.profile.school || ''))).replace(/[<>&]/g, ''); return 'url("data:image/svg+xml;utf8,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="340" height="220"><text x="170" y="115" text-anchor="middle" transform="rotate(-24 170 110)" font-family="Noto Serif KR,serif" font-size="22" font-weight="700" fill="${(THEMES.find(x => x[0] === (S.profile.theme || 'classic')) || THEMES[0])[11] ? '#ffffff' : '#1B1613'}" fill-opacity="0.07">${t}</text></svg>`) + '")'; };
+const wmUrl = () => { const t = (S.profile.wmText || (titleOf() + ' · ' + (S.profile.name || S.profile.school || ''))).replace(/[<>&]/g, ''); return 'url("data:image/svg+xml;utf8,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="340" height="220"><text x="170" y="115" text-anchor="middle" transform="rotate(-24 170 110)" font-family="Noto Serif KR,serif" font-size="22" font-weight="700" fill="${(THEMES.find(x => x[0] === (S.profile.theme || 'classic')) || THEMES[0])[11] ? '#ffffff' : '#1B1613'}" fill-opacity="0.045">${t}</text></svg>`) + '")'; };
 function applyBrand() {
   themeApply();
   document.title = titleOf() + ' · ' + (S.profile.sub || 'Travail Fatal');
