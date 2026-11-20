@@ -135,6 +135,7 @@ form#ask button.clr:hover{background:var(--yel2);border-color:var(--yel)}
 .sw input:checked+i:after{left:21px}
 h3{font-size:14.5px;margin:18px 0 6px;color:var(--navy)}
 h3:first-child{margin-top:0}
+.ai{background:#eef6ff;border:1px solid #b9d4f5;border-radius:10px;padding:8px 10px;margin-bottom:8px;font-size:14px}.ai .ait{margin:4px 0;line-height:1.6;font-size:15px}.aiw{font-size:12px;color:var(--sub);font-weight:400}
 .hint{font-size:12.5px;color:var(--sub);margin:4px 0}
 textarea{width:100%;min-height:150px;border:1.5px solid var(--line);border-radius:10px;padding:8px 10px;font:inherit;font-size:13.5px;line-height:1.6;resize:vertical}
 ol.steps{margin:6px 0 0;padding-left:1.3em;font-size:13.5px}
@@ -261,6 +262,10 @@ ol.steps li{margin:3px 0}
       <h3>📌 화면 맨 아래 작업표시줄에 꽂아 두기</h3>
       <div id="installBox"></div>
 
+      <h3>🤖 AI 한 줄 답변 (선택)</h3>
+      <p class="hint">Claude 키를 넣으면 찾은 조항을 바탕으로 <b>한 줄 답</b>을 원문 위에 얹어 줍니다. 키가 없으면 지금처럼 원문만 보여 줍니다. 키는 <b>이 컴퓨터에만</b> 저장되고, 질문과 찾은 조항 몇 개가 Anthropic으로 전송됩니다(Haiku 5.5 · 질문 1번에 1원 안팎). 학생 개인정보가 든 문서는 넣지 마세요. 키는 platform.claude.com 에서 선불 충전 후 만듭니다.</p>
+      <input id="aiKeyIn" class="tin" type="password" autocomplete="off" placeholder="sk-ant-…">
+      <div class="row"><button class="b s" type="button" data-act="aiSave">키 저장</button><button class="b g s" type="button" data-act="aiClear">키 지우기</button><span id="aiState" class="hint"></span></div>
       <h3>🔁 같은 뜻 낱말 (동의어 사전)</h3>
       <p class="hint">한 줄에 한 묶음, 쉼표로 나눕니다. 질문에 한 낱말이 있으면 같은 줄의 낱말도 함께 찾습니다.<br>예) <b>휴대폰, 휴대전화, 스마트폰</b></p>
       <textarea id="synBox" spellcheck="false"></textarea>
@@ -902,9 +907,28 @@ function ask(q){
   const ids=Object.keys(by).sort((a,b)=>by[b]-by[a]);
   if(ids.length>1) h+='<div class="dchips" data-dc="'+id+'"><button type="button" class="on" data-act="bydoc" data-id="'+id+'" data-doc="">전체 '+hits.length+'</button>'+ids.map(d=>{ const doc=S.docs.find(x=>x.id===d); return '<button type="button" data-act="bydoc" data-id="'+id+'" data-doc="'+esc(d)+'">'+esc(doc?doc.name:'')+' '+by[d]+'</button>'; }).join('')+'</div>';
   h+='<div data-list="'+id+'"></div><div class="row" data-more="'+id+'"></div>';
-  bot(h); showMore(id,3);
+  if(aiKey()) h='<div class="ai" data-ai="'+id+'">🤖 AI가 정리하는 중…</div>'+h;
+  bot(h); showMore(id,3); aiAsk(q,hits,id);
 }
 /* 처음 3건이 한 문서로만 채워지지 않게(다른 문서에도 비슷하게 맞는 곳이 있을 때) */
+
+/* ===== AI 한 줄 답변 (선택: 키가 있을 때만) ===== */
+function aiKey(){ try{ return localStorage.getItem('gj.aiKey')||''; }catch(e){ return ''; } }
+function aiState(){ const e=$('aiState'); if(e) e.textContent= aiKey()? '✅ 키가 저장되어 있습니다.' : '키 없음 (원문 검색만 사용)'; }
+async function aiAsk(q,hits,id){
+  const key=aiKey(); if(!key) return;
+  const box=document.querySelector('[data-ai="'+id+'"]'); if(!box) return;
+  const top=hits.slice(0,6);
+  const ctx=top.map((h,i)=>'['+(i+1)+'] 「'+h.e.doc.name+'」 '+h.e.c.pg+'\n'+String(h.e.c.x||'').replace(/\s+/g,' ').slice(0,900)).join('\n\n');
+  try{
+    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'content-type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:'claude-haiku-5-5',max_tokens:600,system:'당신은 학교 교사의 규정 안내 비서입니다. 아래 [자료] 안의 내용만 근거로 질문에 존댓말로 2~4문장 이내로 답하세요. 근거는 [1]처럼 번호로 표시하세요. 자료에 답이 없으면 "찾은 자료에는 답이 없습니다"라고 말하세요. 추측하지 마세요.',messages:[{role:'user',content:'[질문]\n'+q+'\n\n[자료]\n'+ctx}]})});
+    if(!r.ok) throw new Error(r.status===401?'키가 올바르지 않습니다':r.status===400||r.status===402?'잔액(크레딧)이 부족할 수 있습니다':'응답 오류 '+r.status);
+    const j=await r.json(); const t=(j.content||[]).map(x=>x.text||'').join('').trim();
+    const refs=top.map((h,i)=>'['+(i+1)+'] '+esc(h.e.doc.name)+' '+esc(h.e.c.pg)).join(' · ');
+    box.innerHTML='<b>🤖 AI 한 줄 답 <span class="aiw">(참고용 · 아래 원문과 쪽수로 꼭 확인)</span></b><div class="ait">'+esc(t).replace(/\n/g,'<br>').replace(/\[(\d+)\]/g,'<b>[$1]</b>')+'</div><div class="aiw">근거: '+refs+'</div>';
+  }catch(e){ box.innerHTML='<span class="aiw">AI 답은 건너뛰었습니다('+esc(e.message||'연결 실패')+'). 아래 원문 검색 결과를 보세요.</span>'; }
+}
 function diversify(hits){
   if(hits.length<4) return hits;
   const top=hits[0].score, head=[], rest=[], cnt={};
@@ -1249,8 +1273,10 @@ document.addEventListener('click',async e=>{
   if(act==='close'){ closePanels(); }
   else if(act==='pick'){ $('file').click(); }
   else if(act==='docs'){ openPanel('pDocs'); }
-  else if(act==='set'){ openPanel('pSet'); }
+  else if(act==='set'){ openPanel('pSet'); aiState(); }
   else if(act==='install'){ doInstall(); }
+  else if(act==='aiSave'){ const k=$('aiKeyIn').value.trim(); if(!/^sk-ant-/.test(k)){ toast('키는 sk-ant- 로 시작합니다. 다시 확인해 주세요.'); } else { try{ localStorage.setItem('gj.aiKey',k); }catch(e){} $('aiKeyIn').value=''; aiState(); toast('저장했습니다. 이제 답 위에 AI 한 줄 답이 나옵니다.'); } }
+  else if(act==='aiClear'){ try{ localStorage.removeItem('gj.aiKey'); }catch(e){} aiState(); toast('키를 지웠습니다.'); }
   else if(act==='tSave'){ S.tMain=$('tMainIn').value.trim(); S.tSub=$('tSubIn').value.trim(); await DB.set('title',{m:S.tMain,s:S.tSub}).catch(()=>{}); applyTitle(); toast('제목을 바꿨어요.'); }
   else if(act==='tReset'){ S.tMain=''; S.tSub=''; await DB.set('title',{m:'',s:''}).catch(()=>{}); fillTitleInputs(); applyTitle(); toast('처음 제목으로 되돌렸어요.'); }
   else if(act==='pvClose'){ closeViewer(); }
