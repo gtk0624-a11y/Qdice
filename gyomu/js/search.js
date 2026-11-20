@@ -29,6 +29,12 @@ function buildChunks() {
   S.assess.forEach(a => add('assess', '수행평가', `${a.title} ${a.grade || ''} 기한 ${a.due || '미정'} 단계 ${ASSESS_STEPS[a.step || 0]}`, '#/class'));
   S.training.forEach(t => add('training', '연수', `${t.title} ${t.type} ${t.hours}시간 ${t.done ? '이수' : '미이수'} 기한 ${t.due || '없음'}`, '#/today'));
   S.lessons.forEach(l => add('lesson', '수업 진도', `${l.cls} ${l.unit} ${l.done}/${l.total}차시`, '#/class'));
+  S.pages.forEach(pg => {
+    const lines = (pg.blocks || []).map(b => b.t === 'table' ? (b.rows || []).map(r => r.join(' | ')).join('\n') : b.t === 'todo' ? (b.done ? '[완료] ' : '[할 일] ') + b.x : b.t === 'toggle' ? b.x + ' ' + (b.y || '') : b.t === 'link' ? b.x + ' ' + (b.u || '') : b.x || '').filter(x => String(x).trim());
+    let buf = ''; const flush = () => { if (buf.trim()) add('page', '내 페이지 · ' + (pg.title || '제목 없음'), buf.trim(), '#/page/' + pg.id, pg.lock); buf = ''; };
+    lines.forEach(l => { if ((buf + ' ' + l).length > 380) flush(); buf += (buf ? '\n' : '') + l; }); flush();
+    if (!lines.length) add('page', '내 페이지', pg.title || '제목 없음', '#/page/' + pg.id, pg.lock);
+  });
   S.links.forEach(l => add('link', '서랍', `${l.name} ${l.url}`, l.url));
   LIB.forEach(d => {
     const pages = d.text.split('\f');

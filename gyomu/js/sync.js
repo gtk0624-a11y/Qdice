@@ -10,7 +10,7 @@
 
   function payload() {
     const c = JSON.parse(JSON.stringify(S));
-    c.notes = (c.notes || []).filter(n => !n.lock);
+    c.notes = (c.notes || []).filter(n => !n.lock); c.pages = (c.pages || []).filter(n => !n.lock);
     return JSON.stringify(c);
   }
   async function start() {
@@ -23,8 +23,8 @@
       if (u) unsub = db.collection('users').doc(u.uid).onSnapshot(snap => {
         if (!snap.exists) { push(true); return; }
         const d = snap.data(); if (!d || !d.state || (d.updatedAt || 0) <= (S.updatedAt || 0)) return;
-        const remote = JSON.parse(d.state); const keep = (S.notes || []).filter(n => n.lock);
-        applying = true; Object.assign(S, remote); S.notes = (remote.notes || []).concat(keep); S.updatedAt = d.updatedAt; applying = false;
+        const remote = JSON.parse(d.state); const keep = (S.notes || []).filter(n => n.lock), keepP = (S.pages || []).filter(n => n.lock);
+        applying = true; Object.assign(S, remote); S.notes = (remote.notes || []).concat(keep); S.pages = (remote.pages || []).concat(keepP); S.updatedAt = d.updatedAt; applying = false;
         save(true); TF.render && TF.render(); toast('다른 기기의 최신 내용을 불러왔습니다.');
       }, e => { info.msg = '동기화 오류: ' + e.message; });
       TF.render && TF.render();

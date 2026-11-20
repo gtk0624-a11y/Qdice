@@ -49,8 +49,8 @@ function masthead() {
   return `<header class="mast"><div class="mast1"><h1>업무파탈</h1><span class="fr">Travail Fatal</span></div><div class="mast2"><div class="dt">${D[n.getDay()]} · ${n.getDate()} ${M[n.getMonth()]} ${n.getFullYear()}</div><div>${esc([p.school, p.name && p.name + ' 선생님'].filter(Boolean).join(' · '))}</div></div></header>`;
 }
 function nav(page) {
-  const L = [['today', '오늘'], ['cal', '캘린더'], ['class', '수업·평가'], ['budget', '예산'], ['notes', '기록'], ['lib', '자료·연락'], ['set', '설정']];
-  return `<nav class="nav" aria-label="메뉴">${L.map(([k, v]) => `<a href="#/${k}" ${page === k || (k === 'notes' && page === 'note') ? 'aria-current="page"' : ''}>${v}</a>`).join('')}</nav>`;
+  const L = [['today', '오늘'], ['cal', '캘린더'], ['class', '수업·평가'], ['budget', '예산'], ['notes', '기록'], ['pages', '페이지'], ['lib', '자료·연락'], ['set', '설정']];
+  return `<nav class="nav" aria-label="메뉴">${L.map(([k, v]) => `<a href="#/${k}" ${page === k || (k === 'notes' && page === 'note') || (k === 'pages' && page === 'page') ? 'aria-current="page"' : ''}>${v}</a>`).join('')}</nav>`;
 }
 function footer() {
   const links = S.links.map(l => `<a href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.name)}</a>`).join('<span class="sl">/</span>');
@@ -134,6 +134,11 @@ function todayView() {
     rows.push(row('r9', '학교', '업무 분장표', S.duties.length ? `내 업무 ${mine.length}건${mine[0] ? ' · ' + esc(mine[0].work) : ''}` : '업무 분장표를 올려 보세요', '', mine.map(d => `<div class="nl"><span>${esc(d.dept)} · ${esc(d.work)}</span></div>`).join('') + '<a class="btn sm" href="#/lib">분장표 열기</a>'));
     rows.push(row('r10', '학교', '교내 연락망', S.contacts.length ? `교직원 ${S.contacts.length}명 · 이름·부서·내선 검색` : '연락망을 올려 보세요', '', '<a class="btn sm" href="#/lib">연락망 열기</a>'));
   }
+  S.pages.filter(p => p.pin).forEach(p => {
+    const todos = (p.blocks || []).filter(b => b.t === 'todo'), dn = todos.filter(b => b.done).length, first = (p.blocks || []).find(b => b.x && b.t !== 'todo');
+    const st = todos.length ? `${dn} / ${todos.length} 완료` + (first ? ' · ' + esc(first.x.slice(0, 30)) : '') : (first ? esc(first.x.slice(0, 50)) : '내용 없음');
+    rows.push(row('pg' + p.id, '페이지', esc(p.title || '제목 없음'), st, '', todos.map(b => `<div class="td ${b.done ? 'dn' : ''}"><button class="ck" data-act="bTodo" data-p="${p.id}" data-b="${b.id}" aria-pressed="${!!b.done}" aria-label="완료 표시"></button><span class="tl">${esc(b.x)}</span><span class="stamp">완료</span></div>`).join('') + `<a class="btn sm" href="#/page/${p.id}">페이지 열기</a>`));
+  });
   const up = upcoming(7);
   return `<div class="bh"><h2>오늘의 게시판</h2><span class="mu">줄을 누르면 펼쳐지고, 접어 두어도 현황이 보입니다.</span></div>
   <div class="cols"><span>분류</span><span>제목</span><span>현황</span><span class="r">기한</span><span></span></div>${rows.join('')}
@@ -243,9 +248,10 @@ function render() {
   if (!S.setup) { app.innerHTML = welcome(); $('#chatbox').hidden = true; return; }
   $('#chatbox').hidden = false;
   const [, page = 'today', arg] = (location.hash || '#/today').split('/');
-  const body = { today: todayView, cal: calView, class: classView, budget: budgetView, notes: () => notesView(), note: () => notesView(arg), lib: libView, set: setView }[page] || todayView;
+  const body = { today: todayView, cal: calView, class: classView, budget: budgetView, notes: () => notesView(), note: () => notesView(arg), pages: () => pagesView(), page: () => pagesView(arg), lib: libView, set: setView }[page] || todayView;
   app.innerHTML = masthead() + nav(page) + `<main>${body()}</main>` + footer();
   if (page === 'note') mountNote(arg);
+  if (page === 'page') mountPage();
   window.scrollTo(0, y);
   renderChatFab();
 }
@@ -434,6 +440,7 @@ function sampleData() {
   S.notes = [{ id: uid(), title: '11월 교직원회의', date: t, kind: '회의', body: '체육관 대관 비용은 행정실에서 확인해 알려주기로 함.\n학년말 평가 자료는 다음 달 5일까지 제출.', decisions: '평가 자료 12/5까지 제출\n행사운영비는 행정실 확인 후 집행', followups: '평가 자료 정리\n행정실에 체육관 비용 문의', lock: false }];
   S.duties = [{ id: uid(), dept: '학생인권부', work: '학생 인권 교육·폰프리 운영', who: '예시', mine: true }, { id: uid(), dept: '교무부', work: '학사 일정·시간표', who: '김○○', mine: false }, { id: uid(), dept: '행정실', work: '예산 집행·계약·체육관 대관', who: '이○○ 주무관', mine: false }];
   S.contacts = [{ id: uid(), dept: '교무실', name: '김○○ 교사', ext: '201', phone: '' }, { id: uid(), dept: '행정실', name: '이○○ 주무관', ext: '105', phone: '' }];
+  S.pages = [{ id: uid(), title: '수업 아이디어 메모', parent: '', pin: true, lock: false, blocks: [newBlock('h2', '이번 주 해 볼 것'), newBlock('todo', '질문 카드 인쇄'), newBlock('todo', '모둠 노트 점검'), newBlock('p', '인권 단원은 질문 릴레이로 시작한다.')] }];
   S.links = [{ id: uid(), name: 'K-에듀파인', url: 'https://klef.goe.go.kr' }, { id: uid(), name: '나이스', url: 'https://neis.go.kr' }];
   LIB = [{ id: uid(), name: '예시_복무규정.txt', kind: '규정', added: t, text: '출장 복명서는 출장 종료 후 3일 이내에 제출한다.\n수행평가 결시는 사유서와 증빙을 제출하면 인정 결시로 처리한다.' }];
   saveLib(); location.hash = '#/today'; commit(); toast('예시 데이터를 채웠습니다. 꿈송이에게 "체육관 돈 누가 알아봐?"라고 물어 보세요.');

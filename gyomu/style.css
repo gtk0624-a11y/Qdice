@@ -112,3 +112,21 @@ textarea{width:100%;resize:vertical}label{display:block;font-size:13px;color:var
 @media print{.nav,.drawer,#chatbox,.btn,.x{display:none!important}}
 .tot1{margin:0}.tot1 input{width:170px;font-size:18px;font-family:'Playfair Display',serif;margin-top:2px}
 .sum label span{display:block}
+/* 내 페이지 */
+.nwrap.pw{grid-template-columns:220px minmax(0,1fr)}
+.nlist a.on b{color:var(--red)}
+.ptitle{width:100%;border:0;border-bottom:2px solid var(--ink);background:transparent;font-family:var(--serif);font-size:30px;font-weight:700;padding:6px 0}
+.blk{display:flex;align-items:flex-start;gap:8px;padding:3px 0;position:relative}
+.blk .bctl{margin-left:auto;display:flex;gap:2px;align-items:center;opacity:.35;flex:none}.blk:hover .bctl,.blk:focus-within .bctl{opacity:1}
+.bctl select{width:auto;padding:2px 4px;font-size:12px;border-color:var(--rule)}
+.bta{flex:1;min-width:0;border:0;background:transparent;resize:none;overflow:hidden;padding:4px 2px;font-size:15px;line-height:1.6}.bta:focus,.blk input:focus{background:var(--pl);outline:1px solid var(--rule)}
+.blk input{border:0;background:transparent;flex:1;min-width:0}
+.bh1{font-family:var(--serif);font-size:26px;font-weight:700}.bh2{font-family:var(--serif);font-size:19px;font-weight:700}
+.dot{padding-top:5px;color:var(--red)}.blk-todo .ck{margin-top:7px}
+.blk-quote .bta{border-left:3px solid var(--red);padding-left:12px;font-family:var(--serif);font-size:17px}
+.blk-divider hr{flex:1;border:0;border-top:1px solid var(--ink);margin:12px 0}
+.blk-toggle details{flex:1;border-left:2px solid var(--rule);padding-left:10px}.blk-toggle summary{cursor:pointer}
+.blk-link input{border-bottom:1px solid var(--rule)}.blk-link .btn{margin:0}
+.tw{flex:1;overflow-x:auto}.pt td{padding:0;border:1px solid var(--rule)}.pt input{width:100%;padding:8px;border:0}
+.addb{margin-top:16px;padding-top:10px;border-top:1px solid var(--rule2);display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+@media (max-width:760px){.nwrap.pw{grid-template-columns:1fr}.blk .bctl{opacity:1;flex-wrap:wrap}.ptitle{font-size:24px}}
