@@ -12,8 +12,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
-      - run: npm i comcigan-parser --no-save
+          node-version: 22
+      - run: npm i parse-comcigan --no-save
       - run: node gyomu/tools/comcigan.js /tmp/comcigan.json
       - name: data 가지에 저장
         run: |
