@@ -61,7 +61,20 @@ Object.assign(A, {
 });
 /* 게시판 줄을 펼치거나 접은 상태를 기억합니다 (고치거나 체크해도 줄이 다시 닫히지 않게) */
 document.addEventListener('toggle', e => {
-  const d = e.target; if (!d || !d.dataset || !d.dataset.k || !/^(r\d+|sb|dw)$/.test(d.dataset.k)) return;
+  const d = e.target; if (!d || !d.dataset || !d.dataset.k || !/^(r\d+|sb|dw|s\d+)$/.test(d.dataset.k)) return;
   if (d.open) OPEN.add(d.dataset.k); else OPEN.delete(d.dataset.k);
   try { localStorage.setItem('tf.open', JSON.stringify([...OPEN])); } catch (er) { }
 }, true);
+/* 설정 화면: 각 구역을 접고 펼 수 있게 (공간 확보). 열고 닫은 상태는 기억 */
+function setFold() {
+  if (location.hash.replace(/^#\/?/, '').split('/')[0] !== 'set') return;
+  document.querySelectorAll('main h3.h3').forEach((h, i) => {
+    if (h.closest('details.sec')) return;
+    const par = h.parentNode, d = document.createElement('details'), k = 's' + i;
+    d.className = 'sec'; d.dataset.k = k; if (OPEN.has(k)) d.open = true;
+    const sm = document.createElement('summary'); par.insertBefore(d, h); sm.appendChild(h); d.appendChild(sm);
+    const chev = document.createElement('i'); chev.className = 'chev'; sm.appendChild(chev);
+    while (d.nextSibling && !(d.nextSibling.nodeType === 1 && d.nextSibling.matches && d.nextSibling.matches('h3.h3'))) d.appendChild(d.nextSibling);
+  });
+}
+{ const _r = render; render = function () { _r.apply(this, arguments); setFold(); }; if (typeof TF !== 'undefined') TF.render = render; }

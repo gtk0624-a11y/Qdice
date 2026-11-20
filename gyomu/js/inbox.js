@@ -63,5 +63,5 @@ function ibxStart() {
 A.ibx = ibxStart;
 document.addEventListener('click', e => {
   const a = e.target.closest('[data-go]'); if (!a) return; e.preventDefault();
-  const t = document.getElementById(a.dataset.go); if (t) { t.scrollIntoView({ behavior: 'smooth', block: 'start' }); const d = t.nextElementSibling; if (d && d.tagName === 'DETAILS') d.open = true; }
+  const t = document.getElementById(a.dataset.go); if (t) { setTimeout(() => t.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50); const sec = t.closest('details.sec'); if (sec) { sec.open = true; OPEN.add(sec.dataset.k); try { localStorage.setItem('tf.open', JSON.stringify([...OPEN])); } catch (er) { } } const f = sec && sec.querySelector('details.fnt'); if (f) f.open = true; }
 });

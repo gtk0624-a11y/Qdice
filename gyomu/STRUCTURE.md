@@ -187,3 +187,8 @@ service cloud.firestore {
 ## 꾸미기 찾기
 - 모든 쪽 메뉴줄 오른쪽 빨간 [📨 메신저 붙여넣기] 버튼, 설정 맨 위 [꾸미기 바로가기](워터마크 끄기·글자, 글씨체, 디자인·색).
 - 제목 굵기는 style.css 맨 끝 `font-weight:900` + `-webkit-text-stroke` 블록에서 조절.
+
+
+## 설정 접기·설치 안내
+- 설정의 각 구역(h3)은 extra.js `setFold()`가 자동으로 접는 칸(details.sec)으로 감쌉니다. 열고 닫은 상태는 기억.
+- 설치·작업표시줄 고정·위젯처럼 쓰기 안내는 app.js `setView()`의 `.guide` 구역에서 고침.

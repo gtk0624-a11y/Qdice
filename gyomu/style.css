@@ -551,3 +551,6 @@ img,video,canvas,svg{max-width:100%}
 .bh h2,.h3,h3.h3,.row .ttl,.ttl{font-weight:900!important;-webkit-text-stroke:.7px currentColor;color:var(--ink)}
 .bh h2{-webkit-text-stroke:1.2px currentColor}
 @media(max-width:760px){.nvx{margin:6px 0 0;width:100%}}
+/* 설정 접기 */
+details.sec{border-bottom:1px solid var(--rule2);margin:0}details.sec>summary{cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:space-between}details.sec>summary::-webkit-details-marker{display:none}details.sec>summary h3{margin:14px 0!important;flex:1}details.sec[open]>summary{border-bottom:2px solid var(--cover);margin-bottom:10px}
+.guide{line-height:1.8;font-size:16px}.guide ol,.guide ul{margin:4px 0 12px;padding-left:22px}
