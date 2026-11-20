@@ -26,6 +26,7 @@ const memoId = () => { const v = S && S.profile && S.profile.memo; return Number
 const memoName = () => { const v = memoId(); return MSHP[Math.floor(v / 10)] + ' · ' + MPAL[v % 10][0]; };
 function memoApply() {
   const v = memoId(), r = document.documentElement;
+  r.dataset.skin = (S && S.profile && S.profile.skin === 'classic') ? 'classic' : 'planner';
   r.dataset.msh = String(Math.floor(v / 10)); r.style.setProperty('--mbg', MPAL[v % 10][1]); r.style.setProperty('--mac', MPAL[v % 10][2]);
 }
 A.memoPick = () => {
@@ -43,3 +44,5 @@ A.memoPick = () => {
   d.showModal();
 };
 { const _r = render; render = function () { memoApply(); _r.apply(this, arguments); }; if (typeof TF !== 'undefined') TF.render = render; }
+
+A.skinToggle = () => { S.profile.skin = S.profile.skin === 'classic' ? 'planner' : 'classic'; commit(); };

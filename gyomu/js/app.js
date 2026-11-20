@@ -54,7 +54,8 @@ function masthead() {
   return `<header class="mast"><div class="mast1"><img class="logo" src="${LOGO || DEFLOGO}" alt="도디쌤 이미지"><h1 data-act="editTitle" title="눌러서 제목 고치기">${esc(titleOf())}</h1><span class="fr" data-act="editTitle">${esc(p.sub || 'Travail Fatal')}</span><button class="x" data-act="editTitle" aria-label="제목 고치기">✎</button></div><div class="mast2"><div class="dt">${D[n.getDay()]} · ${n.getDate()} ${M[n.getMonth()]} ${n.getFullYear()}</div><div>${esc([p.school, p.name && p.name + ' 선생님'].filter(Boolean).join(' · '))}</div></div></header>`;
 }
 function nav(page) {
-  const L = [['today', '오늘'], ['cal', '캘린더'], ['class', '수업·평가'], ['budget', '예산'], ['notes', '기록'], ['pages', '페이지'], ['lib', '자료·연락'], ['set', '설정']];
+  const L0 = [['today', '오늘'], ['cal', '캘린더'], ['class', '수업·평가'], ['budget', '예산'], ['notes', '기록'], ['pages', '페이지'], ['lib', '자료·연락'], ['set', '설정']];
+  const L = typeof navOrder === 'function' ? navOrder(L0) : L0;
   return `<nav class="nav" aria-label="메뉴">${L.map(([k, v]) => `<a href="#/${k}" ${page === k || (k === 'notes' && page === 'note') || (k === 'pages' && page === 'page') ? 'aria-current="page"' : ''}>${v}</a>`).join('')}<button class="nvx" data-act="ibx">📨 메신저 붙여넣기</button></nav>`;
 }
 function footer() {
@@ -155,9 +156,9 @@ function todayView() {
     rows.push(row('pg' + p.id, '페이지', esc(p.title || '제목 없음'), st, '', todos.map(b => `<div class="td ${b.done ? 'dn' : ''}"><button class="ck" data-act="bTodo" data-p="${p.id}" data-b="${b.id}" aria-pressed="${!!b.done}" aria-label="완료 표시"></button><span class="tl">${esc(b.x)}</span><span class="stamp">완료</span></div>`).join('') + `<a class="btn sm" href="#/page/${p.id}">페이지 열기</a>`));
   });
   const up = upcoming(7);
-  return `${typeof schoolBanner === 'function' ? schoolBanner() : ''}<div class="bh"><h2>오늘의 게시판</h2><span class="mu">줄을 누르면 펼쳐집니다.</span><button class="btn sm" data-act="ibx">📨 메신저 붙여넣기</button><button class="btn sm" data-act="rowPick">☑ 보일 줄 고르기</button></div>
+  return `${typeof schoolBanner === 'function' ? schoolBanner() : ''}<div class="bh"><h2>오늘의 게시판</h2><span class="mu">줄을 누르면 펼쳐집니다.</span><button class="btn sm" data-act="ordPick">↕ 순서 바꾸기</button><button class="btn sm" data-act="rowPick">☑ 보일 줄 고르기</button></div>
   <div class="spread"><div class="pgL">${miniCal()}${up.length ? `<p class="soon"><b>이번 주 기한</b><br>${up.slice(0, 6).map(e => `${md(e.date)} ${esc(e.t)}`).join('<br>')}</p>` : ''}</div>
-  <div class="pgR"><div class="cols"><span>분류</span><span>제목</span><span>현황</span><span class="r">기한</span><span></span></div>${rows.join('')}</div></div>`;
+  <div class="pgR"><div class="cols"><span>분류</span><span>제목</span><span>현황</span><span class="r">기한</span><span></span></div>${(typeof orderRows === 'function' ? orderRows(rows) : rows).join('')}</div></div>`;
 }
 
 /* ---------- 캘린더 ---------- */
@@ -238,8 +239,8 @@ function libView() {
   <div class="tools"><button class="btn sm" data-act="add_duties">+ 한 줄 추가</button><label class="btn sm file">표 파일로 한 번에 넣기<input type="file" data-import="duties" accept=".csv,.xlsx,.xls,.txt,.hwp,.hwpx,.docx" hidden></label></div><p class="mu">표 파일은 열 순서가 부서 · 업무 · 담당자입니다. 첫 줄 제목은 알아서 건너뜁니다.</p>
   <h3 class="h3">교내 연락망</h3><input class="srch" id="cq" placeholder="이름·부서·내선 검색" value="${esc(UI.q)}" aria-label="연락망 검색"><table class="tbl"><thead><tr><th>부서</th><th>이름</th><th>내선</th><th>전화</th><th></th></tr></thead><tbody>${C.map(c => `<tr><td>${esc(c.dept)}</td><td>${esc(c.name)}</td><td>${esc(c.ext)}</td><td>${esc(c.phone)}</td><td class="act"><button class="x" data-act="edit_contacts" data-id="${c.id}">수정</button>${xbtn('del_contacts', c.id)}</td></tr>`).join('')}</tbody></table>
   <div class="tools"><button class="btn sm" data-act="add_contacts">+ 한 줄 추가</button><label class="btn sm file">표 파일로 한 번에 넣기<input type="file" data-import="contacts" accept=".csv,.xlsx,.xls,.txt,.hwp,.hwpx,.docx" hidden></label></div><p class="mu">열 순서: 부서 · 이름 · 내선 · 전화. 개인 전화번호는 이 기기·내 계정에만 저장됩니다.</p>
-  <h3 class="h3">자료실 (계획서·회의록·규정·교육과정)</h3><div class="tools"><select id="upk" aria-label="자료 종류"><option>계획서</option><option>회의록</option><option>규정</option><option>교육과정</option><option>기타</option></select><label class="btn file">파일 올리기<input type="file" id="docUp" accept=".txt,.csv,.md,.xlsx,.xls,.pdf,.hwp,.hwpx,.docx" multiple hidden></label></div><p class="mu">한글(hwp·hwpx)·워드·PDF·엑셀·텍스트를 읽어 글자를 뽑아 저장합니다(원본 파일은 저장하지 않음). 아래 목록에서 펼치면 제목·표·목록이 보기 편하게 정리되어 나옵니다.</p>
-  ${LIB.map(d => `<details class="doc"><summary><b>${esc(d.name)}</b> <span class="mu">${esc(d.kind)} · ${d.text.length.toLocaleString()}자 · ${d.added}</span></summary><div class="rd">${readable(d.text.slice(0, 60000))}</div><button class="btn sm" data-act="docBudget" data-id="${d.id}">예산 후보 뽑기</button><button class="x" data-act="docDel" data-id="${d.id}">삭제</button></details>`).join('') || '<p class="mu">아직 올린 자료가 없습니다.</p>'}`;
+  <h3 class="h3">자료실 (계획서·회의록·규정·교육과정)</h3><div class="tools"><select id="upk" aria-label="자료 종류"><option>계획서</option><option>회의록</option><option>규정</option><option>교육과정</option><option>기타</option></select><label class="btn file">파일 올리기<input type="file" id="docUp" accept=".txt,.csv,.md,.xlsx,.xls,.pdf,.hwp,.hwpx,.docx" multiple hidden></label></div><p class="mu">한글(hwp·hwpx)·워드·PDF·엑셀·텍스트를 읽어 글자를 뽑아 저장합니다(원본 파일도 이 기기에 저장되어 [원본 열기]로 다시 열 수 있습니다. 엑셀은 [표로 바로 보기]). 아래 목록에서 펼치면 제목·표·목록이 보기 편하게 정리되어 나옵니다.</p>
+  ${LIB.map(d => `<details class="doc"><summary><b>${esc(d.name)}</b> <span class="mu">${esc(d.kind)} · ${d.text.length.toLocaleString()}자 · ${d.added}</span></summary><div class="rd">${readable(d.text.slice(0, 60000))}</div><div class="tools"><button class="btn sm pri" data-act="docOpen" data-id="${d.id}">📂 원본 열기</button>${/\.(xlsx?|csv)$/i.test(d.name) ? `<button class="btn sm" data-act="docSheet" data-id="${d.id}">📊 표로 바로 보기</button>` : ''}<button class="btn sm" data-act="docBig" data-id="${d.id}">🔍 크게 보기</button></div><button class="btn sm" data-act="docBudget" data-id="${d.id}">예산 후보 뽑기</button><button class="x" data-act="docDel" data-id="${d.id}">삭제</button></details>`).join('') || '<p class="mu">아직 올린 자료가 없습니다.</p>'}`;
 }
 
 /* ---------- 설정 ---------- */
@@ -252,7 +253,7 @@ function archView(id) {
 function setView() {
   const p = S.profile, sy = TF.sync.info, rowsT = [['r1', '일과'], ['r2', '할 일'], ['r3', '공문'], ['r4', '수업 진도'], ['r5', '수행평가'], ['r6', '예산'], ['r7', '연수'], ['r8', '기록'], ['r9', '업무 분장표'], ['r10', '교내 연락망'], ['r11', '내 업무'], ['r12', '급식'], ['sb', '학교 배너']];
   return `<div class="bh"><h2>설정</h2></div>
-  <div class="qk"><b>꾸미기 바로가기</b><button class="btn" data-act="wmToggle">워터마크 ${S.profile.wm === false ? '켜기' : '끄기'}</button><button class="btn" data-act="wmEdit">워터마크 글자</button><a class="btn" href="#fontsec" data-go="fontsec">글씨체 바꾸기 ↓</a><a class="btn" href="#fontsec" data-go="themesec">디자인·색 ↓</a></div>
+  <div class="qk"><b>꾸미기 바로가기</b><button class="btn" data-act="wmToggle">워터마크 ${S.profile.wm === false ? '켜기' : '끄기'}</button><button class="btn" data-act="wmEdit">워터마크 글자</button><button class="btn" data-act="skinToggle">화면 스타일: ${S.profile.skin === 'classic' ? '기존 수첩 → 플래너로' : '플래너 → 기존 수첩으로'}</button><button class="btn" data-act="ordPick">↕ 화면 순서</button><a class="btn" href="#fontsec" data-go="fontsec">글씨체 바꾸기 ↓</a><a class="btn" href="#fontsec" data-go="themesec">디자인·색 ↓</a></div>
   <form data-form="profile" class="fm"><h3 class="h3">내 정보</h3><label>이름<input name="name" value="${esc(p.name)}"></label><label>학교<input name="school" value="${esc(p.school)}"></label><label>교과<input name="subject" value="${esc(p.subject)}"></label><label>담당 반 (쉼표로)<input name="classes" value="${esc(p.classes.join(', '))}"></label><label>1교시 시작<input name="start" type="time" value="${p.start}"></label><label>수업 시간(분)<input name="classMin" type="number" value="${p.classMin}"></label><label>쉬는 시간(분)<input name="breakMin" type="number" value="${p.breakMin}"></label><label>개발 연수 목표(시간)<input name="devTarget" type="number" value="${p.devTarget}"></label><button class="btn pri">저장</button></form>
   <h3 class="h3">오늘 게시판에 보일 줄</h3><div class="hides">${rowsT.map(([k, v]) => `<label class="chk"><input type="checkbox" data-hide="${k}" ${S.hide[k] ? '' : 'checked'}> ${v}</label>`).join('')}</div>
   <h3 class="h3">꿈송이</h3><div class="tools"><div class="mas"><img src="${mas()}" alt="꿈송이"></div><label class="btn file">챗봇 꿈송이 그림 바꾸기<input type="file" id="masUp" accept="image/*" hidden></label>${MASCOT ? '<button class="btn" data-act="masDel">기본 꿈송이로</button>' : ''}</div>
@@ -336,7 +337,7 @@ const A = {
   noteExport(el) { const n = find('notes', el.dataset.id); download((n.title || '노트') + '.doc', `<html><meta charset="utf-8"><body><h2>${esc(n.title)}</h2><p>${n.date} · ${esc(n.kind)}</p><pre style="font-family:inherit;white-space:pre-wrap">${esc(n.body)}</pre><h3>결정</h3><pre>${esc(n.decisions)}</pre><h3>후속 조치</h3><pre>${esc(n.followups)}</pre></body></html>`, 'application/msword'); },
   tab(el) { $$('.tab').forEach(b => b.classList.toggle('on', b === el)); const ink = el.dataset.t === 'ink'; $('#nbody').hidden = ink; $('#inkbox').hidden = !ink; },
   /* 자료 */
-  docDel(el) { sure('이 자료를 지울까요?', () => { LIB = LIB.filter(d => d.id !== el.dataset.id); saveLib(); render(); }); },
+  docDel(el) { sure('이 자료를 지울까요?', () => { idb.del('file:' + el.dataset.id); LIB = LIB.filter(d => d.id !== el.dataset.id); saveLib(); render(); }); },
   manageLinks() { ask('뺄 사이트', [{ k: 'id', label: '고르세요', type: 'select', opts: S.links.map(l => l.name) }], o => { S.links = S.links.filter(l => l.name !== o.id); commit(); }, '빼기'); },
   /* 설정 */
   schedPaste() { ask('학사일정 붙여넣기', [{ k: 'text', label: '학사일정 글 (한 줄에 날짜와 행사)', type: 'textarea', rows: 10, req: 1 }], o => scheduleDialog(o.text), '일정 찾기'); },
@@ -394,9 +395,9 @@ document.addEventListener('change', async e => {
   else if (t.dataset.ptotal) { const p = find('budget', t.dataset.ptotal); p.total = Math.max(0, +t.value || 0); commit(); }
   else if (t.dataset.hide) { S.hide[t.dataset.hide] = !t.checked; commit(); }
   else if (t.dataset.note === 'kind' || t.dataset.note === 'date' || t.dataset.note === 'lock') { const n = find('notes', location.hash.split('/')[2]); if (n) { n[t.dataset.note] = t.type === 'checkbox' ? t.checked : t.value; commit(); } }
-  else if (t.id === 'docUp') { const kind = $('#upk').value; for (const f of t.files) { try { toast(f.name + ' 읽는 중…'); const text = await readFile(f); LIB.push({ id: uid(), name: f.name, kind, text, added: today() }); } catch (er) { toast(er.message); } } await saveLib(); toast('올렸습니다. 꿈송이가 이제 이 자료도 찾습니다.'); render(); }
+  else if (t.id === 'docUp') { const kind = $('#upk').value; for (const f of t.files) { try { toast(f.name + ' 읽는 중…'); const text = await readFile(f); { const id = uid(); LIB.push({ id, name: f.name, kind, text, added: today() }); if (typeof keepFile === 'function') await keepFile(id, f); } } catch (er) { toast(er.message); } } await saveLib(); toast('올렸습니다. 꿈송이가 이제 이 자료도 찾습니다.'); render(); }
   else if (t.id === 'schedUp') { const f = t.files[0]; if (!f) return; try { toast('학사일정 읽는 중…'); scheduleDialog(await readFile(f)); } catch (er) { toast(er.message); } }
-  else if (t.id === 'planUp') { const f = t.files[0]; if (!f) return; try { toast('계획서 읽는 중…'); const text = await readFile(f); LIB.push({ id: uid(), name: f.name, kind: '계획서', text, added: today() }); await saveLib(); budgetDialog(text); } catch (er) { toast(er.message); } }
+  else if (t.id === 'planUp') { const f = t.files[0]; if (!f) return; try { toast('계획서 읽는 중…'); const text = await readFile(f); { const id = uid(); LIB.push({ id, name: f.name, kind: '계획서', text, added: today() }); if (typeof keepFile === 'function') await keepFile(id, f); } await saveLib(); budgetDialog(text); } catch (er) { toast(er.message); } }
   else if (t.dataset.import) {
     const f = t.files[0]; if (!f) return; try {
       const text = await readFile(f), key = t.dataset.import, rows = text.split(/\n/).map(l => l.split(/\s\|\s|\t|,/).map(s => s.trim().replace(/^"|"$/g, ''))).filter(r => r.some(Boolean));

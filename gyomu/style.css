@@ -554,3 +554,37 @@ img,video,canvas,svg{max-width:100%}
 /* 설정 접기 */
 details.sec{border-bottom:1px solid var(--rule2);margin:0}details.sec>summary{cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:space-between}details.sec>summary::-webkit-details-marker{display:none}details.sec>summary h3{margin:14px 0!important;flex:1}details.sec[open]>summary{border-bottom:2px solid var(--cover);margin-bottom:10px}
 .guide{line-height:1.8;font-size:16px}.guide ol,.guide ul{margin:4px 0 12px;padding-left:22px}
+.docdlg{width:min(1000px,96vw);max-width:96vw}.docbig{max-height:70vh;overflow:auto;font-size:16px;line-height:1.8}.shw{overflow:auto;max-height:62vh}.shw table{border-collapse:collapse;font-size:14px}.shw td,.shw th{border:1px solid var(--rule2);padding:4px 8px;white-space:pre-wrap;vertical-align:top}
+
+/* ===== 플래너 스킨 (굿노트·캔바 디지털 플래너 느낌: 흰 카드 · 둥근 모서리 · 한 가지 파스텔 포인트) ===== */
+html[data-skin="planner"] body{background:color-mix(in srgb,var(--cover) 13%,#fff) fixed!important}
+html[data-skin="planner"] #app{max-width:1200px;margin:16px auto 90px;padding:22px 30px 60px!important;background:#fff!important;border:0!important;border-radius:28px!important;box-shadow:0 12px 44px rgba(50,60,90,.10)!important}
+html[data-skin="planner"] #app::before,html[data-skin="planner"] #app::after{display:none!important}
+html[data-skin="planner"] .mast{border:0!important;padding:4px 0 8px!important}
+html[data-skin="planner"] .mast2 .dt,html[data-skin="planner"] .mast2{background:color-mix(in srgb,var(--cover) 12%,#fff)!important;border:0!important;box-shadow:none!important;border-radius:14px;padding:6px 14px;transform:none!important;color:var(--ink)}
+html[data-skin="planner"] .nav{display:flex;flex-wrap:wrap;gap:8px!important;padding:8px 0 14px!important;border:0!important;background:transparent!important}
+html[data-skin="planner"] .nav a{background:color-mix(in srgb,var(--cover) 12%,#fff)!important;color:var(--ink)!important;border:0!important;border-radius:999px!important;padding:9px 20px!important;font-weight:800;box-shadow:none!important;text-decoration:none}
+html[data-skin="planner"] .nav a[aria-current]{background:var(--cover)!important;color:#fff!important}
+html[data-skin="planner"] .bh{border-bottom:0!important;margin:14px 0 10px!important;padding-bottom:0!important}
+html[data-skin="planner"] .bh h2{font-size:calc(38px*var(--hs))!important}
+html[data-skin="planner"] .bh>.mu{background:color-mix(in srgb,var(--cover) 10%,#fff)!important;border-left:0!important;border-radius:12px!important}
+html[data-skin="planner"] .h3,html[data-skin="planner"] h3.h3{border:0!important;padding:0!important;margin:26px 0 10px!important;font-size:calc(24px*var(--hs))!important;display:flex;align-items:center;gap:10px}
+html[data-skin="planner"] .h3::before{content:"";flex:none;width:12px;height:12px;border-radius:50%;background:var(--cover)}
+html[data-skin="planner"] .cols{display:none!important}
+html[data-skin="planner"] .row{border:0!important;border-radius:20px!important;background:color-mix(in srgb,var(--cover) 8%,#fff)!important;box-shadow:none!important;margin:10px 0!important}
+html[data-skin="planner"] .row[open]{background:#fff!important;box-shadow:0 6px 22px rgba(50,60,90,.12)!important;outline:2px solid color-mix(in srgb,var(--cover) 30%,#fff)}
+html[data-skin="planner"] .row>summary{padding:14px 20px!important;border:0!important}
+html[data-skin="planner"] .row[open]>summary{border-bottom:0!important}
+html[data-skin="planner"] .cat{background:color-mix(in srgb,var(--cover) 28%,#fff)!important;color:var(--ink)!important}
+html[data-skin="planner"] .mcal,html[data-skin="planner"] .sbanner,html[data-skin="planner"] .dw,html[data-skin="planner"] .pmemo,html[data-skin="planner"] .soon{border:0!important;border-radius:22px!important;background:color-mix(in srgb,var(--cover) 7%,#fff)!important;box-shadow:none!important}
+html[data-skin="planner"] .drawer{border:0!important;border-radius:22px;padding:14px 18px!important}
+html[data-skin="planner"] .btn{border:0!important;border-radius:999px!important;background:color-mix(in srgb,var(--cover) 14%,#fff)!important;color:var(--ink)!important;font-weight:700}
+html[data-skin="planner"] .btn.pri,html[data-skin="planner"] .nvx{background:var(--cover)!important;color:#fff!important}
+html[data-skin="planner"] .btn:hover{filter:brightness(.96)}
+html[data-skin="planner"] input:not([type=checkbox]):not([type=radio]),html[data-skin="planner"] select{border:1.5px solid color-mix(in srgb,var(--cover) 28%,#fff)!important;border-radius:14px!important;background:#fff!important}
+html[data-skin="planner"] .tbl th{background:color-mix(in srgb,var(--cover) 14%,#fff)}
+html[data-skin="planner"] .tbl td,html[data-skin="planner"] .tbl th{border-color:color-mix(in srgb,var(--cover) 14%,#fff)!important}
+html[data-skin="planner"] #wm{opacity:.28}
+html[data-skin="planner"] details.sec{border-bottom:1px solid color-mix(in srgb,var(--cover) 14%,#fff)}
+@media(max-width:700px){html[data-skin="planner"] #app{margin:0 auto 70px;padding:14px 14px 50px!important;border-radius:0 0 22px 22px!important}html[data-skin="planner"] .nav a{padding:8px 14px!important;font-size:15px}}
+html[data-skin="planner"] nav.nav{border:0!important;border-bottom:0!important}html[data-skin="planner"] .mcal .wk,html[data-skin="planner"] .mcal thead{border-color:transparent!important}
