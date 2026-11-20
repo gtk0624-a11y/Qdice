@@ -50,7 +50,7 @@ const xbtn = (act, id, l) => `<button class="x" data-act="${act}" data-id="${id}
 function masthead() {
   const n = new Date(), M = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'], D = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
   const p = S.profile;
-  return `<header class="mast"><div class="mast1"><h1>업무파탈</h1><span class="fr">Travail Fatal</span></div><div class="mast2"><div class="dt">${D[n.getDay()]} · ${n.getDate()} ${M[n.getMonth()]} ${n.getFullYear()}</div><div>${esc([p.school, p.name && p.name + ' 선생님'].filter(Boolean).join(' · '))}</div></div></header>`;
+  return `<header class="mast"><div class="mast1"><img class="logo" src="${LOGO || DEFLOGO}" alt="도디쌤 이미지"><h1 data-act="editTitle" title="눌러서 제목 고치기">${esc(titleOf())}</h1><span class="fr" data-act="editTitle">${esc(p.sub || 'Travail Fatal')}</span><button class="x" data-act="editTitle" aria-label="제목 고치기">✎</button></div><div class="mast2"><div class="dt">${D[n.getDay()]} · ${n.getDate()} ${M[n.getMonth()]} ${n.getFullYear()}</div><div>${esc([p.school, p.name && p.name + ' 선생님'].filter(Boolean).join(' · '))}</div></div></header>`;
 }
 function nav(page) {
   const L = [['today', '오늘'], ['cal', '캘린더'], ['class', '수업·평가'], ['budget', '예산'], ['notes', '기록'], ['pages', '페이지'], ['lib', '자료·연락'], ['set', '설정']];
@@ -246,7 +246,7 @@ function setView() {
   <h3 class="h3">꿈송이</h3><div class="tools"><div class="mas">${MASCOT ? `<img src="${MASCOT}" alt="꿈송이">` : '<span>그림 없음</span>'}</div><label class="btn file">꿈송이 그림 올리기<input type="file" id="masUp" accept="image/*" hidden></label>${MASCOT ? '<button class="btn" data-act="masDel">그림 빼기</button>' : ''}</div>
   <form data-form="claude" class="fm"><label>Claude 열쇠(선택) — 넣으면 꿈송이가 찾은 자료를 문장으로 다듬어 답합니다<input name="key" type="password" value="${esc(localStorage.getItem('tf.claudeKey') || '')}" placeholder="sk-ant-…" autocomplete="off"></label><p class="mu">열쇠는 이 기기에만 저장됩니다. 켜면 "질문 + 찾은 자료 조각"이 Anthropic 서버로 전송됩니다(잠금 노트는 제외). 학생 이름이 든 자료는 올리지 마세요.</p><button class="btn">저장</button></form>
   <h3 class="h3">여러 기기 동기화</h3><p>${esc(sy.msg)}</p>${sy.on ? (sy.user ? '<button class="btn" data-act="logout">로그아웃</button>' : '<button class="btn pri" data-act="login">구글로 로그인</button>') : '<p class="mu">설정 방법은 안내 문서(STRUCTURE.md)의 “동기화 켜기”를 보세요.</p>'}
-  <h3 class="h3">백업</h3><div class="tools"><button class="btn" data-act="backup">백업 파일 받기</button><label class="btn file">백업 파일 불러오기<input type="file" id="restore" accept=".json" hidden></label><button class="btn" data-act="sample">예시 데이터 채우기</button><button class="btn" data-act="reset">모두 지우고 처음부터</button></div><h3 class="h3">지난 학년도 보관함</h3><p class="mu">지난해 백업 파일을 넣어 두면 지금 데이터를 건드리지 않고 읽기만 할 수 있고, 꿈송이도 함께 찾아 줍니다.</p><div class="tools"><label class="btn file">지난 학년도 백업 넣기<input type="file" id="archUp" accept=".json" hidden></label>${ARCH.map(a => `<a class="btn" href="#/arch/${a.id}">${esc(a.label)} 보기</a><button class="btn" data-act="archDel" data-id="${a.id}">삭제</button>`).join('')}</div><h3 class="h3">새 학년도</h3><p class="mu">학년도가 바뀌면 이 버튼을 누르세요. 자동으로 백업 파일을 받은 뒤, 시간표·일정·진도·평가·예산·연수·공문·업무분장·연락망을 비웁니다. 내 정보, 메모, 내 페이지, 서랍, 자료실은 그대로 남습니다.</p><div class="tools"><button class="btn pri" data-act="newYear">새 학년도 시작하기</button></div><p class="mu">브라우저 기록을 지우면 이 기기의 데이터가 사라질 수 있으니 가끔 백업 파일을 받아 두세요.</p>`;
+  <h3 class="h3">백업</h3><div class="tools"><button class="btn" data-act="backup">백업 파일 받기</button><label class="btn file">백업 파일 불러오기<input type="file" id="restore" accept=".json" hidden></label><button class="btn" data-act="sample">예시 데이터 채우기</button><button class="btn" data-act="reset">모두 지우고 처음부터</button></div><h3 class="h3">제목 · 도디쌤 이미지 · 워터마크</h3><div class="tools"><img class="logo" src="${LOGO || DEFLOGO}" alt="도디쌤 이미지"><label class="btn file">도디쌤 이미지 올리기<input type="file" id="logoUp" accept="image/*" hidden></label>${LOGO ? '<button class="btn" data-act="logoDel">기본 그림으로</button>' : ''}<button class="btn" data-act="editTitle">제목 고치기</button><button class="btn" data-act="wmToggle">워터마크 ${S.profile.wm === false ? '켜기' : '끄기'}</button><button class="btn" data-act="wmEdit">워터마크 글자</button></div><h3 class="h3">지난 학년도 보관함</h3><p class="mu">지난해 백업 파일을 넣어 두면 지금 데이터를 건드리지 않고 읽기만 할 수 있고, 꿈송이도 함께 찾아 줍니다.</p><div class="tools"><label class="btn file">지난 학년도 백업 넣기<input type="file" id="archUp" accept=".json" hidden></label>${ARCH.map(a => `<a class="btn" href="#/arch/${a.id}">${esc(a.label)} 보기</a><button class="btn" data-act="archDel" data-id="${a.id}">삭제</button>`).join('')}</div><h3 class="h3">새 학년도</h3><p class="mu">학년도가 바뀌면 이 버튼을 누르세요. 자동으로 백업 파일을 받은 뒤, 시간표·일정·진도·평가·예산·연수·공문·업무분장·연락망을 비웁니다. 내 정보, 메모, 내 페이지, 서랍, 자료실은 그대로 남습니다.</p><div class="tools"><button class="btn pri" data-act="newYear">새 학년도 시작하기</button></div><p class="mu">브라우저 기록을 지우면 이 기기의 데이터가 사라질 수 있으니 가끔 백업 파일을 받아 두세요.</p>`;
 }
 function welcome() {
   return `<div class="wel"><h1>업무파탈</h1><div class="fr">Travail Fatal</div><p>나만의 디지털 교무수첩입니다. 몇 가지만 적으면 바로 시작합니다. 모든 내용은 나중에 설정에서 고칠 수 있습니다.</p>
@@ -265,7 +265,7 @@ function render() {
   if (page === 'note') mountNote(arg);
   if (page === 'page') mountPage();
   window.scrollTo(0, y);
-  renderChatFab();
+  renderChatFab(); applyBrand();
 }
 TF.render = render;
 window.addEventListener('hashchange', () => { window.scrollTo(0, 0); render(); });
@@ -329,6 +329,10 @@ const A = {
   masDel() { MASCOT = ''; idb.del('mascot'); render(); },
   login() { TF.sync.login(); }, logout() { TF.sync.logout(); },
   archDel(el) { sure('이 보관본을 지울까요?', async () => { ARCH = ARCH.filter(x => x.id !== el.dataset.id); await saveArch(); render(); toast('지웠습니다.'); }); },
+  editTitle() { ask('제목 고치기', [{ k: 'title', label: '제목', val: titleOf() }, { k: 'sub', label: '작은 글씨(부제)', val: S.profile.sub || 'Travail Fatal' }], o => { S.profile.title = (o.title || '').trim() || '업무파탈'; S.profile.sub = (o.sub || '').trim(); commit(); toast('제목을 바꿨습니다.'); }, '저장'); },
+  wmToggle() { S.profile.wm = S.profile.wm === false; commit(); },
+  wmEdit() { ask('워터마크 글자', [{ k: 't', label: '비우면 "제목 · 이름"이 자동으로 들어갑니다', val: S.profile.wmText || '' }], o => { S.profile.wmText = (o.t || '').trim(); commit(); }, '저장'); },
+  logoDel() { LOGO = ''; idb.set('logo', ''); render(); },
   newYear() { sure('새 학년도를 시작할까요? 먼저 백업 파일을 받고, 시간표·일정·진도·평가·예산·연수·공문·업무분장·연락망을 비웁니다. 메모·페이지·서랍·자료실은 남습니다.', () => { A.backup(); ['timetable'].forEach(k => S[k] = {}); ['items', 'lessons', 'assess', 'budget', 'training', 'duties', 'contacts'].forEach(k => S[k] = []); S.docs = {}; commit(); toast('새 학년도로 비웠습니다. 학교·교과를 확인하고 학사일정을 올려 주세요.'); }); },
   backup() { download('업무파탈_백업_' + today() + '.json', JSON.stringify({ S, LIB }), 'application/json'); },
   sample() { sampleData(); },
@@ -384,6 +388,7 @@ document.addEventListener('change', async e => {
     } catch (er) { toast(er.message); }
   }
   else if (t.id === 'masUp') { const f = t.files[0]; if (!f) return; const im = new Image(); im.onload = async () => { const c = document.createElement('canvas'), s = 256 / Math.max(im.width, im.height, 256) * (im.width > 256 || im.height > 256 ? 1 : 1); const r = Math.min(1, 256 / Math.max(im.width, im.height)); c.width = Math.round(im.width * r); c.height = Math.round(im.height * r); c.getContext('2d').drawImage(im, 0, 0, c.width, c.height); MASCOT = c.toDataURL('image/png'); await idb.set('mascot', MASCOT); render(); }; im.src = URL.createObjectURL(f); }
+  else if (t.id === 'logoUp') { const f = t.files[0]; if (!f) return; const im = new Image(); im.onload = async () => { const r = Math.min(1, 256 / Math.max(im.width, im.height)), c = document.createElement('canvas'); c.width = Math.round(im.width * r); c.height = Math.round(im.height * r); c.getContext('2d').drawImage(im, 0, 0, c.width, c.height); LOGO = c.toDataURL('image/png'); await idb.set('logo', LOGO); render(); toast('도디쌤 이미지를 바꿨습니다.'); }; im.onerror = () => toast('이미지를 읽지 못했습니다.'); im.src = URL.createObjectURL(f); t.value = ''; }
   else if (t.id === 'archUp') { const f = t.files[0]; if (!f) return; try { const j = JSON.parse(await f.text()); if (!j.S) throw 0; const yr = (j.S.updatedAt ? new Date(j.S.updatedAt) : new Date()), sy0 = yr.getMonth() + 1 >= 3 ? yr.getFullYear() : yr.getFullYear() - 1; ask('보관함 이름', [{ k: 'n', label: '이름', val: sy0 + '학년도' }], async v => { ARCH.push({ id: uid(), label: (v.n || sy0 + '학년도').trim(), at: today(), S: j.S, LIB: j.LIB || [] }); await saveArch(); render(); toast('보관함에 넣었습니다. 지금 데이터는 그대로입니다.'); }, '넣기'); } catch (er) { toast('백업 파일이 아닙니다.'); } t.value = ''; }
   else if (t.id === 'restore') { const f = t.files[0]; if (!f) return; try { const j = JSON.parse(await f.text()); if (!j.S) throw 0; sure('백업으로 덮어쓸까요? 지금 내용은 사라집니다.', async () => { S = Object.assign(DEF(), j.S); LIB = j.LIB || []; await saveLib(); commit(); toast('불러왔습니다.'); }); } catch (er) { toast('백업 파일이 아닙니다.'); } }
 });

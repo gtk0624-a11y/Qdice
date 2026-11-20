@@ -55,6 +55,7 @@ try { S = Object.assign(DEF(), JSON.parse(localStorage.getItem(KEY) || '{}')); }
 S.profile = Object.assign(DEF().profile, S.profile);
 let ARCH = [];
 let LIB = []; // 업로드 문서 [{id,name,kind,text,added}]
+let LOGO = ''; // 도디쌤 이미지(dataURL)
 let MASCOT = ''; // 꿈송이 그림(dataURL)
 
 const TF = { sync: null, render: null };
@@ -67,7 +68,17 @@ function commit() { save(); TF.render && TF.render(); }
 async function loadBig() {
   LIB = (await idb.get('lib')) || [];
   MASCOT = (await idb.get('mascot')) || '';
+  LOGO = (await idb.get('logo')) || '';
   ARCH = (await idb.get('arch')) || [];
+}
+const DEFLOGO = 'data:image/svg+xml;utf8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><circle cx="32" cy="32" r="30" fill="#6E1423"/><circle cx="32" cy="26" r="11" fill="#F2EBDD"/><path d="M12 56c3-14 13-19 20-19s17 5 20 19z" fill="#F2EBDD"/></svg>');
+const titleOf = () => (S.profile.title || '업무파탈').trim();
+const wmUrl = () => { const t = (S.profile.wmText || (titleOf() + ' · ' + (S.profile.name || S.profile.school || ''))).replace(/[<>&]/g, ''); return 'url("data:image/svg+xml;utf8,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="340" height="220"><text x="170" y="115" text-anchor="middle" transform="rotate(-24 170 110)" font-family="Noto Serif KR,serif" font-size="22" font-weight="700" fill="#1B1613" fill-opacity="0.07">${t}</text></svg>`) + '")'; };
+function applyBrand() {
+  document.title = titleOf() + ' · ' + (S.profile.sub || 'Travail Fatal');
+  let w = document.getElementById('wm');
+  if (!w) { w = document.createElement('div'); w.id = 'wm'; w.setAttribute('aria-hidden', 'true'); document.body.appendChild(w); }
+  w.style.backgroundImage = S.profile.wm === false ? 'none' : wmUrl();
 }
 const saveLib = () => idb.set('lib', LIB);
 const saveArch = () => idb.set('arch', ARCH);
