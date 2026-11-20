@@ -100,7 +100,7 @@ function todayView() {
     const d = S.docs[t] || { recv: 0, done: 0 };
     const st = `접수 ${d.recv} · 처리 ${d.done} · ${d.recv - d.done > 0 ? `<span class="hot">남음 ${d.recv - d.done}</span>` : '남음 0'}`;
     const step = (k, l) => `<div class="stp"><span>${l}</span><button class="btn sm" data-act="docs" data-k="${k}" data-d="-1" aria-label="${l} 줄이기">−</button><b class="num">${d[k]}</b><button class="btn sm" data-act="docs" data-k="${k}" data-d="1" aria-label="${l} 늘리기">+</button></div>`;
-    rows.push(row('r3', '업무', '공문', st, '오늘', step('recv', '오늘 받은 공문') + step('done', '처리한 공문')));
+    rows.push(row('r3', '업무', '공문', st, '오늘', step('recv', '오늘 받은 공문') + step('done', '처리한 공문') + (typeof docLogBody === 'function' ? docLogBody() : '')));
   }
   /* 수업 진도 */
   {
@@ -147,6 +147,7 @@ function todayView() {
     const mine = S.duties.filter(d => d.mine);
     rows.push(row('r9', '학교', '업무 분장표', S.duties.length ? `내 업무 ${mine.length}건${mine[0] ? ' · ' + esc(mine[0].work) : ''}` : '업무 분장표를 올려 보세요', '', mine.map(d => `<div class="nl"><span>${esc(d.dept)} · ${esc(d.work)}</span></div>`).join('') + '<a class="btn sm" href="#/lib">분장표 열기</a>'));
     rows.push(typeof mineRow === 'function' ? mineRow() : '');
+    rows.push(typeof mealRow === 'function' ? mealRow() : '');
     rows.push(row('r10', '학교', '교내 연락망', S.contacts.length ? `교직원 ${S.contacts.length}명 · 이름·부서·내선 검색` : '연락망을 올려 보세요', '', '<a class="btn sm" href="#/lib">연락망 열기</a>'));
   }
   S.pages.filter(p => p.pin).forEach(p => {
@@ -155,7 +156,7 @@ function todayView() {
     rows.push(row('pg' + p.id, '페이지', esc(p.title || '제목 없음'), st, '', todos.map(b => `<div class="td ${b.done ? 'dn' : ''}"><button class="ck" data-act="bTodo" data-p="${p.id}" data-b="${b.id}" aria-pressed="${!!b.done}" aria-label="완료 표시"></button><span class="tl">${esc(b.x)}</span><span class="stamp">완료</span></div>`).join('') + `<a class="btn sm" href="#/page/${p.id}">페이지 열기</a>`));
   });
   const up = upcoming(7);
-  return `<div class="bh"><h2>오늘의 게시판</h2><span class="mu">줄을 누르면 펼쳐지고, 접어 두어도 현황이 보입니다.</span></div>
+  return `${typeof schoolBanner === 'function' ? schoolBanner() : ''}<div class="bh"><h2>오늘의 게시판</h2><span class="mu">줄을 누르면 펼쳐집니다.</span><button class="btn sm" data-act="rowPick">☑ 보일 줄 고르기</button></div>
   <div class="spread"><div class="pgL">${miniCal()}${up.length ? `<p class="soon"><b>이번 주 기한</b><br>${up.slice(0, 6).map(e => `${md(e.date)} ${esc(e.t)}`).join('<br>')}</p>` : ''}</div>
   <div class="pgR"><div class="cols"><span>분류</span><span>제목</span><span>현황</span><span class="r">기한</span><span></span></div>${rows.join('')}</div></div>`;
 }
@@ -168,7 +169,7 @@ function calView() {
   for (let i = 0; i < first.getDay(); i++) cells += '<span class="cd e"></span>';
   for (let d = 1; d <= n; d++) {
     const ds = `${Y}-${pad(M)}-${pad(d)}`, e = by[ds] || [];
-    cells += `<button class="cd ${ds === today() ? 'tdy' : ''} ${ds === UI.day ? 'sel' : ''}" data-act="calDay" data-d="${ds}"><span class="n">${d}</span>${e.slice(0, 2).map(x => `<small class="${x.done ? 'dn' : ''}">${esc(x.t)}</small>`).join('')}${e.length > 2 ? `<small class="mu">+${e.length - 2}</small>` : ''}</button>`;
+    cells += `<button class="cd ${ds === today() ? 'tdy' : ''} ${ds === UI.day ? 'sel' : ''}" data-act="calDay" data-d="${ds}"><span class="n">${d}${(S.dayMemo || {})[ds] ? ' 📝' : ''}</span>${e.slice(0, 2).map(x => `<small class="${x.done ? 'dn' : ''}">${esc(x.t)}</small>`).join('')}${e.length > 2 ? `<small class="mu">+${e.length - 2}</small>` : ''}</button>`;
   }
   const day = (by[UI.day] || []);
   const list = day.map(e => e.id ? `<div class="td ${e.done ? 'dn' : ''}"><button class="ck" data-act="tog" data-id="${e.id}" aria-pressed="${!!e.done}" aria-label="완료 표시"></button><span class="tl">${esc(e.t)}</span><span class="mu">${e.kind}</span>${xbtn('delItem', e.id)}</div>` : `<div class="td"><span class="ck off"></span><span class="tl">${esc(e.t)}</span><span class="mu">${e.kind}</span></div>`).join('') || '<p class="mu">이 날은 비어 있습니다.</p>';
@@ -177,6 +178,7 @@ function calView() {
   <div class="calw">${DOW.map(d => `<span>${d}</span>`).join('')}</div><div class="cal">${cells}</div>
   <div class="tools"><label class="btn file">학사일정 파일 올리기<input type="file" id="schedUp" accept=".txt,.csv,.xlsx,.xls,.pdf,.hwp,.hwpx,.docx" hidden></label><button class="btn" data-act="schedPaste">학사일정 붙여넣기</button></div><p class="mu">학사일정(PDF·엑셀·텍스트, 또는 나이스·홈페이지에서 복사한 글)을 넣으면 날짜와 행사를 찾아 캘린더에 한꺼번에 넣어 드립니다. 「3/2 입학식」「7.21~8.20 여름방학」 같은 줄을 알아봅니다.</p>
   <h3 class="h3">${md(UI.day)} (${DOW[new Date(UI.day + 'T00:00:00').getDay()]})</h3>${list}
+  ${typeof dayMemoBox === 'function' ? dayMemoBox(UI.day) : ''}
   <form class="inl" data-form="evt"><input name="title" placeholder="일정·할 일 추가" required aria-label="내용"><select name="cat" aria-label="종류"><option value="event">일정</option><option value="todo">할 일</option></select><button class="btn">추가</button></form>`;
 }
 
@@ -249,7 +251,7 @@ function archView(id) {
   return `<div class="bh"><h2>${esc(a.label)} <span class="mu">(읽기 전용)</span></h2></div><p class="mu">지금 데이터와 섞이지 않는 보관본입니다. 꿈송이에게 "${esc(a.label)} 예산 뭐였지"처럼 물어도 찾아 줍니다.</p>` + (keys.length ? keys.map(k => `<details class="tg"><summary>${esc(k)} <span class="mu">${g[k].length}건</span></summary><div class="tgb">${g[k].map(t => `<p>${esc(t).replace(/\n/g, '<br>')}</p>`).join('')}</div></details>`).join('') : '<p class="mu">내용이 없습니다.</p>');
 }
 function setView() {
-  const p = S.profile, sy = TF.sync.info, rowsT = [['r1', '일과'], ['r2', '할 일'], ['r3', '공문'], ['r4', '수업 진도'], ['r5', '수행평가'], ['r6', '예산'], ['r7', '연수'], ['r8', '기록'], ['r9', '업무 분장표'], ['r10', '교내 연락망'], ['r11', '내 업무']];
+  const p = S.profile, sy = TF.sync.info, rowsT = [['r1', '일과'], ['r2', '할 일'], ['r3', '공문'], ['r4', '수업 진도'], ['r5', '수행평가'], ['r6', '예산'], ['r7', '연수'], ['r8', '기록'], ['r9', '업무 분장표'], ['r10', '교내 연락망'], ['r11', '내 업무'], ['r12', '급식'], ['sb', '학교 배너']];
   return `<div class="bh"><h2>설정</h2></div>
   <form data-form="profile" class="fm"><h3 class="h3">내 정보</h3><label>이름<input name="name" value="${esc(p.name)}"></label><label>학교<input name="school" value="${esc(p.school)}"></label><label>교과<input name="subject" value="${esc(p.subject)}"></label><label>담당 반 (쉼표로)<input name="classes" value="${esc(p.classes.join(', '))}"></label><label>1교시 시작<input name="start" type="time" value="${p.start}"></label><label>수업 시간(분)<input name="classMin" type="number" value="${p.classMin}"></label><label>쉬는 시간(분)<input name="breakMin" type="number" value="${p.breakMin}"></label><label>개발 연수 목표(시간)<input name="devTarget" type="number" value="${p.devTarget}"></label><button class="btn pri">저장</button></form>
   <h3 class="h3">오늘 게시판에 보일 줄</h3><div class="hides">${rowsT.map(([k, v]) => `<label class="chk"><input type="checkbox" data-hide="${k}" ${S.hide[k] ? '' : 'checked'}> ${v}</label>`).join('')}</div>
@@ -271,7 +273,7 @@ function render() {
   $('#chatbox').hidden = false;
   const [, page = 'today', arg] = (location.hash || '#/today').split('/');
   const body = { today: todayView, cal: calView, class: classView, budget: budgetView, notes: () => notesView(), note: () => notesView(arg), pages: () => pagesView(), page: () => pagesView(arg), lib: libView, set: setView, arch: () => archView(arg) }[page] || todayView;
-  app.innerHTML = masthead() + nav(page) + `<main>${body()}</main>` + footer();
+  app.innerHTML = masthead() + nav(page) + `<main>${body()}${typeof pageMemo === 'function' ? pageMemo(page) : ''}</main>` + footer();
   if (page === 'note') mountNote(arg);
   if (page === 'page') mountPage();
   window.scrollTo(0, y);
@@ -347,7 +349,7 @@ const A = {
   wmToggle() { S.profile.wm = S.profile.wm === false; commit(); },
   wmEdit() { ask('워터마크 글자', [{ k: 't', label: '비우면 "제목 · 이름"이 자동으로 들어갑니다', val: S.profile.wmText || '' }], o => { S.profile.wmText = (o.t || '').trim(); commit(); }, '저장'); },
   logoDel() { LOGO = ''; idb.set('logo', ''); render(); },
-  newYear() { sure('새 학년도를 시작할까요? 먼저 백업 파일을 받고, 시간표·일정·진도·평가·예산·연수·공문·업무분장·연락망을 비웁니다. 메모·페이지·서랍·자료실은 남습니다.', () => { A.backup(); ['timetable'].forEach(k => S[k] = {}); ['items', 'lessons', 'assess', 'budget', 'training', 'duties', 'mine', 'contacts'].forEach(k => S[k] = []); S.docs = {}; commit(); toast('새 학년도로 비웠습니다. 학교·교과를 확인하고 학사일정을 올려 주세요.'); }); },
+  newYear() { sure('새 학년도를 시작할까요? 먼저 백업 파일을 받고, 시간표·일정·진도·평가·예산·연수·공문·업무분장·연락망을 비웁니다. 메모·페이지·서랍·자료실은 남습니다.', () => { A.backup(); ['timetable'].forEach(k => S[k] = {}); ['items', 'lessons', 'assess', 'budget', 'training', 'duties', 'mine', 'contacts', 'docLog'].forEach(k => S[k] = []); S.docs = {}; commit(); toast('새 학년도로 비웠습니다. 학교·교과를 확인하고 학사일정을 올려 주세요.'); }); },
   backup() { download('업무파탈_백업_' + today() + '.json', JSON.stringify({ S, LIB }), 'application/json'); },
   sample() { sampleData(); },
   reset() { sure('이 기기의 모든 데이터를 지우고 처음부터 시작할까요? (되돌릴 수 없습니다)', async () => { localStorage.removeItem(KEY); await idb.del('lib'); await idb.del('mascot'); location.hash = ''; location.reload(); }); }

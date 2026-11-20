@@ -8,6 +8,7 @@ const projAlloc = p => (+p.total > 0 ? +p.total : p.lines.reduce((a, l) => a + (
 /* 1) 사이트에 들어간 모든 내용을 '조각'으로 만든다 */
 function buildChunks() {
   const cur = buildChunksCur(), out = cur.slice();
+  if (typeof schoolChunks === 'function') schoolChunks().forEach(c => out.push(c));
   ARCH.forEach(a => {
     const s0 = S, l0 = LIB;
     try { S = Object.assign(DEF(), a.S); LIB = a.LIB || []; buildChunksCur().forEach(c => out.push(Object.assign({}, c, { type: c.type, src: `[${a.label}] ${c.src}`, ref: '#/arch/' + a.id, arch: a.id }))); }
@@ -24,6 +25,9 @@ function buildChunksCur() {
   const c = []; const add = (type, src, text, ref, priv) => c.push({ type, src, text, ref, priv });
   S.duties.forEach(d => add('duty', '업무 분장표 · ' + d.dept, `${d.dept} 업무: ${d.work} / 담당: ${d.who}`, '#/lib'));
   (S.mine || []).forEach(m => add('duty', '내 업무 · ' + m.cat, `내 업무(${m.cat}): ${m.title}${m.memo ? ' / 메모: ' + m.memo : ''}${m.done ? ' (완료)' : ''}`, '#/'));
+  (S.docLog || []).forEach(x => add('doc', '공문 기록 · ' + x.date, `공문 ${x.title}: ${x.done ? '처리 완료' : '아직 처리 안 함'}${x.note ? ' · 처리 내용: ' + x.note : ''}`, '#/'));
+  Object.keys(S.pmemo || {}).forEach(k => { if ((S.pmemo[k] || '').trim()) add('note', '페이지 메모 · ' + ((PMEMO.find(p => p[0] === k) || [0, k])[1]), S.pmemo[k], '#/' + k); });
+  Object.keys(S.dayMemo || {}).forEach(k => { if ((S.dayMemo[k] || '').trim()) add('note', '캘린더 메모 · ' + k, `${k} 메모: ${S.dayMemo[k]}`, '#/cal'); });
   S.contacts.forEach(d => add('contact', '교내 연락망 · ' + d.dept, `${d.dept} ${d.name} 내선 ${d.ext || '-'} 전화 ${d.phone || '-'}`, '#/lib'));
   S.notes.forEach(n => {
     const head = `회의·연수 노트 · ${n.date} ${n.title}`;
@@ -133,6 +137,10 @@ function direct(q) {
   if (/잔액|남은\s*(돈|예산)|얼마\s*(남|썼)|예산\s*(현황|얼마)/.test(q)) {
     const t = btot();
     if (S.budget.length) out.push({ src: '예산 장부(계산)', text: `전체 배정 ${won(t.a)}원 · 집행 ${won(t.s)}원 · 잔액 ${won(t.b)}원 (집행 ${t.a ? Math.round(t.s / t.a * 100) : 0}%)`, ref: '#/budget' });
+  }
+  if (/급식|점심|중식|석식|메뉴|밥/.test(q) && typeof mealFor === 'function') {
+    const k = /모레/.test(q) ? 2 : /내일/.test(q) ? 1 : 0, d = new Date(Date.now() + k * 864e5), ds = d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()), m = mealFor(ds);
+    out.push({ src: '급식 · ' + md(ds), text: m.length ? m.map(x => `${x.kind}: ${x.dishes.map(cleanDish).join(', ')} ${x.kcal || ''}`).join(' / ') : `${md(ds)}에는 급식 자료가 없습니다(주말·방학이거나 아직 받지 못함).`, ref: '#/' });
   }
   if (/마감|기한|급한|다가오|이번\s*주/.test(q)) {
     const ev = upcoming(14);
