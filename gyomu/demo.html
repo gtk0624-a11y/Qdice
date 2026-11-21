@@ -890,6 +890,17 @@ html[data-skin="planner"] .drawer,html[data-skin="planner"] .dw{padding:6px 12px
 .dwf{flex-wrap:nowrap!important;overflow-x:auto;white-space:nowrap;gap:2px 10px!important;scrollbar-width:none}.dwf::-webkit-scrollbar{display:none}
 .dw summary{padding:2px 0!important;font-size:13px!important}
 .cp{margin-top:6px!important}
+/* v76: 업무카드 확장·예산 점검·오늘 카드·서랍 */
+.wkx{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin:4px 0}.wkst select{margin-left:4px;padding:2px 6px;border-radius:8px}.wkst.s5{opacity:.8}.wkst.s3 select,.wkst.s4 select{background:#fff3c4}
+.wkl{display:flex;gap:4px;flex-wrap:wrap;margin:4px 0}.wklg{margin:4px 0;font-size:13px}.wklg p{margin:2px 0}.wklist{max-height:50vh;overflow:auto}
+.wkmo{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;margin:8px 0}.wkmm{border:1.5px solid var(--ink,#2b2a33);border-radius:12px;padding:6px 8px;background:#fff}.wkmm.cur{background:#fff8d6}.wkmm h4{margin:0 0 4px}
+.wkmi{font-size:13.5px;padding:2px 0;border-bottom:1px dashed #ddd}.wkmi.dn{text-decoration:line-through;opacity:.55}.wkmi.gh{border:1px dashed #999;border-radius:6px;padding:2px 4px;color:#666}
+.wkbd{border:1.5px solid var(--ink,#2b2a33);border-radius:12px;padding:6px 10px;margin:6px 0;background:#fff}.wkbd summary{cursor:pointer}.wkbar{display:block;margin-top:4px}.wkbar i{display:block;height:8px;border-radius:5px;background:#e8e4d6;position:relative}.wkbar u{display:block;height:100%;border-radius:5px;background:#5fb88a;text-decoration:none}
+.bdm{display:grid;grid-template-columns:36px 1fr auto auto;gap:6px;align-items:center;margin:3px 0}.bdm i{display:block;height:10px;border-radius:5px;background:#7aa7e6}.bde{margin:6px 0;display:flex;flex-wrap:wrap;gap:6px;align-items:center}.bde input{width:130px}
+.mtw{margin-top:6px;padding-top:4px;border-top:1px dashed #bbb}.mttoday .cmal input[type=checkbox]{width:20px;height:20px;vertical-align:middle}.mttoday .dn{text-decoration:line-through;opacity:.6}
+.ypsig{font-size:12px;margin-right:4px}.ypsig.r{color:#e5484d}.ypsig.o{color:#f08c00}.ypsig.y{color:#e6c200}.ypsig.g{color:#2fa56b}
+/* 서랍: 한 줄로 */
+.dw{display:flex!important;flex-wrap:wrap!important;align-items:center!important;gap:2px 8px!important;margin-top:6px!important;padding:2px 0!important}.dw .dwf{flex:1 1 0;min-width:0}.dw details{flex:0 0 auto}.dw details[open]{flex-basis:100%}.dw summary{padding:0!important;font-size:12px!important}.dw .dwf b{font-size:12px!important}.cp{font-size:11px!important;margin:2px 0!important}
 </style>
 </head>
 <body>
@@ -1507,7 +1518,7 @@ const lessonPct = l => (+l.total ? Math.round(+l.done / +l.total * 100) : 0);
 /* ---------- 목록 설정 (추가·수정 대화상자 공통) ---------- */
 const CFG = {
   duties: { t: '업무 분장', f: i => [{ k: 'dept', label: '부서', val: i.dept, req: 1 }, { k: 'work', label: '업무', val: i.work, req: 1 }, { k: 'who', label: '담당자', val: i.who }, { k: 'mine', label: '내 업무인가요?', type: 'select', opts: ['아니오', '예'], val: i.mine ? '예' : '아니오' }], from: o => ({ dept: o.dept, work: o.work, who: o.who, mine: o.mine === '예' }) },
-  contacts: { t: '연락처', f: i => [{ k: 'dept', label: '부서', val: i.dept }, { k: 'name', label: '이름', val: i.name, req: 1 }, { k: 'ext', label: '내선', val: i.ext }, { k: 'phone', label: '전화(선택)', val: i.phone }], from: o => ({ dept: o.dept, name: o.name, ext: o.ext, phone: o.phone }) },
+  contacts: { t: '연락처', f: i => [{ k: 'dept', label: '부서', val: i.dept }, { k: 'name', label: '이름', val: i.name, req: 1 }, { k: 'ext', label: '내선', val: i.ext }, { k: 'phone', label: '전화(선택)', val: i.phone }, { k: 'memo', label: '최근 연락(날짜·용건 한 줄)', val: i.memo || '' }], from: o => ({ dept: o.dept, name: o.name, ext: o.ext, phone: o.phone, memo: o.memo || '' }) },
   training: { t: '연수', f: i => [{ k: 'title', label: '연수 이름', val: i.title, req: 1 }, { k: 'type', label: '종류', type: 'select', opts: ['필수', '개발'], val: i.type || '필수' }, { k: 'hours', label: '시간', type: 'number', val: i.hours ?? 1 }, { k: 'due', label: '기한(선택)', type: 'date', val: i.due }, { k: 'done', label: '이수 여부', type: 'select', opts: ['미이수', '이수'], val: i.done ? '이수' : '미이수' }, { k: 'certNo', label: '이수번호 (다 들은 뒤 입력)', val: i.certNo }, { k: 'doneDate', label: '이수일', type: 'date', val: i.doneDate }], from: o => ({ title: o.title, type: o.type, hours: +o.hours || 0, due: o.due, done: o.done === '이수', certNo: (o.certNo || '').trim(), doneDate: o.doneDate }) },
   assess: { t: '수행평가', f: i => [{ k: 'title', label: '평가 이름', val: i.title, req: 1 }, { k: 'grade', label: '학년(예: 2학년)', val: i.grade }, { k: 'due', label: '성적 입력 기한', type: 'date', val: i.due }, { k: 'step', label: '진행 단계', type: 'select', opts: ASSESS_STEPS, val: ASSESS_STEPS[i.step || 0] }], from: o => ({ title: o.title, grade: o.grade, due: o.due, step: ASSESS_STEPS.indexOf(o.step) }) },
   lessons: { t: '수업 진도', f: i => [{ k: 'cls', label: '반', type: 'select', opts: S.profile.classes, val: i.cls }, { k: 'unit', label: '단원', val: i.unit, req: 1 }, { k: 'done', label: '나간 차시', type: 'number', val: i.done ?? 0 }, { k: 'total', label: '전체 차시', type: 'number', val: i.total ?? 10 }], from: o => ({ cls: o.cls, unit: o.unit, done: +o.done || 0, total: +o.total || 0 }) },
@@ -1615,7 +1626,7 @@ function todayView() {
     const hrs = f => S.training.filter(f).reduce((q, x) => q + (+x.hours || 0), 0), totH = hrs(x => x.done), reqH = hrs(x => x.done && x.type === '필수');
     const P = S.profile, bar = (lab, v, t) => `<span>${lab} ${v}시간${t ? ` / 목표 ${t}시간 (${Math.min(100, Math.round(v / t * 100))}%)` : ''}</span>${t ? `<i style="--p:${Math.min(100, Math.round(v / t * 100))}%"></i>` : ''}`;
     const sum = `<div class="trsum"><b>이수한 연수 합계 ${totH}시간${P.totTarget ? ` / 목표 ${P.totTarget}시간` : ''}</b>${bar('필수', reqH, P.reqTarget)}${bar('개발', dev, P.devTarget)}${P.totTarget ? bar('전체', totH, P.totTarget) : ''}<button class="btn sm" data-act="trTarget">🎯 목표 시간 정하기</button></div>`;
-    const b = sum + S.training.map(x => `<div class="tr ${x.done ? 'dn' : ''}"><button class="ck" data-act="trToggle" data-id="${x.id}" aria-pressed="${!!x.done}" aria-label="이수 표시"></button><span class="tl">${esc(x.title)}<br><span class="mu">${x.type} ${x.hours}시간 ${x.due ? '· 기한 ' + md(x.due) : ''}${x.done && x.doneDate ? ' · 이수일 ' + md(x.doneDate) : ''}</span></span>${x.done ? `<input class="cert" data-cert="${x.id}" value="${esc(x.certNo || '')}" placeholder="이수번호 입력" aria-label="${esc(x.title)} 이수번호">` : '<span class="mu">다 들으면 이수번호 입력</span>'}<button class="x" data-act="edit_training" data-id="${x.id}">수정</button>${xbtn('del_training', x.id)}</div>`).join('') + `<button class="btn sm" data-act="add_training">+ 연수 추가</button>` + (typeof trSitesHtml === 'function' ? trSitesHtml() : '');
+    const b = sum + S.training.map(x => `<div class="tr ${x.done ? 'dn' : ''}"><button class="ck" data-act="trToggle" data-id="${x.id}" aria-pressed="${!!x.done}" aria-label="이수 표시"></button><span class="tl">${esc(x.title)}<br><span class="mu">${x.type} ${x.hours}시간 ${x.due ? '· 기한 ' + md(x.due) : ''}${x.apply && !x.done ? ' · 신청마감 ' + md(x.apply) : ''}${x.done && x.doneDate ? ' · 이수일 ' + md(x.doneDate) : ''}${x.note ? '<br>📝 ' + esc(x.note) : ''}</span></span>${x.done ? `<input class="cert" data-cert="${x.id}" value="${esc(x.certNo || '')}" placeholder="이수번호 입력" aria-label="${esc(x.title)} 이수번호">` : '<span class="mu">다 들으면 이수번호 입력</span>'}<button class="x" data-act="trNote" data-id="${x.id}">소감·신청일</button><button class="x" data-act="edit_training" data-id="${x.id}">수정</button>${xbtn('del_training', x.id)}</div>`).join('') + `<button class="btn sm" data-act="add_training">+ 연수 추가</button><button class="btn sm" data-act="trLegal">📋 법정 의무연수 목록 넣기</button><button class="btn sm" data-act="trReport">📄 이수 내역 내보내기</button>` + (typeof trSitesHtml === 'function' ? trSitesHtml() : '');
     rows.push(row('r7', '연수', '연수 이수', `이수 합계 ${totH}시간 · 필수 ${rd}/${req.length} · 개발 ${dev}/${S.profile.devTarget}시간${S.profile.totTarget ? ` · 전체 ${totH}/${S.profile.totTarget}시간` : ''}${noNo ? ` · <span class="hot">이수번호 미입력 ${noNo}</span>` : ''}`, left ? md(left.due) + ' ' + ddText(dd(left.due)) : '', b));
   }
   /* 기록 */
@@ -2851,7 +2862,7 @@ function contactTable(C) {
   if (!C.length) return '<p class="mu">연락망이 없습니다. 아래에서 표 파일로 한 번에 넣거나 한 줄씩 추가하세요.</p>';
   const g = {}; C.forEach(c => (g[c.dept || '(부서 없음)'] = g[c.dept || '(부서 없음)'] || []).push(c));
   const tel = s => /\d/.test(s || '') ? `<a href="tel:${esc(String(s).replace(/[^\d+]/g, ''))}">${esc(s)}</a>` : esc(s || '');
-  return `<div class="ctw"><table class="tbl ctb"><thead><tr><th>부서</th><th>이름</th><th>내선</th><th>전화</th><th></th></tr></thead><tbody>${Object.keys(g).sort((a, b) => a.localeCompare(b, 'ko')).map(dp => `<tr class="dg"><th colspan="5">${esc(dp)} <span class="mu">${g[dp].length}명</span></th></tr>` + g[dp].map(c => `<tr><td class="dpn">${esc(c.dept)}</td><td><b>${esc(c.name)}</b></td><td>${tel(c.ext)}</td><td>${tel(c.phone)}</td><td class="act"><button class="x" data-act="edit_contacts" data-id="${c.id}">수정</button>${xbtn('del_contacts', c.id)}</td></tr>`).join('')).join('')}</tbody></table></div>`;
+  return `<div class="ctw"><table class="tbl ctb"><thead><tr><th>부서</th><th>이름</th><th>내선</th><th>전화</th><th></th></tr></thead><tbody>${Object.keys(g).sort((a, b) => a.localeCompare(b, 'ko')).map(dp => `<tr class="dg"><th colspan="5">${esc(dp)} <span class="mu">${g[dp].length}명</span></th></tr>` + g[dp].map(c => `<tr><td class="dpn">${esc(c.dept)}</td><td><b>${esc(c.name)}</b>${c.memo ? `<br><small class="mu">📞 ${esc(c.memo)}</small>` : ''}</td><td>${tel(c.ext)}</td><td>${tel(c.phone)}</td><td class="act"><button class="x" data-act="edit_contacts" data-id="${c.id}">수정</button>${xbtn('del_contacts', c.id)}</td></tr>`).join('')).join('')}</tbody></table></div>`;
 }
 
 /* 꿈송이 비서 모드(자비스처럼): 말로 시키면 일정·할 일·업무·예산·회의기록을 정리해 넣는다.
@@ -5278,7 +5289,7 @@ buildChunks = function () {
 };
 
 /* 화면 맨 아래에 버전 표시 — 옛 화면을 보고 있는지 바로 알 수 있게 */
-const TF_VER = 'v75', _cmFt = footer;
+const TF_VER = 'v76', _cmFt = footer;
 footer = function () { return _cmFt.apply(this, arguments).replace('</footer>', ` · <span class="mu">버전 ${TF_VER} (학급 관리 포함)</span></footer>`); };
 
 /* 새 버전 알림: 옛 화면이 남아 있으면 한 번 눌러 새로 받게 함 */
@@ -5330,7 +5341,7 @@ function ypView() {
   const late = items.filter(x => !x.ok && dd(x.d) !== null && dd(x.d) < 0).length;
   const roll = Y.year !== sy ? `<div class="ypbn">📅 이 표는 <b>${Y.year}학년도</b> 것입니다. 지금은 ${sy}학년도예요. <button class="btn sm pri" data-act="ypRoll">${sy}학년도로 넘기기</button> <span class="mu">줄(틀)은 그대로 두고 날짜·실시 표시만 비웁니다. 지난해 표는 보관됩니다.</span></div>` : '';
   const head = `<tr><th rowspan="2" class="ypn">교육·훈련·행사</th><th colspan="4" class="yph1">1학기</th><th colspan="4" class="yph2">2학기</th><th rowspan="2" class="ypx"></th></tr><tr>${YP_COLS.map(c => `<th class="yps">${c[2]}</th>`).join('')}</tr>`;
-  const body = Y.rows.map(r => `<tr><th class="ypn"><b>${esc(r.name)}</b>${r.rule ? `<small>${esc(r.rule)}</small>` : ''}</th>${YP_COLS.map(c => { const v = (r.cells || {})[c[0]], over = v && v.d && !v.ok && dd(v.d) !== null && dd(v.d) < 0; return `<td><button class="ypc ${v ? (v.ok ? 'ok' : over ? 'late' : 'set') : ''}" data-act="ypCell" data-id="${r.id}" data-k="${c[0]}" aria-label="${esc(r.name)} ${c[1]} ${c[2]}">${v ? (v.ok ? '✔ ' : '') + ypCellTxt(v) || '·' : '＋'}</button></td>`; }).join('')}<td class="ypx"><button class="x" data-act="ypRowEdit" data-id="${r.id}">수정</button><button class="x" data-act="ypRowDel" data-id="${r.id}" aria-label="${esc(r.name)} 삭제">✕</button></td></tr>`).join('');
+  const body = Y.rows.map(r => `<tr><th class="ypn">${typeof ypSig === 'function' ? ypSig(r) : ''}<b>${esc(r.name)}</b>${r.rule ? `<small>${esc(r.rule)}</small>` : ''}</th>${YP_COLS.map(c => { const v = (r.cells || {})[c[0]], over = v && v.d && !v.ok && dd(v.d) !== null && dd(v.d) < 0; return `<td><button class="ypc ${v ? (v.ok ? 'ok' : over ? 'late' : 'set') : ''}" data-act="ypCell" data-id="${r.id}" data-k="${c[0]}" aria-label="${esc(r.name)} ${c[1]} ${c[2]}">${v ? (v.ok ? '✔ ' : '') + ypCellTxt(v) || '·' : '＋'}</button></td>`; }).join('')}<td class="ypx"><button class="x" data-act="ypRowEdit" data-id="${r.id}">수정</button><button class="x" data-act="ypRowDel" data-id="${r.id}" aria-label="${esc(r.name)} 삭제">✕</button></td></tr>`).join('');
   return `<div class="bh"><h2>연간 교육·훈련</h2><span class="mu">매년 되풀이되는 연수·교육·훈련·행사를 한 표로. 칸을 누르면 예정일·실시 여부·참석 인원을 적습니다. 이름 명단은 넣지 않고 <b>인원수·증빙 파일</b>만 남깁니다.</span></div>${roll}
   <div class="hpcard ypsum"><b>${Y.year}학년도</b> · 날짜 있는 항목 ${items.length}건 · 실시 완료 ${done}건${late ? ` · <span class="hot">날짜 지남 ${late}건</span>` : ''}${nxt.length ? `<div class="ypnx">${nxt.map(x => `<span class="chp k-연수">${md(x.d)} ${esc(x.name)} <small>${esc(x.col)}</small> ${ddText(dd(x.d))}</span>`).join(' ')}</div>` : ''}</div>
   <div class="tools"><button class="btn sm pri" data-act="ypAdd">+ 줄 추가</button><button class="btn sm" data-act="ypPre">📋 법정·필수 교육 예시 줄 넣기</button><button class="btn sm" data-act="ypPaste">📥 붙여넣어 가져오기</button><label class="btn sm file">📂 엑셀·CSV 가져오기<input type="file" id="ypFile" accept=".csv,.tsv,.txt,.xlsx,.xls" hidden></label><button class="btn sm" data-act="ypMine">🏫 곡선중 2026 표 불러오기</button><button class="btn sm" data-act="ypCsv">⬇ 엑셀용 내려받기</button></div>
@@ -5748,6 +5759,266 @@ document.addEventListener('keydown', e => {
   if (t.id === 'qaIn') { e.preventDefault(); A.qaGo(); }
   else if (t.dataset && t.dataset.wkadd) { e.preventDefault(); const r = qaParse(t.value); if (!r) return; const ds = t.dataset.wkadd; const it = { id: uid(), title: (r.time ? r.time + ' ' : '') + r.title, date: ds, cat: r.cat, done: false }; if (r.rep) it.rep = r.rep; S.items.push(it); commit(); }
 });
+
+/* 내 업무 카드 확장: 해마다 되풀이 · 연결 붙이기 · 월별 보기 · 인수인계서 · 진행 단계 · 배정판 · 기한 임박 알림 · 일지.
+   카드 필드 추가: stage(0~5), cd(만든 날), sd(마지막 손댄 날), log[{d,t}], links[{label,ref}], tplId.  S.wk.tpl = 해마다 되풀이 업무 [{id,title,dept,who,me,memo,steps[],md:'MM-DD'}] */
+const WK_ST = ['접수', '계획', '품의', '실행', '정산', '완료'];
+const wkTpl = () => { const w = wkD(); w.tpl = w.tpl || []; return w.tpl; };
+const wkN = c => { c.cd = c.cd || today(); c.log = c.log || []; c.links = c.links || []; if (c.stage == null) c.stage = c.done ? 5 : 0; return c; };
+const wkDaysAgo = d => Math.round((new Date(today() + 'T00:00:00') - new Date(d + 'T00:00:00')) / 864e5);
+const wkStalled = () => wkD().cards.map(wkN).filter(c => !c.done && wkDaysAgo(c.sd || c.cd) >= 14);
+const wkById = id => wkD().cards.find(x => x.id === id);
+const wkTplDue = t => { if (!t.md) return ''; const sy = schoolYearNow(), m = +t.md.slice(0, 2); return `${m >= 3 ? sy : sy + 1}-${t.md}`; };
+const wkTplHas = t => wkD().cards.some(c => c.src === 'tpl:' + t.id + ':' + schoolYearNow());
+function wkFromTpl(t) { return wkN({ id: uid(), title: t.title, dept: t.dept || '', who: t.who || '', me: t.me !== false, memo: t.memo || '', due: wkTplDue(t), done: false, steps: (t.steps || []).map(x => ({ t: x, d: false })), src: 'tpl:' + t.id + ':' + schoolYearNow(), tplId: t.id }); }
+
+/* ---- 카드 한 장 ---- */
+const _wk2Card = wkCard;
+wkCard = function (c) {
+  wkN(c); let h = _wk2Card(c);
+  const idle = !c.done && wkDaysAgo(c.sd || c.cd) >= 14;
+  const st = `<div class="wkx"><label class="wkst s${c.stage}">진행 <select data-wkstage="${c.id}" aria-label="진행 단계">${WK_ST.map((s, i) => `<option value="${i}" ${c.stage === i ? 'selected' : ''}>${s}</option>`).join('')}</select></label>${c.tplId ? '<span class="chp k-일정">↻ 해마다</span>' : ''}${idle ? `<span class="chp hot">${wkDaysAgo(c.sd || c.cd)}일째 멈춤</span>` : ''}</div>`;
+  const lk = c.links.length ? `<div class="wkl">${c.links.map((l, i) => `<span class="chp"><a href="${esc(l.ref)}">🔗 ${esc(l.label)}</a> <button class="x" data-act="wkLinkDel" data-id="${c.id}" data-i="${i}" aria-label="연결 떼기">✕</button></span>`).join('')}</div>` : '';
+  const lg = `<details class="wklg"><summary>📒 일지 ${c.log.length}건${c.log.length ? ' · 최근 ' + md(c.log[0].d) : ''}</summary>${c.log.slice(0, 30).map(x => `<p><small class="mu">${md(x.d)}</small> ${esc(x.t)}</p>`).join('') || '<p class="mu">「✍ 오늘 한 일」로 한 줄씩 쌓으면 업무 일지가 됩니다.</p>'}</details>`;
+  h = h.replace('<textarea data-wkmemo', st + lk + lg + '<textarea data-wkmemo');
+  h = h.replace('<button class="btn sm" data-act="wkEdit"', `<button class="btn sm" data-act="wkLog" data-id="${c.id}">✍ 오늘 한 일</button><button class="btn sm" data-act="wkLink" data-id="${c.id}">🔗 연결</button><button class="btn sm" data-act="wkTplSave" data-id="${c.id}">↻ 해마다</button><button class="btn sm" data-act="wkEdit"`);
+  return h;
+};
+
+/* ---- 새 탭 4개 ---- */
+function wkYr() {
+  const T = wkTpl().slice().sort((a, b) => (a.md || '99').localeCompare(b.md || '99')), todoN = T.filter(t => !wkTplHas(t)).length, mineN = wkD().cards.filter(c => c.me && !c.tplId).length;
+  return `<div class="tools"><button class="btn pri" data-act="wkTplAdd">+ 되풀이 업무 추가</button><button class="btn" data-act="wkTplAll" ${todoN ? '' : 'disabled'}>⚡ 올해 카드 한 번에 만들기 (${todoN}건)</button><button class="btn" data-act="wkTplFromCards" ${mineN ? '' : 'disabled'}>내 카드 ${mineN}장을 해마다 업무로 저장</button></div>
+  <p class="mu">매년 되풀이되는 업무의 틀(단계·보통 하는 시기)을 저장해 두고, 새 학년도에 한 번에 카드로 만듭니다. 날짜는 올해 학년도(3월~다음해 2월)에 맞춰 자동으로 들어갑니다.</p>
+  ${T.map(t => `<div class="wkc"><div class="wkh"><b class="wkt">${esc(t.title)}</b></div><div class="wkm">${t.dept ? `<span class="chp k-학사">${esc(t.dept)}</span>` : ''}<span class="chp k-할">${t.md ? '보통 ' + t.md.replace('-', '월 ') + '일' : '시기 미정'}</span>${(t.steps || []).length ? `<span class="mu">할 일 ${t.steps.length}개</span>` : ''}${wkTplHas(t) ? '<span class="chp k-일정">올해 카드 있음</span>' : ''}</div><div class="wkb"><button class="btn sm pri" data-act="wkTplUse" data-id="${t.id}" ${wkTplHas(t) ? 'disabled' : ''}>올해 카드 만들기</button><button class="btn sm" data-act="wkTplDel" data-id="${t.id}">삭제</button></div></div>`).join('') || '<p class="mu">아직 없습니다. 카드의 [↻ 해마다] 버튼으로 저장하거나 위 [+ 되풀이 업무 추가]를 누르세요.</p>'}`;
+}
+function wkMo() {
+  const sy = schoolYearNow(), ms = [3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 1, 2], C = wkD().cards.map(wkN).filter(c => c.me), now = today().slice(0, 7);
+  const none = C.filter(c => !c.due), tpls = wkTpl().filter(t => t.md && !wkTplHas(t));
+  const col = m => {
+    const y = m >= 3 ? sy : sy + 1, key = `${y}-${pad(m)}`, L = C.filter(c => (c.due || '').slice(0, 7) === key).sort((a, b) => a.due.localeCompare(b.due)), G = tpls.filter(t => +t.md.slice(0, 2) === m);
+    return `<div class="wkmm ${key === now ? 'cur' : ''}"><h4>${m}월 <small class="mu">${y}</small></h4>${L.map(c => `<div class="wkmi ${c.done ? 'dn' : ''}"><b>${+c.due.slice(8)}일</b> ${esc(c.title)} <small class="mu">${WK_ST[c.stage]}</small></div>`).join('')}${G.map(t => `<div class="wkmi gh">↻ ${+t.md.slice(3)}일 ${esc(t.title)} <small class="mu">예정</small></div>`).join('')}${L.length + G.length ? '' : '<p class="mu">—</p>'}</div>`;
+  };
+  return `<p class="mu">내 업무 카드의 기한을 학년도(3월~2월) 순서로 펼쳤습니다. 점선은 해마다 업무인데 올해 카드가 아직 없는 것입니다.</p><div class="wkmo">${ms.map(col).join('')}</div>${none.length ? `<h4 class="dlh">기한 없는 카드 <small class="mu">${none.length}건</small></h4><div class="wkmo">${none.slice(0, 40).map(c => `<div class="wkmi ${c.done ? 'dn' : ''}">${esc(c.title)}</div>`).join('')}</div>` : ''}`;
+}
+function wkBd() {
+  const me = wkMe() || '나', g = {}; wkD().cards.map(wkN).forEach(c => { const o = c.me ? [me] : (wkTokens(c.who).length ? wkTokens(c.who) : [c.who || '미정']); o.forEach(n => (g[n] = g[n] || []).push(c)); });
+  const names = Object.keys(g).sort((a, b) => g[b].length - g[a].length), mx = Math.max(1, ...names.map(n => g[n].length));
+  return `<p class="mu">업무분장표의 담당자 이름 기준으로 카드 수와 진행 상황을 봅니다. 학생 명단이 아니라 업무 담당자 이름만 씁니다.</p>${names.map(n => { const L = g[n], dn = L.filter(c => c.done).length, soon = L.filter(c => !c.done && c.due && dd(c.due) !== null && dd(c.due) <= 7).length; return `<details class="wkbd"><summary><b>${esc(n)}</b> <span class="mu">${L.length}건 · 완료 ${dn}${soon ? ` · <span class="hot">7일 내 ${soon}</span>` : ''}</span><span class="wkbar"><i style="width:${Math.round(L.length / mx * 100)}%"><u style="width:${L.length ? Math.round(dn / L.length * 100) : 0}%"></u></i></span></summary>${L.map(c => `<div class="wkmi ${c.done ? 'dn' : ''}">${esc(c.title)} <small class="mu">${esc(c.dept || '')} ${WK_ST[c.stage]}${c.due ? ' · ' + md(c.due) : ''}</small></div>`).join('')}</details>`; }).join('') || '<p class="mu">카드가 없습니다.</p>'}`;
+}
+function wkSt() { const L = wkStalled(); return `<p class="mu">완료되지 않았는데 14일 넘게 손대지 않은 카드입니다(단계 변경·일지·메모 쓰기로 다시 움직이면 빠집니다).</p><div class="wkg">${L.map(wkCard).join('') || '<p class="mu">멈춘 카드가 없습니다. 👍</p>'}</div>`; }
+
+const _wk2View = workView;
+workView = function () {
+  const tab = UI.wkTab, SP = ['yr', 'mo', 'bd', 'st'], sp = SP.includes(tab); wkD().cards.forEach(wkN);
+  UI.wkTab = sp ? 'me' : tab; let h; try { h = _wk2View.apply(this, arguments); } finally { UI.wkTab = tab; }
+  const tb = [['yr', `↻ 해마다 ${wkTpl().length}`], ['mo', '📅 월별'], ['bd', '👥 배정판'], ['st', `⏳ 멈춘 카드 ${wkStalled().length}`]].map(([k, v]) => `<button class="cmtab ${tab === k ? 'on' : ''}" data-act="wkTabSet" data-k="${k}">${v}</button>`).join('');
+  h = h.replace('data-act="wkWipe">🗑 분장표 통째로 지우기</button>', 'data-act="wkWipe">🗑 분장표 통째로 지우기</button><button class="btn" data-act="wkHand">📄 인수인계서</button>');
+  const i = h.indexOf('<div class="cmtabs">'); if (i < 0) return h; const j = h.indexOf('</div>', i);
+  let head = h.slice(0, j); if (sp) head = head.replace(/cmtab on/g, 'cmtab'); head += tb + '</div>';
+  const rest = h.slice(j + 6); if (!sp) return head + rest;
+  const trash = (rest.match(/<details class="dlold">[\s\S]*<\/details>/) || [''])[0];
+  return head + ({ yr: wkYr, mo: wkMo, bd: wkBd, st: wkSt })[tab]() + trash;
+};
+
+/* ---- 동작 ---- */
+function wkLinkCands() {
+  const o = []; S.budget.forEach(p => p.lines.forEach(l => o.push({ label: `예산 ${p.name} › ${l.item}`, ref: '#/budget' })));
+  S.notes.filter(n => !n.lock).slice(-60).reverse().forEach(n => o.push({ label: `노트 ${n.date} ${n.title}`, ref: '#/note/' + n.id }));
+  ((S.yp || {}).rows || []).forEach(r => o.push({ label: `연수표 ${r.name}`, ref: '#/yp' }));
+  (LIB || []).forEach(d => o.push({ label: `자료 ${d.name}`, ref: '#/lib' }));
+  (S.docLog || []).slice(-40).reverse().forEach(x => o.push({ label: `공문 ${x.title}`, ref: '#/' }));
+  return o;
+}
+Object.assign(A, {
+  wkTog(el) { const c = wkById(el.dataset.id); if (!c) return; wkN(c); c.done = !c.done; c.stage = c.done ? 5 : (c.stage === 5 ? 3 : c.stage); c.sd = today(); commit(); },
+  wkLog(el) { const c = wkById(el.dataset.id); if (!c) return; ask('오늘 한 일 (한 줄)', [{ k: 't', label: `「${c.title}」`, req: 1 }], o => { wkN(c).log.unshift({ d: today(), t: o.t.trim() }); c.sd = today(); commit(); toast('일지에 적었습니다.'); }, '적기'); },
+  wkLinkDel(el) { const c = wkById(el.dataset.id); if (c && c.links) { c.links.splice(+el.dataset.i, 1); commit(); } },
+  wkLink(el) {
+    const c = wkById(el.dataset.id); if (!c) return; wkN(c); const L = wkLinkCands(); if (!L.length) { toast('연결할 예산·노트·연수표·자료가 아직 없습니다.'); return; }
+    let d = document.getElementById('wklk'); if (d) d.remove(); d = document.createElement('dialog'); d.id = 'wklk'; d.className = 'dlg wide'; document.body.appendChild(d);
+    d.innerHTML = `<h3>「${esc(c.title)}」에 연결</h3><p class="mu">관련 예산·회의 노트·연수표·자료·공문을 골라 붙이면 카드에서 바로 열립니다.</p><div class="wklist">${L.slice(0, 200).map((x, i) => `<label class="cmr chk"><input type="checkbox" data-lk="${i}" ${c.links.some(y => y.label === x.label) ? 'checked' : ''}> <span>${esc(x.label)}</span></label>`).join('')}</div><div class="tools"><button class="btn pri" id="lkok">붙이기</button><button class="btn" id="lkx">닫기</button></div>`;
+    d.querySelector('#lkx').onclick = () => d.close();
+    d.querySelector('#lkok').onclick = () => { c.links = L.slice(0, 200).filter((x, i) => d.querySelector(`[data-lk="${i}"]`).checked).map(x => ({ label: x.label, ref: x.ref })); c.sd = today(); d.close(); commit(); };
+    d.showModal();
+  },
+  wkTplSave(el) { const c = wkById(el.dataset.id); if (!c) return; ask('해마다 되풀이 업무로 저장', [{ k: 'due', label: '보통 언제까지 하는 업무인가요? (날짜를 고르면 매년 같은 월·일로 카드가 만들어집니다)', type: 'date', val: c.due || '' }], o => { const t = { id: uid(), title: c.title, dept: c.dept || '', who: c.who || '', me: !!c.me, memo: '', steps: (c.steps || []).map(s => s.t), md: o.due ? o.due.slice(5) : '' }; const T = wkTpl(), k = T.findIndex(x => x.title === t.title); if (k >= 0) { t.id = T[k].id; T[k] = t; } else T.push(t); c.tplId = t.id; commit(); toast('해마다 업무에 저장했습니다. [↻ 해마다] 탭에서 다음 학년도에 한 번에 만들 수 있어요.'); }, '저장'); },
+  wkTplAdd() { ask('되풀이 업무 추가', [{ k: 'title', label: '업무 이름', req: 1 }, { k: 'dept', label: '부서·영역' }, { k: 'due', label: '보통 하는 시기 (날짜 하나 고르면 월·일만 씁니다)', type: 'date' }, { k: 'steps', label: '할 일 단계 (한 줄에 하나)', type: 'textarea', rows: 4 }], o => { wkTpl().push({ id: uid(), title: o.title.trim(), dept: (o.dept || '').trim(), who: '', me: true, memo: '', steps: String(o.steps || '').split('\n').map(x => x.trim()).filter(Boolean), md: o.due ? o.due.slice(5) : '' }); commit(); }, '추가'); },
+  wkTplUse(el) { const t = wkTpl().find(x => x.id === el.dataset.id); if (!t || wkTplHas(t)) return; wkD().cards.push(wkFromTpl(t)); commit(); toast('올해 카드를 만들었습니다.'); },
+  wkTplAll() { const L = wkTpl().filter(t => !wkTplHas(t)); if (!L.length) return; L.forEach(t => wkD().cards.push(wkFromTpl(t))); commit(); toast(`올해 카드 ${L.length}장을 만들었습니다. [되돌리기]로 취소할 수 있어요.`); },
+  wkTplDel(el) { sure('이 되풀이 업무를 지울까요? (이미 만든 카드는 그대로 둡니다)', () => { const w = wkD(); w.tpl = wkTpl().filter(x => x.id !== el.dataset.id); commit(); }); },
+  wkTplFromCards() { const T = wkTpl(); let n = 0; wkD().cards.filter(c => c.me && !c.tplId).forEach(c => { if (T.some(t => t.title === c.title)) return; const t = { id: uid(), title: c.title, dept: c.dept || '', who: '', me: true, memo: '', steps: (c.steps || []).map(s => s.t), md: c.due ? c.due.slice(5) : '' }; T.push(t); c.tplId = t.id; n++; }); commit(); toast(`${n}건을 해마다 업무로 저장했습니다.`); },
+  wkHand() {
+    const me = wkMe(), C = wkD().cards.map(wkN).filter(c => c.me), g = {}; C.forEach(c => (g[c.dept || '기타'] = g[c.dept || '기타'] || []).push(c));
+    const T = wkTpl().slice().sort((a, b) => (a.md || '99').localeCompare(b.md || '99'));
+    const html = `<html><meta charset="utf-8"><body style="font-family:'맑은 고딕',sans-serif;line-height:1.6"><h1>업무 인수인계서</h1><p>작성일 ${today()} · 작성자 ${esc(me)} · ${esc(S.profile.school || '')}</p>
+<h2>1. 해마다 되풀이되는 업무 시기</h2>${T.length ? `<table border="1" cellspacing="0" cellpadding="4" style="border-collapse:collapse"><tr><th>시기</th><th>업무</th><th>부서</th><th>할 일</th></tr>${T.map(t => `<tr><td>${t.md ? t.md.replace('-', '월 ') + '일경' : '미정'}</td><td>${esc(t.title)}</td><td>${esc(t.dept || '')}</td><td>${esc((t.steps || []).join(' → '))}</td></tr>`).join('')}</table>` : '<p>저장된 되풀이 업무가 없습니다.</p>'}
+<h2>2. 업무별 진행·메모</h2>${Object.keys(g).map(d => `<h3>${esc(d)}</h3>${g[d].map(c => `<h4>${esc(c.title)}</h4><p>진행: ${WK_ST[c.stage]}${c.due ? ' · 기한 ' + c.due : ''}${c.done ? ' · 완료' : ''}</p>${(c.steps || []).length ? `<ul>${c.steps.map(s => `<li>${s.d ? '✔' : '□'} ${esc(s.t)}</li>`).join('')}</ul>` : ''}${c.memo ? `<p>메모: ${esc(c.memo).replace(/\n/g, '<br>')}</p>` : ''}${c.links.length ? `<p>관련 기록: ${c.links.map(l => esc(l.label)).join(' / ')}</p>` : ''}${c.log.length ? `<p>최근 일지:<br>${c.log.slice(0, 5).map(x => `${x.d} ${esc(x.t)}`).join('<br>')}</p>` : ''}`).join('')}`).join('') || '<p>내 업무 카드가 없습니다.</p>'}
+<p style="color:#888">※ 업무파탈에서 자동으로 만든 문서입니다. 내용을 확인한 뒤 전달하세요.</p></body></html>`;
+    download('업무인수인계서_' + today() + '.doc', html, 'application/msword'); toast('인수인계서(.doc)를 내려받았습니다.');
+  }
+});
+document.addEventListener('change', e => {
+  const t = e.target; if (!t || !t.dataset || !t.dataset.wkstage) return; const c = wkById(t.dataset.wkstage); if (!c) return;
+  c.stage = +t.value; c.done = c.stage === 5; c.sd = today(); commit();
+});
+document.addEventListener('input', e => { const t = e.target; if (t && t.dataset && t.dataset.wkmemo) { const c = wkById(t.dataset.wkmemo); if (c) c.sd = today(); } });
+
+/* ---- 오늘 화면: 업무 카드 기한 임박 ---- */
+const wkInject = () => {
+  const main = document.querySelector('#app main'); if (!main || !S.setup) return; const ex = main.querySelector('.wktoday'), isT = /^#\/(today)?$/.test(location.hash) || !location.hash; if (ex) ex.remove(); if (!isT || (S.navHide || []).includes('work')) return;
+  const L = wkD().cards.filter(c => c.me && !c.done && c.due && dd(c.due) !== null && dd(c.due) <= 3).sort((a, b) => a.due.localeCompare(b.due)); if (!L.length) return;
+  const d = document.createElement('div'); d.className = 'hpcard wktoday'; d.innerHTML = `<b>⏰ 업무 카드 기한 임박</b> <a class="btn sm" href="#/work">내 업무 ▶</a>${L.slice(0, 6).map(c => `<div class="cmal">${dd(c.due) < 0 ? '<span class="hot">기한 지남</span>' : ddText(dd(c.due))} · ${md(c.due)} ${esc(c.title)} <small class="mu">${WK_ST[wkN(c).stage]}</small> <button class="x" data-act="wkTog" data-id="${c.id}">완료</button></div>`).join('')}`;
+  const a = main.querySelector('.yptoday') || main.querySelector('.cmtoday') || main.querySelector('.hpcard') || main.querySelector('.cheer'); if (a) a.after(d); else main.prepend(d);
+};
+const _wk2R = TF.render; TF.render = function () { const v = _wk2R.apply(this, arguments); wkInject(); return v; };
+(function () { const app = document.getElementById('app'); if (!app) return; let t = 0; new MutationObserver(() => { if (t) return; t = setTimeout(() => { t = 0; try { wkInject(); } catch (e) { } }, 0); }).observe(app, { childList: true }); })();
+
+/* ---- 꿈송이 검색: 일지·진행단계·해마다 업무 ---- */
+const _wk2Bc = buildChunks;
+buildChunks = function () {
+  const out = _wk2Bc.apply(this, arguments);
+  wkD().cards.map(wkN).forEach(c => { if (c.log.length) out.push({ type: 'duty', src: '업무 일지 · ' + c.title, text: `${c.title} 일지: ` + c.log.slice(0, 10).map(x => `${x.d} ${x.t}`).join(' / '), ref: '#/work' }); out.push({ type: 'duty', src: '업무 카드 진행 · ' + c.title, text: `${c.title} 진행 단계 ${WK_ST[c.stage]}${c.due ? ' 기한 ' + c.due : ''}${c.done ? ' 완료' : ''}`, ref: '#/work' }); });
+  wkTpl().forEach(t => out.push({ type: 'duty', src: '해마다 되풀이 업무', text: `${t.title} 보통 ${t.md ? t.md.replace('-', '월 ') + '일' : '시기 미정'} ${t.dept || ''}`, ref: '#/work' }));
+  return out;
+};
+
+/* 부서·메뉴 보강: 예산 점검(기한 경고·월별 집행·에듀파인 대조·결재 상태·사업 복제), 연수(신청 마감·소감·법정 의무연수·이수 내역 내보내기),
+   기록(회의록 양식·후속 조치 모아보기), 연간 교육·훈련표 신호등, 오늘(꼭 할 일 3개·퇴근 전 점검·주간 돌아보기·오늘 주의). */
+const mFind = id => { for (const p of S.budget) for (const l of p.lines) if (l.id === id) return [p, l]; return null; };
+const mAddYear = d => /^\d{4}-/.test(d || '') ? (+d.slice(0, 4) + 1) + d.slice(4) : d;
+const BD_ST = ['', '작성', '결재중', '결재완료', '지출완료'];
+
+/* ---------- 예산 점검 패널 ---------- */
+function bdPanel() {
+  const L = []; S.budget.forEach(p => p.lines.forEach(l => L.push([p, l])));
+  const warn = [];
+  L.forEach(([p, l]) => { const sp = spentOf(l), left = (+l.alloc || 0) - sp; if (left < 0) warn.push(`<span class="hot">초과</span> ${esc(p.name)} › ${esc(l.item)} ${won(-left)}원 넘음`); else if (l.deadline && left > 0 && dd(l.deadline) !== null && dd(l.deadline) <= 14) warn.push(`${dd(l.deadline) < 0 ? '<span class="hot">기한 지남</span>' : ddText(dd(l.deadline))} ${esc(p.name)} › ${esc(l.item)} 잔액 ${won(left)}원`); });
+  const byM = {}, add = s => { const k = (s.date || '').slice(0, 7); if (k) byM[k] = (byM[k] || 0) + (+s.amt || 0); };
+  S.budget.forEach(p => { (p.spends || []).forEach(add); p.lines.forEach(l => (l.spends || []).forEach(add)); });
+  const ms = Object.keys(byM).sort(), mx = Math.max(1, ...ms.map(k => byM[k])), T = btot(); let cum = 0;
+  const chart = ms.length ? ms.map(k => { cum += byM[k]; return `<div class="bdm"><span>${+k.slice(5)}월</span><i style="width:${Math.round(byM[k] / mx * 100)}%"></i><b>${won(byM[k])}원</b><small class="mu">누적 ${T.a ? Math.round(cum / T.a * 100) : 0}%</small></div>`; }).join('') : '<p class="mu">지출을 넣으면 월별로 쌓여 보입니다.</p>';
+  const edu = S.budget.map(p => { const led = projAlloc(p) - projSpent(p), v = p.edu, diff = v === '' || v == null ? null : (+v - led); return `<div class="bde"><b>${esc(p.name)}</b> 장부 잔액 ${won(led)}원 · 에듀파인 잔액 <input type="number" inputmode="numeric" data-bdedu="${p.id}" value="${v == null ? '' : v}" placeholder="숫자 입력" aria-label="${esc(p.name)} 에듀파인 잔액">${diff === null ? '' : diff === 0 ? ' <span class="ok">✔ 일치</span>' : ` <span class="hot">⚠ 차이 ${won(diff)}원</span>`}<button class="x" data-act="bdClone" data-id="${p.id}">다음 해로 복제</button></div>`; }).join('');
+  const ap = L.length ? `<table class="tbl"><thead><tr><th>항목</th><th>품의번호</th><th>결재 상태</th></tr></thead><tbody>${L.map(([p, l]) => `<tr><td>${esc(p.name)} › ${esc(l.item)}</td><td><input data-bdno="${l.id}" value="${esc(l.no || '')}" placeholder="번호" aria-label="품의번호"></td><td><select data-bdst="${l.id}" aria-label="결재 상태">${BD_ST.map(s => `<option value="${s}" ${(l.st || '') === s ? 'selected' : ''}>${s || '—'}</option>`).join('')}</select></td></tr>`).join('')}</tbody></table>` : '<p class="mu">목·항목을 만들면 품의번호와 결재 상태를 적을 수 있습니다.</p>';
+  return `<details class="doc bdpanel" ${warn.length ? 'open' : ''}><summary><b>🧭 예산 점검</b> <span class="mu">${warn.length ? `<span class="hot">주의 ${warn.length}건</span> · ` : ''}기한 경고 · 월별 집행 · 에듀파인 대조 · 결재 상태</span></summary>
+  <h4 class="dlh">기한·초과 경고</h4>${warn.map(w => `<div class="cmal">${w}</div>`).join('') || '<p class="mu">14일 안에 기한이 오는 항목이나 초과한 항목이 없습니다.</p>'}
+  <h4 class="dlh">월별 집행</h4>${chart}
+  <h4 class="dlh">에듀파인 잔액 대조</h4><p class="mu">에듀파인에서 본 잔액을 넣으면 장부와의 차이를 알려 줍니다.</p>${edu || '<p class="mu">사업이 없습니다.</p>'}
+  <h4 class="dlh">품의번호·결재 상태</h4>${ap}</details>`;
+}
+const _mBv = budgetView;
+budgetView = function () { const h = _mBv.apply(this, arguments), i = h.indexOf('<section class="bk">'); if (!S.budget.length) return h; const p = bdPanel(); return i < 0 ? h + p : h.slice(0, i) + p + h.slice(i); };
+document.addEventListener('change', e => {
+  const t = e.target; if (!t || !t.dataset) return;
+  if (t.dataset.bdedu) { const p = S.budget.find(x => x.id === t.dataset.bdedu); if (p) { p.edu = t.value === '' ? '' : +t.value; commit(); } }
+  else if (t.dataset.bdno) { const f = mFind(t.dataset.bdno); if (f) { f[1].no = t.value.trim(); save(true); } }
+  else if (t.dataset.bdst) { const f = mFind(t.dataset.bdst); if (f) { f[1].st = t.value; save(true); toast('결재 상태를 저장했습니다.'); } }
+});
+Object.assign(A, {
+  bdClone(el) { const p = S.budget.find(x => x.id === el.dataset.id); if (!p) return; ask('다음 해 사업으로 복제', [{ k: 'n', label: '새 사업 이름', val: p.name.replace(/\d{4}/, y => +y + 1) + (/\d{4}/.test(p.name) ? '' : ' (다음 해)'), req: 1 }], o => { S.budget.push({ id: uid(), name: o.n.trim(), total: p.total || 0, spends: [], lines: p.lines.map(l => ({ id: uid(), item: l.item, alloc: l.alloc, deadline: mAddYear(l.deadline), spends: [] })) }); commit(); toast('항목과 배정액을 복사했습니다(지출은 비웁니다). 금액을 확인하세요.'); }, '복제'); }
+});
+
+/* ---------- 연수 ---------- */
+const _mAe = allEvents;
+allEvents = function () { const e = _mAe.apply(this, arguments); S.training.forEach(t => { if (t.apply && !t.done) e.push({ date: t.apply, t: t.title + ' (연수 신청 마감)', kind: '연수', done: false }); }); return e; };
+Object.assign(A, {
+  trNote(el) { const x = S.training.find(t => t.id === el.dataset.id); if (!x) return; ask(`「${x.title}」 신청 마감·소감`, [{ k: 'apply', label: '연수 신청 마감일 (캘린더에 뜹니다)', type: 'date', val: x.apply || '' }, { k: 'note', label: '한 줄 소감·수업에 적용할 점', type: 'textarea', rows: 3, val: x.note || '' }], o => { x.apply = o.apply || ''; x.note = (o.note || '').trim(); commit(); }, '저장'); },
+  trLegal() { const names = (typeof YP_PRE !== 'undefined' ? YP_PRE : []).map(r => r[0]).filter(n => !/행사|축제/.test(n)); const have = S.training.map(t => t.title); let n = 0; names.forEach(nm => { if (have.some(h => h.includes(nm.slice(0, 4)))) return; S.training.push({ id: uid(), title: nm, type: '필수', hours: 1, due: '', done: false }); n++; }); commit(); toast(n ? `법정 의무 교육 ${n}건을 넣었습니다. 시간·기한은 학교 공문대로 고쳐 주세요.` : '이미 모두 들어 있습니다.'); },
+  trReport() {
+    const L = S.training.filter(t => t.done).sort((a, b) => (a.doneDate || '').localeCompare(b.doneDate || '')), tot = L.reduce((a, t) => a + (+t.hours || 0), 0), P = S.profile;
+    const html = `<html><meta charset="utf-8"><body style="font-family:'맑은 고딕',sans-serif"><h2>연수 이수 내역</h2><p>${esc(P.school || '')} ${esc(P.name || '')} · 작성일 ${today()}</p><p>이수 합계 <b>${tot}시간</b> (필수 ${L.filter(t => t.type === '필수').reduce((a, t) => a + (+t.hours || 0), 0)}시간 · 개발 ${L.filter(t => t.type === '개발').reduce((a, t) => a + (+t.hours || 0), 0)}시간)${P.totTarget ? ` / 목표 ${P.totTarget}시간` : ''}</p><table border="1" cellspacing="0" cellpadding="4" style="border-collapse:collapse"><tr><th>연수명</th><th>구분</th><th>시간</th><th>이수일</th><th>이수번호</th><th>소감·적용점</th></tr>${L.map(t => `<tr><td>${esc(t.title)}</td><td>${t.type}</td><td>${t.hours}</td><td>${t.doneDate || ''}</td><td>${esc(t.certNo || '')}</td><td>${esc(t.note || '')}</td></tr>`).join('')}</table></body></html>`;
+    download('연수이수내역_' + today() + '.doc', html, 'application/msword'); toast('이수 내역(.doc)을 내려받았습니다.');
+  }
+});
+
+/* ---------- 기록 ---------- */
+const NOTE_TPL = () => `일시: ${today()}\n장소: \n참석: (인원 수만)\n\n■ 안건\n1. \n\n■ 논의 내용\n- \n\n■ 결정 사항\n- \n\n■ 후속 조치 (담당·기한)\n- `;
+const _mNv = notesView;
+notesView = function (id) {
+  let h = _mNv.apply(this, arguments);
+  h = h.replace('<button class="btn" data-act="noteNew">+ 새 노트</button>', '<button class="btn" data-act="noteNew">+ 새 노트</button><button class="btn sm" data-act="noteFollow">📌 후속 조치 모아보기</button>');
+  if (id) h = h.replace('<button class="btn" data-act="noteExport"', `<button class="btn" data-act="noteTpl" data-id="${id}">📋 회의록 양식 넣기</button><button class="btn" data-act="noteExport"`);
+  return h;
+};
+Object.assign(A, {
+  noteTpl(el) { const n = S.notes.find(x => x.id === el.dataset.id); if (!n) return; n.body = n.body ? n.body + '\n\n' + NOTE_TPL() : NOTE_TPL(); commit(); },
+  noteFollow() {
+    const all = []; S.notes.slice().sort((a, b) => b.date.localeCompare(a.date)).forEach(n => String(n.followups || '').split('\n').map(x => x.trim()).filter(Boolean).forEach(l => all.push({ n, l })));
+    let d = document.getElementById('nfol'); if (d) d.remove(); d = document.createElement('dialog'); d.id = 'nfol'; d.className = 'dlg wide'; document.body.appendChild(d);
+    const draw = () => { const open = all.filter(x => !(x.n.fdone || {})[x.l]); d.innerHTML = `<h3>📌 후속 조치 모아보기</h3><p class="mu">모든 노트의 후속 조치 중 아직 안 끝낸 것 ${open.length}건 (끝낸 것 ${all.length - open.length}건은 숨깁니다).</p>${open.map((x, i) => `<label class="cmr chk"><input type="checkbox" data-nf="${all.indexOf(x)}"> <span>${esc(x.l)} <small class="mu">${md(x.n.date)} ${esc(x.n.title)}</small> <a href="#/note/${x.n.id}">노트 ▶</a></span></label>`).join('') || '<p class="mu">남은 후속 조치가 없습니다. 👍</p>'}<div class="tools"><button class="btn" id="nfx">닫기</button></div>`; d.querySelector('#nfx').onclick = () => d.close(); d.querySelectorAll('[data-nf]').forEach(c => c.onchange = () => { const x = all[+c.dataset.nf]; x.n.fdone = x.n.fdone || {}; x.n.fdone[x.l] = true; save(true); draw(); }); };
+    draw(); d.showModal();
+  }
+});
+
+/* ---------- 연간 교육·훈련표 신호등 ---------- */
+function ypSig(r) {
+  const v = Object.values(r.cells || {}).filter(c => c && c.d);
+  if (!v.length) return '<span class="ypsig r" title="날짜를 아직 안 잡았습니다">●</span>';
+  if (v.some(c => !c.ok && dd(c.d) !== null && dd(c.d) < 0)) return '<span class="ypsig o" title="날짜가 지났는데 실시 완료 표시가 없습니다">●</span>';
+  return v.every(c => c.ok) ? '<span class="ypsig g" title="잡아 둔 날짜가 모두 실시 완료">●</span>' : '<span class="ypsig y" title="날짜는 잡았고 아직 실시 전입니다">●</span>';
+}
+
+/* ---------- 오늘 화면 ---------- */
+const mtFocus = () => { const f = S.focus = S.focus && S.focus.d === today() ? S.focus : { d: today(), ids: [] }; return f; };
+function mtWarn() {
+  const o = [];
+  S.budget.forEach(p => p.lines.forEach(l => { const left = (+l.alloc || 0) - spentOf(l); if (l.deadline && left > 0 && dd(l.deadline) !== null && dd(l.deadline) <= 7) o.push(`${dd(l.deadline) < 0 ? '<span class="hot">기한 지남</span>' : ddText(dd(l.deadline))} 예산 ${esc(l.item)} 잔액 ${won(left)}원`); }));
+  S.training.forEach(t => { if (t.done) return; if (t.due && dd(t.due) !== null && dd(t.due) <= 7) o.push(`${ddText(dd(t.due))} 연수 ${esc(t.title)} 이수 기한`); if (t.apply && dd(t.apply) !== null && dd(t.apply) >= 0 && dd(t.apply) <= 7) o.push(`${ddText(dd(t.apply))} 연수 ${esc(t.title)} 신청 마감`); });
+  return o.slice(0, 5);
+}
+const mtInject = () => {
+  const main = document.querySelector('#app main'); if (!main || !S.setup) return; const ex = main.querySelector('.mttoday'), isT = /^#\/(today)?$/.test(location.hash) || !location.hash; if (ex) ex.remove(); if (!isT) return;
+  const f = mtFocus(), L = f.ids.map(id => S.items.find(x => x.id === id)).filter(Boolean), warn = mtWarn(), dow = new Date().getDay(), wkend = dow === 0 || dow >= 5;
+  const d = document.createElement('div'); d.className = 'hpcard mttoday';
+  d.innerHTML = `<b>🎯 오늘 꼭 할 일</b> ${L.length < 3 ? '<button class="btn sm" data-act="fcPick">+ 고르기</button>' : ''}${L.map(x => `<div class="cmal"><input type="checkbox" data-act="fcTog" data-id="${x.id}" ${x.done ? 'checked' : ''} aria-label="완료"> <span class="${x.done ? 'dn' : ''}">${esc(x.title)}</span> <button class="x" data-act="fcDel" data-id="${x.id}" aria-label="빼기">✕</button></div>`).join('') || '<div class="mu">오늘 꼭 끝낼 일 3개만 골라 두세요. 나머지는 마음 편하게.</div>'}
+  ${warn.length ? `<div class="mtw"><b>⚠ 오늘 주의</b>${warn.map(w => `<div class="cmal">${w}</div>`).join('')}</div>` : ''}
+  <div class="tools"><button class="btn sm" data-act="eveCheck">🌙 퇴근 전 점검</button><button class="btn sm ${wkend ? 'pri' : ''}" data-act="weekRev">🗓 주간 돌아보기</button></div>`;
+  const a = main.querySelector('.cheer') || main.querySelector('.hpcard'); if (a) a.after(d); else main.prepend(d);
+};
+const _mTR = TF.render; TF.render = function () { const v = _mTR.apply(this, arguments); mtInject(); return v; };
+(function () { const app = document.getElementById('app'); if (!app) return; let t = 0; new MutationObserver(() => { if (t) return; t = setTimeout(() => { t = 0; try { mtInject(); } catch (e) { } }, 0); }).observe(app, { childList: true }); })();
+const mtWeek = off => { const x = wkStartOf(today()); x.setDate(x.getDate() + off); const a = ymd(x); x.setDate(x.getDate() + 6); return [a, ymd(x)]; };
+Object.assign(A, {
+  fcTog(el) { const x = S.items.find(i => i.id === el.dataset.id); if (x) { x.done = !x.done; commit(); } },
+  fcDel(el) { const f = mtFocus(); f.ids = f.ids.filter(i => i !== el.dataset.id); commit(); },
+  fcPick() {
+    const f = mtFocus(), C = S.items.filter(x => x.cat === 'todo' && !x.done && !f.ids.includes(x.id) && (!x.date || dd(x.date) === null || dd(x.date) <= 7)).sort((a, b) => (a.date || '9').localeCompare(b.date || '9')).slice(0, 40);
+    if (!C.length) { toast('고를 할 일이 없습니다. 캘린더에서 할 일을 먼저 추가하세요.'); return; }
+    let d = document.getElementById('fcd'); if (d) d.remove(); d = document.createElement('dialog'); d.id = 'fcd'; d.className = 'dlg wide'; document.body.appendChild(d);
+    d.innerHTML = `<h3>오늘 꼭 할 일 고르기 (${3 - f.ids.length}개까지)</h3>${C.map(x => `<label class="cmr chk"><input type="checkbox" data-fc="${x.id}"> <span>${esc(x.title)} <small class="mu">${x.date ? md(x.date) : ''}</small></span></label>`).join('')}<div class="tools"><button class="btn pri" id="fcok">정하기</button><button class="btn" id="fcx">닫기</button></div>`;
+    d.querySelector('#fcx').onclick = () => d.close();
+    d.querySelector('#fcok').onclick = () => { const ids = [...d.querySelectorAll('[data-fc]:checked')].map(c => c.dataset.fc).slice(0, 3 - f.ids.length); f.ids = f.ids.concat(ids); d.close(); commit(); };
+    d.showModal();
+  },
+  eveCheck() {
+    const t = today(), L = S.items.filter(x => x.cat === 'todo' && !x.done && x.date && x.date <= t);
+    if (!L.length) { toast('오늘까지 끝내지 못한 할 일이 없습니다. 퇴근하셔도 좋습니다. 🌙'); return; }
+    const x = new Date(); x.setDate(x.getDate() + 1); const tm = ymd(x);
+    sure(`오늘까지 못 끝낸 할 일 ${L.length}건을 내일(${md(tm)})로 넘길까요?\n${L.slice(0, 6).map(i => '· ' + i.title).join('\n')}`, () => { L.forEach(i => { i.date = tm; }); commit(); toast('내일로 넘겼습니다. [되돌리기]로 취소할 수 있어요.'); });
+  },
+  weekRev() {
+    const [a, b] = mtWeek(0), [na, nb] = mtWeek(7), inR = (d, x, y) => d && d >= x && d <= y;
+    const done = S.items.filter(i => i.cat === 'todo' && i.done && inR(i.date, a, b)), logs = []; wkD().cards.forEach(c => (c.log || []).forEach(l => { if (inR(l.d, a, b)) logs.push(`${md(l.d)} ${c.title}: ${l.t}`); }));
+    const doneC = wkD().cards.filter(c => c.done && inR(c.sd, a, b)), nxt = allEvents().filter(e => !e.done && inR(e.date, na, nb)).sort((x, y) => x.date.localeCompare(y.date)).slice(0, 12), S2 = S.weekly = S.weekly || {};
+    let d = document.getElementById('wkrv'); if (d) d.remove(); d = document.createElement('dialog'); d.id = 'wkrv'; d.className = 'dlg wide'; document.body.appendChild(d);
+    d.innerHTML = `<h3>🗓 주간 돌아보기 <small class="mu">${md(a)}~${md(b)}</small></h3>
+    <h4 class="dlh">이번 주에 끝낸 일</h4>${done.map(i => `<div>✔ ${esc(i.title)}</div>`).join('')}${doneC.map(c => `<div>✔ [업무] ${esc(c.title)}</div>`).join('') || (done.length ? '' : '<p class="mu">기록된 완료가 없습니다.</p>')}
+    ${logs.length ? `<h4 class="dlh">업무 일지</h4>${logs.slice(0, 15).map(l => `<div>${esc(l)}</div>`).join('')}` : ''}
+    <h4 class="dlh">다음 주 일정·기한</h4>${nxt.map(e => `<div>${md(e.date)} ${esc(e.t)} <small class="mu">${e.kind || ''}</small></div>`).join('') || '<p class="mu">없습니다.</p>'}
+    <h4 class="dlh">이번 주 한 줄 소감</h4><textarea id="wrt" rows="3" style="width:100%" placeholder="잘한 점, 다음 주에 바꿀 점">${esc(S2[a] || '')}</textarea><div class="tools"><button class="btn pri" id="wrok">소감 저장</button><button class="btn" id="wrx">닫기</button></div>`;
+    d.querySelector('#wrx').onclick = () => d.close(); d.querySelector('#wrok').onclick = () => { S2[a] = d.querySelector('#wrt').value.trim(); d.close(); commit(); toast('저장했습니다.'); }; d.showModal();
+  }
+});
+
+/* ---------- 꿈송이 검색: 결재·소감·주간 소감 ---------- */
+const _mBc = buildChunks;
+buildChunks = function () {
+  const out = _mBc.apply(this, arguments);
+  S.budget.forEach(p => p.lines.forEach(l => { if (l.no || l.st) out.push({ type: 'budget', src: `예산 결재 · ${p.name} · ${l.item}`, text: `${p.name} ${l.item} 품의번호 ${l.no || '없음'} 결재 상태 ${l.st || '미입력'}`, ref: '#/budget' }); }));
+  S.training.forEach(t => { if (t.note || t.apply) out.push({ type: 'training', src: '연수 · ' + t.title, text: `${t.title} ${t.apply ? '신청 마감 ' + t.apply : ''} ${t.note ? '소감: ' + t.note : ''}`, ref: '#/today' }); });
+  Object.keys(S.weekly || {}).forEach(k => { if (S.weekly[k]) out.push({ type: 'note', src: '주간 소감 · ' + k, text: `${k} 주 소감: ${S.weekly[k]}`, ref: '#/' }); });
+  return out;
+};
 
 /* 꿈송이 2 — 규정줍줍 + 사이트를 돌아다니는 비서.
    ① 규정줍줍: 올려 둔 자료(규정·지침·계획서)에서 해당 조항을 찾아 파일 이름과 함께 보여 준다(키 없이도 동작, 키가 있으면 문장으로 정리).

@@ -341,3 +341,8 @@ service cloud.firestore {
 - 쓰기 도구(제안 카드→[적용]): 기존 AG_TOOLS + add_wk_card, update_wk_card, set_training_date, add_day_memo. `agPlan`/`agDo`를 감싸서 확장. 적용은 commit()이라 되돌리기 가능. 삭제 도구는 없음.
 - 규정줍줍: 자료실(LIB) 문서를 450자 단위로 쪼개 낱말 겹침으로 점수(규정 종류 ×1.5). 결과는 파일 이름과 함께 표시.
 - 개인정보: 학생·교직원 실명 명단은 도구로 노출되지 않음(수첩에 없음). 키 사용 시 찾은 내용이 Anthropic API로 전송됨(잠금 노트 `lock`은 search_site·list_notes에서 제외).
+
+## v76 보강 (js/work2.js, js/more.js)
+- work2.js — 내 업무 카드 확장: stage/cd/sd/log/links/tplId 필드, S.wk.tpl(해마다 되풀이), 탭 yr·mo·bd·st(workView 래핑), 인수인계서(.doc), 기한 임박 카드(오늘 .wktoday).
+- more.js — 예산 점검 패널(budgetView 래핑: 기한 경고·월별 집행·에듀파인 잔액 p.edu·품의번호 l.no·결재 l.st·사업 복제), 연수(t.apply 신청마감→allEvents, t.note 소감, 법정 의무연수 넣기, 이수 내역 .doc), 기록(회의록 양식, 후속 조치 모아보기 n.fdone), ypSig 신호등, 오늘 카드 .mttoday(S.focus 꼭 할 일 3개, 퇴근 전 점검, 주간 돌아보기 S.weekly).
+- 연락망 c.memo(최근 연락), 연수 목표 시간 S.profile.reqTarget/devTarget/totTarget.

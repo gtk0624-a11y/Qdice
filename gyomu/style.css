@@ -880,3 +880,14 @@ html[data-skin="planner"] .drawer,html[data-skin="planner"] .dw{padding:6px 12px
 .dwf{flex-wrap:nowrap!important;overflow-x:auto;white-space:nowrap;gap:2px 10px!important;scrollbar-width:none}.dwf::-webkit-scrollbar{display:none}
 .dw summary{padding:2px 0!important;font-size:13px!important}
 .cp{margin-top:6px!important}
+/* v76: 업무카드 확장·예산 점검·오늘 카드·서랍 */
+.wkx{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin:4px 0}.wkst select{margin-left:4px;padding:2px 6px;border-radius:8px}.wkst.s5{opacity:.8}.wkst.s3 select,.wkst.s4 select{background:#fff3c4}
+.wkl{display:flex;gap:4px;flex-wrap:wrap;margin:4px 0}.wklg{margin:4px 0;font-size:13px}.wklg p{margin:2px 0}.wklist{max-height:50vh;overflow:auto}
+.wkmo{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;margin:8px 0}.wkmm{border:1.5px solid var(--ink,#2b2a33);border-radius:12px;padding:6px 8px;background:#fff}.wkmm.cur{background:#fff8d6}.wkmm h4{margin:0 0 4px}
+.wkmi{font-size:13.5px;padding:2px 0;border-bottom:1px dashed #ddd}.wkmi.dn{text-decoration:line-through;opacity:.55}.wkmi.gh{border:1px dashed #999;border-radius:6px;padding:2px 4px;color:#666}
+.wkbd{border:1.5px solid var(--ink,#2b2a33);border-radius:12px;padding:6px 10px;margin:6px 0;background:#fff}.wkbd summary{cursor:pointer}.wkbar{display:block;margin-top:4px}.wkbar i{display:block;height:8px;border-radius:5px;background:#e8e4d6;position:relative}.wkbar u{display:block;height:100%;border-radius:5px;background:#5fb88a;text-decoration:none}
+.bdm{display:grid;grid-template-columns:36px 1fr auto auto;gap:6px;align-items:center;margin:3px 0}.bdm i{display:block;height:10px;border-radius:5px;background:#7aa7e6}.bde{margin:6px 0;display:flex;flex-wrap:wrap;gap:6px;align-items:center}.bde input{width:130px}
+.mtw{margin-top:6px;padding-top:4px;border-top:1px dashed #bbb}.mttoday .cmal input[type=checkbox]{width:20px;height:20px;vertical-align:middle}.mttoday .dn{text-decoration:line-through;opacity:.6}
+.ypsig{font-size:12px;margin-right:4px}.ypsig.r{color:#e5484d}.ypsig.o{color:#f08c00}.ypsig.y{color:#e6c200}.ypsig.g{color:#2fa56b}
+/* 서랍: 한 줄로 */
+.dw{display:flex!important;flex-wrap:wrap!important;align-items:center!important;gap:2px 8px!important;margin-top:6px!important;padding:2px 0!important}.dw .dwf{flex:1 1 0;min-width:0}.dw details{flex:0 0 auto}.dw details[open]{flex-basis:100%}.dw summary{padding:0!important;font-size:12px!important}.dw .dwf b{font-size:12px!important}.cp{font-size:11px!important;margin:2px 0!important}
