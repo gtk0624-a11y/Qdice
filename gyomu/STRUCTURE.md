@@ -352,3 +352,13 @@ service cloud.firestore {
 - 카드: c.type(행사·연수·조사·예산)→WK_TYPES 단계·필요 문서, c.docs[{id,name,kind}](파일은 LIB=자료 아카이브, from:'work'), c.evt(캘린더 일정 id), c.team, ✕ 즉시 삭제(undoBar 8초).
 - 올린 파일 전부 아카이브: readFile 래핑(ingestFiles 밖에서 읽은 파일도 LIB에 저장). 화면별 자료 상자는 접힘(.pgfdet). PDF 원본 열기는 앱 안 창(pdf.js).
 - 캘린더: UI.calHide(종류 거르기), S.repDone{반복일정id:{날짜:true}}, 일정 3건 이상 몰림 ⚠, 그 날 기한 업무 카드.
+
+## v78~v80 추가 (공문 단계 · 예산 비고 · 예산 집행 서류)
+- **공문 단계(v78, js/more.js)**: DL_ST ['기안','접수','결재','처리중','완료'], 공문 항목의 `st` 필드. docLogBody 래퍼에 단계 select(`[data-dlst]`)와 「진행 중 모아보기」.
+- **예산 비고(v79, js/more.js·app.js)**: 사업 `p.note`, 항목 `l.note`, 지출 `s.note`. 챗봇 검색 chunk에도 포함.
+- **예산 집행 서류·업체(v80, js/budget2.js)**: 지출(spend)에 `type`(유형) `stg`(단계, 비면 '지출') `vendor`(업체) `docs`(체크한 서류[]) 추가. 설정은 `S.bdTypes`(유형별 필요 서류, 직접 수정 가능), `S.bdCfg {est 견적 기준액, end 예산 마감일}`, `S.vendors {업체:{tel}}`.
+  - bdPanel2(): 단계 칩·서류 체크·업체·집행 속도·불용 경보. budgetView 래퍼로 첫 사업 앞에 끼움. 접힘 상태는 `UI.bdOpen`.
+  - A.spendAdd 덮어씀: 잔액 표시·초과 시 확인·유형/업체 입력. A.bdBack(행사일 역산 일정 4개 → S.items, tag '예산'), A.bdTplEdit, A.bdCfgEdit, A.bdReport(결산 .doc).
+  - mtWarn·buildChunks 래퍼: 오늘 카드에 불용·서류 미비, 챗봇에 업체·집행 정보.
+  - 고칠 곳: 기본 서류 목록 = BD_TYPES0, 기본 견적 기준 = bdCfg() 안의 2000000, 기본 마감일 = 12월 20일.
+  - 개인정보 주의: 업체 연락처는 이 기기 localStorage에만 저장됩니다.
