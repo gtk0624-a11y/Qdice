@@ -637,6 +637,35 @@ html[data-skin="planner"] #chatpan{border:2px solid var(--ink2);box-shadow:6px 6
 html[data-skin="planner"] .mast2 .dt{border:0!important;box-shadow:none!important;transform:none;background:transparent!important}
 .trsum{background:#fff8d6;border:2px solid var(--ink,#2b2a33);border-radius:14px;padding:10px 14px;margin:6px 0 10px;position:relative;overflow:hidden}.trsum b{display:block;font-size:19px;font-weight:900}.trsum span{font-size:13.5px;color:var(--mu)}.trsum i{display:block;height:8px;border-radius:99px;background:#fff;border:1.5px solid var(--ink,#2b2a33);margin-top:6px;position:relative}.trsum i::after{content:"";position:absolute;left:0;top:0;bottom:0;width:var(--p);background:#9bd8c2;border-radius:99px}
 .trsites{margin-top:12px;padding-top:10px;border-top:2px dashed var(--rule,#ccc)}.trsites h4{margin:0 0 8px;font-size:16px;font-weight:900}.trchips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px}.trchip{display:inline-flex;align-items:center;gap:2px;background:#d6e8ff;border:2px solid var(--ink,#2b2a33);border-radius:999px;padding:3px 6px 3px 12px;font-weight:800}.trchip a{color:inherit;text-decoration:none}.trchip .x{border:0;background:transparent;padding:2px 5px;cursor:pointer;font-size:13px}
+
+
+/* ===== 디데이 칩 + 기한 알림 막대 (조용한 톤: 종이색 바탕, 빨강은 D-1 이하에만) ===== */
+.ddstrip{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 0}
+.ddc{display:inline-flex;align-items:baseline;gap:8px;background:var(--card2);border:1px solid var(--rule);border-radius:999px;padding:4px 14px 4px 12px;font-size:16px;color:var(--ink)}
+.ddc b{font-size:19px;font-weight:800;color:var(--ink);letter-spacing:.01em}.ddc.hot b{color:var(--red)}
+.ddn{flex:none;min-width:64px;font-weight:800;font-size:18px}.ddn.past{color:var(--mu);font-weight:500}
+#alarmbar{position:fixed;left:14px;bottom:14px;width:min(520px,calc(100vw - 118px));z-index:40;background:var(--card2);color:var(--ink);border:1px solid var(--rule);border-left:5px solid var(--cover);border-radius:10px;box-shadow:0 6px 18px rgba(0,0,0,.22);display:flex;flex-wrap:wrap;align-items:center}
+#alarmbar[hidden]{display:none}
+#alarmbar .al-main{flex:1;min-width:0;display:flex;align-items:center;gap:10px;background:none;border:0;padding:11px 8px 11px 14px;text-align:left;font-size:16px}
+#alarmbar .al-t{flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:700}
+#alarmbar .al-more{flex:none;color:var(--mu);font-size:14px}
+#alarmbar .al-b{flex:none;font-weight:800;font-size:15px;padding:1px 9px;border-radius:999px;background:var(--rule2);color:var(--ink)}
+#alarmbar .al-b.hot{background:var(--red);color:#fff}
+#alarmbar .al-x{flex:none;background:none;border:0;color:var(--mu);font-size:22px;line-height:1;padding:10px 14px;text-decoration:none}
+#alarmbar .al-chev{flex:none;margin-left:auto;width:8px;height:8px;border-left:1.6px solid var(--ink);border-top:1.6px solid var(--ink);transform:rotate(45deg);margin-top:4px}
+#alarmbar .al-h{flex:1 0 100%;display:flex;align-items:baseline;gap:10px;padding:10px 6px 4px 14px}
+#alarmbar .al-h .al-x{margin-left:auto;font-size:14px;padding:2px 8px;text-decoration:underline}
+#alarmbar .al-l{flex:1 0 100%;padding:0 14px}
+#alarmbar .al-i{display:flex;align-items:center;gap:10px;padding:6px 0;border-top:1px solid var(--rule2)}
+#alarmbar .al-i .al-t{flex:1;white-space:normal}#alarmbar .al-d{color:var(--mu);font-size:14px}
+#alarmbar .al-f{flex:1 0 100%;padding:4px 14px 10px}#alarmbar .al-f .btn{margin:6px 8px 0 0}
+body.hasalarm #app{margin-bottom:96px}
+html[data-nav=bottom] #alarmbar{bottom:78px}
+@media(max-width:760px){#alarmbar{left:8px;width:calc(100vw - 100px)}}
+@media print{#alarmbar{display:none!important}}
+
+#alarmbar .al-h{flex-wrap:nowrap}#alarmbar .al-h b,#alarmbar .al-h .mu{white-space:nowrap}
+@media(max-width:760px){#alarmbar[data-open="1"]{width:calc(100vw - 16px)}}
 </style>
 </head>
 <body>
