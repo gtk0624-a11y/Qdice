@@ -2,7 +2,7 @@
    ① 규정줍줍: 올려 둔 자료(규정·지침·계획서)에서 해당 조항을 찾아 파일 이름과 함께 보여 준다(키 없이도 동작, 키가 있으면 문장으로 정리).
    ② 비서 모드: Claude 키가 있으면 질문마다 "도구"를 스스로 골라 수첩 전체(캘린더·내 업무 카드·예산·연수표·메모·자료실)를 읽고,
       필요하면 일정·카드·표를 고치는 "제안"을 만든다. 고치는 일은 [적용]을 눌러야만 반영되고, 반영 뒤 되돌리기가 된다. */
-const B2_MODEL = () => localStorage.getItem('tf.botModel') || 'claude-sonnet-5-5';
+const B2_MODEL = () => localStorage.getItem('tf.botModel') || 'claude-haiku-5-5';
 const B2_NAVS = ['#/today', '#/cal', '#/work', '#/yp', '#/budget', '#/lib', '#/class', '#/eval', '#/cm', '#/set'];
 const b2Cut = (s, n) => { s = String(s == null ? '' : s); return s.length > n ? s.slice(0, n) + '…(이하 생략)' : s; };
 
@@ -151,7 +151,7 @@ ask1 = async function (q) {
 };
 
 /* ---- 챗봇 안에서 모델 고르기 ---- */
-const B2_MODELS = [['claude-haiku-5-5', '빠르고 저렴 (Haiku)'], ['claude-sonnet-5-5', '균형 · 기본 (Sonnet)'], ['claude-opus-5-5', '가장 똑똑함·비쌈 (Opus)']];
+const B2_MODELS = [['claude-haiku-5-5', '빠르고 저렴 · 기본 (Haiku)'], ['claude-sonnet-5-5', '균형 (Sonnet)'], ['claude-opus-5-5', '가장 똑똑함·비쌈 (Opus)']];
 const _b2Kb = chatKeyBar;
 chatKeyBar = function () {
   const h = _b2Kb.apply(this, arguments);

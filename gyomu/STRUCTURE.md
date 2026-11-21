@@ -336,7 +336,7 @@ service cloud.firestore {
 - #cmfab: 메뉴 설정·화면 틀과 무관하게 항상 표시되는 🏫 버튼(href #/cm).
 
 ## 꿈송이 2 — 규정줍줍 + 비서 모드 (js/bot2.js, v69)
-- 입구: `ask1` 교체. 키(`tf.claudeKey`) 있으면 `b2Loop`(도구 호출 반복, 최대 9회, 모델 `tf.botModel` 기본 claude-sonnet-5-5), 없으면 규정줍줍(`b2RuleBlocks`)+기존 찾기.
+- 입구: `ask1` 교체. 키(`tf.claudeKey`) 있으면 `b2Loop`(도구 호출 반복, 최대 9회, 모델 `tf.botModel` 기본 claude-haiku-5-5), 없으면 규정줍줍(`b2RuleBlocks`)+기존 찾기.
 - 읽기 도구(바로 실행): search_site, find_rule, list_library, read_library, get_calendar, get_day, list_work_cards, get_budget, list_training, list_notes. 새 읽기 도구는 `B2_READ`에 정의 + `b2Run`에 case 추가.
 - 쓰기 도구(제안 카드→[적용]): 기존 AG_TOOLS + add_wk_card, update_wk_card, set_training_date, add_day_memo. `agPlan`/`agDo`를 감싸서 확장. 적용은 commit()이라 되돌리기 가능. 삭제 도구는 없음.
 - 규정줍줍: 자료실(LIB) 문서를 450자 단위로 쪼개 낱말 겹침으로 점수(규정 종류 ×1.5). 결과는 파일 이름과 함께 표시.
