@@ -911,3 +911,7 @@ html[data-skin="planner"] .drawer,html[data-skin="planner"] .dw{padding:6px 12px
 .bdx3{display:flex;flex-wrap:wrap;gap:4px 12px}.bdd{display:inline-flex;gap:4px;align-items:center;font-size:.9em}
 .bdv{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:4px 0}.bdv input{flex:1 1 140px;min-width:0}
 .rq{margin:10px 0}.rqp{margin:4px 0;white-space:pre-wrap}.rqref{white-space:pre-wrap;font-size:.85em;max-height:220px;overflow:auto}
+/* v82 총괄 */
+.hubkp{display:grid;grid-template-columns:repeat(auto-fit,minmax(86px,1fr));gap:8px;margin:8px 0}.hubkp div{background:#f3f6fb;border-radius:10px;padding:8px;text-align:center}.hubkp b{display:block;font-size:1.3em}.hubkp span{font-size:.8em;color:#667}
+.hubcols{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}.hubcol{border:1px solid #dde3ee;border-radius:10px;padding:8px;background:#fff;font-size:.92em}.hubcol>div{margin:3px 0}
+.hubrow{display:flex;gap:8px;align-items:center;margin:4px 0}.hubrow span{flex:1}.hubtabs{margin:10px 0}
