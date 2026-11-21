@@ -1233,6 +1233,7 @@ function allEvents() {
   S.assess.forEach(a => { if (a.due) e.push({ date: a.due, t: a.title + ' (수행평가)', kind: '평가', done: (a.step || 0) >= 5 }); });
   S.budget.forEach(p => p.lines.forEach(l => { if (l.deadline && (l.alloc - spentOf(l)) > 0) e.push({ date: l.deadline, t: `${p.name} ${l.item} 집행 (잔액 ${won(l.alloc - spentOf(l))}원)`, kind: '예산', done: false }); }));
   S.training.forEach(t => { if (t.due) e.push({ date: t.due, t: t.title + ' (연수)', kind: '연수', done: !!t.done }); });
+  (S.dday || []).forEach(x => { if (x.date) e.push({ date: x.date, t: x.title, kind: '디데이', done: false }); });
   return e;
 }
 function upcoming(n) { const seen = new Set(); return allEvents().filter(e => !e.done && dd(e.date) !== null && dd(e.date) >= 0 && dd(e.date) <= n).sort((a, b) => a.date.localeCompare(b.date)).filter(e => { if (!e.span) return true; if (seen.has(e.id)) return false; seen.add(e.id); return true; }); }
@@ -1366,6 +1367,7 @@ function todayView() {
     rows.push(row('r9', '학교', '업무 분장표', S.duties.length ? `내 업무 ${mine.length}건${mine[0] ? ' · ' + esc(mine[0].work) : ''}` : '업무 분장표를 올려 보세요', '', mine.map(d => `<div class="nl"><span>${esc(d.dept)} · ${esc(d.work)}</span></div>`).join('') + '<a class="btn sm" href="#/lib">분장표 열기</a>'));
     rows.push(typeof mineRow === 'function' ? mineRow() : '');
     rows.push(typeof mealRow === 'function' ? mealRow() : '');
+    rows.push(typeof ddayRow === 'function' ? ddayRow() : '');
     rows.push(row('r10', '학교', '교내 연락망', S.contacts.length ? `교직원 ${S.contacts.length}명 · 이름·부서·내선 검색` : '연락망을 올려 보세요', '', '<a class="btn sm" href="#/lib">연락망 열기</a>'));
   }
   S.pages.filter(p => p.pin).forEach(p => {
@@ -1374,7 +1376,7 @@ function todayView() {
     rows.push(row('pg' + p.id, '페이지', esc(p.title || '제목 없음'), st, '', todos.map(b => `<div class="td ${b.done ? 'dn' : ''}"><button class="ck" data-act="bTodo" data-p="${p.id}" data-b="${b.id}" aria-pressed="${!!b.done}" aria-label="완료 표시"></button><span class="tl">${esc(b.x)}</span><span class="stamp">완료</span></div>`).join('') + `<a class="btn sm" href="#/page/${p.id}">페이지 열기</a>`));
   });
   const up = upcoming(7);
-  return `${typeof schoolBanner === 'function' ? schoolBanner() : ''}<div class="bh"><h2>오늘의 게시판</h2><span class="mu">줄을 누르면 펼쳐집니다.</span><button class="btn sm" data-act="ordPick">↕ 순서 바꾸기</button><button class="btn sm" data-act="rowPick">☑ 보일 줄 고르기</button></div>
+  return `${typeof schoolBanner === 'function' ? schoolBanner() : ''}${typeof ddayStrip === 'function' ? ddayStrip() : ''}<div class="bh"><h2>오늘의 게시판</h2><span class="mu">줄을 누르면 펼쳐집니다.</span><button class="btn sm" data-act="ordPick">↕ 순서 바꾸기</button><button class="btn sm" data-act="rowPick">☑ 보일 줄 고르기</button></div>
   <div class="spread"><div class="pgL">${miniCal()}${up.length ? `<p class="soon"><b>이번 주 기한</b><br>${up.slice(0, 6).map(e => `${md(e.date)} ${esc(e.t)}`).join('<br>')}</p>` : ''}</div>
   <div class="pgR"><div class="cols"><span>분류</span><span>제목</span><span>현황</span><span class="r">기한</span><span></span></div>${(typeof orderRows === 'function' ? orderRows(rows) : rows).join('')}</div></div>`;
 }
@@ -1469,7 +1471,7 @@ function archView(id) {
   return `<div class="bh"><h2>${esc(a.label)} <span class="mu">(읽기 전용)</span></h2></div><p class="mu">지금 데이터와 섞이지 않는 보관본입니다. 꿈송이에게 "${esc(a.label)} 예산 뭐였지"처럼 물어도 찾아 줍니다.</p>` + (keys.length ? keys.map(k => `<details class="tg"><summary>${esc(k)} <span class="mu">${g[k].length}건</span></summary><div class="tgb">${g[k].map(t => `<p>${esc(t).replace(/\n/g, '<br>')}</p>`).join('')}</div></details>`).join('') : '<p class="mu">내용이 없습니다.</p>');
 }
 function setView() {
-  const p = S.profile, sy = TF.sync.info, rowsT = [['r1', '일과'], ['r2', '할 일'], ['r3', '공문'], ['r4', '수업 진도'], ['r5', '수행평가'], ['r6', '예산'], ['r7', '연수'], ['r8', '기록'], ['r9', '업무 분장표'], ['r10', '교내 연락망'], ['r11', '내 업무'], ['r12', '급식'], ['sb', '학교 배너']];
+  const p = S.profile, sy = TF.sync.info, rowsT = [['r1', '일과'], ['r2', '할 일'], ['r3', '공문'], ['r4', '수업 진도'], ['r5', '수행평가'], ['r6', '예산'], ['r7', '연수'], ['r8', '기록'], ['r9', '업무 분장표'], ['r10', '교내 연락망'], ['r11', '내 업무'], ['r12', '급식'], ['r13', '디데이·기한 알림'], ['sb', '학교 배너']];
   return `<div class="bh"><h2>설정</h2></div>
   <div class="qk"><b>꾸미기 바로가기</b><button class="btn" data-act="skinToggle">화면 스타일: ${S.profile.skin === 'classic' ? '기존 수첩 → 플래너로' : '플래너 → 기존 수첩으로'}</button><button class="btn" data-act="ordPick">↕ 화면 순서</button><a class="btn" href="#fontsec" data-go="fontsec">글씨체 바꾸기 ↓</a><a class="btn" href="#fontsec" data-go="themesec">디자인·색 ↓</a></div>
   <form data-form="profile" class="fm"><h3 class="h3">내 정보</h3><label>이름<input name="name" value="${esc(p.name)}"></label><label>학교<input name="school" value="${esc(p.school)}"></label><label>교과<input name="subject" value="${esc(p.subject)}"></label><label>담당 반 (쉼표로)<input name="classes" value="${esc(p.classes.join(', '))}"></label><label>1교시 시작<input name="start" type="time" value="${p.start}"></label><label>수업 시간(분)<input name="classMin" type="number" value="${p.classMin}"></label><label>쉬는 시간(분)<input name="breakMin" type="number" value="${p.breakMin}"></label><label>개발 연수 목표(시간)<input name="devTarget" type="number" value="${p.devTarget}"></label><button class="btn pri">저장</button></form>
@@ -1490,8 +1492,9 @@ function welcome() {
 /* ---------- 화면 그리기 ---------- */
 function render() {
   const app = $('#app'), y = window.scrollY;
-  if (!S.setup) { app.innerHTML = welcome(); $('#chatbox').hidden = true; return; }
-  $('#chatbox').hidden = false;
+  const cbx = $('#chatbox');
+  if (!S.setup) { app.innerHTML = welcome(); if (cbx) cbx.hidden = true; return; }
+  if (cbx) cbx.hidden = false;
   const [, page = 'today', arg] = (location.hash || '#/today').split('/');
   const body = { today: todayView, cal: calView, class: classView, budget: budgetView, notes: () => notesView(), note: () => notesView(arg), pages: () => pagesView(), page: () => pagesView(arg), lib: libView, set: setView, arch: () => archView(arg) }[page] || todayView;
   app.innerHTML = masthead() + nav(page) + `<main>${body()}${typeof pageMemo === 'function' ? pageMemo(page) : ''}</main>` + footer();
@@ -1678,7 +1681,7 @@ function openChat() { if (chatOpen) return; chatOpen = true; try { history.pushS
 function closeChat(viaLink) { if (!chatOpen) return; chatOpen = false; renderChat(); if (!viaLink && history.state && history.state.tfChat) history.back(); }
 window.addEventListener('popstate', e => { if (chatOpen) { chatOpen = false; renderChat(); } else if (e.state && e.state.tfChat) history.back(); });
 function renderChatFab() {
-  const b = $('#chatfab'); b.innerHTML = `<img src="${mas()}" alt="꿈송이">`;
+  const b = $('#chatfab'); if (!b) return; b.innerHTML = `<img src="${mas()}" alt="꿈송이">`;
   if (!$('#chatbub')) { const u = document.createElement('button'); u.id = 'chatbub'; u.textContent = '무엇이든 물어보세요!'; u.addEventListener('click', () => $('#chatfab').click()); b.parentNode.insertBefore(u, b); }
 }
 function chatKeyBar() {
@@ -2578,7 +2581,7 @@ Object.assign(A, {
 });
 
 /* 화면 순서 바꾸기: 오늘 게시판의 줄 순서 + 위쪽 메뉴 순서. 사람마다 중요한 것이 다르므로 직접 정합니다. */
-const ORD_ROWS = [['r1', '일과'], ['r2', '할 일'], ['r3', '공문'], ['r4', '수업 진도'], ['r5', '수행평가'], ['r6', '예산'], ['r7', '연수'], ['r8', '기록'], ['r9', '업무 분장표'], ['r11', '내 업무'], ['r12', '급식'], ['r10', '교내 연락망']];
+const ORD_ROWS = [['r1', '일과'], ['r2', '할 일'], ['r3', '공문'], ['r4', '수업 진도'], ['r5', '수행평가'], ['r6', '예산'], ['r7', '연수'], ['r8', '기록'], ['r9', '업무 분장표'], ['r11', '내 업무'], ['r12', '급식'], ['r10', '교내 연락망'], ['r13', '디데이·기한 알림']];
 const ORD_NAV = [['today', '오늘'], ['cal', '캘린더'], ['class', '수업·평가'], ['budget', '예산'], ['notes', '기록'], ['pages', '페이지'], ['lib', '자료·연락']];
 const ORD_PRESETS = {
   '업무 중심': { rows: ['r3', 'r2', 'r9', 'r11', 'r1', 'r6', 'r7', 'r5', 'r4', 'r8', 'r12', 'r10'], nav: ['today', 'cal', 'budget', 'notes', 'lib', 'class', 'pages'] },
@@ -2760,6 +2763,118 @@ function schoolBanner() {
   const week = Object.keys(days).sort().slice(0, 7).map(k => `<div class="ml"><b>${md(iso8(k))}(${DOW[new Date(iso8(k) + 'T00:00:00').getDay()]})</b>${days[k].map(x => `<div>${days[k].length > 1 ? `<i>${esc(x.kind)}</i> ` : ''}${esc(x.dishes.map(cleanDish).join(' · '))}${x.kcal ? ` <small class="mu">${esc(x.kcal.replace(' Kcal', 'kcal'))}</small>` : ''}</div>`).join('')}</div>`).join('');
   return `<details class="sbanner" data-k="sb" ${OPEN.has('sb') ? 'open' : ''}><summary><span class="sbn">🏫 ${esc(name)}</span><span class="sbm">${brief}</span><i class="chev"></i></summary><div class="sbb"><div class="tools">${h ? `<a class="btn pri" href="${esc(h)}" target="_blank" rel="noopener">학교 홈페이지 열기</a>` : ''}<button class="btn sm" data-act="schoolSet">홈페이지 주소·설정</button><button class="btn sm" data-act="mealNow">급식 새로고침</button></div>${cls ? `<p><b>학급</b> ${esc(cls)}</p>` : ''}${sc && (sc.addr || sc.tel) ? `<p class="mu">${esc(sc.addr || '')}${sc.tel ? ' · ☎ ' + esc(sc.tel) : ''}</p>` : ''}<h4 class="dlh">급식 (오늘부터)</h4>${week || '<p class="mu">급식 자료가 아직 없습니다. [급식 새로고침]을 눌러 보세요.</p>'}<p class="mu">알레르기 번호: 1난류 2우유 3메밀 4땅콩 5대두 6밀 7고등어 8게 9새우 10돼지고기 11복숭아 12토마토 13아황산류 14호두 15닭고기 16쇠고기 17오징어 18조개류 19잣 · 출처 나이스 교육정보 개방포털 · 학생 개인별 학적은 나이스 내부 정보라 연동되지 않습니다.</p></div></details>`;
 }
+
+/* dday.js — ① 디데이(직접 추가)  ② 기한 알림: 기한이 N일(기본 2일) 안으로 다가오면 화면 아래 얇은 막대로 알려 줌
+   - 알림 대상: 할 일 · 수행평가 성적입력 기한 · 예산 집행 기한 · 연수 기한 · 내 디데이 (끝낸 것은 제외)
+   - 서버가 없는 앱이라 "앱을 열어 둔 동안"만 알려 줍니다(브라우저 알림을 켜면 열 때 한 번 더 알림). */
+const ddList = () => (S.dday = S.dday || []);
+const ALARM_KINDS = ['할 일', '평가', '예산', '연수', '디데이'];
+const alarmOff = () => parseInt((S.profile || {}).alarmDays, 10) === -1;
+const alarmDays = () => { const n = parseInt((S.profile || {}).alarmDays, 10); return n >= 0 && n <= 14 ? n : 2; };
+const ddBadge = n => n === 0 ? 'D-Day' : n > 0 ? 'D-' + n : 'D+' + (-n);
+
+/* 알림에 올릴 항목: 오늘부터 N일 안의 기한 */
+function alarmItems() {
+  const N = alarmDays(), seen = new Set(), out = [];
+  allEvents().forEach(e => {
+    if (e.done || !ALARM_KINDS.includes(e.kind)) return;
+    const n = dd(e.date); if (n === null || n < 0 || n > N) return;
+    const k = (e.id || '') + '|' + e.t + '|' + e.date; if (seen.has(k)) return; seen.add(k);
+    out.push({ t: String(e.t).replace(/ \((수행평가|연수)\)$/, ''), date: e.date, n, kind: e.kind });
+  });
+  return out.sort((a, b) => a.n - b.n || a.t.localeCompare(b.t));
+}
+
+/* ---- 화면 아래 알림 막대 ---- */
+const ALK = 'tf.alarm', ALN = 'tf.alarmNote';
+const lsGet = k => { try { return JSON.parse(localStorage.getItem(k) || '{}'); } catch (e) { return {}; } };
+const lsSet = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { } };
+function renderAlarm() {
+  let bar = document.getElementById('alarmbar');
+  if (!bar) { bar = document.createElement('div'); bar.id = 'alarmbar'; bar.setAttribute('role', 'status'); bar.setAttribute('aria-live', 'polite'); document.body.appendChild(bar); }
+  const items = (S.setup && !alarmOff()) ? alarmItems() : [];
+  const sig = items.map(i => i.date + i.t).join('|'), st = lsGet(ALK);
+  if (!items.length || (st.day === today() && st.sig === sig)) { bar.hidden = true; document.body.classList.remove('hasalarm'); return; }
+  const open = bar.dataset.open === '1', f = items[0];
+  bar.hidden = false; document.body.classList.add('hasalarm');
+  bar.innerHTML = open
+    ? `<div class="al-h"><b>⏰ 기한이 다가옵니다</b><span class="mu">${alarmDays() === 0 ? '오늘' : alarmDays() + '일 안'} · ${items.length}건</span><button class="al-x" data-act="alToggle" aria-label="접기">접기</button></div>
+       <div class="al-l">${items.slice(0, 8).map(i => `<div class="al-i"><span class="al-b ${i.n <= 1 ? 'hot' : ''}">${ddBadge(i.n)}</span><span class="al-t">${esc(i.t)}</span><span class="al-d">${md(i.date)}</span></div>`).join('')}${items.length > 8 ? `<div class="mu">외 ${items.length - 8}건</div>` : ''}</div>
+       <div class="al-f"><button class="btn sm" data-act="alClose">오늘은 그만 보기</button><button class="btn sm" data-act="ddAlarm">알림 설정</button></div>`
+    : `<button class="al-main" data-act="alToggle" aria-label="기한 알림 펼치기"><span class="al-ic">⏰</span><span class="al-b ${f.n <= 1 ? 'hot' : ''}">${ddBadge(f.n)}</span><span class="al-t">${esc(f.t)}</span>${items.length > 1 ? `<span class="al-more">외 ${items.length - 1}건</span>` : ''}<i class="al-chev"></i></button><button class="al-x" data-act="alClose" aria-label="오늘은 그만 보기">×</button>`;
+  ddNotify(items, sig);
+}
+/* 브라우저 알림(허용했을 때만, 같은 내용은 하루 한 번) */
+function ddNotify(items, sig) {
+  try {
+    if (!('Notification' in window) || Notification.permission !== 'granted') return;
+    const n = lsGet(ALN); if (n.day === today() && n.sig === sig) return; lsSet(ALN, { day: today(), sig });
+    const body = items.slice(0, 4).map(i => `${ddBadge(i.n)} ${i.t}`).join('\n') + (items.length > 4 ? `\n외 ${items.length - 4}건` : '');
+    const opt = { body, icon: 'icons/icon-192.png', tag: 'tf-alarm' };
+    if (navigator.serviceWorker && navigator.serviceWorker.ready) navigator.serviceWorker.ready.then(r => r.showNotification('업무파탈 · 기한 알림', opt)).catch(() => new Notification('업무파탈 · 기한 알림', opt));
+    else new Notification('업무파탈 · 기한 알림', opt);
+  } catch (e) { }
+}
+
+/* ---- 오늘 화면: 위쪽 디데이 칩 + 관리용 줄(r13) ---- */
+function ddayStrip() {
+  const L = ddList().map(x => ({ ...x, n: dd(x.date) })).filter(x => x.n !== null && x.n >= 0).sort((a, b) => a.n - b.n).slice(0, 4);
+  if (!L.length) return '';
+  return `<div class="ddstrip" aria-label="디데이">${L.map(x => `<span class="ddc ${x.n <= 1 ? 'hot' : ''}"><b>${ddBadge(x.n)}</b>${esc(x.title)}</span>`).join('')}</div>`;
+}
+function ddayRow() {
+  const L = ddList().slice().sort((a, b) => a.date.localeCompare(b.date)), nx = L.find(x => dd(x.date) >= 0);
+  const perm = ('Notification' in window) ? Notification.permission : 'none', N = alarmDays();
+  const st = nx ? `${esc(nx.title)} <b>${ddBadge(dd(nx.date))}</b>` : '기다리는 날을 추가해 보세요';
+  const body = (L.length ? L.map(x => `<div class="td"><span class="ddn ${dd(x.date) < 0 ? 'past' : ''}">${ddBadge(dd(x.date))}</span><span class="tl">${esc(x.title)}</span><span class="mu">${md(x.date)}</span>${xbtn('ddDel', x.id)}</div>`).join('') : '<p class="mu">수능·시험·행사처럼 기다리는 날을 추가하면 오늘 화면 위쪽에 작게 보입니다.</p>')
+    + `<div class="tools"><button class="btn sm pri" data-act="ddAdd">+ 디데이 추가</button><button class="btn sm" data-act="ddAlarm">알림 설정 (${alarmOff() ? '꺼짐' : N === 0 ? '당일만' : N + '일 전부터'})</button>${perm === 'default' ? '<button class="btn sm" data-act="ddPerm">브라우저 알림 켜기</button>' : ''}</div>`
+    + `<p class="mu">할 일·수행평가·예산·연수 기한이 ${N}일 안으로 다가오면 화면 아래에 작은 막대로 알려 드립니다.${perm === 'granted' ? ' 브라우저 알림도 함께 받습니다.' : ''} 앱을 열어 둔 동안 알려 주며, 닫아 둔 동안에는 보낼 수 없습니다.</p>`;
+  return row('r13', '일정', '디데이·기한 알림', st, '', body);
+}
+
+Object.assign(A, {
+  ddAdd() { ask('디데이 추가', [{ k: 'title', label: '이름 (예: 수능, 기말고사, 곡선제)', req: 1 }, { k: 'date', label: '날짜', type: 'date', req: 1 }], o => { ddList().push({ id: uid(), title: o.title.trim(), date: o.date }); OPEN.add('r13'); try { localStorage.setItem('tf.open', JSON.stringify([...OPEN])); } catch (e) { } commit(); toast('디데이를 추가했습니다.'); }); },
+  ddDel(el) { S.dday = ddList().filter(x => x.id !== el.dataset.id); commit(); },
+  ddAlarm() { ask('기한 알림 설정', [{ k: 'n', label: '기한 며칠 전부터 알릴까요? (0=당일만, 최대 14, 끄려면 -1)', type: 'number', val: alarmOff() ? -1 : alarmDays() }], o => { const n = parseInt(o.n, 10); S.profile.alarmDays = isNaN(n) ? 2 : Math.max(-1, Math.min(14, n)); lsSet(ALK, {}); commit(); toast(alarmOff() ? '기한 알림을 껐습니다.' : '기한 ' + alarmDays() + '일 전부터 화면 아래에 알려 드립니다.'); }); },
+  ddPerm() { if (!('Notification' in window)) return toast('이 브라우저는 알림을 지원하지 않습니다.'); Notification.requestPermission().then(p => { toast(p === 'granted' ? '브라우저 알림을 켰습니다.' : '알림이 허용되지 않았습니다.'); lsSet(ALN, {}); commit(); }); },
+  alToggle() { const b = document.getElementById('alarmbar'); if (b) { b.dataset.open = b.dataset.open === '1' ? '0' : '1'; renderAlarm(); } },
+  alClose() { lsSet(ALK, { day: today(), sig: alarmItems().map(i => i.date + i.t).join('|') }); renderAlarm(); }
+});
+BOARD_ROWS.push(['r13', '디데이·기한 알림']);
+
+/* 화면을 다시 그릴 때마다 알림 막대도 다시 계산 (날짜가 바뀌면 5분 안에 갱신) */
+(() => { const r = TF.render; TF.render = function () { const v = r.apply(this, arguments); renderAlarm(); return v; }; })();
+setInterval(renderAlarm, 5 * 60 * 1000);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) renderAlarm(); });
+window.addEventListener('hashchange', () => setTimeout(renderAlarm, 50));
+setTimeout(renderAlarm, 300);
+
+/* setui.js — 설정의 "작업표시줄에 고정 · 위젯" 안내 칸(app.js `.guide`) 위에 [앱으로 설치하기]·[위젯 열기] 버튼을 붙입니다.
+   (설정 칸 접기는 extra.js `setFold()`가 맡습니다.) */
+const isStandalone = () => { try { return matchMedia('(display-mode: standalone)').matches || navigator.standalone === true; } catch (e) { return false; } };
+let _ip = null;
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); _ip = e; });
+window.addEventListener('appinstalled', () => { _ip = null; toast('설치했습니다. 작업표시줄 아이콘을 오른쪽 클릭해 "작업 표시줄에 고정"을 누르세요.'); });
+Object.assign(A, {
+  pwaInstall() {
+    if (isStandalone()) return toast('이미 앱으로 열려 있습니다.');
+    if (!_ip) return toast('설치 창을 바로 띄울 수 없습니다. 크롬 ⋮ → 저장 및 공유 → 페이지를 앱으로 설치를 눌러 주세요.');
+    _ip.prompt(); _ip.userChoice.finally(() => { _ip = null; });
+  },
+  widgetOpen() {
+    const w = window.open('widget.html', 'tfwidget', `popup=yes,width=380,height=580,left=${Math.max(0, (screen.availWidth || 1200) - 410)},top=60`);
+    if (!w) toast('팝업이 막혔습니다. 주소창 오른쪽의 팝업 차단을 풀어 주세요.');
+  }
+});
+function installTools() {
+  const g = document.querySelector('main .guide'); if (!g || g.querySelector('.itools')) return;
+  const st = isStandalone(), d = document.createElement('div'); d.className = 'itools';
+  d.innerHTML = `<div class="tools"><button class="btn pri" data-act="pwaInstall" ${st ? 'disabled' : ''}>${st ? '✅ 앱으로 열려 있습니다' : '앱으로 설치하기'}</button><button class="btn" data-act="widgetOpen">🧩 위젯 열기</button></div><p class="mu">🧩 위젯은 디데이·기한 임박·오늘 할 일만 작게 보여 주는 창입니다(보기 전용). 설치 후 작업표시줄 아이콘을 오른쪽 클릭하면 "위젯 열기"도 나옵니다. 항상 맨 위에 두려면 Windows PowerToys의 "Always On Top"(Win+Ctrl+T)을 쓰세요.</p>`;
+  g.prepend(d);
+}
+new MutationObserver(installTools).observe(document.getElementById('app'), { childList: true, subtree: true });
+/* 맨 마지막에 불러오는 파일이라, 여기서 한 번 더 그려 새 부품(디데이 칩·줄)이 처음 화면부터 빠짐없이 나오게 함 */
+if (S.setup && TF.render) TF.render();
 </script>
 </body>
 </html>
