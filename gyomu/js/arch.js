@@ -36,13 +36,14 @@ function reflectDialog(text, name, kind) {
   if (money >= 2) opts.push(['bud', `💰 예산 장부로 (금액 ${money}곳)`]);
   if (sched) opts.push(['sch', '🗓 학사일정으로 한꺼번에']);
   if (tt) opts.push(['tt', '⏰ 시간표로']);
+  if (typeof bellFind === 'function' && bellFind(text, 1).length) opts.push(['bell', '⏰ 일과표 · 행사 일과로 (시계에 반영)']);
   if (plan || kind === '운영표') opts.push(['plan', '📘 수업 교수학습 운영표로']);
   if (!opts.length) return;
   const d = document.createElement('dialog'); d.className = 'dlg';
   d.innerHTML = `<form method="dialog"><h3>「${esc(name)}」에서 찾았어요</h3><p class="mu">자료 아카이브에는 이미 보관했습니다. 아래 중 반영하고 싶은 곳을 누르세요. 반영 전에 미리보기에서 한 번 더 확인합니다.</p><div class="rfl">${opts.map(([k, t]) => `<button type="button" class="btn" data-rf="${k}">${t}</button>`).join('')}</div><div class="dlb"><button value="cancel" class="btn">반영 안 함</button></div></form>`;
   document.body.appendChild(d);
   d.addEventListener('click', e => { const b = e.target.closest('[data-rf]'); if (!b) return; const k = b.dataset.rf; d.close(); setTimeout(() => {
-    if (k === 'ibx') ibxPreview(dates); else if (k === 'bud') budgetDialog(text); else if (k === 'sch') scheduleDialog(text); else if (k === 'tt') ttDialog(text); else if (k === 'plan' && typeof planFromText === 'function') planFromText(text, name);
+    if (k === 'ibx') ibxPreview(dates); else if (k === 'bud') budgetDialog(text); else if (k === 'sch') scheduleDialog(text); else if (k === 'tt') ttDialog(text); else if (k === 'bell') bellFlow(text, name); else if (k === 'plan' && typeof planFromText === 'function') planFromText(text, name);
   }, 60); });
   d.addEventListener('close', () => d.remove()); d.showModal();
 }
@@ -54,10 +55,10 @@ document.addEventListener('paste', e => {
   const text = cd.getData('text/plain') || ''; if (inEditable(e.target) || text.trim().length < 40) return;
   e.preventDefault();
   const d = document.createElement('dialog'); d.className = 'dlg';
-  d.innerHTML = `<form method="dialog"><h3>붙여넣은 글을 어떻게 할까요?</h3><p class="mu">${esc(text.trim().slice(0, 120))}…</p><div class="rfl"><button type="button" class="btn pri" data-pt="ibx">📅 일정·할 일·업무로 정리</button><button type="button" class="btn" data-pt="save">🗂 자료 아카이브에 글로 보관</button></div><div class="dlb"><button value="cancel" class="btn">취소</button></div></form>`;
+  d.innerHTML = `<form method="dialog"><h3>붙여넣은 글을 어떻게 할까요?</h3><p class="mu">${esc(text.trim().slice(0, 120))}…</p><div class="rfl"><button type="button" class="btn pri" data-pt="ibx">📅 일정·할 일·업무로 정리</button><button type="button" class="btn" data-pt="bell">⏰ 일과표·행사 일과로</button><button type="button" class="btn" data-pt="save">🗂 자료 아카이브에 글로 보관</button></div><div class="dlb"><button value="cancel" class="btn">취소</button></div></form>`;
   document.body.appendChild(d);
   d.addEventListener('click', ev => { const b = ev.target.closest('[data-pt]'); if (!b) return; d.close();
-    setTimeout(() => { if (b.dataset.pt === 'ibx') { const c = ibxParse(text); if (c.length) ibxPreview(c); else toast('일정이나 업무로 읽을 내용을 찾지 못했습니다.'); } else { const id = uid(), nm = '붙여넣은 글 ' + today() + ' ' + new Date().toTimeString().slice(0, 5); LIB.push({ id, name: nm, kind: '기타', text, added: today(), from: archPage(), size: text.length }); saveLib(); toast('아카이브에 보관했습니다.'); render(); } }, 60); });
+    setTimeout(() => { if (b.dataset.pt === 'bell') bellFlow(text); else if (b.dataset.pt === 'ibx') { const c = ibxParse(text); if (c.length) ibxPreview(c); else toast('일정이나 업무로 읽을 내용을 찾지 못했습니다.'); } else { const id = uid(), nm = '붙여넣은 글 ' + today() + ' ' + new Date().toTimeString().slice(0, 5); LIB.push({ id, name: nm, kind: '기타', text, added: today(), from: archPage(), size: text.length }); saveLib(); toast('아카이브에 보관했습니다.'); render(); } }, 60); });
   d.addEventListener('close', () => d.remove()); d.showModal();
 });
 ['dragenter', 'dragover'].forEach(ev => document.addEventListener(ev, e => { if (e.dataTransfer && [...(e.dataTransfer.types || [])].includes('Files')) { e.preventDefault(); document.body.classList.add('dropping'); } }));

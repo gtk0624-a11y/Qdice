@@ -250,3 +250,8 @@ service cloud.firestore {
 - notes2.js: `S.meetings`(회의 이름 목록, 사용자가 추가), 노트의 `meeting` 필드. 기록 목록 날짜순/회의별 전환(`UI.nv`), 「제목 보고 회의 자동 분류」(`S.profile.autoMeet`, 선택).
 - deco.js: 시계(`S.profile.clock`, 급식 `lunchS/lunchE` — 비면 일과표의 가장 긴 쉬는 시간), 꾸미기(`S.profile.deco` {on,dim,blur,washi,stick}, 배경 사진은 IDB 키 'deco'에 1600px JPEG로 저장), 격려 500개(`CH_A` 50 × `CH_B` 10, `S.profile.cheer`='today'|'off'). 설정 화면에 `.decoset` 카드가 자동 삽입됩니다.
 - 주의: 단체사진은 학생 얼굴이 담긴 개인정보이므로 이 기기(IDB)에만 저장되고 클라우드 동기화에 포함되지 않습니다.
+
+## 일과표 파일 · 행사 일과 (bell2.js)
+- 설정의 시계 카드: [일과표 파일 올리기](한글·엑셀·PDF → `extractBell`로 읽어 기본 일과표를 그대로 교체), [행사로 일과가 바뀌었어요(붙여넣기)] → `bellFlow(text)`.
+- 행사 일과는 `S.profile.bellOv=[{from,to,label,bell,lunch,drop}]`. 오늘이 기간 안이면 `clkPeriods/clkLunch/periodInfo`가 이것을 쓰고, 기간이 지나면 `bellPrune`이 지워 원래 일과표로 자동 복귀합니다. `drop`=적지 않은 교시는 없는 것으로.
+- 파일·붙여넣기 어디서든(arch.js 반영 창/붙여넣기 창) "⏰ 일과표·행사 일과로" 버튼이 나옵니다. 고칠 곳: `bellFind`(시각 인식 정규식), `bellDates`, `bellLabel`.
