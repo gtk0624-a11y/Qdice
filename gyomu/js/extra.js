@@ -1,5 +1,5 @@
 /* extra.js — ① 페이지별 메모  ② 공문 처리 기록(무슨 공문을 어떻게 처리했는지) */
-const PMEMO = [['today', '오늘'], ['cal', '캘린더'], ['class', '수업'], ['eval', '평가'], ['files', '자료 아카이브'], ['budget', '예산'], ['notes', '기록'], ['pages', '페이지'], ['lib', '자료·연락'], ['set', '설정']];
+const PMEMO = [['today', '오늘'], ['cal', '캘린더'], ['class', '수업 및 시간표'], ['eval', '평가'], ['files', '자료 아카이브'], ['budget', '예산'], ['notes', '기록'], ['pages', '페이지'], ['lib', '자료·연락'], ['set', '설정']];
 function pageMemo(page) {
   const hit = PMEMO.find(x => x[0] === page); if (!hit) return '';
   const v = (S.pmemo || {})[page] || '';

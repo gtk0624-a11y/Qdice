@@ -287,3 +287,21 @@ service cloud.firestore {
 
 ## 부팅 시 자동 열기 (boot.js)
 - 설정 「💻 컴퓨터 켜면 자동으로 열기」: 브라우저(엣지/크롬)·대기 시간·평일만 선택 → `travail-fatal-start.bat` 생성(`bootMake`). 사용자가 `shell:startup` 폴더에 넣으면 부팅 때 `--app=주소`로 열림. 웹 페이지가 스스로 부팅 실행은 불가하므로 시작 파일 방식. 윈도우 전용, 체험판에서는 생성 안 함. 저장: S.profile.bootBr/bootWk/bootDl.
+
+## 오늘의 한마디 (quotes.js / deco.js)
+- quotes.js: `QT_Q`(명언 500 [문장,출처]) · `QT_G`(격언·속담·사자성어 500) · `QT_C`(위로의 글 500, 직접 작성·출처 없음). 원본 텍스트는 data/q_a.txt · g_a.txt · c_c.txt(`문장|출처`), 고칠 때는 txt를 고치고 JSON으로 다시 변환.
+- deco.js `cheerPick(shift)`: 날짜 시드로 매일 다른 글(간격 7 ↔ 500 서로소라 500일 겹치지 않음). `S.profile.cheerKind`(mix/q/g/c), `cheer`(오늘 화면 맨 위), `cheerClk`(시계). 「다른 말」 버튼은 shift만 올림.
+- 주의: 출처는 전해 오는 기록과 기억에 기초한 것이라 번역·귀속 오류가 있을 수 있음. 틀린 줄은 txt에서 삭제.
+
+## 펜 메모 · 끌어서 순서 · 유튜브 (pen.js)
+- 펜 메모: 캔버스 PNG를 IDB 'penm'에 저장(동기화 제외, `pnList`). 위치 구분 `sc`('p:페이지' / 'd:날짜'). 펜 감지 시 터치(손바닥) 무시.
+- 끌기: `drBegin`(pointer 이벤트, 마우스 6px·터치 길게 350ms·손잡이 ⠿ 즉시) → `drMerge`가 `S.order.nav/rows`에 저장. 메뉴는 `nav.nav a`, 줄은 `row()` 래퍼가 붙인 `.drg`, 순서창은 `A.ordPick` 래퍼가 손잡이를 붙임.
+- 유튜브: `#ytfab`·`#ytpan`(body 직속이라 화면이 다시 그려져도 재생 유지), 설정 `S.profile.ytBtn`, 즐겨찾기는 localStorage 'tf.yt'. 뮤직 사이트 자체는 임베드 불가 → 새 창.
+## 오늘 도우미 (helper.js)
+- `S.lessonLog[]`(수업 후 기록) · `S.cellLink{}`('요일-교시'→URL, 시간표 칸 🔗) · `S.endCk/endCustom`(학기말 점검표) · `S.workout{}` · `S.weekRv{}`(한 주 소감). 학생 메모는 IDB 'stum'(개인정보라 동기화·백업 제외). 설정 `helperOn`.
+- 화면이 render()로 직접 다시 그려져도 카드가 사라지지 않도록 portal.js 맨 끝 MutationObserver가 재부착.
+## 교무포털 담기 (portal.js)
+- 북마클릿(`ptCode`)이 포털 화면의 글·첨부 링크(+같은 사이트 링크 최대 30쪽, 읽기 전용·로그아웃/삭제/저장성 링크 제외)를 읽어 `window.open`+`postMessage`로 업무파탈에 전달 → `ptReceive`가 자료 보관함 LIB(kind '교무포털', from 'portal')에 저장하거나 ibxParse로 일정 뽑기. `e.source===window.opener`일 때만 받음. 포털 주소 `S.profile.portalUrl`(사용자 입력).
+- 위험: 학생 개인정보가 보이는 쪽은 체크 해제 안내. 포털이 javascript: 북마클릿·팝업을 막으면 「복사해서 붙여넣어 담기」 사용.
+## 퇴근 타이머 (deco.js)
+- `S.profile.offOn/offT/offMin` → `clkOffTxt()`(1초 갱신, 평일만, 퇴근 후 5분간 🎉 문구).

@@ -783,3 +783,40 @@ body[data-wt=navy] main h2,body[data-wt=navy] main .h3,.wpv[data-wt=navy]{backgr
 .pst{width:148px!important;opacity:.9;cursor:grab;transition:opacity .15s}.pst:hover,.pst:active{opacity:1}.pst .pt{font-size:13px}
 .pst.min{opacity:.8}.pdsel{display:inline-flex;gap:4px;flex-wrap:wrap}.pdsel select{min-height:36px}
 @media(max-width:560px){.pst{width:124px!important}.pst .pt{font-size:12px}}
+
+#tfclock .co{margin-top:6px;font-size:14px;font-weight:800;color:#b3261e;font-variant-numeric:tabular-nums}
+@media(max-width:1539px){#tfclock .co{flex:1 0 100%;margin:0;font-size:13px}}
+
+/* 펜 메모 · 끌기 · 유튜브 */
+.penbox{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:8px}.penth{display:flex;flex-wrap:wrap;gap:8px;flex:1 0 100%}
+.pnt{position:relative;display:inline-block}.pnt img{height:70px;max-width:160px;object-fit:cover;border:2px solid #333;border-radius:6px;background:#fffef2;cursor:pointer}
+.pnt .x{position:absolute;top:-8px;right:-8px;width:22px;height:22px;border-radius:50%;border:1.5px solid #333;background:#fff;font-size:11px;line-height:1;padding:0;cursor:pointer}
+dialog.pndlg{max-width:820px;width:96vw}.pncv{display:block;border:2px solid #333;border-radius:8px;background:#fffef2;margin:8px auto;touch-action:none;cursor:crosshair}
+.pnbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}.pnc{width:30px;height:30px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 1.5px #333;cursor:pointer;padding:0}.pnc.on{box-shadow:0 0 0 3px #e91e63}
+.drg{display:inline-block;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;padding:2px 8px;margin-right:4px;color:#888;font-size:16px;line-height:1;border-radius:6px}.drg:hover{background:rgba(0,0,0,.08)}
+.drgng{opacity:.55;pointer-events:none;outline:2px dashed #e91e63;outline-offset:2px}body.drgbody{cursor:grabbing;user-select:none;-webkit-user-select:none}
+nav.nav a{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
+.ordr .drg{margin-right:8px}
+#ytfab{position:fixed;left:12px;bottom:64px;z-index:41;width:46px;height:46px;border-radius:50%;border:2px solid #333;background:#fff;font-size:22px;cursor:pointer;box-shadow:2px 3px 0 rgba(0,0,0,.25);padding:0}
+html[data-nav=bottom] #ytfab{bottom:120px}
+#ytpan{position:fixed;left:12px;bottom:118px;z-index:42;width:min(380px,calc(100vw - 24px));max-height:calc(100vh - 140px);overflow:auto;background:#fff;color:#222;border:2px solid #333;border-radius:14px;box-shadow:4px 5px 0 rgba(0,0,0,.3);padding:10px 12px;box-sizing:border-box}
+#ytpan[hidden]{display:none}.yth{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}.yth .x,.ytf .x{border:1.5px solid #333;background:#fff;border-radius:50%;width:24px;height:24px;cursor:pointer;padding:0}
+.ytlk,.ytact,.ytfv{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}.ytfm{display:flex;gap:6px;margin:6px 0;flex-wrap:wrap}.ytfm input{flex:1 1 140px;min-width:0;padding:7px 8px;border:1.5px solid #333;border-radius:8px;font:inherit}
+#ytfr iframe{width:100%;aspect-ratio:16/9;border:0;border-radius:8px;background:#000}.ytf{display:inline-flex;gap:3px;align-items:center}
+
+/* 오늘 도우미 */
+.hpcard{border:2px solid #333;border-radius:14px;background:#fffaf0;padding:8px 12px;margin:10px 0}.hpcard>summary{cursor:pointer;font-weight:800;font-size:16px}.hpcard small{font-weight:500;color:#777;margin-left:6px}
+.hpin{margin:6px 0;font-size:14px;line-height:1.6}.hpw{background:#fff0f0;border:1.5px solid #d33;border-radius:8px;padding:6px 10px;margin:6px 0;font-size:13.5px}
+.hpcard .tools{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}.hpwk{margin-right:8px}
+.hpdlg .hpr{display:flex;justify-content:space-between;gap:8px;align-items:center;padding:6px 0;border-bottom:1px dashed #bbb;flex-wrap:wrap}.hpdlg .hpr>span:last-child{display:flex;gap:6px;flex-wrap:wrap}
+.hpdlg .hpf{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}.hpdlg .hpf input,.hpdlg .hpf select{flex:1 1 150px;min-width:0;padding:7px 8px;border:1.5px solid #333;border-radius:8px;font:inherit}
+.hpsum{display:flex;flex-wrap:wrap;gap:10px;margin:8px 0;font-size:15px}.hpsum span{background:#f4f0e6;border-radius:10px;padding:5px 10px}
+.hpck{display:flex;gap:6px;align-items:center;padding:3px 0}.hpdlg .hot{color:#c62828}.hpdlg .tbl{width:100%;border-collapse:collapse;font-size:14px}.hpdlg .tbl td,.hpdlg .tbl th{border:1px solid #ccc;padding:4px 6px;text-align:left}
+.cl{text-decoration:none;font-size:13px}.hpidea{background:#fff;border:1.5px solid #ccc;border-radius:8px;padding:10px;max-height:50vh;overflow:auto;line-height:1.6}
+.row>summary{position:relative}.row>summary>.drg{position:absolute;left:-28px;top:50%;transform:translateY(-50%);margin:0;padding:6px 6px;z-index:2}
+@media(max-width:900px){.row>summary>.drg{left:auto;right:22px;top:6px;transform:none;background:rgba(255,255,255,.7)}}
+.hpcard .tools .btn,.hpcard .tools button,.hpcard .tools a.btn{width:auto!important;flex:0 1 auto!important;display:inline-flex!important}
+.hpcard summary small{display:block;margin:2px 0 0}
+#ytpan{z-index:80!important}#ytpan .btn,#ytpan button.btn{padding:5px 10px!important;font-size:13px!important;min-height:0!important;width:auto!important;box-shadow:1px 2px 0 rgba(0,0,0,.25)}
+#ytpan .ytfm input{padding:6px 8px!important;font-size:13px!important}
+.hpdlg .tools .btn,.hpdlg .tools button{width:auto!important}
