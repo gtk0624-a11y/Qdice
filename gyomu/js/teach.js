@@ -47,13 +47,13 @@ function gridTable(get, o = {}) {
   const ended = (d, p) => { if (!o.live || dow === 0 || dow === 6) return false; if (d < dow) return true; if (d > dow) return false; const x = PL.find(y => y.p === p); return !!(x && mn >= x.e); };
   let h = `<div class="ctw"><table class="tbl wk"><thead><tr><th></th>${[1, 2, 3, 4, 5].map(d => `<th class="${o.live && dow === d ? 'tdy' : ''}">${DOW[d]}</th>`).join('')}</tr></thead><tbody>`;
   for (let p = 1; p <= P; p++) {
-    if (p > 6 && ![1, 2, 3, 4, 5].some(d => get(d, p))) continue;
-    h += `<tr><th>${p}</th>` + [1, 2, 3, 4, 5].map(d => { const c = get(d, p), mk = (o.mark || {})[d + '-' + p]; if (!c) return `<td class="${mk ? 'mk-' + mk.k : ''}" ${mk && mk.t ? `title="${esc(mk.t)}"` : ''}>${mk ? esc(mk.l || '') : ''}</td>`; return `<td class="${ended(d, p) ? 'dn' : ''} ${mk ? 'mk-' + mk.k : ''}" style="${cellBg(c.txt)}">${esc(c.txt)}${ended(d, p) ? '<i class="okc">✓</i>' : ''}${mk && mk.l ? `<small>${esc(mk.l)}</small>` : ''}</td>`; }).join('') + '</tr>';
+    if (p > 6 && ![1, 2, 3, 4, 5].some(d => get(d, p) || (o.dates && cusHas(o.dates[d], p)))) continue;
+    h += `<tr><th>${p}</th>` + [1, 2, 3, 4, 5].map(d => { const c = get(d, p), mk = (o.mark || {})[d + '-' + p], ev = o.dates ? cusSlot(o.dates[d], p) : ''; if (!c) return `<td class="${mk ? 'mk-' + mk.k : ''}" ${mk && mk.t ? `title="${esc(mk.t)}"` : ''}>${mk ? esc(mk.l || '') : ''}${ev}</td>`; return `<td class="${ended(d, p) ? 'dn' : ''} ${mk ? 'mk-' + mk.k : ''}" style="${cellBg(c.txt)}">${esc(c.txt)}${ev}${ended(d, p) ? '<i class="okc">✓</i>' : ''}${mk && mk.l ? `<small>${esc(mk.l)}</small>` : ''}</td>`; }).join('') + '</tr>';
   }
   return h + '</tbody></table></div>';
 }
 const myGet = (d, p) => { const v = S.timetable[d + '-' + p]; return v ? { txt: v } : null; };
-function wkGrid() { return `<details class="wkd" open><summary><b>이번 주 시간표</b> <span class="mu">(세로 · 오늘 칸 표시 · 끝난 수업 ✓)</span></summary>${gridTable(myGet, { live: true })}</details>`; }
+function wkGrid(wkend) { const m = new Date(); m.setHours(0, 0, 0, 0); m.setDate(m.getDate() - ((m.getDay() + 6) % 7) + (wkend ? 7 : 0)); const dates = {}; for (let d = 1; d <= 5; d++) { const x = new Date(m); x.setDate(x.getDate() + d - 1); dates[d] = ymd(x); } return `<details class="wkd" open><summary><b>${wkend ? '다음 주' : '이번 주'} 시간표</b> <span class="mu">(세로 · 오늘 칸 표시 · 끝난 수업 ✓)</span></summary>${gridTable(myGet, { live: !wkend, dates })}</details>`; }
 const pGet = p => (d, q) => { const l = p.cells[d + '-' + q]; return l ? { txt: `${l.g}-${l.c} ${l.s}` } : null; };
 const slotName = k => { const [d, p] = k.split('-'); return DOW[d] + p; };
 /* ----- 분석 ----- */

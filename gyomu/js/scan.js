@@ -1,11 +1,11 @@
 /* 종이에 손으로 쓴 메모·수첩 사진 → 일정/할 일/업무 인식 (Claude 비전, 본인 키 필요). 확인 창에서 고친 뒤 추가. */
 let SC = null;
 const scImg = f => new Promise((res, rej) => { const im = new Image(), u = URL.createObjectURL(f); im.onload = () => { const k = Math.min(1, 1600 / Math.max(im.width, im.height)), c = document.createElement('canvas'); c.width = Math.round(im.width * k); c.height = Math.round(im.height * k); c.getContext('2d').drawImage(im, 0, 0, c.width, c.height); URL.revokeObjectURL(u); res(c.toDataURL('image/jpeg', 0.85).split(',')[1]); }; im.onerror = () => rej(new Error('사진을 읽지 못했습니다')); im.src = u; });
-const SC_TOOL = [{ name: 'save_items', description: '사진 속 손글씨에서 읽은 항목들', input_schema: { type: 'object', properties: { items: { type: 'array', items: { type: 'object', properties: { title: { type: 'string' }, date: { type: 'string', description: 'YYYY-MM-DD, 모르면 빈 문자열' }, time: { type: 'string', description: 'HH:MM, 없으면 빈 문자열' }, kind: { type: 'string', enum: ['event', 'todo', 'work'], description: 'event=일정(행사·회의·약속), todo=마감 있는 할 일, work=내 업무' } }, required: ['title', 'kind'] } } }, required: ['items'] } }];
+const SC_TOOL = [{ name: 'save_items', description: '사진 속 손글씨에서 읽은 항목들', input_schema: { type: 'object', properties: { items: { type: 'array', items: { type: 'object', properties: { title: { type: 'string' }, date: { type: 'string', description: 'YYYY-MM-DD, 모르면 빈 문자열' }, time: { type: 'string', description: 'HH:MM, 없으면 빈 문자열' }, period: { type: 'integer', description: '몇 교시인지(1~9), 없으면 0' }, kind: { type: 'string', enum: ['event', 'todo', 'work'], description: 'event=일정(행사·회의·약속), todo=마감 있는 할 일, work=내 업무' } }, required: ['title', 'kind'] } } }, required: ['items'] } }];
 async function scanRun(file) {
   const dlg = scDlg(); dlg.innerHTML = '<p class="mu">✍️ 손글씨를 읽는 중입니다… (몇 초 걸립니다)</p>';
   let items;
-  if (window.TF_DEMO) { await new Promise(r => setTimeout(r, 900)); const t = new Date(); const d = n => { const x = new Date(t); x.setDate(x.getDate() + n); return `${x.getFullYear()}-${pad(x.getMonth() + 1)}-${pad(x.getDate())}`; }; items = [{ title: '교직원 회의', date: d(2), time: '16:00', kind: 'event' }, { title: '학년말 평가 자료 제출', date: d(7), time: '', kind: 'todo' }, { title: '학생 인권 실태조사 점검', date: '', time: '', kind: 'work' }]; dlg.dataset.demo = '1'; }
+  if (window.TF_DEMO) { await new Promise(r => setTimeout(r, 900)); const t = new Date(); const d = n => { const x = new Date(t); x.setDate(x.getDate() + n); return `${x.getFullYear()}-${pad(x.getMonth() + 1)}-${pad(x.getDate())}`; }; items = [{ title: '교직원 회의', date: d(2), time: '16:00', kind: 'event' }, { title: '도박예방교육', date: d(3), time: '', kind: 'event', period: 7 }, { title: '학년말 평가 자료 제출', date: d(7), time: '', kind: 'todo' }, { title: '학생 인권 실태조사 점검', date: '', time: '', kind: 'work' }]; dlg.dataset.demo = '1'; }
   else {
     if (!agKey()) { dlg.innerHTML = '<h3>📷 손글씨 사진 인식</h3><p>이 기능은 <b>본인 Claude 키</b>가 있어야 켜집니다. 설정 → AI 키에 넣으면 바로 쓸 수 있고, 키는 이 기기에만 저장됩니다.</p><p class="mu">키가 없어도 날짜 화면에서 직접 입력하는 것은 그대로 됩니다.</p><button class="btn" id="scx">닫기</button>'; return; }
     try {
@@ -21,12 +21,12 @@ function scDlg() { let d = document.getElementById('scdlg'); if (!d) { d = docum
 function scShow() {
   const d = scDlg();
   if (!SC.length) { d.innerHTML = '<p>읽어 낸 항목이 없습니다. 글씨가 크게 나오도록 다시 찍어 보세요.</p><button class="btn" id="scx">닫기</button>'; return; }
-  d.innerHTML = `<h3>📷 이렇게 읽었어요</h3><p class="mu">틀린 곳은 고친 뒤 추가하세요. 체크를 끄면 빠집니다.${d.dataset.demo ? ' (체험판 예시 결과)' : ''}</p>` + SC.map((x, i) => `<div class="scr"><input type="checkbox" data-sc="${i}" data-f="on" ${x.on ? 'checked' : ''} aria-label="추가"><select data-sc="${i}" data-f="kind"><option value="event"${x.kind === 'event' ? ' selected' : ''}>일정</option><option value="todo"${x.kind === 'todo' ? ' selected' : ''}>할 일</option><option value="work"${x.kind === 'work' ? ' selected' : ''}>업무</option></select><input type="date" data-sc="${i}" data-f="date" value="${esc(x.date || '')}"><input type="time" data-sc="${i}" data-f="time" value="${esc(x.time || '')}"><input data-sc="${i}" data-f="title" value="${esc(x.title)}"></div>`).join('') + '<div class="tools"><button class="btn pri" id="scok">✅ 선택한 것 추가</button><button class="btn" id="scx">취소</button></div>';
+  d.innerHTML = `<h3>📷 이렇게 읽었어요</h3><p class="mu">틀린 곳은 고친 뒤 추가하세요. 체크를 끄면 빠집니다.${d.dataset.demo ? ' (체험판 예시 결과)' : ''}</p>` + SC.map((x, i) => `<div class="scr"><input type="checkbox" data-sc="${i}" data-f="on" ${x.on ? 'checked' : ''} aria-label="추가"><select data-sc="${i}" data-f="kind" data-cus="kind" data-work="1">${cusKindOpts(true, x.kind)}</select><select data-sc="${i}" data-f="period" aria-label="교시"><option value="">교시 없음</option>${[1,2,3,4,5,6,7].map(n => `<option value="${n}" ${+x.period === n ? 'selected' : ''}>${n}교시</option>`).join('')}</select><input type="date" data-sc="${i}" data-f="date" value="${esc(x.date || '')}"><input type="time" data-sc="${i}" data-f="time" value="${esc(x.time || '')}"><input data-sc="${i}" data-f="title" value="${esc(x.title)}"></div>`).join('') + '<div class="tools"><button class="btn pri" id="scok">✅ 선택한 것 추가</button><button class="btn" id="scx">취소</button></div>';
 }
 function scApply(d) {
   let n = 0; SC.filter(x => x.on && x.title.trim()).forEach(x => {
-    let t = x.title.trim(); if (x.time) t = x.time + ' ' + t; if (x.kind === 'work') t = '[업무] ' + t;
-    S.items.push({ id: uid(), title: t, date: x.date || today(), cat: x.kind === 'event' ? 'event' : 'todo', done: false }); n++;
+    const mk = cusMk(x.kind, x.title, x.period); if (x.time) mk.title = x.time + ' ' + mk.title;
+    S.items.push({ id: uid(), date: x.date || today(), done: false, ...mk }); n++;
   });
   commit(); d.close(); toast(n + '건을 캘린더에 반영했습니다.');
 }

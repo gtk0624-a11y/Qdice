@@ -740,3 +740,18 @@ dialog.daypg{width:min(94vw,640px);max-height:90vh;overflow:auto;padding:14px 16
 #chatbub{right:16px!important;bottom:116px!important;max-width:calc(100vw - 32px)!important;overflow:visible!important}
 #chatbub::after{right:36px!important;bottom:-9px!important;border:8px solid transparent!important;border-top-color:var(--ink)!important;border-bottom:0!important}
 html[data-nav=bottom] #chatbub{bottom:180px!important}
+/* 캘린더↔시간표 연동 표시 + 기기별 조정 */
+.slev{display:block;margin-top:3px;padding:2px 5px;border-radius:6px;background:#fff3b0;border:1px solid #e6c200;color:#5a4700;font-size:11px;font-weight:700;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;box-sizing:border-box}.slev.dn{opacity:.55;text-decoration:line-through}
+.pc{min-width:0}.strip .pc{overflow:hidden}
+.cusr{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--rule)}.cusm{width:min(92vw,420px)}
+.dph{flex-wrap:wrap}.dph .dpclose{margin-left:auto;min-height:40px}.dph b{flex:1 1 auto;text-align:center;font-size:clamp(16px,4.6vw,20px);min-width:0}
+.dpf select,.dpf input,.dpf button,.scr select,.scr input{min-height:40px;max-width:100%;box-sizing:border-box;font-size:16px}
+.dpf select{flex:0 1 auto;min-width:0}.tools{display:flex;flex-wrap:wrap;gap:8px}.tools .btn{min-height:40px}
+dialog.daypg::backdrop{background:rgba(0,0,0,.45)}
+@media(max-width:600px){
+ dialog.daypg{width:100vw;max-width:100vw;max-height:94vh;margin:auto 0 0;border-radius:16px 16px 0 0;padding:12px}
+ .dpf{display:grid;grid-template-columns:1fr 1fr;gap:6px}.dpf input[name=title]{grid-column:1/-1}.dpf .btn{grid-column:1/-1}
+ .scr{display:grid;grid-template-columns:auto 1fr 1fr;gap:4px}.scr input[data-f=title]{grid-column:1/-1}
+ .tdtabs button{padding:4px 9px}.slev{font-size:10px}}
+@media(min-width:601px) and (max-width:1024px){dialog.daypg{width:min(88vw,600px)}.strip .pc{flex-basis:96px}}
+@media(min-width:1025px){dialog.daypg{width:640px}}

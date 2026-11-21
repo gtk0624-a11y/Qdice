@@ -11,7 +11,7 @@ const kcls = k => 'k-' + String(k).replace(/\s/g, '');
 function allEvents() {
   const e = [];
   S.items.forEach(i => {
-    if (!i.date) return; const kind = i.cat === 'todo' ? '할 일' : (i.src === '학사' ? '학사' : '일정');
+    if (!i.date) return; const kind = i.tag || (i.cat === 'todo' ? '할 일' : (i.src === '학사' ? '학사' : '일정'));
     if (i.end && i.end > i.date) { const a = new Date(i.date + 'T00:00:00'), b = new Date(i.end + 'T00:00:00'); for (let k = 0, d = new Date(a); d <= b && k < 70; k++, d.setDate(d.getDate() + 1)) e.push({ date: ymd(d), t: `${i.title} (${md(i.date)}~${md(i.end)})`, kind, id: i.id, done: i.done, span: true }); }
     else e.push({ date: i.date, t: i.title, kind, id: i.id, done: i.done });
   });
@@ -86,10 +86,10 @@ function todayView() {
       else st = '오늘 수업이 모두 끝났습니다';
     }
     const wk = P.dow === 0 || P.dow === 6, sd = UI.tdDay || (wk ? 1 : P.dow), isT = !wk && sd === P.dow;
-    const mon = new Date(); mon.setHours(0, 0, 0, 0); mon.setDate(mon.getDate() - ((mon.getDay() + 6) % 7) + (wk ? 7 : 0)); const dd = d => { const x = new Date(mon); x.setDate(x.getDate() + d - 1); return (x.getMonth() + 1) + '/' + x.getDate(); };
+    const mon = new Date(); mon.setHours(0, 0, 0, 0); mon.setDate(mon.getDate() - ((mon.getDay() + 6) % 7) + (wk ? 7 : 0)); const dd = d => { const x = new Date(mon); x.setDate(x.getDate() + d - 1); return (x.getMonth() + 1) + '/' + x.getDate(); }, dfull = d => { const x = new Date(mon); x.setDate(x.getDate() + d - 1); return ymd(x); };
     const tabs = `<div class="tdtabs" role="tablist">` + [1, 2, 3, 4, 5].map(d => `<button class="${d === sd ? 'on' : ''}${!wk && d === P.dow ? ' tdy' : ''}" role="tab" aria-selected="${d === sd}" data-act="tdDay" data-d="${d}">${DOW[d]}<small>${dd(d)}</small></button>`).join('') + '</div>';
-    let b = `<p class="mu"><b>${DOW[sd]}요일(${dd(sd)}) 시간표${isT ? ' · 오늘' : wk && sd === 1 && !UI.tdDay ? ' · 다음 수업일' : ''}</b></p>${tabs}<div class="strip">` + [1, 2, 3, 4, 5, 6, 7].map(p => { const PL = typeof clkPeriods === 'function' ? clkPeriods() : [], nw = new Date(), mn = nw.getHours() * 60 + nw.getMinutes(), pp = PL.find(y => y.p === p), ended = isT && pp && mn >= pp.e, THX = ['수고했어요^^', '고생했어요♡', '잘했어요!', '오늘도 굿~', '한 시간 끝!', '멋졌어요✿', '푹 쉬어요^^'], has = tt(sd, p); return `<div class="pc ${isT && P.cur === p ? 'now' : ''} ${ended ? 'done' : ''}" style="${typeof cellBg === 'function' && has && !ended ? cellBg(has) : ''}"><b>${p}</b>${esc(has || '—')}${ended && has ? `<span class="okm">✅ 수업 완료</span><span class="thx">${THX[(p * 3 + sd) % THX.length]}</span>` : ''}</div>`; }).join('') + '</div>';
-    if (typeof wkGrid === 'function') b += wkGrid();
+    let b = `<p class="mu"><b>${DOW[sd]}요일(${dd(sd)}) 시간표${isT ? ' · 오늘' : wk && sd === 1 && !UI.tdDay ? ' · 다음 수업일' : ''}</b></p>${tabs}<div class="strip">` + [1, 2, 3, 4, 5, 6, 7].map(p => { const PL = typeof clkPeriods === 'function' ? clkPeriods() : [], nw = new Date(), mn = nw.getHours() * 60 + nw.getMinutes(), pp = PL.find(y => y.p === p), ended = isT && pp && mn >= pp.e, THX = ['수고했어요^^', '고생했어요♡', '잘했어요!', '오늘도 굿~', '한 시간 끝!', '멋졌어요✿', '푹 쉬어요^^'], has = tt(sd, p); return `<div class="pc ${isT && P.cur === p ? 'now' : ''} ${ended ? 'done' : ''}" style="${typeof cellBg === 'function' && has && !ended ? cellBg(has) : ''}"><b>${p}</b>${esc(has || '—')}${typeof cusSlot === 'function' ? cusSlot(dfull(sd), p) : ''}${ended && has ? `<span class="okm">✅ 수업 완료</span><span class="thx">${THX[(p * 3 + sd) % THX.length]}</span>` : ''}</div>`; }).join('') + '</div>';
+    if (typeof wkGrid === 'function') b += wkGrid(wk);
     b += `<div class="tools"><a class="btn pri" href="#/class">✏️ 시간표 입력·수정하기</a><button class="btn" data-act="comci">🔄 컴시간알리미에서 가져오기</button></div><p class="mu">${has ? '시간표를 고치려면 위 버튼(수업 화면의 시간표 표)을 누르세요. 컴시간과 연동해 자동으로 가져옵니다.' : '<b>아직 시간표가 비어 있어요.</b> 위 [시간표 입력·수정하기]에서 칸에 직접 적거나, [컴시간알리미에서 가져오기]를 누르세요.'}</p>`;
     rows.push(row('r1', '오늘', '일과', st, due, b));
   }
@@ -191,7 +191,7 @@ function calView() {
   <div class="tools"><label class="btn file">학사일정 파일 올리기<input type="file" id="schedUp" accept=".txt,.csv,.xlsx,.xls,.pdf,.hwp,.hwpx,.docx" hidden></label><button class="btn" data-act="schedPaste">학사일정 붙여넣기</button></div><p class="mu">학사일정(PDF·엑셀·텍스트, 또는 나이스·홈페이지에서 복사한 글)을 넣으면 날짜와 행사를 찾아 캘린더에 한꺼번에 넣어 드립니다. 「3/2 입학식」「7.21~8.20 여름방학」 같은 줄을 알아봅니다.</p>
   <h3 class="h3">${md(UI.day)} (${DOW[new Date(UI.day + 'T00:00:00').getDay()]})</h3>${list}
   ${typeof dayMemoBox === 'function' ? dayMemoBox(UI.day) : ''}
-  <form class="inl" data-form="evt"><input name="title" placeholder="일정·할 일 추가" required aria-label="내용"><select name="cat" aria-label="종류"><option value="event">일정</option><option value="todo">할 일</option></select><button class="btn">추가</button></form>`;
+  <form class="inl" data-form="evt"><input name="title" placeholder="일정·할 일 추가" required aria-label="내용"><select name="cat" aria-label="종류" data-cus="kind">${cusKindOpts(false, 'event')}</select><button class="btn">추가</button></form>`;
 }
 
 /* ---------- 수업·평가·시간표 ---------- */
@@ -381,7 +381,7 @@ document.addEventListener('click', e => { const el = e.target.closest('[data-act
 const FM = {
   todo(f) { const o = Object.fromEntries(new FormData(f)); S.items.push({ id: uid(), title: o.title, date: o.date || today(), cat: 'todo', done: false }); commit(); },
   pspend(f) { const o = Object.fromEntries(new FormData(f)), p = find('budget', f.dataset.p); const amt = +o.amt; if (!(amt > 0)) return toast('사용 금액을 입력해 주세요.'); (p.spends = p.spends || []).push({ id: uid(), date: o.date || today(), desc: o.desc || '사용', amt }); commit(); },
-  evt(f) { const o = Object.fromEntries(new FormData(f)); S.items.push({ id: uid(), title: o.title, date: UI.day, cat: o.cat, done: false }); commit(); },
+  evt(f) { const o = Object.fromEntries(new FormData(f)); S.items.push({ id: uid(), date: UI.day, done: false, ...cusMk(o.cat, o.title) }); commit(); },
   toTodo(f) {
     const n = find('notes', f.dataset.id), d = new FormData(f).get('date') || today(); const lines = String(n.followups || '').split('\n').map(s => s.replace(/^[-•·*\d.)\s]+/, '').trim()).filter(Boolean);
     if (!lines.length) return toast('후속 조치를 한 줄에 하나씩 적어 주세요.');

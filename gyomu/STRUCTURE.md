@@ -270,3 +270,9 @@ service cloud.firestore {
 - scan.js: 📷 손글씨 사진 → Claude Haiku 비전(본인 키 `tf.claudeKey`) → 확인 창(종류·날짜·시각·제목 수정, 체크) → `S.items` 추가. 체험판은 예시 결과. 사진은 1600px로 줄여 전송(학생 정보 주의).
 - app.js 오늘 카드: 시간표는 한 줄(가로 스크롤), 월~금 탭+날짜(`UI.tdDay`, `A.tdDay`). 말풍선 `#chatbub`은 꿈송이 머리 위(style.css 끝).
 - 수정 위치: 프롬프트=scan.js `scanRun`, 사진 크기=`scImg`.
+
+## 내 목록 · 캘린더↔시간표 연동 (cust.js)
+- 드롭다운 끝의 「＋ 직접 추가…」/「✎ 내 목록 관리…」: 종류 선택(날짜 화면·아래 일정칸·손글씨 확인창)과 자료 종류(`#upk`,`#arcKind`)에 적용. 저장 `S.profile.lists` ({kind:[{n,b:'event'|'todo'}], upk:[], arc:[]}). 새 드롭다운에 쓰려면 `data-cus="kind"`(+`data-work="1"`) 또는 `CUS_STR`에 선택자 추가. 예산·학급 등 ID 값 드롭다운은 일부러 제외.
+- 사용자 종류는 item.tag(이름표)+item.cat(성격)로 저장, `cusMk(값,제목,교시)`가 항목 필드를 만듭니다.
+- 교시 연동: item.per 또는 제목의 「7교시」「3~4교시」(「4교시 후」는 제외)를 `cusPers`가 읽고, 오늘 카드 하루 시간표·주간표(`gridTable` o.dates)의 해당 날짜·교시 칸에 📌 표시(`cusSlot`). 메신저 붙여넣기(inbox.js)는 제목이 그대로 들어가므로 자동 연동.
+- 날짜 화면: ✕ 닫기 버튼, 바깥(어두운 배경) 클릭·Esc로 닫힘. 폰은 아래에서 올라오는 전체폭, 태블릿·PC는 중앙 창.

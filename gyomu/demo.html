@@ -750,6 +750,21 @@ dialog.daypg{width:min(94vw,640px);max-height:90vh;overflow:auto;padding:14px 16
 #chatbub{right:16px!important;bottom:116px!important;max-width:calc(100vw - 32px)!important;overflow:visible!important}
 #chatbub::after{right:36px!important;bottom:-9px!important;border:8px solid transparent!important;border-top-color:var(--ink)!important;border-bottom:0!important}
 html[data-nav=bottom] #chatbub{bottom:180px!important}
+/* 캘린더↔시간표 연동 표시 + 기기별 조정 */
+.slev{display:block;margin-top:3px;padding:2px 5px;border-radius:6px;background:#fff3b0;border:1px solid #e6c200;color:#5a4700;font-size:11px;font-weight:700;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;box-sizing:border-box}.slev.dn{opacity:.55;text-decoration:line-through}
+.pc{min-width:0}.strip .pc{overflow:hidden}
+.cusr{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--rule)}.cusm{width:min(92vw,420px)}
+.dph{flex-wrap:wrap}.dph .dpclose{margin-left:auto;min-height:40px}.dph b{flex:1 1 auto;text-align:center;font-size:clamp(16px,4.6vw,20px);min-width:0}
+.dpf select,.dpf input,.dpf button,.scr select,.scr input{min-height:40px;max-width:100%;box-sizing:border-box;font-size:16px}
+.dpf select{flex:0 1 auto;min-width:0}.tools{display:flex;flex-wrap:wrap;gap:8px}.tools .btn{min-height:40px}
+dialog.daypg::backdrop{background:rgba(0,0,0,.45)}
+@media(max-width:600px){
+ dialog.daypg{width:100vw;max-width:100vw;max-height:94vh;margin:auto 0 0;border-radius:16px 16px 0 0;padding:12px}
+ .dpf{display:grid;grid-template-columns:1fr 1fr;gap:6px}.dpf input[name=title]{grid-column:1/-1}.dpf .btn{grid-column:1/-1}
+ .scr{display:grid;grid-template-columns:auto 1fr 1fr;gap:4px}.scr input[data-f=title]{grid-column:1/-1}
+ .tdtabs button{padding:4px 9px}.slev{font-size:10px}}
+@media(min-width:601px) and (max-width:1024px){dialog.daypg{width:min(88vw,600px)}.strip .pc{flex-basis:96px}}
+@media(min-width:1025px){dialog.daypg{width:640px}}
 </style>
 </head>
 <body>
@@ -1340,7 +1355,7 @@ const kcls = k => 'k-' + String(k).replace(/\s/g, '');
 function allEvents() {
   const e = [];
   S.items.forEach(i => {
-    if (!i.date) return; const kind = i.cat === 'todo' ? '할 일' : (i.src === '학사' ? '학사' : '일정');
+    if (!i.date) return; const kind = i.tag || (i.cat === 'todo' ? '할 일' : (i.src === '학사' ? '학사' : '일정'));
     if (i.end && i.end > i.date) { const a = new Date(i.date + 'T00:00:00'), b = new Date(i.end + 'T00:00:00'); for (let k = 0, d = new Date(a); d <= b && k < 70; k++, d.setDate(d.getDate() + 1)) e.push({ date: ymd(d), t: `${i.title} (${md(i.date)}~${md(i.end)})`, kind, id: i.id, done: i.done, span: true }); }
     else e.push({ date: i.date, t: i.title, kind, id: i.id, done: i.done });
   });
@@ -1415,10 +1430,10 @@ function todayView() {
       else st = '오늘 수업이 모두 끝났습니다';
     }
     const wk = P.dow === 0 || P.dow === 6, sd = UI.tdDay || (wk ? 1 : P.dow), isT = !wk && sd === P.dow;
-    const mon = new Date(); mon.setHours(0, 0, 0, 0); mon.setDate(mon.getDate() - ((mon.getDay() + 6) % 7) + (wk ? 7 : 0)); const dd = d => { const x = new Date(mon); x.setDate(x.getDate() + d - 1); return (x.getMonth() + 1) + '/' + x.getDate(); };
+    const mon = new Date(); mon.setHours(0, 0, 0, 0); mon.setDate(mon.getDate() - ((mon.getDay() + 6) % 7) + (wk ? 7 : 0)); const dd = d => { const x = new Date(mon); x.setDate(x.getDate() + d - 1); return (x.getMonth() + 1) + '/' + x.getDate(); }, dfull = d => { const x = new Date(mon); x.setDate(x.getDate() + d - 1); return ymd(x); };
     const tabs = `<div class="tdtabs" role="tablist">` + [1, 2, 3, 4, 5].map(d => `<button class="${d === sd ? 'on' : ''}${!wk && d === P.dow ? ' tdy' : ''}" role="tab" aria-selected="${d === sd}" data-act="tdDay" data-d="${d}">${DOW[d]}<small>${dd(d)}</small></button>`).join('') + '</div>';
-    let b = `<p class="mu"><b>${DOW[sd]}요일(${dd(sd)}) 시간표${isT ? ' · 오늘' : wk && sd === 1 && !UI.tdDay ? ' · 다음 수업일' : ''}</b></p>${tabs}<div class="strip">` + [1, 2, 3, 4, 5, 6, 7].map(p => { const PL = typeof clkPeriods === 'function' ? clkPeriods() : [], nw = new Date(), mn = nw.getHours() * 60 + nw.getMinutes(), pp = PL.find(y => y.p === p), ended = isT && pp && mn >= pp.e, THX = ['수고했어요^^', '고생했어요♡', '잘했어요!', '오늘도 굿~', '한 시간 끝!', '멋졌어요✿', '푹 쉬어요^^'], has = tt(sd, p); return `<div class="pc ${isT && P.cur === p ? 'now' : ''} ${ended ? 'done' : ''}" style="${typeof cellBg === 'function' && has && !ended ? cellBg(has) : ''}"><b>${p}</b>${esc(has || '—')}${ended && has ? `<span class="okm">✅ 수업 완료</span><span class="thx">${THX[(p * 3 + sd) % THX.length]}</span>` : ''}</div>`; }).join('') + '</div>';
-    if (typeof wkGrid === 'function') b += wkGrid();
+    let b = `<p class="mu"><b>${DOW[sd]}요일(${dd(sd)}) 시간표${isT ? ' · 오늘' : wk && sd === 1 && !UI.tdDay ? ' · 다음 수업일' : ''}</b></p>${tabs}<div class="strip">` + [1, 2, 3, 4, 5, 6, 7].map(p => { const PL = typeof clkPeriods === 'function' ? clkPeriods() : [], nw = new Date(), mn = nw.getHours() * 60 + nw.getMinutes(), pp = PL.find(y => y.p === p), ended = isT && pp && mn >= pp.e, THX = ['수고했어요^^', '고생했어요♡', '잘했어요!', '오늘도 굿~', '한 시간 끝!', '멋졌어요✿', '푹 쉬어요^^'], has = tt(sd, p); return `<div class="pc ${isT && P.cur === p ? 'now' : ''} ${ended ? 'done' : ''}" style="${typeof cellBg === 'function' && has && !ended ? cellBg(has) : ''}"><b>${p}</b>${esc(has || '—')}${typeof cusSlot === 'function' ? cusSlot(dfull(sd), p) : ''}${ended && has ? `<span class="okm">✅ 수업 완료</span><span class="thx">${THX[(p * 3 + sd) % THX.length]}</span>` : ''}</div>`; }).join('') + '</div>';
+    if (typeof wkGrid === 'function') b += wkGrid(wk);
     b += `<div class="tools"><a class="btn pri" href="#/class">✏️ 시간표 입력·수정하기</a><button class="btn" data-act="comci">🔄 컴시간알리미에서 가져오기</button></div><p class="mu">${has ? '시간표를 고치려면 위 버튼(수업 화면의 시간표 표)을 누르세요. 컴시간과 연동해 자동으로 가져옵니다.' : '<b>아직 시간표가 비어 있어요.</b> 위 [시간표 입력·수정하기]에서 칸에 직접 적거나, [컴시간알리미에서 가져오기]를 누르세요.'}</p>`;
     rows.push(row('r1', '오늘', '일과', st, due, b));
   }
@@ -1520,7 +1535,7 @@ function calView() {
   <div class="tools"><label class="btn file">학사일정 파일 올리기<input type="file" id="schedUp" accept=".txt,.csv,.xlsx,.xls,.pdf,.hwp,.hwpx,.docx" hidden></label><button class="btn" data-act="schedPaste">학사일정 붙여넣기</button></div><p class="mu">학사일정(PDF·엑셀·텍스트, 또는 나이스·홈페이지에서 복사한 글)을 넣으면 날짜와 행사를 찾아 캘린더에 한꺼번에 넣어 드립니다. 「3/2 입학식」「7.21~8.20 여름방학」 같은 줄을 알아봅니다.</p>
   <h3 class="h3">${md(UI.day)} (${DOW[new Date(UI.day + 'T00:00:00').getDay()]})</h3>${list}
   ${typeof dayMemoBox === 'function' ? dayMemoBox(UI.day) : ''}
-  <form class="inl" data-form="evt"><input name="title" placeholder="일정·할 일 추가" required aria-label="내용"><select name="cat" aria-label="종류"><option value="event">일정</option><option value="todo">할 일</option></select><button class="btn">추가</button></form>`;
+  <form class="inl" data-form="evt"><input name="title" placeholder="일정·할 일 추가" required aria-label="내용"><select name="cat" aria-label="종류" data-cus="kind">${cusKindOpts(false, 'event')}</select><button class="btn">추가</button></form>`;
 }
 
 /* ---------- 수업·평가·시간표 ---------- */
@@ -1710,7 +1725,7 @@ document.addEventListener('click', e => { const el = e.target.closest('[data-act
 const FM = {
   todo(f) { const o = Object.fromEntries(new FormData(f)); S.items.push({ id: uid(), title: o.title, date: o.date || today(), cat: 'todo', done: false }); commit(); },
   pspend(f) { const o = Object.fromEntries(new FormData(f)), p = find('budget', f.dataset.p); const amt = +o.amt; if (!(amt > 0)) return toast('사용 금액을 입력해 주세요.'); (p.spends = p.spends || []).push({ id: uid(), date: o.date || today(), desc: o.desc || '사용', amt }); commit(); },
-  evt(f) { const o = Object.fromEntries(new FormData(f)); S.items.push({ id: uid(), title: o.title, date: UI.day, cat: o.cat, done: false }); commit(); },
+  evt(f) { const o = Object.fromEntries(new FormData(f)); S.items.push({ id: uid(), date: UI.day, done: false, ...cusMk(o.cat, o.title) }); commit(); },
   toTodo(f) {
     const n = find('notes', f.dataset.id), d = new FormData(f).get('date') || today(); const lines = String(n.followups || '').split('\n').map(s => s.replace(/^[-•·*\d.)\s]+/, '').trim()).filter(Boolean);
     if (!lines.length) return toast('후속 조치를 한 줄에 하나씩 적어 주세요.');
@@ -3572,13 +3587,13 @@ function gridTable(get, o = {}) {
   const ended = (d, p) => { if (!o.live || dow === 0 || dow === 6) return false; if (d < dow) return true; if (d > dow) return false; const x = PL.find(y => y.p === p); return !!(x && mn >= x.e); };
   let h = `<div class="ctw"><table class="tbl wk"><thead><tr><th></th>${[1, 2, 3, 4, 5].map(d => `<th class="${o.live && dow === d ? 'tdy' : ''}">${DOW[d]}</th>`).join('')}</tr></thead><tbody>`;
   for (let p = 1; p <= P; p++) {
-    if (p > 6 && ![1, 2, 3, 4, 5].some(d => get(d, p))) continue;
-    h += `<tr><th>${p}</th>` + [1, 2, 3, 4, 5].map(d => { const c = get(d, p), mk = (o.mark || {})[d + '-' + p]; if (!c) return `<td class="${mk ? 'mk-' + mk.k : ''}" ${mk && mk.t ? `title="${esc(mk.t)}"` : ''}>${mk ? esc(mk.l || '') : ''}</td>`; return `<td class="${ended(d, p) ? 'dn' : ''} ${mk ? 'mk-' + mk.k : ''}" style="${cellBg(c.txt)}">${esc(c.txt)}${ended(d, p) ? '<i class="okc">✓</i>' : ''}${mk && mk.l ? `<small>${esc(mk.l)}</small>` : ''}</td>`; }).join('') + '</tr>';
+    if (p > 6 && ![1, 2, 3, 4, 5].some(d => get(d, p) || (o.dates && cusHas(o.dates[d], p)))) continue;
+    h += `<tr><th>${p}</th>` + [1, 2, 3, 4, 5].map(d => { const c = get(d, p), mk = (o.mark || {})[d + '-' + p], ev = o.dates ? cusSlot(o.dates[d], p) : ''; if (!c) return `<td class="${mk ? 'mk-' + mk.k : ''}" ${mk && mk.t ? `title="${esc(mk.t)}"` : ''}>${mk ? esc(mk.l || '') : ''}${ev}</td>`; return `<td class="${ended(d, p) ? 'dn' : ''} ${mk ? 'mk-' + mk.k : ''}" style="${cellBg(c.txt)}">${esc(c.txt)}${ev}${ended(d, p) ? '<i class="okc">✓</i>' : ''}${mk && mk.l ? `<small>${esc(mk.l)}</small>` : ''}</td>`; }).join('') + '</tr>';
   }
   return h + '</tbody></table></div>';
 }
 const myGet = (d, p) => { const v = S.timetable[d + '-' + p]; return v ? { txt: v } : null; };
-function wkGrid() { return `<details class="wkd" open><summary><b>이번 주 시간표</b> <span class="mu">(세로 · 오늘 칸 표시 · 끝난 수업 ✓)</span></summary>${gridTable(myGet, { live: true })}</details>`; }
+function wkGrid(wkend) { const m = new Date(); m.setHours(0, 0, 0, 0); m.setDate(m.getDate() - ((m.getDay() + 6) % 7) + (wkend ? 7 : 0)); const dates = {}; for (let d = 1; d <= 5; d++) { const x = new Date(m); x.setDate(x.getDate() + d - 1); dates[d] = ymd(x); } return `<details class="wkd" open><summary><b>${wkend ? '다음 주' : '이번 주'} 시간표</b> <span class="mu">(세로 · 오늘 칸 표시 · 끝난 수업 ✓)</span></summary>${gridTable(myGet, { live: !wkend, dates })}</details>`; }
 const pGet = p => (d, q) => { const l = p.cells[d + '-' + q]; return l ? { txt: `${l.g}-${l.c} ${l.s}` } : null; };
 const slotName = k => { const [d, p] = k.split('-'); return DOW[d] + p; };
 /* ----- 분석 ----- */
@@ -3676,8 +3691,8 @@ async function dpImgs(ds) {
 function dpDraw(full) {
   const d = document.getElementById('daypg'); if (!d || !DP) return; const ds = DP;
   if (full) {
-    d.innerHTML = `<div class="dph"><button class="btn sm" data-act="dpMove" data-n="-1" aria-label="전날">‹</button><b>${md(ds)} (${dpWeek(ds)})${ds === today() ? ' · 오늘' : ''}</b><button class="btn sm" data-act="dpMove" data-n="1" aria-label="다음날">›</button><button class="btn sm" id="dpx">닫기</button></div>
-    <form class="dpf"><input name="title" placeholder="일정·할 일·업무를 적고 Enter (바로 캘린더에 반영)" required aria-label="내용"><input type="time" name="time" aria-label="시각(선택)"><select name="kind" aria-label="종류"><option value="event">일정</option><option value="todo">할 일</option><option value="work">업무</option></select><button class="btn pri">추가</button></form>
+    d.innerHTML = `<div class="dph"><button class="btn sm" data-act="dpMove" data-n="-1" aria-label="전날">‹</button><b>${md(ds)} (${dpWeek(ds)})${ds === today() ? ' · 오늘' : ''}</b><button class="btn sm" data-act="dpMove" data-n="1" aria-label="다음날">›</button><button class="btn sm dpclose" data-act="dpClose" aria-label="닫기">✕ 닫기</button></div>
+    <form class="dpf"><input name="title" placeholder="일정·할 일·업무 (예: 7교시 도박예방교육) Enter" required aria-label="내용"><input type="time" name="time" aria-label="시각(선택)"><select name="kind" aria-label="종류" data-cus="kind" data-work="1">${cusKindOpts(true, 'event')}</select><select name="per" aria-label="교시(선택)"><option value="">교시 없음</option>${[1,2,3,4,5,6,7].map(n => `<option value="${n}">${n}교시</option>`).join('')}</select><button class="btn pri">추가</button></form>
     <div id="dpList"></div>
     <label class="dmemo">📝 메모<textarea data-dmemo="${ds}" rows="4" placeholder="이 날 기억할 것·준비물·회의 내용 (쓰면 바로 저장됩니다)">${esc((S.dayMemo || {})[ds] || '')}</textarea></label><button class="btn sm" data-act="memoPick">🎨 메모 디자인</button>
     <h4 class="dph4">🎀 꾸미기</h4><div id="dpStk"></div><div class="tools"><button class="btn sm" data-act="stkDay">⭐ 스티커 붙이기</button><label class="btn sm file">🖼 사진 올리기<input type="file" id="dpUp" accept="image/*" multiple hidden></label></div><label class="btn sm file">📷 손글씨 사진으로 일정 추가<input type="file" id="scUp" accept="image/*" capture="environment" hidden></label><div id="dpImg" class="dpimg"></div><p class="mu">사진은 이 기기에만 저장되고 클라우드 동기화에는 들어가지 않습니다.</p>`;
@@ -3686,20 +3701,23 @@ function dpDraw(full) {
 }
 function dayOpen(ds) {
   DP = ds; UI.day = ds; let d = document.getElementById('daypg');
-  if (!d) { d = document.createElement('dialog'); d.id = 'daypg'; d.className = 'dlg daypg'; document.body.appendChild(d); d.addEventListener('close', () => { DP = null; d.remove(); render(); }); d.addEventListener('click', e => { if (e.target.id === 'dpx') d.close(); const im = e.target.closest('[data-dpbig]'); if (im) { const w = window.open(); if (w) { w.document.write(`<img src="${DIMG[im.dataset.dpbig]}" style="max-width:100%">`); w.document.close(); } } }); }
+  if (!d) { d = document.createElement('dialog'); d.id = 'daypg'; d.className = 'dlg daypg'; document.body.appendChild(d); d.addEventListener('close', () => { DP = null; d.remove(); render(); }); d.addEventListener('click', e => { const im = e.target.closest('[data-dpbig]'); if (im) { const w = window.open(); if (w) { w.document.write(`<img src="${DIMG[im.dataset.dpbig]}" style="max-width:100%">`); w.document.close(); } } }); }
   dpDraw(true); if (!d.open) d.showModal();
 }
 Object.assign(A, {
+  dpClose() { const d = document.getElementById('daypg'); if (d) d.close(); },
   dpMove(el) { dayOpen(dpShift(DP, +el.dataset.n)); },
   dpImgDel(el) { sure('이 사진을 지울까요?', async () => { const l = S.dayImg[el.dataset.d] || []; S.dayImg[el.dataset.d] = l.filter(m => m.id !== el.dataset.id); if (!S.dayImg[el.dataset.d].length) delete S.dayImg[el.dataset.d]; delete DIMG[el.dataset.id]; await idb.del('dimg:' + el.dataset.id); commit(); }); }
 });
+/* 바깥(어두운 배경) 누르면 닫기 — 노션처럼 */
+document.addEventListener('click', e => { const d = e.target; if (d && d.tagName === 'DIALOG' && d.classList.contains('daypg')) { const r = d.getBoundingClientRect(); if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) d.close(); } });
 const _calDay0 = A.calDay; A.calDay = function (el) { _calDay0(el); dayOpen(el.dataset.d); };
 document.addEventListener('submit', e => {
   const f = e.target.closest && e.target.closest('form.dpf'); if (!f) return; e.preventDefault();
   const o = Object.fromEntries(new FormData(f)); let title = o.title.trim(); if (!title) return;
-  if (o.time) title = o.time + ' ' + title; if (o.kind === 'work') title = '[업무] ' + title;
-  S.items.push({ id: uid(), title, date: DP, cat: o.kind === 'event' ? 'event' : 'todo', done: false });
-  commit(); toast('캘린더에 반영했습니다.'); const i = document.querySelector('#daypg [name=title]'); if (i) { i.value = ''; i.focus(); }
+  const mk = cusMk(o.kind, title, o.per); if (o.time) mk.title = o.time + ' ' + mk.title;
+  S.items.push({ id: uid(), date: DP, done: false, ...mk });
+  commit(); toast('캘린더' + (S.items[S.items.length - 1].per || cusPers(S.items[S.items.length - 1]).length ? '·시간표' : '') + '에 반영했습니다.'); const i = document.querySelector('#daypg [name=title]'); if (i) { i.value = ''; i.focus(); }
 }, true);
 document.addEventListener('change', async e => {
   const t = e.target; if (t.id !== 'dpUp') return; const ds = DP, files = [...t.files]; t.value = '';
@@ -3718,11 +3736,11 @@ const _r3 = TF.render; TF.render = function () { const v = _r3.apply(this, argum
 /* 종이에 손으로 쓴 메모·수첩 사진 → 일정/할 일/업무 인식 (Claude 비전, 본인 키 필요). 확인 창에서 고친 뒤 추가. */
 let SC = null;
 const scImg = f => new Promise((res, rej) => { const im = new Image(), u = URL.createObjectURL(f); im.onload = () => { const k = Math.min(1, 1600 / Math.max(im.width, im.height)), c = document.createElement('canvas'); c.width = Math.round(im.width * k); c.height = Math.round(im.height * k); c.getContext('2d').drawImage(im, 0, 0, c.width, c.height); URL.revokeObjectURL(u); res(c.toDataURL('image/jpeg', 0.85).split(',')[1]); }; im.onerror = () => rej(new Error('사진을 읽지 못했습니다')); im.src = u; });
-const SC_TOOL = [{ name: 'save_items', description: '사진 속 손글씨에서 읽은 항목들', input_schema: { type: 'object', properties: { items: { type: 'array', items: { type: 'object', properties: { title: { type: 'string' }, date: { type: 'string', description: 'YYYY-MM-DD, 모르면 빈 문자열' }, time: { type: 'string', description: 'HH:MM, 없으면 빈 문자열' }, kind: { type: 'string', enum: ['event', 'todo', 'work'], description: 'event=일정(행사·회의·약속), todo=마감 있는 할 일, work=내 업무' } }, required: ['title', 'kind'] } } }, required: ['items'] } }];
+const SC_TOOL = [{ name: 'save_items', description: '사진 속 손글씨에서 읽은 항목들', input_schema: { type: 'object', properties: { items: { type: 'array', items: { type: 'object', properties: { title: { type: 'string' }, date: { type: 'string', description: 'YYYY-MM-DD, 모르면 빈 문자열' }, time: { type: 'string', description: 'HH:MM, 없으면 빈 문자열' }, period: { type: 'integer', description: '몇 교시인지(1~9), 없으면 0' }, kind: { type: 'string', enum: ['event', 'todo', 'work'], description: 'event=일정(행사·회의·약속), todo=마감 있는 할 일, work=내 업무' } }, required: ['title', 'kind'] } } }, required: ['items'] } }];
 async function scanRun(file) {
   const dlg = scDlg(); dlg.innerHTML = '<p class="mu">✍️ 손글씨를 읽는 중입니다… (몇 초 걸립니다)</p>';
   let items;
-  if (window.TF_DEMO) { await new Promise(r => setTimeout(r, 900)); const t = new Date(); const d = n => { const x = new Date(t); x.setDate(x.getDate() + n); return `${x.getFullYear()}-${pad(x.getMonth() + 1)}-${pad(x.getDate())}`; }; items = [{ title: '교직원 회의', date: d(2), time: '16:00', kind: 'event' }, { title: '학년말 평가 자료 제출', date: d(7), time: '', kind: 'todo' }, { title: '학생 인권 실태조사 점검', date: '', time: '', kind: 'work' }]; dlg.dataset.demo = '1'; }
+  if (window.TF_DEMO) { await new Promise(r => setTimeout(r, 900)); const t = new Date(); const d = n => { const x = new Date(t); x.setDate(x.getDate() + n); return `${x.getFullYear()}-${pad(x.getMonth() + 1)}-${pad(x.getDate())}`; }; items = [{ title: '교직원 회의', date: d(2), time: '16:00', kind: 'event' }, { title: '도박예방교육', date: d(3), time: '', kind: 'event', period: 7 }, { title: '학년말 평가 자료 제출', date: d(7), time: '', kind: 'todo' }, { title: '학생 인권 실태조사 점검', date: '', time: '', kind: 'work' }]; dlg.dataset.demo = '1'; }
   else {
     if (!agKey()) { dlg.innerHTML = '<h3>📷 손글씨 사진 인식</h3><p>이 기능은 <b>본인 Claude 키</b>가 있어야 켜집니다. 설정 → AI 키에 넣으면 바로 쓸 수 있고, 키는 이 기기에만 저장됩니다.</p><p class="mu">키가 없어도 날짜 화면에서 직접 입력하는 것은 그대로 됩니다.</p><button class="btn" id="scx">닫기</button>'; return; }
     try {
@@ -3738,12 +3756,12 @@ function scDlg() { let d = document.getElementById('scdlg'); if (!d) { d = docum
 function scShow() {
   const d = scDlg();
   if (!SC.length) { d.innerHTML = '<p>읽어 낸 항목이 없습니다. 글씨가 크게 나오도록 다시 찍어 보세요.</p><button class="btn" id="scx">닫기</button>'; return; }
-  d.innerHTML = `<h3>📷 이렇게 읽었어요</h3><p class="mu">틀린 곳은 고친 뒤 추가하세요. 체크를 끄면 빠집니다.${d.dataset.demo ? ' (체험판 예시 결과)' : ''}</p>` + SC.map((x, i) => `<div class="scr"><input type="checkbox" data-sc="${i}" data-f="on" ${x.on ? 'checked' : ''} aria-label="추가"><select data-sc="${i}" data-f="kind"><option value="event"${x.kind === 'event' ? ' selected' : ''}>일정</option><option value="todo"${x.kind === 'todo' ? ' selected' : ''}>할 일</option><option value="work"${x.kind === 'work' ? ' selected' : ''}>업무</option></select><input type="date" data-sc="${i}" data-f="date" value="${esc(x.date || '')}"><input type="time" data-sc="${i}" data-f="time" value="${esc(x.time || '')}"><input data-sc="${i}" data-f="title" value="${esc(x.title)}"></div>`).join('') + '<div class="tools"><button class="btn pri" id="scok">✅ 선택한 것 추가</button><button class="btn" id="scx">취소</button></div>';
+  d.innerHTML = `<h3>📷 이렇게 읽었어요</h3><p class="mu">틀린 곳은 고친 뒤 추가하세요. 체크를 끄면 빠집니다.${d.dataset.demo ? ' (체험판 예시 결과)' : ''}</p>` + SC.map((x, i) => `<div class="scr"><input type="checkbox" data-sc="${i}" data-f="on" ${x.on ? 'checked' : ''} aria-label="추가"><select data-sc="${i}" data-f="kind" data-cus="kind" data-work="1">${cusKindOpts(true, x.kind)}</select><select data-sc="${i}" data-f="period" aria-label="교시"><option value="">교시 없음</option>${[1,2,3,4,5,6,7].map(n => `<option value="${n}" ${+x.period === n ? 'selected' : ''}>${n}교시</option>`).join('')}</select><input type="date" data-sc="${i}" data-f="date" value="${esc(x.date || '')}"><input type="time" data-sc="${i}" data-f="time" value="${esc(x.time || '')}"><input data-sc="${i}" data-f="title" value="${esc(x.title)}"></div>`).join('') + '<div class="tools"><button class="btn pri" id="scok">✅ 선택한 것 추가</button><button class="btn" id="scx">취소</button></div>';
 }
 function scApply(d) {
   let n = 0; SC.filter(x => x.on && x.title.trim()).forEach(x => {
-    let t = x.title.trim(); if (x.time) t = x.time + ' ' + t; if (x.kind === 'work') t = '[업무] ' + t;
-    S.items.push({ id: uid(), title: t, date: x.date || today(), cat: x.kind === 'event' ? 'event' : 'todo', done: false }); n++;
+    const mk = cusMk(x.kind, x.title, x.period); if (x.time) mk.title = x.time + ' ' + mk.title;
+    S.items.push({ id: uid(), date: x.date || today(), done: false, ...mk }); n++;
   });
   commit(); d.close(); toast(n + '건을 캘린더에 반영했습니다.');
 }
@@ -3752,6 +3770,61 @@ function scBtn() {
   if (document.getElementById('scfab')) return; const l = document.createElement('label'); l.id = 'scfab'; l.className = 'scfab'; l.title = '손글씨 사진으로 일정·업무 추가'; l.innerHTML = '📷<span>손글씨 추가</span><input type="file" id="scUp" accept="image/*" capture="environment" hidden>'; document.body.appendChild(l);
 }
 const _r4 = TF.render; TF.render = function () { const v = _r4.apply(this, arguments); scBtn(); return v; };
+
+/* 사용자 목록 만들기(드롭다운 「＋ 직접 추가…」) + 캘린더↔시간표 연동(일정 제목의 「7교시」를 시간표 그 칸에 표시) */
+const cusL = () => ((S.profile = S.profile || {}).lists = S.profile.lists || {});
+const cusKinds = () => cusL().kind || [];
+const cusStr = k => cusL()[k] || [];
+function cusKindOpts(work, sel) {
+  const base = [['event', '일정'], ['todo', '할 일']].concat(work ? [['work', '업무']] : []), cu = cusKinds().map(k => ['c:' + k.n, k.n]);
+  return base.concat(cu).map(([v, n]) => `<option value="${esc(v)}" ${v === sel ? 'selected' : ''}>${esc(n)}</option>`).join('') + '<option value="_new">＋ 직접 추가…</option>' + (cu.length ? '<option value="_edit">✎ 내 목록 관리…</option>' : '');
+}
+function cusMk(v, title, per) {
+  let t = String(title || '').trim(), o = { cat: 'event' };
+  if (v === 'todo') o.cat = 'todo'; else if (v === 'work') { o.cat = 'todo'; t = '[업무] ' + t; }
+  else if (String(v).startsWith('c:')) { const k = cusKinds().find(x => 'c:' + x.n === v); if (k) { o.cat = k.b; o.tag = k.n; } }
+  o.title = t; const p = per ? +per : 0; if (p) o.per = p; return o;
+}
+/* 교시: item.per(숫자) 또는 제목의 "7교시", "3~4교시" */
+function cusPers(i) {
+  if (i.per) return [+i.per]; const t = String(i.title || ''); let m = t.match(/([1-9])\s*[~\-–]\s*([1-9])\s*교시/) || t.match(/(?<![\d/])([1-9])\s+([1-9])\s*교시/);
+  if (m && +m[2] > +m[1]) { const a = +m[1], b = +m[2], r = []; for (let k = Math.min(a, b); k <= Math.max(a, b); k++) r.push(k); return r; }
+  m = t.match(/([1-9])\s*교시(?!\s*(후|전|까지|이후|이전|종료))/); return m ? [+m[1]] : [];
+}
+function cusSlot(ds, p) {
+  const L = (S.items || []).filter(i => i.date && i.src !== '학사' && (i.date === ds || (i.end && i.date <= ds && ds <= i.end)) && cusPers(i).includes(p));
+  return L.map(i => `<span class="slev ${i.done ? 'dn' : ''}" title="${esc(i.title)}">📌 ${esc(String(i.title).replace(/^\[업무\]\s*/, '').replace(/[1-9]\s*([~\-–]\s*[1-9]\s*)?교시\s*/g, '').trim() || i.title)}</span>`).join('');
+}
+const cusHas = (ds, p) => !!(S.items || []).some(i => i.date && i.src !== '학사' && (i.date === ds || (i.end && i.date <= ds && ds <= i.end)) && cusPers(i).includes(p));
+/* 문자열 목록(자료 종류 등): 이미 있는 select 에 내 항목 + 직접 추가 붙이기 */
+const CUS_STR = { '#upk': 'upk', '#arcKind': 'arc' };
+function cusPost() {
+  Object.keys(CUS_STR).forEach(sel => { const el = document.querySelector(sel); if (!el || el.dataset.cus) return; el.dataset.cus = 'str:' + CUS_STR[sel]; el.dataset.base = JSON.stringify([...el.options].map(o => o.text)); cusFill(el); });
+}
+function cusFill(el, pick) {
+  const [t, key] = el.dataset.cus.split(':');
+  if (t === 'str') { const b = JSON.parse(el.dataset.base || '[]'), cu = cusStr(key), cur = pick || el.value; el.innerHTML = b.concat(cu).map(n => `<option>${esc(n)}</option>`).join('') + '<option value="_new">＋ 직접 추가…</option>' + (cu.length ? '<option value="_edit">✎ 내 목록 관리…</option>' : ''); el.value = [...b, ...cu].includes(cur) ? cur : b[0]; }
+  else { el.innerHTML = cusKindOpts(el.dataset.work === '1', pick || (el.dataset.prev || 'event')); }
+}
+function cusRefreshAll(pick) { document.querySelectorAll('select[data-cus]').forEach(el => cusFill(el, pick)); }
+document.addEventListener('change', e => {
+  const el = e.target; if (!el.matches || !el.matches('select[data-cus]')) return;
+  if (el.value !== '_new' && el.value !== '_edit') { el.dataset.prev = el.value; return; }
+  const [t, key] = el.dataset.cus.split(':'), v = el.value; el.value = el.dataset.prev || el.options[0].value;
+  if (v === '_edit') return cusManage(t, key);
+  if (t === 'kind') ask('내 종류 만들기', [{ k: 'n', label: '이름 (예: 상담, 학부모, 출장)', req: 1 }, { k: 'b', label: '성격', type: 'select', opts: ['일정', '할 일'], val: '일정' }], o => {
+    const n = o.n.trim(); if (!n) return; if (!cusKinds().some(k => k.n === n) && !['일정', '할 일', '업무'].includes(n)) { cusL().kind = cusKinds().concat([{ n, b: o.b === '할 일' ? 'todo' : 'event' }]); save(); }
+    cusRefreshAll('c:' + n); document.querySelectorAll('select[data-cus^="kind"]').forEach(s => { if (s === el) { s.value = 'c:' + n; s.dataset.prev = s.value; } }); toast('「' + n + '」 종류를 만들었습니다.');
+  }, '만들기');
+  else ask('내 항목 추가', [{ k: 'n', label: '이름', req: 1 }], o => { const n = o.n.trim(); if (!n) return; const L = cusStr(key); if (!L.includes(n)) { cusL()[key] = L.concat([n]); save(); } cusRefreshAll(); el.value = n; el.dataset.prev = n; }, '추가');
+}, true);
+function cusManage(t, key) {
+  const d = document.createElement('dialog'); d.className = 'dlg cusm'; document.body.appendChild(d);
+  const draw = () => { const L = t === 'kind' ? cusKinds().map(k => k.n + ' (' + (k.b === 'todo' ? '할 일' : '일정') + ')') : cusStr(key); d.innerHTML = '<h3>내 목록 관리</h3>' + (L.map((n, i) => `<div class="cusr"><span>${esc(n)}</span><button class="btn sm" data-cusdel="${i}">삭제</button></div>`).join('') || '<p class="mu">만든 항목이 없습니다.</p>') + '<div class="btns"><button class="btn pri" id="cusok">닫기</button></div><p class="mu">삭제해도 이미 만든 일정·자료의 이름표는 그대로 남습니다.</p>'; };
+  d.addEventListener('click', e => { if (e.target.id === 'cusok') d.close(); const b = e.target.closest('[data-cusdel]'); if (b) { const i = +b.dataset.cusdel; if (t === 'kind') cusL().kind = cusKinds().filter((_, j) => j !== i); else cusL()[key] = cusStr(key).filter((_, j) => j !== i); save(); draw(); cusRefreshAll(); } });
+  d.addEventListener('close', () => d.remove()); draw(); d.showModal();
+}
+const _r5 = TF.render; TF.render = function () { const v = _r5.apply(this, arguments); cusPost(); return v; };
 
 /* setui.js — 설정의 "작업표시줄에 고정 · 위젯" 안내 칸(app.js `.guide`) 위에 [앱으로 설치하기]·[위젯 열기] 버튼을 붙입니다.
    (설정 칸 접기는 extra.js `setFold()`가 맡습니다.) */
