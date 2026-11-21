@@ -716,3 +716,4 @@ body.deco-stick #app::after{content:"⭐ 🌷 ☁️";position:absolute;top:-14p
 @media print{#pstLayer{display:none}}
 .mtoday{display:inline-block;margin-left:8px;padding:1px 9px;border-radius:999px;background:#ff8a65;color:#fff;font-size:12px;font-weight:800;vertical-align:middle}.ml.mtd{background:rgba(255,213,79,.4);border-radius:8px;padding:4px 8px;font-weight:700}
 .addrow{display:block;clear:both;width:100%;margin:10px 0 6px}.as .steps{display:flex;flex-wrap:wrap;gap:4px;margin:6px 0}.as{margin:8px 0;padding-bottom:6px}
+.pc.done{opacity:.72;background:repeating-linear-gradient(135deg,#fbeef3 0 6px,#fff 6px 12px)!important}.pc.done b{text-decoration:line-through;text-decoration-color:#e57aa0}.pc .thx{display:block;font-size:10.5px;line-height:1.2;color:#d6457c;font-weight:700;margin-top:2px;animation:thxp 2.4s ease-in-out infinite}@keyframes thxp{50%{transform:translateY(-2px)}}@media(prefers-reduced-motion:reduce){.pc .thx{animation:none}}
