@@ -48,7 +48,7 @@ function hpCard() {
   ${fr || warn ? `<div class="hpin">${fr}${warn}</div>` : ''}
   <div class="tools"><button class="btn pri sm" data-act="hpEnd">🌇 퇴근 전 3분 정리</button><button class="btn sm" data-act="hpLog">📝 수업 후 한 줄 기록</button><button class="btn sm ${hot ? 'pri' : ''}" data-act="hpWeek">🗓 한 주 돌아보기${hot ? ' ✨' : ''}</button><button class="btn sm" data-act="hpProg">📊 반별 진도 점검</button></div>
   <div class="tools"><button class="btn sm pri" data-act="hpNow">▶ 지금 수업 자료 열기</button><button class="btn sm" data-act="hpLink">🔗 수업 자료 연결</button><button class="btn sm" data-act="hpIdea">💡 차시 아이디어 카드</button><button class="btn sm" data-act="hpDoc">📮 공문 기한 모아보기</button><button class="btn sm" data-act="hpMeet">📋 회의 노트 틀</button><button class="btn sm" data-act="hpChkOpen">✅ 나만의 점검표</button><button class="btn sm" data-act="hpTerm">🎓 학기말 점검표</button><button class="btn sm" data-act="hpStu">🔒 학생 메모(이 기기만)</button></div>
-  <label class="chk hpwk"><input type="checkbox" data-hpw="1" ${done ? 'checked' : ''}> 🏃 오늘 운동했어요</label> <a class="btn sm" href="https://gtk0624-a11y.github.io/badminton/" target="_blank" rel="noopener">운동로그 열기 ↗</a></details>`;
+  <label class="chk hpwk"><input type="checkbox" data-hpw="1" ${done ? 'checked' : ''}> 🏃 오늘 운동했어요</label> ${hpWkLink()}</details>`;
 }
 const hpInject = () => {
   const h = location.hash, main = document.querySelector('#app main'); if (!main || !S.setup) return;
@@ -333,3 +333,7 @@ document.addEventListener('click', e => {
   const r = d.getBoundingClientRect(); if (e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom) return;
   d.close();
 }, true);
+
+/* 운동 사이트 바로가기: 사람마다 쓰는 운동 기록 사이트가 다르므로 각자 주소를 넣습니다 */
+const hpWkLink = () => { const u = (S.profile.workoutUrl || '').trim(); return u ? `<a class="btn sm" href="${esc(u)}" target="_blank" rel="noopener">${esc(S.profile.workoutName || '운동 기록')} 열기 ↗</a><button class="btn sm" data-act="hpWkSet" aria-label="운동 사이트 주소 고치기">✏️</button>` : '<button class="btn sm" data-act="hpWkSet">🔗 내 운동 기록 사이트 연결</button>'; };
+A.hpWkSet = () => ask('내 운동 기록 사이트', [{ k: 'n', label: '이름 (예: 운동로그)', val: S.profile.workoutName || '' }, { k: 'u', label: '주소 (https://…) — 비우면 연결 해제', val: S.profile.workoutUrl || '' }], o => { const u = o.u.trim(); S.profile.workoutUrl = u ? (/^https?:\/\//.test(u) ? u : 'https://' + u) : ''; S.profile.workoutName = o.n.trim(); save(true); TF.render(); });
