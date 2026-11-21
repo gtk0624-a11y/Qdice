@@ -1621,7 +1621,7 @@ function todayView() {
   });
   const up = upcoming(7);
   return `${typeof schoolBanner === 'function' ? schoolBanner() : ''}${typeof ddayStrip === 'function' ? ddayStrip() : ''}<div class="bh"><h2>오늘의 게시판</h2><span class="mu">줄을 누르면 펼쳐집니다.</span><button class="btn sm" data-act="ordPick">↕ 순서 바꾸기</button><button class="btn sm" data-act="rowPick">☑ 보일 줄 고르기</button></div>
-  <div class="spread"><div class="pgL">${miniCal()}${up.length ? `<p class="soon"><b>이번 주 기한</b><br>${up.slice(0, 6).map(e => `${md(e.date)} ${esc(e.t)}`).join('<br>')}</p>` : ''}</div>
+  <div class="spread"><div class="pgL">${miniCal()}${up.length ? `<p class="soon"><b>이번 주 기한</b><br>${up.slice(0, 6).map(e => `<b class="ddb">${ddText(dd(e.date))}</b> ${md(e.date)} ${esc(e.t)}`).join('<br>')}</p>` : ''}</div>
   <div class="pgR"><div class="cols"><span>분류</span><span>제목</span><span>현황</span><span class="r">기한</span><span></span></div>${(typeof orderRows === 'function' ? orderRows(rows) : rows).join('')}</div></div>`;
 }
 
@@ -1640,7 +1640,7 @@ function calView() {
   return `<div class="bh"><h2>캘린더</h2><span class="mu">일정·할 일·평가·예산·연수 기한이 색으로 구분되어 자동으로 모입니다. 날짜에 마우스를 올려 보세요.</span></div>
   <div class="calh"><button class="btn sm" data-act="calMove" data-d="-1" aria-label="이전 달">‹</button><b class="calt">${Y}년 ${M}월</b><button class="btn sm" data-act="calMove" data-d="1" aria-label="다음 달">›</button><button class="btn sm" data-act="calMove" data-d="0">오늘</button></div>
   ${typeof calLegend === 'function' ? calLegend() : ''}<div class="calw">${DOW.map(d => `<span>${d}</span>`).join('')}</div><div class="cal">${cells}</div>${typeof calAgenda === 'function' ? calAgenda(ev) : ''}
-  <div class="tools"><label class="btn file">학사일정 파일 올리기<input type="file" id="schedUp" accept=".txt,.csv,.xlsx,.xls,.pdf,.hwp,.hwpx,.docx" hidden></label><button class="btn" data-act="schedPaste">학사일정 붙여넣기</button></div><p class="mu">학사일정(PDF·엑셀·텍스트, 또는 나이스·홈페이지에서 복사한 글)을 넣으면 날짜와 행사를 찾아 캘린더에 한꺼번에 넣어 드립니다. 「3/2 입학식」「7.21~8.20 여름방학」 같은 줄을 알아봅니다.</p>
+  <div class="tools"><button class="btn pri" data-act="schedNeis">🏫 나이스에서 학사일정 전부 가져오기</button><label class="btn file">학사일정 파일 올리기<input type="file" id="schedUp" accept=".txt,.csv,.xlsx,.xls,.pdf,.hwp,.hwpx,.docx" hidden></label><button class="btn" data-act="schedPaste">학사일정 붙여넣기</button></div><p class="mu">학사일정(PDF·엑셀·텍스트, 또는 나이스·홈페이지에서 복사한 글)을 넣으면 날짜와 행사를 찾아 캘린더에 한꺼번에 넣어 드립니다. 「3/2 입학식」「7.21~8.20 여름방학」 같은 줄을 알아봅니다.</p>
   <h3 class="h3">${md(UI.day)} (${DOW[new Date(UI.day + 'T00:00:00').getDay()]})</h3>${list}
   ${typeof dayMemoBox === 'function' ? dayMemoBox(UI.day) : ''}
   <form class="inl" data-form="evt"><input name="title" placeholder="일정·할 일 추가" required aria-label="내용"><select name="cat" aria-label="종류" data-cus="kind">${cusKindOpts(false, 'event')}</select><button class="btn">추가</button></form>`;
@@ -3850,7 +3850,7 @@ function dpDraw(full) {
     <form class="dpf"><input name="title" placeholder="일정·할 일·업무 (예: 7교시 도박예방교육) Enter" required aria-label="내용"><input type="time" name="time" aria-label="시각(선택)"><select name="kind" aria-label="종류" data-cus="kind" data-work="1">${cusKindOpts(true, 'event')}</select><select name="per" aria-label="교시(선택)"><option value="">교시 없음</option>${[1,2,3,4,5,6,7].map(n => `<option value="${n}">${n}교시</option>`).join('')}</select><label class="chk dppst"><input type="checkbox" name="pst"> 📌 포스트잇으로도 붙이기 <span class="mu">(화면 오른쪽에 쪽지로 떠요 · 선택)</span></label><button class="btn pri">추가</button></form>
     <div id="dpList"></div>
     <label class="dmemo">📝 메모<textarea data-dmemo="${ds}" rows="4" placeholder="이 날 기억할 것·준비물·회의 내용 (쓰면 바로 저장됩니다)">${esc((S.dayMemo || {})[ds] || '')}</textarea></label><button class="btn sm" data-act="memoPick">🎨 메모 디자인</button>${typeof penBar === 'function' ? penBar('d:' + ds) : ''}
-    <h4 class="dph4">🎀 꾸미기</h4><div id="dpStk"></div><div class="tools"><button class="btn sm" data-act="stkDay">⭐ 스티커 붙이기</button><label class="btn sm file">📸 바로 찍기<input type="file" id="dpCam" accept="image/*" capture="environment" hidden></label><label class="btn sm file">🖼 사진·이미지 올리기<input type="file" id="dpUp" accept="image/*" multiple hidden></label></div><p class="mu dpsc">📷 손글씨 사진으로 일정 추가</p><div class="tools"><label class="btn sm file">📸 바로 찍기<input type="file" id="scCam" accept="image/*" capture="environment" hidden></label><label class="btn sm file">🖼 앨범에서 고르기<input type="file" id="scUp" accept="image/*" hidden></label></div><div id="dpImg" class="dpimg"></div><p class="mu">사진은 이 기기에만 저장되고 클라우드 동기화에는 들어가지 않습니다.</p>`;
+    <h4 class="dph4">📷 사진</h4><div id="dpStk"></div><div class="tools"><label class="btn sm file">📸 바로 찍기<input type="file" id="dpCam" accept="image/*" capture="environment" hidden></label><label class="btn sm file">🖼 사진·이미지 올리기<input type="file" id="dpUp" accept="image/*" multiple hidden></label></div><p class="mu dpsc">📷 손글씨 사진으로 일정 추가</p><div class="tools"><label class="btn sm file">📸 바로 찍기<input type="file" id="scCam" accept="image/*" capture="environment" hidden></label><label class="btn sm file">🖼 앨범에서 고르기<input type="file" id="scUp" accept="image/*" hidden></label></div><div id="dpImg" class="dpimg"></div><p class="mu">사진은 이 기기에만 저장되고 클라우드 동기화에는 들어가지 않습니다.</p>`;
   }
   d.querySelector('#dpList').innerHTML = dpList(ds); d.querySelector('#dpStk').innerHTML = dpStk(ds); dpImgs(ds);
 }
@@ -3885,7 +3885,7 @@ document.addEventListener('change', async e => {
 }, true);
 /* 렌더 후: 열려 있는 날짜 화면 새로고침, 달력 칸에 작은 표시(스티커 최대 2개·사진·메모) */
 function cellMarks() {
-  document.querySelectorAll('.cd[data-d]').forEach(c => { const ds = c.dataset.d, sk = dayStk(ds, 2), im = (S.dayImg || {})[ds]; c.querySelector('.cdk')?.remove(); if (sk || im) { const s = document.createElement('span'); s.className = 'cdk'; s.innerHTML = sk + (im ? '<span class="sk">🖼</span>' : ''); c.appendChild(s); } });
+  document.querySelectorAll('.cd[data-d]').forEach(c => { const ds = c.dataset.d, sk = '', im = (S.dayImg || {})[ds]; c.querySelector('.cdk')?.remove(); if (sk || im) { const s = document.createElement('span'); s.className = 'cdk'; s.innerHTML = sk + (im ? '<span class="sk">🖼</span>' : ''); c.appendChild(s); } });
 }
 const _r3 = TF.render; TF.render = function () { const v = _r3.apply(this, arguments); cellMarks(); if (DP && document.getElementById('daypg')) dpDraw(false); return v; };
 
@@ -5255,7 +5255,7 @@ buildChunks = function () {
 };
 
 /* 화면 맨 아래에 버전 표시 — 옛 화면을 보고 있는지 바로 알 수 있게 */
-const TF_VER = 'v66', _cmFt = footer;
+const TF_VER = 'v67', _cmFt = footer;
 footer = function () { return _cmFt.apply(this, arguments).replace('</footer>', ` · <span class="mu">버전 ${TF_VER} (학급 관리 포함)</span></footer>`); };
 
 /* 새 버전 알림: 옛 화면이 남아 있으면 한 번 눌러 새로 받게 함 */
@@ -5394,6 +5394,57 @@ buildChunks = function () {
   return out;
 };
 if (typeof ORD_NAV !== 'undefined' && !ORD_NAV.some(x => x[0] === 'yp')) ORD_NAV.push(['yp', '연간 교육·훈련']);
+
+/* 업무 강화 묶음: ① 나이스 학사일정 통째로 가져오기 ② (이어서) 내 업무 카드 · 파일 읽기 미리보기 */
+
+/* ---------- ① 나이스 학사일정 → 캘린더 ---------- */
+async function neisGet2(name, q, size) {
+  const key = (S.profile.neisKey || '').trim(), u = new URL('https://open.neis.go.kr/hub/' + name);
+  u.searchParams.set('Type', 'json'); u.searchParams.set('pIndex', 1); u.searchParams.set('pSize', size); if (key) u.searchParams.set('KEY', key);
+  Object.keys(q).forEach(k => u.searchParams.set(k, q[k]));
+  const c = new AbortController(), t = setTimeout(() => c.abort(), 9000);
+  try { const r = await fetch(u, { signal: c.signal }); if (!r.ok) throw new Error('HTTP ' + r.status); const j = await r.json(); if (j.RESULT && j.RESULT.CODE === 'INFO-200') return []; if (j.RESULT && j.RESULT.CODE !== 'INFO-000') throw new Error(j.RESULT.MESSAGE || j.RESULT.CODE); return (j[name] && j[name][1] && j[name][1].row) || []; } finally { clearTimeout(t); }
+}
+const nDay = (d, n) => { const x = new Date(d.getTime() + n * 864e5); return x; };
+async function neisSchedLive(sc, sy, onProg) {
+  const key = (S.profile.neisKey || '').trim(), size = key ? 1000 : 5, step = key ? 92 : 3, out = [], base = { ATPT_OFCDC_SC_CODE: sc.atpt, SD_SCHUL_CODE: sc.code };
+  const start = new Date(sy, 2, 1), end = new Date(sy + 1, 2, 0), wins = []; for (let d = start; d <= end; d = nDay(d, step)) wins.push([d, new Date(Math.min(nDay(d, step - 1).getTime(), end.getTime()))]);
+  let done = 0, fail = 0;
+  const one = async (a, b) => {
+    let rows; try { rows = await neisGet2('SchoolSchedule', Object.assign({ AA_FROM_YMD: ymd8(a), AA_TO_YMD: ymd8(b) }, base), size); } catch (e) { fail++; return; }
+    if (rows.length >= size && b > a) { /* 한도에 걸렸으면 하루씩 다시 */ for (let d = a; d <= b; d = nDay(d, 1)) { try { rows = rows.concat(await neisGet2('SchoolSchedule', Object.assign({ AA_FROM_YMD: ymd8(d), AA_TO_YMD: ymd8(d) }, base), size)); } catch (e) { fail++; } } }
+    out.push(...rows);
+  };
+  const q = wins.slice(); const worker = async () => { while (q.length) { const w = q.shift(); await one(w[0], w[1]); done++; if (onProg) onProg(done, wins.length); } };
+  await Promise.all([worker(), worker(), worker(), worker(), worker(), worker()]);
+  if (fail > wins.length / 2) throw new Error('나이스 연결 실패');
+  const seen = new Set(), ev = []; out.forEach(r => { const k = r.AA_YMD + '|' + r.EVENT_NM; if (seen.has(k)) return; seen.add(k); ev.push({ d: r.AA_YMD, n: String(r.EVENT_NM || '').trim(), c: String(r.EVENT_CNTNT || '').trim(), h: r.SBTR_DD_SC_NM || '' }); });
+  return ev;
+}
+function schedApply(ev) { /* 같은 행사가 이어지는 날짜는 기간 하나로 합쳐 넣음 */
+  const by = {}; ev.forEach(e => { if (e.n) (by[e.n] = by[e.n] || []).push(e); });
+  const items = [];
+  Object.keys(by).forEach(n => {
+    const L = by[n].sort((a, b) => a.d.localeCompare(b.d)); let cur = null;
+    L.forEach(e => { const d = iso8(e.d); if (cur && Math.round((new Date(d) - new Date(cur.last)) / 864e5) <= 1) { cur.last = d; } else { if (cur) items.push(cur); cur = { n, first: d, last: d, c: e.c, h: e.h }; } }); if (cur) items.push(cur);
+  });
+  S.items = S.items.filter(i => i.nid !== 'neis');
+  items.forEach(x => S.items.push({ id: uid(), title: x.n + (x.h && /휴업/.test(x.h) ? ' (휴업일)' : ''), date: x.first, end: x.last > x.first ? x.last : '', cat: 'event', src: '학사', nid: 'neis', memo: x.c && x.c !== x.n ? x.c : '', done: false }));
+  S.schedAt = Date.now(); commit(); return items.length;
+}
+async function schedNeis(silent) {
+  if (window.TF_DEMO) { if (!silent) toast('체험판에서는 나이스에 연결하지 않습니다.'); return 0; }
+  const sy = schoolYearNow(); let sc = SCH.school;
+  if (!sc) { try { await schoolLoad(true); } catch (e) { } sc = SCH.school; }
+  if (!sc) { if (!silent) toast('먼저 설정에서 학교 이름을 넣어 주세요. (예: 곡선중학교)'); return 0; }
+  let ev = null, how = '';
+  try { if (!silent) toast('나이스에서 학사일정을 받는 중… (1분 안팎)'); ev = await neisSchedLive(sc, sy, (a, b) => { if (!silent && a % 20 === 0) toast(`받는 중 ${a}/${b}`); }); how = '나이스 직접'; if (!ev.length) ev = null; } catch (e) { ev = null; }
+  if (!ev) { try { const r = await fetch(NEIS_JSON, { cache: 'no-store' }), j = await r.json(); if (j.schedule && j.schedule.length) { ev = j.schedule; how = '매일 새벽 자료'; } } catch (e) { } }
+  if (!ev || !ev.length) { if (!silent) toast('학사일정을 받지 못했습니다. 학교 이름을 확인하거나, 아래 [학사일정 파일 올리기]를 써 주세요.'); return 0; }
+  const n = schedApply(ev); if (!silent) toast(`학사일정 ${n}건을 캘린더에 넣었습니다 (${how}).`); return n;
+}
+A.schedNeis = () => schedNeis(false);
+setTimeout(() => { try { if (S.setup && S.profile.school && Date.now() - (S.schedAt || 0) > 24 * 3600 * 1000) schedNeis(true); } catch (e) { } }, 4000);
 
 /* setui.js — 설정의 "작업표시줄에 고정 · 위젯" 안내 칸(app.js `.guide`) 위에 [앱으로 설치하기]·[위젯 열기] 버튼을 붙입니다.
    (설정 칸 접기는 extra.js `setFold()`가 맡습니다.) */

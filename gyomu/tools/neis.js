@@ -31,7 +31,17 @@ async function api(name, q) {
   for (let off = -3; off <= 21; off += 4) {   // 인증키 없이도 되도록 4일씩 끊어 받습니다(한 번에 5건까지만 주기 때문)
     try { (await api('mealServiceDietInfo', Object.assign({ MLSV_FROM_YMD: ymd(new Date(now.getTime() + off * 864e5)), MLSV_TO_YMD: ymd(new Date(now.getTime() + (off + 3) * 864e5)) }, base))).forEach(push); } catch (e) { console.error('급식 실패:', e.message); }
   }
+  /* 학사일정: 한 번에 5건(인증키 없을 때)까지만 주므로 3일씩 끊고, 꽉 차면 하루씩 다시 받음 */
+  const schedule = [], sy = now.getMonth() + 1 >= 3 ? now.getFullYear() : now.getFullYear() - 1, seenS = new Set(), cap = KEY ? 1000 : 5, stp = KEY ? 92 : 3;
+  const addS = r => { const k = r.AA_YMD + '|' + r.EVENT_NM; if (seenS.has(k)) return; seenS.add(k); schedule.push({ d: r.AA_YMD, n: String(r.EVENT_NM || '').trim(), c: String(r.EVENT_CNTNT || '').trim(), h: r.SBTR_DD_SC_NM || '' }); };
+  const sEnd = new Date(sy + 1, 2, 0);
+  for (let d = new Date(sy, 2, 1); d <= sEnd; d = new Date(d.getTime() + stp * 864e5)) {
+    const e = new Date(Math.min(d.getTime() + (stp - 1) * 864e5, sEnd.getTime()));
+    try { let rows = await api('SchoolSchedule', Object.assign({ AA_FROM_YMD: ymd(d), AA_TO_YMD: ymd(e) }, base)); rows.forEach(addS);
+      if (rows.length >= cap && e > d) for (let x = new Date(d); x <= e; x = new Date(x.getTime() + 864e5)) { try { (await api('SchoolSchedule', Object.assign({ AA_FROM_YMD: ymd(x), AA_TO_YMD: ymd(x) }, base))).forEach(addS); } catch (er) { } } } catch (er) { console.error('학사일정 실패:', er.message); }
+  }
+  schedule.sort((a, b) => a.d.localeCompare(b.d));
   meals.sort((a, b) => a.d.localeCompare(b.d) || a.kind.localeCompare(b.kind));
-  fs.writeFileSync(process.argv[2] || 'neis.json', JSON.stringify({ updated: new Date().toISOString(), school, classes, meals }));
+  fs.writeFileSync(process.argv[2] || 'neis.json', JSON.stringify({ updated: new Date().toISOString(), school, classes, meals, schedule }));
   console.log('저장 완료:', school.name, '학급', JSON.stringify(classes), '급식', meals.length + '건', meals[0] ? meals[0].d + ' ' + meals[0].dishes.slice(0, 3).join(',') : '');
 })().catch(e => { console.error(e); process.exit(1); });
