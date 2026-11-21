@@ -46,12 +46,14 @@ const B2_READ = [
   { name: 'list_work_cards', description: '내 업무(업무분장표) 카드 목록. 각 카드의 담당자·기한·완료·단계·메모', input_schema: { type: 'object', properties: { scope: { type: 'string', enum: ['me', 'all'] }, open_only: { type: 'boolean' }, text: { type: 'string', description: '제목·부서에 포함된 낱말' } } } },
   { name: 'get_budget', description: '예산 사업·항목별 배정·집행·잔액·기한', input_schema: { type: 'object', properties: {} } },
   { name: 'list_training', description: '연간 교육·훈련표(학기×대상 날짜)와 내 연수 이수 현황', input_schema: { type: 'object', properties: {} } },
+  { name: 'get_worklog', description: '업무일지 기간 조회(직접 적은 일지·하루 마무리·감상·성찰 포함)', input_schema: { type: 'object', properties: { from: { type: 'string' }, to: { type: 'string' } }, required: ['from', 'to'] } },
   { name: 'list_notes', description: '회의·연수 노트 목록 또는 제목 일부로 본문 읽기', input_schema: { type: 'object', properties: { title_contains: { type: 'string' } } } }
 ];
 const B2_WRITE = [
   { name: 'add_wk_card', description: '내 업무 메뉴에 업무 카드 추가(업무분장표 이름대로)', input_schema: { type: 'object', properties: { title: { type: 'string' }, dept: { type: 'string' }, who: { type: 'string', description: '담당자 이름(내 업무면 비움)' }, due: { type: 'string' }, memo: { type: 'string' }, steps: { type: 'array', items: { type: 'string' } } }, required: ['title'] } },
   { name: 'update_wk_card', description: '업무 카드의 완료·기한·메모·단계 수정(제목 일부로 찾음)', input_schema: { type: 'object', properties: { title_contains: { type: 'string' }, done: { type: 'boolean' }, due: { type: 'string' }, memo_append: { type: 'string' }, add_step: { type: 'string' } }, required: ['title_contains'] } },
   { name: 'set_training_date', description: '연간 교육·훈련표 한 칸에 날짜(와 인원) 넣기', input_schema: { type: 'object', properties: { name_contains: { type: 'string' }, col: { type: 'string', enum: ['1t', '1s', '1p', '1x', '2t', '2s', '2p', '2x'], description: '1/2=학기, t=교직원 s=학생 p=학부모 x=기타·훈련' }, date: { type: 'string' }, count: { type: 'integer' } }, required: ['name_contains', 'col', 'date'] } },
+  { name: 'add_worklog', description: '업무일지에 한 줄 기록', input_schema: { type: 'object', properties: { text: { type: 'string' }, date: { type: 'string' }, category: { type: 'string', enum: ['업무', '수업', '학생지도', '회의', '공문', '성찰·감상', '기타'] } }, required: ['text'] } },
   { name: 'add_day_memo', description: '캘린더 하루 메모에 한 줄 덧붙이기', input_schema: { type: 'object', properties: { date: { type: 'string' }, text: { type: 'string' } }, required: ['date', 'text'] } }
 ];
 const B2_NAV = { name: 'go_to', description: '사용자가 바로 이동할 수 있는 화면 링크를 답 아래에 붙인다. hash는 ' + B2_NAVS.join(', ') + ' 중 하나', input_schema: { type: 'object', properties: { hash: { type: 'string' }, label: { type: 'string' } }, required: ['hash', 'label'] } };
@@ -67,6 +69,7 @@ function b2Run(name, i) {
     case 'list_work_cards': { const w = wkD(); let L = w.cards; if (i.scope !== 'all') L = L.filter(c => c.me); if (i.open_only) L = L.filter(c => !c.done); if (i.text) L = L.filter(c => agN(c.title + c.dept).includes(agN(i.text))); return { 건수: L.length, 카드: L.slice(0, 60).map(c => ({ 제목: c.title, 부서: c.dept, 담당: c.me ? '나' : c.who, 기한: c.due || '', 완료: !!c.done, 단계: (c.steps || []).map(s => (s.d ? '✔' : '□') + s.t), 메모: b2Cut(c.memo, 200) })) }; }
     case 'get_budget': return S.budget.map(p => ({ 사업: p.name, 항목: p.lines.map(l => ({ 이름: l.item, 배정: +l.alloc || 0, 집행: spentOf(l), 잔액: (+l.alloc || 0) - spentOf(l), 기한: l.deadline || '' })) }));
     case 'list_training': { const yp = S.yp || { rows: [] }; return { 연간표: (yp.rows || []).map(r => ({ 이름: r.name, 기준: r.rule, 날짜: Object.keys(r.cells || {}).filter(k => r.cells[k] && r.cells[k].d).map(k => `${k}:${r.cells[k].d}${r.cells[k].ok ? '(완료)' : ''}`) })), 내연수: (S.training || []).map(t => `${t.title} ${t.type} ${t.hours}h ${t.done ? '이수 ' + (t.certNo || '') : '미이수'}`) }; }
+    case 'get_worklog': { const a = i.from || today(), b = i.to || a; return { 일지: (S.wlog || []).filter(x => x.d >= a && x.d <= b).map(x => `${x.d} [${x.cat}] ${x.t}${x.m ? ' ' + x.m + '분' : ''}`), 마무리: Object.keys(S.wlogDay || {}).filter(d => d >= a && d <= b).map(d => ({ 날짜: d, ...S.wlogDay[d] })) }; }
     case 'list_notes': { const t = i.title_contains; if (!t) return S.notes.map(n => `${n.date} ${n.kind} ${n.title}`).slice(-40); return S.notes.filter(n => !n.lock && agN(n.title).includes(agN(t))).slice(0, 3).map(n => ({ 제목: n.title, 날짜: n.date, 본문: b2Cut(n.body, 2500), 결정: n.decisions, 후속: n.followups })); }
   }
   return { 오류: '알 수 없는 도구' };
@@ -80,6 +83,7 @@ agPlan = function (a) {
     case 'add_wk_card': r.txt = `업무 카드 추가: ${i.title}${i.dept ? ' (' + i.dept + ')' : ''}${i.who ? ' · 담당 ' + i.who : ''}${i.due ? ' · 기한 ' + i.due : ''}${(i.steps || []).length ? ' · 할 일 ' + i.steps.length + '개' : ''}`; return r;
     case 'update_wk_card': { const m = wkD().cards.filter(c => agN(c.title).includes(agN(i.title_contains))); if (m.length !== 1) return bad(`업무 카드 수정: 「${i.title_contains}」에 맞는 카드를 ${m.length ? '하나로 정할 수 없습니다' : '찾지 못했습니다'}`); a._c = m[0]; r.txt = `업무 카드 수정: ${m[0].title}` + (i.done != null ? (i.done ? ' · 완료 처리' : ' · 완료 해제') : '') + (i.due ? ' · 기한 ' + i.due : '') + (i.memo_append ? ' · 메모 추가' : '') + (i.add_step ? ' · 할 일 「' + i.add_step + '」 추가' : ''); return r; }
     case 'set_training_date': { const rows = ((S.yp || {}).rows || []).filter(x => agN(x.name).includes(agN(i.name_contains))); if (rows.length !== 1) return bad(`연수표: 「${i.name_contains}」 줄을 ${rows.length ? '하나로 정할 수 없습니다' : '찾지 못했습니다'}`); if (!/^[12][tspx]$/.test(i.col || '')) return bad('연수표: 칸 위치를 알 수 없습니다'); a._r = rows[0]; r.txt = `연수표: ${rows[0].name} · ${i.col[0]}학기 ${({ t: '교직원', s: '학생', p: '학부모', x: '기타·훈련' })[i.col[1]]} → ${agDate(i.date)}${i.count ? ' · ' + i.count + '명' : ''}`; return r; }
+    case 'add_worklog': r.txt = `업무일지 기록: ${b2Cut(i.text, 60)} (${agDate(i.date)})`; return r;
     case 'add_day_memo': r.txt = `${agDate(i.date)} 메모 추가: ${b2Cut(i.text, 60)}`; return r;
   }
   return _b2Plan(a);
@@ -90,6 +94,7 @@ agDo = function (a) {
     case 'add_wk_card': { const me = (S.profile.name || '').trim(); wkD().cards.push({ id: uid(), title: i.title, dept: i.dept || '', who: i.who || '', me: !i.who || (!!me && i.who.trim() === me), memo: i.memo || '', due: /^\d{4}-\d{2}-\d{2}$/.test(i.due || '') ? i.due : '', done: false, steps: (i.steps || []).map(t => ({ t, d: false })), src: '꿈송이' }); return; }
     case 'update_wk_card': { const c = a._c; if (i.done != null) c.done = !!i.done; if (/^\d{4}-\d{2}-\d{2}$/.test(i.due || '')) c.due = i.due; if (i.memo_append) c.memo = (c.memo ? c.memo + '\n' : '') + i.memo_append; if (i.add_step) (c.steps = c.steps || []).push({ t: i.add_step, d: false }); return; }
     case 'set_training_date': { const r = a._r; r.cells = r.cells || {}; const c = r.cells[i.col] = r.cells[i.col] || {}; c.d = agDate(i.date); if (i.count) c.n = i.count; return; }
+    case 'add_worklog': (S.wlog = S.wlog || []).push({ id: uid(), d: agDate(i.date), t: i.text, cat: i.category || '업무', m: 0, card: '' }); return;
     case 'add_day_memo': { S.dayMemo = S.dayMemo || {}; const d = agDate(i.date); S.dayMemo[d] = (S.dayMemo[d] ? S.dayMemo[d] + '\n' : '') + i.text; return; }
   }
   return _b2Do(a);
@@ -107,7 +112,7 @@ async function b2Call(body) {
   if (!r.ok) throw new Error(r.status === 401 ? '키가 올바르지 않습니다' : r.status === 429 ? '요청이 몰렸습니다. 잠시 뒤 다시 해 주세요' : r.status === 400 || r.status === 402 ? '잔액(크레딧)이나 요청 형식을 확인해 주세요' : '응답 오류 ' + r.status);
   return r.json();
 }
-const B2_LBL = { search_site: '사이트 검색', find_rule: '규정 찾기', list_library: '자료실', read_library: '자료 읽기', get_calendar: '캘린더', get_day: '하루 보기', list_work_cards: '내 업무 카드', get_budget: '예산', list_training: '연수표', list_notes: '회의·연수 노트' };
+const B2_LBL = { search_site: '사이트 검색', find_rule: '규정 찾기', list_library: '자료실', read_library: '자료 읽기', get_calendar: '캘린더', get_day: '하루 보기', list_work_cards: '내 업무 카드', get_budget: '예산', list_training: '연수표', list_notes: '회의·연수 노트', get_worklog: '업무일지' };
 async function b2Loop(q) {
   const hist = CH.slice(-9, -1).filter(m => m.text).map(m => (m.role === 'me' ? '사용자: ' : '꿈송이: ') + b2Cut(m.text, 300)).join('\n');
   const msgs = [{ role: 'user', content: agContext() + (hist ? '\n\n[앞선 대화]\n' + hist : '') + '\n\n[요청]\n' + q }];

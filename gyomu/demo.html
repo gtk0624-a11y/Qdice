@@ -901,6 +901,17 @@ html[data-skin="planner"] .drawer,html[data-skin="planner"] .dw{padding:6px 12px
 .ypsig{font-size:12px;margin-right:4px}.ypsig.r{color:#e5484d}.ypsig.o{color:#f08c00}.ypsig.y{color:#e6c200}.ypsig.g{color:#2fa56b}
 /* 서랍: 한 줄로 */
 .dw{display:flex!important;flex-wrap:wrap!important;align-items:center!important;gap:2px 8px!important;margin-top:6px!important;padding:2px 0!important}.dw .dwf{flex:1 1 0;min-width:0}.dw details{flex:0 0 auto}.dw details[open]{flex-basis:100%}.dw summary{padding:0!important;font-size:12px!important}.dw .dwf b{font-size:12px!important}.cp{font-size:11px!important;margin:2px 0!important}
+/* v77 */
+.undobar{position:fixed;left:50%;transform:translateX(-50%);bottom:76px;z-index:120;background:#2b2a33;color:#fff;padding:10px 14px;border-radius:14px;display:flex;gap:12px;align-items:center;box-shadow:0 4px 14px #0004}.undobar button{background:#ffd75e;border:0;border-radius:10px;padding:6px 10px;font-weight:700}
+.wkh{position:relative;padding-right:30px}.wkxq{position:absolute;right:0;top:0;border:0;background:transparent;font-size:18px;line-height:1;padding:4px 6px;cursor:pointer;color:#888}.wkxq:hover{color:#e5484d}
+.tabx{border:0;background:transparent;color:#999;margin-left:-6px;margin-right:6px;cursor:pointer}.tabx:hover{color:#e5484d}
+.wkx2{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:4px 0}.wkx2 select{padding:2px 6px;border-radius:8px}.wkdocs{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:6px 0}.wkdocs .lnk{background:none;border:0;padding:0;text-decoration:underline;cursor:pointer;font:inherit}.wkup{display:inline-flex;gap:4px;align-items:center}.wkteam{font-size:13px;color:var(--mu);margin:4px 0}
+.pgfdet{margin-top:14px}.pgfdet>summary{cursor:pointer;font-size:13px;color:var(--mu)}.pdfv canvas{display:block;margin:0 0 8px;border:1px solid #ddd}
+.calkind{margin:6px 0}
+.wlf{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}.wlf input[name=t]{flex:1 1 220px}.wlf input[name=m]{width:84px}
+.wld{margin:10px 0}.wle{padding:3px 0;border-bottom:1px dashed #ddd;display:flex;gap:6px;align-items:center;flex-wrap:wrap}.wle.auto{color:var(--mu)}.wlc{margin:6px 0}.wlc label{display:block;margin:4px 0}.wlc textarea{width:100%}
+/* 서랍 너비 */
+.dw{width:fit-content!important;max-width:min(100%,300px)!important}.dw:has(details[open]){width:100%!important;max-width:none!important}.dwf{max-width:210px}
 </style>
 </head>
 <body>
@@ -1539,7 +1550,7 @@ function masthead() {
   return `<header class="mast"><div class="mast1"><img class="logo" src="${LOGO || DEFLOGO}" alt="도디쌤 이미지"><h1 data-act="editTitle" title="눌러서 제목 고치기">${esc(titleOf())}</h1><span class="fr" data-act="editTitle">${esc(p.sub || 'Travail Fatal')}</span><button class="x" data-act="editTitle" aria-label="제목 고치기">✎</button></div><div class="mast2"><div class="dt">${n.getFullYear()}년 ${n.getMonth() + 1}월 ${n.getDate()}일 (${DOW[n.getDay()]})</div><div>${esc([p.school, p.name && p.name + ' 선생님'].filter(Boolean).join(' · '))}</div></div></header>`;
 }
 function nav(page) {
-  const L0 = [['today', '오늘'], ['cal', '캘린더'], ['work', '내 업무'], ['class', '수업 및 시간표'], ['eval', '평가'], ['budget', '예산'], ['notes', '기록'], ['pages', '페이지'], ['lib', '자료·연락'], ['files', '자료 아카이브'], ['yp', '연간 교육·훈련'], ...(typeof cmCfg === 'function' && cmCfg().on ? [['cm', cmCfg().title || '학급 관리']] : []), ['set', '설정']];
+  const L0 = [['today', '오늘'], ['cal', '캘린더'], ['work', '내 업무'], ['wlog', '업무일지'], ['class', '수업 및 시간표'], ['eval', '평가'], ['budget', '예산'], ['notes', '기록'], ['pages', '페이지'], ['lib', '자료·연락'], ['files', '자료 아카이브'], ['yp', '연간 교육·훈련'], ...(typeof cmCfg === 'function' && cmCfg().on ? [['cm', cmCfg().title || '학급 관리']] : []), ['set', '설정']];
   const L = (typeof navOrder === 'function' ? navOrder(L0) : L0).filter(([k]) => k === 'today' || k === 'set' || k === (page === 'note' ? 'notes' : page === 'page' ? 'pages' : page) || !(S.navHide || []).includes(k));
   return `<nav class="nav" aria-label="메뉴">${L.map(([k, v]) => `<a href="#/${k}" ${page === k || (k === 'notes' && page === 'note') || (k === 'pages' && page === 'page') ? 'aria-current="page"' : ''}>${v}</a>`).join('')}<button class="nvx" data-act="navPick" title="위쪽 메뉴 고르기">☰ 메뉴 고르기</button><button class="nvx" data-act="ibx">📨 메신저 붙여넣기</button></nav>`;
 }
@@ -1773,7 +1784,7 @@ function render() {
   if (!S.setup) { app.innerHTML = welcome(); if (cbx) cbx.hidden = true; return; }
   if (cbx) cbx.hidden = false;
   const [, page = 'today', arg] = (location.hash || '#/today').split('/');
-  const body = { today: todayView, cal: calView, class: classView, budget: budgetView, notes: () => notesView(), note: () => notesView(arg), pages: () => pagesView(), page: () => pagesView(arg), lib: libView, files: () => (typeof filesView === 'function' ? filesView() : libView()), eval: () => (typeof evalView === 'function' ? evalView() : classView()), set: setView, arch: () => archView(arg), cm: () => (typeof cmView === 'function' ? cmView() : todayView()), yp: () => (typeof ypView === 'function' ? ypView() : todayView()), work: () => (typeof workView === 'function' ? workView() : todayView()) }[page] || todayView;
+  const body = { today: todayView, cal: calView, class: classView, budget: budgetView, notes: () => notesView(), note: () => notesView(arg), pages: () => pagesView(), page: () => pagesView(arg), lib: libView, files: () => (typeof filesView === 'function' ? filesView() : libView()), eval: () => (typeof evalView === 'function' ? evalView() : classView()), set: setView, arch: () => archView(arg), cm: () => (typeof cmView === 'function' ? cmView() : todayView()), yp: () => (typeof ypView === 'function' ? ypView() : todayView()), work: () => (typeof workView === 'function' ? workView() : todayView()), wlog: () => (typeof wlogView === 'function' ? wlogView() : todayView()) }[page] || todayView;
   app.innerHTML = masthead() + nav(page) + `<main>${typeof backBtn === 'function' ? backBtn(page) : ''}${typeof pageMemo === 'function' ? pageMemo(page) : ''}${body()}${typeof pageFiles === 'function' ? pageFiles(page) : ''}</main>` + footer();
   if (page === 'note') mountNote(arg);
   if (page === 'page') mountPage();
@@ -5289,7 +5300,7 @@ buildChunks = function () {
 };
 
 /* 화면 맨 아래에 버전 표시 — 옛 화면을 보고 있는지 바로 알 수 있게 */
-const TF_VER = 'v76', _cmFt = footer;
+const TF_VER = 'v77', _cmFt = footer;
 footer = function () { return _cmFt.apply(this, arguments).replace('</footer>', ` · <span class="mu">버전 ${TF_VER} (학급 관리 포함)</span></footer>`); };
 
 /* 새 버전 알림: 옛 화면이 남아 있으면 한 번 눌러 새로 받게 함 */
@@ -5842,7 +5853,7 @@ Object.assign(A, {
     d.querySelector('#lkok').onclick = () => { c.links = L.slice(0, 200).filter((x, i) => d.querySelector(`[data-lk="${i}"]`).checked).map(x => ({ label: x.label, ref: x.ref })); c.sd = today(); d.close(); commit(); };
     d.showModal();
   },
-  wkTplSave(el) { const c = wkById(el.dataset.id); if (!c) return; ask('해마다 되풀이 업무로 저장', [{ k: 'due', label: '보통 언제까지 하는 업무인가요? (날짜를 고르면 매년 같은 월·일로 카드가 만들어집니다)', type: 'date', val: c.due || '' }], o => { const t = { id: uid(), title: c.title, dept: c.dept || '', who: c.who || '', me: !!c.me, memo: '', steps: (c.steps || []).map(s => s.t), md: o.due ? o.due.slice(5) : '' }; const T = wkTpl(), k = T.findIndex(x => x.title === t.title); if (k >= 0) { t.id = T[k].id; T[k] = t; } else T.push(t); c.tplId = t.id; commit(); toast('해마다 업무에 저장했습니다. [↻ 해마다] 탭에서 다음 학년도에 한 번에 만들 수 있어요.'); }, '저장'); },
+  wkTplSave(el) { const c = wkById(el.dataset.id); if (!c) return; ask('해마다 되풀이 업무로 저장', [{ k: 'due', label: '보통 언제까지 하는 업무인가요? (날짜를 고르면 매년 같은 월·일로 카드가 만들어집니다)', type: 'date', val: c.due || '' }], o => { const t = { id: uid(), type: c.type || '', title: c.title, dept: c.dept || '', who: c.who || '', me: !!c.me, memo: '', steps: (c.steps || []).map(s => s.t), md: o.due ? o.due.slice(5) : '' }; const T = wkTpl(), k = T.findIndex(x => x.title === t.title); if (k >= 0) { t.id = T[k].id; T[k] = t; } else T.push(t); c.tplId = t.id; commit(); toast('해마다 업무에 저장했습니다. [↻ 해마다] 탭에서 다음 학년도에 한 번에 만들 수 있어요.'); }, '저장'); },
   wkTplAdd() { ask('되풀이 업무 추가', [{ k: 'title', label: '업무 이름', req: 1 }, { k: 'dept', label: '부서·영역' }, { k: 'due', label: '보통 하는 시기 (날짜 하나 고르면 월·일만 씁니다)', type: 'date' }, { k: 'steps', label: '할 일 단계 (한 줄에 하나)', type: 'textarea', rows: 4 }], o => { wkTpl().push({ id: uid(), title: o.title.trim(), dept: (o.dept || '').trim(), who: '', me: true, memo: '', steps: String(o.steps || '').split('\n').map(x => x.trim()).filter(Boolean), md: o.due ? o.due.slice(5) : '' }); commit(); }, '추가'); },
   wkTplUse(el) { const t = wkTpl().find(x => x.id === el.dataset.id); if (!t || wkTplHas(t)) return; wkD().cards.push(wkFromTpl(t)); commit(); toast('올해 카드를 만들었습니다.'); },
   wkTplAll() { const L = wkTpl().filter(t => !wkTplHas(t)); if (!L.length) return; L.forEach(t => wkD().cards.push(wkFromTpl(t))); commit(); toast(`올해 카드 ${L.length}장을 만들었습니다. [되돌리기]로 취소할 수 있어요.`); },
@@ -6020,6 +6031,192 @@ buildChunks = function () {
   return out;
 };
 
+/* v77: 업무일지 · 카드 문서·유형·일정·팀·한 장 요약 · 카드 ✕ 즉시 삭제 · 캘린더 보강 · 올린 파일 모두 아카이브 · PDF 앱 안에서 열기 · 화면 자료 상자 접기 */
+
+/* ---------- 공통: 되돌리기 바 ---------- */
+function undoBar(msg, fn) {
+  let b = document.getElementById('undobar2'); if (b) b.remove();
+  b = document.createElement('div'); b.id = 'undobar2'; b.className = 'undobar'; b.innerHTML = `<span>${esc(msg)}</span><button type="button">↩ 되돌리기</button>`; document.body.appendChild(b);
+  const t = setTimeout(() => b.remove(), 8000); b.querySelector('button').onclick = () => { clearTimeout(t); b.remove(); fn(); };
+}
+
+/* ---------- 올린 파일은 전부 자료 아카이브에 ---------- */
+let _ingDepth = 0;
+const _ing0 = ingestFiles; ingestFiles = async function () { _ingDepth++; try { return await _ing0.apply(this, arguments); } finally { _ingDepth--; } };
+const _rf3 = readFile;
+readFile = async function (f) {
+  const t = await _rf3.apply(this, arguments);
+  try {
+    if (!_ingDepth && f && f.name && !/^image\//.test(f.type || '') && !LIB.some(d => d.name === f.name && (d.size || 0) === (f.size || 0))) {
+      const id = uid(), page = typeof archPage === 'function' ? archPage() : 'lib';
+      LIB.push({ id, name: f.name, kind: typeof guessKind === 'function' ? guessKind(f.name, page) : '기타', text: String(t || ''), added: today(), from: page, size: f.size || 0, readErr: '' });
+      if (typeof keepFile === 'function') await keepFile(id, f); await saveLib(); toast('「' + f.name + '」을 자료 아카이브에도 보관했습니다.');
+    }
+  } catch (e) { }
+  return t;
+};
+/* 화면마다 붙는 「이 화면의 자료」 상자는 접어 둔다 */
+const _fb3 = fileBox;
+fileBox = function (page, kind) { const n = LIB.filter(d => (d.from || 'lib') === page).length; return `<details class="pgfdet"><summary>📎 이 화면의 자료 ${n}개</summary>${_fb3(page, kind)}</details>`; };
+
+/* ---------- PDF·그림은 앱 안에서 열기 (닫아도 파탈은 그대로) ---------- */
+const _dOpen3 = A.docOpen;
+A.docOpen = async function (el) {
+  const doc = docOf(el.dataset.id); if (!doc) return;
+  if (/\.pdf$/i.test(doc.name)) {
+    const f = await idb.get('file:' + doc.id); if (!f) return _dOpen3.apply(this, arguments);
+    const d = bigDlg(doc.name, '<div class="pdfv"><p class="mu">PDF 여는 중…</p></div>'), box = d.querySelector('.pdfv');
+    try {
+      await loadScript('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js');
+      pdfjsLib.GlobalWorkerOptions.workerSrc = window.__pdfLocal ? new URL('lib/pdf.worker.min.js', document.baseURI).href : 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+      const pdf = await pdfjsLib.getDocument({ data: await f.arrayBuffer() }).promise; box.innerHTML = '';
+      for (let i = 1; i <= Math.min(pdf.numPages, 60); i++) { if (!d.isConnected) break; const pg = await pdf.getPage(i), w = Math.min(box.clientWidth || 600, 900), v0 = pg.getViewport({ scale: 1 }), sc = w / v0.width, v = pg.getViewport({ scale: sc * (window.devicePixelRatio || 1) }), c = document.createElement('canvas'); c.width = v.width; c.height = v.height; c.style.width = '100%'; box.appendChild(c); await pg.render({ canvasContext: c.getContext('2d'), viewport: v }).promise; }
+      if (pdf.numPages > 60) box.insertAdjacentHTML('beforeend', '<p class="mu">앞 60쪽까지만 보여 드립니다.</p>');
+    } catch (e) { box.innerHTML = '<p class="mu">PDF를 열지 못했습니다: ' + esc(e.message || '') + '</p>'; }
+    return;
+  }
+  if (/\.(png|jpe?g|gif|webp)$/i.test(doc.name)) { const f = await idb.get('file:' + doc.id); if (f) { const u = URL.createObjectURL(f), d = bigDlg(doc.name, `<img src="${u}" style="max-width:100%" alt="">`); d.addEventListener('close', () => URL.revokeObjectURL(u)); return; } }
+  return _dOpen3.apply(this, arguments);
+};
+
+/* ---------- 업무 유형 · 필요한 문서 ---------- */
+const WK_TYPES = {
+  '행사': { steps: ['계획 수립', '계획서 품의', '공문 시행', '안내·신청 받기', '준비물·장소', '실시', '결과보고', '정산'], docs: ['계획서', '공문', '결과보고서'] },
+  '연수': { steps: ['계획 수립', '강사 섭외', '계획서 품의', '안내 공문', '실시', '이수 처리', '결과보고'], docs: ['계획서', '안내문', '결과보고서'] },
+  '조사': { steps: ['대상·기간 정리', '안내', '자료 수합', '집계', '제출'], docs: ['공문', '제출자료'] },
+  '예산': { steps: ['계획', '품의', '구매·계약', '검수', '정산'], docs: ['품의서', '증빙'] },
+  '일반': { steps: [], docs: [] }
+};
+const WK_DOCK = ['계획서', '공문', '품의서', '안내문', '결과보고서', '제출자료', '증빙', '기타'];
+const wkDocs = c => (c.docs = c.docs || []);
+const wkNeed = c => ((WK_TYPES[c.type] || WK_TYPES['일반']).docs || []);
+const wkMiss = c => wkNeed(c).filter(k => !wkDocs(c).some(d => d.kind === k));
+function wkApplyType(c, t) { c.type = t === '일반' ? '' : t; const T = WK_TYPES[t]; if (T && T.steps.length && !(c.steps || []).length) c.steps = T.steps.map(x => ({ t: x, d: false })); }
+const bdOfLink = label => { const m = /^예산 (.+?) › (.+)$/.exec(label || ''); if (!m) return null; for (const p of S.budget) if (p.name === m[1]) for (const l of p.lines) if (l.item === m[2]) return { p, l, left: (+l.alloc || 0) - spentOf(l) }; return null; };
+
+const _wk3Card = wkCard;
+wkCard = function (c) {
+  let h = _wk3Card(c); wkN(c); const need = wkNeed(c), miss = wkMiss(c), dl = c.due ? dd(c.due) : null;
+  const ev = c.evt && S.items.find(i => i.id === c.evt), bl = (c.links || []).map(l => bdOfLink(l.label)).filter(Boolean);
+  const top = `<div class="wkx2"><select data-wktype="${c.id}" aria-label="업무 유형">${['일반', '행사', '연수', '조사', '예산'].map(t => `<option ${((c.type || '일반') === t) ? 'selected' : ''}>${t}</option>`).join('')}</select>${need.length ? `<span class="chp ${miss.length && dl !== null && dl <= 7 ? 'hot' : ''}">📎 문서 ${need.length - miss.length}/${need.length}${miss.length ? ' · 빠진 것: ' + miss.join(', ') : ' ✔'}</span>` : ''}${ev ? `<span class="chp k-일정">📅 실시 ${md(ev.date)}</span>` : ''}${bl.map(b => `<span class="chp">💰 ${esc(b.l.item)} 잔액 ${won(b.left)}원</span>`).join('')}</div>`;
+  const docs = `<div class="wkdocs">${wkDocs(c).map((d, i) => `<span class="chp"><button class="lnk" data-act="docOpen" data-id="${d.id}">📄 ${esc(d.name)}</button> <small class="mu">${esc(d.kind)}</small> <button class="x" data-act="wkDocDel" data-id="${c.id}" data-i="${i}" aria-label="문서 떼기">✕</button></span>`).join('')}<span class="wkup"><select data-wkdk="${c.id}" aria-label="문서 종류">${WK_DOCK.map(k => `<option ${miss[0] === k ? 'selected' : ''}>${k}</option>`).join('')}</select><label class="btn sm file">📎 문서 올리기<input type="file" data-wkdoc="${c.id}" multiple hidden></label></span></div>`;
+  const team = c.team ? `<div class="wkteam">👥 ${esc(c.team).replace(/\n/g, ' · ')}</div>` : '';
+  h = h.replace('<div class="wkm">', top + '<div class="wkm">').replace('<div class="wkh">', `<div class="wkh"><button class="wkxq" data-act="wkQuickDel" data-id="${c.id}" aria-label="카드 지우기" title="바로 지우기">✕</button>`);
+  h = h.replace('<textarea data-wkmemo', docs + team + '<textarea data-wkmemo');
+  h = h.replace('<button class="btn sm" data-act="wkEdit"', `<button class="btn sm" data-act="wkEvt" data-id="${c.id}">📅 일정 잡기</button><button class="btn sm" data-act="wkTeam" data-id="${c.id}">👥 함께하는 사람</button><button class="btn sm" data-act="wkOne" data-id="${c.id}">📄 한 장 요약</button><button class="btn sm" data-act="wkEdit"`);
+  return h;
+};
+/* 카드·해마다 업무·부서 탭: ✕로 바로 지우기(되돌리기 바) */
+const _wk3View = workView;
+workView = function () {
+  let h = _wk3View.apply(this, arguments);
+  h = h.replace(/(<button class="cmtab[^"]*" data-act="wkTabSet" data-k="(d:[^"]*)">[^<]*<\/button>)/g, '$1<button class="tabx" data-act="wkDeptDel" data-k="$2" aria-label="이 부서 카드 모두 지우기">✕</button>');
+  h = h.replace(/<button class="btn sm" data-act="wkTplDel" data-id="([^"]*)">삭제<\/button>/g, '<button class="btn sm" data-act="wkTplDel" data-id="$1">✕ 지우기</button>');
+  return h;
+};
+Object.assign(A, {
+  wkQuickDel(el) { const W = wkD(), c = W.cards.find(x => x.id === el.dataset.id); if (!c) return; const i = W.cards.indexOf(c); W.cards.splice(i, 1); W.trash.unshift(c); W.trash = W.trash.slice(0, 400); commit(); undoBar(`「${c.title}」 카드를 지웠습니다`, () => { const w = wkD(); w.trash = w.trash.filter(x => x.id !== c.id); w.cards.splice(Math.min(i, w.cards.length), 0, c); commit(); }); },
+  wkDeptDel(el) { const name = String(el.dataset.k || '').slice(2), W = wkD(), L = W.cards.filter(c => !c.me && (c.dept || '기타') === name); if (!L.length) return; W.cards = W.cards.filter(c => !L.includes(c)); W.trash = L.concat(W.trash).slice(0, 400); UI.wkTab = 'me'; commit(); undoBar(`「${name}」 카드 ${L.length}장을 지웠습니다`, () => { const w = wkD(); w.trash = w.trash.filter(x => !L.includes(x)); w.cards = w.cards.concat(L); commit(); }); },
+  wkTplDel(el) { const w = wkD(), T = wkTpl(), t = T.find(x => x.id === el.dataset.id); if (!t) return; w.tpl = T.filter(x => x !== t); commit(); undoBar(`「${t.title}」 해마다 업무를 지웠습니다`, () => { wkD().tpl.push(t); commit(); }); },
+  wkDocDel(el) { const c = wkById(el.dataset.id); if (c) { wkDocs(c).splice(+el.dataset.i, 1); commit(); } },
+  wkEvt(el) { const c = wkById(el.dataset.id); if (!c) return; const cur = c.evt && S.items.find(i => i.id === c.evt); ask('실시일을 캘린더에 올리기', [{ k: 'd', label: '실시(행사)일', type: 'date', val: (cur && cur.date) || c.due || '', req: 1 }, { k: 't', label: '캘린더에 보일 이름', val: (cur && cur.title) || c.title + ' 실시', req: 1 }], o => { if (cur) { cur.date = o.d; cur.title = o.t.trim(); } else { const it = { id: uid(), title: o.t.trim(), date: o.d, cat: 'event', done: false, wk: c.id }; S.items.push(it); c.evt = it.id; } c.sd = today(); commit(); toast('캘린더에 올렸습니다.'); }, '올리기'); },
+  wkTeam(el) { const c = wkById(el.dataset.id); if (!c) return; ask('함께하는 사람', [{ k: 't', label: '한 줄에 한 명: 이름 · 역할 · 연락처 (행정실·업체 포함)', type: 'textarea', rows: 5, val: c.team || '' }], o => { c.team = (o.t || '').trim(); commit(); }, '저장'); },
+  wkOne(el) {
+    const c = wkById(el.dataset.id); if (!c) return; wkN(c); const ev = c.evt && S.items.find(i => i.id === c.evt), miss = wkMiss(c);
+    const html = `<html><meta charset="utf-8"><body style="font-family:'맑은 고딕',sans-serif;line-height:1.6"><h2>${esc(c.title)}</h2><p>유형 ${esc(c.type || '일반')} · 부서 ${esc(c.dept || '')} · 담당 ${esc(c.me ? wkMe() : c.who || '')} · 기한 ${c.due || '미정'}${ev ? ' · 실시 ' + ev.date : ''} · 진행 ${WK_ST[c.stage]}</p>
+<h3>할 일</h3>${(c.steps || []).length ? `<ul>${c.steps.map(s => `<li>${s.d ? '✔' : '□'} ${esc(s.t)}</li>`).join('')}</ul>` : '<p>없음</p>'}
+<h3>문서</h3>${wkDocs(c).length ? `<ul>${wkDocs(c).map(d => `<li>[${esc(d.kind)}] ${esc(d.name)}</li>`).join('')}</ul>` : '<p>올린 문서 없음</p>'}${miss.length ? `<p>⚠ 아직 없는 문서: ${miss.join(', ')}</p>` : ''}
+${c.team ? `<h3>함께하는 사람</h3><p>${esc(c.team).replace(/\n/g, '<br>')}</p>` : ''}${(c.links || []).length ? `<h3>관련 기록</h3><p>${c.links.map(l => esc(l.label)).join('<br>')}</p>` : ''}${c.memo ? `<h3>메모</h3><p>${esc(c.memo).replace(/\n/g, '<br>')}</p>` : ''}${(c.log || []).length ? `<h3>일지</h3>${c.log.map(l => `<div>${l.d} ${esc(l.t)}</div>`).join('')}` : ''}<p style="color:#888">업무파탈 · ${today()}</p></body></html>`;
+    download(`업무_${c.title.slice(0, 20)}_${today()}.doc`, html, 'application/msword'); toast('한 장 요약(.doc)을 내려받았습니다.');
+  },
+  wkAdd() { ask('업무 카드 추가', [{ k: 'title', label: '업무 이름 (분장표에 적힌 그대로)', req: 1 }, { k: 'type', label: '업무 유형 (고르면 단계·필요한 문서가 자동으로 들어갑니다)', type: 'select', opts: ['일반', '행사', '연수', '조사', '예산'], val: '일반' }, { k: 'dept', label: '부서·영역' }, { k: 'who', label: '담당자 (내 업무면 비워 두세요)' }, { k: 'due', label: '기한(선택)', type: 'date' }], o => { const c = wkN({ id: uid(), title: o.title.trim(), dept: (o.dept || '').trim(), who: (o.who || '').trim(), me: !(o.who || '').trim() || (o.who || '').trim() === wkMe(), memo: '', due: o.due || '', done: false, steps: [], src: '직접' }); wkApplyType(c, o.type); wkD().cards.push(c); commit(); }, '추가'); }
+});
+document.addEventListener('change', async e => {
+  const t = e.target; if (!t || !t.dataset) return;
+  if (t.dataset.wktype) { const c = wkById(t.dataset.wktype); if (c) { wkApplyType(c, t.value); c.sd = today(); commit(); } return; }
+  if (t.dataset.wkdoc) {
+    const c = wkById(t.dataset.wkdoc); if (!c || !t.files.length) return; const k = (document.querySelector(`[data-wkdk="${c.id}"]`) || {}).value || '기타', files = [...t.files]; t.value = '';
+    const add = await ingestFiles(files, { from: 'work', kind: k === '기타' ? undefined : k, noAsk: true }); (add || []).forEach(d => wkDocs(c).push({ id: d.id, name: d.name, kind: k })); c.sd = today(); commit(); toast('카드에 문서를 붙였습니다. (자료 아카이브에도 보관됩니다)');
+  }
+});
+/* 유형을 고른 템플릿도 유지 */
+{ const _f = wkFromTpl; wkFromTpl = function (t) { const c = _f.apply(this, arguments); if (t.type) wkApplyType(c, t.type); return c; }; }
+
+/* ---------- 캘린더: 종류 거르기 · 일정 몰림 경고 · 반복 일정 날짜별 완료 · 그 날 업무 카드 ---------- */
+const _ae3 = allEvents;
+allEvents = function () { const e = _ae3.apply(this, arguments), R = S.repDone || {}; e.forEach(x => { if (x.rep && x.id && R[x.id]) x.done = !!R[x.id][x.date]; }); return e; };
+const _tog3 = A.tog;
+A.tog = function (el) {
+  const it = S.items.find(i => i.id === el.dataset.id);
+  if (it && it.rep) { const d = /#\/cal/.test(location.hash) ? (UI.day || today()) : today(); S.repDone = S.repDone || {}; const r = S.repDone[it.id] = S.repDone[it.id] || {}; r[d] = !r[d]; commit(); return; }
+  return _tog3.apply(this, arguments);
+};
+const _cv3 = calView;
+calView = function () {
+  const hide = UI.calHide || [], all = allEvents(), kinds = [...new Set(all.map(e => e.kind || '일정'))];
+  let h;
+  if (hide.length) { const _a = allEvents; allEvents = function () { return _a.apply(this, arguments).filter(e => !hide.includes(e.kind || '일정')); }; try { h = _cv3.apply(this, arguments); } finally { allEvents = _a; } } else h = _cv3.apply(this, arguments);
+  const chips = `<div class="clg2 calkind">${kinds.map(k => `<button class="chip ${hide.includes(k) ? '' : 'on'}" data-act="calKind" data-k="${esc(k)}">${esc(k)}</button>`).join('')}</div>`;
+  const i = h.indexOf('<div class="calw">'); if (i >= 0) h = h.slice(0, i) + chips + h.slice(i);
+  const by = {}; all.filter(e => !hide.includes(e.kind || '일정') && !/학사/.test(e.kind || '')).forEach(e => (by[e.date] = by[e.date] || []).push(e));
+  Object.keys(by).forEach(d => { if (by[d].length >= 3) h = h.replace(`data-act="calDay" data-d="${d}"><span class="n">`, `data-act="calDay" data-d="${d}"><span class="n">⚠ `); });
+  const day = UI.day || today(), n = (by[day] || []).length;
+  if (n >= 3) h = h.replace(/(<h3 class="h3">[^<]*<\/h3>)/, `$1<p class="hot">⚠ 이 날은 일정·기한이 ${n}건 몰려 있습니다. 하나를 옮길 수 있는지 보세요.</p>`);
+  const cards = wkD().cards.filter(c => c.me && !c.done && c.due === day);
+  if (cards.length && /calw/.test(h)) h += `<h4 class="dlh">이 날 기한인 업무 카드</h4>${cards.map(c => `<div class="td"><span class="tl">${esc(c.title)}</span> <span class="mu">${esc(c.dept || '')} ${WK_ST[wkN(c).stage]}</span> <a class="btn sm" href="#/work">카드 ▶</a></div>`).join('')}`;
+  return h;
+};
+A.calKind = el => { const k = el.dataset.k, h = UI.calHide = UI.calHide || []; const i = h.indexOf(k); if (i >= 0) h.splice(i, 1); else h.push(k); render(); };
+
+/* ---------- 업무일지 ---------- */
+const WL_CATS = ['업무', '수업', '학생지도', '회의', '공문', '성찰·감상', '기타'];
+const wlD = () => (S.wlog = S.wlog || []);
+const wlDay = d => { S.wlogDay = S.wlogDay || {}; return (S.wlogDay[d] = S.wlogDay[d] || {}); };
+const wlRange = () => { const r = UI.wlR || 'week', t = today(); if (r === 'all') return ['0000-00-00', '9999-99-99']; if (r === 'month') return [t.slice(0, 7) + '-01', t.slice(0, 7) + '-31']; const x = wkStartOf(t), a = ymd(x); x.setDate(x.getDate() + 6); return [a, ymd(x)]; };
+function wlAuto(d) {
+  const o = []; S.items.filter(i => i.cat === 'todo' && i.done && i.date === d).forEach(i => o.push('✔ 할 일 완료: ' + i.title));
+  wkD().cards.forEach(c => { wkN(c); if (c.done && c.sd === d) o.push('✔ 업무 완료: ' + c.title); (c.log || []).filter(l => l.d === d && !l.wl).forEach(l => o.push(`📒 ${c.title}: ${l.t}`)); });
+  return o;
+}
+function wlogView() {
+  const [a, b] = wlRange(), r = UI.wlR || 'week', cat = UI.wlC || '', E = wlD().filter(x => x.d >= a && x.d <= b && (!cat || x.cat === cat)), days = new Set(E.map(x => x.d));
+  if (!cat) { for (let k = 0; k < 62; k++) { const x = new Date(today() + 'T00:00:00'); x.setDate(x.getDate() - k); const d = ymd(x); if (d >= a && d <= b && wlAuto(d).length) days.add(d); } }
+  const D = [...days].sort().reverse(), open = wkD().cards.filter(c => !c.done), ty = new Date(today() + 'T00:00:00').getFullYear();
+  const past = wlD().filter(x => x.d.slice(5) === today().slice(5) && +x.d.slice(0, 4) < ty).slice(0, 3);
+  const mins = E.reduce((s, x) => s + (+x.m || 0), 0), byC = {}; E.forEach(x => byC[x.cat] = (byC[x.cat] || 0) + 1);
+  return `<div class="bh"><h2>업무일지</h2><span class="mu">하루 한 줄씩 적으면 그날 끝낸 할 일·완료한 업무·카드 일지가 자동으로 같이 모입니다. 월말에 업무일지 문서로 뽑습니다.</span></div>
+  <form class="wlf" data-wlform><input type="date" name="d" value="${today()}" aria-label="날짜"><select name="cat" aria-label="분류">${WL_CATS.map(c => `<option>${c}</option>`).join('')}</select><input name="t" placeholder="오늘 한 일 한 줄 (예: 폰프리 운영계획 초안 작성)" required aria-label="내용"><input name="m" type="number" min="0" inputmode="numeric" placeholder="분(선택)" aria-label="걸린 시간(분)"><select name="card" aria-label="관련 업무 카드"><option value="">관련 카드 없음</option>${open.map(c => `<option value="${c.id}">${esc(c.title.slice(0, 24))}</option>`).join('')}</select><button class="btn pri">기록</button></form>
+  <div class="tools"><button class="chip ${r === 'week' ? 'on' : ''}" data-act="wlR" data-v="week">이번 주</button><button class="chip ${r === 'month' ? 'on' : ''}" data-act="wlR" data-v="month">이번 달</button><button class="chip ${r === 'all' ? 'on' : ''}" data-act="wlR" data-v="all">전체</button><span class="mu"> | </span><button class="chip ${cat ? '' : 'on'}" data-act="wlC" data-v="">모든 분류</button>${WL_CATS.map(c => `<button class="chip ${cat === c ? 'on' : ''}" data-act="wlC" data-v="${c}">${c}${byC[c] ? ' ' + byC[c] : ''}</button>`).join('')}<button class="btn sm" data-act="wlExport">📄 월간 업무일지 문서</button></div>
+  <p class="mu">${E.length}건${mins ? ` · 기록한 시간 ${Math.floor(mins / 60)}시간 ${mins % 60}분` : ''}</p>
+  ${past.length ? `<div class="hpcard"><b>📆 작년 오늘</b>${past.map(x => `<div class="cmal">${x.d} ${esc(x.t)} <small class="mu">${esc(x.cat)}</small></div>`).join('')}</div>` : ''}
+  ${D.map(d => { const L = E.filter(x => x.d === d), au = cat ? [] : wlAuto(d), dy = wlDay(d); return `<section class="wld"><h3 class="h3">${md(d)} (${DOW[new Date(d + 'T00:00:00').getDay()]})</h3>${L.map(x => `<div class="wle"><span class="chp k-일정">${esc(x.cat)}</span> ${esc(x.t)}${x.m ? ` <small class="mu">${x.m}분</small>` : ''}${x.card && wkById(x.card) ? ` <small class="mu">· ${esc(wkById(x.card).title.slice(0, 20))}</small>` : ''}<button class="x" data-act="wlDel" data-id="${x.id}" aria-label="지우기">✕</button></div>`).join('')}${au.map(x => `<div class="wle auto">${esc(x)} <small class="mu">자동</small></div>`).join('')}
+  <details class="wlc"><summary>🌙 하루 마무리 ${dy.done || dy.block || dy.next || dy.feel ? '✔' : ''}</summary><label>오늘 한 일<textarea rows="2" data-wlday="${d}|done">${esc(dy.done || '')}</textarea></label><label>막힌 것·어려웠던 점<textarea rows="2" data-wlday="${d}|block">${esc(dy.block || '')}</textarea></label><label>내일 첫 일<textarea rows="2" data-wlday="${d}|next">${esc(dy.next || '')}</textarea></label><label>💭 오늘의 감상·성찰 (느낀 점, 잘한 점, 다르게 해 볼 점)<textarea rows="3" data-wlday="${d}|feel">${esc(dy.feel || '')}</textarea></label></details></section>`; }).join('') || '<p class="mu">이 기간에 기록이 없습니다. 위 칸에 한 줄만 적어 보세요.</p>'}`;
+}
+Object.assign(A, {
+  wlR(el) { UI.wlR = el.dataset.v; render(); }, wlC(el) { UI.wlC = el.dataset.v; render(); },
+  wlDel(el) { const L = wlD(), i = L.findIndex(x => x.id === el.dataset.id); if (i < 0) return; const x = L[i], c = x.card && wkById(x.card), li = c ? (c.log || []).findIndex(l => l.wl === x.id) : -1, lg = li >= 0 ? c.log.splice(li, 1)[0] : null; L.splice(i, 1); commit(); undoBar('일지 한 줄을 지웠습니다', () => { wlD().push(x); if (lg && c) c.log.unshift(lg); commit(); }); },
+  wlQuick() { ask('업무일지 한 줄', [{ k: 't', label: '오늘 한 일', req: 1 }, { k: 'cat', label: '분류', type: 'select', opts: WL_CATS, val: '업무' }], o => { wlD().push({ id: uid(), d: today(), t: o.t.trim(), cat: o.cat }); commit(); toast('업무일지에 적었습니다.'); }, '기록'); },
+  wlExport() {
+    const m = (UI.wlR === 'month' || UI.wlR === 'week' ? today() : today()).slice(0, 7), E = wlD().filter(x => x.d.slice(0, 7) === m).sort((a, b) => a.d.localeCompare(b.d)), byC = {}, tm = {}; E.forEach(x => { byC[x.cat] = (byC[x.cat] || 0) + 1; tm[x.cat] = (tm[x.cat] || 0) + (+x.m || 0); });
+    const days = {}; E.forEach(x => (days[x.d] = days[x.d] || []).push(x)); for (let k = 0; k < 31; k++) { const d = `${m}-${pad(k + 1)}`; if (wlAuto(d).length) days[d] = days[d] || []; }
+    const html = `<html><meta charset="utf-8"><body style="font-family:'맑은 고딕',sans-serif;line-height:1.6"><h2>${m.replace('-', '년 ')}월 업무일지</h2><p>${esc(S.profile.school || '')} ${esc(S.profile.name || '')}</p><p>분류별: ${Object.keys(byC).map(k => `${k} ${byC[k]}건${tm[k] ? '(' + tm[k] + '분)' : ''}`).join(' · ') || '기록 없음'}</p><table border="1" cellspacing="0" cellpadding="4" style="border-collapse:collapse;width:100%"><tr><th>날짜</th><th>분류</th><th>내용</th><th>시간</th></tr>${Object.keys(days).sort().map(d => { const L = days[d]; return L.map(x => `<tr><td>${md(d)}</td><td>${esc(x.cat)}</td><td>${esc(x.t)}</td><td>${x.m ? x.m + '분' : ''}</td></tr>`).join('') + wlAuto(d).map(x => `<tr><td>${md(d)}</td><td>자동</td><td>${esc(x)}</td><td></td></tr>`).join(''); }).join('')}</table>${Object.keys(S.wlogDay || {}).filter(d => d.slice(0, 7) === m && S.wlogDay[d].feel).sort().map(d => `<h4>${md(d)} 감상·성찰</h4><p>${esc(S.wlogDay[d].feel).replace(/\n/g, '<br>')}</p>`).join('') ? '<h3>감상·성찰</h3>' + Object.keys(S.wlogDay || {}).filter(d => d.slice(0, 7) === m && S.wlogDay[d].feel).sort().map(d => `<h4>${md(d)}</h4><p>${esc(S.wlogDay[d].feel).replace(/\n/g, '<br>')}</p>`).join('') : ''}</body></html>`;
+    download(`업무일지_${m}.doc`, html, 'application/msword'); toast('월간 업무일지(.doc)를 내려받았습니다.');
+  }
+});
+document.addEventListener('submit', e => {
+  if (!e.target.matches('[data-wlform]')) return; e.preventDefault(); const o = Object.fromEntries(new FormData(e.target)), x = { id: uid(), d: o.d || today(), t: (o.t || '').trim(), cat: o.cat || '업무', m: +o.m || 0, card: o.card || '' }; if (!x.t) return;
+  wlD().push(x); const c = x.card && wkById(x.card); if (c) { wkN(c).log.unshift({ d: x.d, t: x.t, wl: x.id }); c.sd = today(); } commit(); toast('업무일지에 적었습니다.');
+});
+document.addEventListener('change', e => { const t = e.target; if (t && t.dataset && t.dataset.wlday) { const [d, k] = t.dataset.wlday.split('|'); wlDay(d)[k] = t.value; save(true); } });
+/* 오늘 카드에 일지 단추 */
+const wlInject = () => { const t = document.querySelector('.mttoday .tools'); if (t && !t.querySelector('[data-act=wlQuick]')) t.insertAdjacentHTML('afterbegin', '<button class="btn sm" data-act="wlQuick">✍ 업무일지</button>'); };
+{ const _r = TF.render; TF.render = function () { const v = _r.apply(this, arguments); setTimeout(wlInject, 0); return v; }; const app = document.getElementById('app'); if (app) { let t = 0; new MutationObserver(() => { if (t) return; t = setTimeout(() => { t = 0; try { wlInject(); } catch (e) { } }, 20); }).observe(app, { childList: true }); } }
+if (typeof ORD_NAV !== 'undefined' && !ORD_NAV.some(x => x[0] === 'wlog')) ORD_NAV.push(['wlog', '업무일지']);
+if (typeof ARCH_PAGES !== 'undefined') ARCH_PAGES.wlog = '업무일지';
+if (typeof PAGE_KIND !== 'undefined') PAGE_KIND.wlog = '';
+const _wl3Bc = buildChunks;
+buildChunks = function () { const out = _wl3Bc.apply(this, arguments); wlD().forEach(x => out.push({ type: 'note', src: '업무일지 · ' + x.d, text: `${x.d} 업무일지(${x.cat}): ${x.t}${x.m ? ' ' + x.m + '분' : ''}`, ref: '#/wlog' })); Object.keys(S.wlogDay || {}).forEach(d => { const v = S.wlogDay[d]; if (v.done || v.block || v.next || v.feel) out.push({ type: 'note', src: '하루 마무리 · ' + d, text: `${d} 마무리: ${v.done || ''} / 막힌 것 ${v.block || ''} / 내일 ${v.next || ''} / 감상·성찰 ${v.feel || ''}`, ref: '#/wlog' }); }); return out; };
+
 /* 꿈송이 2 — 규정줍줍 + 사이트를 돌아다니는 비서.
    ① 규정줍줍: 올려 둔 자료(규정·지침·계획서)에서 해당 조항을 찾아 파일 이름과 함께 보여 준다(키 없이도 동작, 키가 있으면 문장으로 정리).
    ② 비서 모드: Claude 키가 있으면 질문마다 "도구"를 스스로 골라 수첩 전체(캘린더·내 업무 카드·예산·연수표·메모·자료실)를 읽고,
@@ -6068,12 +6265,14 @@ const B2_READ = [
   { name: 'list_work_cards', description: '내 업무(업무분장표) 카드 목록. 각 카드의 담당자·기한·완료·단계·메모', input_schema: { type: 'object', properties: { scope: { type: 'string', enum: ['me', 'all'] }, open_only: { type: 'boolean' }, text: { type: 'string', description: '제목·부서에 포함된 낱말' } } } },
   { name: 'get_budget', description: '예산 사업·항목별 배정·집행·잔액·기한', input_schema: { type: 'object', properties: {} } },
   { name: 'list_training', description: '연간 교육·훈련표(학기×대상 날짜)와 내 연수 이수 현황', input_schema: { type: 'object', properties: {} } },
+  { name: 'get_worklog', description: '업무일지 기간 조회(직접 적은 일지·하루 마무리·감상·성찰 포함)', input_schema: { type: 'object', properties: { from: { type: 'string' }, to: { type: 'string' } }, required: ['from', 'to'] } },
   { name: 'list_notes', description: '회의·연수 노트 목록 또는 제목 일부로 본문 읽기', input_schema: { type: 'object', properties: { title_contains: { type: 'string' } } } }
 ];
 const B2_WRITE = [
   { name: 'add_wk_card', description: '내 업무 메뉴에 업무 카드 추가(업무분장표 이름대로)', input_schema: { type: 'object', properties: { title: { type: 'string' }, dept: { type: 'string' }, who: { type: 'string', description: '담당자 이름(내 업무면 비움)' }, due: { type: 'string' }, memo: { type: 'string' }, steps: { type: 'array', items: { type: 'string' } } }, required: ['title'] } },
   { name: 'update_wk_card', description: '업무 카드의 완료·기한·메모·단계 수정(제목 일부로 찾음)', input_schema: { type: 'object', properties: { title_contains: { type: 'string' }, done: { type: 'boolean' }, due: { type: 'string' }, memo_append: { type: 'string' }, add_step: { type: 'string' } }, required: ['title_contains'] } },
   { name: 'set_training_date', description: '연간 교육·훈련표 한 칸에 날짜(와 인원) 넣기', input_schema: { type: 'object', properties: { name_contains: { type: 'string' }, col: { type: 'string', enum: ['1t', '1s', '1p', '1x', '2t', '2s', '2p', '2x'], description: '1/2=학기, t=교직원 s=학생 p=학부모 x=기타·훈련' }, date: { type: 'string' }, count: { type: 'integer' } }, required: ['name_contains', 'col', 'date'] } },
+  { name: 'add_worklog', description: '업무일지에 한 줄 기록', input_schema: { type: 'object', properties: { text: { type: 'string' }, date: { type: 'string' }, category: { type: 'string', enum: ['업무', '수업', '학생지도', '회의', '공문', '성찰·감상', '기타'] } }, required: ['text'] } },
   { name: 'add_day_memo', description: '캘린더 하루 메모에 한 줄 덧붙이기', input_schema: { type: 'object', properties: { date: { type: 'string' }, text: { type: 'string' } }, required: ['date', 'text'] } }
 ];
 const B2_NAV = { name: 'go_to', description: '사용자가 바로 이동할 수 있는 화면 링크를 답 아래에 붙인다. hash는 ' + B2_NAVS.join(', ') + ' 중 하나', input_schema: { type: 'object', properties: { hash: { type: 'string' }, label: { type: 'string' } }, required: ['hash', 'label'] } };
@@ -6089,6 +6288,7 @@ function b2Run(name, i) {
     case 'list_work_cards': { const w = wkD(); let L = w.cards; if (i.scope !== 'all') L = L.filter(c => c.me); if (i.open_only) L = L.filter(c => !c.done); if (i.text) L = L.filter(c => agN(c.title + c.dept).includes(agN(i.text))); return { 건수: L.length, 카드: L.slice(0, 60).map(c => ({ 제목: c.title, 부서: c.dept, 담당: c.me ? '나' : c.who, 기한: c.due || '', 완료: !!c.done, 단계: (c.steps || []).map(s => (s.d ? '✔' : '□') + s.t), 메모: b2Cut(c.memo, 200) })) }; }
     case 'get_budget': return S.budget.map(p => ({ 사업: p.name, 항목: p.lines.map(l => ({ 이름: l.item, 배정: +l.alloc || 0, 집행: spentOf(l), 잔액: (+l.alloc || 0) - spentOf(l), 기한: l.deadline || '' })) }));
     case 'list_training': { const yp = S.yp || { rows: [] }; return { 연간표: (yp.rows || []).map(r => ({ 이름: r.name, 기준: r.rule, 날짜: Object.keys(r.cells || {}).filter(k => r.cells[k] && r.cells[k].d).map(k => `${k}:${r.cells[k].d}${r.cells[k].ok ? '(완료)' : ''}`) })), 내연수: (S.training || []).map(t => `${t.title} ${t.type} ${t.hours}h ${t.done ? '이수 ' + (t.certNo || '') : '미이수'}`) }; }
+    case 'get_worklog': { const a = i.from || today(), b = i.to || a; return { 일지: (S.wlog || []).filter(x => x.d >= a && x.d <= b).map(x => `${x.d} [${x.cat}] ${x.t}${x.m ? ' ' + x.m + '분' : ''}`), 마무리: Object.keys(S.wlogDay || {}).filter(d => d >= a && d <= b).map(d => ({ 날짜: d, ...S.wlogDay[d] })) }; }
     case 'list_notes': { const t = i.title_contains; if (!t) return S.notes.map(n => `${n.date} ${n.kind} ${n.title}`).slice(-40); return S.notes.filter(n => !n.lock && agN(n.title).includes(agN(t))).slice(0, 3).map(n => ({ 제목: n.title, 날짜: n.date, 본문: b2Cut(n.body, 2500), 결정: n.decisions, 후속: n.followups })); }
   }
   return { 오류: '알 수 없는 도구' };
@@ -6102,6 +6302,7 @@ agPlan = function (a) {
     case 'add_wk_card': r.txt = `업무 카드 추가: ${i.title}${i.dept ? ' (' + i.dept + ')' : ''}${i.who ? ' · 담당 ' + i.who : ''}${i.due ? ' · 기한 ' + i.due : ''}${(i.steps || []).length ? ' · 할 일 ' + i.steps.length + '개' : ''}`; return r;
     case 'update_wk_card': { const m = wkD().cards.filter(c => agN(c.title).includes(agN(i.title_contains))); if (m.length !== 1) return bad(`업무 카드 수정: 「${i.title_contains}」에 맞는 카드를 ${m.length ? '하나로 정할 수 없습니다' : '찾지 못했습니다'}`); a._c = m[0]; r.txt = `업무 카드 수정: ${m[0].title}` + (i.done != null ? (i.done ? ' · 완료 처리' : ' · 완료 해제') : '') + (i.due ? ' · 기한 ' + i.due : '') + (i.memo_append ? ' · 메모 추가' : '') + (i.add_step ? ' · 할 일 「' + i.add_step + '」 추가' : ''); return r; }
     case 'set_training_date': { const rows = ((S.yp || {}).rows || []).filter(x => agN(x.name).includes(agN(i.name_contains))); if (rows.length !== 1) return bad(`연수표: 「${i.name_contains}」 줄을 ${rows.length ? '하나로 정할 수 없습니다' : '찾지 못했습니다'}`); if (!/^[12][tspx]$/.test(i.col || '')) return bad('연수표: 칸 위치를 알 수 없습니다'); a._r = rows[0]; r.txt = `연수표: ${rows[0].name} · ${i.col[0]}학기 ${({ t: '교직원', s: '학생', p: '학부모', x: '기타·훈련' })[i.col[1]]} → ${agDate(i.date)}${i.count ? ' · ' + i.count + '명' : ''}`; return r; }
+    case 'add_worklog': r.txt = `업무일지 기록: ${b2Cut(i.text, 60)} (${agDate(i.date)})`; return r;
     case 'add_day_memo': r.txt = `${agDate(i.date)} 메모 추가: ${b2Cut(i.text, 60)}`; return r;
   }
   return _b2Plan(a);
@@ -6112,6 +6313,7 @@ agDo = function (a) {
     case 'add_wk_card': { const me = (S.profile.name || '').trim(); wkD().cards.push({ id: uid(), title: i.title, dept: i.dept || '', who: i.who || '', me: !i.who || (!!me && i.who.trim() === me), memo: i.memo || '', due: /^\d{4}-\d{2}-\d{2}$/.test(i.due || '') ? i.due : '', done: false, steps: (i.steps || []).map(t => ({ t, d: false })), src: '꿈송이' }); return; }
     case 'update_wk_card': { const c = a._c; if (i.done != null) c.done = !!i.done; if (/^\d{4}-\d{2}-\d{2}$/.test(i.due || '')) c.due = i.due; if (i.memo_append) c.memo = (c.memo ? c.memo + '\n' : '') + i.memo_append; if (i.add_step) (c.steps = c.steps || []).push({ t: i.add_step, d: false }); return; }
     case 'set_training_date': { const r = a._r; r.cells = r.cells || {}; const c = r.cells[i.col] = r.cells[i.col] || {}; c.d = agDate(i.date); if (i.count) c.n = i.count; return; }
+    case 'add_worklog': (S.wlog = S.wlog || []).push({ id: uid(), d: agDate(i.date), t: i.text, cat: i.category || '업무', m: 0, card: '' }); return;
     case 'add_day_memo': { S.dayMemo = S.dayMemo || {}; const d = agDate(i.date); S.dayMemo[d] = (S.dayMemo[d] ? S.dayMemo[d] + '\n' : '') + i.text; return; }
   }
   return _b2Do(a);
@@ -6129,7 +6331,7 @@ async function b2Call(body) {
   if (!r.ok) throw new Error(r.status === 401 ? '키가 올바르지 않습니다' : r.status === 429 ? '요청이 몰렸습니다. 잠시 뒤 다시 해 주세요' : r.status === 400 || r.status === 402 ? '잔액(크레딧)이나 요청 형식을 확인해 주세요' : '응답 오류 ' + r.status);
   return r.json();
 }
-const B2_LBL = { search_site: '사이트 검색', find_rule: '규정 찾기', list_library: '자료실', read_library: '자료 읽기', get_calendar: '캘린더', get_day: '하루 보기', list_work_cards: '내 업무 카드', get_budget: '예산', list_training: '연수표', list_notes: '회의·연수 노트' };
+const B2_LBL = { search_site: '사이트 검색', find_rule: '규정 찾기', list_library: '자료실', read_library: '자료 읽기', get_calendar: '캘린더', get_day: '하루 보기', list_work_cards: '내 업무 카드', get_budget: '예산', list_training: '연수표', list_notes: '회의·연수 노트', get_worklog: '업무일지' };
 async function b2Loop(q) {
   const hist = CH.slice(-9, -1).filter(m => m.text).map(m => (m.role === 'me' ? '사용자: ' : '꿈송이: ') + b2Cut(m.text, 300)).join('\n');
   const msgs = [{ role: 'user', content: agContext() + (hist ? '\n\n[앞선 대화]\n' + hist : '') + '\n\n[요청]\n' + q }];

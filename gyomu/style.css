@@ -891,3 +891,14 @@ html[data-skin="planner"] .drawer,html[data-skin="planner"] .dw{padding:6px 12px
 .ypsig{font-size:12px;margin-right:4px}.ypsig.r{color:#e5484d}.ypsig.o{color:#f08c00}.ypsig.y{color:#e6c200}.ypsig.g{color:#2fa56b}
 /* 서랍: 한 줄로 */
 .dw{display:flex!important;flex-wrap:wrap!important;align-items:center!important;gap:2px 8px!important;margin-top:6px!important;padding:2px 0!important}.dw .dwf{flex:1 1 0;min-width:0}.dw details{flex:0 0 auto}.dw details[open]{flex-basis:100%}.dw summary{padding:0!important;font-size:12px!important}.dw .dwf b{font-size:12px!important}.cp{font-size:11px!important;margin:2px 0!important}
+/* v77 */
+.undobar{position:fixed;left:50%;transform:translateX(-50%);bottom:76px;z-index:120;background:#2b2a33;color:#fff;padding:10px 14px;border-radius:14px;display:flex;gap:12px;align-items:center;box-shadow:0 4px 14px #0004}.undobar button{background:#ffd75e;border:0;border-radius:10px;padding:6px 10px;font-weight:700}
+.wkh{position:relative;padding-right:30px}.wkxq{position:absolute;right:0;top:0;border:0;background:transparent;font-size:18px;line-height:1;padding:4px 6px;cursor:pointer;color:#888}.wkxq:hover{color:#e5484d}
+.tabx{border:0;background:transparent;color:#999;margin-left:-6px;margin-right:6px;cursor:pointer}.tabx:hover{color:#e5484d}
+.wkx2{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:4px 0}.wkx2 select{padding:2px 6px;border-radius:8px}.wkdocs{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:6px 0}.wkdocs .lnk{background:none;border:0;padding:0;text-decoration:underline;cursor:pointer;font:inherit}.wkup{display:inline-flex;gap:4px;align-items:center}.wkteam{font-size:13px;color:var(--mu);margin:4px 0}
+.pgfdet{margin-top:14px}.pgfdet>summary{cursor:pointer;font-size:13px;color:var(--mu)}.pdfv canvas{display:block;margin:0 0 8px;border:1px solid #ddd}
+.calkind{margin:6px 0}
+.wlf{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}.wlf input[name=t]{flex:1 1 220px}.wlf input[name=m]{width:84px}
+.wld{margin:10px 0}.wle{padding:3px 0;border-bottom:1px dashed #ddd;display:flex;gap:6px;align-items:center;flex-wrap:wrap}.wle.auto{color:var(--mu)}.wlc{margin:6px 0}.wlc label{display:block;margin:4px 0}.wlc textarea{width:100%}
+/* 서랍 너비 */
+.dw{width:fit-content!important;max-width:min(100%,300px)!important}.dw:has(details[open]){width:100%!important;max-width:none!important}.dwf{max-width:210px}

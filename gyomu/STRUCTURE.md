@@ -346,3 +346,9 @@ service cloud.firestore {
 - work2.js — 내 업무 카드 확장: stage/cd/sd/log/links/tplId 필드, S.wk.tpl(해마다 되풀이), 탭 yr·mo·bd·st(workView 래핑), 인수인계서(.doc), 기한 임박 카드(오늘 .wktoday).
 - more.js — 예산 점검 패널(budgetView 래핑: 기한 경고·월별 집행·에듀파인 잔액 p.edu·품의번호 l.no·결재 l.st·사업 복제), 연수(t.apply 신청마감→allEvents, t.note 소감, 법정 의무연수 넣기, 이수 내역 .doc), 기록(회의록 양식, 후속 조치 모아보기 n.fdone), ypSig 신호등, 오늘 카드 .mttoday(S.focus 꼭 할 일 3개, 퇴근 전 점검, 주간 돌아보기 S.weekly).
 - 연락망 c.memo(최근 연락), 연수 목표 시간 S.profile.reqTarget/devTarget/totTarget.
+
+## v77 (js/work3.js)
+- 업무일지 `#/wlog`: S.wlog[{id,d,t,cat,m,card}], S.wlogDay{날짜:{done,block,next,feel}}(감상·성찰). 카드 연결 시 카드 일지(c.log, wl=id)에도 기록. 월간 .doc 내보내기, 작년 오늘, 챗봇 도구 get_worklog/add_worklog.
+- 카드: c.type(행사·연수·조사·예산)→WK_TYPES 단계·필요 문서, c.docs[{id,name,kind}](파일은 LIB=자료 아카이브, from:'work'), c.evt(캘린더 일정 id), c.team, ✕ 즉시 삭제(undoBar 8초).
+- 올린 파일 전부 아카이브: readFile 래핑(ingestFiles 밖에서 읽은 파일도 LIB에 저장). 화면별 자료 상자는 접힘(.pgfdet). PDF 원본 열기는 앱 안 창(pdf.js).
+- 캘린더: UI.calHide(종류 거르기), S.repDone{반복일정id:{날짜:true}}, 일정 3건 이상 몰림 ⚠, 그 날 기한 업무 카드.
