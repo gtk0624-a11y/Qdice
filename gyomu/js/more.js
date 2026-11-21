@@ -158,3 +158,7 @@ document.addEventListener('change', e => {
   else if (t.dataset.dl === 'done') { const x = (S.docLog || []).find(v => v.id === t.dataset.id); if (x) { x.st = x.done ? '완료' : (x.st === '완료' ? '처리중' : x.st); save(true); } }
 });
 { const _b = buildChunks; buildChunks = function () { const out = _b.apply(this, arguments); (S.docLog || []).forEach(x => out.push({ type: 'doc', src: '공문 단계 · ' + x.date, text: `공문 ${x.title} 단계: ${dlSt(x)}${x.note ? ' · ' + x.note : ''}`, ref: '#/' })); return out; }; }
+
+/* ---------- 예산 비고 저장·검색 ---------- */
+document.addEventListener('change', e => { const t = e.target; if (t && t.dataset && t.dataset.pnote) { const p = S.budget.find(x => x.id === t.dataset.pnote); if (p) { p.note = t.value.trim(); save(true); toast('비고를 저장했습니다.'); } } });
+{ const _b = buildChunks; buildChunks = function () { const out = _b.apply(this, arguments); S.budget.forEach(p => { if (p.note) out.push({ type: 'budget', src: `예산 비고 · ${p.name}`, text: `${p.name} 비고: ${p.note}`, ref: '#/budget' }); p.lines.forEach(l => { if (l.note) out.push({ type: 'budget', src: `예산 비고 · ${p.name} · ${l.item}`, text: `${p.name} ${l.item} 비고: ${l.note}`, ref: '#/budget' }); (l.spends || []).forEach(s => { if (s.note) out.push({ type: 'budget', src: `예산 지출 비고 · ${p.name} · ${l.item}`, text: `${s.date} ${s.desc} ${s.amt}원 비고: ${s.note}`, ref: '#/budget' }); }); }); }); return out; }; }
