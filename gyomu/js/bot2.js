@@ -149,3 +149,13 @@ ask1 = async function (q) {
   const text = blocks.length ? '' : '올려 주신 자료에서 찾지 못했습니다. 규정·지침 파일은 [자료실]에 올려 두면 조항 단위로 찾아 드립니다. 다른 말로 한 번 더 물어봐 주세요.';
   busy = false; CH.push({ role: 'bot', q, blocks, text }); renderChat();
 };
+
+/* ---- 챗봇 안에서 모델 고르기 ---- */
+const B2_MODELS = [['claude-haiku-5-5', '빠르고 저렴 (Haiku)'], ['claude-sonnet-5-5', '균형 · 기본 (Sonnet)'], ['claude-opus-5-5', '가장 똑똑함·비쌈 (Opus)']];
+const _b2Kb = chatKeyBar;
+chatKeyBar = function () {
+  const h = _b2Kb.apply(this, arguments);
+  if (!agKey() || window.__keyEdit) return h;
+  return h + `<div class="ckb on"><span>🧠 모델</span><select data-b2model aria-label="비서 모델">${B2_MODELS.map(([v, l]) => `<option value="${v}" ${B2_MODEL() === v ? 'selected' : ''}>${l}</option>`).join('')}</select></div>`;
+};
+document.addEventListener('change', e => { if (e.target.matches('[data-b2model]')) { localStorage.setItem('tf.botModel', e.target.value); toast('모델을 바꿨습니다: ' + e.target.selectedOptions[0].textContent); } });

@@ -5268,7 +5268,7 @@ buildChunks = function () {
 };
 
 /* 화면 맨 아래에 버전 표시 — 옛 화면을 보고 있는지 바로 알 수 있게 */
-const TF_VER = 'v69', _cmFt = footer;
+const TF_VER = 'v70', _cmFt = footer;
 footer = function () { return _cmFt.apply(this, arguments).replace('</footer>', ` · <span class="mu">버전 ${TF_VER} (학급 관리 포함)</span></footer>`); };
 
 /* 새 버전 알림: 옛 화면이 남아 있으면 한 번 눌러 새로 받게 함 */
@@ -5876,6 +5876,16 @@ ask1 = async function (q) {
   const text = blocks.length ? '' : '올려 주신 자료에서 찾지 못했습니다. 규정·지침 파일은 [자료실]에 올려 두면 조항 단위로 찾아 드립니다. 다른 말로 한 번 더 물어봐 주세요.';
   busy = false; CH.push({ role: 'bot', q, blocks, text }); renderChat();
 };
+
+/* ---- 챗봇 안에서 모델 고르기 ---- */
+const B2_MODELS = [['claude-haiku-5-5', '빠르고 저렴 (Haiku)'], ['claude-sonnet-5-5', '균형 · 기본 (Sonnet)'], ['claude-opus-5-5', '가장 똑똑함·비쌈 (Opus)']];
+const _b2Kb = chatKeyBar;
+chatKeyBar = function () {
+  const h = _b2Kb.apply(this, arguments);
+  if (!agKey() || window.__keyEdit) return h;
+  return h + `<div class="ckb on"><span>🧠 모델</span><select data-b2model aria-label="비서 모델">${B2_MODELS.map(([v, l]) => `<option value="${v}" ${B2_MODEL() === v ? 'selected' : ''}>${l}</option>`).join('')}</select></div>`;
+};
+document.addEventListener('change', e => { if (e.target.matches('[data-b2model]')) { localStorage.setItem('tf.botModel', e.target.value); toast('모델을 바꿨습니다: ' + e.target.selectedOptions[0].textContent); } });
 
 /* setui.js — 설정의 "작업표시줄에 고정 · 위젯" 안내 칸(app.js `.guide`) 위에 [앱으로 설치하기]·[위젯 열기] 버튼을 붙입니다.
    (설정 칸 접기는 extra.js `setFold()`가 맡습니다.) */
