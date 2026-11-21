@@ -6,7 +6,7 @@ const CMK = 'cmdata';
 let CM = null, cmReady = false, cmUnl = false, cmT = 0;
 const cmNew = () => ({ classes: [], att: {}, logs: {}, grid: {}, duty: [], ev: [], mood: {}, pick: {}, list: {}, pin: '', fired: {} });
 CM = cmNew();
-const cmCfg = () => { const c = (S.cm = S.cm || {}); if (c.title === undefined) Object.assign(c, { on: true, title: '학급 관리', mods: ['att', 'prof', 'coll', 'duty', 'cns', 'spec', 'ev', 'bday', 'tpl'], names: {}, lab: {}, tags: {}, custom: [], links: [], tpl: null, cur: '', mod: 'roster' }); return c; };
+const cmCfg = () => { const c = (S.cm = S.cm || {}); if (c.title === undefined) Object.assign(c, { on: true, title: '학급 관리', mods: ['att', 'prof', 'coll', 'duty', 'cns', 'spec', 'ev', 'bday', 'tpl'], names: {}, lab: {}, tags: {}, custom: [], links: [], tpl: null, cur: '', mod: 'roster', fixOn: 1 }); if (!c.fixOn) { c.on = true; c.fixOn = 1; } return c; };
 const cmSave = () => { if (!cmReady) return; clearTimeout(cmT); cmT = setTimeout(() => idb.set(CMK, CM), 250); };
 const cmDo = () => { cmSave(); TF.render && TF.render(); };
 const cmLocked = () => !!CM.pin && !cmUnl;
@@ -489,7 +489,7 @@ buildChunks = function () {
 };
 
 /* 화면 맨 아래에 버전 표시 — 옛 화면을 보고 있는지 바로 알 수 있게 */
-const TF_VER = 'v62', _cmFt = footer;
+const TF_VER = 'v63', _cmFt = footer;
 footer = function () { return _cmFt.apply(this, arguments).replace('</footer>', ` · <span class="mu">버전 ${TF_VER} (학급 관리 포함)</span></footer>`); };
 
 /* 새 버전 알림: 옛 화면이 남아 있으면 한 번 눌러 새로 받게 함 */
