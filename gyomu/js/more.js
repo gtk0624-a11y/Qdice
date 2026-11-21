@@ -147,7 +147,7 @@ docLogBody = function () {
   return sum + h;
 };
 A.dlAdd = function () {
-  ask('공문 기록', [{ k: 'title', label: '공문 제목·문서번호', req: 1, ph: '예: 학생인권교육 계획 제출(교무부-1234)' }, { k: 'st', label: '구분 (기안: 내가 만드는 문서 · 접수: 받은 공문 · 결재: 결재 올림/대기 · 처리중 · 완료)', type: 'select', opts: DL_ST, val: '접수' }, { k: 'note', label: '처리 내용·메모 (나중에 써도 됩니다)', type: 'textarea', rows: 3 }], o => {
+  ask('공문 기록', [{ k: 'title', label: '공문 제목·문서번호', req: 1, ph: '예: 현장체험학습 계획 제출(교무부-1234)' }, { k: 'st', label: '구분 (기안: 내가 만드는 문서 · 접수: 받은 공문 · 결재: 결재 올림/대기 · 처리중 · 완료)', type: 'select', opts: DL_ST, val: '접수' }, { k: 'note', label: '처리 내용·메모 (나중에 써도 됩니다)', type: 'textarea', rows: 3 }], o => {
     S.docLog = S.docLog || []; const done = o.st === '완료', d = today();
     S.docLog.push({ id: uid(), date: d, title: o.title.trim(), note: (o.note || '').trim(), done, st: o.st }); docAdj(d, 'recv', 1); if (done) docAdj(d, 'done', 1); OPEN.add('r3'); commit();
   });

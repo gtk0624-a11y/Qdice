@@ -39,7 +39,7 @@ async function schedNeis(silent) {
   if (window.TF_DEMO) { if (!silent) toast('체험판에서는 나이스에 연결하지 않습니다.'); return 0; }
   const sy = schoolYearNow(); let sc = SCH.school;
   if (!sc) { try { await schoolLoad(true); } catch (e) { } sc = SCH.school; }
-  if (!sc) { if (!silent) toast('먼저 설정에서 학교 이름을 넣어 주세요. (예: 곡선중학교)'); return 0; }
+  if (!sc) { if (!silent) toast('먼저 설정에서 학교 이름을 넣어 주세요. (예: ○○중학교)'); return 0; }
   let ev = null, how = '';
   try { if (!silent) toast('나이스에서 학사일정을 받는 중… (1분 안팎)'); ev = await neisSchedLive(sc, sy, (a, b) => { if (!silent && a % 20 === 0) toast(`받는 중 ${a}/${b}`); }); how = '나이스 직접'; if (!ev.length) ev = null; } catch (e) { ev = null; }
   if (!ev) { try { const r = await fetch(NEIS_JSON, { cache: 'no-store' }), j = await r.json(); if (j.schedule && j.schedule.length) { ev = j.schedule; how = '매일 새벽 자료'; } } catch (e) { } }
@@ -178,7 +178,7 @@ function workView() {
   let L = tab === 'me' ? C.filter(c => c.me) : tab === 'all' ? C : C.filter(c => !c.me && (c.dept || '기타') === tab.slice(2));
   const g = {}; L.forEach(c => (g[c.dept || '기타'] = g[c.dept || '기타'] || []).push(c));
   const body = Object.keys(g).map(d => `<h4 class="dlh">${esc(d)} <small class="mu">${g[d].length}건</small></h4><div class="wkg">${g[d].map(wkCard).join('')}</div>`).join('');
-  return `<div class="bh"><h2>내 업무</h2><span class="mu">업무분장표의 이름 그대로 카드를 만듭니다. 파일을 올리고 「단서」(예: 학생인권부 샘들 카드도)를 적으면 그대로 반영합니다.</span></div>
+  return `<div class="bh"><h2>내 업무</h2><span class="mu">업무분장표의 이름 그대로 카드를 만듭니다. 파일을 올리고 「단서」(예: ○○부 샘들 카드도)를 적으면 그대로 반영합니다.</span></div>
   <div class="tools"><label class="btn pri file">📂 업무분장표 올리기<input type="file" id="wkUp" accept=".hwp,.hwpx,.docx,.xlsx,.xls,.csv,.txt,.pdf" hidden></label><button class="btn" data-act="wkPaste">📋 표 붙여넣기</button><button class="btn" data-act="wkClue">🧭 단서로 카드 만들기</button><button class="btn" data-act="wkAdd">+ 카드 직접 추가</button><button class="btn" data-act="wkWipe">🗑 분장표 통째로 지우기</button>${undoBtn()}</div>
   ${me ? '' : '<p class="hot">설정에서 내 이름을 먼저 넣어 주세요. 이름이 있어야 내 업무를 가려냅니다.</p>'}
   <div class="cmtabs">${tabs.map(([k, v]) => `<button class="cmtab ${tab === k ? 'on' : ''}" data-act="wkTabSet" data-k="${esc(k)}">${esc(v)}</button>`).join('')}</div>
@@ -227,7 +227,7 @@ function wkFallback(text, me, only) {
 }
 function wkStart(text, fname, preClue) {
   const me0 = wkMe();
-  ask('업무분장표 읽기', [{ k: 'n', label: '내 이름 (분장표에 적힌 그대로)', val: me0, req: 1 }, { k: 'clue', label: '단서 (선택) — 예: "학생인권부 샘들 카드도 만들어" "김철수 샘 업무도"', val: preClue || '', ph: '예: 내가 학생인권부장이라 학생인권부 선생님들 카드도' }], v => {
+  ask('업무분장표 읽기', [{ k: 'n', label: '내 이름 (분장표에 적힌 그대로)', val: me0, req: 1 }, { k: 'clue', label: '단서 (선택) — 예: "○○부 샘들 카드도 만들어" "김철수 샘 업무도"', val: preClue || '', ph: '예: 내가 ○○부장이라 ○○부 선생님들 카드도' }], v => {
     const me = v.n.trim(); if (me !== me0) { S.profile.name = me; save(true); }
     let rows = wkParse(text, me); if (!rows.length && typeof dutyParse === 'function') rows = dutyParse(text, me).map(r => ({ dept: r.dept, work: r.work, who: r.who, mine: r.mine }));
     if (!rows.length || !rows.some(r => r.mine)) { const fbk = wkFallback(text, me, !!rows.length); if (fbk.length) rows = rows.concat(fbk); }
@@ -249,7 +249,7 @@ Object.assign(A, {
   wkClue() {
     const rows = (S.duties || []).filter(x => x.who !== '예시').map(r => ({ dept: r.dept, work: r.work, who: r.who, mine: !!r.mine }));
     if (!rows.length) { toast('먼저 업무분장표를 올리거나 붙여넣어 주세요.'); return; }
-    ask('단서로 카드 만들기', [{ k: 'clue', label: '예: "학생인권부 샘들 업무카드도 만들어" · "김철수 샘 업무" · "전부"', req: 1 }], o => wkReview(rows, wkMe(), o.clue.trim(), `저장된 업무분장 ${rows.length}줄`, '저장된 분장표'), '찾기');
+    ask('단서로 카드 만들기', [{ k: 'clue', label: '예: "○○부 샘들 업무카드도 만들어" · "김철수 샘 업무" · "전부"', req: 1 }], o => wkReview(rows, wkMe(), o.clue.trim(), `저장된 업무분장 ${rows.length}줄`, '저장된 분장표'), '찾기');
   }
 });
 document.addEventListener('change', async e => {

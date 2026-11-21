@@ -117,7 +117,7 @@ Object.assign(A, {
   arcMove(el) {
     const d = LIB.find(x => x.id === el.dataset.id); if (!d) return;
     const cur = d.from || 'lib', labels = Object.keys(ARCH_PAGES).map(k => ARCH_PAGES[k]), custom = [...new Set(LIB.map(x => x.from).filter(f => f && !ARCH_PAGES[f]))];
-    ask('📁 어디로 옮길까요?', [{ k: 'to', label: '이동할 곳 (지금: ' + (ARCH_PAGES[cur] || cur) + ')', type: 'select', opts: labels.concat(custom), val: ARCH_PAGES[cur] || cur }, { k: 'nf', label: '또는 새 폴더 이름 (쓰면 위 선택보다 우선)', ph: '예: 학생인권부, 2학기 공문' }], async o => {
+    ask('📁 어디로 옮길까요?', [{ k: 'to', label: '이동할 곳 (지금: ' + (ARCH_PAGES[cur] || cur) + ')', type: 'select', opts: labels.concat(custom), val: ARCH_PAGES[cur] || cur }, { k: 'nf', label: '또는 새 폴더 이름 (쓰면 위 선택보다 우선)', ph: '예: ○○부, 2학기 공문' }], async o => {
       const nf = (o.nf || '').trim(), key = nf || Object.keys(ARCH_PAGES).find(k => ARCH_PAGES[k] === o.to) || o.to;
       d.from = key; await saveLib(); toast('「' + (ARCH_PAGES[key] || key) + '」로 옮겼습니다.'); if (TF.render) TF.render();
     }, '옮기기');

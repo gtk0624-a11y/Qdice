@@ -67,7 +67,7 @@ function ddayRow() {
 }
 
 Object.assign(A, {
-  ddAdd() { ask('디데이 추가', [{ k: 'title', label: '이름 (예: 수능, 기말고사, 곡선제)', req: 1 }, { k: 'date', label: '날짜', type: 'date', req: 1 }], o => { ddList().push({ id: uid(), title: o.title.trim(), date: o.date }); OPEN.add('r13'); try { localStorage.setItem('tf.open', JSON.stringify([...OPEN])); } catch (e) { } commit(); toast('디데이를 추가했습니다.'); }); },
+  ddAdd() { ask('디데이 추가', [{ k: 'title', label: '이름 (예: 수능, 기말고사, 체육대회)', req: 1 }, { k: 'date', label: '날짜', type: 'date', req: 1 }], o => { ddList().push({ id: uid(), title: o.title.trim(), date: o.date }); OPEN.add('r13'); try { localStorage.setItem('tf.open', JSON.stringify([...OPEN])); } catch (e) { } commit(); toast('디데이를 추가했습니다.'); }); },
   ddDel(el) { S.dday = ddList().filter(x => x.id !== el.dataset.id); commit(); },
   ddAlarm() { ask('기한 알림 설정', [{ k: 'n', label: '기한 며칠 전부터 알릴까요? (0=당일만, 최대 14, 끄려면 -1)', type: 'number', val: alarmOff() ? -1 : alarmDays() }], o => { const n = parseInt(o.n, 10); S.profile.alarmDays = isNaN(n) ? 2 : Math.max(-1, Math.min(14, n)); lsSet(ALK, {}); commit(); toast(alarmOff() ? '기한 알림을 껐습니다.' : '기한 ' + alarmDays() + '일 전부터 화면 아래에 알려 드립니다.'); }); },
   ddPerm() { if (!('Notification' in window)) return toast('이 브라우저는 알림을 지원하지 않습니다.'); Notification.requestPermission().then(p => { toast(p === 'granted' ? '브라우저 알림을 켰습니다.' : '알림이 허용되지 않았습니다.'); lsSet(ALN, {}); commit(); }); },

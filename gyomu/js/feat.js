@@ -28,12 +28,15 @@ document.addEventListener('change', async e => {
   const t = e.target; if (!t || t.id !== 'kitUp' || !t.files[0]) return; let j;
   try { j = JSON.parse(await t.files[0].text()); if (j.tf !== 'kit') throw new Error('설정 꾸러미 파일이 아닙니다'); } catch (err) { toast('가져오기 실패: ' + err.message); t.value = ''; return; } t.value = '';
   const nS = (j.skel || []).length, nC = Object.values(j.cycle || {}).reduce((a, b) => a + b.length, 0), nT = (j.tpl || []).length;
-  sure(`뼈대 ${nS}개 · 연간 업무 ${nC}개 · 반복 업무 틀 ${nT}개를 합치고, 켜고 끈 기능·메뉴 설정·서류 목록·견적 기준을 이 꾸러미 것으로 바꿉니다. 계속할까요? (되돌리기 가능)`, () => {
+  sure(`뼈대 ${nS}개 · 연간 업무 ${nC}개 · 반복 업무 틀 ${nT}개를 합치고, 켜고 끈 기능·메뉴 설정·서류 목록·견적 기준을 이 꾸러미 것으로 바꿉니다. 계속할까요? (되돌리기 가능)`, () => kitApply(j));
+});
+function kitApply(j, msg) {
     (j.skel || []).forEach(s => { if (s && s.name && Array.isArray(s.steps) && !(S.skel = S.skel || []).some(x => x.name === s.name)) S.skel.push({ id: uid(), name: String(s.name), type: s.type || '일반', memo: String(s.memo || ''), docs: s.docs || [], steps: s.steps.map(x => ({ t: String(x.t), off: +x.off || 0 })) }); });
     S.cycle = S.cycle || {}; Object.keys(j.cycle || {}).forEach(m => (j.cycle[m] || []).forEach(x => { const L = (S.cycle[m] = S.cycle[m] || []); if (x && x.t && !L.some(v => v.t === x.t)) L.push({ id: uid(), t: String(x.t), done: {} }); }));
     if (j.bdTypes) S.bdTypes = j.bdTypes; if (j.bdCfg) S.bdCfg = j.bdCfg; if (j.feat) S.feat = j.feat; if (Array.isArray(j.navHide)) S.navHide = j.navHide; if (j.hide) S.hide = j.hide; if (j.order) S.order = j.order;
     if (typeof wkTpl === 'function') { const L = wkTpl(); (j.tpl || []).forEach(x => { if (x && x.title && !L.some(v => v.title === x.title)) L.push(Object.assign({ id: uid() }, x)); }); }
-    featApply(); commit(); toast('설정 꾸러미를 적용했습니다.');
-  });
-});
+  featApply(); commit(); toast(msg || '설정 꾸러미를 적용했습니다.');
+}
+/* 한 번 눌러 넣기: 주소 뒤에 ?kit=이름 을 붙여 열면 kits/이름.json 을 자동으로 합칩니다(내 전용 꾸러미를 코드에 넣지 않고 따로 두는 방법). */
+(async () => { try { const k = new URLSearchParams(location.search).get('kit'); if (!k || !/^[\w-]{3,40}$/.test(k) || !S.setup) return; const r = await fetch('kits/' + k + '.json', { cache: 'no-store' }); if (!r.ok) throw new Error('꾸러미를 찾지 못했습니다'); const j = await r.json(); if (j.tf !== 'kit') throw new Error('꾸러미 형식이 아닙니다'); const done = (S.kitDone = S.kitDone || {}); kitApply(j, `내 업무 꾸러미를 넣었습니다 (뼈대 ${(j.skel || []).length}개). 이제 「내 업무 → 🦴 업무 뼈대로 시작」에서 ★로 보입니다.`); done[k] = today(); save(true); history.replaceState(null, '', location.pathname + location.hash); } catch (e) { toast('꾸러미 넣기 실패: ' + e.message); } })();
 featApply(); { const _r = TF.render; TF.render = function () { featApply(); return _r.apply(this, arguments); }; }

@@ -1561,7 +1561,7 @@ const xbtn = (act, id, l) => `<button class="x" data-act="${act}" data-id="${id}
 function masthead() {
   const n = new Date(), M = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'], D = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
   const p = S.profile;
-  return `<header class="mast"><div class="mast1"><img class="logo" src="${LOGO || DEFLOGO}" alt="도디쌤 이미지"><h1 data-act="editTitle" title="눌러서 제목 고치기">${esc(titleOf())}</h1><span class="fr" data-act="editTitle">${esc(p.sub || 'Travail Fatal')}</span><button class="x" data-act="editTitle" aria-label="제목 고치기">✎</button></div><div class="mast2"><div class="dt">${n.getFullYear()}년 ${n.getMonth() + 1}월 ${n.getDate()}일 (${DOW[n.getDay()]})</div><div>${esc([p.school, p.name && p.name + ' 선생님'].filter(Boolean).join(' · '))}</div></div></header>`;
+  return `<header class="mast"><div class="mast1"><img class="logo" src="${LOGO || DEFLOGO}" alt="내 이미지"><h1 data-act="editTitle" title="눌러서 제목 고치기">${esc(titleOf())}</h1><span class="fr" data-act="editTitle">${esc(p.sub || 'Travail Fatal')}</span><button class="x" data-act="editTitle" aria-label="제목 고치기">✎</button></div><div class="mast2"><div class="dt">${n.getFullYear()}년 ${n.getMonth() + 1}월 ${n.getDate()}일 (${DOW[n.getDay()]})</div><div>${esc([p.school, p.name && p.name + ' 선생님'].filter(Boolean).join(' · '))}</div></div></header>`;
 }
 function nav(page) {
   const L0 = [['today', '오늘'], ['cal', '캘린더'], ['work', '내 업무'], ['hub', '총괄'], ['wlog', '업무일지'], ['class', '수업 및 시간표'], ['eval', '평가'], ['budget', '예산'], ['notes', '기록'], ['pages', '페이지'], ['lib', '자료·연락'], ['files', '자료 아카이브'], ['yp', '연간 교육·훈련'], ...(typeof cmCfg === 'function' && cmCfg().on ? [['cm', cmCfg().title || '학급 관리']] : []), ['set', '설정']];
@@ -1783,7 +1783,7 @@ function setView() {
   <h3 class="h3">여러 기기 동기화</h3><p>${esc(sy.msg)}</p>${sy.on ? (sy.user ? '<button class="btn" data-act="logout">로그아웃</button>' : '<button class="btn pri" data-act="login">구글로 로그인</button>') : '<p class="mu">설정 방법은 안내 문서(STRUCTURE.md)의 “동기화 켜기”를 보세요.</p>'}
   <h3 class="h3">작업표시줄에 고정 · 위젯처럼 쓰기 (설치 방법)</h3><div class="guide"><p><b>① 컴퓨터(윈도우) — 크롬·엣지</b></p><ol><li>평소 업무포털에 로그인하는 브라우저로 이 사이트 주소를 엽니다.</li><li>주소창 오른쪽 끝의 <b>설치 아이콘</b>(모니터에 아래 화살표)을 누르고 <b>설치</b>를 누릅니다. 엣지는 ⋯ 메뉴 → 앱 → <b>이 사이트를 앱으로 설치</b>입니다.</li><li>따로 앱 창이 뜨면 작업표시줄의 아이콘을 <b>우클릭 → 작업 표시줄에 고정</b>합니다. (설치 창에서 '작업 표시줄에 고정'을 고를 수도 있습니다.)</li><li>이제 아이콘 한 번으로 바로 열립니다.</li></ol><p><b>② 위젯처럼 작게 띄워 두기</b></p><ol><li>설치한 앱 창을 모니터 한쪽 구석으로 줄여 놓으면 창 크기를 기억합니다. 시간표·할 일·급식이 나오는 <b>오늘 화면</b>만 띄워 두면 위젯처럼 쓸 수 있습니다.</li><li>윈도우 위젯판·바탕화면 위젯에는 웹앱을 직접 넣을 수 없습니다. 그래서 '작게 띄운 앱 창'이 가장 가깝고 안정적인 방법입니다.</li></ol><p><b>③ 폰·태블릿</b></p><ul><li><b>안드로이드(크롬):</b> ⋮ 메뉴 → <b>앱 설치</b> 또는 <b>홈 화면에 추가</b>.</li><li><b>아이폰·아이패드(사파리):</b> 공유 버튼 → <b>홈 화면에 추가</b>.</li><li>홈 화면 아이콘으로 열면 주소창 없이 앱처럼 보입니다.</li></ul><p class="mu">설치가 안 보이면 주소가 https:// 로 시작하는 깃허브 페이지 주소인지 확인하세요. 파일을 더블클릭해 연 화면에서는 설치되지 않습니다. 화면이 예전 그대로면 Ctrl+Shift+R 을 한 번 누르세요.</p></div>
   <h3 class="h3">백업</h3><div class="tools"><button class="btn" data-act="backup">백업 파일 받기</button><label class="btn file">백업 파일 불러오기<input type="file" id="restore" accept=".json" hidden></label><button class="btn" data-act="sample">예시 데이터 채우기</button><button class="btn" data-act="reset">모두 지우고 처음부터</button></div><h3 class="h3">기기 연동 (컴 · 폰 · 태블릿)</h3><p class="mu">연동 암호를 정하고 모든 기기에 똑같이 넣으면, 한 곳에서 고친 내용이 다른 기기에도 나타납니다. 내용은 암호로 잠겨서 올라가므로 서버에서는 읽을 수 없습니다. 암호를 잊으면 복구할 수 없으니 꼭 적어 두세요.</p><p><b id="cloudst">${esc(CLOUD.info.msg)}</b></p><div class="tools">${CLOUD.pass ? '<button class="btn pri" data-act="cloudNow">지금 맞추기</button><button class="btn" data-act="cloudOff">이 기기 연동 끄기</button>' : '<button class="btn pri" data-act="cloudOn">기기 연동 켜기</button>'}</div><h3 class="h3" id="memosec">메모 디자인 (100가지 · 포스트잇·줄노트·모눈·색종이…)</h3><div class="tools"><button class="btn pri" data-act="memoPick">🎨 메모 디자인 고르기</button><span class="mu">현재: ${typeof memoName==='function'?memoName():''}</span></div>
-  <h3 class="h3" id="fontsec">글씨체 고르기 (50가지 · 모두 무료 글꼴)</h3>${[['bfont', '본문 글씨체', S.profile.bfont], ['hfont', '제목 글씨체', S.profile.hfont]].map(([k, t, cur]) => `<details class="fnt" data-fonts="1"><summary>${t} <span class="mu">현재: ${esc(cur || '기본')}</span></summary><div class="fgrid"><button class="fb ${cur ? '' : 'on'}" data-act="${k}" data-n="">내 기기 글씨체(기본)</button>${FONTS50.map(f => `<button class="fb ${cur === f[0] ? 'on' : ''}" data-act="${k}" data-n="${esc(f[0])}" style="font-family:${fontCss(f)}">${esc(f[0])}<small>가나다 ABC 123</small></button>`).join('')}</div></details>`).join('')}<h3 class="h3" id="themesec">디자인 틀 고르기 (50가지 · 메뉴 위치·종이·줄 모양이 바뀝니다)</h3><div class="thm frm">${FRAMES.map(f => `<button class="th" data-act="frame" data-id="${f[0]}" aria-pressed="${frameOf()[0] === f[0]}">${frameThumb(f[2])}<b>${f[0]}. ${f[1]}</b></button>`).join('')}</div><h3 class="h3">색 고르기 (30가지)</h3><div class="thm">${THEMES.map(t => `<button class="th" data-act="theme" data-id="${t[0]}" aria-pressed="${(S.profile.theme || 'classic') === t[0]}"><span class="sw"><i style="background:${t[3]}"></i><i style="background:${t[5]}"></i><i style="background:${t[7]}"></i><i style="background:${t[6]}"></i></span><b>${t[1]}</b><small>${t[2]}</small></button>`).join('')}</div><h3 class="h3">제목 · 도디쌤 이미지</h3><div class="tools"><img class="logo" src="${LOGO || DEFLOGO}" alt="도디쌤 이미지"><label class="btn file">도디쌤 이미지 올리기<input type="file" id="logoUp" accept="image/*" hidden></label>${LOGO ? '<button class="btn" data-act="logoDel">기본 그림으로</button>' : ''}<button class="btn" data-act="editTitle">제목 고치기</button></div><h3 class="h3">지난 학년도 보관함</h3><p class="mu">지난해 백업 파일을 넣어 두면 지금 데이터를 건드리지 않고 읽기만 할 수 있고, 꿈송이도 함께 찾아 줍니다.</p><div class="tools"><label class="btn file">지난 학년도 백업 넣기<input type="file" id="archUp" accept=".json" hidden></label>${ARCH.map(a => `<a class="btn" href="#/arch/${a.id}">${esc(a.label)} 보기</a><button class="btn" data-act="archDel" data-id="${a.id}">삭제</button>`).join('')}</div><h3 class="h3">새 학년도</h3><p class="mu">학년도가 바뀌면 이 버튼을 누르세요. 자동으로 백업 파일을 받은 뒤, 시간표·일정·진도·평가·예산·연수·공문·업무분장·연락망을 비웁니다. 내 정보, 메모, 내 페이지, 서랍, 자료실은 그대로 남습니다.</p><div class="tools"><button class="btn pri" data-act="newYear">새 학년도 시작하기</button></div><p class="mu">브라우저 기록을 지우면 이 기기의 데이터가 사라질 수 있으니 가끔 백업 파일을 받아 두세요.</p>`;
+  <h3 class="h3" id="fontsec">글씨체 고르기 (50가지 · 모두 무료 글꼴)</h3>${[['bfont', '본문 글씨체', S.profile.bfont], ['hfont', '제목 글씨체', S.profile.hfont]].map(([k, t, cur]) => `<details class="fnt" data-fonts="1"><summary>${t} <span class="mu">현재: ${esc(cur || '기본')}</span></summary><div class="fgrid"><button class="fb ${cur ? '' : 'on'}" data-act="${k}" data-n="">내 기기 글씨체(기본)</button>${FONTS50.map(f => `<button class="fb ${cur === f[0] ? 'on' : ''}" data-act="${k}" data-n="${esc(f[0])}" style="font-family:${fontCss(f)}">${esc(f[0])}<small>가나다 ABC 123</small></button>`).join('')}</div></details>`).join('')}<h3 class="h3" id="themesec">디자인 틀 고르기 (50가지 · 메뉴 위치·종이·줄 모양이 바뀝니다)</h3><div class="thm frm">${FRAMES.map(f => `<button class="th" data-act="frame" data-id="${f[0]}" aria-pressed="${frameOf()[0] === f[0]}">${frameThumb(f[2])}<b>${f[0]}. ${f[1]}</b></button>`).join('')}</div><h3 class="h3">색 고르기 (30가지)</h3><div class="thm">${THEMES.map(t => `<button class="th" data-act="theme" data-id="${t[0]}" aria-pressed="${(S.profile.theme || 'classic') === t[0]}"><span class="sw"><i style="background:${t[3]}"></i><i style="background:${t[5]}"></i><i style="background:${t[7]}"></i><i style="background:${t[6]}"></i></span><b>${t[1]}</b><small>${t[2]}</small></button>`).join('')}</div><h3 class="h3">제목 · 내 이미지</h3><div class="tools"><img class="logo" src="${LOGO || DEFLOGO}" alt="내 이미지"><label class="btn file">도디쌤 이미지 올리기<input type="file" id="logoUp" accept="image/*" hidden></label>${LOGO ? '<button class="btn" data-act="logoDel">기본 그림으로</button>' : ''}<button class="btn" data-act="editTitle">제목 고치기</button></div><h3 class="h3">지난 학년도 보관함</h3><p class="mu">지난해 백업 파일을 넣어 두면 지금 데이터를 건드리지 않고 읽기만 할 수 있고, 꿈송이도 함께 찾아 줍니다.</p><div class="tools"><label class="btn file">지난 학년도 백업 넣기<input type="file" id="archUp" accept=".json" hidden></label>${ARCH.map(a => `<a class="btn" href="#/arch/${a.id}">${esc(a.label)} 보기</a><button class="btn" data-act="archDel" data-id="${a.id}">삭제</button>`).join('')}</div><h3 class="h3">새 학년도</h3><p class="mu">학년도가 바뀌면 이 버튼을 누르세요. 자동으로 백업 파일을 받은 뒤, 시간표·일정·진도·평가·예산·연수·공문·업무분장·연락망을 비웁니다. 내 정보, 메모, 내 페이지, 서랍, 자료실은 그대로 남습니다.</p><div class="tools"><button class="btn pri" data-act="newYear">새 학년도 시작하기</button></div><p class="mu">브라우저 기록을 지우면 이 기기의 데이터가 사라질 수 있으니 가끔 백업 파일을 받아 두세요.</p>`;
 }
 function welcome() {
   return `<div class="wel"><h1>업무파탈</h1><div class="fr">Travail Fatal</div><p>나만의 디지털 교무수첩입니다. 몇 가지만 적으면 바로 시작합니다. 모든 내용은 나중에 설정에서 고칠 수 있습니다.</p>
@@ -1845,7 +1845,7 @@ const A = {
   calDay(el) { UI.day = el.dataset.d; render(); },
   calMove(el) { const d = +el.dataset.d; if (!d) { UI.cal = today().slice(0, 7); UI.day = today(); } else { const [Y, M] = UI.cal.split('-').map(Number), n = new Date(Y, M - 1 + d, 1); UI.cal = `${n.getFullYear()}-${pad(n.getMonth() + 1)}`; } render(); },
   /* 예산 */
-  projAdd() { ask('사업(부서) 만들기', [{ k: 'name', label: '이름 (예: 학생인권부 사업)', req: 1 }, { k: 'total', label: '총액(원) — 나중에 넣어도 됩니다', type: 'number' }], o => { S.budget.push({ id: uid(), name: o.name, total: +o.total || 0, lines: [], spends: [] }); commit(); }); },
+  projAdd() { ask('사업(부서) 만들기', [{ k: 'name', label: '이름 (예: ○○부 사업)', req: 1 }, { k: 'total', label: '총액(원) — 나중에 넣어도 됩니다', type: 'number' }], o => { S.budget.push({ id: uid(), name: o.name, total: +o.total || 0, lines: [], spends: [] }); commit(); }); },
   pspendDel(el) { const p = find('budget', el.dataset.p); p.spends = p.spends.filter(s => s.id !== el.dataset.id); commit(); },
   projRename(el) { const p = find('budget', el.dataset.id); ask('이름 바꾸기', [{ k: 'name', label: '이름', val: p.name, req: 1 }], o => { p.name = o.name; commit(); }); },
   projDel(el) { sure('이 사업과 안의 항목을 모두 지울까요?', () => { S.budget = S.budget.filter(p => p.id !== el.dataset.id); commit(); }); },
@@ -1930,7 +1930,7 @@ document.addEventListener('change', async e => {
     } catch (er) { toast(er.message); }
   }
   else if (t.id === 'masUp') { const f = t.files[0]; if (!f) return; const im = new Image(); im.onload = async () => { const c = document.createElement('canvas'), s = 256 / Math.max(im.width, im.height, 256) * (im.width > 256 || im.height > 256 ? 1 : 1); const r = Math.min(1, 256 / Math.max(im.width, im.height)); c.width = Math.round(im.width * r); c.height = Math.round(im.height * r); c.getContext('2d').drawImage(im, 0, 0, c.width, c.height); MASCOT = c.toDataURL('image/png'); await idb.set('mascot', MASCOT); render(); }; im.src = URL.createObjectURL(f); }
-  else if (t.id === 'logoUp') { const f = t.files[0]; if (!f) return; const im = new Image(); im.onload = async () => { const r = Math.min(1, 256 / Math.max(im.width, im.height)), c = document.createElement('canvas'); c.width = Math.round(im.width * r); c.height = Math.round(im.height * r); c.getContext('2d').drawImage(im, 0, 0, c.width, c.height); LOGO = c.toDataURL('image/png'); await idb.set('logo', LOGO); render(); toast('도디쌤 이미지를 바꿨습니다.'); }; im.onerror = () => toast('이미지를 읽지 못했습니다.'); im.src = URL.createObjectURL(f); t.value = ''; }
+  else if (t.id === 'logoUp') { const f = t.files[0]; if (!f) return; const im = new Image(); im.onload = async () => { const r = Math.min(1, 256 / Math.max(im.width, im.height)), c = document.createElement('canvas'); c.width = Math.round(im.width * r); c.height = Math.round(im.height * r); c.getContext('2d').drawImage(im, 0, 0, c.width, c.height); LOGO = c.toDataURL('image/png'); await idb.set('logo', LOGO); render(); toast('이미지를 바꿨습니다.'); }; im.onerror = () => toast('이미지를 읽지 못했습니다.'); im.src = URL.createObjectURL(f); t.value = ''; }
   else if (t.id === 'archUp') { const f = t.files[0]; if (!f) return; try { const j = JSON.parse(await f.text()); if (!j.S) throw 0; const yr = (j.S.updatedAt ? new Date(j.S.updatedAt) : new Date()), sy0 = yr.getMonth() + 1 >= 3 ? yr.getFullYear() : yr.getFullYear() - 1; ask('보관함 이름', [{ k: 'n', label: '이름', val: sy0 + '학년도' }], async v => { ARCH.push({ id: uid(), label: (v.n || sy0 + '학년도').trim(), at: today(), S: j.S, LIB: j.LIB || [] }); await saveArch(); render(); toast('보관함에 넣었습니다. 지금 데이터는 그대로입니다.'); }, '넣기'); } catch (er) { toast('백업 파일이 아닙니다.'); } t.value = ''; }
   else if (t.id === 'restore') { const f = t.files[0]; if (!f) return; try { const j = JSON.parse(await f.text()); if (!j.S) throw 0; sure('백업으로 덮어쓸까요? 지금 내용은 사라집니다.', async () => { S = Object.assign(DEF(), j.S); LIB = j.LIB || []; await saveLib(); commit(); toast('불러왔습니다.'); }); } catch (er) { toast('백업 파일이 아닙니다.'); } }
 });
@@ -1941,7 +1941,7 @@ function budgetDialog(text) {
   if (!c.length) return toast('금액이 있는 줄을 찾지 못했습니다. 예산 장부에 직접 넣어 주세요.');
   const d = document.createElement('dialog'); d.className = 'dlg wide';
   d.innerHTML = `<form method="dialog"><h3>계획서에서 찾은 예산 후보 ${c.length}건</h3><p class="mu">맞는 것만 체크하고 넣을 사업을 고르세요. 금액·기한은 넣은 뒤 장부에서 고칠 수 있습니다.</p>
-  <label>넣을 사업<select name="proj">${S.budget.map(p => `<option value="${p.id}">${esc(p.name)}</option>`).join('')}<option value="_new">+ 새 사업 만들기</option></select></label><label>새 사업 이름(새로 만들 때)<input name="newname" placeholder="예: 학생인권부 사업"></label>
+  <label>넣을 사업<select name="proj">${S.budget.map(p => `<option value="${p.id}">${esc(p.name)}</option>`).join('')}<option value="_new">+ 새 사업 만들기</option></select></label><label>새 사업 이름(새로 만들 때)<input name="newname" placeholder="예: ○○부 사업"></label>
   <table class="tbl"><tbody>${c.map((x, i) => `<tr><td><input type="checkbox" name="c${i}" checked aria-label="포함"></td><td>${esc(x.item)}</td><td class="r">${won(x.alloc)}원</td><td>${x.deadline || ''}</td></tr>`).join('')}</tbody></table>
   <div class="btns"><button value="ok" class="pri">체크한 항목 넣기</button><button value="cancel" formnovalidate>취소</button></div></form>`;
   document.body.appendChild(d);
@@ -2038,11 +2038,11 @@ function sampleData() {
   S.items = [{ id: uid(), title: '2-1 수행평가 채점표 출력', date: t, cat: 'todo', done: true }, { id: uid(), title: '1-3 진도 보충 계획', date: t, cat: 'todo', done: false }, { id: uid(), title: '예산 품의 올리기', date: add(3), cat: 'todo', done: false }, { id: uid(), title: '학년말 교육과정 평가 자료 제출', date: add(10), cat: 'event', done: false }];
   S.lessons = [['1-1', 72], ['1-2', 72], ['1-3', 64], ['2-1', 80], ['2-2', 80], ['2-3', 76]].map(([c, p]) => ({ id: uid(), cls: c, unit: '2단원', done: Math.round(p / 10), total: 10 }));
   S.assess = [{ id: uid(), title: '질문 만들기 수행평가', grade: '2학년', due: add(5), step: 3 }];
-  S.exams = [{ id: uid(), title: '2학기 기말고사 도덕', grade: '2학년', date: add(19), range: 'Ⅲ단원~Ⅳ단원', ratio: 40 }]; S.postits = [{ id: uid(), text: '학생인권 연수 자료 제출', date: add(2), color: '노랑', done: false }]; S.profile.clock = true; S.profile.cheer = 'today'; S.profile.subject = '도덕'; S.profile.name = '예시';
-  S.budget = [{ id: uid(), name: '학생인권부 사업', total: 0, spends: [], lines: [{ id: uid(), item: '일반수용비', alloc: 1500000, deadline: add(24), spends: [{ id: uid(), date: add(-9), desc: '인권 교육 자료 인쇄', amt: 720000 }] }, { id: uid(), item: '행사운영비', alloc: 1000000, deadline: add(29), spends: [{ id: uid(), date: add(-4), desc: '캠페인 물품', amt: 580000 }] }] }];
+  S.exams = [{ id: uid(), title: '2학기 기말고사', grade: '2학년', date: add(19), range: 'Ⅲ단원~Ⅳ단원', ratio: 40 }]; S.postits = [{ id: uid(), text: '연수 자료 제출', date: add(2), color: '노랑', done: false }]; S.profile.clock = true; S.profile.cheer = 'today'; S.profile.subject = '도덕'; S.profile.name = '예시';
+  S.budget = [{ id: uid(), name: '○○부 사업', total: 0, spends: [], lines: [{ id: uid(), item: '일반수용비', alloc: 1500000, deadline: add(24), spends: [{ id: uid(), date: add(-9), desc: '인권 교육 자료 인쇄', amt: 720000 }] }, { id: uid(), item: '행사운영비', alloc: 1000000, deadline: add(29), spends: [{ id: uid(), date: add(-4), desc: '캠페인 물품', amt: 580000 }] }] }];
   S.training = [{ id: uid(), title: '정보보안 연수', type: '필수', hours: 2, due: add(9), done: false }, { id: uid(), title: '학생 인권 연수', type: '필수', hours: 2, done: true, doneDate: add(-6), certNo: '2026-인권-0382' }, { id: uid(), title: 'AI 활용 수업 연수', type: '개발', hours: 15, done: true, doneDate: add(-20), certNo: '' }];
   S.notes = [{ id: uid(), title: '11월 교직원회의', date: t, kind: '회의', body: '체육관 대관 비용은 행정실에서 확인해 알려주기로 함.\n학년말 평가 자료는 다음 달 5일까지 제출.', decisions: '평가 자료 12/5까지 제출\n행사운영비는 행정실 확인 후 집행', followups: '평가 자료 정리\n행정실에 체육관 비용 문의', lock: false }];
-  S.duties = [{ id: uid(), dept: '학생인권부', work: '학생 인권 교육·폰프리 운영', who: '예시', mine: true }, { id: uid(), dept: '교무부', work: '학사 일정·시간표', who: '김○○', mine: false }, { id: uid(), dept: '행정실', work: '예산 집행·계약·체육관 대관', who: '이○○ 주무관', mine: false }];
+  S.duties = [{ id: uid(), dept: '○○부', work: '학교 행사 운영·교육 지원', who: '예시', mine: true }, { id: uid(), dept: '교무부', work: '학사 일정·시간표', who: '김○○', mine: false }, { id: uid(), dept: '행정실', work: '예산 집행·계약·체육관 대관', who: '이○○ 주무관', mine: false }];
   S.contacts = [{ id: uid(), dept: '교무실', name: '김○○ 교사', ext: '201', phone: '' }, { id: uid(), dept: '행정실', name: '이○○ 주무관', ext: '105', phone: '' }];
   S.pages = [{ id: uid(), title: '수업 아이디어 메모', parent: '', pin: true, lock: false, blocks: [newBlock('h2', '이번 주 해 볼 것'), newBlock('todo', '질문 카드 인쇄'), newBlock('todo', '모둠 노트 점검'), newBlock('p', '인권 단원은 질문 릴레이로 시작한다.')] }];
   S.links = [{ id: uid(), name: 'K-에듀파인', url: 'https://klef.goe.go.kr' }, { id: uid(), name: '나이스', url: 'https://neis.go.kr' }];
@@ -2589,7 +2589,7 @@ function mineShow(rows, name) {
 
 Object.assign(A, {
   mineDel(el) { S.mine = S.mine.filter(m => m.id !== el.dataset.id); commit(); },
-  mineAdd() { ask('내 업무 추가', [{ k: 'cat', label: '분류(부서·영역)', ph: '예: 학생인권부' }, { k: 'title', label: '업무 내용', req: 1 }, { k: 'memo', label: '메모·기한(선택)' }], o => { S.mine.push({ id: uid(), cat: (o.cat || '').trim() || '기타', title: o.title.trim(), memo: (o.memo || '').trim(), done: false }); OPEN.add('r11'); commit(); }); },
+  mineAdd() { ask('내 업무 추가', [{ k: 'cat', label: '분류(부서·영역)', ph: '예: ○○부' }, { k: 'title', label: '업무 내용', req: 1 }, { k: 'memo', label: '메모·기한(선택)' }], o => { S.mine.push({ id: uid(), cat: (o.cat || '').trim() || '기타', title: o.title.trim(), memo: (o.memo || '').trim(), done: false }); OPEN.add('r11'); commit(); }); },
   minePaste() { ask('분장표 붙여넣기', [{ k: 'text', label: '한글·엑셀의 업무분장표 표를 복사해서 붙여 넣으세요', type: 'textarea', rows: 10, req: 1 }], o => mineStart(o.text), '다음'); }
 });
 document.addEventListener('change', async e => {
@@ -2628,7 +2628,7 @@ function docLogBody() {
 }
 Object.assign(A, {
   dlAdd() {
-    ask('공문 기록', [{ k: 'title', label: '공문 제목·문서번호', req: 1, ph: '예: 학생인권교육 계획 제출(교무부-1234)' }, { k: 'note', label: '처리 내용 (나중에 써도 됩니다)', type: 'textarea', rows: 3 }, { k: 'st', label: '상태', type: 'select', opts: ['처리 완료', '아직 처리 안 함'] }], o => {
+    ask('공문 기록', [{ k: 'title', label: '공문 제목·문서번호', req: 1, ph: '예: 현장체험학습 계획 제출(교무부-1234)' }, { k: 'note', label: '처리 내용 (나중에 써도 됩니다)', type: 'textarea', rows: 3 }, { k: 'st', label: '상태', type: 'select', opts: ['처리 완료', '아직 처리 안 함'] }], o => {
       S.docLog = S.docLog || []; const done = o.st === '처리 완료', d = today();
       S.docLog.push({ id: uid(), date: d, title: o.title.trim(), note: (o.note || '').trim(), done }); docAdj(d, 'recv', 1); if (done) docAdj(d, 'done', 1); OPEN.add('r3'); commit();
     });
@@ -3274,7 +3274,7 @@ function ddayRow() {
 }
 
 Object.assign(A, {
-  ddAdd() { ask('디데이 추가', [{ k: 'title', label: '이름 (예: 수능, 기말고사, 곡선제)', req: 1 }, { k: 'date', label: '날짜', type: 'date', req: 1 }], o => { ddList().push({ id: uid(), title: o.title.trim(), date: o.date }); OPEN.add('r13'); try { localStorage.setItem('tf.open', JSON.stringify([...OPEN])); } catch (e) { } commit(); toast('디데이를 추가했습니다.'); }); },
+  ddAdd() { ask('디데이 추가', [{ k: 'title', label: '이름 (예: 수능, 기말고사, 체육대회)', req: 1 }, { k: 'date', label: '날짜', type: 'date', req: 1 }], o => { ddList().push({ id: uid(), title: o.title.trim(), date: o.date }); OPEN.add('r13'); try { localStorage.setItem('tf.open', JSON.stringify([...OPEN])); } catch (e) { } commit(); toast('디데이를 추가했습니다.'); }); },
   ddDel(el) { S.dday = ddList().filter(x => x.id !== el.dataset.id); commit(); },
   ddAlarm() { ask('기한 알림 설정', [{ k: 'n', label: '기한 며칠 전부터 알릴까요? (0=당일만, 최대 14, 끄려면 -1)', type: 'number', val: alarmOff() ? -1 : alarmDays() }], o => { const n = parseInt(o.n, 10); S.profile.alarmDays = isNaN(n) ? 2 : Math.max(-1, Math.min(14, n)); lsSet(ALK, {}); commit(); toast(alarmOff() ? '기한 알림을 껐습니다.' : '기한 ' + alarmDays() + '일 전부터 화면 아래에 알려 드립니다.'); }); },
   ddPerm() { if (!('Notification' in window)) return toast('이 브라우저는 알림을 지원하지 않습니다.'); Notification.requestPermission().then(p => { toast(p === 'granted' ? '브라우저 알림을 켰습니다.' : '알림이 허용되지 않았습니다.'); lsSet(ALN, {}); commit(); }); },
@@ -4520,7 +4520,7 @@ function hpDoc() {
 
 /* ---------- 회의 노트 틀 ---------- */
 const HP_MEET = {
-  '학생인권부 회의': '■ 안건\n1. \n2. \n\n■ 논의\n- \n\n■ 학생 인권 관련 확인할 것\n- ',
+  '부서 회의': '■ 안건\n1. \n2. \n\n■ 논의\n- \n\n■ 결정 사항·후속 조치\n- ',
   '수업탐구공동체(수탐공)': '■ 이번 모임 주제\n\n■ 수업 나눔(질문·관찰)\n- \n\n■ 다음 모임까지 해 볼 것\n- ',
   '교직원 회의': '■ 전달 사항\n1. \n2. \n\n■ 우리 부서 관련\n- \n\n■ 회신·제출 기한\n- ',
   '연수 전달': '■ 연수명·일시·강사\n\n■ 핵심 내용 3가지\n1. \n2. \n3. \n\n■ 우리 학교/수업에 적용할 점\n- '
@@ -4795,7 +4795,7 @@ Object.assign(A, {
   arcMove(el) {
     const d = LIB.find(x => x.id === el.dataset.id); if (!d) return;
     const cur = d.from || 'lib', labels = Object.keys(ARCH_PAGES).map(k => ARCH_PAGES[k]), custom = [...new Set(LIB.map(x => x.from).filter(f => f && !ARCH_PAGES[f]))];
-    ask('📁 어디로 옮길까요?', [{ k: 'to', label: '이동할 곳 (지금: ' + (ARCH_PAGES[cur] || cur) + ')', type: 'select', opts: labels.concat(custom), val: ARCH_PAGES[cur] || cur }, { k: 'nf', label: '또는 새 폴더 이름 (쓰면 위 선택보다 우선)', ph: '예: 학생인권부, 2학기 공문' }], async o => {
+    ask('📁 어디로 옮길까요?', [{ k: 'to', label: '이동할 곳 (지금: ' + (ARCH_PAGES[cur] || cur) + ')', type: 'select', opts: labels.concat(custom), val: ARCH_PAGES[cur] || cur }, { k: 'nf', label: '또는 새 폴더 이름 (쓰면 위 선택보다 우선)', ph: '예: ○○부, 2학기 공문' }], async o => {
       const nf = (o.nf || '').trim(), key = nf || Object.keys(ARCH_PAGES).find(k => ARCH_PAGES[k] === o.to) || o.to;
       d.from = key; await saveLib(); toast('「' + (ARCH_PAGES[key] || key) + '」로 옮겼습니다.'); if (TF.render) TF.render();
     }, '옮기기');
@@ -5315,7 +5315,7 @@ buildChunks = function () {
 };
 
 /* 화면 맨 아래에 버전 표시 — 옛 화면을 보고 있는지 바로 알 수 있게 */
-const TF_VER = 'v83', _cmFt = footer;
+const TF_VER = 'v84', _cmFt = footer;
 footer = function () { return _cmFt.apply(this, arguments).replace('</footer>', ` · <span class="mu">버전 ${TF_VER} (학급 관리 포함)</span></footer>`); };
 
 /* 새 버전 알림: 옛 화면이 남아 있으면 한 번 눌러 새로 받게 함 */
@@ -5370,7 +5370,7 @@ function ypView() {
   const body = Y.rows.map(r => `<tr><th class="ypn">${typeof ypSig === 'function' ? ypSig(r) : ''}<b>${esc(r.name)}</b>${r.rule ? `<small>${esc(r.rule)}</small>` : ''}</th>${YP_COLS.map(c => { const v = (r.cells || {})[c[0]], over = v && v.d && !v.ok && dd(v.d) !== null && dd(v.d) < 0; return `<td><button class="ypc ${v ? (v.ok ? 'ok' : over ? 'late' : 'set') : ''}" data-act="ypCell" data-id="${r.id}" data-k="${c[0]}" aria-label="${esc(r.name)} ${c[1]} ${c[2]}">${v ? (v.ok ? '✔ ' : '') + ypCellTxt(v) || '·' : '＋'}</button></td>`; }).join('')}<td class="ypx"><button class="x" data-act="ypRowEdit" data-id="${r.id}">수정</button><button class="x" data-act="ypRowDel" data-id="${r.id}" aria-label="${esc(r.name)} 삭제">✕</button></td></tr>`).join('');
   return `<div class="bh"><h2>연간 교육·훈련</h2><span class="mu">매년 되풀이되는 연수·교육·훈련·행사를 한 표로. 칸을 누르면 예정일·실시 여부·참석 인원을 적습니다. 이름 명단은 넣지 않고 <b>인원수·증빙 파일</b>만 남깁니다.</span></div>${roll}
   <div class="hpcard ypsum"><b>${Y.year}학년도</b> · 날짜 있는 항목 ${items.length}건 · 실시 완료 ${done}건${late ? ` · <span class="hot">날짜 지남 ${late}건</span>` : ''}${nxt.length ? `<div class="ypnx">${nxt.map(x => `<span class="chp k-연수">${md(x.d)} ${esc(x.name)} <small>${esc(x.col)}</small> ${ddText(dd(x.d))}</span>`).join(' ')}</div>` : ''}</div>
-  <div class="tools"><button class="btn sm pri" data-act="ypAdd">+ 줄 추가</button><button class="btn sm" data-act="ypPre">📋 법정·필수 교육 예시 줄 넣기</button><button class="btn sm" data-act="ypPaste">📥 붙여넣어 가져오기</button><label class="btn sm file">📂 엑셀·CSV 가져오기<input type="file" id="ypFile" accept=".csv,.tsv,.txt,.xlsx,.xls" hidden></label><button class="btn sm" data-act="ypMine">🏫 곡선중 2026 표 불러오기</button><button class="btn sm" data-act="ypCsv">⬇ 엑셀용 내려받기</button></div>
+  <div class="tools"><button class="btn sm pri" data-act="ypAdd">+ 줄 추가</button><button class="btn sm" data-act="ypPre">📋 법정·필수 교육 예시 줄 넣기</button><button class="btn sm" data-act="ypPaste">📥 붙여넣어 가져오기</button><label class="btn sm file">📂 엑셀·CSV 가져오기<input type="file" id="ypFile" accept=".csv,.tsv,.txt,.xlsx,.xls" hidden></label>${/곡선/.test(S.profile.school || '') ? '<button class="btn sm" data-act="ypMine">🏫 곡선중 2026 표 불러오기</button>' : ''}<button class="btn sm" data-act="ypCsv">⬇ 엑셀용 내려받기</button></div>
   ${Y.rows.length ? `<div class="ypwrap"><table class="yptb">${head}${body}</table></div>` : '<p class="mu">아직 줄이 없습니다. [📋 예시 줄 넣기]로 시작하거나, 노션·엑셀 표를 [📥 붙여넣어 가져오기] 하세요. 줄은 해마다 그대로 쓰고 날짜만 새로 넣으면 됩니다.</p>'}
   <p class="mu">💡 날짜를 넣으면 캘린더에 연수 색으로 나타나고, 14일 안으로 다가오면 오늘 화면에 알려 줍니다. 꿈송이에게 "안전교육 언제 했지?"라고 물어도 찾아 줍니다. 증빙 사진·문서는 아래 [파일 올리기]에 넣으세요.</p>`;
 }
@@ -5384,7 +5384,7 @@ Object.assign(A, {
       if (!v.d && !v.t && !v.n && !v.ok) delete r.cells[k]; else r.cells[k] = v; ypCommit();
     }, '저장');
   },
-  ypAdd() { ask('줄 추가', [{ k: 'name', label: '교육·훈련·행사 이름', req: 1, ph: '예: 소방 훈련, 곡선제, 학부모 총회' }, { k: 'rule', label: '법정 기준·메모 (선택)', ph: '예: 학기당 1회' }], o => { ypD().rows.push({ id: uid(), name: o.name.trim(), rule: (o.rule || '').trim(), cells: {} }); ypCommit(); }, '추가'); },
+  ypAdd() { ask('줄 추가', [{ k: 'name', label: '교육·훈련·행사 이름', req: 1, ph: '예: 소방 훈련, 체육대회, 학부모 총회' }, { k: 'rule', label: '법정 기준·메모 (선택)', ph: '예: 학기당 1회' }], o => { ypD().rows.push({ id: uid(), name: o.name.trim(), rule: (o.rule || '').trim(), cells: {} }); ypCommit(); }, '추가'); },
   ypRowEdit(el) { const r = ypD().rows.find(x => x.id === el.dataset.id); if (!r) return; ask('줄 고치기', [{ k: 'name', label: '이름', val: r.name, req: 1 }, { k: 'rule', label: '법정 기준·메모', val: r.rule || '' }], o => { r.name = o.name.trim(); r.rule = (o.rule || '').trim(); ypCommit(); }, '저장'); },
   ypRowDel(el) { const r = ypD().rows.find(x => x.id === el.dataset.id); if (!r) return; sure(`「${r.name}」 줄을 지울까요? 적어 둔 날짜도 함께 사라집니다.`, () => { const Y = ypD(); Y.rows = Y.rows.filter(x => x !== r); ypCommit(); }); },
   ypPre() { const Y = ypD(), have = new Set(Y.rows.map(r => r.name)), add = YP_PRE.filter(p => !have.has(p[0])); if (!add.length) { toast('예시 줄이 이미 모두 있습니다.'); return; } sure(`예시 ${add.length}줄을 추가합니다. 기준(횟수·시간)은 참고용이니 해마다 받는 공문에 맞춰 고쳐 쓰세요.`, () => { add.forEach(p => Y.rows.push({ id: uid(), name: p[0], rule: p[1], cells: {} })); ypCommit(); toast('예시 줄을 넣었습니다. 칸을 눌러 날짜를 적으세요.'); }); },
@@ -5496,7 +5496,7 @@ async function schedNeis(silent) {
   if (window.TF_DEMO) { if (!silent) toast('체험판에서는 나이스에 연결하지 않습니다.'); return 0; }
   const sy = schoolYearNow(); let sc = SCH.school;
   if (!sc) { try { await schoolLoad(true); } catch (e) { } sc = SCH.school; }
-  if (!sc) { if (!silent) toast('먼저 설정에서 학교 이름을 넣어 주세요. (예: 곡선중학교)'); return 0; }
+  if (!sc) { if (!silent) toast('먼저 설정에서 학교 이름을 넣어 주세요. (예: ○○중학교)'); return 0; }
   let ev = null, how = '';
   try { if (!silent) toast('나이스에서 학사일정을 받는 중… (1분 안팎)'); ev = await neisSchedLive(sc, sy, (a, b) => { if (!silent && a % 20 === 0) toast(`받는 중 ${a}/${b}`); }); how = '나이스 직접'; if (!ev.length) ev = null; } catch (e) { ev = null; }
   if (!ev) { try { const r = await fetch(NEIS_JSON, { cache: 'no-store' }), j = await r.json(); if (j.schedule && j.schedule.length) { ev = j.schedule; how = '매일 새벽 자료'; } } catch (e) { } }
@@ -5635,7 +5635,7 @@ function workView() {
   let L = tab === 'me' ? C.filter(c => c.me) : tab === 'all' ? C : C.filter(c => !c.me && (c.dept || '기타') === tab.slice(2));
   const g = {}; L.forEach(c => (g[c.dept || '기타'] = g[c.dept || '기타'] || []).push(c));
   const body = Object.keys(g).map(d => `<h4 class="dlh">${esc(d)} <small class="mu">${g[d].length}건</small></h4><div class="wkg">${g[d].map(wkCard).join('')}</div>`).join('');
-  return `<div class="bh"><h2>내 업무</h2><span class="mu">업무분장표의 이름 그대로 카드를 만듭니다. 파일을 올리고 「단서」(예: 학생인권부 샘들 카드도)를 적으면 그대로 반영합니다.</span></div>
+  return `<div class="bh"><h2>내 업무</h2><span class="mu">업무분장표의 이름 그대로 카드를 만듭니다. 파일을 올리고 「단서」(예: ○○부 샘들 카드도)를 적으면 그대로 반영합니다.</span></div>
   <div class="tools"><label class="btn pri file">📂 업무분장표 올리기<input type="file" id="wkUp" accept=".hwp,.hwpx,.docx,.xlsx,.xls,.csv,.txt,.pdf" hidden></label><button class="btn" data-act="wkPaste">📋 표 붙여넣기</button><button class="btn" data-act="wkClue">🧭 단서로 카드 만들기</button><button class="btn" data-act="wkAdd">+ 카드 직접 추가</button><button class="btn" data-act="wkWipe">🗑 분장표 통째로 지우기</button>${undoBtn()}</div>
   ${me ? '' : '<p class="hot">설정에서 내 이름을 먼저 넣어 주세요. 이름이 있어야 내 업무를 가려냅니다.</p>'}
   <div class="cmtabs">${tabs.map(([k, v]) => `<button class="cmtab ${tab === k ? 'on' : ''}" data-act="wkTabSet" data-k="${esc(k)}">${esc(v)}</button>`).join('')}</div>
@@ -5684,7 +5684,7 @@ function wkFallback(text, me, only) {
 }
 function wkStart(text, fname, preClue) {
   const me0 = wkMe();
-  ask('업무분장표 읽기', [{ k: 'n', label: '내 이름 (분장표에 적힌 그대로)', val: me0, req: 1 }, { k: 'clue', label: '단서 (선택) — 예: "학생인권부 샘들 카드도 만들어" "김철수 샘 업무도"', val: preClue || '', ph: '예: 내가 학생인권부장이라 학생인권부 선생님들 카드도' }], v => {
+  ask('업무분장표 읽기', [{ k: 'n', label: '내 이름 (분장표에 적힌 그대로)', val: me0, req: 1 }, { k: 'clue', label: '단서 (선택) — 예: "○○부 샘들 카드도 만들어" "김철수 샘 업무도"', val: preClue || '', ph: '예: 내가 ○○부장이라 ○○부 선생님들 카드도' }], v => {
     const me = v.n.trim(); if (me !== me0) { S.profile.name = me; save(true); }
     let rows = wkParse(text, me); if (!rows.length && typeof dutyParse === 'function') rows = dutyParse(text, me).map(r => ({ dept: r.dept, work: r.work, who: r.who, mine: r.mine }));
     if (!rows.length || !rows.some(r => r.mine)) { const fbk = wkFallback(text, me, !!rows.length); if (fbk.length) rows = rows.concat(fbk); }
@@ -5706,7 +5706,7 @@ Object.assign(A, {
   wkClue() {
     const rows = (S.duties || []).filter(x => x.who !== '예시').map(r => ({ dept: r.dept, work: r.work, who: r.who, mine: !!r.mine }));
     if (!rows.length) { toast('먼저 업무분장표를 올리거나 붙여넣어 주세요.'); return; }
-    ask('단서로 카드 만들기', [{ k: 'clue', label: '예: "학생인권부 샘들 업무카드도 만들어" · "김철수 샘 업무" · "전부"', req: 1 }], o => wkReview(rows, wkMe(), o.clue.trim(), `저장된 업무분장 ${rows.length}줄`, '저장된 분장표'), '찾기');
+    ask('단서로 카드 만들기', [{ k: 'clue', label: '예: "○○부 샘들 업무카드도 만들어" · "김철수 샘 업무" · "전부"', req: 1 }], o => wkReview(rows, wkMe(), o.clue.trim(), `저장된 업무분장 ${rows.length}줄`, '저장된 분장표'), '찾기');
   }
 });
 document.addEventListener('change', async e => {
@@ -6058,7 +6058,7 @@ docLogBody = function () {
   return sum + h;
 };
 A.dlAdd = function () {
-  ask('공문 기록', [{ k: 'title', label: '공문 제목·문서번호', req: 1, ph: '예: 학생인권교육 계획 제출(교무부-1234)' }, { k: 'st', label: '구분 (기안: 내가 만드는 문서 · 접수: 받은 공문 · 결재: 결재 올림/대기 · 처리중 · 완료)', type: 'select', opts: DL_ST, val: '접수' }, { k: 'note', label: '처리 내용·메모 (나중에 써도 됩니다)', type: 'textarea', rows: 3 }], o => {
+  ask('공문 기록', [{ k: 'title', label: '공문 제목·문서번호', req: 1, ph: '예: 현장체험학습 계획 제출(교무부-1234)' }, { k: 'st', label: '구분 (기안: 내가 만드는 문서 · 접수: 받은 공문 · 결재: 결재 올림/대기 · 처리중 · 완료)', type: 'select', opts: DL_ST, val: '접수' }, { k: 'note', label: '처리 내용·메모 (나중에 써도 됩니다)', type: 'textarea', rows: 3 }], o => {
     S.docLog = S.docLog || []; const done = o.st === '완료', d = today();
     S.docLog.push({ id: uid(), date: d, title: o.title.trim(), note: (o.note || '').trim(), done, st: o.st }); docAdj(d, 'recv', 1); if (done) docAdj(d, 'done', 1); OPEN.add('r3'); commit();
   });
@@ -6612,14 +6612,17 @@ document.addEventListener('change', async e => {
   const t = e.target; if (!t || t.id !== 'kitUp' || !t.files[0]) return; let j;
   try { j = JSON.parse(await t.files[0].text()); if (j.tf !== 'kit') throw new Error('설정 꾸러미 파일이 아닙니다'); } catch (err) { toast('가져오기 실패: ' + err.message); t.value = ''; return; } t.value = '';
   const nS = (j.skel || []).length, nC = Object.values(j.cycle || {}).reduce((a, b) => a + b.length, 0), nT = (j.tpl || []).length;
-  sure(`뼈대 ${nS}개 · 연간 업무 ${nC}개 · 반복 업무 틀 ${nT}개를 합치고, 켜고 끈 기능·메뉴 설정·서류 목록·견적 기준을 이 꾸러미 것으로 바꿉니다. 계속할까요? (되돌리기 가능)`, () => {
+  sure(`뼈대 ${nS}개 · 연간 업무 ${nC}개 · 반복 업무 틀 ${nT}개를 합치고, 켜고 끈 기능·메뉴 설정·서류 목록·견적 기준을 이 꾸러미 것으로 바꿉니다. 계속할까요? (되돌리기 가능)`, () => kitApply(j));
+});
+function kitApply(j, msg) {
     (j.skel || []).forEach(s => { if (s && s.name && Array.isArray(s.steps) && !(S.skel = S.skel || []).some(x => x.name === s.name)) S.skel.push({ id: uid(), name: String(s.name), type: s.type || '일반', memo: String(s.memo || ''), docs: s.docs || [], steps: s.steps.map(x => ({ t: String(x.t), off: +x.off || 0 })) }); });
     S.cycle = S.cycle || {}; Object.keys(j.cycle || {}).forEach(m => (j.cycle[m] || []).forEach(x => { const L = (S.cycle[m] = S.cycle[m] || []); if (x && x.t && !L.some(v => v.t === x.t)) L.push({ id: uid(), t: String(x.t), done: {} }); }));
     if (j.bdTypes) S.bdTypes = j.bdTypes; if (j.bdCfg) S.bdCfg = j.bdCfg; if (j.feat) S.feat = j.feat; if (Array.isArray(j.navHide)) S.navHide = j.navHide; if (j.hide) S.hide = j.hide; if (j.order) S.order = j.order;
     if (typeof wkTpl === 'function') { const L = wkTpl(); (j.tpl || []).forEach(x => { if (x && x.title && !L.some(v => v.title === x.title)) L.push(Object.assign({ id: uid() }, x)); }); }
-    featApply(); commit(); toast('설정 꾸러미를 적용했습니다.');
-  });
-});
+  featApply(); commit(); toast(msg || '설정 꾸러미를 적용했습니다.');
+}
+/* 한 번 눌러 넣기: 주소 뒤에 ?kit=이름 을 붙여 열면 kits/이름.json 을 자동으로 합칩니다(내 전용 꾸러미를 코드에 넣지 않고 따로 두는 방법). */
+(async () => { try { const k = new URLSearchParams(location.search).get('kit'); if (!k || !/^[\w-]{3,40}$/.test(k) || !S.setup) return; const r = await fetch('kits/' + k + '.json', { cache: 'no-store' }); if (!r.ok) throw new Error('꾸러미를 찾지 못했습니다'); const j = await r.json(); if (j.tf !== 'kit') throw new Error('꾸러미 형식이 아닙니다'); const done = (S.kitDone = S.kitDone || {}); kitApply(j, `내 업무 꾸러미를 넣었습니다 (뼈대 ${(j.skel || []).length}개). 이제 「내 업무 → 🦴 업무 뼈대로 시작」에서 ★로 보입니다.`); done[k] = today(); save(true); history.replaceState(null, '', location.pathname + location.hash); } catch (e) { toast('꾸러미 넣기 실패: ' + e.message); } })();
 featApply(); { const _r = TF.render; TF.render = function () { featApply(); return _r.apply(this, arguments); }; }
 
 /* 꿈송이 2 — 규정줍줍 + 사이트를 돌아다니는 비서.

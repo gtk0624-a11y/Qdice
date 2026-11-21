@@ -64,7 +64,7 @@ function mineShow(rows, name) {
 
 Object.assign(A, {
   mineDel(el) { S.mine = S.mine.filter(m => m.id !== el.dataset.id); commit(); },
-  mineAdd() { ask('내 업무 추가', [{ k: 'cat', label: '분류(부서·영역)', ph: '예: 학생인권부' }, { k: 'title', label: '업무 내용', req: 1 }, { k: 'memo', label: '메모·기한(선택)' }], o => { S.mine.push({ id: uid(), cat: (o.cat || '').trim() || '기타', title: o.title.trim(), memo: (o.memo || '').trim(), done: false }); OPEN.add('r11'); commit(); }); },
+  mineAdd() { ask('내 업무 추가', [{ k: 'cat', label: '분류(부서·영역)', ph: '예: ○○부' }, { k: 'title', label: '업무 내용', req: 1 }, { k: 'memo', label: '메모·기한(선택)' }], o => { S.mine.push({ id: uid(), cat: (o.cat || '').trim() || '기타', title: o.title.trim(), memo: (o.memo || '').trim(), done: false }); OPEN.add('r11'); commit(); }); },
   minePaste() { ask('분장표 붙여넣기', [{ k: 'text', label: '한글·엑셀의 업무분장표 표를 복사해서 붙여 넣으세요', type: 'textarea', rows: 10, req: 1 }], o => mineStart(o.text), '다음'); }
 });
 document.addEventListener('change', async e => {
