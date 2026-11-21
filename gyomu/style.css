@@ -778,3 +778,8 @@ body[data-wt=navy] main h2,body[data-wt=navy] main .h3,.wpv[data-wt=navy]{backgr
 .pmemo{margin:8px 0 16px}
 .dt{font-family:inherit!important;letter-spacing:0!important;font-weight:700}
 @media(max-width:760px){.spread{grid-template-columns:minmax(0,1fr)!important}.pgL{position:static!important;min-width:0}.mcal{min-width:0}.mcal .calt{font-size:22px;white-space:normal}.mcal .calh{flex-wrap:wrap}}
+
+/* 포스트잇: 화면을 덜 가리게 (작게·반투명·3장 넘으면 자동 접힘, 어디든 잡고 끌기) */
+.pst{width:148px!important;opacity:.9;cursor:grab;transition:opacity .15s}.pst:hover,.pst:active{opacity:1}.pst .pt{font-size:13px}
+.pst.min{opacity:.8}.pdsel{display:inline-flex;gap:4px;flex-wrap:wrap}.pdsel select{min-height:36px}
+@media(max-width:560px){.pst{width:124px!important}.pst .pt{font-size:12px}}
