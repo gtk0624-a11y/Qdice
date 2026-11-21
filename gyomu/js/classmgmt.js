@@ -6,7 +6,7 @@ const CMK = 'cmdata';
 let CM = null, cmReady = false, cmUnl = false, cmT = 0;
 const cmNew = () => ({ classes: [], att: {}, logs: {}, grid: {}, duty: [], ev: [], mood: {}, pick: {}, list: {}, pin: '', fired: {} });
 CM = cmNew();
-const cmCfg = () => { const c = (S.cm = S.cm || {}); if (c.title === undefined) Object.assign(c, { on: false, title: '학급 관리', mods: [], names: {}, lab: {}, tags: {}, custom: [], links: [], tpl: null, cur: '', mod: 'roster' }); return c; };
+const cmCfg = () => { const c = (S.cm = S.cm || {}); if (c.title === undefined) Object.assign(c, { on: true, title: '학급 관리', mods: ['att', 'prof', 'coll', 'duty', 'cns', 'spec', 'ev', 'bday', 'tpl'], names: {}, lab: {}, tags: {}, custom: [], links: [], tpl: null, cur: '', mod: 'roster' }); return c; };
 const cmSave = () => { if (!cmReady) return; clearTimeout(cmT); cmT = setTimeout(() => idb.set(CMK, CM), 250); };
 const cmDo = () => { cmSave(); TF.render && TF.render(); };
 const cmLocked = () => !!CM.pin && !cmUnl;
@@ -56,6 +56,7 @@ const cmBd = s => { const v = String((s && s.bd) || '').replace(/\D/g, ''); if (
 const cmDow = '일월화수목금토';
 
 /* ---------- 불러오기 ---------- */
+cmInit();
 idb.get(CMK).then(v => { CM = Object.assign(cmNew(), v || {}); cmReady = true; if (DEMO) cmSeed(); cmInit(); cmRefresh(); });
 function cmRefresh() { if (/^#\/(cm|today)?$/.test(location.hash || '#/today') || !location.hash) TF.render && TF.render(); }
 function cmInit() { if (cmCfg().on && typeof ORD_NAV !== 'undefined' && !ORD_NAV.some(x => x[0] === 'cm')) ORD_NAV.push(['cm', cmCfg().title]); }

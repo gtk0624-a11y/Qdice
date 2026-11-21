@@ -283,6 +283,7 @@ function welcome() {
 
 /* ---------- 화면 그리기 ---------- */
 function render() {
+  if (document.body.classList.contains('drgbody')) return; /* 끌어서 옮기는 중에는 화면을 다시 그리지 않음 */
   const app = $('#app'), y = window.scrollY;
   const cbx = $('#chatbox');
   if (!S.setup) { app.innerHTML = welcome(); if (cbx) cbx.hidden = true; return; }
