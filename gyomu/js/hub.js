@@ -51,9 +51,9 @@ function hubRetro() {
   return `<p class="mu">업무가 끝나면 한 줄씩 남기세요. 「내년에 바꿀 점」은 내년 같은 업무를 시작할 때 그대로 참고됩니다.</p><div class="tools"><button class="btn pri" data-act="rtAdd">+ 돌아보기 쓰기</button></div>${L.map(r => `<div class="bdx"><div class="bdx1"><b>${esc(r.title)}</b> <small class="mu">${r.y}학년도</small></div>${[['👍 잘된 점', r.good], ['😓 막힌 점', r.hard], ['🔧 내년에 바꿀 점', r.next]].filter(x => x[1]).map(x => `<p class="rqp"><b>${x[0]}</b> ${esc(x[1])}</p>`).join('')}<div class="tools"><button class="btn sm" data-act="rtEdit" data-id="${r.id}">수정</button><button class="x" data-act="rtDel" data-id="${r.id}">✕</button></div></div>`).join('') || '<p class="mu">아직 기록이 없습니다.</p>'}`;
 }
 function hubView() {
-  const t = UI.hubTab || 'board', body = { board: hubBoard, cycle: hubCycle, check: hubCheck, agenda: hubAgenda, case: hubCase, req: hubReq, retro: hubRetro }[t]();
+  let t = UI.hubTab || 'board'; if (t !== 'board' && !featOn('hub_' + t)) t = 'board'; const body = { board: hubBoard, cycle: hubCycle, check: hubCheck, agenda: hubAgenda, case: hubCase, req: hubReq, retro: hubRetro }[t]();
   return `<div class="bh"><h2>업무 총괄</h2><span class="mu">여러 업무를 한눈에 보고 빠뜨리지 않게 돕습니다.</span></div><div class="tools"><button class="btn" data-act="hubHand">📘 인수인계 한 권 받기</button></div>
-  <div class="bdchips hubtabs">${HUB_TABS.map(([k, v]) => `<button class="x ${t === k ? 'on' : ''}" data-act="hubTab" data-k="${k}">${v}</button>`).join('')}</div>${body}`;
+  <div class="bdchips hubtabs">${HUB_TABS.filter(x => x[0] === 'board' || featOn('hub_' + x[0])).map(([k, v]) => `<button class="x ${t === k ? 'on' : ''}" data-act="hubTab" data-k="${k}">${v}</button>`).join('')}</div>${body}`;
 }
 const hubAsk = (title, fields, ok, label) => ask(title, fields, o => { UI.hubTab = UI.hubTab || 'board'; ok(o); }, label);
 Object.assign(A, {
