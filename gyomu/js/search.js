@@ -93,7 +93,7 @@ function intent(q) {
   if (/돈|예산|잔액|얼마|집행|비용|품의|결제/.test(q)) t.add('budget');
   if (/회의|결정|협의|말씀|얘기/.test(q)) t.add('note');
   if (/수행|평가|채점|시험/.test(q)) t.add('assess');
-  if (/연수|이수/.test(q)) t.add('training');
+  if (/연수|이수|교육|훈련|소방|안전|재난|예방/.test(q)) t.add('training');
   if (/시간표|교시|몇\s*교시|수업\s*시간/.test(q)) t.add('timetable');
   if (/공문/.test(q)) t.add('docs');
   if (/학사|방학|개학|행사|시험|입학|졸업/.test(q)) t.add('item');

@@ -324,3 +324,13 @@ service cloud.firestore {
 - 챗봇: buildChunks 래핑 → type 'class', priv:true(외부 AI 전송 제외, 기기 안 검색만). PIN 잠금 중엔 제외.
 - 보안: PIN(SHA-256 해시, CM.pin), 암호 백업 .tfcm(AES-GCM, PBKDF2), 모두 지우기.
 - 개인정보 위험: 폰·PC 분실, 브라우저 데이터 삭제 시 복구 불가 → 암호 백업 안내. 기기 간 자동 이동 없음.
+
+## 연간 교육·훈련표 (js/yearplan.js) — 해마다 반복되는 연수·교육·훈련·행사
+- 저장: S.yp = {year, rows[{id,name,rule,cells{'1t'..'2x':{d,t,n,ok}}}], hist{학년도:rows}} (localStorage·백업 포함). 칸 키: 학기(1·2)+대상(t교직원·s학생·p학부모·x기타/훈련). 참석은 인원 숫자(n)만, 이름 명단 없음.
+- 새 학년도: A.ypRoll — 줄(틀) 유지, 칸 비움, 지난해는 hist 보관. 학년도 불일치 시 노란 안내 표시.
+- 연동: allEvents()에 ypEvents()(캘린더·디데이 알림), 오늘 화면 📚 임박 카드(14일 안·날짜 지남, ypInject+MutationObserver), 꿈송이 buildChunks 래핑(type 'training').
+- 가져오기: 붙여넣기·CSV·엑셀(ypImportRows) — 노션 표(이름·필요연수·6칸) 또는 내려받은 양식(이름·기준·8칸) 자동 구분. 날짜 3.10/3/10/2026-03-10 인식(3월 기준 학년도).
+- 예시 줄 YP_PRE는 참고용(기준은 해마다 공문에 맞춰 수정). 증빙 파일: 페이지 하단 파일 올리기(PAGE_KIND.yp).
+## 공문 사진 (js/scan.js 끝) · 떠 있는 학급 관리 버튼 (js/classmgmt.js 끝)
+- 오늘 「공문」 줄 아래 📸/🖼 → Claude 비전(본인 키)으로 제목·발신·기한·할 일 추출 → 확인창 → S.docLog 등록, 선택 시 캘린더·아카이브 보관. 키 없으면 직접 적기. 학생·학부모 실명·연락처는 옮기지 않도록 지시.
+- #cmfab: 메뉴 설정·화면 틀과 무관하게 항상 표시되는 🏫 버튼(href #/cm).

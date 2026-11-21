@@ -36,3 +36,44 @@ function scBtn() {
   if (document.getElementById('scfab')) return; const b = document.createElement('button'); b.id = 'scfab'; b.className = 'scfab'; b.type = 'button'; b.title = '손글씨 사진으로 일정·업무 추가'; b.innerHTML = '📷<span>손글씨 추가</span>'; b.addEventListener('click', () => { const d = document.createElement('dialog'); d.className = 'dlg cusm'; d.innerHTML = '<h3>📷 손글씨 사진으로 추가</h3><p class="mu">종이 수첩·포스트잇을 찍거나, 이미 찍어 둔 사진을 고르세요.</p><div class="tools">' + scPickHtml + '</div><div class="btns"><button class="btn" id="scpx">닫기</button></div>'; document.body.appendChild(d); d.addEventListener('change', () => setTimeout(() => d.close(), 50)); d.addEventListener('click', e => { if (e.target.id === 'scpx') d.close(); }); d.addEventListener('close', () => setTimeout(() => d.remove(), 100)); d.showModal(); }); document.body.appendChild(b);
 }
 const _r4 = TF.render; TF.render = function () { const v = _r4.apply(this, arguments); scBtn(); return v; };
+
+/* 공문 사진 → 오늘 「공문」 처리 기록으로 등록 (본인 Claude 키 필요, 체험판은 예시) */
+const DOC_TOOL = [{ name: 'save_doc', description: '사진 속 공문 내용', input_schema: { type: 'object', properties: { title: { type: 'string', description: '공문 제목(문서번호가 보이면 함께)' }, sender: { type: 'string', description: '발신 부서·기관' }, due: { type: 'string', description: '회신·제출·신청 기한 YYYY-MM-DD, 없으면 빈 문자열' }, event_date: { type: 'string', description: '행사·연수·회의 일시 YYYY-MM-DD, 없으면 빈 문자열' }, action: { type: 'string', description: '내가 해야 할 일 한 줄(제출·회신·참석·전달 등)' }, kind: { type: 'string', enum: ['회신·제출', '연수·교육', '행사', '전달·참고', '기타'] } }, required: ['title', 'kind'] } }];
+let DOCP = null;
+async function docPhotoRun(file) {
+  const dlg = scDlg(); dlg.innerHTML = '<p class="mu">📄 공문을 읽는 중입니다… (몇 초 걸립니다)</p>'; let r;
+  if (window.TF_DEMO) { await new Promise(x => setTimeout(x, 800)); const t = new Date(); t.setDate(t.getDate() + 5); r = { title: '2027학년도 학교폭력 예방교육 계획 제출(생활인권부-1234)', sender: '경기도교육청', due: `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, '0')}-${String(t.getDate()).padStart(2, '0')}`, event_date: '', action: '학교 계획서 작성 후 에듀파인으로 제출', kind: '회신·제출' }; dlg.dataset.demo = '1'; }
+  else {
+    if (!agKey()) { dlg.innerHTML = '<h3>📄 공문 사진 읽기</h3><p>이 기능은 <b>본인 Claude 키</b>가 있어야 켜집니다. 오른쪽 아래 꿈송이를 눌러 열린 창 맨 위 <b>🔑 키 입력칸</b>에 붙여넣으세요. 키 없이 쓰려면 아래 [직접 적기]를 누르세요.</p><div class="tools"><button class="btn pri" id="docMan">직접 적기</button><button class="btn" id="scx">닫기</button></div>'; return; }
+    try {
+      const b64 = await scImg(file);
+      const res = await fetch('https://api.anthropic.com/v1/messages', { method: 'POST', headers: { 'content-type': 'application/json', 'x-api-key': agKey(), 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' }, body: JSON.stringify({ model: 'claude-haiku-5-5', max_tokens: 1200, tools: DOC_TOOL, tool_choice: { type: 'tool', name: 'save_doc' }, system: `학교에 온 공문(또는 그 화면·출력물)을 찍은 사진입니다. 제목, 발신, 회신·제출 기한, 행사·연수 일시, 내가 해야 할 일을 save_doc으로 반환하세요. 오늘은 ${today()}입니다. 연도가 없으면 가까운 미래로 YYYY-MM-DD 계산. 없는 정보는 빈 문자열이고 지어내지 마세요. 학생·학부모 실명, 연락처, 주민번호는 절대 옮기지 마세요.`, messages: [{ role: 'user', content: [{ type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: b64 } }, { type: 'text', text: '이 공문의 핵심을 뽑아 주세요.' }] }] }) });
+      if (!res.ok) throw new Error(res.status === 401 ? '키가 올바르지 않습니다' : res.status === 400 || res.status === 402 ? '잔액(크레딧)이 부족할 수 있습니다' : '응답 오류 ' + res.status);
+      const j = await res.json(); r = ((j.content || []).find(c => c.type === 'tool_use') || { input: null }).input; if (!r) throw new Error('내용을 읽지 못했습니다');
+    } catch (e) { dlg.innerHTML = `<p>읽지 못했습니다(${esc(e.message)}). 공문이 화면에 크게, 밝게 나오도록 다시 찍어 보세요.</p><div class="tools"><button class="btn pri" id="docMan">직접 적기</button><button class="btn" id="scx">닫기</button></div>`; DOCP = { file }; return; }
+  }
+  DOCP = { ...r, file }; docPhotoShow();
+}
+function docPhotoShow() {
+  const d = scDlg(), r = DOCP || {}, due = r.due || '';
+  d.innerHTML = `<h3>📄 이렇게 읽었어요</h3><p class="mu">틀린 곳은 고친 뒤 [공문 처리에 올리기]를 누르세요.${d.dataset.demo ? ' (체험판 예시 결과)' : ''}</p>
+  <label class="dpl">공문 제목<input id="dpT" value="${esc(r.title || '')}"></label><label class="dpl">발신<input id="dpS" value="${esc(r.sender || '')}"></label><label class="dpl">내가 할 일<input id="dpA" value="${esc(r.action || '')}"></label>
+  <label class="dpl">회신·제출 기한<input id="dpD" type="date" value="${esc(due)}"></label><label class="dpl">행사·연수 일시<input id="dpE" type="date" value="${esc(r.event_date || '')}"></label>
+  <label class="dpk"><input type="checkbox" id="dpC" checked> 기한·일시를 캘린더에 넣기</label><label class="dpk"><input type="checkbox" id="dpK" ${r.file ? 'checked' : ''}> 공문 사진을 자료 아카이브에 보관</label>
+  <div class="tools"><button class="btn pri" id="dpOk">공문 처리에 올리기</button><button class="btn" id="scx">닫기</button></div>`;
+}
+async function docPhotoApply() {
+  const v = id => (document.getElementById(id) || {}).value || '', t = v('dpT').trim(); if (!t) { toast('공문 제목을 적어 주세요.'); return; }
+  const note = [v('dpS') && '발신 ' + v('dpS').trim(), v('dpA') && '할 일: ' + v('dpA').trim(), v('dpD') && '기한 ' + v('dpD'), v('dpE') && '일시 ' + v('dpE')].filter(Boolean).join(' · ');
+  const td = today(); S.docLog = S.docLog || []; S.docLog.push({ id: uid(), date: td, title: t, note, done: false }); docAdj(td, 'recv', 1);
+  if ((document.getElementById('dpC') || {}).checked) {
+    if (v('dpD')) S.items.push({ id: uid(), date: v('dpD'), done: false, ...cusMk('todo', '[공문] ' + t + ' 제출·회신') });
+    if (v('dpE')) S.items.push({ id: uid(), date: v('dpE'), done: false, ...cusMk('event', '[공문] ' + t) });
+  }
+  const f = DOCP && DOCP.file;
+  if ((document.getElementById('dpK') || {}).checked && f && typeof keepFile === 'function') { try { const id = uid(); LIB.push({ id, name: '공문사진_' + td + '_' + t.slice(0, 20) + '.jpg', kind: '공문', text: t + ' ' + note, added: td, from: 'today', size: f.size || 0 }); await keepFile(id, f); await saveLib(); } catch (e) { } }
+  OPEN.add('r3'); DOCP = null; const d = document.getElementById('scdlg'); if (d) d.close(); commit(); toast('오늘 공문 처리 목록에 올렸습니다.');
+}
+document.addEventListener('change', e => { if (e.target.id !== 'docCam' && e.target.id !== 'docUp') return; const f = e.target.files[0]; e.target.value = ''; if (f) docPhotoRun(f); }, true);
+document.addEventListener('click', e => { const t = e.target; if (!t || !t.id) return; if (t.id === 'dpOk') docPhotoApply(); else if (t.id === 'docMan') { const d = document.getElementById('scdlg'); if (d) d.close(); A.dlAdd(); } }, true);
+{ const _dlb = docLogBody; docLogBody = function () { return _dlb.apply(this, arguments) + '<div class="tools dpt"><label class="btn sm pri file">📸 공문 사진 찍기<input type="file" id="docCam" accept="image/*" capture="environment" hidden></label><label class="btn sm file">🖼 사진·캡처 고르기<input type="file" id="docUp" accept="image/*" hidden></label><span class="mu">찍으면 제목·기한·할 일을 읽어 위 목록에 올려 줍니다</span></div>'; }; }

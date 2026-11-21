@@ -1,6 +1,6 @@
 /* 자료 아카이브 · 어디서든 붙여넣기/끌어놓기(한글·엑셀·PDF·글) · 올린 문서를 일정·업무·예산에 반영할지 묻기 */
-const ARCH_PAGES = { today: '오늘', cal: '캘린더', class: '수업', eval: '평가', budget: '예산', notes: '기록', lib: '자료·연락', files: '아카이브', pages: '페이지', set: '설정', cm: '학급 관리' };
-const ARCH_KINDS = ['계획서', '평가계획서', '운영표', '회의록', '공문', '규정', '교육과정', '예산', '일정', '정기고사·지필고사', '수행평가', '기타'];
+const ARCH_PAGES = { today: '오늘', cal: '캘린더', class: '수업', eval: '평가', budget: '예산', notes: '기록', lib: '자료·연락', files: '아카이브', pages: '페이지', set: '설정', cm: '학급 관리', yp: '연간 교육·훈련' };
+const ARCH_KINDS = ['계획서', '평가계획서', '운영표', '회의록', '공문', '규정', '교육과정', '예산', '일정', '정기고사·지필고사', '수행평가', '연수·교육', '기타'];
 const archPage = () => ((location.hash || '#/today').split('/')[1]) || 'today';
 const archBusy = () => !!document.querySelector('dialog[open]');
 function guessKind(name, page) {
@@ -82,7 +82,7 @@ function filesView() {
   ${L.map(fileRow).join('') || '<p class="mu">보관된 자료가 없습니다.</p>'}`;
 }
 /* 각 페이지 맨 아래에 "이 페이지 자료" 상자(올린 파일은 아카이브에도 같이 보관) */
-const PAGE_KIND = { budget: '예산', cal: '일정', notes: '회의록', lib: '규정', pages: '', today: '', cm: '' };
+const PAGE_KIND = { budget: '예산', cal: '일정', notes: '회의록', lib: '규정', pages: '', today: '', cm: '', yp: '연수·교육' };
 function pageFiles(page) { return page in PAGE_KIND ? `<section class="pgfiles">${fileBox(page, PAGE_KIND[page])}</section>` : ''; }
 function fileBox(page, kind) {
   const L = LIB.filter(d => (d.from || 'lib') === page).slice(-6).reverse();

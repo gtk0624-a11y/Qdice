@@ -489,7 +489,7 @@ buildChunks = function () {
 };
 
 /* 화면 맨 아래에 버전 표시 — 옛 화면을 보고 있는지 바로 알 수 있게 */
-const TF_VER = 'v61', _cmFt = footer;
+const TF_VER = 'v62', _cmFt = footer;
 footer = function () { return _cmFt.apply(this, arguments).replace('</footer>', ` · <span class="mu">버전 ${TF_VER} (학급 관리 포함)</span></footer>`); };
 
 /* 새 버전 알림: 옛 화면이 남아 있으면 한 번 눌러 새로 받게 함 */
@@ -497,3 +497,14 @@ footer = function () { return _cmFt.apply(this, arguments).replace('</footer>', 
   if (DEMO || !/^https?:/.test(location.protocol)) return;
   setTimeout(() => fetch('sw.js', { cache: 'no-store' }).then(r => r.text()).then(t => { const m = /VERSION = 'tf-(v\d+)'/.exec(t); if (m && m[1] !== TF_VER && +m[1].slice(1) > +TF_VER.slice(1)) { const b = document.createElement('div'); b.className = 'cmlock'; b.style.cssText = 'position:fixed;left:8px;right:8px;bottom:8px;z-index:90;text-align:center'; b.innerHTML = '🔄 새 버전(' + m[1] + ')이 있어요. <button class="btn sm pri" id="cmnew">지금 새로 받기</button>'; document.body.appendChild(b); b.querySelector('#cmnew').onclick = async () => { try { (await navigator.serviceWorker.getRegistrations()).forEach(r => r.unregister()); (await caches.keys()).forEach(k => caches.delete(k)); } catch (e) { } location.reload(); }; } }).catch(() => { }), 3000);
 })();
+
+/* 어떤 화면 틀에서도 보이는 떠 있는 「학급 관리」 버튼 */
+function cmFab() {
+  let b = document.getElementById('cmfab'); const show = S.setup && cmCfg().on && !/^#\/cm/.test(location.hash);
+  if (!show) { if (b) b.remove(); return; }
+  if (!b) { b = document.createElement('a'); b.id = 'cmfab'; b.className = 'cmfab'; b.href = '#/cm'; document.body.appendChild(b); }
+  b.innerHTML = '🏫<span>' + esc(cmCfg().title || '학급 관리') + '</span>';
+}
+const _cmF2 = TF.render; TF.render = function () { const v = _cmF2.apply(this, arguments); try { cmFab(); } catch (e) { } return v; };
+window.addEventListener('hashchange', () => { try { cmFab(); } catch (e) { } });
+setTimeout(() => { try { cmFab(); } catch (e) { } }, 300);
