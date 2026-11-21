@@ -454,8 +454,8 @@ function cmAlerts() {
 }
 const cmInject = () => {
   const main = document.querySelector('#app main'); if (!main || !S.setup) return; const ex = main.querySelector('.cmtoday'), isT = /^#\/(today)?$/.test(location.hash) || !location.hash;
-  const L = isT ? cmAlerts() : []; if (ex) ex.remove(); if (!L.length) return;
-  const d = document.createElement('div'); d.className = 'hpcard cmtoday'; d.innerHTML = `<b>🏫 ${esc(cmCfg().title)} 알림</b>${L.slice(0, 8).map(x => `<div class="cmr">${esc(x)}</div>`).join('')}${L.length > 8 ? `<p class="mu">외 ${L.length - 8}건</p>` : ''}<div class="tools"><a class="btn sm" href="#/cm">열기</a></div>`;
+  const L = isT ? cmAlerts() : []; if (ex) ex.remove(); if (!isT || !cmCfg().on) return;
+  const d = document.createElement('div'); d.className = 'hpcard cmtoday'; d.innerHTML = `<b>🏫 ${esc(cmCfg().title)}</b> <a class="btn sm pri" href="#/cm">열기 ▶</a>${L.length ? '' : '<span class="mu"> 출결·상담·당번·행사 (오늘 알림 없음)</span>'}${L.slice(0, 8).map(x => `<div class="cmr">${esc(x)}</div>`).join('')}${L.length > 8 ? `<p class="mu">외 ${L.length - 8}건</p>` : ''}`;
   const a = main.querySelector('.hpcard') || main.querySelector('.cheer'); if (a) a.after(d); else main.prepend(d);
 };
 const _cmR = TF.render; TF.render = function () { const v = _cmR.apply(this, arguments); cmInject(); return v; };
