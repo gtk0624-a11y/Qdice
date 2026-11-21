@@ -362,3 +362,8 @@ service cloud.firestore {
   - mtWarn·buildChunks 래퍼: 오늘 카드에 불용·서류 미비, 챗봇에 업체·집행 정보.
   - 고칠 곳: 기본 서류 목록 = BD_TYPES0, 기본 견적 기준 = bdCfg() 안의 2000000, 기본 마감일 = 12월 20일.
   - 개인정보 주의: 업체 연락처는 이 기기 localStorage에만 저장됩니다.
+
+## v81 (예산 요구서·계획서, 업무 뼈대)
+- **js/budget3.js**: `S.bdReq` 요구서(사업·학년도·항목표[단가×수량·산출 근거·올해 집행 참고]·계획서 4칸·작년 참고 글). A.rqNew(올해 사업 복사 가능)/rqItem/rqPlan/rqRef(자료 아카이브 LIB에서 사업명 근처 글 발췌)/rqAI(키가 있을 때 Claude 초안, 모델은 tf.botModel)/rqDoc(요구서·계획서 .doc).
+- **js/skel.js**: 업무 뼈대. SK_BUILT(범용 7종, 코드에 있음) + `S.skel`(내 전용, 사용자 데이터). A.skUse → 내 업무 카드(wkN) + 단계 날짜 + 캘린더(tag '업무'). 내보내기/가져오기는 .json(`{tf:'skel',skel:[...]}`).
+- **배포 원칙**: 코드에는 특정 교사·학교의 업무를 넣지 않습니다. 개인 업무 틀은 .json 파일로 따로 보관하고 「뼈대 가져오기」로 넣습니다.

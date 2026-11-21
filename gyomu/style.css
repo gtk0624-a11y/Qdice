@@ -910,3 +910,4 @@ html[data-skin="planner"] .drawer,html[data-skin="planner"] .dw{padding:6px 12px
 .bdx2{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}.bdx2 select,.bdx2 input{flex:1 1 110px;min-width:0}
 .bdx3{display:flex;flex-wrap:wrap;gap:4px 12px}.bdd{display:inline-flex;gap:4px;align-items:center;font-size:.9em}
 .bdv{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:4px 0}.bdv input{flex:1 1 140px;min-width:0}
+.rq{margin:10px 0}.rqp{margin:4px 0;white-space:pre-wrap}.rqref{white-space:pre-wrap;font-size:.85em;max-height:220px;overflow:auto}

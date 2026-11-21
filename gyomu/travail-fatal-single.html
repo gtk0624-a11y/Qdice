@@ -919,6 +919,7 @@ html[data-skin="planner"] .drawer,html[data-skin="planner"] .dw{padding:6px 12px
 .bdx2{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}.bdx2 select,.bdx2 input{flex:1 1 110px;min-width:0}
 .bdx3{display:flex;flex-wrap:wrap;gap:4px 12px}.bdd{display:inline-flex;gap:4px;align-items:center;font-size:.9em}
 .bdv{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:4px 0}.bdv input{flex:1 1 140px;min-width:0}
+.rq{margin:10px 0}.rqp{margin:4px 0;white-space:pre-wrap}.rqref{white-space:pre-wrap;font-size:.85em;max-height:220px;overflow:auto}
 </style>
 </head>
 <body>
@@ -5308,7 +5309,7 @@ buildChunks = function () {
 };
 
 /* 화면 맨 아래에 버전 표시 — 옛 화면을 보고 있는지 바로 알 수 있게 */
-const TF_VER = 'v80', _cmFt = footer;
+const TF_VER = 'v81', _cmFt = footer;
 footer = function () { return _cmFt.apply(this, arguments).replace('</footer>', ` · <span class="mu">버전 ${TF_VER} (학급 관리 포함)</span></footer>`); };
 
 /* 새 버전 알림: 옛 화면이 남아 있으면 한 번 눌러 새로 받게 함 */
@@ -6330,7 +6331,7 @@ Object.assign(A, {
     }, '기록');
   },
   bdBack() {
-    ask('행사일로 예산 일정 만들기', [{ k: 'name', label: '행사·사업 이름', req: 1, ph: '예: 곡선제' }, { k: 'day', label: '행사일', type: 'date', val: today(), req: 1 }, { k: 'a', label: '품의는 며칠 전까지', type: 'number', val: 14 }, { k: 'b', label: '계약·구매는 며칠 전까지', type: 'number', val: 7 }, { k: 'c', label: '정산은 며칠 뒤까지', type: 'number', val: 7 }], o => {
+    ask('행사일로 예산 일정 만들기', [{ k: 'name', label: '행사·사업 이름', req: 1, ph: '예: 체육대회' }, { k: 'day', label: '행사일', type: 'date', val: today(), req: 1 }, { k: 'a', label: '품의는 며칠 전까지', type: 'number', val: 14 }, { k: 'b', label: '계약·구매는 며칠 전까지', type: 'number', val: 7 }, { k: 'c', label: '정산은 며칠 뒤까지', type: 'number', val: 7 }], o => {
       const D = o.day, mk = (t, date) => S.items.push({ id: uid(), title: `[예산] ${o.name} ${t}`, date, cat: 'event', tag: '예산', done: false });
       mk('품의 올리기', bdWday(bdShift(D, -(+o.a || 14)), -1)); mk('계약·구매 마무리', bdWday(bdShift(D, -(+o.b || 7)), -1)); mk('검수 준비', bdWday(bdShift(D, -1), -1)); mk('지출·정산 끝내기', bdWday(bdShift(D, +o.c || 7), 1)); commit(); toast('캘린더에 예산 일정 4개를 넣었습니다(주말은 평일로 옮겼습니다).');
     }, '만들기');
@@ -6356,6 +6357,117 @@ Object.assign(A, {
   bdVendors().forEach(v => { const t = (S.vendors || {})[v.n] || {}; out.push({ type: 'budget', src: `예산 업체 · ${v.n}`, text: `업체 ${v.n}: ${v.c}건 거래, 합계 ${v.sum}원, 최근 ${v.last} ${v.what}${t.tel ? ', 연락처 ' + t.tel : ''}`, ref: '#/budget' }); });
   bdAll().forEach(x => { const s = x.s; if (s.type || s.vendor || (s.stg && s.stg !== '지출')) out.push({ type: 'budget', src: `예산 집행 · ${x.p.name}`, text: `${s.date} ${s.desc} ${s.amt}원 · 유형 ${s.type || '미지정'} · 단계 ${bdStg(s)} · 업체 ${s.vendor || '없음'} · ${bdMiss(s).length ? '빠진 서류 ' + bdMiss(s).join(', ') : '서류 이상 없음'}`, ref: '#/budget' }); });
   return out; }; }
+
+/* 예산 요구서·사업계획서 쓰기(v81): 내년 사업별 요구서 초안(올해 사업 복사 또는 빈 틀) → 산출 근거 표 → 작년 자료(아카이브) 참고 → (키가 있으면) AI 초안 → 요구서·계획서 .doc 내려받기.
+   저장: S.bdReq = [{id,name,y,items:[{id,item,price,qty,why,ref}],purpose,when,content,effect,refText}] — 단순하게 '세우고 쓰고 정리'만 합니다. */
+const rqTot = r => (r.items || []).reduce((a, i) => a + (+i.price || 0) * (+i.qty || 1), 0);
+const rqFind = id => (S.bdReq || []).find(r => r.id === id);
+let rqBusy = false;
+
+function bdPanel3() {
+  const rs = S.bdReq || [];
+  const cards = rs.map(r => { const t = rqTot(r), ref = (r.items || []).reduce((a, i) => a + (+i.ref || 0), 0);
+    const rows = (r.items || []).map(i => { const a = (+i.price || 0) * (+i.qty || 1), d = i.ref ? a - i.ref : null; return `<tr><td>${esc(i.item)}${i.why ? `<br><small class="mu">${esc(i.why)}</small>` : ''}</td><td class="r">${won(i.price)} × ${+i.qty || 1}</td><td class="r"><b>${won(a)}</b></td><td class="r mu">${i.ref ? won(i.ref) : '-'}${d === null ? '' : `<br><small class="${d > 0 ? 'hot' : ''}">${d > 0 ? '+' : ''}${won(d)}</small>`}</td><td class="act"><button class="x" data-act="rqItem" data-r="${r.id}" data-i="${i.id}">수정</button><button class="x" data-act="rqItemDel" data-r="${r.id}" data-i="${i.id}">✕</button></td></tr>`; }).join('');
+    const plan = [['목적', r.purpose], ['기간·대상', r.when], ['내용', r.content], ['기대효과', r.effect]].filter(x => x[1]).map(x => `<p class="rqp"><b>${x[0]}</b> ${esc(x[1])}</p>`).join('');
+    return `<section class="bk rq"><div class="bkh"><h3 class="h3">${esc(r.name)} <small class="mu">${r.y}학년도 요구</small></h3>${xbtn('rqDel', r.id)}</div>
+    <div class="sum"><div><span>요구 합계</span><b class="num">${won(t)}</b></div><div><span>올해 집행(참고)</span><b class="num">${ref ? won(ref) : '-'}</b></div><div><span>증감</span><b class="num ${ref && t > ref ? 'hot' : ''}">${ref ? (t - ref > 0 ? '+' : '') + won(t - ref) : '-'}</b></div></div>
+    ${rows ? `<table class="tbl"><thead><tr><th>항목·산출 근거</th><th class="r">단가×수량</th><th class="r">요구액</th><th class="r">올해 집행</th><th></th></tr></thead><tbody>${rows}</tbody></table>` : '<p class="mu">항목을 추가하세요. 단가와 수량만 넣으면 금액이 계산됩니다.</p>'}
+    ${plan}${r.refText ? `<details class="doc"><summary>📎 작년 참고 자료</summary><pre class="rqref">${esc(r.refText)}</pre></details>` : ''}
+    <div class="tools"><button class="btn sm" data-act="rqItem" data-r="${r.id}">+ 항목</button><button class="btn sm" data-act="rqPlan" data-r="${r.id}">✍ 계획서 내용 쓰기</button><button class="btn sm" data-act="rqRef" data-r="${r.id}">📎 작년 자료 참고</button><button class="btn sm" data-act="rqAI" data-r="${r.id}">🤖 초안 써 주기</button><button class="btn sm" data-act="rqDoc" data-r="${r.id}" data-k="req">📄 요구서 받기</button><button class="btn sm" data-act="rqDoc" data-r="${r.id}" data-k="plan">📄 계획서 받기</button></div></section>`; }).join('');
+  return `<details class="doc bdpanel bdp3" ${UI.rqOpen || rs.length ? 'open' : ''}><summary><b>📝 예산 요구서·계획서</b> <span class="mu">${rs.length ? rs.length + '건 작성 중' : '내년 예산 요구서와 사업계획서 초안'}</span></summary>
+  <p class="mu">① 사업을 만들고 ② 항목과 산출 근거를 넣고 ③ 작년 자료를 참고해 계획서 내용을 쓴 뒤 ④ 문서로 받으면 끝입니다. 「🤖 초안」은 Claude 키가 있을 때만 쓰입니다.</p>
+  <div class="tools"><button class="btn" data-act="rqNew">+ 요구서 만들기</button></div>${cards}</details>`;
+}
+{ const _b = budgetView; budgetView = function () { const h = _b.apply(this, arguments), p = bdPanel3(), i = h.indexOf('<section class="bk">'); if (!S.budget.length) { const j = h.indexOf('<p class="mu">아직 사업이 없습니다'); return j < 0 ? h + p : h.slice(0, j) + p + h.slice(j); } return i < 0 ? h + p : h.slice(0, i) + p + h.slice(i); }; }
+document.addEventListener('toggle', e => { const t = e.target; if (t && t.classList && t.classList.contains('bdp3')) UI.rqOpen = t.open; }, true);
+
+const rqFields = (v = {}) => [{ k: 'item', label: '항목 (예: 학생 인권 교육 자료 인쇄)', val: v.item || '', req: 1 }, { k: 'price', label: '단가(원)', type: 'number', val: v.price ?? '', req: 1 }, { k: 'qty', label: '수량', type: 'number', val: v.qty ?? 1 }, { k: 'why', label: '산출 근거 (예: 학생 450명 × 1부, 작년 단가 기준)', val: v.why || '' }];
+async function rqCall(r) {
+  const key = localStorage.getItem('tf.claudeKey'); if (!key) return null;
+  const items = (r.items || []).map(i => `- ${i.item}: ${won(i.price)}원 × ${i.qty || 1} = ${won((+i.price || 0) * (+i.qty || 1))}원 ${i.why || ''}`).join('\n');
+  const sys = '당신은 중학교 교사의 예산 요구서·사업계획서 작성을 돕는 비서입니다. 작년 참고 자료의 문체와 구성을 따르되 올해 항목표에 맞게, 과장 없이 존댓말 공문체(~함, ~할 예정임 등 학교 계획서 어투)로 쓰세요. 아래 형식을 정확히 지키세요.\n### 목적\n(1~2문장)\n### 기간·대상\n(1문장)\n### 내용\n(항목표를 반영한 3~5줄)\n### 기대효과\n(1~2문장)';
+  const res = await fetch('https://api.anthropic.com/v1/messages', { method: 'POST', headers: { 'content-type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' }, body: JSON.stringify({ model: localStorage.getItem('tf.botModel') || 'claude-haiku-5-5', max_tokens: 900, system: sys, messages: [{ role: 'user', content: `사업명: ${r.name} (${r.y}학년도)\n[항목표]\n${items || '(없음)'}\n[작년 참고 자료]\n${(r.refText || '(없음)').slice(0, 5000)}` }] }) });
+  if (!res.ok) throw new Error('Claude 응답 오류 ' + res.status);
+  const j = await res.json(); return (j.content || []).map(x => x.text || '').join('');
+}
+function rqDocHtml(r, kind) {
+  const t = rqTot(r), tb = `<table border=1 cellspacing=0 cellpadding=5 width=100%><tr><th>항목</th><th>산출 근거</th><th>단가</th><th>수량</th><th>금액</th></tr>${(r.items || []).map(i => `<tr><td>${esc(i.item)}</td><td>${esc(i.why || '')}</td><td align=right>${won(i.price)}</td><td align=right>${+i.qty || 1}</td><td align=right>${won((+i.price || 0) * (+i.qty || 1))}</td></tr>`).join('')}<tr><td colspan=4 align=center><b>합계</b></td><td align=right><b>${won(t)}</b></td></tr></table>`;
+  const head = `<html><head><meta charset="utf-8"><style>body{font-family:'맑은 고딕';font-size:11pt}h2{text-align:center}th{background:#eee}</style></head><body>`;
+  if (kind === 'req') return head + `<h2>${r.y}학년도 예산 요구서</h2><p>사업명: <b>${esc(r.name)}</b></p><p>요구액: <b>${won(t)}원</b></p>${tb}</body></html>`;
+  const sec = (h, v) => `<h3>${h}</h3><p>${esc(v || '(내용을 입력하세요)').replace(/\n/g, '<br>')}</p>`;
+  return head + `<h2>${r.y}학년도 ${esc(r.name)} 계획서</h2>${sec('1. 목적', r.purpose)}${sec('2. 기간·대상', r.when)}${sec('3. 내용', r.content)}<h3>4. 소요 예산</h3>${tb}${sec('5. 기대효과', r.effect)}</body></html>`;
+}
+Object.assign(A, {
+  rqNew() {
+    const yy = (typeof schoolYearNow === 'function' ? schoolYearNow() : new Date().getFullYear()) + 1;
+    ask('요구서 만들기', [{ k: 'name', label: '사업 이름', req: 1, ph: '예: 체육대회 운영' }, { k: 'y', label: '대상 학년도', type: 'number', val: yy }, { k: 'from', label: '시작 방법', type: 'select', opts: ['빈 틀로 시작', ...S.budget.map(p => '올해 사업 복사: ' + p.name)] }], o => {
+      const r = { id: uid(), name: o.name.trim(), y: +o.y || yy, items: [] }, p = S.budget.find(x => o.from === '올해 사업 복사: ' + x.name);
+      if (p) { if (p.lines.length) r.items = p.lines.map(l => ({ id: uid(), item: l.item, price: +l.alloc || 0, qty: 1, why: '올해 배정 기준', ref: spentOf(l) })); else r.items = [{ id: uid(), item: p.name, price: projAlloc(p), qty: 1, why: '올해 배정 기준', ref: projSpent(p) }]; }
+      (S.bdReq = S.bdReq || []).push(r); UI.rqOpen = true; commit(); toast(p ? '올해 항목을 복사했습니다. 단가·수량을 내년 기준으로 고치세요.' : '요구서를 만들었습니다. 항목을 추가하세요.');
+    }, '만들기');
+  },
+  rqItem(el) { const r = rqFind(el.dataset.r); if (!r) return; const it = el.dataset.i ? r.items.find(x => x.id === el.dataset.i) : null; ask(it ? '항목 수정' : '항목 추가', rqFields(it || {}), o => { const v = { item: o.item.trim(), price: +o.price || 0, qty: +o.qty || 1, why: (o.why || '').trim() }; if (it) Object.assign(it, v); else r.items.push(Object.assign({ id: uid() }, v)); UI.rqOpen = true; commit(); }); },
+  rqItemDel(el) { const r = rqFind(el.dataset.r); if (r) { r.items = r.items.filter(x => x.id !== el.dataset.i); UI.rqOpen = true; commit(); } },
+  rqDel(el) { sure('이 요구서를 지울까요?', () => { S.bdReq = (S.bdReq || []).filter(x => x.id !== el.dataset.id); commit(); }); },
+  rqPlan(el) { const r = rqFind(el.dataset.r); if (!r) return; ask('계획서 내용', [{ k: 'purpose', label: '목적', type: 'textarea', rows: 3, val: r.purpose || '' }, { k: 'when', label: '기간·대상', type: 'textarea', rows: 2, val: r.when || '' }, { k: 'content', label: '내용', type: 'textarea', rows: 5, val: r.content || '' }, { k: 'effect', label: '기대효과', type: 'textarea', rows: 3, val: r.effect || '' }], o => { Object.assign(r, { purpose: o.purpose.trim(), when: o.when.trim(), content: o.content.trim(), effect: o.effect.trim() }); UI.rqOpen = true; commit(); }); },
+  rqRef(el) {
+    const r = rqFind(el.dataset.r); if (!r) return; const docs = [...LIB].filter(d => d.text).sort((a, b) => (/예산|계획|요구/.test(b.name) ? 1 : 0) - (/예산|계획|요구/.test(a.name) ? 1 : 0));
+    if (!docs.length) { toast('자료 아카이브에 글자를 읽은 파일이 없습니다. 작년 계획서·요구서를 먼저 올려 주세요.'); return; }
+    ask('작년 자료 고르기', [{ k: 'd', label: '참고할 파일 (사업 이름과 비슷한 부분을 뽑습니다)', type: 'select', opts: docs.slice(0, 40).map(d => d.name) }], o => {
+      const d = docs.find(x => x.name === o.d); if (!d) return; const key = (r.name.match(/[가-힣A-Za-z0-9]{2,}/) || [''])[0], i = key ? d.text.indexOf(key) : -1, s = Math.max(0, i - 150);
+      r.refText = `[${d.name}]\n` + d.text.slice(s, s + 2500).trim(); UI.rqOpen = true; commit(); toast(i < 0 ? '사업 이름이 파일에 없어 앞부분을 가져왔습니다.' : '관련 부분을 참고 자료로 붙였습니다.');
+    }, '붙이기');
+  },
+  async rqAI(el) {
+    const r = rqFind(el.dataset.r); if (!r || rqBusy) return; if (!localStorage.getItem('tf.claudeKey')) { toast('Claude 키가 있어야 초안을 써 줍니다. 키 없이는 「✍ 계획서 내용 쓰기」로 직접 적어 주세요.'); return; }
+    rqBusy = true; toast('초안을 쓰는 중입니다…'); try { const t = await rqCall(r), pick = h => { const m = new RegExp('###\\s*' + h + '\\s*\\n([\\s\\S]*?)(?=\\n###|$)').exec(t); return m ? m[1].trim() : ''; };
+      const v = { purpose: pick('목적'), when: pick('기간·대상'), content: pick('내용'), effect: pick('기대효과') }; if (!v.purpose && !v.content) throw new Error('형식을 읽지 못했습니다'); Object.assign(r, v); UI.rqOpen = true; commit(); toast('초안을 넣었습니다. 읽어 보고 고쳐 주세요(되돌리기 가능).'); } catch (e) { toast('초안 실패: ' + e.message); } rqBusy = false;
+  },
+  rqDoc(el) { const r = rqFind(el.dataset.r); if (!r) return; download(`${r.name}_${el.dataset.k === 'req' ? '예산요구서' : '계획서'}_${r.y}.doc`, rqDocHtml(r, el.dataset.k), 'application/msword'); toast('문서를 내려받았습니다. 한글·워드에서 열어 다듬으세요.'); }
+});
+{ const _c = buildChunks; buildChunks = function () { const out = _c.apply(this, arguments); (S.bdReq || []).forEach(r => out.push({ type: 'budget', src: `예산 요구서 · ${r.name}`, text: `${r.y}학년도 ${r.name} 요구 합계 ${rqTot(r)}원: ${(r.items || []).map(i => i.item + ' ' + ((+i.price || 0) * (+i.qty || 1)) + '원').join(', ')} ${r.purpose || ''}`, ref: '#/budget' })); return out; }; }
+
+/* 업무 뼈대(v81): 업무 종류별 「단계 + 기준일로부터 며칠 전·후 + 필요 서류」 틀. 기준일(행사일·접수일·시행일)만 넣으면 내 업무 카드와 캘린더 일정이 한 번에 만들어집니다.
+   기본 제공은 어느 학교에서나 쓰는 범용 틀뿐이고, 내 전용 틀은 직접 만들거나 「뼈대 가져오기」(.json)로 넣습니다 → 코드에는 개인 업무가 들어 있지 않습니다.
+   저장: S.skel = [{id,name,type,memo,docs[],steps:[{t,off}]}] */
+const SK_BUILT = [
+  { id: 'b-event', name: '학교 행사 운영', type: '행사', docs: ['계획서', '공문', '결과보고서'], memo: '행사일 기준', steps: [{ t: '계획 수립', off: -30 }, { t: '계획서 품의', off: -21 }, { t: '안내 공문·가정통신문', off: -14 }, { t: '준비물·장소 확정', off: -7 }, { t: '리허설·점검', off: -1 }, { t: '행사 실시', off: 0 }, { t: '결과보고', off: 3 }, { t: '정산', off: 7 }] },
+  { id: 'b-train', name: '연수·특강 운영', type: '연수', docs: ['계획서', '안내문', '결과보고서'], memo: '실시일 기준', steps: [{ t: '강사 섭외', off: -30 }, { t: '계획서 품의', off: -21 }, { t: '안내 공문', off: -14 }, { t: '준비물·장소', off: -3 }, { t: '연수 실시', off: 0 }, { t: '이수 처리', off: 3 }, { t: '결과보고', off: 7 }] },
+  { id: 'b-comm', name: '위원회·협의회 운영', type: '일반', docs: ['공문', '기타'], memo: '회의일 기준', steps: [{ t: '위원 구성·안내', off: -21 }, { t: '안건 정리', off: -7 }, { t: '회의 안내', off: -5 }, { t: '회의 개최', off: 0 }, { t: '회의록 작성', off: 2 }, { t: '결과 안내·반영', off: 7 }] },
+  { id: 'b-rule', name: '규정(학칙·내규) 개정', type: '일반', docs: ['계획서', '공문', '기타'], memo: '시행일 기준. 절차와 심의 기관은 학교 규정에 맞게 고치세요.', steps: [{ t: '현행 규정 점검', off: -90 }, { t: '개정안 초안', off: -60 }, { t: '의견 수렴(학생·학부모·교사)', off: -45 }, { t: '의견 반영·수정', off: -30 }, { t: '위원회·운영위 심의', off: -14 }, { t: '공포·안내', off: 0 }, { t: '시행 후 점검', off: 30 }] },
+  { id: 'b-case', name: '민원·사안 처리', type: '일반', docs: ['공문', '증빙'], memo: '접수일 기준. 기한은 관련 법령·학교 규정에 따라 직접 고치세요. 개인정보는 이름 대신 번호로만 적으세요.', steps: [{ t: '접수·기록', off: 0 }, { t: '사실 확인', off: 3 }, { t: '보호·조치', off: 5 }, { t: '심의 요청', off: 10 }, { t: '결과 통보', off: 14 }, { t: '종결·기록 정리', off: 21 }] },
+  { id: 'b-survey', name: '설문·실태조사', type: '조사', docs: ['공문', '제출자료'], memo: '마감일 기준', steps: [{ t: '문항 설계', off: -21 }, { t: '안내·배포', off: -14 }, { t: '응답 독려', off: -5 }, { t: '마감·수합', off: 0 }, { t: '집계·분석', off: 3 }, { t: '결과 공유·제출', off: 7 }] },
+  { id: 'b-budget', name: '예산 사업 운영', type: '예산', docs: ['품의서', '증빙'], memo: '집행일 기준', steps: [{ t: '계획·산출 근거', off: -30 }, { t: '품의', off: -21 }, { t: '구매·계약', off: -10 }, { t: '검수', off: -1 }, { t: '지출', off: 0 }, { t: '정산·서류 정리', off: 7 }] }
+];
+const skAll = () => [...(S.skel || []).map(x => Object.assign({ mine: 1 }, x)), ...SK_BUILT];
+const skDay = (d, n) => { const x = new Date(d + 'T00:00:00'); x.setDate(x.getDate() + n); while (x.getDay() === 0 || x.getDay() === 6) x.setDate(x.getDate() + (n < 0 ? -1 : 1)); return ymd(x); };
+const skBar = () => `<div class="tools sk"><button class="btn pri" data-act="skUse">🦴 업무 뼈대로 시작</button><button class="btn" data-act="skNew">+ 내 뼈대 만들기</button>${(S.skel || []).length ? '<button class="btn" data-act="skEdit">✏ 내 뼈대 고치기</button>' : ''}<button class="btn" data-act="skExport">📤 내보내기</button><label class="btn file">📥 가져오기<input type="file" id="skUp" accept=".json" hidden></label></div>`;
+{ const _w = workView; workView = function () { return skBar() + _w.apply(this, arguments); }; }
+const skFields = (v = {}) => [{ k: 'name', label: '뼈대 이름', val: v.name || '', req: 1 }, { k: 'type', label: '기본 유형 (필요 서류 표시에 쓰입니다)', type: 'select', opts: ['일반', '행사', '연수', '조사', '예산'], val: v.type || '일반' }, { k: 'steps', label: '단계 — 한 줄에 「일수|단계」 (기준일 전은 -14, 후는 7, 당일 0)', type: 'textarea', rows: 8, val: (v.steps || []).map(s => s.off + '|' + s.t).join('\n') }, { k: 'memo', label: '메모 (기준일 설명·주의점)', val: v.memo || '' }];
+const skParse = o => ({ name: o.name.trim(), type: o.type, memo: (o.memo || '').trim(), steps: String(o.steps || '').split('\n').map(r => { const i = r.indexOf('|'); if (i < 0) return null; const off = parseInt(r.slice(0, i), 10), t = r.slice(i + 1).trim(); return t && !isNaN(off) ? { t, off } : null; }).filter(Boolean).sort((a, b) => a.off - b.off) });
+Object.assign(A, {
+  skUse() {
+    const all = skAll(); ask('업무 뼈대로 시작', [{ k: 'sk', label: '뼈대 고르기', type: 'select', opts: all.map(s => (s.mine ? '★ ' : '') + s.name), val: all[0].name }, { k: 'title', label: '업무 이름 (예: 2학기 체육대회)', req: 1 }, { k: 'day', label: '기준일 (행사일·접수일·시행일 등)', type: 'date', val: today(), req: 1 }, { k: 'cal', label: '단계별 일정을 캘린더에도 넣을까요?', type: 'select', opts: ['예', '아니오'], val: '예' }], o => {
+      const sk = all.find(s => (s.mine ? '★ ' : '') + s.name === o.sk); if (!sk) return; const D = o.day, steps = sk.steps.map(s => ({ t: s.t, d: false, date: skDay(D, s.off) }));
+      const c = wkN({ id: uid(), title: o.title.trim(), dept: '', who: '', me: true, memo: [sk.memo, sk.docs && sk.docs.length ? '필요 서류: ' + sk.docs.join(', ') : ''].filter(Boolean).join('\n'), due: steps.length ? steps[steps.length - 1].date : D, done: false, steps: steps.map(s => ({ t: `${s.t} · ${md(s.date)}`, d: false })), src: '뼈대' });
+      wkApplyType(c, sk.type || '일반'); c.steps = steps.map(s => ({ t: `${s.t} · ${md(s.date)}`, d: false })); wkD().cards.push(c);
+      if (o.cal === '예') steps.forEach(s => S.items.push({ id: uid(), title: `[${o.title.trim()}] ${s.t}`, date: s.date, cat: 'event', tag: '업무', done: false }));
+      commit(); toast(`업무 카드와 단계 ${steps.length}개를 만들었습니다${o.cal === '예' ? '(캘린더 포함, 주말은 평일로 옮김)' : ''}.`);
+    }, '만들기');
+  },
+  skNew() { ask('내 뼈대 만들기', skFields(), o => { const v = skParse(o); if (!v.steps.length) { toast('단계를 「일수|단계」 형식으로 한 줄 이상 적어 주세요.'); return; } (S.skel = S.skel || []).push(Object.assign({ id: uid(), docs: [] }, v)); commit(); toast('내 뼈대를 저장했습니다.'); }, '저장'); },
+  skEdit() {
+    const L = S.skel || []; if (!L.length) return; ask('내 뼈대 고르기', [{ k: 'n', label: '고칠 뼈대', type: 'select', opts: L.map(s => s.name) }], o => {
+      const s = L.find(x => x.name === o.n); if (!s) return; ask('뼈대 고치기 (이름을 모두 지우면 삭제)', skFields(s).map(f => f.k === 'name' ? Object.assign(f, { req: 0 }) : f), p => { if (!p.name.trim()) { S.skel = L.filter(x => x !== s); commit(); toast('뼈대를 지웠습니다.'); return; } Object.assign(s, skParse(p)); commit(); });
+    }, '고치기');
+  },
+  skExport() { download('업무뼈대_' + today() + '.json', JSON.stringify({ tf: 'skel', skel: skAll().filter(s => s.mine).map(({ mine, ...r }) => r) }, null, 1), 'application/json'); toast((S.skel || []).length ? '내 뼈대를 파일로 내려받았습니다. 다른 기기·동료에게 「가져오기」로 줄 수 있습니다.' : '아직 내 뼈대가 없어 빈 파일입니다.'); }
+});
+document.addEventListener('change', async e => {
+  const t = e.target; if (!t || t.id !== 'skUp' || !t.files[0]) return;
+  try { const j = JSON.parse(await t.files[0].text()), L = (j.skel || []).filter(s => s && s.name && Array.isArray(s.steps) && s.steps.every(x => x && x.t && !isNaN(+x.off))); if (!L.length) throw new Error('뼈대 형식이 아닙니다'); S.skel = S.skel || []; L.forEach(s => { if (!S.skel.some(x => x.name === s.name)) S.skel.push({ id: uid(), name: String(s.name), type: ['행사', '연수', '조사', '예산'].includes(s.type) ? s.type : '일반', memo: String(s.memo || ''), docs: (s.docs || []).map(String), steps: s.steps.map(x => ({ t: String(x.t), off: +x.off })) }); }); commit(); toast(`뼈대 ${L.length}개를 가져왔습니다(같은 이름은 건너뜀).`); } catch (err) { toast('가져오기 실패: ' + err.message); }
+  t.value = '';
+});
 
 /* 꿈송이 2 — 규정줍줍 + 사이트를 돌아다니는 비서.
    ① 규정줍줍: 올려 둔 자료(규정·지침·계획서)에서 해당 조항을 찾아 파일 이름과 함께 보여 준다(키 없이도 동작, 키가 있으면 문장으로 정리).

@@ -75,7 +75,7 @@ Object.assign(A, {
     }, '기록');
   },
   bdBack() {
-    ask('행사일로 예산 일정 만들기', [{ k: 'name', label: '행사·사업 이름', req: 1, ph: '예: 곡선제' }, { k: 'day', label: '행사일', type: 'date', val: today(), req: 1 }, { k: 'a', label: '품의는 며칠 전까지', type: 'number', val: 14 }, { k: 'b', label: '계약·구매는 며칠 전까지', type: 'number', val: 7 }, { k: 'c', label: '정산은 며칠 뒤까지', type: 'number', val: 7 }], o => {
+    ask('행사일로 예산 일정 만들기', [{ k: 'name', label: '행사·사업 이름', req: 1, ph: '예: 체육대회' }, { k: 'day', label: '행사일', type: 'date', val: today(), req: 1 }, { k: 'a', label: '품의는 며칠 전까지', type: 'number', val: 14 }, { k: 'b', label: '계약·구매는 며칠 전까지', type: 'number', val: 7 }, { k: 'c', label: '정산은 며칠 뒤까지', type: 'number', val: 7 }], o => {
       const D = o.day, mk = (t, date) => S.items.push({ id: uid(), title: `[예산] ${o.name} ${t}`, date, cat: 'event', tag: '예산', done: false });
       mk('품의 올리기', bdWday(bdShift(D, -(+o.a || 14)), -1)); mk('계약·구매 마무리', bdWday(bdShift(D, -(+o.b || 7)), -1)); mk('검수 준비', bdWday(bdShift(D, -1), -1)); mk('지출·정산 끝내기', bdWday(bdShift(D, +o.c || 7), 1)); commit(); toast('캘린더에 예산 일정 4개를 넣었습니다(주말은 평일로 옮겼습니다).');
     }, '만들기');
