@@ -84,11 +84,10 @@ async function comciSync(silent) {
     }
     mine.forEach(l => { const k = l.d + '-' + l.p; if (!G[k]) G[k] = `${l.g}-${l.c} ${l.s}`.trim(); });
     if (!Object.keys(G).length) { if (!silent) toast(`컴시간에서 "${key}" 선생님 수업을 찾지 못했습니다. 설정의 이름을 확인해 주세요.`); return; }
-    const same = JSON.stringify(G) === JSON.stringify(S.timetable); S.timetable = G; S.profile.comci = Date.now();
-    if (!same) { commit(); if (!silent) toast(`컴시간 시간표 ${Object.keys(G).length}칸을 가져왔습니다. (${(j.updated || '').slice(0, 10)} 기준)`); } else if (!silent) toast('이미 최신 시간표입니다.');
+    ttwApply(G, silent, j);
   } catch (e) { if (!silent) toast('컴시간 자료가 아직 없습니다. GitHub의 Actions 탭에서 "컴시간 시간표 가져오기"를 한 번 실행해 주세요. 그동안은 아래 "붙여넣기"로 넣을 수 있습니다.'); }
 }
-setTimeout(() => { if (!S.setup) return; const empty = !Object.keys(S.timetable || {}).some(k => S.timetable[k]); if (empty ? (S.profile.name || '').trim().length >= 2 : (S.profile.comci && Date.now() - S.profile.comci > 6 * 3600 * 1000)) comciSync(true); }, 2500);
+/* 자동 가져오기는 tt2.js(ttwWatch)가 맡습니다 */
 
 /* ---- 문서 읽기 편하게 보기 ---- */
 function readable(text) {
