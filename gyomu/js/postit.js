@@ -24,7 +24,7 @@ function pstManage() {
   ${all.map(x => `<p class="fbl ${x.done ? 'dn' : ''}"><span class="pst-dot" style="background:${PST_COL[x.color] || PST_COL['노랑']}"></span>${x.date ? esc(md(x.date)) + ' ' + pstDday(x) + ' · ' : ''}${esc(x.text)} ${x.done ? '<button class="x" data-act="pstUndo" data-id="' + x.id + '">다시 붙이기</button>' : ''}<button class="x" data-act="pstDel" data-id="${x.id}">삭제</button></p>`).join('')}</div>`;
 }
 const _pmemo0 = pageMemo;
-pageMemo = function (page) { const h = _pmemo0(page); if (page !== 'today') return h; return h.replace(/<\/details>\s*$/, pstManage() + '</details>').replace('<details class="pmemo" ', pstList().length ? '<details class="pmemo" open ' : '<details class="pmemo" '); };
+pageMemo = function (page) { const h = _pmemo0(page); if (page !== 'today') return h; return h.replace('<small>', '<span class="pstbadge">📌 포스트잇 기능 있어요</span> <small>').replace(/<\/details>\s*$/, pstManage() + '</details>').replace('<details class="pmemo" ', pstList().length ? '<details class="pmemo" open ' : '<details class="pmemo" '); };
 const pstId = () => uid();
 Object.assign(A, {
   pstToggle() { S.profile.pstDown = !pstDown(); save(); pstDraw(); const b = document.querySelector('.pstm [data-act=pstToggle]'); if (b) b.textContent = pstDown() ? '⬆ 포스트잇 올리기' : '⬇ 포스트잇 모두 내리기'; },

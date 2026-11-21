@@ -280,3 +280,7 @@ service cloud.firestore {
 ## 시간표 변경 감시 (tt2.js)
 - 앱 열기·화면 복귀·오늘 화면 렌더 시(최소 5분 간격) `ttwWatch`→`comciSync(true)`로 컴시간 자료를 다시 받고, 달라지면 `ttwApply`가 자동 적용 + 상단 🔔 배너(오늘/내일 표시, [확인]/[되돌리기], 브라우저 알림 허용 시 알림). 이전 시간표는 `S.profile.ttChg.prev`.
 - 한계: 컴시간 자료(data 브랜치 comcigan.json)가 GitHub Actions(평일 새벽 5시)로 갱신된 시점까지만 반영됩니다. 체험판은 7초 뒤 예시 변경 알림을 한 번 보여 줍니다.
+
+## 마스킹테이프·포스트잇 보강
+- 설정 「🎀 마스킹테이프 제목」: `S.profile.deco.washi` = 'pink|yellow|sky|mint|purple|kraft|orange|navy'(빈 값=사용 안 함). deco.js `WASHI` 목록 + style.css `body[data-wt=…]`. 새 종류는 두 곳에 한 줄씩 추가.
+- 오늘 메모 제목 옆 「📌 포스트잇 기능 있어요」 배지(postit.js `pageMemo`). 날짜 화면: 입력 시 「포스트잇으로도 붙이기」 체크(선택), 목록 항목마다 📌 버튼(`A.dpPst`).

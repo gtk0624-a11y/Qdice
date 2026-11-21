@@ -7,7 +7,7 @@ const dpWeek = ds => DOW[new Date(ds + 'T00:00:00').getDay()];
 const dpShift = (ds, n) => { const d = new Date(ds + 'T00:00:00'); d.setDate(d.getDate() + n); return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`; };
 function dpList(ds) {
   const ev = allEvents().filter(e => e.date === ds);
-  return ev.map(e => e.id ? `<div class="td ${e.done ? 'dn' : ''}"><button class="ck" data-act="tog" data-id="${e.id}" aria-pressed="${!!e.done}" aria-label="완료 표시"></button><span class="tl">${esc(e.t)}</span><span class="mu">${esc(e.kind)}</span>${xbtn('delItem', e.id)}</div>` : `<div class="td"><span class="ck off"></span><span class="tl">${esc(e.t)}</span><span class="mu">${esc(e.kind)}</span></div>`).join('') || '<p class="mu">이 날은 비어 있습니다. 위에서 바로 추가하세요.</p>';
+  return ev.map(e => e.id ? `<div class="td ${e.done ? 'dn' : ''}"><button class="ck" data-act="tog" data-id="${e.id}" aria-pressed="${!!e.done}" aria-label="완료 표시"></button><span class="tl">${esc(e.t)}</span><span class="mu">${esc(e.kind)}</span><button class="x" data-act="dpPst" data-id="${e.id}" aria-label="포스트잇으로 붙이기" title="포스트잇으로 붙이기">📌</button>${xbtn('delItem', e.id)}</div>` : `<div class="td"><span class="ck off"></span><span class="tl">${esc(e.t)}</span><span class="mu">${esc(e.kind)}</span></div>`).join('') || '<p class="mu">이 날은 비어 있습니다. 위에서 바로 추가하세요.</p>';
 }
 function dpStk(ds) { const L = (S.stk || {})[ds] || []; return `<div class="dpsk">${L.map((s, i) => `<span class="sk big">${stkHtml(s)}<button class="x" data-act="stkDayDel" data-d="${ds}" data-i="${i}" aria-label="스티커 떼기">✕</button></span>`).join('') || '<span class="mu">아직 붙인 스티커가 없습니다.</span>'}</div>`; }
 async function dpImgs(ds) {
@@ -20,7 +20,7 @@ function dpDraw(full) {
   const d = document.getElementById('daypg'); if (!d || !DP) return; const ds = DP;
   if (full) {
     d.innerHTML = `<div class="dph"><button class="btn sm" data-act="dpMove" data-n="-1" aria-label="전날">‹</button><b>${md(ds)} (${dpWeek(ds)})${ds === today() ? ' · 오늘' : ''}</b><button class="btn sm" data-act="dpMove" data-n="1" aria-label="다음날">›</button><button class="btn sm dpclose" data-act="dpClose" aria-label="닫기">✕ 닫기</button></div>
-    <form class="dpf"><input name="title" placeholder="일정·할 일·업무 (예: 7교시 도박예방교육) Enter" required aria-label="내용"><input type="time" name="time" aria-label="시각(선택)"><select name="kind" aria-label="종류" data-cus="kind" data-work="1">${cusKindOpts(true, 'event')}</select><select name="per" aria-label="교시(선택)"><option value="">교시 없음</option>${[1,2,3,4,5,6,7].map(n => `<option value="${n}">${n}교시</option>`).join('')}</select><button class="btn pri">추가</button></form>
+    <form class="dpf"><input name="title" placeholder="일정·할 일·업무 (예: 7교시 도박예방교육) Enter" required aria-label="내용"><input type="time" name="time" aria-label="시각(선택)"><select name="kind" aria-label="종류" data-cus="kind" data-work="1">${cusKindOpts(true, 'event')}</select><select name="per" aria-label="교시(선택)"><option value="">교시 없음</option>${[1,2,3,4,5,6,7].map(n => `<option value="${n}">${n}교시</option>`).join('')}</select><label class="chk dppst"><input type="checkbox" name="pst"> 📌 포스트잇으로도 붙이기 <span class="mu">(화면 오른쪽에 쪽지로 떠요 · 선택)</span></label><button class="btn pri">추가</button></form>
     <div id="dpList"></div>
     <label class="dmemo">📝 메모<textarea data-dmemo="${ds}" rows="4" placeholder="이 날 기억할 것·준비물·회의 내용 (쓰면 바로 저장됩니다)">${esc((S.dayMemo || {})[ds] || '')}</textarea></label><button class="btn sm" data-act="memoPick">🎨 메모 디자인</button>
     <h4 class="dph4">🎀 꾸미기</h4><div id="dpStk"></div><div class="tools"><button class="btn sm" data-act="stkDay">⭐ 스티커 붙이기</button><label class="btn sm file">📸 바로 찍기<input type="file" id="dpCam" accept="image/*" capture="environment" hidden></label><label class="btn sm file">🖼 사진·이미지 올리기<input type="file" id="dpUp" accept="image/*" multiple hidden></label></div><p class="mu dpsc">📷 손글씨 사진으로 일정 추가</p><div class="tools"><label class="btn sm file">📸 바로 찍기<input type="file" id="scCam" accept="image/*" capture="environment" hidden></label><label class="btn sm file">🖼 앨범에서 고르기<input type="file" id="scUp" accept="image/*" hidden></label></div><div id="dpImg" class="dpimg"></div><p class="mu">사진은 이 기기에만 저장되고 클라우드 동기화에는 들어가지 않습니다.</p>`;
@@ -33,6 +33,7 @@ function dayOpen(ds) {
   dpDraw(true); if (!d.open) d.showModal();
 }
 Object.assign(A, {
+  dpPst(el) { const it = S.items.find(x => x.id === el.dataset.id); if (!it) return; pstList().push({ id: pstId(), text: it.title, date: it.date, color: '노랑', done: false }); S.profile.pstDown = false; commit(); toast('포스트잇으로 붙였습니다.'); },
   dpClose() { const d = document.getElementById('daypg'); if (d) d.close(); },
   dpMove(el) { dayOpen(dpShift(DP, +el.dataset.n)); },
   dpImgDel(el) { sure('이 사진을 지울까요?', async () => { const l = S.dayImg[el.dataset.d] || []; S.dayImg[el.dataset.d] = l.filter(m => m.id !== el.dataset.id); if (!S.dayImg[el.dataset.d].length) delete S.dayImg[el.dataset.d]; delete DIMG[el.dataset.id]; await idb.del('dimg:' + el.dataset.id); commit(); }); }
@@ -44,7 +45,7 @@ document.addEventListener('submit', e => {
   const f = e.target.closest && e.target.closest('form.dpf'); if (!f) return; e.preventDefault();
   const o = Object.fromEntries(new FormData(f)); let title = o.title.trim(); if (!title) return;
   const mk = cusMk(o.kind, title, o.per); if (o.time) mk.title = o.time + ' ' + mk.title;
-  S.items.push({ id: uid(), date: DP, done: false, ...mk });
+  S.items.push({ id: uid(), date: DP, done: false, ...mk }); if (o.pst) { pstList().push({ id: pstId(), text: mk.title, date: DP, color: '노랑', done: false }); S.profile.pstDown = false; }
   commit(); toast('캘린더' + (S.items[S.items.length - 1].per || cusPers(S.items[S.items.length - 1]).length ? '·시간표' : '') + '에 반영했습니다.'); const i = document.querySelector('#daypg [name=title]'); if (i) { i.value = ''; i.focus(); }
 }, true);
 document.addEventListener('change', async e => {

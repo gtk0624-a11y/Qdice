@@ -29,9 +29,10 @@ function clkDraw() {
 }
 setInterval(clkDraw, 15000);
 /* ---------- 다꾸 ---------- */
-const DEC = () => (S.profile.deco = S.profile.deco || { on: false, dim: 70, blur: 2, washi: false, stick: false });
+const WASHI = { pink: '분홍 빗금', yellow: '노랑 체크', sky: '하늘 물방울', mint: '민트 세로줄', purple: '보라 지그재그', kraft: '크라프트 종이', orange: '주황 점선', navy: '남색 가로줄' };
+const DEC = () => { const d = (S.profile.deco = S.profile.deco || { on: false, dim: 70, blur: 2, washi: '', stick: false }); if (d.washi === true) d.washi = 'pink'; else if (!d.washi || !WASHI[d.washi]) d.washi = ''; return d; };
 async function decoApply() {
-  const d = DEC(), b = document.body; b.classList.toggle('deco-on', !!d.on); b.classList.toggle('deco-stick', !!(d.on && d.stick));
+  const d = DEC(), b = document.body; b.classList.toggle('deco-on', !!d.on); b.classList.toggle('deco-stick', !!(d.on && d.stick)); b.classList.toggle('deco-washi', !!d.washi); if (d.washi) b.dataset.wt = d.washi; else delete b.dataset.wt;
   let st = document.getElementById('decoCss'); if (!st) { st = document.createElement('style'); st.id = 'decoCss'; document.head.appendChild(st); }
   let url = ''; if (d.on) { try { url = (await idb.get('deco')) || ''; } catch (e) { } }
   st.textContent = d.on ? `:root{--decoA:${(+d.dim || 70) / 100}}${url ? `body.deco-on::before{background-image:url("${url}");filter:blur(${+d.blur || 0}px)}` : ''}` : '';
@@ -49,6 +50,7 @@ function decoCard() {
   <div class="row2c"><label class="btn sm file">📷 배경 사진 고르기<input type="file" accept="image/*" data-decophoto hidden></label><button class="x" data-act="decoPhotoDel">사진 지우기</button></div>
   <div class="row2c"><label>글씨 보호막(종이 불투명도) <input type="range" min="55" max="100" step="5" data-dset="deco.dim" value="${d.dim}"> <b>${d.dim}%</b></label><label>사진 흐림 <input type="range" min="0" max="12" data-dset="deco.blur" value="${d.blur}"></label></div>
   <div class="row2c"><label class="chk"><input type="checkbox" data-dset="deco.stick" ${d.stick ? 'checked' : ''}> 모서리 스티커</label></div></div>
+  <div class="dset"><b>🎀 마스킹테이프 제목</b> <span class="mu">(제목 뒤에 깔리는 띠 · 사진 꾸미기와 별개로 쓸 수 있어요)</span><div class="row2c"><select data-dset="deco.washi" aria-label="마스킹테이프 종류"><option value="" ${!d.washi ? 'selected' : ''}>사용 안 함</option>${Object.keys(WASHI).map(k => `<option value="${k}" ${d.washi === k ? 'selected' : ''}>${WASHI[k]}</option>`).join('')}</select><span class="wpv" data-wt="${d.washi || ''}">${d.washi ? '미리보기' : ''}</span></div></div>
   <div class="dset"><b>격려의 말</b> <span class="mu">(${CHEER.length}개 중 하루에 하나)</span><div class="row2c"><select data-dset="cheer" aria-label="격려의 말 표시"><option value="off" ${cm === 'off' ? 'selected' : ''}>표시 안 함</option><option value="today" ${cm === 'today' ? 'selected' : ''}>오늘 화면 맨 위에 표시</option></select></div><div class="row2c"><label class="chk"><input type="checkbox" data-dset="cheerClk" ${p.cheerClk ? 'checked' : ''}> 시계에도 격려의 말 넣기 <span class="mu">(위 선택과 함께 둘 다 켤 수 있어요 · 시계 보이기가 켜져 있어야 보입니다)</span></label></div></div></section>`;
 }
 function decoInject() {
@@ -68,7 +70,7 @@ document.addEventListener('change', async e => {
   const k = t.dataset && t.dataset.dset; if (!k) return;
   const v = t.type === 'checkbox' ? t.checked : t.type === 'range' ? +t.value : t.value;
   if (k.startsWith('deco.')) DEC()[k.slice(5)] = v; else S.profile[k] = v;
-  save(); if (k === 'cheer') { const o = document.querySelector('#app main .cheer'); if (o) o.remove(); } if (k.startsWith('deco')) await decoApply(); clkDraw(); if (k === 'deco.dim') { const b = t.parentNode.querySelector('b'); if (b) b.textContent = v + '%'; } decoInject();
+  save(); if (k === 'cheer') { const o = document.querySelector('#app main .cheer'); if (o) o.remove(); } if (k.startsWith('deco')) await decoApply(); if (k === 'deco.washi') { const pv = document.querySelector('.wpv'); if (pv) { pv.dataset.wt = v; pv.textContent = v ? '미리보기' : ''; } } clkDraw(); if (k === 'deco.dim') { const b = t.parentNode.querySelector('b'); if (b) b.textContent = v + '%'; } decoInject();
 }, true);
 document.addEventListener('input', e => { const t = e.target; if (t.dataset && t.dataset.dset === 'deco.dim') { DEC().dim = +t.value; document.documentElement.style.setProperty('--decoA', t.value / 100); const b = t.parentNode.querySelector('b'); if (b) b.textContent = t.value + '%'; } });
 if (S.setup) { decoApply(); clkDraw(); decoInject(); }
