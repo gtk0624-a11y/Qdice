@@ -4229,12 +4229,10 @@ function hpProgWarn() {
 function hpCard() {
   const dow = new Date().getDay(), hot = dow === 5 || dow === 0, w = hpProgWarn(), fr = hpFreeHints();
   const warn = w.length ? `<div class="hpw">⚠️ ${w.map(x => x.g + '학년 ' + x.cs.map(c => c + '반 「' + esc(x.last[c].prog) + '」').join(' / ')).join(' · ')} — 같은 학년인데 진도가 달라요. <button type="button" class="btn sm" data-act="hpProg">자세히</button></div>` : '';
-  const done = (S.workout || {})[today()];
   return `<details class="hpcard" ${S.profile.hpOpen === false ? '' : 'open'}><summary>🧰 오늘 도우미 <small>퇴근 전 정리 · 수업 후 기록 · 한 주 돌아보기 …</small></summary>
   ${fr || warn ? `<div class="hpin">${fr}${warn}</div>` : ''}
   <div class="tools"><button class="btn pri sm" data-act="hpEnd">🌇 퇴근 전 3분 정리</button><button class="btn sm" data-act="hpLog">📝 수업 후 한 줄 기록</button><button class="btn sm ${hot ? 'pri' : ''}" data-act="hpWeek">🗓 한 주 돌아보기${hot ? ' ✨' : ''}</button><button class="btn sm" data-act="hpProg">📊 반별 진도 점검</button></div>
-  <div class="tools"><button class="btn sm pri" data-act="hpNow">▶ 지금 수업 자료 열기</button><button class="btn sm" data-act="hpLink">🔗 수업 자료 연결</button><button class="btn sm" data-act="hpIdea">💡 차시 아이디어 카드</button><button class="btn sm" data-act="hpDoc">📮 공문 기한 모아보기</button><button class="btn sm" data-act="hpMeet">📋 회의 노트 틀</button><button class="btn sm" data-act="hpChkOpen">✅ 나만의 점검표</button><button class="btn sm" data-act="hpTerm">🎓 학기말 점검표</button><button class="btn sm" data-act="hpStu">🔒 학생 메모(이 기기만)</button></div>
-  <label class="chk hpwk"><input type="checkbox" data-hpw="1" ${done ? 'checked' : ''}> 🏃 오늘 운동했어요</label> ${hpWkLink()}</details>`;
+  <div class="tools"><button class="btn sm pri" data-act="hpNow">▶ 지금 수업 자료 열기</button><button class="btn sm" data-act="hpLink">🔗 수업 자료 연결</button><button class="btn sm" data-act="hpIdea">💡 차시 아이디어 카드</button><button class="btn sm" data-act="hpDoc">📮 공문 기한 모아보기</button><button class="btn sm" data-act="hpMeet">📋 회의 노트 틀</button><button class="btn sm" data-act="hpChkOpen">✅ 나만의 점검표</button><button class="btn sm" data-act="hpTerm">🎓 학기말 점검표</button><button class="btn sm" data-act="hpStu">🔒 학생 메모(이 기기만)</button></div></details>`;
 }
 const hpInject = () => {
   const h = location.hash, main = document.querySelector('#app main'); if (!main || !S.setup) return;
@@ -4519,10 +4517,6 @@ document.addEventListener('click', e => {
   const r = d.getBoundingClientRect(); if (e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom) return;
   d.close();
 }, true);
-
-/* 운동 사이트 바로가기: 사람마다 쓰는 운동 기록 사이트가 다르므로 각자 주소를 넣습니다 */
-const hpWkLink = () => { const u = (S.profile.workoutUrl || '').trim(); return u ? `<a class="btn sm" href="${esc(u)}" target="_blank" rel="noopener">${esc(S.profile.workoutName || '운동 기록')} 열기 ↗</a><button class="btn sm" data-act="hpWkSet" aria-label="운동 사이트 주소 고치기">✏️</button>` : '<button class="btn sm" data-act="hpWkSet">🔗 내 운동 기록 사이트 연결</button>'; };
-A.hpWkSet = () => ask('내 운동 기록 사이트', [{ k: 'n', label: '이름 (예: 운동로그)', val: S.profile.workoutName || '' }, { k: 'u', label: '주소 (https://…) — 비우면 연결 해제', val: S.profile.workoutUrl || '' }], o => { const u = o.u.trim(); S.profile.workoutUrl = u ? (/^https?:\/\//.test(u) ? u : 'https://' + u) : ''; S.profile.workoutName = o.n.trim(); save(true); TF.render(); });
 
 /* 교무포털 자료 담기 — 학교 안에서만 열리는 교무포털의 내용을 업무파탈 「자료 보관함」으로 가져옵니다.
    방식: ① 즐겨찾기 막대에 「📥 업무파탈에 담기」 버튼(북마클릿)을 만들어 두고 ② 학교에서 교무포털 화면을 연 채 그 버튼을 누르면
@@ -5138,7 +5132,15 @@ const _cmR = TF.render; TF.render = function () { const v = _cmR.apply(this, arg
 /* ---------- 꿈송이 챗봇 검색: 학급 관리 내용도 찾아 줍니다 (학생 정보는 외부 AI에는 보내지 않음) ---------- */
 const _cmBc = buildChunks;
 buildChunks = function () {
-  const out = _cmBc.apply(this, arguments); if (!cmReady || !cmCfg().on || cmLocked()) return out;
+  const out = _cmBc.apply(this, arguments);
+  { const q = (src, text, ref) => out.push({ type: 'class', src, text, ref: ref || '#/class' });
+    (S.lessonLog || []).forEach(l => q('수업 기록 · ' + l.date, `${l.date} ${l.cls || ''} ${l.p ? l.p + '교시' : ''} 진도 ${l.prog || ''} 반응 ${l.react || ''} 다음 ${l.next || ''}`));
+    (S.chkLists || []).forEach(l => q('나만의 점검표 · ' + l.name, `${l.name}: ` + l.items.map(i => i.t + (i.done ? '(완료)' : '(미완료)')).join(', '), '#/'));
+    Object.keys(S.cellLinks || {}).forEach(k => (S.cellLinks[k] || []).forEach(x => q('수업 자료 연결', `${k} ${x.n} ${x.u}`)));
+    const ek = typeof S.endList === 'object' && S.endList; if (ek) (Array.isArray(ek) ? ek : []).forEach(g => q('학기말 점검표 · ' + g.g, `${g.g}: ` + (g.items || []).join(', '), '#/'));
+    Object.keys(S.weekRv || {}).forEach(k => { const w = S.weekRv[k]; if (w && (w.good || w.next)) q('한 주 돌아보기 · ' + k, `${k} 좋았던 일 ${w.good || ''} 다음 주 다짐 ${w.next || ''}`, '#/'); });
+  }
+  if (!cmReady || !cmCfg().on || cmLocked()) return out;
   const add = (src, text) => out.push({ type: 'class', src: '학급 관리 · ' + src, text, ref: '#/cm', priv: true });
   CM.classes.forEach(cl => {
     cmStus(cl).forEach(s => add('명렬', `${cl.name} ${s.no}번 ${s.name}${s.bd ? ' 생일 ' + s.bd : ''}${s.tel ? ' 연락처 ' + s.tel : ''}${s.memo ? ' ' + s.memo : ''}`));
@@ -5155,8 +5157,14 @@ buildChunks = function () {
 };
 
 /* 화면 맨 아래에 버전 표시 — 옛 화면을 보고 있는지 바로 알 수 있게 */
-const TF_VER = 'v59', _cmFt = footer;
+const TF_VER = 'v60', _cmFt = footer;
 footer = function () { return _cmFt.apply(this, arguments).replace('</footer>', ` · <span class="mu">버전 ${TF_VER} (학급 관리 포함)</span></footer>`); };
+
+/* 새 버전 알림: 옛 화면이 남아 있으면 한 번 눌러 새로 받게 함 */
+(function () {
+  if (DEMO || !/^https?:/.test(location.protocol)) return;
+  setTimeout(() => fetch('sw.js', { cache: 'no-store' }).then(r => r.text()).then(t => { const m = /VERSION = 'tf-(v\d+)'/.exec(t); if (m && m[1] !== TF_VER && +m[1].slice(1) > +TF_VER.slice(1)) { const b = document.createElement('div'); b.className = 'cmlock'; b.style.cssText = 'position:fixed;left:8px;right:8px;bottom:8px;z-index:90;text-align:center'; b.innerHTML = '🔄 새 버전(' + m[1] + ')이 있어요. <button class="btn sm pri" id="cmnew">지금 새로 받기</button>'; document.body.appendChild(b); b.querySelector('#cmnew').onclick = async () => { try { (await navigator.serviceWorker.getRegistrations()).forEach(r => r.unregister()); (await caches.keys()).forEach(k => caches.delete(k)); } catch (e) { } location.reload(); }; } }).catch(() => { }), 3000);
+})();
 
 /* setui.js — 설정의 "작업표시줄에 고정 · 위젯" 안내 칸(app.js `.guide`) 위에 [앱으로 설치하기]·[위젯 열기] 버튼을 붙입니다.
    (설정 칸 접기는 extra.js `setFold()`가 맡습니다.) */

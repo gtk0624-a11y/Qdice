@@ -464,7 +464,15 @@ const _cmR = TF.render; TF.render = function () { const v = _cmR.apply(this, arg
 /* ---------- 꿈송이 챗봇 검색: 학급 관리 내용도 찾아 줍니다 (학생 정보는 외부 AI에는 보내지 않음) ---------- */
 const _cmBc = buildChunks;
 buildChunks = function () {
-  const out = _cmBc.apply(this, arguments); if (!cmReady || !cmCfg().on || cmLocked()) return out;
+  const out = _cmBc.apply(this, arguments);
+  { const q = (src, text, ref) => out.push({ type: 'class', src, text, ref: ref || '#/class' });
+    (S.lessonLog || []).forEach(l => q('수업 기록 · ' + l.date, `${l.date} ${l.cls || ''} ${l.p ? l.p + '교시' : ''} 진도 ${l.prog || ''} 반응 ${l.react || ''} 다음 ${l.next || ''}`));
+    (S.chkLists || []).forEach(l => q('나만의 점검표 · ' + l.name, `${l.name}: ` + l.items.map(i => i.t + (i.done ? '(완료)' : '(미완료)')).join(', '), '#/'));
+    Object.keys(S.cellLinks || {}).forEach(k => (S.cellLinks[k] || []).forEach(x => q('수업 자료 연결', `${k} ${x.n} ${x.u}`)));
+    const ek = typeof S.endList === 'object' && S.endList; if (ek) (Array.isArray(ek) ? ek : []).forEach(g => q('학기말 점검표 · ' + g.g, `${g.g}: ` + (g.items || []).join(', '), '#/'));
+    Object.keys(S.weekRv || {}).forEach(k => { const w = S.weekRv[k]; if (w && (w.good || w.next)) q('한 주 돌아보기 · ' + k, `${k} 좋았던 일 ${w.good || ''} 다음 주 다짐 ${w.next || ''}`, '#/'); });
+  }
+  if (!cmReady || !cmCfg().on || cmLocked()) return out;
   const add = (src, text) => out.push({ type: 'class', src: '학급 관리 · ' + src, text, ref: '#/cm', priv: true });
   CM.classes.forEach(cl => {
     cmStus(cl).forEach(s => add('명렬', `${cl.name} ${s.no}번 ${s.name}${s.bd ? ' 생일 ' + s.bd : ''}${s.tel ? ' 연락처 ' + s.tel : ''}${s.memo ? ' ' + s.memo : ''}`));
@@ -481,5 +489,11 @@ buildChunks = function () {
 };
 
 /* 화면 맨 아래에 버전 표시 — 옛 화면을 보고 있는지 바로 알 수 있게 */
-const TF_VER = 'v59', _cmFt = footer;
+const TF_VER = 'v60', _cmFt = footer;
 footer = function () { return _cmFt.apply(this, arguments).replace('</footer>', ` · <span class="mu">버전 ${TF_VER} (학급 관리 포함)</span></footer>`); };
+
+/* 새 버전 알림: 옛 화면이 남아 있으면 한 번 눌러 새로 받게 함 */
+(function () {
+  if (DEMO || !/^https?:/.test(location.protocol)) return;
+  setTimeout(() => fetch('sw.js', { cache: 'no-store' }).then(r => r.text()).then(t => { const m = /VERSION = 'tf-(v\d+)'/.exec(t); if (m && m[1] !== TF_VER && +m[1].slice(1) > +TF_VER.slice(1)) { const b = document.createElement('div'); b.className = 'cmlock'; b.style.cssText = 'position:fixed;left:8px;right:8px;bottom:8px;z-index:90;text-align:center'; b.innerHTML = '🔄 새 버전(' + m[1] + ')이 있어요. <button class="btn sm pri" id="cmnew">지금 새로 받기</button>'; document.body.appendChild(b); b.querySelector('#cmnew').onclick = async () => { try { (await navigator.serviceWorker.getRegistrations()).forEach(r => r.unregister()); (await caches.keys()).forEach(k => caches.delete(k)); } catch (e) { } location.reload(); }; } }).catch(() => { }), 3000);
+})();
