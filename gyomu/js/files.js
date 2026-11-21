@@ -73,13 +73,21 @@ async function comciSync(silent) {
   try {
     const r = await fetch(COMCI_URL, { cache: 'no-store' }); if (!r.ok) throw new Error('none'); const j = await r.json();
     const key = nm.slice(0, 2) + '*', G = {};
-    (j.lessons || []).filter(l => l.t === key || l.t === nm || l.t === nm.slice(0, 2)).forEach(l => { const k = l.d + '-' + l.p; if (!G[k]) G[k] = `${l.g}-${l.c} ${l.s}`.trim(); });
+    let mine = (j.lessons || []).filter(l => l.t === key || l.t === nm || l.t === nm.slice(0, 2));
+    /* 컴시간에는 이름이 두 글자("김정")만 있어 이름이 같은 선생님(김정환·김정현)이 섞입니다 → 과목으로 가려냅니다 */
+    const subs = [...new Set(mine.map(l => l.s))], want = ((S.profile.comciSub || S.profile.subject || '')).trim(), core = subs.filter(x => !/^(자율|스동|동아리|창체|진로|봉사)/.test(x));
+    if (core.length > 1) {
+      const hit = want && core.find(x => x.includes(want) || want.includes(x));
+      if (hit) mine = mine.filter(l => l.s === hit || /^(자율|창체|진로)/.test(l.s) && false);
+      else { if (!silent) ask('이름이 같은 선생님이 있어요', [{ k: 'sub', label: `컴시간에 "${key}" 선생님이 여러 분입니다. 내 과목을 고르세요`, type: 'select', opts: core, val: core[0] }], o => { S.profile.comciSub = o.sub; save(); comciSync(false); }); return; }
+    }
+    mine.forEach(l => { const k = l.d + '-' + l.p; if (!G[k]) G[k] = `${l.g}-${l.c} ${l.s}`.trim(); });
     if (!Object.keys(G).length) { if (!silent) toast(`컴시간에서 "${key}" 선생님 수업을 찾지 못했습니다. 설정의 이름을 확인해 주세요.`); return; }
     const same = JSON.stringify(G) === JSON.stringify(S.timetable); S.timetable = G; S.profile.comci = Date.now();
     if (!same) { commit(); if (!silent) toast(`컴시간 시간표 ${Object.keys(G).length}칸을 가져왔습니다. (${(j.updated || '').slice(0, 10)} 기준)`); } else if (!silent) toast('이미 최신 시간표입니다.');
   } catch (e) { if (!silent) toast('컴시간 자료가 아직 없습니다. GitHub의 Actions 탭에서 "컴시간 시간표 가져오기"를 한 번 실행해 주세요. 그동안은 아래 "붙여넣기"로 넣을 수 있습니다.'); }
 }
-setTimeout(() => { if (S.profile.comci && Date.now() - S.profile.comci > 6 * 3600 * 1000) comciSync(true); }, 2500);
+setTimeout(() => { if (!S.setup) return; const empty = !Object.keys(S.timetable || {}).some(k => S.timetable[k]); if (empty ? (S.profile.name || '').trim().length >= 2 : (S.profile.comci && Date.now() - S.profile.comci > 6 * 3600 * 1000)) comciSync(true); }, 2500);
 
 /* ---- 문서 읽기 편하게 보기 ---- */
 function readable(text) {
