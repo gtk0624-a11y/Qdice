@@ -134,3 +134,27 @@ buildChunks = function () {
   Object.keys(S.weekly || {}).forEach(k => { if (S.weekly[k]) out.push({ type: 'note', src: '주간 소감 · ' + k, text: `${k} 주 소감: ${S.weekly[k]}`, ref: '#/' }); });
   return out;
 };
+
+/* ---------- 공문 처리: 기안 · 접수 · 결재 · 처리중 · 완료 ---------- */
+const DL_ST = ['기안', '접수', '결재', '처리중', '완료'];
+const dlSt = x => x.st || (x.done ? '완료' : '접수');
+const _dlB = docLogBody;
+docLogBody = function () {
+  let h = _dlB.apply(this, arguments); const L = S.docLog || [];
+  h = h.replace(/(<input type="checkbox" data-dl="done" data-id="([^"]+)"[^>]*>)/g, (m, a, id) => { const x = L.find(v => v.id === id); return a + `<select class="dlst s${DL_ST.indexOf(x ? dlSt(x) : '접수')}" data-dlst="${id}" aria-label="공문 단계">${DL_ST.map(s => `<option ${x && dlSt(x) === s ? 'selected' : ''}>${s}</option>`).join('')}</select>`; });
+  const open = L.filter(x => dlSt(x) !== '완료'), cnt = s => open.filter(x => dlSt(x) === s).length;
+  const sum = `<div class="dlsum">${DL_ST.slice(0, 4).map(s => `<span class="chp s${DL_ST.indexOf(s)}">${s} ${cnt(s)}</span>`).join('')}</div>` + (open.length ? `<details class="dlold"><summary>진행 중인 공문 ${open.length}건 모아보기</summary>${DL_ST.slice(0, 4).map(s => { const l = open.filter(x => dlSt(x) === s); return l.length ? `<b class="mgc">${s}</b>${l.map(x => `<div class="mi">${esc(x.title)} <small class="mu">${md(x.date)}${x.note ? ' · ' + esc(x.note.slice(0, 40)) : ''}</small></div>`).join('')}` : ''; }).join('')}</details>` : '');
+  return sum + h;
+};
+A.dlAdd = function () {
+  ask('공문 기록', [{ k: 'title', label: '공문 제목·문서번호', req: 1, ph: '예: 학생인권교육 계획 제출(교무부-1234)' }, { k: 'st', label: '구분 (기안: 내가 만드는 문서 · 접수: 받은 공문 · 결재: 결재 올림/대기 · 처리중 · 완료)', type: 'select', opts: DL_ST, val: '접수' }, { k: 'note', label: '처리 내용·메모 (나중에 써도 됩니다)', type: 'textarea', rows: 3 }], o => {
+    S.docLog = S.docLog || []; const done = o.st === '완료', d = today();
+    S.docLog.push({ id: uid(), date: d, title: o.title.trim(), note: (o.note || '').trim(), done, st: o.st }); docAdj(d, 'recv', 1); if (done) docAdj(d, 'done', 1); OPEN.add('r3'); commit();
+  });
+};
+document.addEventListener('change', e => {
+  const t = e.target; if (!t || !t.dataset) return;
+  if (t.dataset.dlst) { const x = (S.docLog || []).find(v => v.id === t.dataset.dlst); if (!x) return; const was = !!x.done; x.st = t.value; x.done = t.value === '완료'; if (was !== x.done) docAdj(x.date, 'done', x.done ? 1 : -1); commit(); }
+  else if (t.dataset.dl === 'done') { const x = (S.docLog || []).find(v => v.id === t.dataset.id); if (x) { x.st = x.done ? '완료' : (x.st === '완료' ? '처리중' : x.st); save(true); } }
+});
+{ const _b = buildChunks; buildChunks = function () { const out = _b.apply(this, arguments); (S.docLog || []).forEach(x => out.push({ type: 'doc', src: '공문 단계 · ' + x.date, text: `공문 ${x.title} 단계: ${dlSt(x)}${x.note ? ' · ' + x.note : ''}`, ref: '#/' })); return out; }; }

@@ -902,3 +902,4 @@ html[data-skin="planner"] .drawer,html[data-skin="planner"] .dw{padding:6px 12px
 .wld{margin:10px 0}.wle{padding:3px 0;border-bottom:1px dashed #ddd;display:flex;gap:6px;align-items:center;flex-wrap:wrap}.wle.auto{color:var(--mu)}.wlc{margin:6px 0}.wlc label{display:block;margin:4px 0}.wlc textarea{width:100%}
 /* 서랍 너비 */
 .dw{width:fit-content!important;max-width:min(100%,300px)!important}.dw:has(details[open]){width:100%!important;max-width:none!important}.dwf{max-width:210px}
+.dlsum{display:flex;gap:6px;flex-wrap:wrap;margin:4px 0}.dlst{padding:2px 4px;border-radius:8px;margin:0 4px;font-size:13px}.dlst.s0{background:#e8e4ff}.dlst.s1{background:#dff1ff}.dlst.s2{background:#fff3c4}.dlst.s3{background:#ffe3d6}.dlst.s4{background:#dff5e7}
