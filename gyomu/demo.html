@@ -867,6 +867,11 @@ details.sec.sub{border:1px solid var(--rule2,#ccc);border-radius:10px;margin:8px
 @media(max-width:600px){.cmfab span{display:none}}
 .dpl{display:block;margin:6px 0;font-size:13px}.dpl input{display:block;width:100%;box-sizing:border-box;margin-top:2px}.dpk{display:block;margin:6px 0;font-size:13px}.dpt{margin-top:8px;align-items:center}
 @media(max-width:600px){.yptb th.ypn{min-width:112px;max-width:132px;padding:4px 6px}.yptb{min-width:900px}}
+/* 학급 관리: 체크박스와 내용 붙이기 */
+.cmr.chk,.cmr .chk,label.cmr{display:flex;justify-content:flex-start;align-items:center;gap:8px}
+.cmr .chk{flex:1 1 180px;min-width:0}.cmr.chk>span,.cmr .chk>span{flex:1 1 auto;text-align:left;min-width:0}
+.cmr input[type=checkbox]{flex:0 0 auto;width:20px;height:20px;margin:0}
+.cmr>span:last-child:not(.chk span){margin-left:auto}
 </style>
 </head>
 <body>
@@ -5250,7 +5255,7 @@ buildChunks = function () {
 };
 
 /* 화면 맨 아래에 버전 표시 — 옛 화면을 보고 있는지 바로 알 수 있게 */
-const TF_VER = 'v64', _cmFt = footer;
+const TF_VER = 'v65', _cmFt = footer;
 footer = function () { return _cmFt.apply(this, arguments).replace('</footer>', ` · <span class="mu">버전 ${TF_VER} (학급 관리 포함)</span></footer>`); };
 
 /* 새 버전 알림: 옛 화면이 남아 있으면 한 번 눌러 새로 받게 함 */
