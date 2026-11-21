@@ -5249,7 +5249,7 @@ buildChunks = function () {
 };
 
 /* 화면 맨 아래에 버전 표시 — 옛 화면을 보고 있는지 바로 알 수 있게 */
-const TF_VER = 'v63', _cmFt = footer;
+const TF_VER = 'v64', _cmFt = footer;
 footer = function () { return _cmFt.apply(this, arguments).replace('</footer>', ` · <span class="mu">버전 ${TF_VER} (학급 관리 포함)</span></footer>`); };
 
 /* 새 버전 알림: 옛 화면이 남아 있으면 한 번 눌러 새로 받게 함 */
@@ -5279,6 +5279,8 @@ const YP_PRE = [
   ['생명존중·자살예방 교육', ''], ['양성평등·성희롱·성폭력 예방교육', ''], ['인권교육', '학생 학기당 2시간 / 학부모 연 2회'], ['도박예방교육', '학생·교직원·학부모 연 1시간(학부모는 가정통신문 가능)'],
   ['장애인식 개선·특수 의무연수', ''], ['개인정보보호·정보보안', ''], ['감염병 예방교육', ''], ['회복적 생활교육', ''], ['학교 행사(축제·체육대회 등)', '행사명은 줄 이름을 고쳐 쓰세요']
 ];
+/* 도디쌤(곡선중) 2026학년도 노션 연수표 — 개인 예시, 버튼으로만 불러옴 */
+const YP_MINE = "\"교육·훈련·행사\",\"법정 기준·메모\",\"1학기 교직원\",\"1학기 학생\",\"1학기 학부모\",\"1학기 기타·훈련\",\"2학기 교직원\",\"2학기 학생\",\"2학기 학부모\",\"2학기 기타·훈련\"\n\"학교폭력연수(연2회)\",\"교사·학생·학부모 학기당 1회\",\"3.10 (실시)\",\"3.26 (실시)\",\"3.19 (실시)\",\"\",\"\",\"9.7 (실시)\",\"\",\"\"\n\"안전연수(3년 15시간 및 학교연수)\",\"\",\"3.10 (실시)\",\"\",\"\",\"\",\"\",\"\",\"\",\"\"\n\"인성연수\",\"교원 연 1시간 이상\",\"3.10 (실시)\",\"\",\"3.19 (실시)\",\"\",\"\",\"\",\"\",\"\"\n\"가정폭력연수\",\"교원·학생·학부모 연 1시간\",\"\",\"\",\"3.19 (실시)\",\"\",\"\",\"\",\"\",\"\"\n\"아동학대 예방교육\",\"학생 6개월에 1회 이상\",\"\",\"6.25 동영상시청 (실시)\",\"\",\"\",\"\",\"\",\"\",\"\"\n\"교권보호 교육\",\"교원·학생·학부모 연 1회 이상\",\"3.10 (실시)\",\"4.9 (실시)\",\"3.19 (실시)\",\"\",\"\",\"\",\"\",\"\"\n\"위기관리(자살예방)·생명존중\",\"\",\"\",\"4.17 (실시)\",\"\",\"\",\"\",\"\",\"\",\"\"\n\"양성평등\",\"\",\"\",\"\",\"3.19 (실시)\",\"\",\"\",\"\",\"\",\"\"\n\"긴급지원대상자 신고의무 관련 교육\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\"\n\"회복적 생활교육\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\"\n\"재난훈련\",\"\",\"\",\"5.13 5교시 (실시)\",\"\",\"\",\"\",\"\",\"\",\"\"\n\"인권교육\",\"학생 학기당 2시간, 학부모 연 2회 / 교직원: 7.3 교직원 회의\",\"\",\"\",\"3.19 (실시)\",\"\",\"\",\"\",\"\",\"\"\n\"도박예방교육\",\"학생·교직원·학부모 연 1시간 (학부모 가정통신문 가능)\",\"\",\"5.13 뮤지컬 6교시 (실시)\",\"\",\"\",\"\",\"\",\"\",\"\"\n\"소방 훈련\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\"\n";
 const ypSY = () => { const d = new Date(); return d.getMonth() >= 2 ? d.getFullYear() : d.getFullYear() - 1; };
 const ypD = () => { const y = S.yp = S.yp || { year: ypSY(), rows: [], hist: {} }; y.rows = y.rows || []; y.hist = y.hist || {}; return y; };
 const ypLab = k => { const c = YP_COLS.find(x => x[0] === k); return c ? c[1] + ' ' + c[2] : k; };
@@ -5302,12 +5304,13 @@ function ypView() {
   const body = Y.rows.map(r => `<tr><th class="ypn"><b>${esc(r.name)}</b>${r.rule ? `<small>${esc(r.rule)}</small>` : ''}</th>${YP_COLS.map(c => { const v = (r.cells || {})[c[0]], over = v && v.d && !v.ok && dd(v.d) !== null && dd(v.d) < 0; return `<td><button class="ypc ${v ? (v.ok ? 'ok' : over ? 'late' : 'set') : ''}" data-act="ypCell" data-id="${r.id}" data-k="${c[0]}" aria-label="${esc(r.name)} ${c[1]} ${c[2]}">${v ? (v.ok ? '✔ ' : '') + ypCellTxt(v) || '·' : '＋'}</button></td>`; }).join('')}<td class="ypx"><button class="x" data-act="ypRowEdit" data-id="${r.id}">수정</button><button class="x" data-act="ypRowDel" data-id="${r.id}" aria-label="${esc(r.name)} 삭제">✕</button></td></tr>`).join('');
   return `<div class="bh"><h2>연간 교육·훈련</h2><span class="mu">매년 되풀이되는 연수·교육·훈련·행사를 한 표로. 칸을 누르면 예정일·실시 여부·참석 인원을 적습니다. 이름 명단은 넣지 않고 <b>인원수·증빙 파일</b>만 남깁니다.</span></div>${roll}
   <div class="hpcard ypsum"><b>${Y.year}학년도</b> · 날짜 있는 항목 ${items.length}건 · 실시 완료 ${done}건${late ? ` · <span class="hot">날짜 지남 ${late}건</span>` : ''}${nxt.length ? `<div class="ypnx">${nxt.map(x => `<span class="chp k-연수">${md(x.d)} ${esc(x.name)} <small>${esc(x.col)}</small> ${ddText(dd(x.d))}</span>`).join(' ')}</div>` : ''}</div>
-  <div class="tools"><button class="btn sm pri" data-act="ypAdd">+ 줄 추가</button><button class="btn sm" data-act="ypPre">📋 법정·필수 교육 예시 줄 넣기</button><button class="btn sm" data-act="ypPaste">📥 붙여넣어 가져오기</button><label class="btn sm file">📂 엑셀·CSV 가져오기<input type="file" id="ypFile" accept=".csv,.tsv,.txt,.xlsx,.xls" hidden></label><button class="btn sm" data-act="ypCsv">⬇ 엑셀용 내려받기</button></div>
+  <div class="tools"><button class="btn sm pri" data-act="ypAdd">+ 줄 추가</button><button class="btn sm" data-act="ypPre">📋 법정·필수 교육 예시 줄 넣기</button><button class="btn sm" data-act="ypPaste">📥 붙여넣어 가져오기</button><label class="btn sm file">📂 엑셀·CSV 가져오기<input type="file" id="ypFile" accept=".csv,.tsv,.txt,.xlsx,.xls" hidden></label><button class="btn sm" data-act="ypMine">🏫 곡선중 2026 표 불러오기</button><button class="btn sm" data-act="ypCsv">⬇ 엑셀용 내려받기</button></div>
   ${Y.rows.length ? `<div class="ypwrap"><table class="yptb">${head}${body}</table></div>` : '<p class="mu">아직 줄이 없습니다. [📋 예시 줄 넣기]로 시작하거나, 노션·엑셀 표를 [📥 붙여넣어 가져오기] 하세요. 줄은 해마다 그대로 쓰고 날짜만 새로 넣으면 됩니다.</p>'}
   <p class="mu">💡 날짜를 넣으면 캘린더에 연수 색으로 나타나고, 14일 안으로 다가오면 오늘 화면에 알려 줍니다. 꿈송이에게 "안전교육 언제 했지?"라고 물어도 찾아 줍니다. 증빙 사진·문서는 아래 [파일 올리기]에 넣으세요.</p>`;
 }
 const ypCommit = () => commit();
 Object.assign(A, {
+  ypMine() { sure('도디쌤의 노션 연수표(2026학년도, 곡선중)를 불러옵니다. 같은 이름 줄은 칸만 덮어씁니다.', () => ypImportText(YP_MINE)); },
   ypCell(el) {
     const r = ypD().rows.find(x => x.id === el.dataset.id), k = el.dataset.k; if (!r) return; const c = (r.cells = r.cells || {})[k] || {};
     ask(`${r.name} · ${ypLab(k)}`, [{ k: 'd', label: '예정일(또는 실시일)', type: 'date', val: c.d || '' }, { k: 't', label: '메모 (예: 5교시, 강사, 방식)', val: c.t || '' }, { k: 'n', label: '참석 인원 (숫자만, 이름은 적지 않음)', type: 'number', val: c.n || '' }, { k: 'st', label: '상태', type: 'select', opts: ['예정', '실시 완료'], val: c.ok ? '실시 완료' : '예정' }], o => {
