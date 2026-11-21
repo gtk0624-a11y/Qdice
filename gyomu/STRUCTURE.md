@@ -305,3 +305,12 @@ service cloud.firestore {
 - 위험: 학생 개인정보가 보이는 쪽은 체크 해제 안내. 포털이 javascript: 북마클릿·팝업을 막으면 「복사해서 붙여넣어 담기」 사용.
 ## 퇴근 타이머 (deco.js)
 - `S.profile.offOn/offT/offMin` → `clkOffTxt()`(1초 갱신, 평일만, 퇴근 후 5분간 🎉 문구).
+
+## 나만의 점검표 · 수업 자료 연결 · 모든 창 바깥 클릭 닫기 (js/helper.js)
+- 나만의 점검표: S.chkLists[{id,name,items[{id,t,done}],daily,day}] — hpChkOpen(). 「매일 새로 시작」은 hpChkDaily()가 날짜 바뀌면 체크 해제. 추천 틀은 HP_CHK_TPL.
+- 학기말 점검표: S.endList(편집본)/S.endCk(체크)/S.endCustom — hpTerm()에서 이름·항목 고치기/삭제/추가/초기화.
+- 수업 자료 연결: S.cellLinks{'요일-교시':[{id,n,u,k}]} — 딜시·한 번뿐인 인생·HTML 슬라이드 파일(IDB 'cl:'+id, 이 기기에만)·임의 URL 여러 개.
+- 수업 기록: S.lessonLog (이 브라우저 localStorage, 백업 JSON에 포함, 클라우드 동기화 켰을 때만 동기화). 「수업 및 시간표」 맨 아래에 표시.
+- 포털 담은 자료: 자료 아카이브(LIB, IDB 'lib') → 교무포털 폴더. 📁 이동(A.arcMove), 💾 저장(A.arcSave), 모두 폴더에 저장(ptSaveAll).
+- 모든 <dialog>: 어두운 바깥 영역 클릭 시 닫힘(helper.js 끝, data-noclose로 제외).
+- 개인정보 위험: 학생 메모('stum')·HTML 슬라이드('cl:')는 기기 전용(동기화·백업 제외).

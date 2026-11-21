@@ -820,3 +820,10 @@ html[data-nav=bottom] #ytfab{bottom:120px}
 #ytpan{z-index:80!important}#ytpan .btn,#ytpan button.btn{padding:5px 10px!important;font-size:13px!important;min-height:0!important;width:auto!important;box-shadow:1px 2px 0 rgba(0,0,0,.25)}
 #ytpan .ytfm input{padding:6px 8px!important;font-size:13px!important}
 .hpdlg .tools .btn,.hpdlg .tools button{width:auto!important}
+
+.hplg{display:grid;grid-template-columns:26px repeat(5,minmax(0,1fr));gap:4px;margin:8px 0;font-size:12.5px;text-align:center;align-items:stretch}.hplg>b{align-self:center}
+.hpcell{position:relative;border:1.5px solid #333;border-radius:8px;background:#fff;padding:5px 2px;min-height:38px;cursor:pointer;font:inherit;font-size:12px;line-height:1.25;word-break:keep-all;overflow-wrap:anywhere}.hpcell.on{background:#ffe9a8;box-shadow:0 0 0 2px #e91e63}.hpcell.no{border-style:dashed;border-color:#ccc;color:#bbb;cursor:default;display:flex;align-items:center;justify-content:center}
+.hpcell i{position:absolute;top:-6px;right:-4px;background:#e91e63;color:#fff;border-radius:999px;font-size:10px;font-style:normal;min-width:16px;height:16px;line-height:16px}
+.hppre{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}.hpcls{white-space:nowrap}.cl{cursor:pointer;font-size:14px;margin-right:2px}
+
+.hpcl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;width:100%;text-align:left;border:1.5px solid #333;border-radius:10px;background:#fff;padding:8px 12px;margin:6px 0;cursor:pointer;font:inherit}.hpbar{flex:1 0 100%;height:6px;background:#eee;border-radius:99px;overflow:hidden}.hpbar i{display:block;height:100%;background:#4caf9a}

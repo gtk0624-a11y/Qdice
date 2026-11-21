@@ -13,7 +13,7 @@ function hpDlg(title, draw, handle, onClose) {
   d.innerHTML = `<form method="dialog"><h3>${title}</h3><div class="hpbody"></div><div class="btns"><button value="ok" class="pri">닫기</button></div></form>`;
   document.body.appendChild(d);
   const body = d.querySelector('.hpbody'), paint = () => { body.innerHTML = draw(d); };
-  paint();
+  d._paint = paint; paint();
   d.addEventListener('click', e => { const b = e.target.closest('[data-hp]'); if (!b) return; if (b.type !== 'checkbox') e.preventDefault(); handle(b.dataset.hp.split('|'), b, paint, d); });
   d.addEventListener('input', e => {
     const t = e.target;
@@ -47,7 +47,7 @@ function hpCard() {
   return `<details class="hpcard" ${S.profile.hpOpen === false ? '' : 'open'}><summary>🧰 오늘 도우미 <small>퇴근 전 정리 · 수업 후 기록 · 한 주 돌아보기 …</small></summary>
   ${fr || warn ? `<div class="hpin">${fr}${warn}</div>` : ''}
   <div class="tools"><button class="btn pri sm" data-act="hpEnd">🌇 퇴근 전 3분 정리</button><button class="btn sm" data-act="hpLog">📝 수업 후 한 줄 기록</button><button class="btn sm ${hot ? 'pri' : ''}" data-act="hpWeek">🗓 한 주 돌아보기${hot ? ' ✨' : ''}</button><button class="btn sm" data-act="hpProg">📊 반별 진도 점검</button></div>
-  <div class="tools"><button class="btn sm" data-act="hpIdea">💡 차시 아이디어 카드</button><button class="btn sm" data-act="hpLink">🔗 수업 자료 연결</button><button class="btn sm" data-act="hpDoc">📮 공문 기한 모아보기</button><button class="btn sm" data-act="hpMeet">📋 회의 노트 틀</button><button class="btn sm" data-act="hpTerm">✅ 학기말 점검표</button><button class="btn sm" data-act="hpStu">🔒 학생 메모(이 기기만)</button></div>
+  <div class="tools"><button class="btn sm pri" data-act="hpNow">▶ 지금 수업 자료 열기</button><button class="btn sm" data-act="hpLink">🔗 수업 자료 연결</button><button class="btn sm" data-act="hpIdea">💡 차시 아이디어 카드</button><button class="btn sm" data-act="hpDoc">📮 공문 기한 모아보기</button><button class="btn sm" data-act="hpMeet">📋 회의 노트 틀</button><button class="btn sm" data-act="hpChkOpen">✅ 나만의 점검표</button><button class="btn sm" data-act="hpTerm">🎓 학기말 점검표</button><button class="btn sm" data-act="hpStu">🔒 학생 메모(이 기기만)</button></div>
   <label class="chk hpwk"><input type="checkbox" data-hpw="1" ${done ? 'checked' : ''}> 🏃 오늘 운동했어요</label> <a class="btn sm" href="https://gtk0624-a11y.github.io/badminton/" target="_blank" rel="noopener">운동로그 열기 ↗</a></details>`;
 }
 const hpInject = () => {
@@ -59,8 +59,6 @@ const hpInject = () => {
 const _rhp1 = TF.render; TF.render = function () { const v = _rhp1.apply(this, arguments); hpInject(); return v; };
 document.addEventListener('toggle', e => { const t = e.target; if (t && t.classList && t.classList.contains('hpcard')) { S.profile.hpOpen = t.open; save(true); } }, true);
 
-/* 시간표 칸의 🔗 (수업 자료 연결) */
-const cellLinkHtml = (d, p) => { const u = (S.cellLink || {})[d + '-' + p]; return u ? ` <a class="cl" href="${esc(u)}" target="_blank" rel="noopener" title="수업 자료 열기" onclick="event.stopPropagation()">🔗</a>` : ''; };
 
 /* ---------- ① 퇴근 전 3분 정리 ---------- */
 function hpEnd() {
@@ -87,7 +85,7 @@ function hpLog() {
   ask('📝 수업 후 한 줄 기록', [{ k: 'sel', label: '어느 수업?', type: 'select', opts: cl.length ? cl : ['(오늘 시간표 수업 없음)'] }, { k: 'cls', label: '반 직접 입력 (비우면 위 수업의 반)', ph: '예: 2-1' }, { k: 'prog', label: '진도 (어디까지 했나요)', ph: '예: 3단원 2차시 — 정의의 원칙', req: 1 }, { k: 'react', label: '아이들 반응·특이사항', type: 'textarea', rows: 3 }, { k: 'next', label: '다음 시간에 할 것', ph: '예: 모둠 발표 이어서' }], o => {
     const m = /^(\d)교시 · (.*)$/.exec(o.sel || ''), cls = (o.cls || '').trim() || (m ? hpClsOf(m[2]) : '');
     hpLogs().push({ id: uid(), date: today(), at: Date.now(), p: m ? +m[1] : 0, cls, prog: o.prog.trim(), react: (o.react || '').trim(), next: (o.next || '').trim() });
-    commit(); toast('기록했습니다. 반별 진도 점검에 반영돼요.');
+    commit(); toast('기록했습니다. [수업 및 시간표] 화면 맨 아래 「수업 기록」에 쌓이고 반별 진도 점검에 반영돼요.');
     const w = hpProgWarn().filter(x => x.cs.includes(cls)); if (w.length) setTimeout(() => toast('⚠️ ' + w[0].g + '학년 반들의 진도가 서로 달라요. [반별 진도 점검]에서 확인하세요.'), 1800);
   }, '기록하기');
 }
@@ -133,17 +131,58 @@ function hpWeek() {
 document.addEventListener('change', e => { if (e.target.dataset && e.target.dataset.hpw) A.hpWork(e.target); });
 A.hpWork = el => { S.workout = S.workout || {}; if (el.checked) S.workout[today()] = true; else delete S.workout[today()]; save(true); toast(el.checked ? '운동 기록! 멋져요 💪' : '해제했어요.'); };
 
-/* ---------- 수업 자료 연결 (시간표 칸 🔗) ---------- */
-function hpLink() {
-  hpDlg('🔗 수업 자료 연결', () => {
-    const cells = []; for (let d = 1; d <= 5; d++) for (let p = 1; p <= 7; p++) if (tt(d, p)) cells.push([d + '-' + p, DOW[d] + '요일 ' + p + '교시 · ' + tt(d, p)]);
-    const cur = Object.keys(S.cellLink || {}).sort();
-    return `<p class="mu">시간표 칸에 학습지·슬라이드·구글 문서 링크를 붙여 두면, 오늘 시간표 그 칸에 🔗가 생겨 수업 직전 바로 엽니다. (매주 같은 요일·교시에 적용)</p>
-    ${cells.length ? `<div class="hpf"><select id="hpcs">${cells.map(c => `<option value="${c[0]}">${esc(c[1])}</option>`).join('')}</select><input id="hpcu" placeholder="https:// 링크 붙여넣기" aria-label="자료 링크"><button type="button" class="btn sm pri" data-hp="ladd">연결</button></div>` : '<p class="mu">시간표가 비어 있어요. 먼저 시간표를 넣어 주세요.</p>'}
-    ${cur.length ? '<h4 class="dlh">연결된 자료</h4>' + cur.map(k => { const [d, p] = k.split('-'); return `<div class="hpr"><span>${DOW[d]}요일 ${p}교시 · ${esc(tt(d, p))}<br><a href="${esc(S.cellLink[k])}" target="_blank" rel="noopener">${esc(S.cellLink[k].slice(0, 60))}</a></span><button type="button" class="btn sm" data-hp="ldel2|${k}">끊기</button></div>`; }).join('') : ''}`;
+/* ---------- 수업 자료 연결: 시간표 칸마다 HTML 슬라이드·딜시·여러 프로그램·학습지·영상을 여러 개 걸어 두고 바로 엽니다 ---------- */
+const HP_KIND = { '슬라이드': '🖥', '프로그램': '🎮', '학습지': '📄', '영상': '▶️', '링크': '🔗' };
+const HP_PRE = [['딜레마 시뮬(딜시)', 'https://gtk0624-a11y.github.io/Qdice/dilsi/', '프로그램'], ['한 번뿐인 인생', 'https://gtk0624-a11y.github.io/Qdice/onelife/', '프로그램']];
+const hpKindOf = u => /presentation|canva\.com|slides|\.pptx?(\?|$)|슬라이드/i.test(u) ? '슬라이드' : /youtu\.?be/i.test(u) ? '영상' : /docs\.google\.com\/(document|forms)|\.hwpx?(\?|$)|\.pdf(\?|$)|학습지/i.test(u) ? '학습지' : /github\.io|netlify|vercel|\.html?(\?|$)/i.test(u) ? '프로그램' : '링크';
+const hpCL = () => { const o = (S.cellLinks = S.cellLinks || {}); if (S.cellLink) { Object.keys(S.cellLink).forEach(k => { (o[k] = o[k] || []).push({ id: uid(), n: '수업 자료', u: S.cellLink[k], k: hpKindOf(S.cellLink[k]) }); }); delete S.cellLink; save(true); } return o; };
+const hpPre = () => HP_PRE.map(x => ({ n: x[0], u: x[1], k: x[2] })).concat((S.links || []).filter(l => l.url && !HP_PRE.some(x => x[1] === l.url)).slice(0, 14).map(l => ({ n: l.name || l.url, u: l.url, k: hpKindOf(l.url) })));
+const cellLinkHtml = (d, p) => { const L = hpCL()[d + '-' + p] || []; if (!L.length) return ''; return ' <span class="hpcls">' + L.slice(0, 3).map(l => `<span class="cl" role="button" tabindex="0" data-act="hpOpenL" data-id="${l.id}" title="${esc(l.n)} 열기">${HP_KIND[l.k] || '🔗'}</span>`).join('') + (L.length > 3 ? `<span class="mu">+${L.length - 3}</span>` : '') + '</span>'; };
+async function hpOpenLink(l) {
+  if (String(l.u).startsWith('idb:')) { const f = await idb.get('cl:' + l.u.slice(4)); if (!f) return toast('올려 둔 파일을 찾지 못했어요. 다시 올려 주세요.'); const url = URL.createObjectURL(f); window.open(url, '_blank'); setTimeout(() => URL.revokeObjectURL(url), 180000); }
+  else extOpen(l.u);
+}
+const hpFindL = id => { const o = hpCL(); for (const k of Object.keys(o)) { const l = o[k].find(x => x.id === id); if (l) return l; } return null; };
+A.hpOpenL = el => { const l = hpFindL(el.dataset.id); if (l) hpOpenLink(l); };
+function hpNowCell() {
+  const n = new Date(), dow = n.getDay(), mins = n.getHours() * 60 + n.getMinutes(), P = typeof clkPeriods === 'function' ? clkPeriods() : [];
+  const cur = P.find(x => mins >= x.s && mins < x.e) || P.find(x => x.s > mins && tt(dow, x.p)); return cur && dow % 6 ? dow + '-' + cur.p : null;
+}
+function hpNow() {
+  const k = hpNowCell(), L = k ? (hpCL()[k] || []) : [];
+  if (!L.length) { toast(k ? '이 시간 칸에 연결된 자료가 없어요. 지금 연결해 보세요.' : '지금은 수업 시간이 아니에요. 연결할 칸을 골라 주세요.'); return hpLink(k); }
+  hpDlg('▶ 지금 수업 자료 — ' + DOW[k.split('-')[0]] + '요일 ' + k.split('-')[1] + '교시 ' + esc(tt(...k.split('-'))), () => L.map(l => `<div class="hpr"><span style="font-size:17px">${HP_KIND[l.k] || '🔗'} <b>${esc(l.n)}</b> <span class="mu">${esc(l.k)}</span></span><button type="button" class="btn pri" data-hp="open|${l.id}">▶ 열기</button></div>`).join(''), (a) => { if (a[0] === 'open') { const l = hpFindL(a[1]); if (l) hpOpenLink(l); } });
+}
+function hpLink(sel) {
+  const o = hpCL(), cells = []; for (let d = 1; d <= 5; d++) for (let p = 1; p <= 7; p++) if (tt(d, p)) cells.push(d + '-' + p);
+  let cur = sel && cells.includes(sel) ? sel : (hpNowCell() && cells.includes(hpNowCell()) ? hpNowCell() : cells[0]);
+  const d0 = hpDlg('🔗 수업 자료 연결', () => {
+    if (!cells.length) return '<p class="mu">시간표가 비어 있어요. 먼저 [수업 및 시간표]에서 시간표를 넣어 주세요.</p>';
+    const grid = '<div class="hplg"><span></span>' + [1, 2, 3, 4, 5].map(d => `<b>${DOW[d]}</b>`).join('') + [1, 2, 3, 4, 5, 6, 7].map(p => `<b>${p}</b>` + [1, 2, 3, 4, 5].map(d => { const v = tt(d, p), k = d + '-' + p, n = (o[k] || []).length; return v ? `<button type="button" class="hpcell ${k === cur ? 'on' : ''}" data-hp="cell|${k}"><span>${esc(v)}</span>${n ? `<i>${n}</i>` : ''}</button>` : '<span class="hpcell no">·</span>'; }).join('')).join('') + '</div>';
+    const L = o[cur] || [], [cd, cp] = cur.split('-'), pre = hpPre();
+    return `<p class="mu">① 칸을 누르고 ② 자료를 고르거나 붙여넣으면 오늘 시간표 그 칸에 아이콘이 생겨요. 수업 직전엔 [▶ 지금 수업 자료 열기] 한 번이면 됩니다.</p>${grid}
+    <h4 class="dlh">${DOW[cd]}요일 ${cp}교시 · ${esc(tt(cd, cp))} <span class="mu">(${L.length}개 연결됨)</span></h4>
+    ${L.map(l => `<div class="hpr"><span>${HP_KIND[l.k] || '🔗'} <b>${esc(l.n)}</b> <span class="mu">${esc(l.k)}${String(l.u).startsWith('idb:') ? ' · 올려 둔 파일' : ''}</span></span><span><button type="button" class="btn sm" data-hp="open|${l.id}">▶ 열기</button><button type="button" class="btn sm" data-hp="ledit|${l.id}">✏️</button><button type="button" class="btn sm" data-hp="ldel|${l.id}">🗑</button></span></div>`).join('') || '<p class="mu">아직 연결된 자료가 없어요.</p>'}
+    <h4 class="dlh">＋ 자료 더하기</h4>
+    <p class="mu" style="margin:2px 0">내가 만든 프로그램·서랍 사이트 (눌러서 바로 연결)</p><div class="hppre">${pre.map((x, i) => `<button type="button" class="chp" data-hp="pre|${i}">${HP_KIND[x.k] || '🔗'} ${esc(x.n)}</button>`).join('')}</div>
+    <div class="hpf"><input id="hpn" placeholder="이름 (예: 정의 단원 슬라이드)" aria-label="자료 이름"><input id="hpu" placeholder="주소 붙여넣기 (구글 슬라이드·캔바·HTML 슬라이드·딜시 등)" aria-label="자료 주소"></div>
+    <div class="hpf"><label class="chk"><input type="checkbox" id="hpall" checked> 같은 수업(${esc(tt(cd, cp))})의 다른 시간에도 함께 연결</label><button type="button" class="btn sm pri" data-hp="add">＋ 연결하기</button><button type="button" class="btn sm" data-hp="file">📎 내 HTML 슬라이드 파일 올려 연결</button><input type="file" id="hpf" accept=".html,.htm" hidden></div>
+    <p class="mu">HTML 파일은 이 기기 안에 저장되고 인터넷 없이도 열려요. (다른 기기에서는 파일을 다시 올려야 합니다)</p>`;
   }, (a, b, paint, d) => {
-    if (a[0] === 'ladd') { let u = (d.querySelector('#hpcu').value || '').trim(); if (!u) return toast('링크를 붙여넣어 주세요.'); if (!/^https?:\/\//i.test(u)) u = 'https://' + u; S.cellLink = S.cellLink || {}; S.cellLink[d.querySelector('#hpcs').value] = u; save(); toast('연결했습니다.'); paint(); }
-    if (a[0] === 'ldel2') { delete S.cellLink[a[1]]; save(); paint(); }
+    if (a[0] === 'cell') { cur = a[1]; paint(); return; }
+    const addTo = (link, all) => { const keys = all ? cells.filter(k => tt(...k.split('-')) === tt(...cur.split('-'))) : [cur]; keys.forEach(k => { (o[k] = o[k] || []).push({ id: uid(), n: link.n, u: link.u, k: link.k }); }); save(); toast('연결했습니다' + (keys.length > 1 ? ' (같은 수업 ' + keys.length + '칸)' : '') + '.'); paint(); };
+    if (a[0] === 'pre') { const x = hpPre()[+a[1]]; if (x) addTo(x, d.querySelector('#hpall').checked); }
+    if (a[0] === 'add') { let u = (d.querySelector('#hpu').value || '').trim(); if (!u) return toast('주소를 붙여넣어 주세요.'); if (!/^https?:\/\//i.test(u)) u = 'https://' + u; addTo({ n: (d.querySelector('#hpn').value || '').trim() || '수업 자료', u, k: hpKindOf(u) }, d.querySelector('#hpall').checked); }
+    if (a[0] === 'file') d.querySelector('#hpf').click();
+    if (a[0] === 'open') { const l = hpFindL(a[1]); if (l) hpOpenLink(l); }
+    if (a[0] === 'ldel') { (o[cur] = (o[cur] || []).filter(l => l.id !== a[1])); save(); paint(); }
+    if (a[0] === 'ledit') { const l = (o[cur] || []).find(x => x.id === a[1]); if (l) ask('연결 고치기', [{ k: 'n', label: '이름', val: l.n, req: 1 }, { k: 'u', label: '주소', val: String(l.u).startsWith('idb:') ? '(올려 둔 파일 — 주소는 못 고쳐요)' : l.u }, { k: 'k', label: '종류', type: 'select', opts: Object.keys(HP_KIND), val: l.k }], v => { l.n = v.n.trim() || l.n; if (!String(l.u).startsWith('idb:') && v.u.trim()) l.u = /^https?:\/\//i.test(v.u.trim()) ? v.u.trim() : 'https://' + v.u.trim(); l.k = v.k; save(); paint(); }); }
+  });
+  if (d0) d0.addEventListener('change', async e => {
+    if (e.target.id !== 'hpf' || !e.target.files[0]) return; const f = e.target.files[0], id = uid();
+    if (f.size > 25 * 1048576) return toast('25MB보다 큰 파일은 연결할 수 없어요.');
+    await idb.set('cl:' + id, f); const keys = d0.querySelector('#hpall').checked ? cells.filter(k => tt(...k.split('-')) === tt(...cur.split('-'))) : [cur];
+    keys.forEach(k => { (o[k] = o[k] || []).push({ id: uid(), n: f.name.replace(/\.html?$/i, ''), u: 'idb:' + id, k: '슬라이드' }); }); save(); toast('파일을 올려 연결했습니다.'); d0._paint();
   });
 }
 
@@ -169,16 +208,26 @@ function hpMeet() {
   }, '노트 만들기');
 }
 
-/* ---------- 학기말 점검표 ---------- */
+/* ---------- 학기말 점검표 (모두 고치고·지우고·더할 수 있음) ---------- */
 const HP_TERM = [['평가', [['t1', '수행평가 점수 입력·확인'], ['t2', '평가 근거 자료 보관(학생 결과물·채점표)'], ['t3', '성적 산출 및 이의신청 안내']]], ['생기부', [['t4', '교과 세부능력 및 특기사항 입력'], ['t5', '바이트·맞춤법 점검, 생기발랄로 확인'], ['t6', '창체·행특 담당 부분 확인']]], ['수업', [['t7', '진도 마무리·남은 차시 정리'], ['t8', '학습지·슬라이드 정리 및 백업'], ['t9', '다음 학기 수업 개선점 메모']]], ['업무', [['t10', '예산 집행 정산·증빙 확인'], ['t11', '필수연수 이수 확인'], ['t12', '미처리 공문·회신 확인'], ['t13', '업무 인수인계 자료 정리']]], ['나', [['t14', '업무파탈 백업 파일 받기'], ['t15', '나에게 선물 하나 (쉬는 날 정하기)']]]];
+const hpEndSeed = () => HP_TERM.flatMap(g => g[1].map(x => ({ id: x[0], g: g[0], t: x[1] }))).concat((S.endCustom || []).map(x => ({ id: x.id, g: '내가 추가한 것', t: x.t })));
+const hpEndList = () => (S.endList = S.endList || hpEndSeed());
 function hpTerm() {
   hpDlg('✅ 학기말 점검표', () => {
-    const ck = S.endCk || {}, cu = S.endCustom || [], row = (id, t, c) => `<label class="chk hpck"><input type="checkbox" data-hp="ck|${id}" ${c ? 'checked' : ''}> <span>${esc(t)}</span></label>`, all = HP_TERM.flatMap(g => g[1]).map(x => x[0]).concat(cu.map(x => x.id));
-    return `<p class="mu">${all.filter(k => ck[k]).length} / ${all.length} 완료 · 체크는 바로 저장됩니다.</p>${HP_TERM.map(g => `<h4 class="dlh">${g[0]}</h4>${g[1].map(x => row(x[0], x[1], ck[x[0]])).join('')}`).join('')}<h4 class="dlh">내가 추가한 것</h4>${cu.map(x => `<div class="hpr">${row(x.id, x.t, ck[x.id])}<button type="button" class="btn sm" data-hp="cdel|${x.id}">삭제</button></div>`).join('')}<div class="hpf"><input id="hpct" placeholder="점검할 것 직접 추가"><button type="button" class="btn sm" data-hp="cadd">추가</button></div>`;
-  }, (a, b, paint, d) => {
+    const L = hpEndList(), ck = S.endCk || {}, groups = [...new Set(L.map(x => x.g))];
+    return `<p class="mu">${L.filter(x => ck[x.id]).length} / ${L.length} 완료 · 모든 항목을 ✏️고치고 🗑지우고 ＋더할 수 있어요. 바로 저장됩니다.</p>
+    ${groups.map(g => `<h4 class="dlh">${esc(g)} <button type="button" class="btn sm" data-hp="grn|${esc(g)}">✏️ 분류 이름</button><button type="button" class="btn sm" data-hp="gdel|${esc(g)}">🗑 분류 삭제</button><button type="button" class="btn sm" data-hp="iadd|${esc(g)}">＋ 항목</button></h4>${L.filter(x => x.g === g).map(x => `<div class="hpr"><label class="chk hpck"><input type="checkbox" data-hp="ck|${x.id}" ${ck[x.id] ? 'checked' : ''}> <span>${esc(x.t)}</span></label><span><button type="button" class="btn sm" data-hp="iedit|${x.id}">✏️</button><button type="button" class="btn sm" data-hp="idel|${x.id}">🗑</button></span></div>`).join('')}`).join('')}
+    <div class="tools"><button type="button" class="btn sm pri" data-hp="gadd">＋ 새 분류 만들기</button><button type="button" class="btn sm" data-hp="reset">처음 목록으로 되돌리기</button></div>`;
+  }, (a, b, paint) => {
+    const L = hpEndList();
     if (a[0] === 'ck') { S.endCk = S.endCk || {}; S.endCk[a[1]] = b.checked; save(true); return; }
-    if (a[0] === 'cadd') { const t = (d.querySelector('#hpct').value || '').trim(); if (!t) return; (S.endCustom = S.endCustom || []).push({ id: 'c' + uid(), t }); save(); paint(); }
-    if (a[0] === 'cdel') { S.endCustom = (S.endCustom || []).filter(x => x.id !== a[1]); save(); paint(); }
+    if (a[0] === 'iedit') { const x = L.find(i => i.id === a[1]); if (x) ask('항목 고치기', [{ k: 't', label: '내용', val: x.t, req: 1 }], o => { x.t = o.t.trim() || x.t; save(); paint(); }); }
+    if (a[0] === 'idel') { S.endList = L.filter(i => i.id !== a[1]); save(); paint(); }
+    if (a[0] === 'iadd') ask('항목 더하기 — ' + a[1], [{ k: 't', label: '점검할 것', req: 1 }], o => { L.push({ id: 'c' + uid(), g: a[1], t: o.t.trim() }); save(); paint(); });
+    if (a[0] === 'gadd') ask('새 분류 만들기', [{ k: 'g', label: '분류 이름 (예: 학급, 행사)', req: 1 }, { k: 't', label: '첫 항목', req: 1 }], o => { L.push({ id: 'c' + uid(), g: o.g.trim(), t: o.t.trim() }); save(); paint(); });
+    if (a[0] === 'grn') ask('분류 이름 고치기', [{ k: 'g', label: '이름', val: a[1], req: 1 }], o => { const n = o.g.trim(); if (n) L.forEach(x => { if (x.g === a[1]) x.g = n; }); save(); paint(); });
+    if (a[0] === 'gdel') sure('「' + a[1] + '」 분류와 그 안의 항목을 모두 지울까요?', () => { S.endList = L.filter(x => x.g !== a[1]); save(); paint(); });
+    if (a[0] === 'reset') sure('처음 목록으로 되돌릴까요? (내가 고친 내용은 사라지고, 체크는 유지됩니다)', () => { delete S.endList; S.endCustom = []; save(); paint(); });
   });
 }
 
@@ -209,10 +258,78 @@ async function hpStu() {
   setTimeout(() => { const d = [...document.querySelectorAll('dialog.hpdlg')].pop(); if (d) d.addEventListener('input', e => { if (e.target.dataset.stu !== undefined) { M[e.target.dataset.stu] = e.target.value; idb.set('stum', M); } }); }, 0);
 }
 
-Object.assign(A, { hpEnd, hpLog, hpWeek, hpProg, hpLink, hpDoc, hpMeet, hpTerm, hpIdea, hpStu });
+Object.assign(A, { hpNow, hpEnd, hpLog, hpWeek, hpProg, hpLink, hpDoc, hpMeet, hpTerm, hpIdea, hpStu });
 /* 설정: 도우미 카드 보이기 */
 const hpSet = () => `<div class="dset"><label class="chk"><input type="checkbox" data-dset="helperOn" ${S.profile.helperOn !== false ? 'checked' : ''}> <b>🧰 오늘 도우미 카드</b> — 오늘 화면 위쪽의 퇴근 전 정리·수업 후 기록·한 주 돌아보기 등 모음 (선택)</label></div>
   `;
 const _dchp = decoCard;
 decoCard = function () { const h = _dchp(); return h.replace('<div class="dset"><b>💻 컴퓨터 켜면', hpSet() + '<div class="dset"><b>💻 컴퓨터 켜면'); };
 document.addEventListener('change', e => { if (e.target.dataset && e.target.dataset.dset === 'helperOn') setTimeout(() => TF.render && TF.render(), 0); });
+
+/* ---------- 「수업 및 시간표」 화면 맨 아래: 수업 기록 모음 (고치기·지우기·내려받기) ---------- */
+function hpLogHtml() {
+  const L = hpLogs().slice().sort((a, b) => b.date.localeCompare(a.date) || (b.at || 0) - (a.at || 0));
+  return `<h3 class="h3" id="hplogs">📝 수업 기록 <span class="mu">(수업 후 한 줄 기록이 여기에 쌓입니다 · 이 기기에 저장 · 백업 파일에 포함)</span></h3><div class="tools"><button class="btn sm pri" data-act="hpLog">＋ 새 기록</button><button class="btn sm" data-act="hpProg">📊 반별 진도 점검</button>${L.length ? '<button class="btn sm" data-act="hpLogCsv">⬇ 엑셀(CSV)로 내려받기</button>' : ''}</div>
+  ${L.length ? L.slice(0, 30).map(l => `<div class="hpr"><span><b>${hpDate(l.date)}</b> ${l.p ? l.p + '교시 ' : ''}${esc(l.cls)} — ${esc(l.prog)}${l.react ? `<br><span class="mu">반응: ${esc(l.react)}</span>` : ''}${l.next ? `<br><span class="mu">다음: ${esc(l.next)}</span>` : ''}</span><span><button class="btn sm" data-act="hpLogEdit" data-id="${l.id}">✏️ 고치기</button><button class="btn sm" data-act="hpLogDel" data-id="${l.id}">🗑</button></span></div>`).join('') + (L.length > 30 ? `<p class="mu">최근 30건만 보입니다. 전체는 CSV로 내려받으세요. (${L.length}건)</p>` : '') : '<p class="mu">아직 기록이 없어요. 오늘 화면 [🧰 오늘 도우미] → [📝 수업 후 한 줄 기록]으로 시작하세요.</p>'}`;
+}
+const _cvhp = classView; classView = function () { const h = _cvhp.apply(this, arguments); return h + hpLogHtml(); };
+Object.assign(A, {
+  hpLogEdit(el) {
+    const l = hpLogs().find(x => x.id === el.dataset.id); if (!l) return;
+    ask('수업 기록 고치기', [{ k: 'date', label: '날짜', type: 'date', val: l.date }, { k: 'cls', label: '반', val: l.cls }, { k: 'prog', label: '진도', val: l.prog, req: 1 }, { k: 'react', label: '반응·특이사항', type: 'textarea', rows: 3, val: l.react }, { k: 'next', label: '다음 시간에 할 것', val: l.next }], o => { l.date = o.date || l.date; l.cls = (o.cls || '').trim(); l.prog = o.prog.trim(); l.react = (o.react || '').trim(); l.next = (o.next || '').trim(); commit(); toast('고쳤습니다.'); });
+  },
+  hpLogDel(el) { sure('이 수업 기록을 지울까요?', () => { S.lessonLog = hpLogs().filter(x => x.id !== el.dataset.id); commit(); }); },
+  hpLogCsv() { const q = v => '"' + String(v || '').replace(/"/g, '""') + '"'; download('수업기록_' + today() + '.csv', '\ufeff날짜,교시,반,진도,반응·특이사항,다음 시간\n' + hpLogs().slice().sort((a, b) => a.date.localeCompare(b.date)).map(l => [l.date, l.p || '', l.cls, l.prog, l.react, l.next].map(q).join(',')).join('\n'), 'text/csv'); }
+});
+
+/* ---------- 나만의 점검 체크리스트 (여러 개 만들기 · 항목 고치기/지우기 · 매일 자동 새로 시작 선택) ---------- */
+const HP_CHK_TPL = {
+  '학기초 준비': ['시간표·반 명단 확인', '교과 진도표 짜기', '수행평가 계획 확인', '학습 준비물 구입·정리', '학급 규칙·안내문 준비'],
+  '수업 준비(차시 전)': ['학습지 출력', '슬라이드·프로그램 열어 보기', '태블릿·기자재 점검', '모둠 자리·역할 정하기', '평가 기록지 준비'],
+  '수행평가 채점 끝내기': ['제출물 모두 모았는지 확인', '루브릭 기준 다시 읽기', '채점 및 점수 입력', '이의신청 안내', '근거 자료 보관'],
+  '출장·연수 가기 전': ['수업 대체·자습 자료 준비', '공문 결재 확인', '교통·시간 확인', '다녀와서 전달 연수 일정 잡기'],
+  '행사 준비': ['계획서·공문 확인', '예산 확인', '역할 분담', '안내 메시지 보내기', '끝난 뒤 정산·결과 정리'],
+  '나의 하루 루틴': ['아침 일정 확인', '수업 후 한 줄 기록', '공문 처리 확인', '운동', '퇴근 전 3분 정리']
+};
+const hpChk = () => (S.chkLists = S.chkLists || []);
+function hpChkDaily() { const t = today(); hpChk().forEach(l => { if (l.daily && l.day !== t) { l.items.forEach(i => { i.done = false; }); l.day = t; } }); }
+function hpChkOpen(sel) {
+  let cur = sel || null; hpChkDaily();
+  hpDlg('✅ 나만의 점검표', () => {
+    const L = hpChk(), l = cur && L.find(x => x.id === cur);
+    if (!l) return `<p class="mu">내가 필요한 점검표를 마음대로 만들 수 있어요. 항목은 언제든 고치고 지우고 더할 수 있습니다. 「매일 새로 시작」을 켜면 날마다 체크가 비워져 루틴으로 쓰기 좋아요.</p>
+      ${L.map(x => { const n = x.items.filter(i => i.done).length, pc = x.items.length ? Math.round(n / x.items.length * 100) : 0; return `<button type="button" class="hpcl" data-hp="open|${x.id}"><b>${esc(x.name)}</b>${x.daily ? ' <span class="mu">🔁 매일</span>' : ''}<span class="mu">${n} / ${x.items.length}</span><span class="hpbar"><i style="width:${pc}%"></i></span></button>`; }).join('') || '<p class="mu">아직 점검표가 없어요. 아래에서 만들어 보세요.</p>'}
+      <h4 class="dlh">＋ 새 점검표</h4><div class="tools"><button type="button" class="btn sm pri" data-hp="new">빈 점검표 만들기</button></div>
+      <p class="mu" style="margin:4px 0">또는 추천 틀로 시작 (만든 뒤 마음대로 고치세요)</p><div class="hppre">${Object.keys(HP_CHK_TPL).map(k => `<button type="button" class="chp" data-hp="tpl|${esc(k)}">${esc(k)}</button>`).join('')}</div>`;
+    return `<div class="tools"><button type="button" class="btn sm" data-hp="back">◀ 목록</button><button type="button" class="btn sm" data-hp="ren">✏️ 이름</button><button type="button" class="btn sm" data-hp="daily">${l.daily ? '🔁 매일 새로 시작: 켜짐' : '🔁 매일 새로 시작: 꺼짐'}</button><button type="button" class="btn sm" data-hp="clr">체크 모두 해제</button><button type="button" class="btn sm" data-hp="ldel">🗑 점검표 삭제</button></div>
+      <h4 class="dlh">${esc(l.name)} <span class="mu">${l.items.filter(i => i.done).length} / ${l.items.length}</span></h4>
+      ${l.items.map((i, k) => `<div class="hpr"><label class="chk hpck"><input type="checkbox" data-hp="ck|${i.id}" ${i.done ? 'checked' : ''}> <span>${esc(i.t)}</span></label><span><button type="button" class="btn sm" data-hp="up|${i.id}" ${k === 0 ? 'disabled' : ''}>▲</button><button type="button" class="btn sm" data-hp="dn|${i.id}" ${k === l.items.length - 1 ? 'disabled' : ''}>▼</button><button type="button" class="btn sm" data-hp="ed|${i.id}">✏️</button><button type="button" class="btn sm" data-hp="del|${i.id}">🗑</button></span></div>`).join('') || '<p class="mu">항목이 없어요. 아래에 적어 더하세요.</p>'}
+      <div class="hpf"><input id="hpci" placeholder="점검할 것 한 줄 (Enter로 바로 더하기)" aria-label="새 항목"><button type="button" class="btn sm pri" data-hp="add">＋ 더하기</button></div>`;
+  }, (a, b, paint, d) => {
+    const L = hpChk(), l = cur && L.find(x => x.id === cur);
+    if (a[0] === 'open') { cur = a[1]; paint(); return; } if (a[0] === 'back') { cur = null; paint(); return; }
+    if (a[0] === 'new') return ask('새 점검표', [{ k: 'n', label: '이름', ph: '예: 수업 전 확인', req: 1 }], o => { const x = { id: uid(), name: o.n.trim(), items: [], daily: false }; L.push(x); cur = x.id; save(); paint(); });
+    if (a[0] === 'tpl') { const x = { id: uid(), name: a[1], items: HP_CHK_TPL[a[1]].map(t => ({ id: uid(), t, done: false })), daily: /루틴/.test(a[1]) }; if (x.daily) x.day = today(); L.push(x); cur = x.id; save(); paint(); return; }
+    if (!l) return;
+    if (a[0] === 'ck') { const i = l.items.find(x => x.id === a[1]); if (i) { i.done = b.checked; save(true); const h = d.querySelector('.dlh .mu'); if (h) h.textContent = l.items.filter(x => x.done).length + ' / ' + l.items.length; } return; }
+    if (a[0] === 'add') { const inp = d.querySelector('#hpci'), t = (inp.value || '').trim(); if (!t) return; l.items.push({ id: uid(), t, done: false }); save(); paint(); const n = d.querySelector('#hpci'); if (n) n.focus(); return; }
+    if (a[0] === 'ed') { const i = l.items.find(x => x.id === a[1]); if (i) ask('항목 고치기', [{ k: 't', label: '내용', val: i.t, req: 1 }], o => { i.t = o.t.trim() || i.t; save(); paint(); }); return; }
+    if (a[0] === 'del') { l.items = l.items.filter(x => x.id !== a[1]); save(); paint(); return; }
+    if (a[0] === 'up' || a[0] === 'dn') { const k = l.items.findIndex(x => x.id === a[1]), j = k + (a[0] === 'up' ? -1 : 1); if (j >= 0 && j < l.items.length) { [l.items[k], l.items[j]] = [l.items[j], l.items[k]]; save(); paint(); } return; }
+    if (a[0] === 'ren') return ask('점검표 이름', [{ k: 'n', label: '이름', val: l.name, req: 1 }], o => { l.name = o.n.trim() || l.name; save(); paint(); });
+    if (a[0] === 'daily') { l.daily = !l.daily; l.day = today(); save(); paint(); return; }
+    if (a[0] === 'clr') { l.items.forEach(i => { i.done = false; }); save(); paint(); return; }
+    if (a[0] === 'ldel') return sure('「' + l.name + '」 점검표를 지울까요?', () => { S.chkLists = L.filter(x => x.id !== l.id); cur = null; save(); paint(); });
+  });
+  const dd0 = [...document.querySelectorAll('dialog.hpdlg')].pop(); if (dd0) dd0.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.id === 'hpci') { e.preventDefault(); const b = dd0.querySelector('[data-hp=add]'); if (b) b.click(); } });
+}
+A.hpChkOpen = () => hpChkOpen();
+
+/* ---------- 모든 창: 옆 빈 화면(어두운 바깥)을 누르면 닫힘 ---------- */
+let hpDown = null;
+document.addEventListener('pointerdown', e => { hpDown = e.target; }, true);
+document.addEventListener('click', e => {
+  const d = e.target; if (!d || d.tagName !== 'DIALOG' || hpDown !== d || d.dataset.noclose) return;
+  const r = d.getBoundingClientRect(); if (e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom) return;
+  d.close();
+}, true);

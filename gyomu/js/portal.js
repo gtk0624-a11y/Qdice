@@ -54,7 +54,7 @@ function ptReceive(pages) {
     if (!pick.length) return;
     if (rv === 'save') {
       pick.forEach(p => { const old = p.url ? LIB.findIndex(x => x.from === 'portal' && x.url === p.url) : -1; const it = { id: uid(), name: '[포털] ' + p.title, kind: '교무포털', text: (p.url ? '[출처] ' + p.url + '\n\n' : '') + p.text, added: today(), from: 'portal', url: p.url, size: p.text.length }; if (old >= 0) LIB[old] = it; else LIB.push(it); });
-      await saveLib(); toast(pick.length + '쪽을 자료 보관함에 담았습니다. (자료 아카이브에서 볼 수 있어요)'); if (TF.render) TF.render();
+      await saveLib(); toast(pick.length + '쪽을 담았습니다. 이 컴퓨터 브라우저의 [자료 아카이브 → 교무포털]에 보관돼요. 파일로 옮기려면 거기서 [💾 내 컴퓨터에 저장]을 누르세요.'); if (TF.render) TF.render();
     } else {
       const c = ibxParse(pick.map(p => p.text).join('\n\n')); if (c.length) ibxPreview(c); else toast('일정이나 업무로 읽을 내용을 찾지 못했습니다.');
     }
@@ -90,12 +90,49 @@ Object.assign(A, {
   ptPaste() {
     ask('📋 복사해서 붙여넣어 담기', [{ k: 'title', label: '제목', ph: '예: 교무포털 공지 11월', req: 1 }, { k: 'text', label: '교무포털 화면에서 복사한 내용 (Ctrl+A → Ctrl+C → 여기에 Ctrl+V)', type: 'textarea', rows: 10, req: 1 }], o => ptReceive([{ title: o.title, url: '', text: o.text }]), '다음');
   },
-  ptOpen() { const u = (S.profile.portalUrl || '').trim(); if (u && /^https?:\/\//i.test(u)) window.open(u, '_blank', 'noopener'); else A.ptHelp(); }
+  ptOpen() { const u = (S.profile.portalUrl || '').trim(); if (u && /^https?:\/\//i.test(u)) extOpen(u); else A.ptHelp(); },
+  ptBox() { UI.ff = 'portal'; location.hash = '#/files'; if (TF.render) TF.render(); },
+  async ptSaveAll() {
+    const L = LIB.filter(d => d.from === 'portal'); if (!L.length) return toast('담은 포털 자료가 아직 없어요.');
+    const nm = d => d.name.replace(/[\\/:*?"<>|]/g, '_').slice(0, 80) + '.txt';
+    if (window.showDirectoryPicker) { try { const dir = await showDirectoryPicker({ mode: 'readwrite' }); const used = {}; for (const d of L) { let n = nm(d); if (used[n]) n = n.replace(/\.txt$/, '_' + (++used[n]) + '.txt'); else used[n] = 1; const w = await (await dir.getFileHandle(n, { create: true })).createWritable(); await w.write(d.text || ''); await w.close(); } return toast(L.length + '개를 고른 폴더에 저장했습니다.'); } catch (e) { if (e && e.name === 'AbortError') return; } }
+    sure(L.length + '개를 내려받기 폴더에 하나씩 저장할까요?', () => L.forEach((d, i) => setTimeout(() => ptDown(new Blob([d.text || ''], { type: 'text/plain;charset=utf-8' }), nm(d)), i * 350)));
+  }
+});
+
+
+/* ---------- 바깥 사이트는 별도 창으로 열기 (설치형 앱 창에서 그 창을 닫으면 업무파탈까지 닫히던 문제 방지) ---------- */
+function extOpen(u) { const w = window.open(u, '_blank', 'popup=yes,width=1100,height=780,left=80,top=40'); if (!w) window.open(u, '_blank'); }
+document.addEventListener('click', e => {
+  const a = e.target.closest && e.target.closest('a[target="_blank"][href^="http"]'); if (!a || e.defaultPrevented) return;
+  try { const u = new URL(a.href), base = location.pathname.replace(/[^\/]*$/, ''); if (u.origin === location.origin && u.pathname.startsWith(base)) return; } catch (x) { return; }
+  e.preventDefault(); extOpen(a.href);
+}, true);
+/* ---------- 자료 아카이브: 이동 · 내 컴퓨터에 저장 ---------- */
+ARCH_PAGES.portal = '교무포털';
+function ptDown(blob, name) { const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 60000); }
+const _fileRow0 = fileRow;
+fileRow = function (d) { const h = _fileRow0(d); return h.replace('<button class="x" data-act="docDel"', `<button class="btn sm" data-act="arcMove" data-id="${d.id}">📁 이동</button><button class="btn sm" data-act="arcSave" data-id="${d.id}">💾 내 컴퓨터에 저장</button><button class="x" data-act="docDel"`); };
+Object.assign(A, {
+  arcMove(el) {
+    const d = LIB.find(x => x.id === el.dataset.id); if (!d) return;
+    const cur = d.from || 'lib', labels = Object.keys(ARCH_PAGES).map(k => ARCH_PAGES[k]), custom = [...new Set(LIB.map(x => x.from).filter(f => f && !ARCH_PAGES[f]))];
+    ask('📁 어디로 옮길까요?', [{ k: 'to', label: '이동할 곳 (지금: ' + (ARCH_PAGES[cur] || cur) + ')', type: 'select', opts: labels.concat(custom), val: ARCH_PAGES[cur] || cur }, { k: 'nf', label: '또는 새 폴더 이름 (쓰면 위 선택보다 우선)', ph: '예: 학생인권부, 2학기 공문' }], async o => {
+      const nf = (o.nf || '').trim(), key = nf || Object.keys(ARCH_PAGES).find(k => ARCH_PAGES[k] === o.to) || o.to;
+      d.from = key; await saveLib(); toast('「' + (ARCH_PAGES[key] || key) + '」로 옮겼습니다.'); if (TF.render) TF.render();
+    }, '옮기기');
+  },
+  async arcSave(el) {
+    const d = LIB.find(x => x.id === el.dataset.id); if (!d) return;
+    const f = await idb.get('file:' + d.id), blob = f || new Blob([d.text || ''], { type: 'text/plain;charset=utf-8' }), name = (d.name || '자료').replace(/[\\/:*?"<>|]/g, '_') + (f || /\.[A-Za-z0-9]{2,5}$/.test(d.name) ? '' : '.txt');
+    if (window.showSaveFilePicker) { try { const h = await showSaveFilePicker({ suggestedName: name }); const w = await h.createWritable(); await w.write(blob); await w.close(); return toast('저장했습니다: ' + h.name); } catch (e) { if (e && e.name === 'AbortError') return; } }
+    ptDown(blob, name); toast('내려받기 폴더에 저장했습니다.');
+  }
 });
 
 const ptCard = () => { const u = (S.profile.portalUrl || '').trim(), ok = /^https?:\/\//i.test(u); return `<div class="dset"><b>🏫 교무포털 자료 담기</b> <span class="mu">(학교 안에서만 열리는 교무포털의 내용을 업무파탈로 가져옵니다)</span>
   <div class="row2c"><label>교무포털 주소 <input type="url" data-dset="portalUrl" value="${esc(u)}" placeholder="학교에서 쓰는 포털 주소(선택)"></label>${ok ? `<a class="btn sm" href="${esc(u)}" target="_blank" rel="noopener">포털 열기 ↗</a>` : ''}</div>
-  <div class="tools"><button type="button" class="btn sm pri" data-act="ptHelp">📥 담기 버튼 만들기·사용법</button><button type="button" class="btn sm" data-act="ptPaste">📋 복사해서 붙여넣어 담기</button></div></div>
+  <div class="tools"><button type="button" class="btn sm pri" data-act="ptHelp">📥 담기 버튼 만들기·사용법</button><button type="button" class="btn sm" data-act="ptPaste">📋 복사해서 붙여넣어 담기</button><button type="button" class="btn sm" data-act="ptBox">📂 담은 자료 보기·이동</button><button type="button" class="btn sm" data-act="ptSaveAll">💾 담은 자료 모두 폴더에 저장</button></div><p class="mu">담긴 자료는 이 컴퓨터 브라우저 안의 [자료 아카이브 → 교무포털]에 글자로 보관됩니다(첨부파일 원본은 링크만 담기므로, 필요한 파일은 포털에서 받아 [자료 아카이브]에 올리면 원본째 보관됩니다).</p></div>
   `; };
 const _dcpt = decoCard;
 decoCard = function () { const h = _dcpt(); return h.replace('<div class="dset"><b>💻 컴퓨터 켜면', ptCard() + '<div class="dset"><b>💻 컴퓨터 켜면'); };
