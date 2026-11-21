@@ -290,7 +290,7 @@ function render() {
   if (cbx) cbx.hidden = false;
   const [, page = 'today', arg] = (location.hash || '#/today').split('/');
   const body = { today: todayView, cal: calView, class: classView, budget: budgetView, notes: () => notesView(), note: () => notesView(arg), pages: () => pagesView(), page: () => pagesView(arg), lib: libView, files: () => (typeof filesView === 'function' ? filesView() : libView()), eval: () => (typeof evalView === 'function' ? evalView() : classView()), set: setView, arch: () => archView(arg), cm: () => (typeof cmView === 'function' ? cmView() : todayView()) }[page] || todayView;
-  app.innerHTML = masthead() + nav(page) + `<main>${typeof pageMemo === 'function' ? pageMemo(page) : ''}${body()}</main>` + footer();
+  app.innerHTML = masthead() + nav(page) + `<main>${typeof pageMemo === 'function' ? pageMemo(page) : ''}${body()}${typeof pageFiles === 'function' ? pageFiles(page) : ''}</main>` + footer();
   if (page === 'note') mountNote(arg);
   if (page === 'page') mountPage();
   window.scrollTo(0, y);

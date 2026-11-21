@@ -1716,7 +1716,7 @@ function render() {
   if (cbx) cbx.hidden = false;
   const [, page = 'today', arg] = (location.hash || '#/today').split('/');
   const body = { today: todayView, cal: calView, class: classView, budget: budgetView, notes: () => notesView(), note: () => notesView(arg), pages: () => pagesView(), page: () => pagesView(arg), lib: libView, files: () => (typeof filesView === 'function' ? filesView() : libView()), eval: () => (typeof evalView === 'function' ? evalView() : classView()), set: setView, arch: () => archView(arg), cm: () => (typeof cmView === 'function' ? cmView() : todayView()) }[page] || todayView;
-  app.innerHTML = masthead() + nav(page) + `<main>${typeof pageMemo === 'function' ? pageMemo(page) : ''}${body()}</main>` + footer();
+  app.innerHTML = masthead() + nav(page) + `<main>${typeof pageMemo === 'function' ? pageMemo(page) : ''}${body()}${typeof pageFiles === 'function' ? pageFiles(page) : ''}</main>` + footer();
   if (page === 'note') mountNote(arg);
   if (page === 'page') mountPage();
   window.scrollTo(0, y);
@@ -3192,8 +3192,8 @@ window.addEventListener('hashchange', () => setTimeout(renderAlarm, 50));
 setTimeout(renderAlarm, 300);
 
 /* 자료 아카이브 · 어디서든 붙여넣기/끌어놓기(한글·엑셀·PDF·글) · 올린 문서를 일정·업무·예산에 반영할지 묻기 */
-const ARCH_PAGES = { today: '오늘', cal: '캘린더', class: '수업', eval: '평가', budget: '예산', notes: '기록', lib: '자료·연락', files: '아카이브', pages: '페이지', set: '설정' };
-const ARCH_KINDS = ['계획서', '평가계획서', '운영표', '회의록', '공문', '규정', '교육과정', '예산', '일정', '기타'];
+const ARCH_PAGES = { today: '오늘', cal: '캘린더', class: '수업', eval: '평가', budget: '예산', notes: '기록', lib: '자료·연락', files: '아카이브', pages: '페이지', set: '설정', cm: '학급 관리' };
+const ARCH_KINDS = ['계획서', '평가계획서', '운영표', '회의록', '공문', '규정', '교육과정', '예산', '일정', '정기고사·지필고사', '수행평가', '기타'];
 const archPage = () => ((location.hash || '#/today').split('/')[1]) || 'today';
 const archBusy = () => !!document.querySelector('dialog[open]');
 function guessKind(name, page) {
@@ -3269,15 +3269,17 @@ function filesView() {
   const cnt = {}; LIB.forEach(d => cnt[d.from || 'lib'] = (cnt[d.from || 'lib'] || 0) + 1);
   return `<div class="bh"><h2>자료 아카이브</h2><span class="mu">여기서 올리거나 어느 화면에서든 올린 모든 파일이 모입니다. 원본도 함께 보관됩니다.</span></div>
   <div class="drop"><b>📎 한글·엑셀·PDF·워드 파일을 여기에 올리세요</b><p class="mu">어느 화면에서든 파일을 끌어다 놓거나 Ctrl+V로 붙여넣어도 됩니다. 올리면 일정·업무·예산에 반영할지 물어봅니다.</p>
-  <div class="tools"><select id="arcKind" aria-label="자료 종류">${ARCH_KINDS.map(k => `<option>${k}</option>`).join('')}</select><label class="btn pri file">파일 올리기<input type="file" id="arcUp" accept=".txt,.csv,.md,.xlsx,.xls,.pdf,.hwp,.hwpx,.docx" multiple hidden></label></div></div>
+  <div class="tools"><select id="arcKind" aria-label="자료 종류">${ARCH_KINDS.map(k => `<option>${k}</option>`).join('')}</select><label class="btn pri file">파일 올리기<input type="file" id="arcUp" multiple hidden></label></div></div>
   <input class="srch" id="arcQ" placeholder="파일 이름·종류·내용 검색" value="${esc(UI.fq)}" aria-label="아카이브 검색">
   <div class="clg2"><button class="chp ${f ? '' : 'on'}" data-act="arcF" data-f="">전체 ${LIB.length}</button>${Object.keys(cnt).map(k => `<button class="chp ${f === k ? 'on' : ''}" data-act="arcF" data-f="${k}">${esc(ARCH_PAGES[k] || k)} ${cnt[k]}</button>`).join('')}</div>
   ${L.map(fileRow).join('') || '<p class="mu">보관된 자료가 없습니다.</p>'}`;
 }
 /* 각 페이지 맨 아래에 "이 페이지 자료" 상자(올린 파일은 아카이브에도 같이 보관) */
+const PAGE_KIND = { budget: '예산', cal: '일정', notes: '회의록', lib: '규정', pages: '', today: '', cm: '' };
+function pageFiles(page) { return page in PAGE_KIND ? `<section class="pgfiles">${fileBox(page, PAGE_KIND[page])}</section>` : ''; }
 function fileBox(page, kind) {
   const L = LIB.filter(d => (d.from || 'lib') === page).slice(-6).reverse();
-  return `<h3 class="h3">이 화면의 자료 <span class="mu">(자료 아카이브에도 함께 보관됩니다)</span></h3><div class="tools"><label class="btn file">📎 파일 올리기<input type="file" data-fbup="${page}" data-fk="${kind || ''}" accept=".txt,.csv,.md,.xlsx,.xls,.pdf,.hwp,.hwpx,.docx" multiple hidden></label><a class="btn sm" href="#/files">자료 아카이브 전체 보기</a></div>${L.map(d => `<p class="fbl">📄 <b>${esc(d.name)}</b> <span class="mu">${esc(d.kind)} · ${d.added}</span> <button class="x" data-act="docOpen" data-id="${d.id}">원본 열기</button></p>`).join('')}`;
+  return `<h3 class="h3">이 화면의 자료 <span class="mu">(자료 아카이브에도 함께 보관됩니다)</span></h3><div class="tools"><label class="btn file">📎 파일 올리기<input type="file" data-fbup="${page}" data-fk="${kind || ''}" multiple hidden></label><a class="btn sm" href="#/files">자료 아카이브 전체 보기</a></div>${L.map(d => `<p class="fbl">📄 <b>${esc(d.name)}</b> <span class="mu">${esc(d.kind)} · ${d.added}</span> <button class="x" data-act="docOpen" data-id="${d.id}">원본 열기</button></p>`).join('')}`;
 }
 Object.assign(A, {
   arcF(el) { UI.ff = el.dataset.f; render(); },
