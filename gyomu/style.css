@@ -672,3 +672,13 @@ small.k-일정,.chp.k-일정{background:#d6e8ff}small.k-할일,.chp.k-할일{bac
 #chatpan .ch-h{cursor:grab;user-select:none}@media(max-width:560px){#chatpan .ch-h{cursor:default}}
 .ctw{overflow-x:auto}.ctb{width:100%;font-size:15.5px}.ctb th,.ctb td{padding:8px 10px!important}.ctb .dg th{background:#cfeee3!important;font-size:16px;text-align:left}.ctb tbody tr:nth-child(even):not(.dg){background:rgba(0,0,0,.03)}.ctb .dpn{color:var(--mu);font-size:13px}.ctb a{color:inherit;font-weight:700}
 @media(max-width:560px){.ctb .dpn{display:none}}
+/* 아카이브·수업·평가 */
+.drop{border:2px dashed var(--line,#cbb);border-radius:14px;padding:14px;margin:8px 0;background:rgba(255,255,255,.5)}
+body.dropping::after{content:"📎 여기에 놓으면 자료 아카이브에 보관됩니다";position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;background:rgba(255,230,160,.85);border:6px dashed #c90;pointer-events:none}
+.rfl{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}.clg2{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}.chp.on{background:#ffd54f;color:#222;font-weight:700}
+.fbl{margin:4px 0}.arc summary{cursor:pointer}.rd{max-height:240px;overflow:auto;font-size:13px;white-space:pre-wrap;background:rgba(0,0,0,.04);padding:8px;border-radius:8px}
+.steps2{background:rgba(255,224,130,.35);border-radius:12px;padding:10px 14px;margin:8px 0}.steps2 ol{margin:6px 0 0 18px;padding:0}
+.prg .prow{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:6px 0}.prg .prow .bar{flex:1 1 120px;min-width:90px}.nxt{font-size:12px;opacity:.8}
+.tbl{width:100%;border-collapse:collapse;font-size:13px}.tbl td,.tbl th{border:1px solid rgba(0,0,0,.15);padding:5px 7px;vertical-align:top}.tbl tr.gone td{opacity:.55}
+.rubt textarea,.rubt input{width:100%;box-sizing:border-box;font:inherit;font-size:12px}.rubt input.pt{width:52px}.ctw{overflow-x:auto}
+.stp1{border:1px solid rgba(0,0,0,.2);background:#fff;border-radius:999px;padding:3px 10px;margin:2px;font-size:12px;cursor:pointer}.stp1.on{background:#ffd54f;font-weight:700}.stp1.past{background:#e6f4d7}

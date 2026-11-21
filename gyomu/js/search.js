@@ -50,7 +50,7 @@ function buildChunksCur() {
     add('budget', `예산 · ${p.name} · ${l.item}`, `${p.name} ${l.item} 배정 ${won(l.alloc)}원 집행 ${won(sp)}원 잔액 ${won(l.alloc - sp)}원 집행기한 ${l.deadline || '없음'}`, '#/budget');
     (l.spends || []).forEach(s => add('budget', `예산 · ${p.name} · ${l.item} 지출`, `${s.date} ${s.desc} ${won(s.amt)}원 (${p.name} ${l.item})`, '#/budget'));
   }));
-  S.assess.forEach(a => add('assess', '수행평가', `${a.title} ${a.grade || ''} 기한 ${a.due || '미정'} 단계 ${ASSESS_STEPS[a.step || 0]}`, '#/class'));
+  S.assess.forEach(a => add('assess', '수행평가', `${a.title} ${a.grade || ''} 기한 ${a.due || '미정'} 단계 ${ASSESS_STEPS[a.step || 0]}`, '#/eval'));
   S.training.forEach(t => add('training', '연수 · ' + t.title, `${t.title} ${t.type}연수 ${t.hours}시간 ${t.done ? '이수' : '미이수'} 이수번호 ${t.certNo || '미입력'} 이수일 ${t.doneDate || '없음'} 기한 ${t.due || '없음'}`, '#/today'));
   S.lessons.forEach(l => add('lesson', '수업 진도', `${l.cls} ${l.unit} ${l.done}/${l.total}차시`, '#/class'));
   S.pages.forEach(pg => {

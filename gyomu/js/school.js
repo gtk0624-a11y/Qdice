@@ -76,7 +76,7 @@ Object.assign(A, {
   }
 });
 
-if (typeof render === 'function' && S.setup) render();
+if (typeof render === 'function' && S.setup) setTimeout(render, 0);
 
 /* 학교 정보 배너 (오늘 화면 맨 위): 누르면 메뉴(홈페이지·일주일 급식·학교 정보)가 펼쳐집니다 */
 function schoolBanner() {

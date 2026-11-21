@@ -56,7 +56,7 @@ function masthead() {
   return `<header class="mast"><div class="mast1"><img class="logo" src="${LOGO || DEFLOGO}" alt="도디쌤 이미지"><h1 data-act="editTitle" title="눌러서 제목 고치기">${esc(titleOf())}</h1><span class="fr" data-act="editTitle">${esc(p.sub || 'Travail Fatal')}</span><button class="x" data-act="editTitle" aria-label="제목 고치기">✎</button></div><div class="mast2"><div class="dt">${D[n.getDay()]} · ${n.getDate()} ${M[n.getMonth()]} ${n.getFullYear()}</div><div>${esc([p.school, p.name && p.name + ' 선생님'].filter(Boolean).join(' · '))}</div></div></header>`;
 }
 function nav(page) {
-  const L0 = [['today', '오늘'], ['cal', '캘린더'], ['class', '수업·평가'], ['budget', '예산'], ['notes', '기록'], ['pages', '페이지'], ['lib', '자료·연락'], ['set', '설정']];
+  const L0 = [['today', '오늘'], ['cal', '캘린더'], ['class', '수업'], ['eval', '평가'], ['budget', '예산'], ['notes', '기록'], ['pages', '페이지'], ['lib', '자료·연락'], ['files', '자료 아카이브'], ['set', '설정']];
   const L = typeof navOrder === 'function' ? navOrder(L0) : L0;
   return `<nav class="nav" aria-label="메뉴">${L.map(([k, v]) => `<a href="#/${k}" ${page === k || (k === 'notes' && page === 'note') || (k === 'pages' && page === 'page') ? 'aria-current="page"' : ''}>${v}</a>`).join('')}<button class="nvx" data-act="ibx">📨 메신저 붙여넣기</button></nav>`;
 }
@@ -281,7 +281,7 @@ function render() {
   if (!S.setup) { app.innerHTML = welcome(); if (cbx) cbx.hidden = true; return; }
   if (cbx) cbx.hidden = false;
   const [, page = 'today', arg] = (location.hash || '#/today').split('/');
-  const body = { today: todayView, cal: calView, class: classView, budget: budgetView, notes: () => notesView(), note: () => notesView(arg), pages: () => pagesView(), page: () => pagesView(arg), lib: libView, set: setView, arch: () => archView(arg) }[page] || todayView;
+  const body = { today: todayView, cal: calView, class: classView, budget: budgetView, notes: () => notesView(), note: () => notesView(arg), pages: () => pagesView(), page: () => pagesView(arg), lib: libView, files: () => (typeof filesView === 'function' ? filesView() : libView()), eval: () => (typeof evalView === 'function' ? evalView() : classView()), set: setView, arch: () => archView(arg) }[page] || todayView;
   app.innerHTML = masthead() + nav(page) + `<main>${body()}${typeof pageMemo === 'function' ? pageMemo(page) : ''}</main>` + footer();
   if (page === 'note') mountNote(arg);
   if (page === 'page') mountPage();
@@ -399,7 +399,7 @@ document.addEventListener('change', async e => {
   else if (t.dataset.ptotal) { const p = find('budget', t.dataset.ptotal); p.total = Math.max(0, +t.value || 0); commit(); }
   else if (t.dataset.hide) { S.hide[t.dataset.hide] = !t.checked; commit(); }
   else if (t.dataset.note === 'kind' || t.dataset.note === 'date' || t.dataset.note === 'lock') { const n = find('notes', location.hash.split('/')[2]); if (n) { n[t.dataset.note] = t.type === 'checkbox' ? t.checked : t.value; commit(); } }
-  else if (t.id === 'docUp') { const kind = $('#upk').value; for (const f of t.files) { try { toast(f.name + ' 읽는 중…'); const text = await readFile(f); { const id = uid(); LIB.push({ id, name: f.name, kind, text, added: today() }); if (typeof keepFile === 'function') await keepFile(id, f); } } catch (er) { toast(er.message); } } await saveLib(); toast('올렸습니다. 꿈송이가 이제 이 자료도 찾습니다.'); render(); }
+  else if (t.id === 'docUp') { await ingestFiles([...t.files], { kind: $('#upk').value, from: 'lib', noAsk: t.files.length > 1 }); t.value = ''; }
   else if (t.id === 'schedUp') { const f = t.files[0]; if (!f) return; try { toast('학사일정 읽는 중…'); scheduleDialog(await readFile(f)); } catch (er) { toast(er.message); } }
   else if (t.id === 'planUp') { const f = t.files[0]; if (!f) return; try { toast('계획서 읽는 중…'); const text = await readFile(f); { const id = uid(); LIB.push({ id, name: f.name, kind: '계획서', text, added: today() }); if (typeof keepFile === 'function') await keepFile(id, f); } await saveLib(); budgetDialog(text); } catch (er) { toast(er.message); } }
   else if (t.dataset.import) {

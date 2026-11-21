@@ -49,7 +49,7 @@ const KEY = DEMO ? 'travailfatal.demo' : 'travailfatal.v1';
 const DEF = () => ({
   v: 1, updatedAt: 0, setup: false,
   profile: { name: '', school: '', subject: '', classes: ['1-1', '1-2', '1-3', '2-1', '2-2', '2-3'], start: '09:00', classMin: 45, breakMin: 10, devTarget: 30 },
-  timetable: {}, items: [], lessons: [], assess: [], budget: [], training: [], notes: [], docs: {}, stk: {}, duties: [], mine: [], pmemo: {}, dayMemo: {}, docLog: [], contacts: [], links: [], pages: [], hide: {}, order: {}
+  timetable: {}, items: [], lessons: [], assess: [], exams: [], plans: [], prog: {}, rubrics: [], meetings: [],  budget: [], training: [], notes: [], docs: {}, stk: {}, duties: [], mine: [], pmemo: {}, dayMemo: {}, docLog: [], contacts: [], links: [], pages: [], hide: {}, order: {}
 });
 let S;
 try { S = Object.assign(DEF(), JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (e) { S = DEF(); }
@@ -291,7 +291,7 @@ async function readFile(f) {
   }
   if (/\.pdf$/.test(n)) {
     await loadScript('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js');
-    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    pdfjsLib.GlobalWorkerOptions.workerSrc = window.__pdfLocal ? new URL('lib/pdf.worker.min.js', document.baseURI).href : 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
     const pdf = await pdfjsLib.getDocument({ data: await f.arrayBuffer() }).promise;
     let out = '';
     for (let i = 1; i <= pdf.numPages; i++) { const pg = await pdf.getPage(i); const c = await pg.getTextContent(); out += c.items.map(x => x.str).join(' ') + '\n\f'; }

@@ -239,3 +239,9 @@ service cloud.firestore {
 - 메신저 붙여넣기 후: 날짜가 있는 항목은 모두 캘린더 항목(S.items)으로 들어가고, 첫 날짜의 달로 캘린더가 열립니다. 날짜가 있는 "내 업무"는 [업무] 할 일로도 캘린더에 들어갑니다.
 - 챗봇 창: 머리줄을 끌어 옮김(위치 localStorage `tf.chatpos`), 이름은 설정 "챗봇 이름"(S.profile.botName). 채팅창은 history에 쌓이지 않아 뒤로가기는 바로 이전 화면으로 갑니다.
 - 연락망: contactTable() — 부서별 묶음 표, 전화·내선 눌러 걸기(tel:).
+
+## 수업·평가·아카이브 (class2.js / arch.js / files2.js)
+- arch.js: `ingestFiles(files,{from,kind})` — 모든 파일 올리기의 단일 통로(읽기→LIB 저장+원본 보관→`reflectDialog`로 일정·예산·학사·시간표·운영표 반영 여부 질문). 전역 Ctrl+V 붙여넣기/끌어놓기, 자료 아카이브 화면(`filesView`), 페이지별 `fileBox(page,kind)`.
+- class2.js: `classView`(시간표 설명 + 교수학습 운영표/진도: `S.plans`,`S.prog[반]={planId,upto}`, `parsePlan`/`planFromText`, `syncProg`→`S.lessons`의 `pg-` 항목) · `evalView`(`S.exams`,`S.assess`,`S.rubrics`) · 캘린더 연동(`allEvents` 래핑).
+- files2.js: 오프라인 HWP(CFB) 파서. 자주 고칠 곳: `RUB_PRESETS`, `parsePlan` 정규식.
+- 주의: 업로드한 파일 원본은 IDB `file:<id>`에 보관(개인정보 포함 가능). 단일 빌드는 한 스크립트라 최상위 const 이름이 겹치면 안 됩니다.

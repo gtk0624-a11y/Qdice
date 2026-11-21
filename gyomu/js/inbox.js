@@ -40,6 +40,12 @@ function ibxStart() {
   ask('경기도 메신저 내용 붙여넣기', [{ k: 'text', label: '메신저 내용을 통째로 붙여넣으세요', type: 'textarea', rows: 10, req: 1 }], o => {
     const c = ibxParse(o.text || '');
     if (!c.length) return toast('일정이나 업무로 읽을 내용을 찾지 못했습니다.');
+    ibxPreview(c);
+  }, '정리하기');
+}
+/* 미리보기 창(메신저·문서 모두 여기로): 체크한 것만 일정·할 일·내 업무로 들어가고 캘린더에 반영됩니다 */
+function ibxPreview(c) {
+  {
     const d = document.createElement('dialog'); d.className = 'dlg';
     d.innerHTML = `<form method="dialog"><h3>이렇게 정리했습니다</h3><p class="mu">체크한 것만 추가됩니다. 날짜·제목·종류는 여기서 고칠 수 있습니다.</p>${c.map((x, i) => `<div class="ibx"><label class="chk"><input type="checkbox" name="c${i}" ${x.on === false ? '' : 'checked'}> 추가</label><input type="date" name="d${i}" value="${x.date}"><input name="t${i}" value="${esc(x.title)}"><select name="k${i}">${[['event', '일정'], ['todo', '할 일'], ['mine', '내 업무']].map(([v, n]) => `<option value="${v}" ${x.kind === v ? 'selected' : ''}>${n}</option>`).join('')}</select></div>`).join('')}<div class="btns"><button value="ok" class="pri">추가</button><button value="cancel" formnovalidate>취소</button></div></form>`;
     document.body.appendChild(d);
@@ -60,7 +66,7 @@ function ibxStart() {
       d.remove();
     });
     d.showModal();
-  }, '정리하기');
+  }
 }
 A.ibx = ibxStart;
 document.addEventListener('click', e => {

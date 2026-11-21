@@ -1,7 +1,7 @@
 /* dday.js — ① 디데이(직접 추가)  ② 기한 알림: 기한이 N일(기본 2일) 안으로 다가오면 화면 아래 얇은 막대로 알려 줌
    - 알림 대상: 할 일 · 수행평가 성적입력 기한 · 예산 집행 기한 · 연수 기한 · 내 디데이 (끝낸 것은 제외)
    - 서버가 없는 앱이라 "앱을 열어 둔 동안"만 알려 줍니다(브라우저 알림을 켜면 열 때 한 번 더 알림). */
-const ddList = () => (S.dday = S.dday || []);
+function ddList() { return (S.dday = S.dday || []); }
 const ALARM_KINDS = ['할 일', '평가', '예산', '연수', '디데이'];
 const alarmOff = () => parseInt((S.profile || {}).alarmDays, 10) === -1;
 const alarmDays = () => { const n = parseInt((S.profile || {}).alarmDays, 10); return n >= 0 && n <= 14 ? n : 2; };
