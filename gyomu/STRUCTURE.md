@@ -314,3 +314,13 @@ service cloud.firestore {
 - 포털 담은 자료: 자료 아카이브(LIB, IDB 'lib') → 교무포털 폴더. 📁 이동(A.arcMove), 💾 저장(A.arcSave), 모두 폴더에 저장(ptSaveAll).
 - 모든 <dialog>: 어두운 바깥 영역 클릭 시 닫힘(helper.js 끝, data-noclose로 제외).
 - 개인정보 위험: 학생 메모('stum')·HTML 슬라이드('cl:')는 기기 전용(동기화·백업 제외).
+
+## 학급 관리 (js/classmgmt.js) — 담임·교과 선택형, 학생 정보는 이 기기 전용
+- 저장: 학생 데이터 CM → IndexedDB 'cmdata'(이 기기). S(localStorage)·클라우드 동기화·일반 백업(JSON)에 들어가지 않음. 설정(메뉴 이름·켠 기능·구분 항목·안내문 틀·연동 링크)만 S.cm.
+- CM = {classes[{id,name,stu[{id,no,name,bd,tel,memo}]}], att, logs{모듈id:[]}, grid{모듈id:{반id:[항목]}}, duty[], ev[], mood, pick, list, pin(해시), fired}.
+- 기능 목록 CM_MODS(담임/교과/공통) + 사용자 정의(S.cm.custom). 켜기·끄기: S.cm.mods. 이름·구분·상태 이름은 ⚙️로 편집(S.cm.names/tags/lab).
+- 엔진: att(출결) · log(상담·특이사항 등) · grid(수합·수행평가) · duty(1인1역·청소, 요일·날짜·순환·알림 20초 타이머) · ev(행사, 파일 끌어놓기→cmEvParse) · mood · pick · list · bday · tel · tpl · prof(학생 한 장 요약).
+- 명렬: 엑셀(번호·이름·생일·보호자 연락처·메모), 시트 = 반. 양식 내려받기 A.cmTpl, 올리기 cmImportFile(lib/xlsx).
+- 챗봇: buildChunks 래핑 → type 'class', priv:true(외부 AI 전송 제외, 기기 안 검색만). PIN 잠금 중엔 제외.
+- 보안: PIN(SHA-256 해시, CM.pin), 암호 백업 .tfcm(AES-GCM, PBKDF2), 모두 지우기.
+- 개인정보 위험: 폰·PC 분실, 브라우저 데이터 삭제 시 복구 불가 → 암호 백업 안내. 기기 간 자동 이동 없음.
