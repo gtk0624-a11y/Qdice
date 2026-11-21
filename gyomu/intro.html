@@ -91,7 +91,7 @@ footer{padding:36px 0 60px;text-align:center;color:var(--sub);font-size:14px}
 </header>
 
 <nav class="sigband" aria-label="시그니처 기능">
-  <a href="#sig">① 메신저 붙여넣기</a><a href="#scan">② 손글씨 사진</a><a href="#day">③ 날짜 화면</a><a href="#tt">④ 시간표</a><a href="#ai">⑤ 꿈송이 비서</a>
+  <a href="#sig">① 메신저 붙여넣기</a><a href="#scan">② 손글씨 사진</a><a href="#day">③ 날짜 화면</a><a href="#tt">④ 시간표</a><a href="#ai">⑤ 꿈송이 비서</a><a href="#key">🔑 AI 키·비용</a>
 </nav>
 
 <section id="name">
@@ -146,7 +146,7 @@ footer{padding:36px 0 60px;text-align:center;color:var(--sub);font-size:14px}
   <p class="sec-sub">종이 수첩·포스트잇·칠판에 적은 일정을 <b>폰으로 찍어 올리면</b> 손글씨를 읽어 일정·할 일·업무(몇 교시인지도)로 나눕니다. 확인 창에서 고친 뒤 캘린더에 반영하므로 마음대로 저장되지 않습니다.</p>
   <div class="grid g2">
     <div class="card c-sky"><div class="ic">📷</div><h3>사진 → 일정·업무</h3><p>화면 왼쪽 아래 📷 버튼, 또는 날짜 화면에서 사진을 올립니다. 폰에서는 카메라가 바로 열립니다.</p></div>
-    <div class="card c-lemon"><div class="ic">🔑</div><h3>본인 Claude 키 필요</h3><p>사진 한 장에 약 1원입니다. 키 만드는 법과 비용은 아래 "AI 키" 안내를 보세요. 체험판에서는 키 없이 예시 결과가 나옵니다.</p></div>
+    <div class="card c-lemon"><div class="ic">🔑</div><h3>본인 Claude 키 필요</h3><p>사진 한 장에 약 1원입니다. 키 만드는 법과 비용은 <a href="#key">AI 키 안내</a>를 보세요. 체험판에서는 키 없이 예시 결과가 나옵니다.</p></div>
   </div>
 </section>
 
@@ -180,7 +180,24 @@ footer{padding:36px 0 60px;text-align:center;color:var(--sub);font-size:14px}
     <div class="card c-lemon"><div class="ic">🪄</div><h3>시키기 (개별 이용 · 본인 Claude 키 필요)</h3>
       <p>"내일 3시 교직원 회의 일정 넣어줘", "일반수용비에 인쇄비 5만원 집행 추가해줘", "배정액 10만원 늘려줘". 먼저 <b>"이렇게 처리할게요" 카드</b>로 보여 주고, [적용]을 눌러야 반영됩니다. 삭제는 하지 않습니다.</p></div>
   </div>
-  <div class="note" style="margin-top:14px"><b>💰 AI 키 만드는 법 · 비용 (초보용)</b>
+  <div class="note" style="margin-top:14px"><b>AI 사용 시 꼭 알아 두세요</b>
+    <ul>
+      <li><b>AI 기능은 선생님마다 개별로 이용합니다.</b> 이 사이트가 대신 비용을 내 주지 않으며, 각자 본인의 Claude 키를 발급받아 자기 기기에 넣어야 켜집니다. 키가 없어도 찾기·메신저 붙여넣기·예산 등 나머지 기능은 모두 쓸 수 있고, 체험판에서는 AI 시키기가 동작하지 않습니다.</li>
+      <li>키는 이 기기에만 저장됩니다. 사용료는 쓴 만큼만 내는 방식(저렴한 Haiku 모델 사용)이라, 충전한 금액이 곧 한도입니다.</li>
+      <li>AI를 켜면 "질문 + 일정·예산 현황"이 Anthropic 서버로 전송됩니다. <b>학생 실명·민감정보는 넣지 마세요.</b></li>
+      <li>AI는 틀릴 수 있어서 카드로 확인한 뒤 적용하도록 만들었습니다.</li>
+    </ul></div>
+</section>
+
+<section id="key">
+  <h2>🔑 AI 키 — 어디에 필요하고, 얼마나 드나요</h2>
+  <p class="sec-sub">AI 기능은 선생님마다 <b>본인 키</b>로 켭니다. 이 사이트가 대신 비용을 내 주지 않습니다. 키가 없어도 대부분의 기능은 그대로 쓸 수 있습니다.</p>
+  <div class="scroll"><table class="vs"><tr><th>기능</th><th>키</th></tr>
+    <tr><td>① 메신저 붙여넣기 · ③ 날짜 화면 · ④ 시간표(컴시간 연동·교환·공강) · 예산 · 찾기</td><td><b>필요 없음</b> (무료)</td></tr>
+    <tr><td>② 손글씨 사진 인식</td><td>필요 (사진 1장 약 1원)</td></tr>
+    <tr><td>⑤ 꿈송이에게 말로 시키기</td><td>필요 (1번 약 0.7원)</td></tr>
+  </table></div>
+  <div class="note" style="margin-top:14px"><b>💰 키 만드는 법 · 비용 (초보용)</b>
     <ol>
       <li>크롬에서 <b>console.anthropic.com</b> 에 접속해 구글 계정 등으로 가입합니다.</li>
       <li>왼쪽 메뉴 <b>Billing(결제)</b>에서 카드로 크레딧을 충전합니다. 보통 <b>최소 5달러(약 7,000원)</b>부터이고, 충전한 만큼만 쓰이며 자동으로 더 빠져나가지 않게 설정할 수 있습니다.</li>
@@ -195,13 +212,6 @@ footer{padding:36px 0 60px;text-align:center;color:var(--sub);font-size:14px}
       <li>그래서 충전한 7,000원으로 실컷 써도 <b>학기 내내 쓸 수 있는 수준</b>입니다. 한 학기에 5,000원도 안 쓰는 분이 대부분일 것으로 봅니다.</li>
     </ul>
     <p class="mu">※ 환율·가격은 바뀔 수 있고 부가세가 붙을 수 있습니다. 실제 사용액은 Anthropic 콘솔의 Usage 화면에서 확인하세요. 키는 남에게 보여 주지 마세요(유출되면 콘솔에서 바로 삭제).</p></div>
-  <div class="note" style="margin-top:14px"><b>AI 사용 시 꼭 알아 두세요</b>
-    <ul>
-      <li><b>AI 기능은 선생님마다 개별로 이용합니다.</b> 이 사이트가 대신 비용을 내 주지 않으며, 각자 본인의 Claude 키를 발급받아 자기 기기에 넣어야 켜집니다. 키가 없어도 찾기·메신저 붙여넣기·예산 등 나머지 기능은 모두 쓸 수 있고, 체험판에서는 AI 시키기가 동작하지 않습니다.</li>
-      <li>키는 이 기기에만 저장됩니다. 사용료는 쓴 만큼만 내는 방식(저렴한 Haiku 모델 사용)이라, 충전한 금액이 곧 한도입니다.</li>
-      <li>AI를 켜면 "질문 + 일정·예산 현황"이 Anthropic 서버로 전송됩니다. <b>학생 실명·민감정보는 넣지 마세요.</b></li>
-      <li>AI는 틀릴 수 있어서 카드로 확인한 뒤 적용하도록 만들었습니다.</li>
-    </ul></div>
 </section>
 
 <section id="custom">
