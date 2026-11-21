@@ -11,6 +11,7 @@ const kcls = k => 'k-' + String(k).replace(/\s/g, '');
 function allEvents() {
   const e = [];
   S.items.forEach(i => {
+    if (i.rep && i.date) { if (typeof repDates === 'function') repDates(i).forEach(d => e.push({ date: d, t: i.title + ' 🔁', kind: i.tag || '일정', id: i.id, done: false, rep: 1 })); return; }
     if (!i.date) return; const kind = i.tag || (i.cat === 'todo' ? '할 일' : (i.src === '학사' ? '학사' : '일정'));
     if (i.end && i.end > i.date) { const a = new Date(i.date + 'T00:00:00'), b = new Date(i.end + 'T00:00:00'); for (let k = 0, d = new Date(a); d <= b && k < 70; k++, d.setDate(d.getDate() + 1)) e.push({ date: ymd(d), t: `${i.title} (${md(i.date)}~${md(i.end)})`, kind, id: i.id, done: i.done, span: true }); }
     else e.push({ date: i.date, t: i.title, kind, id: i.id, done: i.done });
@@ -20,6 +21,7 @@ function allEvents() {
   S.training.forEach(t => { if (t.due) e.push({ date: t.due, t: t.title + ' (연수)', kind: '연수', done: !!t.done }); });
   (S.dday || []).forEach(x => { if (x.date) e.push({ date: x.date, t: x.title, kind: '디데이', done: false }); });
   if (typeof ypEvents === 'function') ypEvents().forEach(x => e.push(x));
+  if (typeof wkEvents === 'function') wkEvents().forEach(x => e.push(x));
   return e;
 }
 function upcoming(n) { const seen = new Set(); return allEvents().filter(e => !e.done && dd(e.date) !== null && dd(e.date) >= 0 && dd(e.date) <= n).sort((a, b) => a.date.localeCompare(b.date)).filter(e => { if (!e.span) return true; if (seen.has(e.id)) return false; seen.add(e.id); return true; }); }
@@ -57,7 +59,7 @@ function masthead() {
   return `<header class="mast"><div class="mast1"><img class="logo" src="${LOGO || DEFLOGO}" alt="도디쌤 이미지"><h1 data-act="editTitle" title="눌러서 제목 고치기">${esc(titleOf())}</h1><span class="fr" data-act="editTitle">${esc(p.sub || 'Travail Fatal')}</span><button class="x" data-act="editTitle" aria-label="제목 고치기">✎</button></div><div class="mast2"><div class="dt">${n.getFullYear()}년 ${n.getMonth() + 1}월 ${n.getDate()}일 (${DOW[n.getDay()]})</div><div>${esc([p.school, p.name && p.name + ' 선생님'].filter(Boolean).join(' · '))}</div></div></header>`;
 }
 function nav(page) {
-  const L0 = [['today', '오늘'], ['cal', '캘린더'], ['class', '수업 및 시간표'], ['eval', '평가'], ['budget', '예산'], ['notes', '기록'], ['pages', '페이지'], ['lib', '자료·연락'], ['files', '자료 아카이브'], ['yp', '연간 교육·훈련'], ...(typeof cmCfg === 'function' && cmCfg().on ? [['cm', cmCfg().title || '학급 관리']] : []), ['set', '설정']];
+  const L0 = [['today', '오늘'], ['cal', '캘린더'], ['work', '내 업무'], ['class', '수업 및 시간표'], ['eval', '평가'], ['budget', '예산'], ['notes', '기록'], ['pages', '페이지'], ['lib', '자료·연락'], ['files', '자료 아카이브'], ['yp', '연간 교육·훈련'], ...(typeof cmCfg === 'function' && cmCfg().on ? [['cm', cmCfg().title || '학급 관리']] : []), ['set', '설정']];
   const L = (typeof navOrder === 'function' ? navOrder(L0) : L0).filter(([k]) => k === 'today' || k === 'set' || k === (page === 'note' ? 'notes' : page === 'page' ? 'pages' : page) || !(S.navHide || []).includes(k));
   return `<nav class="nav" aria-label="메뉴">${L.map(([k, v]) => `<a href="#/${k}" ${page === k || (k === 'notes' && page === 'note') || (k === 'pages' && page === 'page') ? 'aria-current="page"' : ''}>${v}</a>`).join('')}<button class="nvx" data-act="navPick" title="위쪽 메뉴 고르기">☰ 메뉴 고르기</button><button class="nvx" data-act="ibx">📨 메신저 붙여넣기</button></nav>`;
 }
@@ -290,8 +292,8 @@ function render() {
   if (!S.setup) { app.innerHTML = welcome(); if (cbx) cbx.hidden = true; return; }
   if (cbx) cbx.hidden = false;
   const [, page = 'today', arg] = (location.hash || '#/today').split('/');
-  const body = { today: todayView, cal: calView, class: classView, budget: budgetView, notes: () => notesView(), note: () => notesView(arg), pages: () => pagesView(), page: () => pagesView(arg), lib: libView, files: () => (typeof filesView === 'function' ? filesView() : libView()), eval: () => (typeof evalView === 'function' ? evalView() : classView()), set: setView, arch: () => archView(arg), cm: () => (typeof cmView === 'function' ? cmView() : todayView()), yp: () => (typeof ypView === 'function' ? ypView() : todayView()) }[page] || todayView;
-  app.innerHTML = masthead() + nav(page) + `<main>${typeof pageMemo === 'function' ? pageMemo(page) : ''}${body()}${typeof pageFiles === 'function' ? pageFiles(page) : ''}</main>` + footer();
+  const body = { today: todayView, cal: calView, class: classView, budget: budgetView, notes: () => notesView(), note: () => notesView(arg), pages: () => pagesView(), page: () => pagesView(arg), lib: libView, files: () => (typeof filesView === 'function' ? filesView() : libView()), eval: () => (typeof evalView === 'function' ? evalView() : classView()), set: setView, arch: () => archView(arg), cm: () => (typeof cmView === 'function' ? cmView() : todayView()), yp: () => (typeof ypView === 'function' ? ypView() : todayView()), work: () => (typeof workView === 'function' ? workView() : todayView()) }[page] || todayView;
+  app.innerHTML = masthead() + nav(page) + `<main>${typeof backBtn === 'function' ? backBtn(page) : ''}${typeof pageMemo === 'function' ? pageMemo(page) : ''}${body()}${typeof pageFiles === 'function' ? pageFiles(page) : ''}</main>` + footer();
   if (page === 'note') mountNote(arg);
   if (page === 'page') mountPage();
   window.scrollTo(0, y);

@@ -862,3 +862,14 @@ details.sec.sub{border:1px solid var(--rule2,#ccc);border-radius:10px;margin:8px
 .cmr .chk{flex:1 1 180px;min-width:0}.cmr.chk>span,.cmr .chk>span{flex:1 1 auto;text-align:left;min-width:0}
 .cmr input[type=checkbox]{flex:0 0 auto;width:20px;height:20px;margin:0}
 .cmr>span:last-child:not(.chk span){margin-left:auto}
+/* 내 업무 카드 · 되돌리기 · 뒤로 */
+.wkg{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px;margin:6px 0 12px}
+.wkc{border:1.5px solid #333;border-radius:12px;background:#fff;padding:10px 12px;min-width:0}.wkc.oth{background:#f6f8ff;border-style:dashed}.wkc.dn{opacity:.6}
+.wkh{display:flex;gap:8px;align-items:flex-start}.wkt{word-break:keep-all;overflow-wrap:anywhere}.wkm{display:flex;flex-wrap:wrap;gap:4px;margin:6px 0;align-items:center}
+.wks{display:flex;gap:6px;align-items:center;margin:2px 0;font-size:13px}.wks.dn span{text-decoration:line-through;opacity:.6}.wks span{flex:1 1 auto;min-width:0;overflow-wrap:anywhere}
+.wkc textarea{width:100%;box-sizing:border-box;margin-top:6px;font:inherit;font-size:13px}.wkb{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.wkraw{white-space:pre-wrap;word-break:break-all;max-height:220px;overflow:auto;background:#f4f4f4;border-radius:8px;padding:8px;font-size:12px}
+.backbtn{margin:0 0 8px}.ddb{color:#c0392b}
+.qabar{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 10px}.qabar input{flex:1 1 220px;min-width:0;padding:8px 10px;border:1.5px solid #333;border-radius:10px;font:inherit}
+.wkdg{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px;margin:8px 0}.wkd{border:1.5px solid #333;border-radius:12px;background:#fff;padding:8px;min-width:0}.wkd.tdy{background:#fff8d6}.wkd.sun .wkdh{color:#c0392b}.wkd.sat .wkdh{color:#2a6fd6}
+.wkd textarea,.wkd .wkadd{width:100%;box-sizing:border-box;margin-top:6px;font:inherit;font-size:13px}.wkmt{margin:4px 0}
