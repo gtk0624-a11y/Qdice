@@ -86,7 +86,8 @@ function todayView() {
       else st = '오늘 수업이 모두 끝났습니다';
     }
     const wk = P.dow === 0 || P.dow === 6, sd = wk ? 1 : P.dow;
-    let b = `<p class="mu"><b>${wk ? '다음 수업일(월요일) 시간표' : DOW[sd] + '요일 시간표'}</b></p><div class="strip">` + [1, 2, 3, 4, 5, 6, 7].map(p => { const PL = typeof clkPeriods === 'function' ? clkPeriods() : [], nw = new Date(), mn = nw.getHours() * 60 + nw.getMinutes(), pp = PL.find(y => y.p === p), ended = !wk && pp && mn >= pp.e, THX = ['수고했어요^^', '고생했어요♡', '잘했어요!', '오늘도 굿~', '한 시간 끝!', '멋졌어요✿', '푹 쉬어요^^'], has = tt(sd, p); return `<div class="pc ${!wk && P.cur === p ? 'now' : ''} ${ended ? 'done' : ''}"><b>${p}</b>${esc(has || '—')}${ended && has ? `<span class="thx">${THX[(p * 3 + sd) % THX.length]}</span>` : ''}</div>`; }).join('') + '</div>';
+    let b = `<p class="mu"><b>${wk ? '다음 수업일(월요일) 시간표' : DOW[sd] + '요일 시간표'}</b></p><div class="strip">` + [1, 2, 3, 4, 5, 6, 7].map(p => { const PL = typeof clkPeriods === 'function' ? clkPeriods() : [], nw = new Date(), mn = nw.getHours() * 60 + nw.getMinutes(), pp = PL.find(y => y.p === p), ended = !wk && pp && mn >= pp.e, THX = ['수고했어요^^', '고생했어요♡', '잘했어요!', '오늘도 굿~', '한 시간 끝!', '멋졌어요✿', '푹 쉬어요^^'], has = tt(sd, p); return `<div class="pc ${!wk && P.cur === p ? 'now' : ''} ${ended ? 'done' : ''}" style="${typeof cellBg === 'function' && has && !ended ? cellBg(has) : ''}"><b>${p}</b>${esc(has || '—')}${ended && has ? `<span class="okm">✅ 수업 완료</span><span class="thx">${THX[(p * 3 + sd) % THX.length]}</span>` : ''}</div>`; }).join('') + '</div>';
+    if (typeof wkGrid === 'function') b += wkGrid();
     b += `<div class="tools"><a class="btn pri" href="#/class">✏️ 시간표 입력·수정하기</a><button class="btn" data-act="comci">🔄 컴시간알리미에서 가져오기</button></div><p class="mu">${has ? '시간표를 고치려면 위 버튼(수업 화면의 시간표 표)을 누르세요. 컴시간과 연동해 자동으로 가져옵니다.' : '<b>아직 시간표가 비어 있어요.</b> 위 [시간표 입력·수정하기]에서 칸에 직접 적거나, [컴시간알리미에서 가져오기]를 누르세요.'}</p>`;
     rows.push(row('r1', '오늘', '일과', st, due, b));
   }
@@ -472,7 +473,7 @@ function closeChat(viaLink) { if (!chatOpen) return; chatOpen = false; renderCha
 window.addEventListener('popstate', () => { if (chatOpen) { chatOpen = false; renderChat(); } });
 function renderChatFab() {
   const b = $('#chatfab'); if (!b) return; b.innerHTML = `<img src="${mas()}" alt="꿈송이">`;
-  if (!$('#chatbub')) { const u = document.createElement('button'); u.id = 'chatbub'; u.textContent = '무엇이든 물어보세요!'; u.addEventListener('click', () => $('#chatfab').click()); b.parentNode.insertBefore(u, b); }
+  if (!$('#chatbub')) { const u = document.createElement('button'); u.id = 'chatbub'; u.textContent = '궁금하면 눌러보세요.'; u.addEventListener('click', () => $('#chatfab').click()); b.parentNode.insertBefore(u, b); }
 }
 function chatKeyBar() {
   const has = !!localStorage.getItem('tf.claudeKey');
@@ -523,6 +524,7 @@ function sampleData() {
   S.items = [{ id: uid(), title: '2-1 수행평가 채점표 출력', date: t, cat: 'todo', done: true }, { id: uid(), title: '1-3 진도 보충 계획', date: t, cat: 'todo', done: false }, { id: uid(), title: '예산 품의 올리기', date: add(3), cat: 'todo', done: false }, { id: uid(), title: '학년말 교육과정 평가 자료 제출', date: add(10), cat: 'event', done: false }];
   S.lessons = [['1-1', 72], ['1-2', 72], ['1-3', 64], ['2-1', 80], ['2-2', 80], ['2-3', 76]].map(([c, p]) => ({ id: uid(), cls: c, unit: '2단원', done: Math.round(p / 10), total: 10 }));
   S.assess = [{ id: uid(), title: '질문 만들기 수행평가', grade: '2학년', due: add(5), step: 3 }];
+  S.exams = [{ id: uid(), title: '2학기 기말고사 도덕', grade: '2학년', date: add(19), range: 'Ⅲ단원~Ⅳ단원', ratio: 40 }]; S.postits = [{ id: uid(), text: '학생인권 연수 자료 제출', date: add(2), color: '노랑', done: false }]; S.profile.clock = true; S.profile.cheer = 'today'; S.profile.subject = '도덕'; S.profile.name = '예시';
   S.budget = [{ id: uid(), name: '학생인권부 사업', total: 0, spends: [], lines: [{ id: uid(), item: '일반수용비', alloc: 1500000, deadline: add(24), spends: [{ id: uid(), date: add(-9), desc: '인권 교육 자료 인쇄', amt: 720000 }] }, { id: uid(), item: '행사운영비', alloc: 1000000, deadline: add(29), spends: [{ id: uid(), date: add(-4), desc: '캠페인 물품', amt: 580000 }] }] }];
   S.training = [{ id: uid(), title: '정보보안 연수', type: '필수', hours: 2, due: add(9), done: false }, { id: uid(), title: '학생 인권 연수', type: '필수', hours: 2, done: true, doneDate: add(-6), certNo: '2026-인권-0382' }, { id: uid(), title: 'AI 활용 수업 연수', type: '개발', hours: 15, done: true, doneDate: add(-20), certNo: '' }];
   S.notes = [{ id: uid(), title: '11월 교직원회의', date: t, kind: '회의', body: '체육관 대관 비용은 행정실에서 확인해 알려주기로 함.\n학년말 평가 자료는 다음 달 5일까지 제출.', decisions: '평가 자료 12/5까지 제출\n행사운영비는 행정실 확인 후 집행', followups: '평가 자료 정리\n행정실에 체육관 비용 문의', lock: false }];
@@ -542,7 +544,7 @@ function sampleData() {
   if (DEMO) {
     if (!S.setup) sampleData();
     const ds = document.createElement('div'); ds.id = 'demostrip';
-    ds.innerHTML = '<b>체험판</b> · 예시 데이터입니다. 내 수첩과 분리되어 이 브라우저에만 저장돼요 <a href="./">내 수첩 시작하기 →</a> <a href="intro.html">소개 보기</a>';
+    ds.innerHTML = '<b>체험판</b> · 체험만 하는 연습용입니다. 가상의 예시 데이터이고, 입력한 내용은 이 브라우저에만 잠깐 저장돼요 <a href="intro.html">소개 보기</a>';
     document.body.insertBefore(ds, document.body.firstChild);
   }
   render();

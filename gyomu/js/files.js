@@ -69,6 +69,7 @@ function ttDialog(text) {
 /* ---- 컴시간알리미 연동 (GitHub Actions 가 매일 새벽 받아 둔 자료를 읽습니다) ---- */
 const COMCI_URL = window.TF_COMCI_URL || 'https://raw.githubusercontent.com/gtk0624-a11y/Qdice/data/comcigan.json';
 async function comciSync(silent) {
+  if (window.TF_DEMO) { if (!silent) toast('체험판에서는 실제 컴시간 대신 가상의 시간표로 체험합니다.'); return; }
   const nm = (S.profile.name || '').trim(); if (nm.length < 2) { if (!silent) toast('설정에서 내 이름을 먼저 넣어 주세요. (컴시간에는 이름이 "김정*"처럼 보입니다)'); return; }
   try {
     const r = await fetch(COMCI_URL, { cache: 'no-store' }); if (!r.ok) throw new Error('none'); const j = await r.json();
