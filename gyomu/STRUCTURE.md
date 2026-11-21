@@ -255,3 +255,7 @@ service cloud.firestore {
 - 설정의 시계 카드: [일과표 파일 올리기](한글·엑셀·PDF → `extractBell`로 읽어 기본 일과표를 그대로 교체), [행사로 일과가 바뀌었어요(붙여넣기)] → `bellFlow(text)`.
 - 행사 일과는 `S.profile.bellOv=[{from,to,label,bell,lunch,drop}]`. 오늘이 기간 안이면 `clkPeriods/clkLunch/periodInfo`가 이것을 쓰고, 기간이 지나면 `bellPrune`이 지워 원래 일과표로 자동 복귀합니다. `drop`=적지 않은 교시는 없는 것으로.
 - 파일·붙여넣기 어디서든(arch.js 반영 창/붙여넣기 창) "⏰ 일과표·행사 일과로" 버튼이 나옵니다. 고칠 곳: `bellFind`(시각 인식 정규식), `bellDates`, `bellLabel`.
+
+## 포스트잇 (postit.js)
+- `S.postits=[{id,text,date,color,done,min,x,y}]`, 전체 내리기는 `S.profile.pstDown`. 화면 오른쪽 가장자리에 쌓이고(`#pstLayer`), 머리를 끌면 자유 이동(x,y 저장). [–]=한 줄로 접기, [✓]=내리기(완료), 하단 [📌 N ▼ 내리기]=전부 숨김/올림.
+- 만들고 관리하는 곳: 오늘 화면의 「오늘 메모」 안(`pageMemo('today')` 래핑). 직접 적기 또는 앞으로의 일정에서 골라 만들기. 기한이 지나면 붉은 머리로 표시.
