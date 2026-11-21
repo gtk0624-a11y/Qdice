@@ -785,6 +785,8 @@ body[data-wt=orange] main h2,body[data-wt=orange] main .h3,.wpv[data-wt=orange]{
 body[data-wt=navy] main h2,body[data-wt=navy] main .h3,.wpv[data-wt=navy]{background:repeating-linear-gradient(0deg,#cfdcf5 0 4px,#f5f8ff 4px 8px)}
 .pstbadge{display:inline-block;margin-left:6px;padding:1px 8px;border-radius:999px;background:#fff176;border:1px solid #c9b700;font-size:12px;font-weight:800;color:#5a4a00}
 .dppst{flex:1 0 100%;font-size:14px}
+.pmemo{margin:8px 0 16px}
+.dt{font-family:inherit!important;letter-spacing:0!important;font-weight:700}
 </style>
 </head>
 <body>
@@ -1417,7 +1419,7 @@ const xbtn = (act, id, l) => `<button class="x" data-act="${act}" data-id="${id}
 function masthead() {
   const n = new Date(), M = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'], D = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
   const p = S.profile;
-  return `<header class="mast"><div class="mast1"><img class="logo" src="${LOGO || DEFLOGO}" alt="도디쌤 이미지"><h1 data-act="editTitle" title="눌러서 제목 고치기">${esc(titleOf())}</h1><span class="fr" data-act="editTitle">${esc(p.sub || 'Travail Fatal')}</span><button class="x" data-act="editTitle" aria-label="제목 고치기">✎</button></div><div class="mast2"><div class="dt">${D[n.getDay()]} · ${n.getDate()} ${M[n.getMonth()]} ${n.getFullYear()}</div><div>${esc([p.school, p.name && p.name + ' 선생님'].filter(Boolean).join(' · '))}</div></div></header>`;
+  return `<header class="mast"><div class="mast1"><img class="logo" src="${LOGO || DEFLOGO}" alt="도디쌤 이미지"><h1 data-act="editTitle" title="눌러서 제목 고치기">${esc(titleOf())}</h1><span class="fr" data-act="editTitle">${esc(p.sub || 'Travail Fatal')}</span><button class="x" data-act="editTitle" aria-label="제목 고치기">✎</button></div><div class="mast2"><div class="dt">${n.getFullYear()}년 ${n.getMonth() + 1}월 ${n.getDate()}일 (${DOW[n.getDay()]})</div><div>${esc([p.school, p.name && p.name + ' 선생님'].filter(Boolean).join(' · '))}</div></div></header>`;
 }
 function nav(page) {
   const L0 = [['today', '오늘'], ['cal', '캘린더'], ['class', '수업'], ['eval', '평가'], ['budget', '예산'], ['notes', '기록'], ['pages', '페이지'], ['lib', '자료·연락'], ['files', '자료 아카이브'], ['set', '설정']];
@@ -1653,7 +1655,7 @@ function render() {
   if (cbx) cbx.hidden = false;
   const [, page = 'today', arg] = (location.hash || '#/today').split('/');
   const body = { today: todayView, cal: calView, class: classView, budget: budgetView, notes: () => notesView(), note: () => notesView(arg), pages: () => pagesView(), page: () => pagesView(arg), lib: libView, files: () => (typeof filesView === 'function' ? filesView() : libView()), eval: () => (typeof evalView === 'function' ? evalView() : classView()), set: setView, arch: () => archView(arg) }[page] || todayView;
-  app.innerHTML = masthead() + nav(page) + `<main>${body()}${typeof pageMemo === 'function' ? pageMemo(page) : ''}</main>` + footer();
+  app.innerHTML = masthead() + nav(page) + `<main>${typeof pageMemo === 'function' ? pageMemo(page) : ''}${body()}</main>` + footer();
   if (page === 'note') mountNote(arg);
   if (page === 'page') mountPage();
   window.scrollTo(0, y);
@@ -3521,7 +3523,7 @@ function pstDraw() {
   if (!L) { L = document.createElement('div'); L.id = 'pstLayer'; document.body.appendChild(L); }
   const N = pstSorted(), down = pstDown(); L.className = down ? 'down' : '';
   if (!N.length) { L.innerHTML = ''; return; }
-  let slot = 0; const nv = document.querySelector('nav.nav'), base = innerWidth >= 1540 ? 190 : Math.max(190, ...[...document.querySelectorAll('nav.nav, .nvx')].map(e => Math.round(e.getBoundingClientRect().bottom + 16)));
+  let slot = 0; const nv = document.querySelector('nav.nav'), base = innerWidth >= 1540 ? 190 : Math.max(190, ...[...document.querySelectorAll('nav.nav, .nvx')].map(e => Math.round(e.getBoundingClientRect().bottom + 26)));
   L.innerHTML = `<button class="pst-tray" data-act="pstToggle" aria-label="${down ? '포스트잇 올리기' : '포스트잇 모두 내리기'}" aria-expanded="${!down}">📌 ${N.length}${down ? ' ▲ 올리기' : ' ▼ 내리기'}</button>` + (down ? '' : N.map(x => {
     const late = x.date && dd(x.date) < 0, pos = x.x != null ? `left:${x.x}px;top:${x.y}px;` : `right:12px;top:${base + slot++ * (x.min ? 34 : 100)}px;`;
     return `<div class="pst ${x.min ? 'min' : ''} ${late ? 'late' : ''}" data-id="${x.id}" style="${pos}background:${PST_COL[x.color] || PST_COL['노랑']};--rot:${((x.id.charCodeAt(x.id.length - 1) % 5) - 2)}deg"><div class="ph" title="끌어서 옮길 수 있어요"><b>${x.date ? esc(md(x.date)) + ' · ' + pstDday(x) : '메모'}</b><span><button data-act="pstMin" data-id="${x.id}" aria-label="${x.min ? '펼치기' : '접기'}">${x.min ? '▢' : '–'}</button><button data-act="pstDone" data-id="${x.id}" aria-label="완료(내리기)">✓</button></span></div>${x.min ? '' : `<div class="pt">${esc(x.text)}</div>`}</div>`;
@@ -3558,6 +3560,7 @@ document.addEventListener('pointermove', e => { if (!_pd) return; const w = _pd.
 document.addEventListener('pointerup', () => { if (!_pd) return; const x = pstList().find(n => n.id === _pd.n.dataset.id); if (x) { x.x = parseInt(_pd.n.style.left); x.y = parseInt(_pd.n.style.top); save(true); } _pd = null; });
 const _r1 = TF.render; TF.render = function () { const v = _r1.apply(this, arguments); pstDraw(); return v; };
 if (S.setup) pstDraw();
+let _pstT; const pstLater = () => { clearTimeout(_pstT); _pstT = setTimeout(pstDraw, 250); }; window.addEventListener('resize', pstLater); window.addEventListener('load', pstLater); setTimeout(pstDraw, 900);
 
 /* 선생님 시간표 · 나와 공강이 같은 선생님 · 수업 교환 가능 교사 · 바뀐 시간표 미리보기 · 학년별 색 · 주간(세로)/하루(가로) 시간표
    자료: 컴시간 전체 시간표(깃허브 data 가지의 comcigan.json). 컴시간에는 이름이 두 글자("김정")뿐이라 과목·겹침으로 같은 이름의 선생님을 나눕니다. */

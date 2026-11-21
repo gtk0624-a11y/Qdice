@@ -775,3 +775,5 @@ body[data-wt=orange] main h2,body[data-wt=orange] main .h3,.wpv[data-wt=orange]{
 body[data-wt=navy] main h2,body[data-wt=navy] main .h3,.wpv[data-wt=navy]{background:repeating-linear-gradient(0deg,#cfdcf5 0 4px,#f5f8ff 4px 8px)}
 .pstbadge{display:inline-block;margin-left:6px;padding:1px 8px;border-radius:999px;background:#fff176;border:1px solid #c9b700;font-size:12px;font-weight:800;color:#5a4a00}
 .dppst{flex:1 0 100%;font-size:14px}
+.pmemo{margin:8px 0 16px}
+.dt{font-family:inherit!important;letter-spacing:0!important;font-weight:700}
