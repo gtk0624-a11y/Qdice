@@ -51,6 +51,7 @@ function decoCard() {
   <div class="row2c"><label>글씨 보호막(종이 불투명도) <input type="range" min="55" max="100" step="5" data-dset="deco.dim" value="${d.dim}"> <b>${d.dim}%</b></label><label>사진 흐림 <input type="range" min="0" max="12" data-dset="deco.blur" value="${d.blur}"></label></div>
   <div class="row2c"><label class="chk"><input type="checkbox" data-dset="deco.stick" ${d.stick ? 'checked' : ''}> 모서리 스티커</label></div></div>
   <div class="dset"><b>🎀 마스킹테이프 제목</b> <span class="mu">(제목 뒤에 깔리는 띠 · 사진 꾸미기와 별개로 쓸 수 있어요)</span><div class="row2c"><select data-dset="deco.washi" aria-label="마스킹테이프 종류"><option value="" ${!d.washi ? 'selected' : ''}>사용 안 함</option>${Object.keys(WASHI).map(k => `<option value="${k}" ${d.washi === k ? 'selected' : ''}>${WASHI[k]}</option>`).join('')}</select><span class="wpv" data-wt="${d.washi || ''}">${d.washi ? '미리보기' : ''}</span></div></div>
+  ${typeof bootCard === 'function' ? bootCard() : ''}
   <div class="dset"><b>격려의 말</b> <span class="mu">(${CHEER.length}개 중 하루에 하나)</span><div class="row2c"><select data-dset="cheer" aria-label="격려의 말 표시"><option value="off" ${cm === 'off' ? 'selected' : ''}>표시 안 함</option><option value="today" ${cm === 'today' ? 'selected' : ''}>오늘 화면 맨 위에 표시</option></select></div><div class="row2c"><label class="chk"><input type="checkbox" data-dset="cheerClk" ${p.cheerClk ? 'checked' : ''}> 시계에도 격려의 말 넣기 <span class="mu">(위 선택과 함께 둘 다 켤 수 있어요 · 시계 보이기가 켜져 있어야 보입니다)</span></label></div></div></section>`;
 }
 function decoInject() {

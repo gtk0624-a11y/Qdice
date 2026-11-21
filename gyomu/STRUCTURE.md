@@ -284,3 +284,6 @@ service cloud.firestore {
 ## 마스킹테이프·포스트잇 보강
 - 설정 「🎀 마스킹테이프 제목」: `S.profile.deco.washi` = 'pink|yellow|sky|mint|purple|kraft|orange|navy'(빈 값=사용 안 함). deco.js `WASHI` 목록 + style.css `body[data-wt=…]`. 새 종류는 두 곳에 한 줄씩 추가.
 - 오늘 메모 제목 옆 「📌 포스트잇 기능 있어요」 배지(postit.js `pageMemo`). 날짜 화면: 입력 시 「포스트잇으로도 붙이기」 체크(선택), 목록 항목마다 📌 버튼(`A.dpPst`).
+
+## 부팅 시 자동 열기 (boot.js)
+- 설정 「💻 컴퓨터 켜면 자동으로 열기」: 브라우저(엣지/크롬)·대기 시간·평일만 선택 → `travail-fatal-start.bat` 생성(`bootMake`). 사용자가 `shell:startup` 폴더에 넣으면 부팅 때 `--app=주소`로 열림. 웹 페이지가 스스로 부팅 실행은 불가하므로 시작 파일 방식. 윈도우 전용, 체험판에서는 생성 안 함. 저장: S.profile.bootBr/bootWk/bootDl.
