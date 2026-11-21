@@ -45,15 +45,17 @@ function ibxStart() {
     document.body.appendChild(d);
     d.addEventListener('close', () => {
       if (d.returnValue === 'ok') {
-        const f = new FormData(d.querySelector('form')); let n = 0;
+        const f = new FormData(d.querySelector('form')); let n = 0, first = '';
         c.forEach((x, i) => {
           if (!f.get('c' + i)) return; const t = (f.get('t' + i) || '').trim(), dt = f.get('d' + i) || '', k = f.get('k' + i); if (!t) return;
-          if (k === 'mine') { S.mine.push({ id: uid(), cat: '메신저', title: t, memo: dt, done: false }); OPEN.add('r11'); }
+          if (k === 'mine') { S.mine.push({ id: uid(), cat: '메신저', title: t, memo: dt, done: false }); OPEN.add('r11'); if (dt) S.items.push({ id: uid(), title: '[업무] ' + t, date: dt, cat: 'todo', done: false }); } /* 날짜가 있는 내 업무는 캘린더에도 */
           else S.items.push({ id: uid(), title: t, date: dt || today(), cat: k, done: false });
+          if (dt && (!first || dt < first)) first = dt;
           n++;
         });
         try { localStorage.setItem('tf.open', JSON.stringify([...OPEN])); } catch (e) { }
-        commit(); toast(n + '건을 추가했습니다.');
+        if (first) { UI.cal = first.slice(0, 7); UI.day = first; location.hash = '#/cal'; } /* 추가한 첫 날짜의 캘린더로 이동 */
+        commit(); toast(n + '건을 추가했습니다. 캘린더에도 반영됐어요.');
       }
       d.remove();
     });

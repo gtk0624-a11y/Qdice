@@ -233,3 +233,9 @@ service cloud.firestore {
 **위젯** — `widget.html`은 본 앱과 같은 `localStorage`(`travailfatal.v1`)를 **읽기만** 합니다(본 앱 자료를 덮어쓰지 않으려고). `allEvents()`와 비슷한 계산이 `js/widget.js`에 복사되어 있으니 **기한 종류를 추가하면 두 곳을 같이 고치세요.**
 **자주 고칠 곳**: 알림 대상 종류 `dday.js ALARM_KINDS` / 알림 기본 일수 `alarmDays()` / 알림 막대 모양 `style.css` 끝의 `#alarmbar` / 위젯 모양 `widget.html` 안 `<style>`.
 **위험 지점**: ① 위젯·알림은 같은 브라우저·같은 주소에서만 자료를 봅니다(다른 브라우저·기기는 비어 보임). ② 닫혀 있는 동안은 알림이 가지 않습니다. ③ `sw.js`의 `FILES`에 새 파일을 넣고 `VERSION`을 올려야 설치한 앱에 반영됩니다.
+
+## 캘린더 강화·챗봇 이동·연락망 표 (js/cal2.js)
+- 캘린더: 종류별 색(CAL_KINDS, CSS `.k-종류`), 범례, 달별 "업무·일정 한눈에" 목록(calAgenda), 날짜에 마우스를 올리면 작은 일정 창(.calpop, 떼면 사라짐). 새 종류를 만들면 CAL_KINDS와 style.css 색을 같이 추가.
+- 메신저 붙여넣기 후: 날짜가 있는 항목은 모두 캘린더 항목(S.items)으로 들어가고, 첫 날짜의 달로 캘린더가 열립니다. 날짜가 있는 "내 업무"는 [업무] 할 일로도 캘린더에 들어갑니다.
+- 챗봇 창: 머리줄을 끌어 옮김(위치 localStorage `tf.chatpos`), 이름은 설정 "챗봇 이름"(S.profile.botName). 채팅창은 history에 쌓이지 않아 뒤로가기는 바로 이전 화면으로 갑니다.
+- 연락망: contactTable() — 부서별 묶음 표, 전화·내선 눌러 걸기(tel:).

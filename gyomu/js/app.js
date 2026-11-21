@@ -7,6 +7,7 @@ const OPEN = new Set(JSON.parse(localStorage.getItem('tf.open') || '["r1","r2"]'
 
 /* ---------- 공통 계산 ---------- */
 function btot() { let a = 0, s = 0; S.budget.forEach(p => { a += projAlloc(p); s += projSpent(p); }); return { a, s, b: a - s }; }
+const kcls = k => 'k-' + String(k).replace(/\s/g, '');
 function allEvents() {
   const e = [];
   S.items.forEach(i => {
@@ -68,7 +69,7 @@ function miniCal() {
   const [Y, M] = UI.cal.split('-').map(Number), first = new Date(Y, M - 1, 1), n = new Date(Y, M, 0).getDate(), by = {};
   allEvents().forEach(e => (by[e.date] = by[e.date] || []).push(e));
   let cells = ''; for (let i = 0; i < first.getDay(); i++) cells += '<span class="mc e"></span>';
-  for (let d = 1; d <= n; d++) { const ds = `${Y}-${pad(M)}-${pad(d)}`, c = (by[ds] || []).length, w = new Date(Y, M - 1, d).getDay(); cells += `<button class="mc ${ds === today() ? 'tdy' : ''} ${ds === UI.day ? 'sel' : ''} ${w === 0 ? 'sun' : ''}" data-act="calDay" data-d="${ds}" aria-label="${M}월 ${d}일"><span>${d}</span>${dayStk(ds, 2) ? `<b class="sks">${dayStk(ds, 2)}</b>` : ''}${c ? `<i>${'●'.repeat(Math.min(c, 3))}</i>` : ''}</button>`; }
+  for (let d = 1; d <= n; d++) { const ds = `${Y}-${pad(M)}-${pad(d)}`, c = (by[ds] || []).length, w = new Date(Y, M - 1, d).getDay(); cells += `<button class="mc ${ds === today() ? 'tdy' : ''} ${ds === UI.day ? 'sel' : ''} ${w === 0 ? 'sun' : ''}" data-act="calDay" data-d="${ds}" aria-label="${M}월 ${d}일"><span>${d}</span>${dayStk(ds, 2) ? `<b class="sks">${dayStk(ds, 2)}</b>` : ''}${c ? `<i>${(by[ds] || []).slice(0, 3).map(x => `<u class="${kcls(x.kind)}">●</u>`).join('')}</i>` : ''}</button>`; }
   const day = by[UI.day] || [];
   return `<section class="mcal"><div class="calh"><button class="btn sm" data-act="calMove" data-d="-1" aria-label="이전 달">‹</button><b class="calt">${Y}년 ${M}월</b><button class="btn sm" data-act="calMove" data-d="1" aria-label="다음 달">›</button><button class="btn sm" data-act="calMove" data-d="0">오늘</button></div><div class="calw">${DOW.map(d => `<span>${d}</span>`).join('')}</div><div class="mgrid">${cells}</div><div class="mday"><b>${md(UI.day)} (${DOW[new Date(UI.day + 'T00:00:00').getDay()]})</b>${day.length ? day.map(e => `<p class="${e.done ? 'dn' : ''}">· ${esc(e.t)} <span class="mu">${e.kind || ''}</span></p>`).join('') : '<p class="mu">이 날 일정이 없습니다.</p>'}<div class="mdst">${((S.stk || {})[UI.day] || []).map((s, i) => `<button class="stk" data-act="stkDayDel" data-d="${UI.day}" data-i="${i}" aria-label="스티커 떼기">${stkHtml(s)}</button>`).join('')}</div><button class="btn sm" data-act="stkDay">🎀 스티커 붙이기</button> <a href="#/cal" class="btn sm">일정 추가·학사일정 올리기</a></div></section>`;
 }
@@ -173,13 +174,13 @@ function calView() {
   for (let i = 0; i < first.getDay(); i++) cells += '<span class="cd e"></span>';
   for (let d = 1; d <= n; d++) {
     const ds = `${Y}-${pad(M)}-${pad(d)}`, e = by[ds] || [];
-    cells += `<button class="cd ${ds === today() ? 'tdy' : ''} ${ds === UI.day ? 'sel' : ''}" data-act="calDay" data-d="${ds}"><span class="n">${d}${(S.dayMemo || {})[ds] ? ' 📝' : ''}</span>${e.slice(0, 2).map(x => `<small class="${x.done ? 'dn' : ''}">${esc(x.t)}</small>`).join('')}${e.length > 2 ? `<small class="mu">+${e.length - 2}</small>` : ''}</button>`;
+    cells += `<button class="cd ${ds === today() ? 'tdy' : ''} ${ds === UI.day ? 'sel' : ''}" data-act="calDay" data-d="${ds}"><span class="n">${d}${(S.dayMemo || {})[ds] ? ' 📝' : ''}</span>${e.slice(0, 3).map(x => `<small class="${kcls(x.kind)} ${x.done ? 'dn' : ''}">${esc(x.t)}</small>`).join('')}${e.length > 3 ? `<small class="mu">+${e.length - 3}건 더</small>` : ''}</button>`;
   }
   const day = (by[UI.day] || []);
   const list = day.map(e => e.id ? `<div class="td ${e.done ? 'dn' : ''}"><button class="ck" data-act="tog" data-id="${e.id}" aria-pressed="${!!e.done}" aria-label="완료 표시"></button><span class="tl">${esc(e.t)}</span><span class="mu">${e.kind}</span>${xbtn('delItem', e.id)}</div>` : `<div class="td"><span class="ck off"></span><span class="tl">${esc(e.t)}</span><span class="mu">${e.kind}</span></div>`).join('') || '<p class="mu">이 날은 비어 있습니다.</p>';
-  return `<div class="bh"><h2>캘린더</h2><span class="mu">평가·예산·연수 기한이 자동으로 모입니다.</span></div>
+  return `<div class="bh"><h2>캘린더</h2><span class="mu">일정·할 일·평가·예산·연수 기한이 색으로 구분되어 자동으로 모입니다. 날짜에 마우스를 올려 보세요.</span></div>
   <div class="calh"><button class="btn sm" data-act="calMove" data-d="-1" aria-label="이전 달">‹</button><b class="calt">${Y}년 ${M}월</b><button class="btn sm" data-act="calMove" data-d="1" aria-label="다음 달">›</button><button class="btn sm" data-act="calMove" data-d="0">오늘</button></div>
-  <div class="calw">${DOW.map(d => `<span>${d}</span>`).join('')}</div><div class="cal">${cells}</div>
+  ${typeof calLegend === 'function' ? calLegend() : ''}<div class="calw">${DOW.map(d => `<span>${d}</span>`).join('')}</div><div class="cal">${cells}</div>${typeof calAgenda === 'function' ? calAgenda(ev) : ''}
   <div class="tools"><label class="btn file">학사일정 파일 올리기<input type="file" id="schedUp" accept=".txt,.csv,.xlsx,.xls,.pdf,.hwp,.hwpx,.docx" hidden></label><button class="btn" data-act="schedPaste">학사일정 붙여넣기</button></div><p class="mu">학사일정(PDF·엑셀·텍스트, 또는 나이스·홈페이지에서 복사한 글)을 넣으면 날짜와 행사를 찾아 캘린더에 한꺼번에 넣어 드립니다. 「3/2 입학식」「7.21~8.20 여름방학」 같은 줄을 알아봅니다.</p>
   <h3 class="h3">${md(UI.day)} (${DOW[new Date(UI.day + 'T00:00:00').getDay()]})</h3>${list}
   ${typeof dayMemoBox === 'function' ? dayMemoBox(UI.day) : ''}
@@ -241,7 +242,7 @@ function libView() {
   return `<div class="bh"><h2>자료·연락</h2><span class="mu">여기에 올린 모든 내용은 꿈송이가 찾아 줍니다.</span></div>
   ${typeof mineBody === 'function' ? '<h3 class="h3">내 업무</h3>' + mineBody() : ''}<h3 class="h3">업무 분장표</h3><table class="tbl"><thead><tr><th>부서</th><th>업무</th><th>담당</th><th></th></tr></thead><tbody>${S.duties.map(d => `<tr class="${d.mine ? 'mine' : ''}"><td>${esc(d.dept)}</td><td>${esc(d.work)}</td><td>${esc(d.who)}${d.mine ? ' <b class="hot">나</b>' : ''}</td><td class="act"><button class="x" data-act="edit_duties" data-id="${d.id}">수정</button>${xbtn('del_duties', d.id)}</td></tr>`).join('')}</tbody></table>
   <div class="tools"><button class="btn sm" data-act="add_duties">+ 한 줄 추가</button><label class="btn sm file">표 파일로 한 번에 넣기<input type="file" data-import="duties" accept=".csv,.xlsx,.xls,.txt,.hwp,.hwpx,.docx" hidden></label></div><p class="mu">표 파일은 열 순서가 부서 · 업무 · 담당자입니다. 첫 줄 제목은 알아서 건너뜁니다.</p>
-  <h3 class="h3">교내 연락망</h3><input class="srch" id="cq" placeholder="이름·부서·내선 검색" value="${esc(UI.q)}" aria-label="연락망 검색"><table class="tbl"><thead><tr><th>부서</th><th>이름</th><th>내선</th><th>전화</th><th></th></tr></thead><tbody>${C.map(c => `<tr><td>${esc(c.dept)}</td><td>${esc(c.name)}</td><td>${esc(c.ext)}</td><td>${esc(c.phone)}</td><td class="act"><button class="x" data-act="edit_contacts" data-id="${c.id}">수정</button>${xbtn('del_contacts', c.id)}</td></tr>`).join('')}</tbody></table>
+  <h3 class="h3">교내 연락망 <span class="mu">${C.length}명</span></h3><input class="srch" id="cq" placeholder="이름·부서·내선 검색" value="${esc(UI.q)}" aria-label="연락망 검색">${contactTable(C)}
   <div class="tools"><button class="btn sm" data-act="add_contacts">+ 한 줄 추가</button><label class="btn sm file">표 파일로 한 번에 넣기<input type="file" data-import="contacts" accept=".csv,.xlsx,.xls,.txt,.hwp,.hwpx,.docx" hidden></label></div><p class="mu">열 순서: 부서 · 이름 · 내선 · 전화. 개인 전화번호는 이 기기·내 계정에만 저장됩니다.</p>
   <h3 class="h3">자료실 (계획서·회의록·규정·교육과정)</h3><div class="tools"><select id="upk" aria-label="자료 종류"><option>계획서</option><option>회의록</option><option>규정</option><option>교육과정</option><option>기타</option></select><label class="btn file">파일 올리기<input type="file" id="docUp" accept=".txt,.csv,.md,.xlsx,.xls,.pdf,.hwp,.hwpx,.docx" multiple hidden></label></div><p class="mu">한글(hwp·hwpx)·워드·PDF·엑셀·텍스트를 읽어 글자를 뽑아 저장합니다(원본 파일도 이 기기에 저장되어 [원본 열기]로 다시 열 수 있습니다. 엑셀은 [표로 바로 보기]). 아래 목록에서 펼치면 제목·표·목록이 보기 편하게 정리되어 나옵니다.</p>
   ${LIB.map(d => `<details class="doc"><summary><b>${esc(d.name)}</b> <span class="mu">${esc(d.kind)} · ${d.text.length.toLocaleString()}자 · ${d.added}</span></summary><div class="rd">${readable(d.text.slice(0, 60000))}</div><div class="tools"><button class="btn sm pri" data-act="docOpen" data-id="${d.id}">📂 원본 열기</button>${/\.(xlsx?|csv)$/i.test(d.name) ? `<button class="btn sm" data-act="docSheet" data-id="${d.id}">📊 표로 바로 보기</button>` : ''}<button class="btn sm" data-act="docBig" data-id="${d.id}">🔍 크게 보기</button></div><button class="btn sm" data-act="docBudget" data-id="${d.id}">예산 후보 뽑기</button><button class="x" data-act="docDel" data-id="${d.id}">삭제</button></details>`).join('') || '<p class="mu">아직 올린 자료가 없습니다.</p>'}`;
@@ -258,7 +259,7 @@ function setView() {
   const p = S.profile, sy = TF.sync.info, rowsT = [['r1', '일과'], ['r2', '할 일'], ['r3', '공문'], ['r4', '수업 진도'], ['r5', '수행평가'], ['r6', '예산'], ['r7', '연수'], ['r8', '기록'], ['r9', '업무 분장표'], ['r10', '교내 연락망'], ['r11', '내 업무'], ['r12', '급식'], ['r13', '디데이·기한 알림'], ['sb', '학교 배너']];
   return `<div class="bh"><h2>설정</h2></div>
   <div class="qk"><b>꾸미기 바로가기</b><button class="btn" data-act="skinToggle">화면 스타일: ${S.profile.skin === 'classic' ? '기존 수첩 → 플래너로' : '플래너 → 기존 수첩으로'}</button><button class="btn" data-act="ordPick">↕ 화면 순서</button><a class="btn" href="#fontsec" data-go="fontsec">글씨체 바꾸기 ↓</a><a class="btn" href="#fontsec" data-go="themesec">디자인·색 ↓</a></div>
-  <form data-form="profile" class="fm"><h3 class="h3">내 정보</h3><label>이름<input name="name" value="${esc(p.name)}"></label><label>학교<input name="school" value="${esc(p.school)}"></label><label>교과<input name="subject" value="${esc(p.subject)}"></label><label>담당 반 (쉼표로)<input name="classes" value="${esc(p.classes.join(', '))}"></label><label>1교시 시작<input name="start" type="time" value="${p.start}"></label><label>수업 시간(분)<input name="classMin" type="number" value="${p.classMin}"></label><label>쉬는 시간(분)<input name="breakMin" type="number" value="${p.breakMin}"></label><label>개발 연수 목표(시간)<input name="devTarget" type="number" value="${p.devTarget}"></label><button class="btn pri">저장</button></form>
+  <form data-form="profile" class="fm"><h3 class="h3">내 정보</h3><label>이름<input name="name" value="${esc(p.name)}"></label><label>학교<input name="school" value="${esc(p.school)}"></label><label>교과<input name="subject" value="${esc(p.subject)}"></label><label>담당 반 (쉼표로)<input name="classes" value="${esc(p.classes.join(', '))}"></label><label>1교시 시작<input name="start" type="time" value="${p.start}"></label><label>수업 시간(분)<input name="classMin" type="number" value="${p.classMin}"></label><label>쉬는 시간(분)<input name="breakMin" type="number" value="${p.breakMin}"></label><label>개발 연수 목표(시간)<input name="devTarget" type="number" value="${p.devTarget}"></label><label>챗봇 이름<input name="botName" value="${esc(p.botName || '꿈송이 · 업무파탈 줍줍')}" placeholder="꿈송이 · 업무파탈 줍줍"></label><button class="btn pri">저장</button></form>
   <h3 class="h3">오늘 게시판에 보일 줄</h3><div class="hides">${rowsT.map(([k, v]) => `<label class="chk"><input type="checkbox" data-hide="${k}" ${S.hide[k] ? '' : 'checked'}> ${v}</label>`).join('')}</div>
   <h3 class="h3">꿈송이</h3><div class="tools"><div class="mas"><img src="${mas()}" alt="꿈송이"></div><label class="btn file">챗봇 꿈송이 그림 바꾸기<input type="file" id="masUp" accept="image/*" hidden></label>${MASCOT ? '<button class="btn" data-act="masDel">기본 꿈송이로</button>' : ''}</div>
   <form data-form="claude" class="fm"><label>Claude 열쇠(선택) — 넣으면 꿈송이가 찾은 자료를 문장으로 다듬어 답합니다<input name="key" type="password" value="${esc(localStorage.getItem('tf.claudeKey') || '')}" placeholder="sk-ant-…" autocomplete="off"></label><p class="mu">열쇠는 이 기기에만 저장됩니다. 켜면 "질문 + 찾은 자료 조각"이 Anthropic 서버로 전송됩니다(잠금 노트는 제외). 학생 이름이 든 자료는 올리지 마세요.</p><button class="btn">저장</button></form>
@@ -379,7 +380,7 @@ const FM = {
     lines.forEach(t => { if (!S.items.some(i => i.title === t && i.date === d)) S.items.push({ id: uid(), title: t, date: d, cat: 'todo', done: false }); });
     commit(); toast(`할 일 ${lines.length}건을 보냈습니다.`);
   },
-  profile(f) { const o = Object.fromEntries(new FormData(f)); Object.assign(S.profile, { name: o.name, school: o.school, subject: o.subject, classes: o.classes.split(',').map(s => s.trim()).filter(Boolean), start: o.start || '09:00', classMin: +o.classMin || 45, breakMin: +o.breakMin || 10, devTarget: +o.devTarget || 30 }); commit(); toast('저장했습니다.'); },
+  profile(f) { const o = Object.fromEntries(new FormData(f)); Object.assign(S.profile, { name: o.name, school: o.school, subject: o.subject, classes: o.classes.split(',').map(s => s.trim()).filter(Boolean), start: o.start || '09:00', classMin: +o.classMin || 45, breakMin: +o.breakMin || 10, devTarget: +o.devTarget || 30, botName: (o.botName || '').trim() }); commit(); toast('저장했습니다.'); },
   claude(f) { const k = new FormData(f).get('key').trim(); k ? localStorage.setItem('tf.claudeKey', k) : localStorage.removeItem('tf.claudeKey'); toast(k ? 'Claude 열쇠를 저장했습니다.' : '열쇠를 지웠습니다.'); },
   welcome(f) { const o = Object.fromEntries(new FormData(f)); Object.assign(S.profile, { name: o.name, school: o.school, subject: o.subject, classes: o.classes.split(',').map(s => s.trim()).filter(Boolean) }); S.setup = true; location.hash = '#/today'; commit(); }
 };
@@ -461,9 +462,10 @@ function scheduleDialog(text) {
 /* ---------- 꿈송이 챗봇 ---------- */
 const CH = [{ role: 'bot', blocks: [], text: '안녕하세요, 꿈송이입니다. 올려 두신 계획서·예산·회의록·업무 분장·연락망·규정 안에서 찾아 드립니다. 말이 대충이어도 괜찮아요.' }];
 let chatOpen = false, busy = false;
-function openChat() { if (chatOpen) return; chatOpen = true; try { history.pushState({ tfChat: 1 }, '', location.href); } catch (e) { } renderChat(); setTimeout(() => { const q = $('#chq'); q && q.focus(); }, 50); }
-function closeChat(viaLink) { if (!chatOpen) return; chatOpen = false; renderChat(); if (!viaLink && history.state && history.state.tfChat) history.back(); }
-window.addEventListener('popstate', e => { if (chatOpen) { chatOpen = false; renderChat(); } else if (e.state && e.state.tfChat) history.back(); });
+function openChat() { if (chatOpen) return; chatOpen = true; renderChat(); setTimeout(() => { const q = $('#chq'); q && q.focus(); }, 50); }
+function closeChat(viaLink) { if (!chatOpen) return; chatOpen = false; renderChat(); }
+/* 뒤로가기는 채팅창에 가로채이지 않고 바로 이전 화면으로 간다(채팅창은 history에 넣지 않음) */
+window.addEventListener('popstate', () => { if (chatOpen) { chatOpen = false; renderChat(); } });
 function renderChatFab() {
   const b = $('#chatfab'); if (!b) return; b.innerHTML = `<img src="${mas()}" alt="꿈송이">`;
   if (!$('#chatbub')) { const u = document.createElement('button'); u.id = 'chatbub'; u.textContent = '무엇이든 물어보세요!'; u.addEventListener('click', () => $('#chatfab').click()); b.parentNode.insertBefore(u, b); }
@@ -476,7 +478,7 @@ function chatKeyBar() {
 function renderChat() {
   const p = $('#chatpan'); p.hidden = !chatOpen; if (!chatOpen) return;
   p.style.setProperty('--mas', `url("${mas()}")`);
-  p.innerHTML = `<div class="ch-h"><span class="ch-face"><img src="${mas()}" alt=""></span><div><b>꿈송이 · 업무파탈 줍줍</b><span>수첩 안의 모든 기록에서 찾아요</span></div><button class="x" data-chat="close" aria-label="닫기">닫기</button></div>
+  p.innerHTML = `<div class="ch-h"><span class="ch-face"><img src="${mas()}" alt=""></span><div><b>${esc(S.profile.botName || '꿈송이 · 업무파탈 줍줍')}</b><span>수첩 안의 모든 기록에서 찾아요</span></div><button class="x" data-chat="close" aria-label="닫기">닫기</button></div>
   <div class="ch-b" id="chlog">${CH.length ? '' : `<div class="hello"><img src="${mas()}" alt="꿈송이"><div class="bb"><b>안녕하세요, 꿈송이예요!</b><br>회의록·계획서·예산·일정·연락망·연수 이수번호까지, 이 수첩에 적은 건 뭐든 물어보세요. 말을 대충 해도 찾아 드려요.</div></div>`}${CH.map((m, mi) => m.role === 'me' ? `<div class="me">${esc(m.text)}</div>` : `<div class="bot">${m.text ? `<p>${esc(m.text).replace(/\n/g, '<br>')}</p>` : ''}${typeof agentCard === 'function' && m.act ? agentCard(m, mi) : ''}${(m.blocks || []).map((b, i) => `<div class="hit"><span class="no">${i + 1}</span><div><div>${b.html || snippet(b.text, m.q || '')}</div><div class="src">출처: ${esc(b.src)} ${b.ref ? `<a href="${esc(b.ref)}" ${/^http/.test(b.ref) ? 'target="_blank" rel="noopener"' : 'data-chat="go"'}>원문 열기</a>` : ''}</div></div></div>`).join('')}${m.blocks && m.blocks.length || m.text.length > 60 ? `<div class="ch-act"><button class="x" data-chat="copy" data-i="${mi}">복사</button><button class="x" data-chat="export" data-i="${mi}">문서로 내보내기</button><button class="x" data-chat="print" data-i="${mi}">인쇄·PDF</button></div>` : ''}</div>`).join('')}${busy ? '<div class="bot"><p class="mu">찾는 중…</p></div>' : ''}</div>
   <div class="ch-q">${['내 담당 업무', '예산 잔액', '이번 주 마감', '연수 이수 현황'].map(s => `<button class="chip" data-chat="ask" data-q="${s}">${s}</button>`).join('')}</div>
   ${chatKeyBar()}
