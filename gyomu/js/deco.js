@@ -25,13 +25,13 @@ function clkDraw() {
   if (!on) { if (el) el.remove(); return; }
   if (!el) { el = document.createElement('div'); el.id = 'tfclock'; el.setAttribute('role', 'status'); document.body.appendChild(el); }
   const n = new Date(), st = clkState();
-  el.className = 'clk-' + st.cls; el.innerHTML = `<div class="ct">${clkHM(n.getHours() * 60 + n.getMinutes())}</div><div class="cd2">${n.getMonth() + 1}월 ${n.getDate()}일 (${DOW[n.getDay()]})</div><div class="cb">${esc(st.big)}</div><div class="cs">${esc(st.sub)}</div>`;
+  el.className = 'clk-' + st.cls; el.innerHTML = `<div class="ct">${clkHM(n.getHours() * 60 + n.getMinutes())}</div><div class="cd2">${n.getMonth() + 1}월 ${n.getDate()}일 (${DOW[n.getDay()]})</div><div class="cb">${esc(st.big)}</div><div class="cs">${esc(st.sub)}</div>${S.profile.cheerClk ? `<div class="cc">💌 ${esc(cheerPick(_cheerShift))}</div>` : ''}`; document.body.classList.toggle('hascc', !!S.profile.cheerClk);
 }
 setInterval(clkDraw, 15000);
 /* ---------- 다꾸 ---------- */
 const DEC = () => (S.profile.deco = S.profile.deco || { on: false, dim: 70, blur: 2, washi: false, stick: false });
 async function decoApply() {
-  const d = DEC(), b = document.body; b.classList.toggle('deco-on', !!d.on); b.classList.toggle('deco-washi', !!(d.on && d.washi)); b.classList.toggle('deco-stick', !!(d.on && d.stick));
+  const d = DEC(), b = document.body; b.classList.toggle('deco-on', !!d.on); b.classList.toggle('deco-stick', !!(d.on && d.stick));
   let st = document.getElementById('decoCss'); if (!st) { st = document.createElement('style'); st.id = 'decoCss'; document.head.appendChild(st); }
   let url = ''; if (d.on) { try { url = (await idb.get('deco')) || ''; } catch (e) { } }
   st.textContent = d.on ? `:root{--decoA:${(+d.dim || 70) / 100}}${url ? `body.deco-on::before{background-image:url("${url}");filter:blur(${+d.blur || 0}px)}` : ''}` : '';
@@ -48,8 +48,8 @@ function decoCard() {
   <div class="dset"><label class="chk"><input type="checkbox" data-dset="deco.on" ${d.on ? 'checked' : ''}> <b>꾸미기(다꾸) 켜기</b> — 우리 반 단체사진 같은 사진을 배경으로 깝니다. 글씨는 반투명 종이 위에 놓여서 사진 때문에 읽기 어렵지 않아요.</label>
   <div class="row2c"><label class="btn sm file">📷 배경 사진 고르기<input type="file" accept="image/*" data-decophoto hidden></label><button class="x" data-act="decoPhotoDel">사진 지우기</button></div>
   <div class="row2c"><label>글씨 보호막(종이 불투명도) <input type="range" min="55" max="100" step="5" data-dset="deco.dim" value="${d.dim}"> <b>${d.dim}%</b></label><label>사진 흐림 <input type="range" min="0" max="12" data-dset="deco.blur" value="${d.blur}"></label></div>
-  <div class="row2c"><label class="chk"><input type="checkbox" data-dset="deco.washi" ${d.washi ? 'checked' : ''}> 마스킹테이프 제목</label><label class="chk"><input type="checkbox" data-dset="deco.stick" ${d.stick ? 'checked' : ''}> 모서리 스티커</label></div></div>
-  <div class="dset"><b>격려의 말</b> <span class="mu">(${CHEER.length}개 중 하루에 하나)</span><div class="row2c"><select data-dset="cheer" aria-label="격려의 말 표시"><option value="off" ${cm === 'off' ? 'selected' : ''}>표시 안 함</option><option value="today" ${cm === 'today' ? 'selected' : ''}>오늘 화면 맨 위에 표시</option></select></div></div></section>`;
+  <div class="row2c"><label class="chk"><input type="checkbox" data-dset="deco.stick" ${d.stick ? 'checked' : ''}> 모서리 스티커</label></div></div>
+  <div class="dset"><b>격려의 말</b> <span class="mu">(${CHEER.length}개 중 하루에 하나)</span><div class="row2c"><select data-dset="cheer" aria-label="격려의 말 표시"><option value="off" ${cm === 'off' ? 'selected' : ''}>표시 안 함</option><option value="today" ${cm === 'today' ? 'selected' : ''}>오늘 화면 맨 위에 표시</option></select></div><div class="row2c"><label class="chk"><input type="checkbox" data-dset="cheerClk" ${p.cheerClk ? 'checked' : ''}> 시계에도 격려의 말 넣기 <span class="mu">(위 선택과 함께 둘 다 켤 수 있어요 · 시계 보이기가 켜져 있어야 보입니다)</span></label></div></div></section>`;
 }
 function decoInject() {
   const h = location.hash || '#/today', main = document.querySelector('#app main'); if (!main || !S.setup) return;
@@ -59,7 +59,7 @@ function decoInject() {
 new MutationObserver(() => { decoInject(); }).observe(document.getElementById('app'), { childList: true, subtree: true });
 window.addEventListener('hashchange', () => setTimeout(decoInject, 30));
 Object.assign(A, {
-  cheerNext() { _cheerShift++; const c = document.querySelector('.cheer span'); if (c) c.textContent = '💌 ' + cheerPick(_cheerShift); },
+  cheerNext() { _cheerShift++; const c = document.querySelector('.cheer span'); if (c) c.textContent = '💌 ' + cheerPick(_cheerShift); clkDraw(); },
   decoPhotoDel() { idb.del('deco').then(() => { decoApply(); toast('배경 사진을 지웠습니다.'); }); }
 });
 document.addEventListener('change', async e => {
