@@ -4093,7 +4093,7 @@ function drBegin(item, e, o) {
     if (ev.pointerId !== e.pointerId) return;
     if (!on) { const dist = Math.hypot(ev.clientX - sx, ev.clientY - sy); if (touchHold) { if (dist > 8) end(true); return; } if (dist < 6) return; act(); }
     ev.preventDefault();
-    const over = [...par.children].find(c => { if (c === item || !c.matches(o.sel)) return false; const q = c.getBoundingClientRect(); return ev.clientX >= q.left && ev.clientX <= q.right && ev.clientY >= q.top && ev.clientY <= q.bottom; });
+    const over = [...par.children].find(c => { if (c === item || !c.matches(o.sel)) return false; const q = c.getBoundingClientRect(); return (o.axis === 'y' || (ev.clientX >= q.left && ev.clientX <= q.right)) && (o.axis === 'x' || (ev.clientY >= q.top && ev.clientY <= q.bottom)); });
     if (!over) return;
     const r = over.getBoundingClientRect(); let after = o.axis === 'x' ? ev.clientX > r.left + r.width / 2 : ev.clientY > r.top + r.height / 2;
     if (o.fixedLast && over.matches(o.fixedLast) && after) after = false; /* 설정 메뉴는 항상 맨 끝 */
