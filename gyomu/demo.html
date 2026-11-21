@@ -714,6 +714,7 @@ body.deco-stick #app::after{content:"⭐ 🌷 ☁️";position:absolute;top:-14p
 .calh{display:flex;align-items:center;gap:8px;flex-wrap:nowrap}.calh .calt{flex:1 1 auto;min-width:0;text-align:center;font-size:clamp(16px,2.2vw,22px)!important;white-space:nowrap;margin:0 4px}.calh .btn{flex:0 0 auto;min-width:34px;padding:4px 8px;line-height:1}
 .mcal .calh{gap:4px}.mcal .calh .calt{font-size:17px!important}
 .calh .calt,.mcal .calt{min-width:0!important;width:auto!important;overflow:visible}.mcal .calh .btn{min-width:30px!important;padding:4px 7px!important}
+.exbox{margin:6px 0 10px;padding:8px 10px;border-radius:10px;background:rgba(255,224,130,.3)}.exbox p{margin:3px 0}
 </style>
 </head>
 <body>
@@ -1411,8 +1412,9 @@ function todayView() {
     const A = [...S.assess].sort((a, b) => (a.due || '9').localeCompare(b.due || '9')), nx = A.find(a => (a.step || 0) < 5);
     const st = nx ? `${esc(nx.title)} · <b>${ASSESS_STEPS[nx.step || 0]}</b> 단계` : (A.length ? '모든 평가가 확정되었습니다' : '평가를 등록해 보세요');
     const b = A.map(a => `<div class="as"><div class="ah"><b>${esc(a.title)}</b> <span class="mu">${esc(a.grade || '')} ${a.due ? '· 입력기한 ' + md(a.due) + ' ' + ddText(dd(a.due)) : ''}</span> <button class="x" data-act="edit_assess" data-id="${a.id}">수정</button>${xbtn('del_assess', a.id)}</div><div class="steps">${ASSESS_STEPS.map((s, i) => `<button class="stp1 ${i === (a.step || 0) ? 'on' : ''} ${i < (a.step || 0) ? 'past' : ''}" data-act="assessStep" data-id="${a.id}" data-s="${i}">${s}</button>`).join('')}</div></div>`).join('') + `<button class="btn sm" data-act="add_assess">+ 수행평가 추가</button>`;
-    const EX = (S.exams || []).filter(x => x.date && x.date >= t).sort((a, b) => a.date.localeCompare(b.date)), exh = EX.slice(0, 3).map(x => `<p class="mu">📝 정기고사 ${md(x.date)} ${ddText(dd(x.date))} · ${esc(x.title)}</p>`).join('');
-    rows.push(row('r5', '성적', '평가', EX.length ? `${st} · 정기고사 ${ddText(dd(EX[0].date))}` : st, nx && nx.due ? md(nx.due) + ' ' + ddText(dd(nx.due)) : '', exh + b + '<p class="mu"><a href="#/eval">평가 화면에서 정기고사·수행평가·평가계획서·루브릭 관리 →</a></p>'));
+    const EXall = [...(S.exams || [])].sort((a, b) => (a.date || '9').localeCompare(b.date || '9')), EX = EXall.filter(x => x.date && x.date >= t),
+      exh = `<div class="exbox"><b>📝 정기고사</b>${EXall.map(x => `<p class="mu">${x.date ? md(x.date) + ' ' + (x.date >= t ? ddText(dd(x.date)) : '(지남)') : '날짜 미정'} · ${esc(x.title)}${x.range ? ' · ' + esc(x.range) : ''} <button class="x" data-act="edit_exams" data-id="${x.id}">수정</button></p>`).join('') || '<p class="mu">등록된 정기고사가 없습니다.</p>'}<button class="btn sm" data-act="add_exams">+ 정기고사 추가</button></div>`;
+    rows.push(row('r5', '성적', '평가', (EX.length ? `${st} · 정기고사 ${ddText(dd(EX[0].date))}` : (EXall.length ? st : st + ' · 정기고사 미등록')), nx && nx.due ? md(nx.due) + ' ' + ddText(dd(nx.due)) : '', exh + '<b>📋 수행평가</b>' + b + '<p class="mu"><a href="#/eval">평가 화면에서 정기고사·수행평가·평가계획서·루브릭 관리 →</a></p>'));
   }
   /* 예산 */
   {

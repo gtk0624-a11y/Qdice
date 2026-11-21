@@ -704,3 +704,4 @@ body.deco-stick #app::after{content:"⭐ 🌷 ☁️";position:absolute;top:-14p
 .calh{display:flex;align-items:center;gap:8px;flex-wrap:nowrap}.calh .calt{flex:1 1 auto;min-width:0;text-align:center;font-size:clamp(16px,2.2vw,22px)!important;white-space:nowrap;margin:0 4px}.calh .btn{flex:0 0 auto;min-width:34px;padding:4px 8px;line-height:1}
 .mcal .calh{gap:4px}.mcal .calh .calt{font-size:17px!important}
 .calh .calt,.mcal .calt{min-width:0!important;width:auto!important;overflow:visible}.mcal .calh .btn{min-width:30px!important;padding:4px 7px!important}
+.exbox{margin:6px 0 10px;padding:8px 10px;border-radius:10px;background:rgba(255,224,130,.3)}.exbox p{margin:3px 0}
