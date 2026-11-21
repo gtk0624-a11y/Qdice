@@ -1293,7 +1293,7 @@ function extractSchedule(text, sy) {
 
 'use strict';
 /* ===== 업무파탈 app.js : 화면 · 동작 =====
-   읽는 순서: 맨 위 공통 계산 → 화면(오늘/캘린더/수업·평가/예산/기록/자료·연락/설정) → 동작(A) → 폼(FM) → 꿈송이 → 시작 */
+   읽는 순서: 맨 위 공통 계산 → 화면(오늘/캘린더/수업/평가/예산/기록/자료·연락/설정) → 동작(A) → 폼(FM) → 꿈송이 → 시작 */
 const ASSESS_STEPS = ['계획', '안내', '수행', '채점', '입력', '확정'];
 const UI = { cal: today().slice(0, 7), day: today(), q: '' };
 const OPEN = new Set(JSON.parse(localStorage.getItem('tf.open') || '["r1","r2"]'));
@@ -1371,7 +1371,7 @@ function todayView() {
   /* 일과 */
   {
     const has = Object.keys(S.timetable).some(k => S.timetable[k]);
-    let st = '시간표가 비어 있습니다 → 수업·평가에서 "컴시간에서 가져오기"', due = '';
+    let st = '시간표가 비어 있습니다 → 아래 [시간표 입력·수정하기]', due = '';
     if (has) {
       if (P.dow === 0 || P.dow === 6) st = '주말입니다';
       else if (P.cur) { st = `${P.cur}교시 ${esc(tt(P.dow, P.cur) || '공강')} 진행 중`; due = P.cur < 7 ? '다음 ' + (P.cur + 1) + '교시' : ''; }
@@ -1379,7 +1379,7 @@ function todayView() {
       else st = '오늘 수업이 모두 끝났습니다';
     }
     let b = '<div class="strip">' + [1, 2, 3, 4, 5, 6, 7].map(p => `<div class="pc ${P.cur === p ? 'now' : ''}"><b>${p}</b>${esc(tt(P.dow, p) || '—')}</div>`).join('') + '</div>';
-    b += '<p class="mu">시간표는 컴시간알리미를 보고 한 번만 입력해 두면 매일 자동으로 보입니다.</p>';
+    b += `<div class="tools"><a class="btn pri" href="#/class">✏️ 시간표 입력·수정하기</a><button class="btn" data-act="comci">🔄 컴시간알리미에서 가져오기</button></div><p class="mu">${has ? '시간표를 고치려면 위 버튼(수업 화면의 시간표 표)을 누르세요. 컴시간과 연동해 자동으로 가져옵니다.' : '<b>아직 시간표가 비어 있어요.</b> 위 [시간표 입력·수정하기]에서 칸에 직접 적거나, [컴시간알리미에서 가져오기]를 누르세요.'}</p>`;
     rows.push(row('r1', '오늘', '일과', st, due, b));
   }
   /* 할 일 */
@@ -1399,18 +1399,20 @@ function todayView() {
   }
   /* 수업 진도 */
   {
-    const L = S.lessons, avg = L.length ? Math.round(L.reduce((a, l) => a + lessonPct(l), 0) / L.length) : 0;
+    const L = S.lessons.some(l => String(l.id).startsWith('pg-')) ? S.lessons.filter(l => String(l.id).startsWith('pg-')) : S.lessons, avg = L.length ? Math.round(L.reduce((a, l) => a + lessonPct(l), 0) / L.length) : 0;
     const slow = L.filter(l => lessonPct(l) < avg - 5);
     const st = L.length ? `${L.length}개 반 평균 ${avg}%${slow.length ? ` · <span class="hot">${slow.map(l => l.cls).join('·')} 느림</span>` : ''}` : '반별 진도를 입력해 보세요';
     const b = L.map(l => `<div class="ls"><span class="lc">${esc(l.cls)}</span><span class="lu">${esc(l.unit)}</span>${bar(lessonPct(l), lessonPct(l) < avg - 5)}<span class="num">${l.done}/${l.total}</span><button class="btn sm" data-act="lessonStep" data-id="${l.id}" data-d="-1" aria-label="한 차시 줄이기">−</button><button class="btn sm" data-act="lessonStep" data-id="${l.id}" data-d="1" aria-label="한 차시 나감">+1차시</button></div>`).join('') + `<button class="btn sm" data-act="add_lessons">+ 진도 추가</button>`;
-    rows.push(row('r4', '수업', '수업 진도', st, '', b));
+    const nxL = (S.profile.classes || []).map(c => { const pl = typeof planOf === 'function' && planOf(c); if (!pl) return ''; const up = (S.prog[c] || {}).upto || 0, n = pl.rows.find(r => r.n > up); return n ? `<p class="mu">${esc(c)} 다음 ${n.n}차시: ${esc(n.topic)}</p>` : ''; }).join('');
+    rows.push(row('r4', '교과', '수업', st, '', b + nxL + '<p class="mu"><a href="#/class">수업 화면에서 시간표·교수학습 운영표·진도 관리 →</a></p>'));
   }
   /* 평가 */
   {
     const A = [...S.assess].sort((a, b) => (a.due || '9').localeCompare(b.due || '9')), nx = A.find(a => (a.step || 0) < 5);
-    const st = nx ? `${esc(nx.title)} · <b>${ASSESS_STEPS[nx.step || 0]}</b> 단계` : (A.length ? '모든 평가가 확정되었습니다' : '수행평가를 등록해 보세요');
+    const st = nx ? `${esc(nx.title)} · <b>${ASSESS_STEPS[nx.step || 0]}</b> 단계` : (A.length ? '모든 평가가 확정되었습니다' : '평가를 등록해 보세요');
     const b = A.map(a => `<div class="as"><div class="ah"><b>${esc(a.title)}</b> <span class="mu">${esc(a.grade || '')} ${a.due ? '· 입력기한 ' + md(a.due) + ' ' + ddText(dd(a.due)) : ''}</span> <button class="x" data-act="edit_assess" data-id="${a.id}">수정</button>${xbtn('del_assess', a.id)}</div><div class="steps">${ASSESS_STEPS.map((s, i) => `<button class="stp1 ${i === (a.step || 0) ? 'on' : ''} ${i < (a.step || 0) ? 'past' : ''}" data-act="assessStep" data-id="${a.id}" data-s="${i}">${s}</button>`).join('')}</div></div>`).join('') + `<button class="btn sm" data-act="add_assess">+ 수행평가 추가</button>`;
-    rows.push(row('r5', '평가', '수행평가', st, nx && nx.due ? md(nx.due) + ' ' + ddText(dd(nx.due)) : '', b));
+    const EX = (S.exams || []).filter(x => x.date && x.date >= t).sort((a, b) => a.date.localeCompare(b.date)), exh = EX.slice(0, 3).map(x => `<p class="mu">📝 정기고사 ${md(x.date)} ${ddText(dd(x.date))} · ${esc(x.title)}</p>`).join('');
+    rows.push(row('r5', '성적', '평가', EX.length ? `${st} · 정기고사 ${ddText(dd(EX[0].date))}` : st, nx && nx.due ? md(nx.due) + ' ' + ddText(dd(nx.due)) : '', exh + b + '<p class="mu"><a href="#/eval">평가 화면에서 정기고사·수행평가·평가계획서·루브릭 관리 →</a></p>'));
   }
   /* 예산 */
   {
@@ -1549,7 +1551,7 @@ function archView(id) {
   return `<div class="bh"><h2>${esc(a.label)} <span class="mu">(읽기 전용)</span></h2></div><p class="mu">지금 데이터와 섞이지 않는 보관본입니다. 꿈송이에게 "${esc(a.label)} 예산 뭐였지"처럼 물어도 찾아 줍니다.</p>` + (keys.length ? keys.map(k => `<details class="tg"><summary>${esc(k)} <span class="mu">${g[k].length}건</span></summary><div class="tgb">${g[k].map(t => `<p>${esc(t).replace(/\n/g, '<br>')}</p>`).join('')}</div></details>`).join('') : '<p class="mu">내용이 없습니다.</p>');
 }
 function setView() {
-  const p = S.profile, sy = TF.sync.info, rowsT = [['r1', '일과'], ['r2', '할 일'], ['r3', '공문'], ['r4', '수업 진도'], ['r5', '수행평가'], ['r6', '예산'], ['r7', '연수'], ['r8', '기록'], ['r9', '업무 분장표'], ['r10', '교내 연락망'], ['r11', '내 업무'], ['r12', '급식'], ['r13', '디데이·기한 알림'], ['sb', '학교 배너']];
+  const p = S.profile, sy = TF.sync.info, rowsT = [['r1', '일과'], ['r2', '할 일'], ['r3', '공문'], ['r4', '수업'], ['r5', '평가'], ['r6', '예산'], ['r7', '연수'], ['r8', '기록'], ['r9', '업무 분장표'], ['r10', '교내 연락망'], ['r11', '내 업무'], ['r12', '급식'], ['r13', '디데이·기한 알림'], ['sb', '학교 배너']];
   return `<div class="bh"><h2>설정</h2></div>
   <div class="qk"><b>꾸미기 바로가기</b><button class="btn" data-act="skinToggle">화면 스타일: ${S.profile.skin === 'classic' ? '기존 수첩 → 플래너로' : '플래너 → 기존 수첩으로'}</button><button class="btn" data-act="ordPick">↕ 화면 순서</button><a class="btn" href="#fontsec" data-go="fontsec">글씨체 바꾸기 ↓</a><a class="btn" href="#fontsec" data-go="themesec">디자인·색 ↓</a></div>
   <form data-form="profile" class="fm"><h3 class="h3">내 정보</h3><label>이름<input name="name" value="${esc(p.name)}"></label><label>학교<input name="school" value="${esc(p.school)}"></label><label>교과<input name="subject" value="${esc(p.subject)}"></label><label>담당 반 (쉼표로)<input name="classes" value="${esc(p.classes.join(', '))}"></label><label>1교시 시작<input name="start" type="time" value="${p.start}"></label><label>수업 시간(분)<input name="classMin" type="number" value="${p.classMin}"></label><label>쉬는 시간(분)<input name="breakMin" type="number" value="${p.breakMin}"></label><label>개발 연수 목표(시간)<input name="devTarget" type="number" value="${p.devTarget}"></label><label>챗봇 이름<input name="botName" value="${esc(p.botName || '꿈송이 · 업무파탈 줍줍')}" placeholder="꿈송이 · 업무파탈 줍줍"></label><button class="btn pri">저장</button></form>
@@ -2418,7 +2420,7 @@ document.addEventListener('input', e => {
 });
 
 /* 게시판에 보일 줄 고르기: 체크하면 보이고, 빼면 숨겨집니다 (바로 반영) */
-const BOARD_ROWS = [['sb', '🏫 학교 배너 (홈페이지·급식)'], ['r1', '일과'], ['r2', '할 일'], ['r3', '공문'], ['r4', '수업 진도'], ['r5', '수행평가'], ['r6', '예산'], ['r7', '연수'], ['r8', '기록'], ['r9', '업무 분장표'], ['r11', '내 업무'], ['r12', '급식'], ['r10', '교내 연락망']];
+const BOARD_ROWS = [['sb', '🏫 학교 배너 (홈페이지·급식)'], ['r1', '일과'], ['r2', '할 일'], ['r3', '공문'], ['r4', '수업'], ['r5', '평가'], ['r6', '예산'], ['r7', '연수'], ['r8', '기록'], ['r9', '업무 분장표'], ['r11', '내 업무'], ['r12', '급식'], ['r10', '교내 연락망']];
 Object.assign(A, {
   rowPick() {
     const d = document.createElement('dialog'); d.className = 'dlg';
@@ -2772,7 +2774,7 @@ Object.assign(A, {
 });
 
 /* 화면 순서 바꾸기: 오늘 게시판의 줄 순서 + 위쪽 메뉴 순서. 사람마다 중요한 것이 다르므로 직접 정합니다. */
-const ORD_ROWS = [['r1', '일과'], ['r2', '할 일'], ['r3', '공문'], ['r4', '수업 진도'], ['r5', '수행평가'], ['r6', '예산'], ['r7', '연수'], ['r8', '기록'], ['r9', '업무 분장표'], ['r11', '내 업무'], ['r12', '급식'], ['r10', '교내 연락망'], ['r13', '디데이·기한 알림']];
+const ORD_ROWS = [['r1', '일과'], ['r2', '할 일'], ['r3', '공문'], ['r4', '수업'], ['r5', '평가'], ['r6', '예산'], ['r7', '연수'], ['r8', '기록'], ['r9', '업무 분장표'], ['r11', '내 업무'], ['r12', '급식'], ['r10', '교내 연락망'], ['r13', '디데이·기한 알림']];
 const ORD_NAV = [['today', '오늘'], ['cal', '캘린더'], ['class', '수업'], ['eval', '평가'], ['budget', '예산'], ['notes', '기록'], ['pages', '페이지'], ['lib', '자료·연락'], ['files', '자료 아카이브']];
 const ORD_PRESETS = {
   '업무 중심': { rows: ['r3', 'r2', 'r9', 'r11', 'r1', 'r6', 'r7', 'r5', 'r4', 'r8', 'r12', 'r10'], nav: ['today', 'cal', 'budget', 'notes', 'lib', 'class', 'pages'] },
