@@ -724,3 +724,19 @@ table.wk td small{display:block;font-size:10px;font-weight:700}table.wk td.mk-ne
 .wkd{margin:10px 0}.wkd summary{cursor:pointer}.gcrow{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:8px 0}.gcrow input[type=color]{width:34px;height:26px;padding:0;border:1px solid #999;border-radius:6px;vertical-align:middle}
 .tbox{border:2px solid #333;border-radius:14px;padding:10px 14px;margin:12px 0;background:rgba(255,255,255,.55)}.swp{margin-top:10px;padding:10px;border-radius:10px;background:rgba(255,245,200,.6)}.swg{display:grid;grid-template-columns:1fr 1fr;gap:12px}@media(max-width:760px){.swg{grid-template-columns:1fr}}.fbl.pk{background:rgba(255,224,130,.5)}
 .pc .okm{display:block;font-size:10.5px;font-weight:800;color:#2e9e5b;margin-top:2px}
+/* 날짜 화면 */
+dialog.daypg{width:min(94vw,640px);max-height:90vh;overflow:auto;padding:14px 16px}
+.dph{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}.dph b{font-size:20px}.dph4{margin:14px 0 6px}
+.dpf{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}.dpf input[name=title]{flex:1 1 180px}.dpsk{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0}.sk.big{position:relative;display:inline-block}.sk.big img{height:48px}.sk.big .em{font-size:36px}.sk.big .x{position:absolute;top:-8px;right:-8px;font-size:11px;background:#fff;border-radius:50%;width:20px;height:20px;padding:0}
+.dpimg{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}.dpim{position:relative}.dpim img{height:90px;border-radius:8px;border:1px solid #ccc;cursor:zoom-in}.dpim .x{position:absolute;top:-6px;right:-6px;background:#fff;border-radius:50%;width:20px;height:20px;padding:0}
+.cd .cdk{position:absolute;right:2px;bottom:1px;display:flex;gap:1px;font-size:13px;line-height:1;pointer-events:none}.cd .cdk img{height:16px}.cd{position:relative}
+.scfab{position:fixed;left:12px;bottom:14px;z-index:40;background:#fff;border:2px solid #f0a;border-radius:24px;padding:8px 12px;font-size:20px;box-shadow:0 2px 8px #0003;cursor:pointer;display:flex;gap:6px;align-items:center}.scfab span{font-size:13px;font-weight:700}
+.scr{display:flex;flex-wrap:wrap;gap:4px;margin:6px 0;align-items:center}.scr input[data-f=title]{flex:1 1 160px}
+@media(max-width:600px){.scfab span{display:none}}
+/* 하루 시간표: 한 줄 + 요일 탭 */
+.strip{flex-wrap:nowrap!important;overflow-x:auto;gap:6px;padding-bottom:4px}.strip .pc{flex:1 0 82px;min-width:82px;padding:8px 6px}
+.tdtabs{display:flex;gap:6px;margin:6px 0 8px;flex-wrap:wrap}.tdtabs button{border:1px solid var(--rule);background:#fff;border-radius:10px;padding:5px 12px;font-weight:700;cursor:pointer;display:flex;flex-direction:column;align-items:center;line-height:1.15;color:var(--ink)}.tdtabs button small{font-weight:400;font-size:11px;color:var(--mu)}.tdtabs button.on{background:var(--red);border-color:var(--red);color:#fff}.tdtabs button.on small{color:#fff}.tdtabs button.tdy:not(.on){border-color:var(--red)}
+/* 말풍선: 꿈송이 머리 위 */
+#chatbub{right:16px!important;bottom:116px!important;max-width:calc(100vw - 32px)!important;overflow:visible!important}
+#chatbub::after{right:36px!important;bottom:-9px!important;border:8px solid transparent!important;border-top-color:var(--ink)!important;border-bottom:0!important}
+html[data-nav=bottom] #chatbub{bottom:180px!important}

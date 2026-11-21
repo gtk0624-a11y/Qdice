@@ -264,3 +264,9 @@ service cloud.firestore {
 - 컴시간 전체 자료(`COMCI_URL`의 data 가지 comcigan.json, localStorage `tf.comci.all`에 6시간 캐시) → `PEOPLE`. 컴시간은 이름이 두 글자뿐이라 같은 이름은 「과목별 4시간 이상 + 같은 칸 겹침」이면 다른 사람으로 나눕니다(자율·동아리 칸은 양쪽에 같이 표시).
 - 수업 화면 ③: 선생님 이름 검색→시간표, 나와 공강이 같은 선생님 순위, 수업 교환(같은 반의 다른 교과 시간과 맞바꾸기)·대강 가능 교사, 바뀐 시간표 미리보기·요청 문구 복사. 학년별 색은 `S.profile.gcol`(수업 화면에서 변경), 오늘 화면에 주간(세로) 시간표 `wkGrid`.
 - 체험판(`TF_DEMO`)은 `cmcDemo()`가 만든 가상 학교·선생님으로 같은 기능을 체험합니다(실제 학교 자료 요청 없음). 개인정보: 다른 선생님 시간표는 학교 공개 시간표 자료입니다.
+
+## 날짜 화면 · 손글씨 사진 (daypg.js, scan.js)
+- daypg.js: 캘린더 날짜 클릭(`A.calDay` 래핑) → `<dialog id="daypg">`. 일정/할 일/업무 입력(→`S.items`, 업무는 제목 앞 `[업무] `), 날짜 메모(`S.dayMemo`), 스티커(`S.stk`, 이 화면에서만 붙이기), 사진(`S.dayImg[date]`=목록, 원본은 IDB `dimg:<id>`, 기기 전용). 달력 칸에는 스티커 2개·🖼 표시만. 아래 기존 칸은 그대로.
+- scan.js: 📷 손글씨 사진 → Claude Haiku 비전(본인 키 `tf.claudeKey`) → 확인 창(종류·날짜·시각·제목 수정, 체크) → `S.items` 추가. 체험판은 예시 결과. 사진은 1600px로 줄여 전송(학생 정보 주의).
+- app.js 오늘 카드: 시간표는 한 줄(가로 스크롤), 월~금 탭+날짜(`UI.tdDay`, `A.tdDay`). 말풍선 `#chatbub`은 꿈송이 머리 위(style.css 끝).
+- 수정 위치: 프롬프트=scan.js `scanRun`, 사진 크기=`scImg`.

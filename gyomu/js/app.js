@@ -85,8 +85,10 @@ function todayView() {
       else if (P.next) { st = `다음 ${P.next}교시 ${esc(tt(P.dow, P.next) || '공강')}`; due = ''; }
       else st = '오늘 수업이 모두 끝났습니다';
     }
-    const wk = P.dow === 0 || P.dow === 6, sd = wk ? 1 : P.dow;
-    let b = `<p class="mu"><b>${wk ? '다음 수업일(월요일) 시간표' : DOW[sd] + '요일 시간표'}</b></p><div class="strip">` + [1, 2, 3, 4, 5, 6, 7].map(p => { const PL = typeof clkPeriods === 'function' ? clkPeriods() : [], nw = new Date(), mn = nw.getHours() * 60 + nw.getMinutes(), pp = PL.find(y => y.p === p), ended = !wk && pp && mn >= pp.e, THX = ['수고했어요^^', '고생했어요♡', '잘했어요!', '오늘도 굿~', '한 시간 끝!', '멋졌어요✿', '푹 쉬어요^^'], has = tt(sd, p); return `<div class="pc ${!wk && P.cur === p ? 'now' : ''} ${ended ? 'done' : ''}" style="${typeof cellBg === 'function' && has && !ended ? cellBg(has) : ''}"><b>${p}</b>${esc(has || '—')}${ended && has ? `<span class="okm">✅ 수업 완료</span><span class="thx">${THX[(p * 3 + sd) % THX.length]}</span>` : ''}</div>`; }).join('') + '</div>';
+    const wk = P.dow === 0 || P.dow === 6, sd = UI.tdDay || (wk ? 1 : P.dow), isT = !wk && sd === P.dow;
+    const mon = new Date(); mon.setHours(0, 0, 0, 0); mon.setDate(mon.getDate() - ((mon.getDay() + 6) % 7) + (wk ? 7 : 0)); const dd = d => { const x = new Date(mon); x.setDate(x.getDate() + d - 1); return (x.getMonth() + 1) + '/' + x.getDate(); };
+    const tabs = `<div class="tdtabs" role="tablist">` + [1, 2, 3, 4, 5].map(d => `<button class="${d === sd ? 'on' : ''}${!wk && d === P.dow ? ' tdy' : ''}" role="tab" aria-selected="${d === sd}" data-act="tdDay" data-d="${d}">${DOW[d]}<small>${dd(d)}</small></button>`).join('') + '</div>';
+    let b = `<p class="mu"><b>${DOW[sd]}요일(${dd(sd)}) 시간표${isT ? ' · 오늘' : wk && sd === 1 && !UI.tdDay ? ' · 다음 수업일' : ''}</b></p>${tabs}<div class="strip">` + [1, 2, 3, 4, 5, 6, 7].map(p => { const PL = typeof clkPeriods === 'function' ? clkPeriods() : [], nw = new Date(), mn = nw.getHours() * 60 + nw.getMinutes(), pp = PL.find(y => y.p === p), ended = isT && pp && mn >= pp.e, THX = ['수고했어요^^', '고생했어요♡', '잘했어요!', '오늘도 굿~', '한 시간 끝!', '멋졌어요✿', '푹 쉬어요^^'], has = tt(sd, p); return `<div class="pc ${isT && P.cur === p ? 'now' : ''} ${ended ? 'done' : ''}" style="${typeof cellBg === 'function' && has && !ended ? cellBg(has) : ''}"><b>${p}</b>${esc(has || '—')}${ended && has ? `<span class="okm">✅ 수업 완료</span><span class="thx">${THX[(p * 3 + sd) % THX.length]}</span>` : ''}</div>`; }).join('') + '</div>';
     if (typeof wkGrid === 'function') b += wkGrid();
     b += `<div class="tools"><a class="btn pri" href="#/class">✏️ 시간표 입력·수정하기</a><button class="btn" data-act="comci">🔄 컴시간알리미에서 가져오기</button></div><p class="mu">${has ? '시간표를 고치려면 위 버튼(수업 화면의 시간표 표)을 누르세요. 컴시간과 연동해 자동으로 가져옵니다.' : '<b>아직 시간표가 비어 있어요.</b> 위 [시간표 입력·수정하기]에서 칸에 직접 적거나, [컴시간알리미에서 가져오기]를 누르세요.'}</p>`;
     rows.push(row('r1', '오늘', '일과', st, due, b));
@@ -328,6 +330,7 @@ const A = {
   lessonAll() { S.profile.classes.forEach(c => { if (!S.lessons.some(l => l.cls === c)) S.lessons.push({ id: uid(), cls: c, unit: '1단원', done: 0, total: 10 }); }); commit(); },
   assessStep(el) { const a = find('assess', el.dataset.id); if (a) { a.step = +el.dataset.s; commit(); } },
   trToggle(el) { const x = find('training', el.dataset.id); if (x) { x.done = !x.done; x.doneDate = x.done ? today() : ''; commit(); if (x.done) toast('이수 처리했습니다. 이수번호를 입력해 주세요.'); } },
+  tdDay(el) { UI.tdDay = +el.dataset.d; render(); },
   calDay(el) { UI.day = el.dataset.d; render(); },
   calMove(el) { const d = +el.dataset.d; if (!d) { UI.cal = today().slice(0, 7); UI.day = today(); } else { const [Y, M] = UI.cal.split('-').map(Number), n = new Date(Y, M - 1 + d, 1); UI.cal = `${n.getFullYear()}-${pad(n.getMonth() + 1)}`; } render(); },
   /* 예산 */

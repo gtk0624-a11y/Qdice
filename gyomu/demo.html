@@ -734,6 +734,22 @@ table.wk td small{display:block;font-size:10px;font-weight:700}table.wk td.mk-ne
 .wkd{margin:10px 0}.wkd summary{cursor:pointer}.gcrow{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:8px 0}.gcrow input[type=color]{width:34px;height:26px;padding:0;border:1px solid #999;border-radius:6px;vertical-align:middle}
 .tbox{border:2px solid #333;border-radius:14px;padding:10px 14px;margin:12px 0;background:rgba(255,255,255,.55)}.swp{margin-top:10px;padding:10px;border-radius:10px;background:rgba(255,245,200,.6)}.swg{display:grid;grid-template-columns:1fr 1fr;gap:12px}@media(max-width:760px){.swg{grid-template-columns:1fr}}.fbl.pk{background:rgba(255,224,130,.5)}
 .pc .okm{display:block;font-size:10.5px;font-weight:800;color:#2e9e5b;margin-top:2px}
+/* 날짜 화면 */
+dialog.daypg{width:min(94vw,640px);max-height:90vh;overflow:auto;padding:14px 16px}
+.dph{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}.dph b{font-size:20px}.dph4{margin:14px 0 6px}
+.dpf{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}.dpf input[name=title]{flex:1 1 180px}.dpsk{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0}.sk.big{position:relative;display:inline-block}.sk.big img{height:48px}.sk.big .em{font-size:36px}.sk.big .x{position:absolute;top:-8px;right:-8px;font-size:11px;background:#fff;border-radius:50%;width:20px;height:20px;padding:0}
+.dpimg{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}.dpim{position:relative}.dpim img{height:90px;border-radius:8px;border:1px solid #ccc;cursor:zoom-in}.dpim .x{position:absolute;top:-6px;right:-6px;background:#fff;border-radius:50%;width:20px;height:20px;padding:0}
+.cd .cdk{position:absolute;right:2px;bottom:1px;display:flex;gap:1px;font-size:13px;line-height:1;pointer-events:none}.cd .cdk img{height:16px}.cd{position:relative}
+.scfab{position:fixed;left:12px;bottom:14px;z-index:40;background:#fff;border:2px solid #f0a;border-radius:24px;padding:8px 12px;font-size:20px;box-shadow:0 2px 8px #0003;cursor:pointer;display:flex;gap:6px;align-items:center}.scfab span{font-size:13px;font-weight:700}
+.scr{display:flex;flex-wrap:wrap;gap:4px;margin:6px 0;align-items:center}.scr input[data-f=title]{flex:1 1 160px}
+@media(max-width:600px){.scfab span{display:none}}
+/* 하루 시간표: 한 줄 + 요일 탭 */
+.strip{flex-wrap:nowrap!important;overflow-x:auto;gap:6px;padding-bottom:4px}.strip .pc{flex:1 0 82px;min-width:82px;padding:8px 6px}
+.tdtabs{display:flex;gap:6px;margin:6px 0 8px;flex-wrap:wrap}.tdtabs button{border:1px solid var(--rule);background:#fff;border-radius:10px;padding:5px 12px;font-weight:700;cursor:pointer;display:flex;flex-direction:column;align-items:center;line-height:1.15;color:var(--ink)}.tdtabs button small{font-weight:400;font-size:11px;color:var(--mu)}.tdtabs button.on{background:var(--red);border-color:var(--red);color:#fff}.tdtabs button.on small{color:#fff}.tdtabs button.tdy:not(.on){border-color:var(--red)}
+/* 말풍선: 꿈송이 머리 위 */
+#chatbub{right:16px!important;bottom:116px!important;max-width:calc(100vw - 32px)!important;overflow:visible!important}
+#chatbub::after{right:36px!important;bottom:-9px!important;border:8px solid transparent!important;border-top-color:var(--ink)!important;border-bottom:0!important}
+html[data-nav=bottom] #chatbub{bottom:180px!important}
 </style>
 </head>
 <body>
@@ -1398,8 +1414,10 @@ function todayView() {
       else if (P.next) { st = `다음 ${P.next}교시 ${esc(tt(P.dow, P.next) || '공강')}`; due = ''; }
       else st = '오늘 수업이 모두 끝났습니다';
     }
-    const wk = P.dow === 0 || P.dow === 6, sd = wk ? 1 : P.dow;
-    let b = `<p class="mu"><b>${wk ? '다음 수업일(월요일) 시간표' : DOW[sd] + '요일 시간표'}</b></p><div class="strip">` + [1, 2, 3, 4, 5, 6, 7].map(p => { const PL = typeof clkPeriods === 'function' ? clkPeriods() : [], nw = new Date(), mn = nw.getHours() * 60 + nw.getMinutes(), pp = PL.find(y => y.p === p), ended = !wk && pp && mn >= pp.e, THX = ['수고했어요^^', '고생했어요♡', '잘했어요!', '오늘도 굿~', '한 시간 끝!', '멋졌어요✿', '푹 쉬어요^^'], has = tt(sd, p); return `<div class="pc ${!wk && P.cur === p ? 'now' : ''} ${ended ? 'done' : ''}" style="${typeof cellBg === 'function' && has && !ended ? cellBg(has) : ''}"><b>${p}</b>${esc(has || '—')}${ended && has ? `<span class="okm">✅ 수업 완료</span><span class="thx">${THX[(p * 3 + sd) % THX.length]}</span>` : ''}</div>`; }).join('') + '</div>';
+    const wk = P.dow === 0 || P.dow === 6, sd = UI.tdDay || (wk ? 1 : P.dow), isT = !wk && sd === P.dow;
+    const mon = new Date(); mon.setHours(0, 0, 0, 0); mon.setDate(mon.getDate() - ((mon.getDay() + 6) % 7) + (wk ? 7 : 0)); const dd = d => { const x = new Date(mon); x.setDate(x.getDate() + d - 1); return (x.getMonth() + 1) + '/' + x.getDate(); };
+    const tabs = `<div class="tdtabs" role="tablist">` + [1, 2, 3, 4, 5].map(d => `<button class="${d === sd ? 'on' : ''}${!wk && d === P.dow ? ' tdy' : ''}" role="tab" aria-selected="${d === sd}" data-act="tdDay" data-d="${d}">${DOW[d]}<small>${dd(d)}</small></button>`).join('') + '</div>';
+    let b = `<p class="mu"><b>${DOW[sd]}요일(${dd(sd)}) 시간표${isT ? ' · 오늘' : wk && sd === 1 && !UI.tdDay ? ' · 다음 수업일' : ''}</b></p>${tabs}<div class="strip">` + [1, 2, 3, 4, 5, 6, 7].map(p => { const PL = typeof clkPeriods === 'function' ? clkPeriods() : [], nw = new Date(), mn = nw.getHours() * 60 + nw.getMinutes(), pp = PL.find(y => y.p === p), ended = isT && pp && mn >= pp.e, THX = ['수고했어요^^', '고생했어요♡', '잘했어요!', '오늘도 굿~', '한 시간 끝!', '멋졌어요✿', '푹 쉬어요^^'], has = tt(sd, p); return `<div class="pc ${isT && P.cur === p ? 'now' : ''} ${ended ? 'done' : ''}" style="${typeof cellBg === 'function' && has && !ended ? cellBg(has) : ''}"><b>${p}</b>${esc(has || '—')}${ended && has ? `<span class="okm">✅ 수업 완료</span><span class="thx">${THX[(p * 3 + sd) % THX.length]}</span>` : ''}</div>`; }).join('') + '</div>';
     if (typeof wkGrid === 'function') b += wkGrid();
     b += `<div class="tools"><a class="btn pri" href="#/class">✏️ 시간표 입력·수정하기</a><button class="btn" data-act="comci">🔄 컴시간알리미에서 가져오기</button></div><p class="mu">${has ? '시간표를 고치려면 위 버튼(수업 화면의 시간표 표)을 누르세요. 컴시간과 연동해 자동으로 가져옵니다.' : '<b>아직 시간표가 비어 있어요.</b> 위 [시간표 입력·수정하기]에서 칸에 직접 적거나, [컴시간알리미에서 가져오기]를 누르세요.'}</p>`;
     rows.push(row('r1', '오늘', '일과', st, due, b));
@@ -1641,6 +1659,7 @@ const A = {
   lessonAll() { S.profile.classes.forEach(c => { if (!S.lessons.some(l => l.cls === c)) S.lessons.push({ id: uid(), cls: c, unit: '1단원', done: 0, total: 10 }); }); commit(); },
   assessStep(el) { const a = find('assess', el.dataset.id); if (a) { a.step = +el.dataset.s; commit(); } },
   trToggle(el) { const x = find('training', el.dataset.id); if (x) { x.done = !x.done; x.doneDate = x.done ? today() : ''; commit(); if (x.done) toast('이수 처리했습니다. 이수번호를 입력해 주세요.'); } },
+  tdDay(el) { UI.tdDay = +el.dataset.d; render(); },
   calDay(el) { UI.day = el.dataset.d; render(); },
   calMove(el) { const d = +el.dataset.d; if (!d) { UI.cal = today().slice(0, 7); UI.day = today(); } else { const [Y, M] = UI.cal.split('-').map(Number), n = new Date(Y, M - 1 + d, 1); UI.cal = `${n.getFullYear()}-${pad(n.getMonth() + 1)}`; } render(); },
   /* 예산 */
@@ -3635,6 +3654,104 @@ classView = function () {
 function ttColor() { document.querySelectorAll('input[data-tt]').forEach(i => { const td = i.closest('td'); if (td) td.style.background = gradeOf(i.value) ? gcol(gradeOf(i.value)) : ''; }); }
 const _r2 = TF.render; TF.render = function () { const v = _r2.apply(this, arguments); ttColor(); return v; };
 setTimeout(() => { if (S.setup) cmcLoad(); }, window.TF_DEMO ? 300 : 3000);
+
+/* 날짜 화면: 캘린더(또는 작은 달력)에서 날짜를 누르면 그 날의 페이지가 떠서 일정·할 일·업무 입력, 메모, 스티커 꾸미기, 사진 올리기를 한곳에서 합니다.
+   (아래쪽 기존 칸은 그대로 둡니다.) 사진 원본은 이 기기 IDB 'dimg:<id>'에, 목록만 S.dayImg 에 저장됩니다. */
+S.dayImg = S.dayImg || {};
+const DIMG = {};
+let DP = null;
+const dpWeek = ds => DOW[new Date(ds + 'T00:00:00').getDay()];
+const dpShift = (ds, n) => { const d = new Date(ds + 'T00:00:00'); d.setDate(d.getDate() + n); return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`; };
+function dpList(ds) {
+  const ev = allEvents().filter(e => e.date === ds);
+  return ev.map(e => e.id ? `<div class="td ${e.done ? 'dn' : ''}"><button class="ck" data-act="tog" data-id="${e.id}" aria-pressed="${!!e.done}" aria-label="완료 표시"></button><span class="tl">${esc(e.t)}</span><span class="mu">${esc(e.kind)}</span>${xbtn('delItem', e.id)}</div>` : `<div class="td"><span class="ck off"></span><span class="tl">${esc(e.t)}</span><span class="mu">${esc(e.kind)}</span></div>`).join('') || '<p class="mu">이 날은 비어 있습니다. 위에서 바로 추가하세요.</p>';
+}
+function dpStk(ds) { const L = (S.stk || {})[ds] || []; return `<div class="dpsk">${L.map((s, i) => `<span class="sk big">${stkHtml(s)}<button class="x" data-act="stkDayDel" data-d="${ds}" data-i="${i}" aria-label="스티커 떼기">✕</button></span>`).join('') || '<span class="mu">아직 붙인 스티커가 없습니다.</span>'}</div>`; }
+async function dpImgs(ds) {
+  const L = (S.dayImg || {})[ds] || [], box = document.getElementById('dpImg'); if (!box) return;
+  for (const m of L) if (!DIMG[m.id]) { try { DIMG[m.id] = await idb.get('dimg:' + m.id); } catch (e) { } }
+  if (!document.getElementById('dpImg')) return;
+  box.innerHTML = L.map(m => `<span class="dpim"><img src="${DIMG[m.id] || ''}" alt="${esc(m.name || '사진')}" data-dpbig="${m.id}"><button class="x" data-act="dpImgDel" data-d="${ds}" data-id="${m.id}" aria-label="사진 지우기">✕</button></span>`).join('') || '<span class="mu">아직 올린 사진이 없습니다.</span>';
+}
+function dpDraw(full) {
+  const d = document.getElementById('daypg'); if (!d || !DP) return; const ds = DP;
+  if (full) {
+    d.innerHTML = `<div class="dph"><button class="btn sm" data-act="dpMove" data-n="-1" aria-label="전날">‹</button><b>${md(ds)} (${dpWeek(ds)})${ds === today() ? ' · 오늘' : ''}</b><button class="btn sm" data-act="dpMove" data-n="1" aria-label="다음날">›</button><button class="btn sm" id="dpx">닫기</button></div>
+    <form class="dpf"><input name="title" placeholder="일정·할 일·업무를 적고 Enter (바로 캘린더에 반영)" required aria-label="내용"><input type="time" name="time" aria-label="시각(선택)"><select name="kind" aria-label="종류"><option value="event">일정</option><option value="todo">할 일</option><option value="work">업무</option></select><button class="btn pri">추가</button></form>
+    <div id="dpList"></div>
+    <label class="dmemo">📝 메모<textarea data-dmemo="${ds}" rows="4" placeholder="이 날 기억할 것·준비물·회의 내용 (쓰면 바로 저장됩니다)">${esc((S.dayMemo || {})[ds] || '')}</textarea></label><button class="btn sm" data-act="memoPick">🎨 메모 디자인</button>
+    <h4 class="dph4">🎀 꾸미기</h4><div id="dpStk"></div><div class="tools"><button class="btn sm" data-act="stkDay">⭐ 스티커 붙이기</button><label class="btn sm file">🖼 사진 올리기<input type="file" id="dpUp" accept="image/*" multiple hidden></label></div><label class="btn sm file">📷 손글씨 사진으로 일정 추가<input type="file" id="scUp" accept="image/*" capture="environment" hidden></label><div id="dpImg" class="dpimg"></div><p class="mu">사진은 이 기기에만 저장되고 클라우드 동기화에는 들어가지 않습니다.</p>`;
+  }
+  d.querySelector('#dpList').innerHTML = dpList(ds); d.querySelector('#dpStk').innerHTML = dpStk(ds); dpImgs(ds);
+}
+function dayOpen(ds) {
+  DP = ds; UI.day = ds; let d = document.getElementById('daypg');
+  if (!d) { d = document.createElement('dialog'); d.id = 'daypg'; d.className = 'dlg daypg'; document.body.appendChild(d); d.addEventListener('close', () => { DP = null; d.remove(); render(); }); d.addEventListener('click', e => { if (e.target.id === 'dpx') d.close(); const im = e.target.closest('[data-dpbig]'); if (im) { const w = window.open(); if (w) { w.document.write(`<img src="${DIMG[im.dataset.dpbig]}" style="max-width:100%">`); w.document.close(); } } }); }
+  dpDraw(true); if (!d.open) d.showModal();
+}
+Object.assign(A, {
+  dpMove(el) { dayOpen(dpShift(DP, +el.dataset.n)); },
+  dpImgDel(el) { sure('이 사진을 지울까요?', async () => { const l = S.dayImg[el.dataset.d] || []; S.dayImg[el.dataset.d] = l.filter(m => m.id !== el.dataset.id); if (!S.dayImg[el.dataset.d].length) delete S.dayImg[el.dataset.d]; delete DIMG[el.dataset.id]; await idb.del('dimg:' + el.dataset.id); commit(); }); }
+});
+const _calDay0 = A.calDay; A.calDay = function (el) { _calDay0(el); dayOpen(el.dataset.d); };
+document.addEventListener('submit', e => {
+  const f = e.target.closest && e.target.closest('form.dpf'); if (!f) return; e.preventDefault();
+  const o = Object.fromEntries(new FormData(f)); let title = o.title.trim(); if (!title) return;
+  if (o.time) title = o.time + ' ' + title; if (o.kind === 'work') title = '[업무] ' + title;
+  S.items.push({ id: uid(), title, date: DP, cat: o.kind === 'event' ? 'event' : 'todo', done: false });
+  commit(); toast('캘린더에 반영했습니다.'); const i = document.querySelector('#daypg [name=title]'); if (i) { i.value = ''; i.focus(); }
+}, true);
+document.addEventListener('change', async e => {
+  const t = e.target; if (t.id !== 'dpUp') return; const ds = DP, files = [...t.files]; t.value = '';
+  for (const f of files) {
+    try { const url = await new Promise((res, rej) => { const im = new Image(), u = URL.createObjectURL(f); im.onload = () => { const k = Math.min(1, 1400 / Math.max(im.width, im.height)), c = document.createElement('canvas'); c.width = Math.round(im.width * k); c.height = Math.round(im.height * k); c.getContext('2d').drawImage(im, 0, 0, c.width, c.height); URL.revokeObjectURL(u); res(c.toDataURL('image/jpeg', 0.8)); }; im.onerror = () => rej(); im.src = u; });
+      const id = uid(); await idb.set('dimg:' + id, url); DIMG[id] = url; (S.dayImg[ds] = S.dayImg[ds] || []).push({ id, name: f.name }); } catch (er) { toast('「' + f.name + '」 사진을 읽지 못했습니다.'); }
+  }
+  save(); if (DP === ds) { dpDraw(false); } render(); toast('사진을 올렸습니다.');
+}, true);
+/* 렌더 후: 열려 있는 날짜 화면 새로고침, 달력 칸에 작은 표시(스티커 최대 2개·사진·메모) */
+function cellMarks() {
+  document.querySelectorAll('.cd[data-d]').forEach(c => { const ds = c.dataset.d, sk = dayStk(ds, 2), im = (S.dayImg || {})[ds]; c.querySelector('.cdk')?.remove(); if (sk || im) { const s = document.createElement('span'); s.className = 'cdk'; s.innerHTML = sk + (im ? '<span class="sk">🖼</span>' : ''); c.appendChild(s); } });
+}
+const _r3 = TF.render; TF.render = function () { const v = _r3.apply(this, arguments); cellMarks(); if (DP && document.getElementById('daypg')) dpDraw(false); return v; };
+
+/* 종이에 손으로 쓴 메모·수첩 사진 → 일정/할 일/업무 인식 (Claude 비전, 본인 키 필요). 확인 창에서 고친 뒤 추가. */
+let SC = null;
+const scImg = f => new Promise((res, rej) => { const im = new Image(), u = URL.createObjectURL(f); im.onload = () => { const k = Math.min(1, 1600 / Math.max(im.width, im.height)), c = document.createElement('canvas'); c.width = Math.round(im.width * k); c.height = Math.round(im.height * k); c.getContext('2d').drawImage(im, 0, 0, c.width, c.height); URL.revokeObjectURL(u); res(c.toDataURL('image/jpeg', 0.85).split(',')[1]); }; im.onerror = () => rej(new Error('사진을 읽지 못했습니다')); im.src = u; });
+const SC_TOOL = [{ name: 'save_items', description: '사진 속 손글씨에서 읽은 항목들', input_schema: { type: 'object', properties: { items: { type: 'array', items: { type: 'object', properties: { title: { type: 'string' }, date: { type: 'string', description: 'YYYY-MM-DD, 모르면 빈 문자열' }, time: { type: 'string', description: 'HH:MM, 없으면 빈 문자열' }, kind: { type: 'string', enum: ['event', 'todo', 'work'], description: 'event=일정(행사·회의·약속), todo=마감 있는 할 일, work=내 업무' } }, required: ['title', 'kind'] } } }, required: ['items'] } }];
+async function scanRun(file) {
+  const dlg = scDlg(); dlg.innerHTML = '<p class="mu">✍️ 손글씨를 읽는 중입니다… (몇 초 걸립니다)</p>';
+  let items;
+  if (window.TF_DEMO) { await new Promise(r => setTimeout(r, 900)); const t = new Date(); const d = n => { const x = new Date(t); x.setDate(x.getDate() + n); return `${x.getFullYear()}-${pad(x.getMonth() + 1)}-${pad(x.getDate())}`; }; items = [{ title: '교직원 회의', date: d(2), time: '16:00', kind: 'event' }, { title: '학년말 평가 자료 제출', date: d(7), time: '', kind: 'todo' }, { title: '학생 인권 실태조사 점검', date: '', time: '', kind: 'work' }]; dlg.dataset.demo = '1'; }
+  else {
+    if (!agKey()) { dlg.innerHTML = '<h3>📷 손글씨 사진 인식</h3><p>이 기능은 <b>본인 Claude 키</b>가 있어야 켜집니다. 설정 → AI 키에 넣으면 바로 쓸 수 있고, 키는 이 기기에만 저장됩니다.</p><p class="mu">키가 없어도 날짜 화면에서 직접 입력하는 것은 그대로 됩니다.</p><button class="btn" id="scx">닫기</button>'; return; }
+    try {
+      const b64 = await scImg(file);
+      const r = await fetch('https://api.anthropic.com/v1/messages', { method: 'POST', headers: { 'content-type': 'application/json', 'x-api-key': agKey(), 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' }, body: JSON.stringify({ model: 'claude-haiku-5-5', max_tokens: 1500, tools: SC_TOOL, tool_choice: { type: 'tool', name: 'save_items' }, system: `교사가 종이에 손으로 쓴 메모·수첩·포스트잇 사진입니다. 글씨를 읽어 일정(event)·할 일(todo)·업무(work)로 나눠 save_items로 반환하세요. 오늘은 ${today()}입니다. "내일·다음 주 화" 등은 오늘 기준으로 YYYY-MM-DD 계산, 연도가 없으면 가까운 미래로. 날짜가 없으면 빈 문자열. 읽기 어려운 글자는 추측해 쓰되 지어내지 마세요. 학생 실명이 보이면 제목에서 빼세요.`, messages: [{ role: 'user', content: [{ type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: b64 } }, { type: 'text', text: '이 종이에서 일정·할 일·업무를 뽑아 주세요.' }] }] }) });
+      if (!r.ok) throw new Error(r.status === 401 ? '키가 올바르지 않습니다' : r.status === 400 || r.status === 402 ? '잔액(크레딧)이 부족할 수 있습니다' : '응답 오류 ' + r.status);
+      const j = await r.json(); items = ((j.content || []).find(c => c.type === 'tool_use') || { input: {} }).input.items || [];
+    } catch (e) { dlg.innerHTML = `<p>인식하지 못했습니다(${esc(e.message)}). 사진을 더 밝고 가깝게 다시 찍어 보세요.</p><button class="btn" id="scx">닫기</button>`; return; }
+  }
+  SC = items.map(x => ({ ...x, on: true })); scShow();
+}
+function scDlg() { let d = document.getElementById('scdlg'); if (!d) { d = document.createElement('dialog'); d.id = 'scdlg'; d.className = 'dlg daypg'; document.body.appendChild(d); d.addEventListener('close', () => d.remove()); d.addEventListener('click', e => { if (e.target.id === 'scx') d.close(); if (e.target.id === 'scok') scApply(d); }); d.addEventListener('input', e => { const i = e.target.dataset.sc; if (i == null) return; const it = SC[+i], f = e.target.dataset.f; if (f === 'on') it.on = e.target.checked; else it[f] = e.target.value; }); } if (!d.open) d.showModal(); return d; }
+function scShow() {
+  const d = scDlg();
+  if (!SC.length) { d.innerHTML = '<p>읽어 낸 항목이 없습니다. 글씨가 크게 나오도록 다시 찍어 보세요.</p><button class="btn" id="scx">닫기</button>'; return; }
+  d.innerHTML = `<h3>📷 이렇게 읽었어요</h3><p class="mu">틀린 곳은 고친 뒤 추가하세요. 체크를 끄면 빠집니다.${d.dataset.demo ? ' (체험판 예시 결과)' : ''}</p>` + SC.map((x, i) => `<div class="scr"><input type="checkbox" data-sc="${i}" data-f="on" ${x.on ? 'checked' : ''} aria-label="추가"><select data-sc="${i}" data-f="kind"><option value="event"${x.kind === 'event' ? ' selected' : ''}>일정</option><option value="todo"${x.kind === 'todo' ? ' selected' : ''}>할 일</option><option value="work"${x.kind === 'work' ? ' selected' : ''}>업무</option></select><input type="date" data-sc="${i}" data-f="date" value="${esc(x.date || '')}"><input type="time" data-sc="${i}" data-f="time" value="${esc(x.time || '')}"><input data-sc="${i}" data-f="title" value="${esc(x.title)}"></div>`).join('') + '<div class="tools"><button class="btn pri" id="scok">✅ 선택한 것 추가</button><button class="btn" id="scx">취소</button></div>';
+}
+function scApply(d) {
+  let n = 0; SC.filter(x => x.on && x.title.trim()).forEach(x => {
+    let t = x.title.trim(); if (x.time) t = x.time + ' ' + t; if (x.kind === 'work') t = '[업무] ' + t;
+    S.items.push({ id: uid(), title: t, date: x.date || today(), cat: x.kind === 'event' ? 'event' : 'todo', done: false }); n++;
+  });
+  commit(); d.close(); toast(n + '건을 캘린더에 반영했습니다.');
+}
+document.addEventListener('change', e => { if (e.target.id !== 'scUp') return; const f = e.target.files[0]; e.target.value = ''; if (f) scanRun(f); }, true);
+function scBtn() {
+  if (document.getElementById('scfab')) return; const l = document.createElement('label'); l.id = 'scfab'; l.className = 'scfab'; l.title = '손글씨 사진으로 일정·업무 추가'; l.innerHTML = '📷<span>손글씨 추가</span><input type="file" id="scUp" accept="image/*" capture="environment" hidden>'; document.body.appendChild(l);
+}
+const _r4 = TF.render; TF.render = function () { const v = _r4.apply(this, arguments); scBtn(); return v; };
 
 /* setui.js — 설정의 "작업표시줄에 고정 · 위젯" 안내 칸(app.js `.guide`) 위에 [앱으로 설치하기]·[위젯 열기] 버튼을 붙입니다.
    (설정 칸 접기는 extra.js `setFold()`가 맡습니다.) */
