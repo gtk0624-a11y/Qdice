@@ -334,3 +334,10 @@ service cloud.firestore {
 ## 공문 사진 (js/scan.js 끝) · 떠 있는 학급 관리 버튼 (js/classmgmt.js 끝)
 - 오늘 「공문」 줄 아래 📸/🖼 → Claude 비전(본인 키)으로 제목·발신·기한·할 일 추출 → 확인창 → S.docLog 등록, 선택 시 캘린더·아카이브 보관. 키 없으면 직접 적기. 학생·학부모 실명·연락처는 옮기지 않도록 지시.
 - #cmfab: 메뉴 설정·화면 틀과 무관하게 항상 표시되는 🏫 버튼(href #/cm).
+
+## 꿈송이 2 — 규정줍줍 + 비서 모드 (js/bot2.js, v69)
+- 입구: `ask1` 교체. 키(`tf.claudeKey`) 있으면 `b2Loop`(도구 호출 반복, 최대 9회, 모델 `tf.botModel` 기본 claude-sonnet-5-5), 없으면 규정줍줍(`b2RuleBlocks`)+기존 찾기.
+- 읽기 도구(바로 실행): search_site, find_rule, list_library, read_library, get_calendar, get_day, list_work_cards, get_budget, list_training, list_notes. 새 읽기 도구는 `B2_READ`에 정의 + `b2Run`에 case 추가.
+- 쓰기 도구(제안 카드→[적용]): 기존 AG_TOOLS + add_wk_card, update_wk_card, set_training_date, add_day_memo. `agPlan`/`agDo`를 감싸서 확장. 적용은 commit()이라 되돌리기 가능. 삭제 도구는 없음.
+- 규정줍줍: 자료실(LIB) 문서를 450자 단위로 쪼개 낱말 겹침으로 점수(규정 종류 ×1.5). 결과는 파일 이름과 함께 표시.
+- 개인정보: 학생·교직원 실명 명단은 도구로 노출되지 않음(수첩에 없음). 키 사용 시 찾은 내용이 Anthropic API로 전송됨(잠금 노트 `lock`은 search_site·list_notes에서 제외).
