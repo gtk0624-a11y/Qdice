@@ -838,3 +838,5 @@ html[data-nav=bottom] #ytfab{bottom:120px}
 .cmdrop{border:2px dashed #888;border-radius:12px;padding:14px;text-align:center;margin:8px 0;background:#fafafa}.cmdrop.over{background:#e7f1ff;border-color:#2a6fd6}
 .cmbig{font-size:clamp(28px,8vw,56px);font-weight:800;text-align:center;padding:18px 8px;border:2px solid #333;border-radius:16px;margin:8px 0;background:#fffbe8;word-break:keep-all}
 .cmtb{border-collapse:collapse;width:100%}.cmtb th,.cmtb td{border:1px solid #999;padding:4px 8px;text-align:center}.cmpin{display:flex;gap:8px;margin:12px 0}.cmtoday .cmr{justify-content:flex-start}
+details.sec.sub{border:1px solid var(--rule2,#ccc);border-radius:10px;margin:8px 0;background:#fff}details.sec.sub>summary{padding:10px 12px;font-weight:700;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center}details.sec.sub>summary::-webkit-details-marker{display:none}details.sec.sub>.dset{padding:0 12px 12px;margin:0;border:0}
+.foldall{display:inline-flex;gap:6px;margin-left:8px;flex-wrap:wrap}.nvx[data-act="navPick"]{white-space:nowrap}

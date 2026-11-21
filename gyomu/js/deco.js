@@ -77,6 +77,7 @@ function decoInject() {
   const h = location.hash || '#/today', main = document.querySelector('#app main'); if (!main || !S.setup) return;
   if (/^#\/set/.test(h) && !main.querySelector('.decoset')) { const bh = main.querySelector('.bh'), w = document.createElement('div'); w.innerHTML = decoCard(); bh ? bh.after(w.firstChild) : main.prepend(w.firstChild); }
   if (/^#\/(today)?$/.test(h) || h === '#/' || h === '') { const on = (S.profile.cheer || 'off') === 'today', ex = main.querySelector('.cheer'); if (on && !ex) { const c = document.createElement('div'); c.className = 'cheer'; c.innerHTML = `<span>💌 ${esc(cheerPick(_cheerShift))}</span><button class="x" data-act="cheerNext" aria-label="다른 말">다른 말</button>`; main.prepend(c); } else if (!on && ex) ex.remove(); }
+  if (/^#\/set/.test(h) && typeof setFold2 === 'function') { setFold(); setFold2(); }
 }
 new MutationObserver(() => { decoInject(); }).observe(document.getElementById('app'), { childList: true, subtree: true });
 window.addEventListener('hashchange', () => setTimeout(decoInject, 30));

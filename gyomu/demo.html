@@ -848,6 +848,8 @@ html[data-nav=bottom] #ytfab{bottom:120px}
 .cmdrop{border:2px dashed #888;border-radius:12px;padding:14px;text-align:center;margin:8px 0;background:#fafafa}.cmdrop.over{background:#e7f1ff;border-color:#2a6fd6}
 .cmbig{font-size:clamp(28px,8vw,56px);font-weight:800;text-align:center;padding:18px 8px;border:2px solid #333;border-radius:16px;margin:8px 0;background:#fffbe8;word-break:keep-all}
 .cmtb{border-collapse:collapse;width:100%}.cmtb th,.cmtb td{border:1px solid #999;padding:4px 8px;text-align:center}.cmpin{display:flex;gap:8px;margin:12px 0}.cmtoday .cmr{justify-content:flex-start}
+details.sec.sub{border:1px solid var(--rule2,#ccc);border-radius:10px;margin:8px 0;background:#fff}details.sec.sub>summary{padding:10px 12px;font-weight:700;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center}details.sec.sub>summary::-webkit-details-marker{display:none}details.sec.sub>.dset{padding:0 12px 12px;margin:0;border:0}
+.foldall{display:inline-flex;gap:6px;margin-left:8px;flex-wrap:wrap}.nvx[data-act="navPick"]{white-space:nowrap}
 </style>
 </head>
 <body>
@@ -1484,8 +1486,8 @@ function masthead() {
 }
 function nav(page) {
   const L0 = [['today', '오늘'], ['cal', '캘린더'], ['class', '수업 및 시간표'], ['eval', '평가'], ['budget', '예산'], ['notes', '기록'], ['pages', '페이지'], ['lib', '자료·연락'], ['files', '자료 아카이브'], ...(typeof cmCfg === 'function' && cmCfg().on ? [['cm', cmCfg().title || '학급 관리']] : []), ['set', '설정']];
-  const L = typeof navOrder === 'function' ? navOrder(L0) : L0;
-  return `<nav class="nav" aria-label="메뉴">${L.map(([k, v]) => `<a href="#/${k}" ${page === k || (k === 'notes' && page === 'note') || (k === 'pages' && page === 'page') ? 'aria-current="page"' : ''}>${v}</a>`).join('')}<button class="nvx" data-act="ibx">📨 메신저 붙여넣기</button></nav>`;
+  const L = (typeof navOrder === 'function' ? navOrder(L0) : L0).filter(([k]) => k === 'today' || k === 'set' || k === (page === 'note' ? 'notes' : page === 'page' ? 'pages' : page) || !(S.navHide || []).includes(k));
+  return `<nav class="nav" aria-label="메뉴">${L.map(([k, v]) => `<a href="#/${k}" ${page === k || (k === 'notes' && page === 'note') || (k === 'pages' && page === 'page') ? 'aria-current="page"' : ''}>${v}</a>`).join('')}<button class="nvx" data-act="navPick" title="위쪽 메뉴 고르기">☰ 메뉴 고르기</button><button class="nvx" data-act="ibx">📨 메신저 붙여넣기</button></nav>`;
 }
 function footer() {
   return `${drawerHtml()}<footer class="cp">© 김정환 · M.A.D.T (Moral And Digital Teacher)</footer>`;
@@ -2580,7 +2582,7 @@ Object.assign(A, {
 });
 /* 게시판 줄을 펼치거나 접은 상태를 기억합니다 (고치거나 체크해도 줄이 다시 닫히지 않게) */
 document.addEventListener('toggle', e => {
-  const d = e.target; if (!d || !d.dataset || !d.dataset.k || !/^(r\d+|sb|dw|s\d+)$/.test(d.dataset.k)) return;
+  const d = e.target; if (!d || !d.dataset || !d.dataset.k || !/^(r\d+|sb|dw|[sd]\d+)$/.test(d.dataset.k)) return;
   if (d.open) OPEN.add(d.dataset.k); else OPEN.delete(d.dataset.k);
   try { localStorage.setItem('tf.open', JSON.stringify([...OPEN])); } catch (er) { }
 }, true);
@@ -2596,7 +2598,20 @@ function setFold() {
     while (d.nextSibling && !(d.nextSibling.nodeType === 1 && d.nextSibling.matches && d.nextSibling.matches('h3.h3'))) d.appendChild(d.nextSibling);
   });
 }
-{ const _r = render; render = function () { _r.apply(this, arguments); setFold(); }; if (typeof TF !== 'undefined') TF.render = render; }
+/* 설정의 큰 묶음(시계·꾸미기·도우미·포털·학급 관리 …) 안의 항목도 하나씩 접고 펼 수 있게 */
+function setFold2() {
+  if (location.hash.replace(/^#\/?/, '').split('/')[0] !== 'set') return;
+  document.querySelectorAll('main section.decoset .dset').forEach((b, i) => {
+    if (b.closest('details.sub') || (b.parentNode.closest && b.parentNode.closest('.dset'))) return;
+    const el = b.querySelector('b'); let t = ((el ? el.textContent : b.textContent) || '').replace(/\s+/g, ' ').trim(); t = t.split(/ — | \(/)[0].slice(0, 32) || '설정';
+    const k = 'd' + i, d = document.createElement('details'); d.className = 'sec sub'; d.dataset.k = k; if (OPEN.has(k)) d.open = true;
+    const sm = document.createElement('summary'); sm.innerHTML = '<span class="subt"></span><i class="chev"></i>'; sm.firstChild.textContent = t;
+    b.parentNode.insertBefore(d, b); d.appendChild(sm); d.appendChild(b);
+  });
+  const bh = document.querySelector('main .bh'); if (bh && !bh.querySelector('.foldall')) { const w = document.createElement('span'); w.className = 'foldall'; w.innerHTML = '<button type="button" class="btn sm" data-act="setOpenAll" data-o="1">모두 펼치기</button> <button type="button" class="btn sm" data-act="setOpenAll" data-o="0">모두 접기</button>'; bh.appendChild(w); }
+}
+A.setOpenAll = el => { const o = el.dataset.o === '1'; document.querySelectorAll('main details.sec').forEach(d => { d.open = o; }); };
+{ const _r = render; render = function () { _r.apply(this, arguments); setFold(); setFold2(); }; if (typeof TF !== 'undefined') TF.render = render; }
 
 /* 서랍: 자주 가는 사이트 모음 (검색·즐겨찾기·분류·넣기/고치기/빼기·백업). 주소만 저장하며 비밀번호는 저장하지 않습니다. */
 let DWTAB = '전체';
@@ -3520,6 +3535,7 @@ function decoInject() {
   const h = location.hash || '#/today', main = document.querySelector('#app main'); if (!main || !S.setup) return;
   if (/^#\/set/.test(h) && !main.querySelector('.decoset')) { const bh = main.querySelector('.bh'), w = document.createElement('div'); w.innerHTML = decoCard(); bh ? bh.after(w.firstChild) : main.prepend(w.firstChild); }
   if (/^#\/(today)?$/.test(h) || h === '#/' || h === '') { const on = (S.profile.cheer || 'off') === 'today', ex = main.querySelector('.cheer'); if (on && !ex) { const c = document.createElement('div'); c.className = 'cheer'; c.innerHTML = `<span>💌 ${esc(cheerPick(_cheerShift))}</span><button class="x" data-act="cheerNext" aria-label="다른 말">다른 말</button>`; main.prepend(c); } else if (!on && ex) ex.remove(); }
+  if (/^#\/set/.test(h) && typeof setFold2 === 'function') { setFold(); setFold2(); }
 }
 new MutationObserver(() => { decoInject(); }).observe(document.getElementById('app'), { childList: true, subtree: true });
 window.addEventListener('hashchange', () => setTimeout(decoInject, 30));
@@ -4518,6 +4534,24 @@ document.addEventListener('click', e => {
   d.close();
 }, true);
 
+/* 위쪽 메뉴 고르기: 오늘·설정은 항상 보이고 나머지는 보일 것만 고릅니다 */
+A.navPick = () => {
+  hpDlg('☰ 위쪽 메뉴 고르기', () => {
+    const hid = S.navHide || [], L = ordList('nav').filter(k => k !== 'today' && k !== 'set'), lab = k => (ORD_NAV.find(x => x[0] === k) || [0, k])[1];
+    return `<p class="mu">체크한 메뉴만 위쪽에 보입니다. <b>오늘</b>과 <b>설정</b>은 항상 보여요. 숨긴 메뉴도 여기서 「열기」로 갈 수 있어요.</p>
+    <div class="hpr"><span><b>오늘</b> <span class="mu">(항상)</span></span><span></span></div>${L.map(k => `<div class="hpr"><label class="chk hpck"><input type="checkbox" data-hp="nv|${k}" ${hid.includes(k) ? '' : 'checked'}> <span>${esc(lab(k))}</span></label><button type="button" class="btn sm" data-hp="go|${k}">열기</button></div>`).join('')}
+    <div class="hpr"><span><b>설정</b> <span class="mu">(항상)</span></span><span></span></div>
+    <div class="tools"><button type="button" class="btn sm" data-hp="all">모두 보이기</button><button type="button" class="btn sm" data-hp="few">꼭 필요한 것만 (오늘·캘린더·수업 및 시간표·학급 관리)</button></div>`;
+  }, (a, b, paint, d) => {
+    S.navHide = S.navHide || [];
+    if (a[0] === 'nv') { S.navHide = b.checked ? S.navHide.filter(x => x !== a[1]) : [...new Set([...S.navHide, a[1]])]; save(true); return; }
+    if (a[0] === 'go') { d.close(); location.hash = '#/' + a[1]; return; }
+    if (a[0] === 'all') S.navHide = [];
+    if (a[0] === 'few') S.navHide = ordList('nav').filter(k => !['today', 'set', 'cal', 'class', 'cm'].includes(k));
+    save(true); paint();
+  });
+};
+
 /* 교무포털 자료 담기 — 학교 안에서만 열리는 교무포털의 내용을 업무파탈 「자료 보관함」으로 가져옵니다.
    방식: ① 즐겨찾기 막대에 「📥 업무파탈에 담기」 버튼(북마클릿)을 만들어 두고 ② 학교에서 교무포털 화면을 연 채 그 버튼을 누르면
    ③ 그 화면(원하면 이어진 쪽까지)의 글·표·첨부 링크를 읽어 업무파탈 창으로 보내고 ④ 업무파탈에서 골라 담습니다.
@@ -4663,7 +4697,7 @@ if (S.setup) { hpInject(); ptBtn(); pnLoad().then(pnRefresh); }
 /* render()를 직접 부르는 곳(교시 탭·메모 디자인 닫기 등)에서도 오늘 도우미·한마디·펜 메모가 사라지지 않게, 화면이 다시 그려지면 한 번 더 붙입니다 */
 (function () {
   const app = document.getElementById('app'); if (!app) return; let t = 0;
-  new MutationObserver(() => { if (t) return; t = setTimeout(() => { t = 0; try { hpInject(); ptBtn(); decoInject(); pnLoad().then(pnRefresh); } catch (e) { } }, 0); }).observe(app, { childList: true });
+  new MutationObserver(() => { if (t) return; t = setTimeout(() => { t = 0; try { hpInject(); ptBtn(); decoInject(); pnLoad().then(pnRefresh); setFold(); setFold2(); } catch (e) { } }, 0); }).observe(app, { childList: true });
 })();
 
 'use strict';
@@ -5157,7 +5191,7 @@ buildChunks = function () {
 };
 
 /* 화면 맨 아래에 버전 표시 — 옛 화면을 보고 있는지 바로 알 수 있게 */
-const TF_VER = 'v60', _cmFt = footer;
+const TF_VER = 'v61', _cmFt = footer;
 footer = function () { return _cmFt.apply(this, arguments).replace('</footer>', ` · <span class="mu">버전 ${TF_VER} (학급 관리 포함)</span></footer>`); };
 
 /* 새 버전 알림: 옛 화면이 남아 있으면 한 번 눌러 새로 받게 함 */

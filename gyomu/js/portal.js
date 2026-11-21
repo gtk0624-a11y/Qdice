@@ -143,5 +143,5 @@ if (S.setup) { hpInject(); ptBtn(); pnLoad().then(pnRefresh); }
 /* render()를 직접 부르는 곳(교시 탭·메모 디자인 닫기 등)에서도 오늘 도우미·한마디·펜 메모가 사라지지 않게, 화면이 다시 그려지면 한 번 더 붙입니다 */
 (function () {
   const app = document.getElementById('app'); if (!app) return; let t = 0;
-  new MutationObserver(() => { if (t) return; t = setTimeout(() => { t = 0; try { hpInject(); ptBtn(); decoInject(); pnLoad().then(pnRefresh); } catch (e) { } }, 0); }).observe(app, { childList: true });
+  new MutationObserver(() => { if (t) return; t = setTimeout(() => { t = 0; try { hpInject(); ptBtn(); decoInject(); pnLoad().then(pnRefresh); setFold(); setFold2(); } catch (e) { } }, 0); }).observe(app, { childList: true });
 })();

@@ -61,7 +61,7 @@ Object.assign(A, {
 });
 /* 게시판 줄을 펼치거나 접은 상태를 기억합니다 (고치거나 체크해도 줄이 다시 닫히지 않게) */
 document.addEventListener('toggle', e => {
-  const d = e.target; if (!d || !d.dataset || !d.dataset.k || !/^(r\d+|sb|dw|s\d+)$/.test(d.dataset.k)) return;
+  const d = e.target; if (!d || !d.dataset || !d.dataset.k || !/^(r\d+|sb|dw|[sd]\d+)$/.test(d.dataset.k)) return;
   if (d.open) OPEN.add(d.dataset.k); else OPEN.delete(d.dataset.k);
   try { localStorage.setItem('tf.open', JSON.stringify([...OPEN])); } catch (er) { }
 }, true);
@@ -77,4 +77,17 @@ function setFold() {
     while (d.nextSibling && !(d.nextSibling.nodeType === 1 && d.nextSibling.matches && d.nextSibling.matches('h3.h3'))) d.appendChild(d.nextSibling);
   });
 }
-{ const _r = render; render = function () { _r.apply(this, arguments); setFold(); }; if (typeof TF !== 'undefined') TF.render = render; }
+/* 설정의 큰 묶음(시계·꾸미기·도우미·포털·학급 관리 …) 안의 항목도 하나씩 접고 펼 수 있게 */
+function setFold2() {
+  if (location.hash.replace(/^#\/?/, '').split('/')[0] !== 'set') return;
+  document.querySelectorAll('main section.decoset .dset').forEach((b, i) => {
+    if (b.closest('details.sub') || (b.parentNode.closest && b.parentNode.closest('.dset'))) return;
+    const el = b.querySelector('b'); let t = ((el ? el.textContent : b.textContent) || '').replace(/\s+/g, ' ').trim(); t = t.split(/ — | \(/)[0].slice(0, 32) || '설정';
+    const k = 'd' + i, d = document.createElement('details'); d.className = 'sec sub'; d.dataset.k = k; if (OPEN.has(k)) d.open = true;
+    const sm = document.createElement('summary'); sm.innerHTML = '<span class="subt"></span><i class="chev"></i>'; sm.firstChild.textContent = t;
+    b.parentNode.insertBefore(d, b); d.appendChild(sm); d.appendChild(b);
+  });
+  const bh = document.querySelector('main .bh'); if (bh && !bh.querySelector('.foldall')) { const w = document.createElement('span'); w.className = 'foldall'; w.innerHTML = '<button type="button" class="btn sm" data-act="setOpenAll" data-o="1">모두 펼치기</button> <button type="button" class="btn sm" data-act="setOpenAll" data-o="0">모두 접기</button>'; bh.appendChild(w); }
+}
+A.setOpenAll = el => { const o = el.dataset.o === '1'; document.querySelectorAll('main details.sec').forEach(d => { d.open = o; }); };
+{ const _r = render; render = function () { _r.apply(this, arguments); setFold(); setFold2(); }; if (typeof TF !== 'undefined') TF.render = render; }

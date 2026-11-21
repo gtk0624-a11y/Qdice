@@ -331,3 +331,21 @@ document.addEventListener('click', e => {
   const r = d.getBoundingClientRect(); if (e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom) return;
   d.close();
 }, true);
+
+/* 위쪽 메뉴 고르기: 오늘·설정은 항상 보이고 나머지는 보일 것만 고릅니다 */
+A.navPick = () => {
+  hpDlg('☰ 위쪽 메뉴 고르기', () => {
+    const hid = S.navHide || [], L = ordList('nav').filter(k => k !== 'today' && k !== 'set'), lab = k => (ORD_NAV.find(x => x[0] === k) || [0, k])[1];
+    return `<p class="mu">체크한 메뉴만 위쪽에 보입니다. <b>오늘</b>과 <b>설정</b>은 항상 보여요. 숨긴 메뉴도 여기서 「열기」로 갈 수 있어요.</p>
+    <div class="hpr"><span><b>오늘</b> <span class="mu">(항상)</span></span><span></span></div>${L.map(k => `<div class="hpr"><label class="chk hpck"><input type="checkbox" data-hp="nv|${k}" ${hid.includes(k) ? '' : 'checked'}> <span>${esc(lab(k))}</span></label><button type="button" class="btn sm" data-hp="go|${k}">열기</button></div>`).join('')}
+    <div class="hpr"><span><b>설정</b> <span class="mu">(항상)</span></span><span></span></div>
+    <div class="tools"><button type="button" class="btn sm" data-hp="all">모두 보이기</button><button type="button" class="btn sm" data-hp="few">꼭 필요한 것만 (오늘·캘린더·수업 및 시간표·학급 관리)</button></div>`;
+  }, (a, b, paint, d) => {
+    S.navHide = S.navHide || [];
+    if (a[0] === 'nv') { S.navHide = b.checked ? S.navHide.filter(x => x !== a[1]) : [...new Set([...S.navHide, a[1]])]; save(true); return; }
+    if (a[0] === 'go') { d.close(); location.hash = '#/' + a[1]; return; }
+    if (a[0] === 'all') S.navHide = [];
+    if (a[0] === 'few') S.navHide = ordList('nav').filter(k => !['today', 'set', 'cal', 'class', 'cm'].includes(k));
+    save(true); paint();
+  });
+};
