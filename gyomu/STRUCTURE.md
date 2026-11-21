@@ -245,3 +245,8 @@ service cloud.firestore {
 - class2.js: `classView`(시간표 설명 + 교수학습 운영표/진도: `S.plans`,`S.prog[반]={planId,upto}`, `parsePlan`/`planFromText`, `syncProg`→`S.lessons`의 `pg-` 항목) · `evalView`(`S.exams`,`S.assess`,`S.rubrics`) · 캘린더 연동(`allEvents` 래핑).
 - files2.js: 오프라인 HWP(CFB) 파서. 자주 고칠 곳: `RUB_PRESETS`, `parsePlan` 정규식.
 - 주의: 업로드한 파일 원본은 IDB `file:<id>`에 보관(개인정보 포함 가능). 단일 빌드는 한 스크립트라 최상위 const 이름이 겹치면 안 됩니다.
+
+## 기록 회의별 · 시계 · 꾸미기 · 격려 (notes2.js / deco.js)
+- notes2.js: `S.meetings`(회의 이름 목록, 사용자가 추가), 노트의 `meeting` 필드. 기록 목록 날짜순/회의별 전환(`UI.nv`), 「제목 보고 회의 자동 분류」(`S.profile.autoMeet`, 선택).
+- deco.js: 시계(`S.profile.clock`, 급식 `lunchS/lunchE` — 비면 일과표의 가장 긴 쉬는 시간), 꾸미기(`S.profile.deco` {on,dim,blur,washi,stick}, 배경 사진은 IDB 키 'deco'에 1600px JPEG로 저장), 격려 500개(`CH_A` 50 × `CH_B` 10, `S.profile.cheer`='today'|'off'). 설정 화면에 `.decoset` 카드가 자동 삽입됩니다.
+- 주의: 단체사진은 학생 얼굴이 담긴 개인정보이므로 이 기기(IDB)에만 저장되고 클라우드 동기화에 포함되지 않습니다.

@@ -692,6 +692,28 @@ body.dropping::after{content:"📎 여기에 놓으면 자료 아카이브에 �
 .tbl{width:100%;border-collapse:collapse;font-size:13px}.tbl td,.tbl th{border:1px solid rgba(0,0,0,.15);padding:5px 7px;vertical-align:top}.tbl tr.gone td{opacity:.55}
 .rubt textarea,.rubt input{width:100%;box-sizing:border-box;font:inherit;font-size:12px}.rubt input.pt{width:52px}.ctw{overflow-x:auto}
 .stp1{border:1px solid rgba(0,0,0,.2);background:#fff;border-radius:999px;padding:3px 10px;margin:2px;font-size:12px;cursor:pointer}.stp1.on{background:#ffd54f;font-weight:700}.stp1.past{background:#e6f4d7}
+/* 기록 회의별 */
+.nlist .seg{display:flex;gap:6px;margin:8px 0}.nlist .chk.sm{font-size:12px;display:block;margin:4px 0}.mtg{margin:6px 0}.mtg summary{cursor:pointer}
+/* 시계 */
+#tfclock{position:fixed;z-index:60;text-align:center;background:rgba(255,253,240,.94);border:2px solid #333;border-radius:16px;box-shadow:3px 3px 0 #333;padding:10px 14px;font-family:inherit;color:#222}
+#tfclock .ct{font-size:34px;font-weight:800;letter-spacing:1px;line-height:1.1}#tfclock .cd2{font-size:12px;opacity:.7}#tfclock .cb{font-size:16px;font-weight:800;margin-top:6px}#tfclock .cs{font-size:12px;opacity:.85;margin-top:2px}
+#tfclock.clk-cls{background:#e3f4e1}#tfclock.clk-lunch{background:#ffe9b8}#tfclock.clk-brk{background:#e1ecff}#tfclock.clk-end,#tfclock.clk-we{background:#efe6ff}
+@media(min-width:1540px){#tfclock{top:130px;right:calc((100vw - 1180px)/2 - 160px);width:150px;padding:8px 8px}#tfclock .ct{font-size:28px}}
+@media(max-width:1539px){#tfclock{top:6px;right:6px;left:6px;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:2px 12px;padding:4px 10px;border-radius:12px;box-shadow:2px 2px 0 #333}#tfclock .ct{font-size:20px}#tfclock .cb{margin:0;font-size:14px}#tfclock .cd2{display:none}#tfclock .cs{margin:0;font-size:11px}body.hasclk{padding-top:46px}}
+@media print{#tfclock{display:none}}
+/* 다꾸 */
+body.deco-on::before{content:"";position:fixed;inset:-12px;z-index:-1;background-size:cover;background-position:center}
+body.deco-on{background:transparent!important}
+body.deco-on #app{background-color:rgba(255,253,245,var(--decoA,.7))!important;backdrop-filter:blur(2px);border-radius:18px}
+body.deco-washi main h2,body.deco-washi main .h3{display:inline-block;background:repeating-linear-gradient(135deg,rgba(255,170,190,.55) 0 8px,rgba(255,255,255,.55) 8px 16px);padding:2px 14px;transform:rotate(-1deg);border-radius:3px;box-shadow:0 1px 2px rgba(0,0,0,.15)}
+body.deco-stick #app::after{content:"⭐ 🌷 ☁️";position:absolute;top:-14px;right:20px;font-size:26px;letter-spacing:6px;pointer-events:none}
+/* 설정·격려 */
+.decoset{border:2px solid #333;border-radius:14px;padding:12px 16px;margin:12px 0;background:rgba(255,255,255,.6)}.dset{margin:10px 0}.row2c{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:6px 0}
+.cheer{display:flex;gap:10px;align-items:center;justify-content:space-between;background:#fff3d6;border:2px dashed #c90;border-radius:12px;padding:8px 14px;margin:8px 0;font-weight:600}
+/* 달 이동 화살표 겹침 방지 */
+.calh{display:flex;align-items:center;gap:8px;flex-wrap:nowrap}.calh .calt{flex:1 1 auto;min-width:0;text-align:center;font-size:clamp(16px,2.2vw,22px)!important;white-space:nowrap;margin:0 4px}.calh .btn{flex:0 0 auto;min-width:34px;padding:4px 8px;line-height:1}
+.mcal .calh{gap:4px}.mcal .calh .calt{font-size:17px!important}
+.calh .calt,.mcal .calt{min-width:0!important;width:auto!important;overflow:visible}.mcal .calh .btn{min-width:30px!important;padding:4px 7px!important}
 </style>
 </head>
 <body>
@@ -3227,6 +3249,113 @@ document.addEventListener('input', e => {
 const _allEvents0 = allEvents;
 allEvents = function () { const e = _allEvents0(); (S.exams || []).forEach(x => { if (x.date) e.push({ date: x.date, t: x.title + (x.range ? ' (' + x.range + ')' : ''), kind: '평가', done: false }); }); S.assess.forEach(a => { if (a.when) e.push({ date: a.when, t: a.title + ' 시행', kind: '평가', done: (a.step || 0) >= 3 }); }); return e; };
 syncProg();
+
+/* 기록: 회의 이름 목록(추가 가능) · 회의별 보기 · 제목에서 회의 자동 분류(선택) */
+const MEET0 = ['교직원회의', '부장회의', '학년협의회', '교과협의회', '수업탐구공동체', '연수', '학교운영위원회', '기타'];
+const meetList = () => { S.meetings = (Array.isArray(S.meetings) && S.meetings.length) ? S.meetings : [...MEET0]; return S.meetings; };
+const guessMeet = n => { const t = norm((n.title || '') + ' ' + (n.body || '').slice(0, 80)); return meetList().find(m => m !== '기타' && t.includes(norm(m).replace(/회의$/, ''))) || ''; };
+const _notesView0 = notesView;
+notesView = function (id) {
+  let h = _notesView0(id); UI.nv = UI.nv || 'date';
+  const n = S.notes.find(x => x.id === id), M = meetList(), auto = !!S.profile.autoMeet;
+  const item = x => `<a href="#/note/${x.id}" class="${x.id === id ? 'on' : ''}"><b>${esc(x.title || '제목 없음')}</b><span class="mu">${md(x.date)}${UI.nv === 'date' ? ' · ' + esc(x.meeting || x.kind || '') : ''}${x.lock ? ' · 잠금' : ''}</span></a>`;
+  let body;
+  if (UI.nv === 'meet') {
+    const g = {}; [...S.notes].sort((a, b) => b.date.localeCompare(a.date)).forEach(x => (g[x.meeting || '(회의 미지정)'] = g[x.meeting || '(회의 미지정)'] || []).push(x));
+    body = Object.keys(g).sort((a, b) => (M.indexOf(a) < 0 ? 99 : M.indexOf(a)) - (M.indexOf(b) < 0 ? 99 : M.indexOf(b))).map(k => `<details class="mtg" ${OPEN.has('mt' + k) || (n && (n.meeting || '(회의 미지정)') === k) ? 'open' : ''} data-open="mt${esc(k)}"><summary><b>${esc(k)}</b> <span class="mu">${g[k].length}건</span></summary>${g[k].map(item).join('')}</details>`).join('') || '<p class="mu">노트가 없습니다.</p>';
+  } else body = [...S.notes].sort((a, b) => b.date.localeCompare(a.date)).map(item).join('') || '<p class="mu">노트가 없습니다.</p>';
+  const aside = `<aside class="nlist"><button class="btn" data-act="noteNew">+ 새 노트</button><div class="seg"><button class="chp ${UI.nv === 'date' ? 'on' : ''}" data-act="nvSet" data-v="date">날짜순</button><button class="chp ${UI.nv === 'meet' ? 'on' : ''}" data-act="nvSet" data-v="meet">회의별</button></div><label class="chk sm"><input type="checkbox" data-meetauto ${auto ? 'checked' : ''}> 제목 보고 회의 자동 분류</label><button class="x" data-act="meetEdit">회의 이름 관리</button>${body}</aside>`;
+  const a = h.indexOf('<aside class="nlist">'), b = h.indexOf('</aside>', a); if (a >= 0 && b > a) h = h.slice(0, a) + aside + h.slice(b + 8);
+  if (n) { const s = h.indexOf('<select data-note="kind"'), e = h.indexOf('</select>', s); if (s >= 0) h = h.slice(0, s) + `<select data-meetsel aria-label="회의 이름"><option value="">(회의 선택)</option>${M.map(m => `<option ${m === n.meeting ? 'selected' : ''}>${esc(m)}</option>`).join('')}<option value="__add">＋ 새 회의 이름 추가…</option>` + h.slice(e); }
+  return h;
+};
+Object.assign(A, {
+  nvSet(el) { UI.nv = el.dataset.v; render(); },
+  meetEdit() { ask('회의 이름 관리 (줄마다 하나)', [{ k: 'l', label: '회의 이름 목록', type: 'textarea', rows: 10, val: meetList().join('\n') }], o => { const L = [...new Set(o.l.split('\n').map(s => s.trim()).filter(Boolean))]; S.meetings = L.length ? L : [...MEET0]; commit(); }); }
+});
+document.addEventListener('change', e => {
+  const t = e.target;
+  if (t.dataset && t.dataset.meetsel !== undefined) { const n = find('notes', location.hash.split('/')[2]); if (!n) return; if (t.value === '__add') { t.value = n.meeting || ''; ask('새 회의 이름', [{ k: 'name', label: '회의 이름 (예: 3학년 학년회의)', req: 1 }], o => { const m = o.name.trim(); if (!meetList().includes(m)) S.meetings.push(m); n.meeting = m; n.kind = '회의'; commit(); }); } else { n.meeting = t.value; n.kind = t.value ? '회의' : n.kind; commit(); } }
+  else if (t.dataset && t.dataset.meetauto !== undefined) { S.profile.autoMeet = t.checked; if (t.checked) { let c = 0; S.notes.forEach(x => { if (!x.meeting) { const g = guessMeet(x); if (g) { x.meeting = g; c++; } } }); toast(c ? c + '개 노트를 회의별로 분류했습니다.' : '자동 분류를 켰습니다. 제목에 회의 이름이 들어가면 분류돼요.'); } commit(); }
+}, true);
+document.addEventListener('input', e => { const t = e.target; if (t.dataset && t.dataset.note === 'title' && S.profile.autoMeet) { const n = find('notes', location.hash.split('/')[2]); if (n && !n.meeting) { const g = guessMeet(n); if (g) { n.meeting = g; const s = document.querySelector('[data-meetsel]'); if (s) s.value = g; save(true); } } } });
+meetList();
+
+/* 시계(교시·급식 알림) · 다꾸(사진 배경·꾸미기) · 격려 문구 500개 · 설정 카드 */
+const CH_A = ['오늘도 교실 문을 여는 선생님의 발걸음이 누군가에게는 하루의 시작입니다.', '아이들은 선생님이 가르친 내용보다 선생님이 건넨 한마디를 더 오래 기억합니다.', '완벽한 수업이 아니어도 괜찮습니다. 준비한 마음은 아이들에게 전해집니다.', '쌓이는 업무 속에서도 수업을 놓지 않는 선생님이 학교의 중심입니다.', '오늘 해낸 작은 일들이 모여 한 학기가 됩니다.', '지치는 날이 있다는 건 그만큼 진심으로 일하고 있다는 뜻입니다.', '선생님이 웃으면 교실 온도가 1도쯤 올라갑니다.', '모든 아이를 다 바꿀 수는 없어도, 한 아이에게는 평생의 선생님이 될 수 있습니다.', '답이 보이지 않는 날에도 질문을 멈추지 않는 선생님이 멋집니다.', '지금 미뤄 둔 일은 내일의 선생님이 잘 해낼 겁니다.', '공문이 쏟아지는 날에도 수업 한 시간은 반드시 아이들의 것입니다.', '하루를 무사히 보낸 것만으로도 충분히 잘하고 있습니다.', '선생님의 한 줄 칭찬이 어떤 아이의 한 달을 바꿉니다.', '실수했다면 그 덕분에 다음 수업이 더 좋아질 차례입니다.', '쉬는 시간에 물 한 모금 마시는 것도 훌륭한 업무의 일부입니다.', '선생님의 노력은 지금 보이지 않아도 어딘가에서 싹트고 있습니다.', '아이들은 완벽한 어른이 아니라 진심인 어른을 믿습니다.', '오늘 힘들었다면 내일은 그 경험이 선생님의 노련함이 됩니다.', '바쁜 중에도 아이의 이름을 불러 주는 사람, 그게 선생님입니다.', '모든 일을 한 번에 끝내려 하지 않아도 됩니다. 한 줄씩 지워 가면 됩니다.', '수업이 마음 같지 않았던 날은 다음 수업의 아이디어가 태어나는 날입니다.', '선생님이 건네는 "괜찮아"가 누군가에게는 오늘 들은 유일한 위로일 수 있습니다.', '학교가 돌아가는 건 보이지 않는 곳에서 애쓰는 선생님들 덕분입니다.', '지금 하는 고민은 좋은 선생님이 되려는 사람만 하는 고민입니다.', '오늘의 한 걸음이 내일 아이들이 걸을 길을 만듭니다.', '서두르지 않아도 됩니다. 좋은 수업은 천천히 익습니다.', '오늘도 아이들 앞에 서는 용기를 낸 선생님, 정말 대단합니다.', '해야 할 일이 많다는 건 그만큼 믿고 맡기는 사람이라는 뜻입니다.', '선생님의 미소 한 번이 교실의 긴장을 풀어 줍니다.', '아무도 알아주지 않아도 선생님의 정성은 아이들 마음에 남습니다.', '오늘 배운 한 가지가 있다면 그것으로 성장한 하루입니다.', '체력도 실력입니다. 오늘은 조금 일찍 쉬어도 좋습니다.', '아이들의 "선생님!" 한마디에는 수많은 마음이 담겨 있습니다.', '마감이 겹쳐도 하나씩 풀면 반드시 끝이 납니다.', '선생님이 지켜 온 원칙은 아이들에게 말없는 수업이 됩니다.', '좋은 질문 하나를 던진 오늘 수업, 이미 성공입니다.', '잘 안 풀린 하루라도 선생님의 가치는 줄어들지 않습니다.', '회의가 길어진 날에도 아이들 얼굴을 떠올리면 힘이 납니다.', '한 번 더 설명해 주는 인내가 아이의 이해를 완성합니다.', '선생님이 아이들에게 주는 가장 큰 선물은 믿어 주는 눈빛입니다.', '오늘의 피곤함은 최선을 다했다는 증거입니다.', '변화는 느리지만 선생님의 수업은 분명히 아이들을 자라게 합니다.', '완성된 계획서보다 시작한 선생님이 먼저 이깁니다.', '선생님의 하루는 기록되지 않아도 아이들의 삶에 기록됩니다.', '오늘도 학교에 와 준 것만으로 아이들에게는 안심이 됩니다.', '어려운 학생 앞에서 포기하지 않는 마음이 가장 훌륭한 교육입니다.', '업무는 쌓여도 선생님의 열정은 닳지 않습니다.', '잠깐 창밖을 보는 여유도 좋은 수업을 위한 준비입니다.', '선생님이 배우는 자세를 보이면 아이들도 배우는 사람이 됩니다.', '지금까지 잘해 왔고, 앞으로도 잘할 선생님입니다.'];
+const CH_B = ['오늘도 응원합니다.', '충분히 잘하고 계십니다.', '잠깐 숨 고르고 가셔도 괜찮습니다.', '선생님 덕분에 학교가 따뜻합니다.', '오늘의 수고, 꿈송이가 기억할게요.', '한 가지만 끝내도 오늘은 성공입니다.', '무리하지 말고 천천히 가요.', '선생님은 이미 좋은 선생님입니다.', '내일은 오늘보다 한결 가벼울 거예요.', '힘내세요, 꿈송이가 곁에 있어요!'];
+const CHEER = []; CH_A.forEach(a => CH_B.forEach(b => CHEER.push(a + ' ' + b)));   /* 50 × 10 = 500 */
+const cheerPick = (shift = 0) => { const d = new Date(), seed = d.getFullYear() * 400 + Math.floor((d - new Date(d.getFullYear(), 0, 0)) / 864e5); return CHEER[((seed * 37 + shift * 101) % CHEER.length + CHEER.length) % CHEER.length]; };
+let _cheerShift = 0;
+/* ---------- 시계 ---------- */
+function clkPeriods() { const p = S.profile; if (p.bell && p.bell.length) return p.bell.map(x => ({ p: x.p, s: x.s, e: x.e })).sort((a, b) => a.s - b.s); const [h, m] = (p.start || '09:00').split(':').map(Number), st = h * 60 + m, L = []; for (let i = 1; i <= 7; i++) { const a = st + (i - 1) * (+p.classMin + +p.breakMin); L.push({ p: i, s: a, e: a + +p.classMin }); } return L; }
+const clkHM = n => String(Math.floor(n / 60)).padStart(2, '0') + ':' + String(n % 60).padStart(2, '0');
+const clkParse = s => { const m = String(s || '').match(/^(\d{1,2}):(\d{2})$/); return m ? +m[1] * 60 + +m[2] : null; };
+function clkLunch(P) { const p = S.profile, a = clkParse(p.lunchS), b = clkParse(p.lunchE); if (a != null && b != null) return [a, b]; let best = null; for (let i = 0; i + 1 < P.length; i++) { const g = P[i + 1].s - P[i].e; if (g >= 30 && (!best || g > best[1] - best[0])) best = [P[i].e, P[i + 1].s]; } return best || [12 * 60 + 30, 13 * 60 + 20]; }
+function clkState() {
+  const n = new Date(), mins = n.getHours() * 60 + n.getMinutes(), dow = n.getDay(), P = clkPeriods(), L = clkLunch(P);
+  if (dow === 0 || dow === 6) return { big: '주말입니다', sub: '푹 쉬세요 🌿', cls: 'we' };
+  if (mins >= L[0] && mins < L[1]) return { big: '급식시간입니다', sub: `${clkHM(L[0])}~${clkHM(L[1])} · 맛있게 드세요 🍚`, cls: 'lunch' };
+  const cur = P.find(x => mins >= x.s && mins < x.e);
+  if (cur) { const my = S.timetable[dow + '-' + cur.p]; return { big: `지금은 ${cur.p}교시입니다`, sub: `${clkHM(cur.s)}~${clkHM(cur.e)} · ${cur.e - mins}분 남음${my ? ' · 내 수업 ' + my : ' · 수업 없음(업무 시간)'}`, cls: my ? 'cls' : 'free' }; }
+  const nx = P.find(x => x.s > mins);
+  if (nx && mins >= P[0].s) { const prev = [...P].reverse().find(x => x.e <= mins), my = S.timetable[dow + '-' + nx.p]; return { big: '쉬는 시간입니다', sub: `${clkHM(nx.s)} ${nx.p}교시 시작(${nx.s - mins}분 뒤)${my ? ' · ' + my : ''}`, cls: 'brk' }; }
+  if (nx) return { big: '수업 전입니다', sub: `${nx.p}교시는 ${clkHM(nx.s)}에 시작해요`, cls: 'pre' };
+  return { big: '수업이 모두 끝났어요', sub: '오늘도 수고하셨습니다 🌙', cls: 'end' };
+}
+function clkDraw() {
+  let el = document.getElementById('tfclock'); const on = S.setup && S.profile.clock; document.body.classList.toggle('hasclk', !!on);
+  if (!on) { if (el) el.remove(); return; }
+  if (!el) { el = document.createElement('div'); el.id = 'tfclock'; el.setAttribute('role', 'status'); document.body.appendChild(el); }
+  const n = new Date(), st = clkState();
+  el.className = 'clk-' + st.cls; el.innerHTML = `<div class="ct">${clkHM(n.getHours() * 60 + n.getMinutes())}</div><div class="cd2">${n.getMonth() + 1}월 ${n.getDate()}일 (${DOW[n.getDay()]})</div><div class="cb">${esc(st.big)}</div><div class="cs">${esc(st.sub)}</div>`;
+}
+setInterval(clkDraw, 15000);
+/* ---------- 다꾸 ---------- */
+const DEC = () => (S.profile.deco = S.profile.deco || { on: false, dim: 70, blur: 2, washi: false, stick: false });
+async function decoApply() {
+  const d = DEC(), b = document.body; b.classList.toggle('deco-on', !!d.on); b.classList.toggle('deco-washi', !!(d.on && d.washi)); b.classList.toggle('deco-stick', !!(d.on && d.stick));
+  let st = document.getElementById('decoCss'); if (!st) { st = document.createElement('style'); st.id = 'decoCss'; document.head.appendChild(st); }
+  let url = ''; if (d.on) { try { url = (await idb.get('deco')) || ''; } catch (e) { } }
+  st.textContent = d.on ? `:root{--decoA:${(+d.dim || 70) / 100}}${url ? `body.deco-on::before{background-image:url("${url}");filter:blur(${+d.blur || 0}px)}` : ''}` : '';
+}
+function decoPhoto(file) {
+  return new Promise((res, rej) => { const im = new Image(), u = URL.createObjectURL(file); im.onload = () => { const k = Math.min(1, 1600 / Math.max(im.width, im.height)), c = document.createElement('canvas'); c.width = Math.round(im.width * k); c.height = Math.round(im.height * k); c.getContext('2d').drawImage(im, 0, 0, c.width, c.height); URL.revokeObjectURL(u); res(c.toDataURL('image/jpeg', 0.75)); }; im.onerror = () => rej(new Error('사진을 읽지 못했습니다')); im.src = u; });
+}
+/* ---------- 설정 카드 · 오늘 격려 ---------- */
+function decoCard() {
+  const p = S.profile, d = DEC(), cm = p.cheer || 'off';
+  return `<section class="decoset"><h3 class="h3">⏰ 시계 · 🎨 꾸미기 · 💌 격려 (선택)</h3>
+  <div class="dset"><label class="chk"><input type="checkbox" data-dset="clock" ${p.clock ? 'checked' : ''}> <b>시계 보이기</b> — 일과표 기준으로 "지금은 3교시입니다 / 급식시간입니다"를 알려 줘요. 컴퓨터는 화면 오른쪽, 폰·태블릿은 화면 위쪽에 맞춰 나옵니다.</label>
+  <div class="row2c"><label>급식 시작 <input type="time" data-dset="lunchS" value="${esc(p.lunchS || '')}"></label><label>급식 끝 <input type="time" data-dset="lunchE" value="${esc(p.lunchE || '')}"></label><span class="mu">비워 두면 일과표에서 가장 긴 쉬는 시간을 급식으로 봅니다.</span></div></div>
+  <div class="dset"><label class="chk"><input type="checkbox" data-dset="deco.on" ${d.on ? 'checked' : ''}> <b>꾸미기(다꾸) 켜기</b> — 우리 반 단체사진 같은 사진을 배경으로 깝니다. 글씨는 반투명 종이 위에 놓여서 사진 때문에 읽기 어렵지 않아요.</label>
+  <div class="row2c"><label class="btn sm file">📷 배경 사진 고르기<input type="file" accept="image/*" data-decophoto hidden></label><button class="x" data-act="decoPhotoDel">사진 지우기</button></div>
+  <div class="row2c"><label>글씨 보호막(종이 불투명도) <input type="range" min="55" max="100" step="5" data-dset="deco.dim" value="${d.dim}"> <b>${d.dim}%</b></label><label>사진 흐림 <input type="range" min="0" max="12" data-dset="deco.blur" value="${d.blur}"></label></div>
+  <div class="row2c"><label class="chk"><input type="checkbox" data-dset="deco.washi" ${d.washi ? 'checked' : ''}> 마스킹테이프 제목</label><label class="chk"><input type="checkbox" data-dset="deco.stick" ${d.stick ? 'checked' : ''}> 모서리 스티커</label></div></div>
+  <div class="dset"><b>격려의 말</b> <span class="mu">(${CHEER.length}개 중 하루에 하나)</span><div class="row2c"><select data-dset="cheer" aria-label="격려의 말 표시"><option value="off" ${cm === 'off' ? 'selected' : ''}>표시 안 함</option><option value="today" ${cm === 'today' ? 'selected' : ''}>오늘 화면 맨 위에 표시</option></select></div></div></section>`;
+}
+function decoInject() {
+  const h = location.hash || '#/today', main = document.querySelector('#app main'); if (!main || !S.setup) return;
+  if (/^#\/set/.test(h) && !main.querySelector('.decoset')) { const bh = main.querySelector('.bh'), w = document.createElement('div'); w.innerHTML = decoCard(); bh ? bh.after(w.firstChild) : main.prepend(w.firstChild); }
+  if (/^#\/(today)?$/.test(h) || h === '#/' || h === '') { const on = (S.profile.cheer || 'off') === 'today', ex = main.querySelector('.cheer'); if (on && !ex) { const c = document.createElement('div'); c.className = 'cheer'; c.innerHTML = `<span>💌 ${esc(cheerPick(_cheerShift))}</span><button class="x" data-act="cheerNext" aria-label="다른 말">다른 말</button>`; main.prepend(c); } else if (!on && ex) ex.remove(); }
+}
+new MutationObserver(() => { decoInject(); }).observe(document.getElementById('app'), { childList: true, subtree: true });
+window.addEventListener('hashchange', () => setTimeout(decoInject, 30));
+Object.assign(A, {
+  cheerNext() { _cheerShift++; const c = document.querySelector('.cheer span'); if (c) c.textContent = '💌 ' + cheerPick(_cheerShift); },
+  decoPhotoDel() { idb.del('deco').then(() => { decoApply(); toast('배경 사진을 지웠습니다.'); }); }
+});
+document.addEventListener('change', async e => {
+  const t = e.target;
+  if (t.dataset && t.dataset.decophoto !== undefined) { const f = t.files[0]; t.value = ''; if (!f) return; try { await idb.set('deco', await decoPhoto(f)); DEC().on = true; save(); await decoApply(); toast('배경 사진을 적용했습니다. 글씨가 안 읽히면 "글씨 보호막"을 올려 보세요.'); render(); } catch (er) { toast(er.message); } return; }
+  const k = t.dataset && t.dataset.dset; if (!k) return;
+  const v = t.type === 'checkbox' ? t.checked : t.type === 'range' ? +t.value : t.value;
+  if (k.startsWith('deco.')) DEC()[k.slice(5)] = v; else S.profile[k] = v;
+  save(); if (k === 'cheer') { const o = document.querySelector('#app main .cheer'); if (o) o.remove(); } if (k.startsWith('deco')) await decoApply(); clkDraw(); if (k === 'deco.dim') { const b = t.parentNode.querySelector('b'); if (b) b.textContent = v + '%'; } decoInject();
+}, true);
+document.addEventListener('input', e => { const t = e.target; if (t.dataset && t.dataset.dset === 'deco.dim') { DEC().dim = +t.value; document.documentElement.style.setProperty('--decoA', t.value / 100); const b = t.parentNode.querySelector('b'); if (b) b.textContent = t.value + '%'; } });
+if (S.setup) { decoApply(); clkDraw(); decoInject(); }
+const _r0 = TF.render; TF.render = function () { const v = _r0.apply(this, arguments); clkDraw(); decoInject(); return v; };
 
 /* setui.js — 설정의 "작업표시줄에 고정 · 위젯" 안내 칸(app.js `.guide`) 위에 [앱으로 설치하기]·[위젯 열기] 버튼을 붙입니다.
    (설정 칸 접기는 extra.js `setFold()`가 맡습니다.) */
