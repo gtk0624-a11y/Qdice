@@ -3916,7 +3916,7 @@ function bootMake() {
 Object.assign(A, {
   bootDl() {
     if (window.TF_DEMO) return toast('체험판에서는 만들 수 없어요. 내 수첩(실제 주소)에서 받아 주세요.');
-    const b = new Blob(['﻿' + bootMake()], { type: 'application/octet-stream' }), a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = 'travail-fatal-start.bat'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 3000);
+    const b = new Blob([bootMake()], { type: 'application/octet-stream' }), a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = 'travail-fatal-start.bat'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 3000);
     toast('시작 파일을 받았습니다. 아래 순서대로 시작프로그램 폴더에 넣어 주세요.');
   }
 });
