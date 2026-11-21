@@ -454,7 +454,7 @@ function cmAlerts() {
 }
 const cmInject = () => {
   const main = document.querySelector('#app main'); if (!main || !S.setup) return; const ex = main.querySelector('.cmtoday'), isT = /^#\/(today)?$/.test(location.hash) || !location.hash;
-  const L = isT ? cmAlerts() : []; if (ex) ex.remove(); if (!isT || !cmCfg().on) return;
+  const L = isT ? cmAlerts() : []; if (ex) ex.remove(); if (!isT || !cmCfg().on || (S.navHide || []).includes('cm')) return;
   const d = document.createElement('div'); d.className = 'hpcard cmtoday'; d.innerHTML = `<b>🏫 ${esc(cmCfg().title)}</b> <a class="btn sm pri" href="#/cm">열기 ▶</a>${L.length ? '' : '<span class="mu"> 출결·상담·당번·행사 (오늘 알림 없음)</span>'}${L.slice(0, 8).map(x => `<div class="cmr">${esc(x)}</div>`).join('')}${L.length > 8 ? `<p class="mu">외 ${L.length - 8}건</p>` : ''}`;
   const a = main.querySelector('.hpcard') || main.querySelector('.cheer'); if (a) a.after(d); else main.prepend(d);
 };
@@ -489,7 +489,7 @@ buildChunks = function () {
 };
 
 /* 화면 맨 아래에 버전 표시 — 옛 화면을 보고 있는지 바로 알 수 있게 */
-const TF_VER = 'v65', _cmFt = footer;
+const TF_VER = 'v66', _cmFt = footer;
 footer = function () { return _cmFt.apply(this, arguments).replace('</footer>', ` · <span class="mu">버전 ${TF_VER} (학급 관리 포함)</span></footer>`); };
 
 /* 새 버전 알림: 옛 화면이 남아 있으면 한 번 눌러 새로 받게 함 */
@@ -500,7 +500,7 @@ footer = function () { return _cmFt.apply(this, arguments).replace('</footer>', 
 
 /* 어떤 화면 틀에서도 보이는 떠 있는 「학급 관리」 버튼 */
 function cmFab() {
-  let b = document.getElementById('cmfab'); const show = S.setup && cmCfg().on && !/^#\/cm/.test(location.hash);
+  let b = document.getElementById('cmfab'); const show = S.setup && cmCfg().on && !(S.navHide || []).includes('cm') && !/^#\/cm/.test(location.hash);
   if (!show) { if (b) b.remove(); return; }
   if (!b) { b = document.createElement('a'); b.id = 'cmfab'; b.className = 'cmfab'; b.href = '#/cm'; document.body.appendChild(b); }
   b.innerHTML = '🏫<span>' + esc(cmCfg().title || '학급 관리') + '</span>';

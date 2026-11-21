@@ -98,7 +98,7 @@ document.addEventListener('change', async e => {
 
 /* 오늘 화면 알림 카드 */
 const ypInject = () => {
-  const main = document.querySelector('#app main'); if (!main || !S.setup) return; const ex = main.querySelector('.yptoday'), isT = /^#\/(today)?$/.test(location.hash) || !location.hash; if (ex) ex.remove(); if (!isT) return;
+  const main = document.querySelector('#app main'); if (!main || !S.setup) return; const ex = main.querySelector('.yptoday'), isT = /^#\/(today)?$/.test(location.hash) || !location.hash; if (ex) ex.remove(); if (!isT || (S.navHide || []).includes('yp')) return;
   const L = ypAlerts(); if (!L.length) return;
   const d = document.createElement('div'); d.className = 'hpcard yptoday'; d.innerHTML = `<b>📚 교육·훈련 임박</b> <a class="btn sm" href="#/yp">표 열기 ▶</a>${L.slice(0, 6).map(x => `<div class="cmal">${dd(x.d) < 0 ? '<span class="hot">날짜 지남</span>' : ddText(dd(x.d))} · ${md(x.d)} ${esc(x.name)} <small class="mu">${esc(x.col)}</small> <button class="x" data-act="ypDone" data-id="${x.id}">실시 완료</button></div>`).join('')}`;
   const a = main.querySelector('.cmtoday') || main.querySelector('.hpcard') || main.querySelector('.cheer'); if (a) a.after(d); else main.prepend(d);
