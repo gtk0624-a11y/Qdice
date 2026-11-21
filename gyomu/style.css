@@ -916,3 +916,15 @@ html[data-skin="planner"] .drawer,html[data-skin="planner"] .dw{padding:6px 12px
 .hubcols{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}.hubcol{border:1px solid #dde3ee;border-radius:10px;padding:8px;background:#fff;font-size:.92em}.hubcol>div{margin:3px 0}
 .hubrow{display:flex;gap:8px;align-items:center;margin:4px 0}.hubrow span{flex:1}.hubtabs{margin:10px 0}
 .nf-mttoday .mttoday,.nf-yps .ypsig{display:none!important}
+/* v86 떠 있는 버튼(꿈송이·사진·학급)이 입력 칸·마지막 버튼을 가리지 않게 */
+main{padding-bottom:120px}
+body:has(input:focus,textarea:focus,select:focus) #chatfab,body:has(input:focus,textarea:focus,select:focus) #chatbub,body:has(input:focus,textarea:focus,select:focus) .scfab,body:has(input:focus,textarea:focus,select:focus) .cmfab,body:has(dialog[open]) #chatfab,body:has(dialog[open]) #chatbub,body:has(dialog[open]) .scfab,body:has(dialog[open]) .cmfab{opacity:0;pointer-events:none}
+/* v86 떠 있는 아이콘(꿈송이·사진·학급)이 어떤 화면에서도 서로·아래 메뉴와 겹치지 않게: 왼쪽은 아래에서 위로 쌓고, 아래 메뉴 모드에서는 메뉴 위로 올립니다 */
+html{--fb:14px}html[data-nav=bottom]{--fb:78px}
+.scfab{bottom:var(--fb)!important}.cmfab{bottom:calc(var(--fb) + 62px)!important}
+html[data-nav=bottom] #chatfab{bottom:calc(var(--fb) + 6px)!important}
+#chatbub{margin-bottom:8px}
+#chatfab{bottom:calc(var(--fb) + 6px)!important}#chatbub{bottom:calc(var(--fb) + 112px)!important}
+html[data-nav=bottom] #chatbub,html #chatbub{bottom:calc(var(--fb) + 112px)!important}
+html[data-nav=right] #chatbub{max-width:130px;white-space:normal;text-align:center}
+html[data-nav=right] #chatbub{display:none!important}

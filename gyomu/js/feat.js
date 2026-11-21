@@ -40,3 +40,8 @@ function kitApply(j, msg) {
 /* 한 번 눌러 넣기: 주소 뒤에 ?kit=이름 을 붙여 열면 kits/이름.json 을 자동으로 합칩니다(내 전용 꾸러미를 코드에 넣지 않고 따로 두는 방법). */
 (async () => { try { const k = new URLSearchParams(location.search).get('kit'); if (!k || !/^[\w-]{3,40}$/.test(k) || !S.setup) return; const r = await fetch('kits/' + k + '.json', { cache: 'no-store' }); if (!r.ok) throw new Error('꾸러미를 찾지 못했습니다'); const j = await r.json(); if (j.tf !== 'kit') throw new Error('꾸러미 형식이 아닙니다'); const done = (S.kitDone = S.kitDone || {}); kitApply(j, `내 업무 꾸러미를 넣었습니다 (뼈대 ${(j.skel || []).length}개). 이제 「내 업무 → 🦴 업무 뼈대로 시작」에서 ★로 보입니다.`); done[k] = today(); save(true); history.replaceState(null, '', location.pathname + location.hash); } catch (e) { toast('꾸러미 넣기 실패: ' + e.message); } })();
 featApply(); { const _r = TF.render; TF.render = function () { featApply(); return _r.apply(this, arguments); }; }
+/* 떠 있는 아이콘(꿈송이·사진·학급)이 아래 고정 메뉴와 겹치지 않게: 메뉴 높이를 재서 --fb(아이콘이 서는 바닥 높이)를 맞춥니다. 화면 크기가 바뀌어도 다시 잽니다. */
+function fabFit() {
+  try { const n = document.querySelector('.nav'); let fb = 14; if (n && /fixed|sticky/.test(getComputedStyle(n).position)) { const b = n.getBoundingClientRect(); if (b.bottom >= innerHeight - 4 && b.height < innerHeight * 0.6) fb = Math.round(innerHeight - b.top) + 12; } document.documentElement.style.setProperty('--fb', fb + 'px'); } catch (e) { }
+}
+{ const _r = TF.render; TF.render = function () { const v = _r.apply(this, arguments); setTimeout(fabFit, 0); return v; }; addEventListener('resize', fabFit); setTimeout(fabFit, 300); setTimeout(fabFit, 1500); }
