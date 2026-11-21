@@ -23,7 +23,7 @@ function dpDraw(full) {
     <form class="dpf"><input name="title" placeholder="일정·할 일·업무 (예: 7교시 도박예방교육) Enter" required aria-label="내용"><input type="time" name="time" aria-label="시각(선택)"><select name="kind" aria-label="종류" data-cus="kind" data-work="1">${cusKindOpts(true, 'event')}</select><select name="per" aria-label="교시(선택)"><option value="">교시 없음</option>${[1,2,3,4,5,6,7].map(n => `<option value="${n}">${n}교시</option>`).join('')}</select><button class="btn pri">추가</button></form>
     <div id="dpList"></div>
     <label class="dmemo">📝 메모<textarea data-dmemo="${ds}" rows="4" placeholder="이 날 기억할 것·준비물·회의 내용 (쓰면 바로 저장됩니다)">${esc((S.dayMemo || {})[ds] || '')}</textarea></label><button class="btn sm" data-act="memoPick">🎨 메모 디자인</button>
-    <h4 class="dph4">🎀 꾸미기</h4><div id="dpStk"></div><div class="tools"><button class="btn sm" data-act="stkDay">⭐ 스티커 붙이기</button><label class="btn sm file">🖼 사진 올리기<input type="file" id="dpUp" accept="image/*" multiple hidden></label></div><label class="btn sm file">📷 손글씨 사진으로 일정 추가<input type="file" id="scUp" accept="image/*" capture="environment" hidden></label><div id="dpImg" class="dpimg"></div><p class="mu">사진은 이 기기에만 저장되고 클라우드 동기화에는 들어가지 않습니다.</p>`;
+    <h4 class="dph4">🎀 꾸미기</h4><div id="dpStk"></div><div class="tools"><button class="btn sm" data-act="stkDay">⭐ 스티커 붙이기</button><label class="btn sm file">📸 바로 찍기<input type="file" id="dpCam" accept="image/*" capture="environment" hidden></label><label class="btn sm file">🖼 사진·이미지 올리기<input type="file" id="dpUp" accept="image/*" multiple hidden></label></div><p class="mu dpsc">📷 손글씨 사진으로 일정 추가</p><div class="tools"><label class="btn sm file">📸 바로 찍기<input type="file" id="scCam" accept="image/*" capture="environment" hidden></label><label class="btn sm file">🖼 앨범에서 고르기<input type="file" id="scUp" accept="image/*" hidden></label></div><div id="dpImg" class="dpimg"></div><p class="mu">사진은 이 기기에만 저장되고 클라우드 동기화에는 들어가지 않습니다.</p>`;
   }
   d.querySelector('#dpList').innerHTML = dpList(ds); d.querySelector('#dpStk').innerHTML = dpStk(ds); dpImgs(ds);
 }
@@ -48,7 +48,7 @@ document.addEventListener('submit', e => {
   commit(); toast('캘린더' + (S.items[S.items.length - 1].per || cusPers(S.items[S.items.length - 1]).length ? '·시간표' : '') + '에 반영했습니다.'); const i = document.querySelector('#daypg [name=title]'); if (i) { i.value = ''; i.focus(); }
 }, true);
 document.addEventListener('change', async e => {
-  const t = e.target; if (t.id !== 'dpUp') return; const ds = DP, files = [...t.files]; t.value = '';
+  const t = e.target; if (t.id !== 'dpUp' && t.id !== 'dpCam') return; const ds = DP, files = [...t.files]; t.value = '';
   for (const f of files) {
     try { const url = await new Promise((res, rej) => { const im = new Image(), u = URL.createObjectURL(f); im.onload = () => { const k = Math.min(1, 1400 / Math.max(im.width, im.height)), c = document.createElement('canvas'); c.width = Math.round(im.width * k); c.height = Math.round(im.height * k); c.getContext('2d').drawImage(im, 0, 0, c.width, c.height); URL.revokeObjectURL(u); res(c.toDataURL('image/jpeg', 0.8)); }; im.onerror = () => rej(); im.src = u; });
       const id = uid(); await idb.set('dimg:' + id, url); DIMG[id] = url; (S.dayImg[ds] = S.dayImg[ds] || []).push({ id, name: f.name }); } catch (er) { toast('「' + f.name + '」 사진을 읽지 못했습니다.'); }

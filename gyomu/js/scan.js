@@ -30,8 +30,9 @@ function scApply(d) {
   });
   commit(); d.close(); toast(n + '건을 캘린더에 반영했습니다.');
 }
-document.addEventListener('change', e => { if (e.target.id !== 'scUp') return; const f = e.target.files[0]; e.target.value = ''; if (f) scanRun(f); }, true);
+document.addEventListener('change', e => { if (e.target.id !== 'scUp' && e.target.id !== 'scCam') return; const f = e.target.files[0]; e.target.value = ''; if (f) scanRun(f); }, true);
+const scPickHtml = '<label class="btn pri file">📸 바로 찍기<input type="file" id="scCam" accept="image/*" capture="environment" hidden></label><label class="btn file">🖼 앨범에서 고르기<input type="file" id="scUp" accept="image/*" hidden></label>';
 function scBtn() {
-  if (document.getElementById('scfab')) return; const l = document.createElement('label'); l.id = 'scfab'; l.className = 'scfab'; l.title = '손글씨 사진으로 일정·업무 추가'; l.innerHTML = '📷<span>손글씨 추가</span><input type="file" id="scUp" accept="image/*" capture="environment" hidden>'; document.body.appendChild(l);
+  if (document.getElementById('scfab')) return; const b = document.createElement('button'); b.id = 'scfab'; b.className = 'scfab'; b.type = 'button'; b.title = '손글씨 사진으로 일정·업무 추가'; b.innerHTML = '📷<span>손글씨 추가</span>'; b.addEventListener('click', () => { const d = document.createElement('dialog'); d.className = 'dlg cusm'; d.innerHTML = '<h3>📷 손글씨 사진으로 추가</h3><p class="mu">종이 수첩·포스트잇을 찍거나, 이미 찍어 둔 사진을 고르세요.</p><div class="tools">' + scPickHtml + '</div><div class="btns"><button class="btn" id="scpx">닫기</button></div>'; document.body.appendChild(d); d.addEventListener('change', () => setTimeout(() => d.close(), 50)); d.addEventListener('click', e => { if (e.target.id === 'scpx') d.close(); }); d.addEventListener('close', () => setTimeout(() => d.remove(), 100)); d.showModal(); }); document.body.appendChild(b);
 }
 const _r4 = TF.render; TF.render = function () { const v = _r4.apply(this, arguments); scBtn(); return v; };
