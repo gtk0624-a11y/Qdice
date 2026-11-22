@@ -411,3 +411,4 @@ service cloud.firestore {
 - 연 칸은 localStorage `tf.fold`(화면|제목)에 기억. 최초 1회(`tf.foldv`)는 예전에 열려 있던 줄(`tf.open`)·오늘 도우미를 모두 접음. `#/pages`는 제외.
 - 새 화면에 구역을 붙이려면 `<h3 class="h3">`로 시작하는 소제목을 main 바로 아래에 두면 자동으로 접힘.
 - 오늘 도우미(helper.js)는 기본 접힘(S.profile.hpOpen===true일 때만 열림).
+- v94: 오늘 화면에서 「오늘의 게시판」을 「오늘 꼭 할 일」 위로(placeBoard). 학급 관리는 최초 1회 navHide에 cm를 넣어 기본 숨김(메뉴 고르기에서 선택해야 메뉴·오늘 카드·떠 있는 단추가 보임, tf.cmhide).

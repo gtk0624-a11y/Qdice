@@ -12,7 +12,13 @@
     nodes[0].parentNode.insertBefore(d, nodes[0]); nodes.forEach(n => b.appendChild(n)); return d;
   }
   function migrate() {
+    try { if (!localStorage.getItem('tf.cmhide')) { localStorage.setItem('tf.cmhide', '1'); S.navHide = S.navHide || []; if (!S.navHide.includes('cm')) S.navHide.push('cm'); save(true); } } catch (e) { } /* 학급 관리는 선택해야 보임(메뉴 고르기) */
     try { if (localStorage.getItem(KV)) return; localStorage.setItem(KV, '1'); OPEN.clear(); localStorage.setItem('tf.open', '[]'); if (S.profile) { S.profile.hpOpen = false; save(true); } } catch (e) { }
+  }
+  /* 「오늘의 게시판」을 「오늘 꼭 할 일」 위로(다른 카드가 나중에 끼어들어도 다시 맞춤) */
+  function placeBoard() {
+    const main = document.querySelector('main'); if (!main) return; const d = main.querySelector(':scope > details.afold[data-fk*="게시판"]'), top = main.querySelector(':scope > .mttoday') || main.querySelector(':scope > .hpcard');
+    if (d && top && !(d.compareDocumentPosition(top) & 4)) main.insertBefore(d, top);
   }
   function foldPass() {
     const main = document.querySelector('main'); if (!main || main.querySelector(':scope > .foldbar')) return;
@@ -22,7 +28,7 @@
     const key = t => hash + '|' + String(t).replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim().slice(0, 30);
     if (today) {
       const kids = [...main.children], bh = kids.find(e => e.classList.contains('bh')), sp = kids.find(e => e.classList.contains('spread')), cm = kids.find(e => e.classList.contains('cmtoday'));
-      if (bh && sp) { wrap([bh, sp], '📋 오늘의 게시판 <small>일정·할 일·평가·예산·연수 한눈에</small>', key('게시판')); n++; }
+      if (bh && sp) { const d = wrap([bh, sp], '📋 오늘의 게시판 <small>일정·할 일·평가·예산·연수 한눈에</small>', key('게시판')); n++; placeBoard(); }
       if (cm && getComputedStyle(cm).display !== 'none') { wrap([cm], '🏫 학급 관리 <small>오늘 반 일정·상담 후속</small>', key('학급')); n++; }
     } else {
       const hs = [...main.children].filter(e => e.matches('h3.h3'));
@@ -34,6 +40,7 @@
       });
       [...main.children].filter(e => e.matches('.steps2, .note2')).forEach((e, i) => { wrap([e], '💡 사용법 <small>필요할 때만 펼치세요</small>', key('사용법' + i), 'help'); n++; });
     }
+    if (today) { setTimeout(placeBoard, 60); setTimeout(placeBoard, 500); }
     if (n >= 2) {
       const bar = document.createElement('div'); bar.className = 'foldbar';
       bar.innerHTML = '<button type="button" class="btn sm" data-fold="open">▾ 모두 펼치기</button><button type="button" class="btn sm" data-fold="close">▸ 모두 접기</button>';
