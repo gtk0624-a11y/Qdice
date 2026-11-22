@@ -2,6 +2,8 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>축의금 접수 장부</title>
 <style>
@@ -408,7 +410,8 @@ function renderSet(){const s=S.set;
   <button class="btn full" data-act="pasteMerge">붙여넣은 내용 합치기</button></div>
   ${trashInfo()?`<div class="card"><h3>↩️ 초기화 직전 상태 복구</h3><div class="note">마지막으로 지우기 직전의 ${trashInfo()}건이 폰에 남아 있습니다.</div><button class="btn mint full" data-act="restoreTrash">복구하기</button></div>`:''}
   <div class="card"><h3>⚠️ 초기화</h3><button class="btn bad full" data-act="reset">모든 접수 내역 지우기</button>
-  <div class="note" style="margin-top:6px">행사 당일 전에 연습으로 입력해 보신 뒤, 시작 전에 한 번 지우세요.</div></div>`;}
+  <div class="note" style="margin-top:6px">행사 당일 전에 연습으로 입력해 보신 뒤, 시작 전에 한 번 지우세요.</div></div>
+  <div class="note" style="text-align:center;margin:14px 0">프로그램 버전 <b>v7</b> (11/22 오후) · 카톡 글 보내기 포함</div>`;}
 function dl(name,text,type,blob){try{const b=blob||new Blob([text],{type});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{a.remove();URL.revokeObjectURL(u)},1500);}catch(e){toast('이 화면에서는 파일 저장이 막혀 있습니다');}}
 async function outFile(name,text,type){
   try{const f=new File([text],name,{type});if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],title:name});return 'shared';}}catch(e){if(e&&e.name==='AbortError')return 'cancel';}
