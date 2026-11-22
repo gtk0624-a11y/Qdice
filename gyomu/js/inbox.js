@@ -41,7 +41,13 @@ function ibxParse(text) {
     const lab = (l.match(IBX_LABEL) || [])[1] || '', deadline = /(기한|마감)\s*[:：]|(기한|마감)\s*$/.test(l.replace(/(까지|부터).*$/, '')) || /기한|마감/.test(lab);
     const range = ds.length > 1 && /[~∼–]/.test(l.slice(ds[0].idx + ds[0].raw.length, ds[1].idx)) ? ds[1].date : '';
     let t = ibxTitle(l, ds);
-    if (!t) t = (subject || '일정') + (deadline ? ' 마감' : '');
+    t = t.replace(/[월화수목금토일]요일/g, ' ').replace(/\s+/g, ' ').trim();
+    const fb = !t; if (fb) t = (subject || '일정') + (deadline ? ' 마감' : '');
+    else { /* 날짜 줄 아래 이어지는 짧은 줄(행사 이름·주관)을 한 제목으로 묶는다 */
+      const det = []; let org = '';
+      for (let j = i + 1; j < lines.length && j <= i + 5; j++) { const x = lines[j]; if (ibxDates(x).length) break; if (IBX_PLACE.test(x) || IBX_META.test(x) || /파이팅|화이팅|감사|수고|^[^가-힣A-Za-z0-9]+$|:\)/.test(x)) continue; const m = x.match(/^(주관|주최|주관부서)\s*[:：]\s*(.+)$/); if (m) { org = m[2].trim(); continue; } if (/^(담당|대상|비고|준비물)\s*[:：]/.test(x)) continue; if (x.length <= 30 && det.length < 1) det.push(ibxClean(x)); }
+      if (det.length && !/마감/.test(t)) t += ' · ' + det[0]; if (org && org.length <= 12) t += ' (주관 ' + org + ')';
+    }
     if (range) t += ` (~${+range.slice(5, 7)}/${+range.slice(8)})`;
     const tm = ibxTime(l) || ibxTime(lines[i + 1] || '') || ibxTime(lines[i + 2] || '');
     if (tm) t += ' ' + tm;
