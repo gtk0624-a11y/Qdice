@@ -195,8 +195,7 @@ function fh(p,e){e=e||{};
   <div id="${p}dup" class="warn" hidden></div>
   <label class="lb">금액 <small>만원 단위로 쓰세요 (10 = 10만원, 3.5 = 3만5천원)</small></label>
   <input id="${p}amt" data-p="${p}" data-k="amt" class="in amt" inputmode="decimal" autocomplete="off" placeholder="0" value="${e.won?won2in(e.won):''}">
-  <div class="chips">${[1,2,3,5,10,20,30,50].map(n=>`<button type="button" class="chip" data-chip="${n}" data-p="${p}">${n}만</button>`).join('')}</div>
-  <div class="chips">${[70,100,150,200,300,500,1000].map(n=>`<button type="button" class="chip b" data-chip="${n}" data-p="${p}">${n}만</button>`).join('')}</div>
+  <div class="chips">${[1,2,3,5,10,20,30,50,100].map(n=>`<button type="button" class="chip" data-chip="${n}" data-p="${p}">${n}만</button>`).join('')}</div>
   <div id="${p}big" class="big empty">금액을 누르면 한글로 크게 보여드립니다</div>
   <label class="lb">관계</label>
   <div class="segs">${RELS.map(r=>`<label class="seg"><input type="radio" name="${p}rel" value="${r}" ${r===rel?'checked':''}><span>${r}</span></label>`).join('')}</div>
@@ -223,18 +222,17 @@ function updDup(p){const nm=document.getElementById(p+'name').value.trim();const
 
 /* ====== 접수 탭 ====== */
 let lastId=null;
+function bkHTML(){return S.entries.length?`<div class="${S.since>=5?'banner':'card'}" style="display:flex;align-items:center;gap:8px;justify-content:space-between;padding:10px 12px"><span>${S.since>=5?'📌':'💾'} 백업 안 한 접수 <b>${S.since}건</b>${S.since>=5?' · 지금 백업하세요':''}</span><button class="btn pri" data-act="backup" style="padding:9px 12px;white-space:nowrap">📋 백업</button></div>`:'';}
+function recentHTML(){const recent=[...S.entries].filter(e=>!e.del).sort((a,b)=>b.ts-a.ts).slice(0,5);
+  return `<div class="card"><h3>방금 접수한 5건</h3>${recent.length?recent.map(rowHTML).join(''):'<div class="note">아직 접수한 건이 없습니다.</div>'}
+  <div class="note" style="margin-top:8px">눌러서 수정할 수 있습니다.</div></div>`;}
+function lastBoxHTML(){const le=lastId&&S.entries.find(e=>e.id===lastId&&!e.del);return le?lastHTML(le):'';}
 function renderIn(){
-  const recent=[...S.entries].filter(e=>!e.del).sort((a,b)=>b.ts-a.ts).slice(0,5);
-  const le=lastId&&S.entries.find(e=>e.id===lastId);
-  $('#tab-in').innerHTML=`
-  ${S.entries.length?`<div class="${S.since>=5?'banner':'card'}" style="display:flex;align-items:center;gap:8px;justify-content:space-between;padding:10px 12px"><span>${S.since>=5?'📌':'💾'} 백업 안 한 접수 <b>${S.since}건</b>${S.since>=5?' · 지금 백업하세요':''}</span><button class="btn pri" data-act="backup" style="padding:9px 12px;white-space:nowrap">📋 백업</button></div>`:''}
-  <div id="lastBox">${le?lastHTML(le):''}</div>
-  <div class="card">${fh('f')}
-    <button class="go" id="fGo" type="button">저장하고 다음 손님 ▶</button>
-  </div>
-  <div class="card"><h3>방금 접수한 5건</h3>${recent.length?recent.map(rowHTML).join(''):'<div class="note">아직 접수한 건이 없습니다.</div>'}
-  <div class="note" style="margin-top:8px">눌러서 수정할 수 있습니다.</div></div>`;
+  $('#tab-in').innerHTML=`<div id="bkBar">${bkHTML()}</div><div id="lastBox">${lastBoxHTML()}</div>
+  <div class="card">${fh('f')}<button class="go" id="fGo" type="button">저장하고 다음 손님 ▶</button></div>
+  <div id="recentBox">${recentHTML()}</div>`;
   updBig('f');}
+function updateIn(){if(!$('#recentBox')){renderIn();return;}$('#bkBar').innerHTML=bkHTML();$('#lastBox').innerHTML=lastBoxHTML();$('#recentBox').innerHTML=recentHTML();}
 function lastHTML(e){return `<div class="card last"><div class="no">✅ 저장됐습니다 · 봉투에 이 번호를 적어 주세요</div>
   <div class="env">${noStr(e)}</div><div class="who">${esc(e.name)} <span class="tag">${esc(e.rel)}</span></div>
   <div class="amt">${krw(e.won)} (${fmt(e.won)})</div>
@@ -414,8 +412,8 @@ function trashInfo(){try{const o=JSON.parse(localStorage.getItem(LST));if(o&&o.e
 let tab='in';
 function show(t){tab=t;['in','list','calc','set'].forEach(k=>$('#tab-'+k).hidden=k!==t);
   document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.tab===t));
-  if(t==='list')renderList();if(t==='calc')renderCalc();if(t==='set')renderSet();window.scrollTo(0,0);}
-function refreshAll(){topbar();if(tab==='in')renderIn();else if(tab==='list')renderList();else if(tab==='calc')renderCalc();else renderSet();}
+  if(t==='in')updateIn();if(t==='list')renderList();if(t==='calc')renderCalc();if(t==='set')renderSet();window.scrollTo(0,0);}
+function refreshAll(){topbar();if(tab==='in')updateIn();else if(tab==='list')renderList();else if(tab==='calc')renderCalc();else renderSet();}
 
 document.addEventListener('click',e=>{
   const t=e.target.closest('button,[data-edit]');if(!t)return;
