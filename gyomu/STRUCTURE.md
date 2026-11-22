@@ -401,3 +401,6 @@ service cloud.firestore {
 
 ## v90
 - teach.js: 「다른 선생님 시간표·공강·수업 교환」을 수업 및 시간표 화면의 내 시간표 표 바로 아래(#tchSec)로 이동(예전엔 화면 맨 아래).
+
+## v91 — 메신저 붙여넣기
+- inbox.js: ibxParse 재작성(인사·연락처·붙임 줄 버림, 번호·라벨 정리, 시간·장소 뽑기, 제목은 단어 단위로만 줄임, 과거·설명 문장은 기본 체크 해제). Claude 키가 있으면 ibxAI가 JSON으로 일정·마감만 추출(실패 시 규칙으로). arch.js·portal.js도 ibxParse를 그대로 씀.
