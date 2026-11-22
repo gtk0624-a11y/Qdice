@@ -143,7 +143,7 @@ select.in{flex:0 0 auto;min-width:0;width:auto}
 
 <script>
 /* ====== 기본 도구 ====== */
-const APP_V=9;
+const APP_V=10;
 const isKakao=/KAKAOTALK/i.test(navigator.userAgent||'');
 const $=s=>document.querySelector(s);
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -562,10 +562,36 @@ async function textShare(){try{await navigator.share({text:ktChunks.join('\n\n')
 
 /* ====== 카톡 안 화면 → 기본 브라우저로 넘기기 / 새 버전 확인 ====== */
 function bar(html,onBtn,btnText){const b=$('#newVer');b.hidden=false;b.innerHTML='<span>'+html+'</span><button class="btn pri" id="barBtn" style="padding:7px 12px;white-space:nowrap">'+btnText+'</button>';$('#barBtn').onclick=onBtn;}
+/*PACK_START*/
+async function packLedger(L){
+  const rows=L.entries.map(e=>[e.id,e.seat,e.no,e.name,e.won,e.rel,e.method,e.meals,e.memo||'',e.ts,e.upd,e.del?1:0,e.dev||'']);
+  const payload=JSON.stringify({s:L.set,c:L.cash,r:rows});
+  const b64u=u8=>{let bin='';for(let i=0;i<u8.length;i++)bin+=String.fromCharCode(u8[i]);return btoa(bin).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');};
+  try{if(typeof CompressionStream!=='undefined'&&typeof Blob!=='undefined'&&Blob.prototype.stream){
+    const cs=new Blob([payload]).stream().pipeThrough(new CompressionStream('deflate-raw'));
+    return 'z.'+b64u(new Uint8Array(await new Response(cs).arrayBuffer()));}}catch(e){}
+  return 'p.'+b64u(new TextEncoder().encode(payload));}
+async function unpackLedger(str){
+  const kind=str.slice(0,2),b=atob(str.slice(2).replace(/-/g,'+').replace(/_/g,'/'));
+  const u=new Uint8Array(b.length);for(let i=0;i<b.length;i++)u[i]=b.charCodeAt(i);
+  let text;
+  if(kind==='z.'){const ds=new Blob([u]).stream().pipeThrough(new DecompressionStream('deflate-raw'));text=await new Response(ds).text();}
+  else text=new TextDecoder().decode(u);
+  const o=JSON.parse(text);
+  return{entries:o.r.map(r=>({id:r[0],seat:r[1],no:r[2],name:r[3],won:r[4],rel:r[5],method:r[6],meals:r[7],memo:r[8],ts:r[9],upd:r[10],del:!!r[11],dev:r[12]})),set:o.s,cash:o.c};}
+/*PACK_END*/
 async function openExternal(){
   try{await copyText(JSON.stringify(S));}catch(e){}
-  toast('접수 내용을 복사해 뒀습니다. 열리면 [불러오기]를 누르세요');
-  setTimeout(()=>{location.href='kakaotalk://web/openExternal?url='+encodeURIComponent(location.origin+location.pathname+'?from=kakao&t='+Date.now());},700);}
+  let hash='';try{hash=await packLedger(S);}catch(e){}
+  let url=location.origin+location.pathname+'?from=kakao&t='+Date.now();
+  if(hash&&hash.length<70000)url+='#kd='+hash;
+  toast('기본 브라우저로 이동합니다…');
+  setTimeout(()=>{location.href='kakaotalk://web/openExternal?url='+encodeURIComponent(url);},500);}
+async function importKd(h){
+  try{const o=await unpackLedger(h.slice(4));
+    ['groom','bride','date','venue','who'].forEach(k=>{if(!S.set[k]&&o.set&&o.set[k])S.set[k]=o.set[k];});
+    if(cashTotal()===0&&o.cash)S.cash=Object.assign(S.cash,o.cash);
+    mergeText(JSON.stringify({entries:o.entries}));return true;}catch(e){return false;}}
 async function importFromClipboard(){
   try{const t=await navigator.clipboard.readText();if(t&&t.trim().startsWith('{')){mergeText(t);$('#newVer').hidden=true;return;}}catch(e){}
   showModal(`<h3>접수 내용 불러오기</h3><div class="note">카톡 화면에서 복사해 둔 내용을 아래 칸에 길게 눌러 <b>붙여넣기</b> 하세요.</div><textarea class="in" id="impBox" style="height:140px;font-size:14px" placeholder="여기에 붙여넣기"></textarea><button class="go" id="impGo">불러오기</button><button class="btn full" id="mClose2">닫기</button>`);
@@ -612,7 +638,11 @@ $('#modal').addEventListener('click',e=>{if(e.target.id==='modal'&&!document.get
 document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.dataset&&e.target.dataset.p==='f'&&e.target.dataset.k==='amt'){e.preventDefault();submitMain();}});
 
 topbar();renderIn();tryRestore();checkVersion();
-try{const u=new URLSearchParams(location.search);if(u.get('from')==='kakao'){history.replaceState(null,'',location.pathname);setTimeout(()=>bar('📥 카톡에서 가져온 접수 내용이 있습니다',importFromClipboard,'불러오기'),600);}}catch(e){}
+(async()=>{let fromK=false;try{fromK=new URLSearchParams(location.search).get('from')==='kakao';}catch(e){}
+  const kd=location.hash||'';let done=false;
+  try{if(fromK||kd.startsWith('#kd='))history.replaceState(null,'',location.pathname);}catch(e){}
+  if(kd.startsWith('#kd='))done=await importKd(kd);
+  if(fromK&&!done)setTimeout(()=>bar('📥 카톡에서 가져온 접수 내용이 있습니다',importFromClipboard,'불러오기'),600);})();
 </script>
 </body>
 </html>
