@@ -8,32 +8,56 @@ const b2Cut = (s, n) => { s = String(s == null ? '' : s); return s.length > n ? 
 
 /* ---- 규정줍줍: 자료실 문서에서 조항 찾기 ---- */
 function b2Chunks() {
-  const out = [];
+  if (b2Chunks._k === (LIB || []).length + ':' + (LIB || []).reduce((n, d) => n + (d.text || '').length, 0)) return b2Chunks._v;
+  const out = [], CH_ = /^제\s*\d+\s*장/, AR_ = /^(제\s*\d+\s*조(?:\s*의\s*\d+)?\s*(?:[(（][^)）]{1,30}[)）])?)/;
   (LIB || []).forEach(d => {
-    const lines = String(d.text || '').split(/\n+/).map(x => x.trim()).filter(Boolean); let buf = '', n = 0;
-    const flush = () => { if (buf) out.push({ file: d.name, kind: d.kind || '', text: buf, n: ++n }); buf = ''; };
-    lines.forEach(l => { if ((buf + ' ' + l).length > 450 && buf) flush(); buf += (buf ? '\n' : '') + l; }); flush();
+    const lines = String(d.text || '').split(/\n+/).map(x => x.trim()).filter(Boolean); let buf = '', head = '', chap = '', n = 0;
+    const flush = () => { if (buf) out.push({ file: d.name, kind: d.kind || '', text: buf, head, chap, n: ++n }); buf = ''; };
+    lines.forEach(l => {
+      if (CH_.test(l) && l.length < 50) { flush(); chap = l; head = ''; return; }
+      const m = l.match(AR_);
+      if (m) { flush(); head = m[1].replace(/\s+/g, ''); }
+      else if (buf && buf.length + l.length > (head ? 900 : 600)) flush();
+      buf += (buf ? '\n' : '') + l;
+    }); flush();
   });
-  return out;
+  b2Chunks._k = (LIB || []).length + ':' + (LIB || []).reduce((n, d) => n + (d.text || '').length, 0); b2Chunks._v = out; return out;
 }
+const b2Words = q => [...new Set(String(q).split(/[\s,?.!]+/).map(w => w.replace(/(해줘|알려줘|뭐야|인가요|인지|있나요|되나요|할까요|은|는|이|가|을|를|에|의|도|로|으로|이나|나|좀)$/, '')).filter(w => w.length >= 2))];
 function b2Rules(q, limit) {
   const ch = b2Chunks(); if (!ch.length) return [];
   const qg = new Set(); grams(q).forEach(g => qg.add(g));
   const qn = norm(q); if (typeof SYN !== 'undefined') Object.keys(SYN).forEach(k => { if (qn.includes(k)) SYN[k].forEach(w => grams(w).forEach(g => qg.add(g))); });
   if (!qg.size) return [];
-  const df = new Map(); const ns = ch.map(c => norm(c.file + c.text));
+  const kws = b2Words(q).map(norm).filter(w => w.length >= 2), need = Math.min(2, qg.size);
+  const df = new Map(); const ns = ch.map(c => norm(c.file + c.head + c.text)), hs = ch.map(c => norm(c.head + c.chap + c.file));
   qg.forEach(g => df.set(g, ns.filter(n => n.includes(g)).length));
-  const res = ch.map((c, i) => { let s = 0, h = 0; qg.forEach(g => { if (ns[i].includes(g)) { h++; s += Math.log(1 + ch.length / (1 + df.get(g))); } }); if (c.kind === '규정') s *= 1.5; return { c, s, h }; }).filter(r => r.h >= 2 && r.s > 0).sort((a, b) => b.s - a.s);
-  if (res.length) { const top = res[0].s; return res.filter(r => r.s >= top * .4).slice(0, limit || 5).map(r => r.c); }
+  const res = ch.map((c, i) => {
+    let s = 0, h = 0; qg.forEach(g => { if (ns[i].includes(g)) { h++; const w = Math.log(1 + ch.length / (1 + df.get(g))); s += w; if (hs[i].includes(g)) s += w * 0.8; } });
+    kws.forEach(k => { if (ns[i].includes(k)) s += 2.5; });
+    if (c.kind === '규정') s *= 1.5; return { c, s, h };
+  }).filter(r => r.h >= need && r.s > 0).sort((a, b) => b.s - a.s);
+  if (res.length) { const top = res[0].s; return res.filter(r => r.s >= top * .45).slice(0, limit || 5).map(r => r.c); }
   return [];
 }
 function b2Mark(text, q) {
-  let t = esc(text); const ws = [...new Set(String(q).split(/[\s,?.!]+/).map(w => w.replace(/(은|는|이|가|을|를|에|의|도|로|으로|이나|나|좀|해줘|알려줘|뭐야|인가요|인지|있나요)$/, '')).filter(w => w.length >= 2))];
+  let t = esc(text); const ws = b2Words(q);
   ws.forEach(w => { try { t = t.replace(new RegExp(w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'), m => `<mark>${m}</mark>`); } catch (e) { } });
   return t.replace(/\n/g, '<br>');
 }
+function b2Key(c, q) {
+  const ws = b2Words(q).map(norm), sents = c.text.split(/(?<=[.다음임함됨])\s+|\n/).map(x => x.trim()).filter(x => x.length > 6);
+  const sc = sents.map(x => ({ x, s: ws.reduce((n, w) => n + (norm(x).includes(w) ? 1 : 0), 0) })).filter(r => r.s > 0).sort((a, b) => b.s - a.s);
+  return sc.length ? sc.slice(0, 2).map(r => r.x).join(' ') : '';
+}
 const b2RuleIntent = q => /규정|지침|조항|근거|기준|복무|출장|결시|학칙|규칙|며칠|언제까지|가능한가|되나요|해도 되|해야 하|안 되|인정/.test(q);
-function b2RuleBlocks(q) { return b2Rules(q, 4).map(c => ({ src: `규정줍줍 · ${c.file}${c.kind ? ' (' + c.kind + ')' : ''}`, html: b2Mark(c.text, q), text: c.text, ref: '#/lib' })); }
+function b2RuleBlocks(q) {
+  const r = b2Rules(q, 4); if (!r.length) return [];
+  const key = b2Key(r[0], q), lab = c => `규정줍줍 · ${c.file}${c.head ? ' · ' + c.head : ''}${c.chap ? ' (' + c.chap.slice(0, 20) + ')' : ''}`;
+  const out = r.map(c => ({ src: lab(c), html: b2Mark(c.text, q), text: c.text, ref: '#/lib' }));
+  if (key) out.unshift({ src: `📌 핵심 · ${r[0].head || r[0].file}`, html: b2Mark(key, q), text: key, ref: '#/lib' });
+  return out;
+}
 
 /* ---- 도구: 읽기(바로 실행) ---- */
 const B2_READ = [
@@ -61,7 +85,7 @@ const B2_NAV = { name: 'go_to', description: '사용자가 바로 이동할 수 
 function b2Run(name, i) {
   switch (name) {
     case 'search_site': return search(i.query || '', true).slice(0, 8).map(h => ({ 출처: h.c.src, 내용: b2Cut(h.c.text, 400), 링크: h.c.ref }));
-    case 'find_rule': { const r = b2Rules(i.query || '', 6); return r.length ? r.map(c => ({ 파일: c.file, 종류: c.kind, 문단: b2Cut(c.text, 700) })) : { 결과: '자료실에서 관련 조항을 찾지 못했습니다', 자료수: (LIB || []).length }; }
+    case 'find_rule': { const r = b2Rules(i.query || '', 6); return r.length ? r.map(c => ({ 파일: c.file, 조항: c.head || '', 종류: c.kind, 문단: b2Cut(c.text, 700) })) : { 결과: '자료실에서 관련 조항을 찾지 못했습니다', 자료수: (LIB || []).length }; }
     case 'list_library': return (LIB || []).map(d => ({ 이름: d.name, 종류: d.kind || '', 글자수: (d.text || '').length, 올린날: d.added || '' }));
     case 'read_library': { const d = (LIB || []).find(x => agN(x.name).includes(agN(i.name_contains))); if (!d) return { 오류: '그 이름의 문서가 없습니다' }; const o = +i.offset || 0; return { 이름: d.name, 전체글자: (d.text || '').length, offset: o, 본문: (d.text || '').slice(o, o + 6000) }; }
     case 'get_calendar': { const a = i.from || today(), b = i.to || a; const ev = allEvents().filter(e => e.date >= a && e.date <= b).sort((x, y) => x.date.localeCompare(y.date)); return { 건수: ev.length, 목록: ev.slice(0, 120).map(e => `${e.date} ${e.t}${e.kind ? ' [' + e.kind + ']' : ''}${e.done ? ' (완료)' : ''}`) }; }

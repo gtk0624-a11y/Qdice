@@ -10,7 +10,7 @@ function pstDraw() {
   const N = pstSorted(), down = pstDown(); let _i = 0; L.className = down ? 'down' : '';
   if (!N.length) { L.innerHTML = ''; return; }
   let slot = 0; const nv = document.querySelector('nav.nav'), base = innerWidth >= 1540 ? 190 : Math.max(190, ...[...document.querySelectorAll('nav.nav, .nvx')].map(e => Math.round(e.getBoundingClientRect().bottom + 26)));
-  L.innerHTML = `<button class="pst-tray" data-act="pstToggle" aria-label="${down ? '포스트잇 올리기' : '포스트잇 모두 내리기'}" aria-expanded="${!down}">📌 ${N.length}${down ? ' ▲ 올리기' : ' ▼ 내리기'}</button>` + (down ? '' : N.map(x => {
+  L.innerHTML = `<button class="pst-tray" data-act="pstToggle" aria-label="${down ? '포스트잇 올리기' : '포스트잇 모두 내리기'}" aria-expanded="${!down}" title="${down ? '포스트잇 올리기' : '포스트잇 모두 내리기'}" style="top:${Math.max(60, base - 36)}px">📌${N.length}${down ? '▲' : '▼'}</button>` + (down ? '' : N.map(x => {
     const idx = _i++, mini = x.min || (!x.open && idx >= 3); x = Object.assign({}, x, { min: mini });
     const late = x.date && dd(x.date) < 0, pos = x.x != null ? `left:${x.x}px;top:${x.y}px;` : `right:12px;top:${base + slot++ * (x.min ? 34 : 100)}px;`;
     return `<div class="pst ${x.min ? 'min' : ''} ${late ? 'late' : ''}" data-id="${x.id}" style="${pos}background:${PST_COL[x.color] || PST_COL['노랑']};--rot:${((x.id.charCodeAt(x.id.length - 1) % 5) - 2)}deg"><div class="ph" title="끌어서 옮길 수 있어요"><b>${x.date ? esc(md(x.date)) + ' · ' + pstDday(x) : '메모'}</b><span><button data-act="pstMin" data-id="${x.id}" aria-label="${x.min ? '펼치기' : '접기'}">${x.min ? '▢' : '–'}</button><button data-act="pstDone" data-id="${x.id}" aria-label="내리기" title="내리기(오늘 메모에서 다시 붙일 수 있어요)">✕</button></span></div>${x.min ? '' : `<div class="pt">${esc(x.text)}</div>`}</div>`;
