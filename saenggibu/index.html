@@ -1587,7 +1587,9 @@ async function importXlsx(file){
     const k=sid(s); cols.forEach(o=>{ const raw=String(p.r[o.j]||''); const t=clean(raw); if(!t.trim()) return; if(t!==raw) tidied++; const rr=rec(k,o.it.key); if(rr.text!==t){ rr.text=t; rr.updated=Date.now(); rr.copied=0; } if(doneRows[k]&&doneRows[k][o.it.name]) rr.done=true; filled++; }); });
   if(!plan.length){ toast('학생 줄을 하나도 읽지 못했습니다. 학년·반·번호 칸에 숫자가 들어 있는지 확인해 주세요.'); return; }
   if(!restored && !filled){ toast('학생 '+plan.length+'명은 찾았지만 내용 칸이 비어 있습니다. 영역 칸(예: '+(curIt?curIt.name:'세특: 도덕')+')에 초안을 썼는지 확인해 주세요.'); return; }
-  sortStudents(); save(); toast((restored?'전부 되돌렸습니다. ':'불러왔습니다. ')+'학생 '+plan.length+'명, 내용 '+filled+'칸'+(mapCur>=0?' (\''+headRaw[mapCur]+'\' 칸 → '+curIt.name+')':'')+(skipped?' · 번호를 못 읽은 '+skipped+'줄 건너뜀':'')+(tidied?' (띄어쓰기·맞춤법 '+tidied+'칸 바로 정리)':'')); render();
+  const byCls={}; plan.forEach(p=>{ const k=p.g+'-'+p.c; byCls[k]=(byCls[k]||0)+1; }); const clsList=Object.keys(byCls).sort((a,b)=>byCls[b]-byCls[a]);
+  if(!restored && clsList.length && !isGrp(UI.cls) && !byCls[UI.cls]){ UI.cls=clsList[0]; if(mapCur<0 && cols.length===1) UI.item=cols[0].it.key; }
+  sortStudents(); save(); toast((restored?'전부 되돌렸습니다. ':'✔ 들어갔습니다: ')+(restored?'':clsList.map(c=>clsName(c)+' '+byCls[c]+'명').join(', ')+' · ')+'학생 '+plan.length+'명, 내용 '+filled+'칸'+(mapCur>=0?' (\''+headRaw[mapCur]+'\' 칸 → '+curIt.name+')':'')+(skipped?' · 번호를 못 읽은 '+skipped+'줄 건너뜀':'')+(tidied?' (띄어쓰기·맞춤법 '+tidied+'칸 바로 정리)':'')); render();
 }
 
 // 독서기록 불러오기(학생이 구글 폼으로 입력한 응답 파일)
@@ -1849,7 +1851,7 @@ function saveDuty(){ dutyBoxSave(); if(S.schoolClubs){ const mk=autoClubs(); if(
 // 브라우저 탭 제목에 숫자 표시 + 다른 탭을 보고 있을 때 새 알림이 오면 깜박임
 const BASE_TITLE='도디쌤의 생기발랄';
 // 새 버전 알림: 사이트가 고쳐져 올라오면 화면 위에 띠를 띄움(브라우저가 예전 화면을 기억하는 문제 해결)
-const BUILD_V='20261122-120415';
+const BUILD_V='20261122-121317';
 async function checkNewVersion(){ if(!/^https?:/.test(location.protocol)) return; try{ const r=await fetch('version.json?t='+Date.now(),{cache:'no-store'}); if(!r.ok) return; const j=await r.json();
   if(j && j.v && j.v!==BUILD_V && !document.getElementById('newVer')){ const d=document.createElement('div'); d.id='newVer'; d.innerHTML='✨ 생기발랄 새 버전이 나왔어요. <button class="b s" id="newVerGo">새로 고침</button> <span style="font-weight:600">또는 키보드 <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>R</kbd></span> <span class="hint" style="color:inherit;opacity:.8">· 써 둔 내용은 그대로 남아요</span>'; document.body.prepend(d); document.getElementById('newVerGo').onclick=()=>{ flush().finally(()=>{ location.replace(location.pathname+'?v='+encodeURIComponent(j.v)+location.hash); }); }; } }catch(e){} }
 const SUB_DEFAULT='선생님을 잇는 생기부 플랫폼';
@@ -2196,7 +2198,7 @@ M.addEventListener('change',e=>{
   if(t.id==='stAutoLock'){ st.autoLock=+t.value; save(); return; }
   if(t.id==='readFile' && t.files[0]){ planReading(t.files[0]).catch(()=>toast('독서기록 파일을 읽지 못했습니다. 엑셀(.xlsx)이나 CSV 파일인지 확인해 주세요.')); return; }
   if(t.id==='grpFile' && t.files[0]){ const isPdf=/\.pdf$/i.test(t.files[0].name); needXLSX().then(()=>readFile(t.files[0])).then(async buf=>{ let rows; if(isPdf){ const r=await pdfLines(buf); if(r.chars<20){ toast('이 PDF는 글자를 읽을 수 없습니다(스캔 그림). 엑셀로 올려 주세요.'); return; } rows=rosterRowsFromText(r.lines.join('\n')); } else { const wb=XLSX.read(buf,{type:'array'}); rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,raw:false,defval:''}); } const nm=$('#grpName').value.trim()||t.files[0].name.replace(/\.[^.]+$/,''); const gp=makeGroup(rows,nm,$('#grpItem').value); if(gp){ UI.cls='g:'+gp.id; UI.item=gp.item; renderSet(); } }).catch(()=>toast('부원 명단 파일을 읽지 못했습니다.')); return; }
-  if(t.id==='xlsIn2' && t.files[0]){ const f=t.files[0]; t.value=''; needXLSX().then(()=>readFile(f)).then(buf=>{ const wb=XLSX.read(buf,{type:'array'}); if(wb.Sheets['_복원용']){ toast('이 파일은 엑셀 백업입니다. 백업은 [설정·백업 → 엑셀 백업 불러오기]에서 올려 주세요.'); return; } return importXlsx({__buf:buf}); }).catch(()=>toast('엑셀 파일을 읽지 못했습니다.')); return; }
+  if(t.id==='xlsIn2' && t.files[0]){ const f=t.files[0]; t.value=''; needXLSX().then(()=>readFile(f)).then(buf=>{ const wb=XLSX.read(buf,{type:'array'}); if(wb.Sheets['_복원용']){ toast('이 파일은 엑셀 백업입니다. 백업은 [설정·백업 → 엑셀 백업 불러오기]에서 올려 주세요.'); return; } return importXlsx({__buf:buf}); }).catch(e=>{ console.error(e); toast('엑셀 파일을 읽지 못했습니다. 엑셀에서 그 파일을 닫은 뒤 다시 올려 주세요. (.xlsx 파일인지도 확인)'); }); return; }
   if(t.id==='xlsIn' && t.files[0]){ importXlsx(t.files[0]).catch(()=>toast('엑셀 파일을 읽지 못했습니다.')); return; }
   if((t.id==='rosterFile'||t.id==='rosterFile0') && t.files.length){ const fs=Array.from(t.files); (async()=>{ for(const f of fs){ await importAny(f); } })().then(()=>{ render(); if(fs.length>1) toast(fs.length+'개 파일에서 명단을 넣었습니다 · 전체 '+S.students.length+'명 ('+classes().length+'개 학급)'); }).catch(()=>toast('명단 파일을 읽지 못했습니다. 엑셀(.xlsx)이나 CSV인지 확인해 주세요.')); return; }
   if(t.id==='jsonIn' && t.files[0]){ t.files[0].text().then(txt=>{ const d=JSON.parse(txt); if(!d||!Array.isArray(d.students)||!d.records||!Array.isArray(d.items)) throw 0; if(!confirm('지금 자료를 모두 지우고 이 파일 내용으로 바꿉니다. 계속할까요?')) return; S=Object.assign(freshState(),d); S.settings=Object.assign(freshState().settings,d.settings||{}); S.sisu=Object.assign(freshState().sisu,d.sisu||{}); save(); toast('불러왔습니다.'); render(); }).catch(()=>toast('이 프로그램의 백업 파일이 아닙니다.')); return; }
