@@ -142,9 +142,19 @@ function parseAmt(str){const v=parseFloat(String(str||'').replace(/[,\s원]/g,''
 const LS='chukui_ledger_v1';
 let mem=null;
 function fresh(){return{v:1,set:{groom:'',bride:'',date:'',venue:'',seat:'A',meals:1,who:''},entries:[],cash:{50000:0,10000:0,5000:0,1000:0,etc:0},last:{rel:'친척',method:'현금'},since:0}}
-function load(){try{const r=localStorage.getItem(LS);if(r){const o=JSON.parse(r);return Object.assign(fresh(),o,{set:Object.assign(fresh().set,o.set||{}),cash:Object.assign(fresh().cash,o.cash||{})});}}catch(e){}return fresh();}
+const LS2='chukui_ledger_copy',LST='chukui_trash';
+function idbOpen(){return new Promise((res,rej)=>{try{const r=indexedDB.open('chukui',1);r.onupgradeneeded=()=>r.result.createObjectStore('k');r.onsuccess=()=>res(r.result);r.onerror=()=>rej();}catch(e){rej();}});}
+function idbPut(s){idbOpen().then(db=>{db.transaction('k','readwrite').objectStore('k').put(s,'S');}).catch(()=>{});}
+function idbGet(){return idbOpen().then(db=>new Promise(res=>{const q=db.transaction('k').objectStore('k').get('S');q.onsuccess=()=>res(q.result||null);q.onerror=()=>res(null);})).catch(()=>null);}
+function adopt(o){return Object.assign(fresh(),o,{set:Object.assign(fresh().set,o.set||{}),cash:Object.assign(fresh().cash,o.cash||{})});}
+function load(){try{const r=localStorage.getItem(LS)||localStorage.getItem(LS2);if(r){const o=JSON.parse(r);return Object.assign(fresh(),o,{set:Object.assign(fresh().set,o.set||{}),cash:Object.assign(fresh().cash,o.cash||{})});}}catch(e){}return fresh();}
 let S=load();
-function save(){try{localStorage.setItem(LS,JSON.stringify(S));}catch(e){mem=S;}}
+function save(){const s=JSON.stringify(S);try{localStorage.setItem(LS,s);localStorage.setItem(LS2,s);}catch(e){mem=S;}idbPut(s);}
+async function tryRestore(){if(S.entries.length)return;let c=null;try{c=localStorage.getItem(LS2);}catch(e){}
+  let cand=null;for(const raw of [c,await idbGet()]){if(!raw)continue;try{const o=JSON.parse(raw);if(o&&o.entries&&o.entries.length){cand=o;break;}}catch(e){}}
+  if(!cand)return;
+  const n=cand.entries.filter(e=>!e.del);
+  if(await ask('이전 접수 내역을 찾았습니다',`<b>${n.length}건 · ${fmt(sum(n))}</b><br>이전에 접수한 내역이 폰 안에 남아 있습니다.<br>복구할까요?`,'복구하기','복구 안 함')){S=adopt(cand);save();refreshAll();toast('복구했습니다');}}
 let undoStack=[];
 function snap(){undoStack.push(JSON.stringify({entries:S.entries,since:S.since}));if(undoStack.length>40)undoStack.shift();}
 function undo(){const s=undoStack.pop();if(!s){toast('되돌릴 작업이 없습니다');return false;}const o=JSON.parse(s);S.entries=o.entries;S.since=o.since;save();lastId=null;refreshAll();toast('되돌렸습니다');return true;}
@@ -212,7 +222,7 @@ function renderIn(){
   const recent=[...S.entries].filter(e=>!e.del).sort((a,b)=>b.ts-a.ts).slice(0,5);
   const le=lastId&&S.entries.find(e=>e.id===lastId);
   $('#tab-in').innerHTML=`
-  ${S.since>=15?`<div class="banner">📌 ${S.since}건이 아직 백업되지 않았습니다. <button class="btn pri" data-act="backup" style="margin-left:6px;padding:7px 12px">지금 백업</button></div>`:''}
+  ${S.entries.length?`<div class="${S.since>=5?'banner':'card'}" style="display:flex;align-items:center;gap:8px;justify-content:space-between;padding:10px 12px"><span>${S.since>=5?'📌':'💾'} 백업 안 한 접수 <b>${S.since}건</b>${S.since>=5?' · 지금 백업하세요':''}</span><button class="btn pri" data-act="backup" style="padding:9px 12px;white-space:nowrap">📋 백업</button></div>`:''}
   <div id="lastBox">${le?lastHTML(le):''}</div>
   <div class="card">${fh('f')}
     <button class="go" id="fGo" type="button">저장하고 다음 손님 ▶</button>
@@ -347,6 +357,7 @@ function renderSet(){const s=S.set;
   <div class="note" style="margin-top:10px">파일이 안 열리면 복사한 백업 내용을 아래에 붙여넣으세요.</div>
   <textarea class="in" id="pasteBox" style="height:90px;font-size:14px" placeholder="여기에 붙여넣기"></textarea>
   <button class="btn full" data-act="pasteMerge">붙여넣은 내용 합치기</button></div>
+  ${trashInfo()?`<div class="card"><h3>↩️ 초기화 직전 상태 복구</h3><div class="note">마지막으로 지우기 직전의 ${trashInfo()}건이 폰에 남아 있습니다.</div><button class="btn mint full" data-act="restoreTrash">복구하기</button></div>`:''}
   <div class="card"><h3>⚠️ 초기화</h3><button class="btn bad full" data-act="reset">모든 접수 내역 지우기</button>
   <div class="note" style="margin-top:6px">행사 당일 전에 연습으로 입력해 보신 뒤, 시작 전에 한 번 지우세요.</div></div>`;}
 function dl(name,text,type){const b=new Blob([text],{type});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{a.remove();URL.revokeObjectURL(u)},1500);}
@@ -372,7 +383,10 @@ function mergeText(txt){const r={result:txt};(()=>{try{const o=JSON.parse(String
 function resetAll(){showModal(`<h3>정말 모두 지울까요?</h3><div style="font-size:17px">접수 내역이 전부 사라집니다. 계속하려면 아래 칸에 <b>지우기</b>라고 입력해 주세요.</div>
   <input class="in" id="rtxt" style="margin-top:10px"><button class="go" id="rGo" style="background:var(--bad);box-shadow:none">전부 지우기</button><button class="btn full" id="rNo">취소</button>`);
   $('#rNo').onclick=closeModal;$('#rGo').onclick=()=>{if($('#rtxt').value.trim()!=='지우기'){toast('"지우기"를 정확히 입력해 주세요');return;}
-    snap();S.entries=[];S.since=0;S.cash=fresh().cash;lastId=null;save();closeModal();refreshAll();toast('초기화했습니다 (되돌리기 가능)');};}
+    if(S.entries.length){try{localStorage.setItem(LST,JSON.stringify(S));}catch(e){}}
+    snap();S.entries=[];S.since=0;S.cash=fresh().cash;lastId=null;save();closeModal();refreshAll();toast('초기화했습니다 (설정 탭에서 복구 가능)');};}
+function restoreTrash(){try{const o=JSON.parse(localStorage.getItem(LST));if(!o||!o.entries||!o.entries.length)throw 0;snap();S=adopt(o);save();refreshAll();toast('초기화 직전 상태로 복구했습니다');}catch(e){toast('복구할 내역이 없습니다');}}
+function trashInfo(){try{const o=JSON.parse(localStorage.getItem(LST));if(o&&o.entries&&o.entries.length)return o.entries.filter(e=>!e.del).length;}catch(e){}return 0;}
 
 /* ====== 탭·이벤트 ====== */
 let tab='in';
@@ -393,7 +407,7 @@ document.addEventListener('click',e=>{
   else if(a==='copyBackup')copyBackup();
   else if(a==='pasteMerge'){const v=$('#pasteBox').value;if(!v.trim()){toast('붙여넣은 내용이 없습니다');}else{mergeText(v);}}
   else if(a==='backup')doBackup();else if(a==='csv')doCsv();else if(a==='share')shareText();
-  else if(a==='print')printSheet();else if(a==='reset')resetAll();});
+  else if(a==='print')printSheet();else if(a==='reset')resetAll();else if(a==='restoreTrash')restoreTrash();});
 document.addEventListener('input',e=>{const t=e.target;
   if(t.dataset.k==='amt')updBig(t.dataset.p);
   else if(t.dataset.k==='name')updDup(t.dataset.p);
@@ -408,7 +422,7 @@ document.addEventListener('change',e=>{const t=e.target;
 $('#modal').addEventListener('click',e=>{if(e.target.id==='modal'&&!document.getElementById('aOk')){editingId=null;closeModal();}});
 document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.dataset&&e.target.dataset.p==='f'&&e.target.dataset.k==='amt'){e.preventDefault();submitMain();}});
 
-topbar();renderIn();
+topbar();renderIn();tryRestore();
 </script>
 </body>
 </html>
