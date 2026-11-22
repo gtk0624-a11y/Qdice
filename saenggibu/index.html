@@ -1863,8 +1863,10 @@ function saveDuty(){ dutyBoxSave(); if(S.schoolClubs){ const mk=autoClubs(); if(
 // 브라우저 탭 제목에 숫자 표시 + 다른 탭을 보고 있을 때 새 알림이 오면 깜박임
 const BASE_TITLE='도디쌤의 생기발랄';
 // 새 버전 알림: 사이트가 고쳐져 올라오면 화면 위에 띠를 띄움(브라우저가 예전 화면을 기억하는 문제 해결)
-const BUILD_V='20261122-133233';
+const BUILD_V='20261122-133554';
 async function checkNewVersion(){ if(!/^https?:/.test(location.protocol)) return; try{ const r=await fetch('version.json?t='+Date.now(),{cache:'no-store'}); if(!r.ok) return; const j=await r.json();
+  // 새 판이 나왔는데 이 탭을 안 보고 있으면 저장 후 조용히 새 판으로 (옛 판 탭이 남아 덮어쓰지 않게)
+  if(j && j.v && j.v!==BUILD_V && document.hidden){ (FROZEN? Promise.resolve() : flushReal()).then(()=>location.reload()); return; }
   if(j && j.v && j.v!==BUILD_V && !document.getElementById('newVer')){ const d=document.createElement('div'); d.id='newVer'; d.innerHTML='✨ 생기발랄 새 버전이 나왔어요. <button class="b s" id="newVerGo">새로 고침</button> <span style="font-weight:600">또는 키보드 <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>R</kbd></span> <span class="hint" style="color:inherit;opacity:.8">· 써 둔 내용은 그대로 남아요</span>'; document.body.prepend(d); document.getElementById('newVerGo').onclick=()=>{ flush().finally(()=>{ location.replace(location.pathname+'?v='+encodeURIComponent(j.v)+location.hash); }); }; } }catch(e){} }
 const SUB_DEFAULT='선생님을 잇는 생기부 플랫폼';
 // 부제: 담당자가 고치면 모든 선생님 화면에 같이 바뀜(시트에 보관). 원제는 고정.
@@ -2382,7 +2384,7 @@ window.addEventListener('beforeunload',()=>{ flush(); });
     applySubtitle(); checkNewVersion(); setInterval(()=>{ if(!document.hidden) checkNewVersion(); },300000); document.addEventListener('visibilitychange',()=>{ if(!document.hidden) checkNewVersion(); });
     if(S.settings.admin && !S.settings.adminKey){ S.settings.admin=false; save(); }
     if(!/#link=/.test(location.hash)) fetchRoster(false);
-    applyLinkFromUrl(); tabHello(); };
+    applyLinkFromUrl(); if(!document.hidden) tabHello(); };
   const load=x=>{ if(x && Array.isArray(x.students) && x.records){ S=Object.assign(freshState(),x); S.settings=Object.assign(freshState().settings,x.settings||{}); S.sisu=Object.assign(freshState().sisu,x.sisu||{}); } };
   if(d && d.enc){
     $('#lockScr').style.display='flex'; const pw=$('#lockPw'); pw.focus();
