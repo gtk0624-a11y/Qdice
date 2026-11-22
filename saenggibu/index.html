@@ -574,7 +574,9 @@ function lint(text, ctx){
   const out=[]; const t=String(text||''); if(!t.trim()) return out;
   for(const [re,msg] of LINT_RULES){ const m=t.match(re); if(m) out.push(msg+' — "'+m[0]+'"'); }
   (ctx&&ctx.banned||[]).forEach(w=>{ if(w && t.includes(w)) out.push('내가 등록한 금지어 — "'+w+'"'); });
-  (ctx&&ctx.names||[]).forEach(n=>{ if(n && n.length>=2 && t.includes(n)) out.push('다른 학생 이름이 들어 있음(내용 뒤바뀜 확인) — "'+n+'"'); });
+  // 두 글자 이름(예: '조율')은 낱말과 겹치므로 뒤에 바로 한글 낱말이 이어지면(조율하며·조율을) 이름으로 보지 않음
+  const nameIn=n=>{ if(n.length>=3) return t.includes(n); const re=new RegExp(n.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'(?![가-힣])|'+n+'(?=(학생|이가|이는|이의|이와|이랑|이도|에게))','g'); return re.test(t); };
+  (ctx&&ctx.names||[]).forEach(n=>{ if(n && n.length>=2 && nameIn(n)) out.push('다른 학생 이름이 들어 있음(내용 뒤바뀜 확인) — "'+n+'"'); });
   const m2=t.match(/[가-힣]*(니다|다|요|까)[.!?](?=\s|$)/);
   if(m2) out.push('종결어미 확인(~함/~음/~임 체가 아님) — "'+m2[0]+'"');
   if(!/[.]$/.test(t.trim())) out.push('마침표로 끝나지 않음');
@@ -754,6 +756,8 @@ function ensureItems(){ let n=0;
   { let ch=false; (S.settings.duties||[]).forEach(d=>{ if(d.cls || !/세특|교과/.test(d.field||'')) return; const its=S.items.filter(i=>/^세특/.test(i.name) && (!d.sub || areaSame(i.name.replace(/^세특\s*:?\s*/,''),d.sub))); if(!its.length) return;
       const cs=new Set(); Object.keys(S.records).forEach(k=>{ const [sd,ik]=k.split('|'); if(its.some(i=>i.key===ik) && String(S.records[k].text||'').trim()){ const c=sd.split('-').slice(0,2).join('-'); if(/^\d+-\d+$/.test(c)) cs.add(c); } });
       if(cs.size){ d.cls=[...cs].sort((a,b)=>a.localeCompare(b,'ko',{numeric:true})).join(','); ch=true; } });
+    // 담임 항목(자율·진로·행동·독서·출결·수상)을 반 없이 '전부'로 넣은 담임 → 내 담임 반으로 (학교 전체 요청이 다 오지 않게)
+    const hr=S.settings.homeroom; if(hr) (S.settings.duties||[]).forEach(d=>{ if(!d.cls && !d.sub && noSub(d.field)){ d.cls=hr; ch=true; } });
     if(ch){ n++; try{ dutyBoxSave(); }catch(e){} } }
   if(!S.pickInit){ S.pickInit=true; if(S.items.some(i=>i.mine===false && !['free','chul','dokseo'].includes(i.key))) S.items.forEach(i=>{ i.pick=i.mine!==false; }); n++; }
   // 전체 양식을 올리다 생긴 빈 "세특: 과목명"이 내 세특과 함께 두 개로 보이면 빈 것을 지움
@@ -1861,7 +1865,7 @@ function saveDuty(){ dutyBoxSave(); if(S.schoolClubs){ const mk=autoClubs(); if(
 // 브라우저 탭 제목에 숫자 표시 + 다른 탭을 보고 있을 때 새 알림이 오면 깜박임
 const BASE_TITLE='도디쌤의 생기발랄';
 // 새 버전 알림: 사이트가 고쳐져 올라오면 화면 위에 띠를 띄움(브라우저가 예전 화면을 기억하는 문제 해결)
-const BUILD_V='20261122-123229';
+const BUILD_V='20261122-132308';
 async function checkNewVersion(){ if(!/^https?:/.test(location.protocol)) return; try{ const r=await fetch('version.json?t='+Date.now(),{cache:'no-store'}); if(!r.ok) return; const j=await r.json();
   if(j && j.v && j.v!==BUILD_V && !document.getElementById('newVer')){ const d=document.createElement('div'); d.id='newVer'; d.innerHTML='✨ 생기발랄 새 버전이 나왔어요. <button class="b s" id="newVerGo">새로 고침</button> <span style="font-weight:600">또는 키보드 <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>R</kbd></span> <span class="hint" style="color:inherit;opacity:.8">· 써 둔 내용은 그대로 남아요</span>'; document.body.prepend(d); document.getElementById('newVerGo').onclick=()=>{ flush().finally(()=>{ location.replace(location.pathname+'?v='+encodeURIComponent(j.v)+location.hash); }); }; } }catch(e){} }
 const SUB_DEFAULT='선생님을 잇는 생기부 플랫폼';
