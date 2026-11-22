@@ -1063,7 +1063,7 @@ async function exportItemXlsx(scope){
   toast('📥 '+fname+' — '+filled+'/'+total+'명 입력'+(over?' · 초과 '+over+'명(빨리 줄이세요)':'')+'. 엑셀의 C열을 복사해 나이스에 붙이세요.');
 }
 function writeHeadHTML(){
-  { if(isGrp(UI.cls)){ const gp=grpOf(UI.cls); if(gp && itemBy(gp.item)) UI.item=gp.item; } else { UI.lastCls=UI.cls; const ok=itemsFor(UI.cls); if(ok.length && !ok.some(i=>i.key===UI.item)) UI.item=(ok.find(i=>!/동아리/.test(i.name))||ok[0]).key; } }
+  { if(isGrp(UI.cls)){ const gp=grpOf(UI.cls); if(gp && itemBy(gp.item)) UI.item=gp.item; } else { UI.lastCls=UI.cls; const ok=itemsFor(UI.cls); if(UI.forceItem!==UI.item && ok.length && !ok.some(i=>i.key===UI.item)) UI.item=(ok.find(i=>!/동아리/.test(i.name))||ok[0]).key; } }
   const cl=visClasses(), it=itemBy(UI.item); const mine=act(unitStudents(UI.cls)); const all=mine.length; const isG=!!grpOf(UI.cls);
   const written=countWritten(mine,it.key), need=isG? all : needOf(all,it), ra=isG? 100 : ratioOf(it);
   let done=0, over=0; mine.forEach(s=>{ const r=peek(sid(s),it.key); if(r.done) done++; if(B(r.text)>it.limit) over++; });
@@ -1562,12 +1562,13 @@ async function importXlsx(file){
   const idCols=[ci.g,ci.c,ci.n,ci.name,ci.note,ci.hb];
   // 영역 이름이 사이트와 다르면(예: '과세특', '세특', '내용', '초안') 지금 보고 있는 영역으로
   const curIt=itemBy(UI.item);
-  const unknownText=headRaw.map((nm,j)=>j).filter(j=>!idCols.includes(j) && rows.slice(1).some(r=>String(r[j]||'').trim().length>5) && !S.items.some(i=>i.name===headRaw[j]) && !(/^세특/.test(headRaw[j])&&S.items.some(i=>/^세특/.test(i.name))));
-  const mapCur = curIt && unknownText.length===1 && !headRaw.some((nm,j)=>!idCols.includes(j)&&S.items.some(i=>i.name===nm)&&rows.slice(1).some(r=>String(r[j]||'').trim())) ? unknownText[0] : -1;
+  const findIt=nm=>S.items.find(i=>i.name===nm) || S.items.find(i=>normArea(i.name)===normArea(nm)) || null;
+  const unknownText=headRaw.map((nm,j)=>j).filter(j=>!idCols.includes(j) && rows.slice(1).some(r=>String(r[j]||'').trim().length>5) && !findIt(headRaw[j]));
+  const mapCur = curIt && unknownText.length===1 && !headRaw.some((nm,j)=>!idCols.includes(j)&&findIt(nm)&&rows.slice(1).some(r=>String(r[j]||'').trim())) ? unknownText[0] : -1;
   const limits={}; if(wb.Sheets['항목한도']) XLSX.utils.sheet_to_json(wb.Sheets['항목한도'],{header:1,defval:''}).slice(1).forEach(r=>{ if(r[0]&&+r[1]>0) limits[String(r[0]).trim()]=+r[1]; });
   const doneRows={}; if(wb.Sheets['완료여부']){ const dr=XLSX.utils.sheet_to_json(wb.Sheets['완료여부'],{header:1,defval:''}); const dh=(dr[0]||[]).map(x=>String(x).trim()); dr.slice(1).forEach(r=>{ const k=parseInt(r[0],10)+'-'+parseInt(r[1],10)+'-'+parseInt(r[2],10); doneRows[k]={}; dh.forEach((nm,j)=>{ if(j>3&&String(r[j]).trim()==='완료') doneRows[k][nm]=true; }); }); }
   const cols=[]; headRaw.forEach((nm,j)=>{ if(!nm||idCols.includes(j)) return;
-    let it= j===mapCur? curIt : S.items.find(i=>i.name===nm);
+    let it= j===mapCur? curIt : findIt(nm);
     const hasText=rows.slice(1).some(r=>String(r[j]||'').trim());
     if(!it && !hasText) return; // 빈 칸은 새 영역을 만들지 않음
     if(!it && nm==='세특: 과목명'){ const se=S.items.filter(i=>/^세특/.test(i.name)); if(se.length===1) it=se[0]; else if(se.length>1){ const mineSe=se.filter(i=>itemOkFor(i,S.settings.homeroom||'')||myDuties().some(d=>/세특|교과/.test(d.field||'')&&areaSame(i.name.replace(/^세특\s*:?\s*/,''),d.sub||''))); if(mineSe.length===1) it=mineSe[0]; } }
@@ -1588,7 +1589,10 @@ async function importXlsx(file){
   if(!plan.length){ toast('학생 줄을 하나도 읽지 못했습니다. 학년·반·번호 칸에 숫자가 들어 있는지 확인해 주세요.'); return; }
   if(!restored && !filled){ toast('학생 '+plan.length+'명은 찾았지만 내용 칸이 비어 있습니다. 영역 칸(예: '+(curIt?curIt.name:'세특: 도덕')+')에 초안을 썼는지 확인해 주세요.'); return; }
   const byCls={}; plan.forEach(p=>{ const k=p.g+'-'+p.c; byCls[k]=(byCls[k]||0)+1; }); const clsList=Object.keys(byCls).sort((a,b)=>byCls[b]-byCls[a]);
-  if(!restored && clsList.length && !isGrp(UI.cls) && !byCls[UI.cls]){ UI.cls=clsList[0]; if(mapCur<0 && cols.length===1) UI.item=cols[0].it.key; }
+  if(!restored){ const used=cols.filter(o=>plan.some(p=>String(p.r[o.j]||'').trim())).map(o=>o.it);
+    used.forEach(it=>{ if(it.pick===false) it.pick=true; if(it.mine===false) it.mine=true; });
+    if(clsList.length && !isGrp(UI.cls) && !byCls[UI.cls]) UI.cls=clsList[0];
+    if(used.length && !used.some(it=>it.key===UI.item)) UI.item=used[0].key; UI.forceItem=UI.item; }
   sortStudents(); save(); toast((restored?'전부 되돌렸습니다. ':'✔ 들어갔습니다: ')+(restored?'':clsList.map(c=>clsName(c)+' '+byCls[c]+'명').join(', ')+' · ')+'학생 '+plan.length+'명, 내용 '+filled+'칸'+(mapCur>=0?' (\''+headRaw[mapCur]+'\' 칸 → '+curIt.name+')':'')+(skipped?' · 번호를 못 읽은 '+skipped+'줄 건너뜀':'')+(tidied?' (띄어쓰기·맞춤법 '+tidied+'칸 바로 정리)':'')); render();
 }
 
@@ -1851,7 +1855,7 @@ function saveDuty(){ dutyBoxSave(); if(S.schoolClubs){ const mk=autoClubs(); if(
 // 브라우저 탭 제목에 숫자 표시 + 다른 탭을 보고 있을 때 새 알림이 오면 깜박임
 const BASE_TITLE='도디쌤의 생기발랄';
 // 새 버전 알림: 사이트가 고쳐져 올라오면 화면 위에 띠를 띄움(브라우저가 예전 화면을 기억하는 문제 해결)
-const BUILD_V='20261122-121317';
+const BUILD_V='20261122-122049';
 async function checkNewVersion(){ if(!/^https?:/.test(location.protocol)) return; try{ const r=await fetch('version.json?t='+Date.now(),{cache:'no-store'}); if(!r.ok) return; const j=await r.json();
   if(j && j.v && j.v!==BUILD_V && !document.getElementById('newVer')){ const d=document.createElement('div'); d.id='newVer'; d.innerHTML='✨ 생기발랄 새 버전이 나왔어요. <button class="b s" id="newVerGo">새로 고침</button> <span style="font-weight:600">또는 키보드 <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>R</kbd></span> <span class="hint" style="color:inherit;opacity:.8">· 써 둔 내용은 그대로 남아요</span>'; document.body.prepend(d); document.getElementById('newVerGo').onclick=()=>{ flush().finally(()=>{ location.replace(location.pathname+'?v='+encodeURIComponent(j.v)+location.hash); }); }; } }catch(e){} }
 const SUB_DEFAULT='선생님을 잇는 생기부 플랫폼';
@@ -2271,8 +2275,8 @@ M.addEventListener('click',async e=>{
   if(card && t.dataset.act==='nvapply'){ naverApply(card); return; }
   if(card && t.dataset.act==='undo'){ const c=cardCtx(card), k=c.sidv+'|'+c.ik; if(undoMap.has(k)){ c.ta.value=undoMap.get(k); const r=rec(c.sidv,c.ik); r.text=c.ta.value; r.updated=Date.now(); undoMap.delete(k); noFix.add(k); save(); refreshCard(card,''); toast('되돌렸습니다. 이 칸은 다시 고칠 때까지 자동 교정을 하지 않습니다.'); } return; }
   if(t.dataset.pick){ UI.sid=t.dataset.pick; renderSearch(); return; }
-  const pc=t.closest('[data-cls]'); if(pc){ UI.cls=pc.dataset.cls; const gp=grpOf(UI.cls); if(gp && itemBy(gp.item)) UI.item=gp.item; renderWrite(); return; }
-  const pi=t.closest('[data-itemk]'); if(pi){ const it2=itemBy(pi.dataset.itemk); if(!it2) return; UI.item=it2.key; if(isGrp(UI.cls) && !/동아리/.test(it2.name)){ const b=backCls(it2); if(b) UI.cls=b; } renderWrite(); return; }
+  const pc=t.closest('[data-cls]'); if(pc){ UI.forceItem=''; UI.cls=pc.dataset.cls; const gp=grpOf(UI.cls); if(gp && itemBy(gp.item)) UI.item=gp.item; renderWrite(); return; }
+  const pi=t.closest('[data-itemk]'); if(pi){ UI.forceItem=''; const it2=itemBy(pi.dataset.itemk); if(!it2) return; UI.item=it2.key; if(isGrp(UI.cls) && !/동아리/.test(it2.name)){ const b=backCls(it2); if(b) UI.cls=b; } renderWrite(); return; }
   if(t.dataset.goit){ const c=$('.card[data-ik="'+t.dataset.goit+'"]'); if(c){ c.scrollIntoView({block:'center',behavior:'smooth'}); const ta=$('.ta',c); ta.focus(); } return; }
   if(t.id==='copyAll'){ const s=S.students.find(x=>sid(x)===UI.sid); if(!s) return; const txt=S.items.map(it=>'['+it.name+']\n'+peek(UI.sid,it.key).text).join('\n\n'); toast(await copyText(txt)? '전 항목을 복사했습니다.' : '복사에 실패했습니다.'); return; }
   const gm=t.closest('[data-gmiss]'); if(gm){ UI.cls=gm.dataset.gmiss; const gp=grpOf(UI.cls); if(gp) UI.item=gp.item; UI.filter='empty'; go('write'); return; }
