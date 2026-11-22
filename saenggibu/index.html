@@ -1855,7 +1855,7 @@ function saveDuty(){ dutyBoxSave(); if(S.schoolClubs){ const mk=autoClubs(); if(
 // 브라우저 탭 제목에 숫자 표시 + 다른 탭을 보고 있을 때 새 알림이 오면 깜박임
 const BASE_TITLE='도디쌤의 생기발랄';
 // 새 버전 알림: 사이트가 고쳐져 올라오면 화면 위에 띠를 띄움(브라우저가 예전 화면을 기억하는 문제 해결)
-const BUILD_V='20261122-122049';
+const BUILD_V='20261122-122710';
 async function checkNewVersion(){ if(!/^https?:/.test(location.protocol)) return; try{ const r=await fetch('version.json?t='+Date.now(),{cache:'no-store'}); if(!r.ok) return; const j=await r.json();
   if(j && j.v && j.v!==BUILD_V && !document.getElementById('newVer')){ const d=document.createElement('div'); d.id='newVer'; d.innerHTML='✨ 생기발랄 새 버전이 나왔어요. <button class="b s" id="newVerGo">새로 고침</button> <span style="font-weight:600">또는 키보드 <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>R</kbd></span> <span class="hint" style="color:inherit;opacity:.8">· 써 둔 내용은 그대로 남아요</span>'; document.body.prepend(d); document.getElementById('newVerGo').onclick=()=>{ flush().finally(()=>{ location.replace(location.pathname+'?v='+encodeURIComponent(j.v)+location.hash); }); }; } }catch(e){} }
 const SUB_DEFAULT='선생님을 잇는 생기부 플랫폼';
@@ -2358,7 +2358,7 @@ M.addEventListener('click',async e=>{
     return; }
   if(t.id==='wipe'){ if(confirm('이 컴퓨터에 저장된 학생 명단·생기부 내용·일정이 모두 지워집니다. 백업을 받으셨습니까?') && confirm('정말 지웁니다. 되돌릴 수 없습니다.')){ LOCK.key=null; LOCK.salt=null; S=freshState(); await flush(); $('#lockBtn').style.display='none'; toast('모두 지웠습니다.'); go('write'); } return; }
 });
-document.addEventListener('visibilitychange',()=>{ if(document.hidden) flush(); else if(Date.now()-(S.settings.lastReqFetch||0)>60000) fetchReqs(true); });
+document.addEventListener('visibilitychange',()=>{ if(document.hidden) flush(); else if(!FROZEN){ flush(); tabHello(); } if(!document.hidden && Date.now()-(S.settings.lastReqFetch||0)>60000) fetchReqs(true); });
 window.addEventListener('beforeunload',()=>{ flush(); });
 
 // ───────── 12. 시작 ─────────
