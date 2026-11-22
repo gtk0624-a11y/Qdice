@@ -89,14 +89,23 @@ select.in{flex:0 0 auto;min-width:0;width:auto}
 .banner{background:var(--warn2);color:var(--warn);padding:12px;border-radius:12px;font-weight:700;margin-bottom:12px}
 #printArea{display:none}
 @media print{
- body{background:#fff;padding:0}
+ @page{size:A4;margin:12mm}
+ body{background:#fff;padding:0;font-size:11pt}
  header,main,nav,#modal,#toast{display:none!important}
- #printArea{display:block;color:#000;font-size:13pt}
- .sheet{height:48vh;border-bottom:2px dashed #888;padding:6mm 8mm;page-break-inside:avoid}
- .sheet:last-child{border-bottom:0}
- .sheet h2{margin:0 0 6px;font-size:17pt}
- .sheet table td,.sheet table th{border:1px solid #999;padding:5px 8px}
- .sign{display:flex;gap:30px;margin-top:14px}.sign div{flex:1;border-bottom:1px solid #000;padding-bottom:22px}
+ #printArea{display:block;color:#000}
+ .rep h2{margin:0 0 4px;font-size:18pt}
+ .rep .sub{font-size:10.5pt;margin-bottom:8px}
+ .rep h3{margin:12px 0 4px;font-size:12pt;color:#000}
+ .rep table{width:100%;border-collapse:collapse;font-size:10.5pt}
+ .rep td,.rep th{border:1px solid #777;padding:4px 6px;text-align:left;color:#000;font-size:10.5pt}
+ .rep th{background:#eee}
+ .rep td.r,.rep th.r{text-align:right}
+ .rep thead{display:table-header-group}
+ .rep tfoot{display:table-row-group}
+ .rep tr{page-break-inside:avoid}
+ .rep .sum th{width:17%}
+ .sign{display:flex;gap:30px;margin-top:18px;page-break-inside:avoid}
+ .sign div{flex:1;border-bottom:1px solid #000;padding-bottom:22px}
 }
 </style>
 </head>
@@ -327,7 +336,7 @@ function renderCalc(){
   <table>${[[50000,'5만원'],[10000,'1만원'],[5000,'5천원'],[1000,'1천원']].map(([v,l])=>`<tr><td>${l}</td><td class="r"><input class="in" style="width:110px;font-size:18px;padding:8px;text-align:right" inputmode="numeric" data-cash="${v}" value="${S.cash[v]||''}"> 장</td></tr>`).join('')}
   <tr><td>수표·기타</td><td class="r"><input class="in" style="width:140px;font-size:18px;padding:8px;text-align:right" inputmode="numeric" data-cash="etc" value="${S.cash.etc||''}"> 원</td></tr></table>
   <div id="diff"></div></div>
-  <button class="go" data-act="print" style="margin-top:4px">🖨️ 정산서 인쇄 (2부)</button>
+  <button class="go" data-act="print" style="margin-top:4px">🖨️ 명단·정산서 인쇄</button>
   <button class="btn full" data-act="share">💬 요약을 카톡·문자로 보내기</button>`;
   calcDiff();}
 function calcDiff(){const el=$('#diff');if(!el)return;
@@ -341,15 +350,26 @@ function summaryText(){const a=act(),s=S.set;
 async function shareText(){const t=summaryText();
   try{if(navigator.share){await navigator.share({text:t});return;}}catch(e){if(e&&e.name==='AbortError')return;}
   try{await navigator.clipboard.writeText(t);toast('요약을 복사했습니다. 카톡에 붙여넣으세요');}catch(e){showModal(`<h3>요약</h3><textarea class="in" style="height:200px;font-size:15px">${esc(t)}</textarea><button class="btn full" id="mClose2">닫기</button>`);$('#mClose2').onclick=closeModal;}}
-function printSheet(){const a=act(),s=S.set;const book=sum(a.filter(e=>e.method!=='송금')),real=cashTotal();
-  const one=`<div class="sheet"><h2>축의금 접수 정산서</h2>
-  <div>${esc([s.groom,s.bride].filter(Boolean).join(' ♥ '))} ${esc(s.date)} ${esc(s.venue)} · 접수자 ${esc(s.who||s.seat)} · 출력 ${new Date().toLocaleString('ko-KR')}</div>
-  <table style="width:100%;border-collapse:collapse;margin-top:8px"><tr><th>봉투 수</th><td>${a.length}건</td><th>식권</th><td>${a.reduce((t,e)=>t+e.meals,0)}장</td></tr>
-  <tr><th>명부 총액</th><td>${fmt(sum(a))}</td><th>명부 현금·수표</th><td>${fmt(book)}</td></tr>
-  <tr><th>실사 현금</th><td>${real?fmt(real):'(미입력)'}</td><th>차액</th><td>${real?fmt(real-book):'-'}</td></tr>
-  <tr><th>송금 합계</th><td>${fmt(sum(a.filter(e=>e.method==='송금')))}</td><th>빠진 번호</th><td>${missing().join(', ')||'없음'}</td></tr>${a.filter(isBig).length?`<tr><th>고액 ${S.set.big||100}만↑</th><td colspan="3">${a.filter(isBig).map(e=>esc(noStr(e)+' '+e.name+' '+fmt(e.won))).join(' / ')}</td></tr>`:''}</table>
+function printSheet(){
+  const a=[...act()].sort((x,y)=>x.seat.localeCompare(y.seat)||x.no-y.no);const s=S.set;
+  const book=sum(a.filter(e=>e.method!=='송금')),real=cashTotal(),delN=S.entries.length-a.length;
+  const meals=a.reduce((t,e)=>t+e.meals,0),big=a.filter(isBig),won=n=>(n||0).toLocaleString('ko-KR');
+  const rows=a.map(e=>`<tr><td>${esc(noStr(e))}</td><td>${isBig(e)?'★ ':''}${esc(e.name)}</td><td>${esc(e.rel)}</td><td class="r">${won(e.won)}</td><td>${esc(e.method)}</td><td class="r">${e.meals}</td><td>${esc(e.memo||'')}</td><td>${hm(e.ts)}</td></tr>`).join('');
+  $('#printArea').innerHTML=`<div class="rep"><h2>축의금 접수 명부 및 정산서</h2>
+  <div class="sub">${esc([s.groom,s.bride].filter(Boolean).join(' ♥ '))} ${esc(s.date)} ${esc(s.venue)} · 접수자 ${esc(s.who||s.seat)} · 출력 ${new Date().toLocaleString('ko-KR')}</div>
+  <table class="sum">
+   <tr><th>봉투 수</th><td>${a.length}건</td><th>명부 총액</th><td><b>${won(sum(a))}원</b></td></tr>
+   <tr><th>현금·수표</th><td>${won(book)}원</td><th>송금</th><td>${won(sum(a.filter(e=>e.method==='송금')))}원</td></tr>
+   <tr><th>실사 현금·수표</th><td>${real?won(real)+'원':'(미입력)'}</td><th>차액</th><td>${real?(real-book>0?'+':'')+won(real-book)+'원':'-'}</td></tr>
+   <tr><th>식권 합계</th><td>${meals}장</td><th>빠진 번호</th><td>${esc(missing().join(', ')||'없음')}${delN?' · 삭제 '+delN+'건':''}</td></tr>
+  </table>
+  <h3>접수 명단 (${a.length}건)</h3>
+  <table><thead><tr><th>번호</th><th>이름</th><th>관계</th><th class="r">금액(원)</th><th>방식</th><th class="r">식권</th><th>메모</th><th>시각</th></tr></thead>
+  <tbody>${rows||'<tr><td colspan="8">접수 내역이 없습니다.</td></tr>'}</tbody>
+  <tfoot><tr><th colspan="3">합계</th><th class="r">${won(sum(a))}</th><th></th><th class="r">${meals}</th><th colspan="2">${a.length}건</th></tr></tfoot></table>
+  ${big.length?`<h3>★ 고액 접수 (${S.set.big||100}만 원 이상) ${big.length}건 · ${won(sum(big))}원</h3><div>${big.map(e=>esc(noStr(e)+' '+e.name+' '+won(e.won)+'원')).join(' / ')}</div>`:''}
   <div class="sign"><div>접수자 서명</div><div>혼주(인수자) 서명</div></div></div>`;
-  $('#printArea').innerHTML=one+one;window.print();}
+  window.print();}
 
 /* ====== 설정·저장 탭 ====== */
 function renderSet(){const s=S.set;
