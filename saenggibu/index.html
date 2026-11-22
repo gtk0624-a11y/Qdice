@@ -743,6 +743,18 @@ const DEFAULT_ITEMS=[
 ];
 // 예전에 만든 자료에도 담임 칸(출결·독서)을 더함
 function ensureItems(){ let n=0;
+  // '나이스 붙이기' 엑셀을 올리다 생긴 가짜 영역(나이스에 붙일 내용·바이트·상태) 정리: 내용은 내 세특으로 옮김
+  { const fake=S.items.filter(i=>/^(나이스에 붙일 내용|바이트|상태)$/.test(i.name)); if(fake.length){ const nice=fake.find(i=>i.name==='나이스에 붙일 내용');
+      const se=S.items.filter(i=>/^세특/.test(i.name) && i.pick!==false && !fake.includes(i)); const tgt= se.length===1? se[0] : null;
+      if(!nice || tgt){ Object.keys(S.records).forEach(k=>{ const [sd,ik]=k.split('|'); const f=fake.find(i=>i.key===ik); if(!f) return; const r=S.records[k];
+          if(f===nice && tgt && String(r.text||'').trim()){ const tk=sd+'|'+tgt.key; if(!S.records[tk] || !String(S.records[tk].text||'').trim()) S.records[tk]=r; }
+          delete S.records[k]; });
+        S.items=S.items.filter(i=>!fake.includes(i)); if(fake.some(i=>i.key===UI.item)) UI.item=(tgt||S.items[0]).key; n++; } } }
+  // 반 없이 저장된 세특 담당: 이미 그 과목 글이 들어 있는 반으로 채움
+  { let ch=false; (S.settings.duties||[]).forEach(d=>{ if(d.cls || !/세특|교과/.test(d.field||'')) return; const its=S.items.filter(i=>/^세특/.test(i.name) && (!d.sub || areaSame(i.name.replace(/^세특\s*:?\s*/,''),d.sub))); if(!its.length) return;
+      const cs=new Set(); Object.keys(S.records).forEach(k=>{ const [sd,ik]=k.split('|'); if(its.some(i=>i.key===ik) && String(S.records[k].text||'').trim()){ const c=sd.split('-').slice(0,2).join('-'); if(/^\d+-\d+$/.test(c)) cs.add(c); } });
+      if(cs.size){ d.cls=[...cs].sort((a,b)=>a.localeCompare(b,'ko',{numeric:true})).join(','); ch=true; } });
+    if(ch){ n++; try{ dutyBoxSave(); }catch(e){} } }
   if(!S.pickInit){ S.pickInit=true; if(S.items.some(i=>i.mine===false && !['free','chul','dokseo'].includes(i.key))) S.items.forEach(i=>{ i.pick=i.mine!==false; }); n++; }
   // 전체 양식을 올리다 생긴 빈 "세특: 과목명"이 내 세특과 함께 두 개로 보이면 빈 것을 지움
   const se=S.items.filter(i=>/^세특/.test(i.name)), ph=se.find(i=>i.name==='세특: 과목명');
@@ -1537,63 +1549,57 @@ async function importXlsx(file){
       restored=true;
     }catch(e){ toast('복원용 시트가 손상되어 입력 내용만 불러옵니다.'); }
   }
-  // 제목 줄 찾기: 어느 시트든, 위쪽 15줄 안에서 '이름' 칸과 (학년·반·번호 또는 학번)이 있는 줄. 띄어쓰기·표 제목 줄이 있어도 됨
-  const HN=x=>String(x||'').replace(/[\s\u3000]/g,'');
-  let ws=null, rows=null, hi=-1;
-  const order=['생기부'].concat(wb.SheetNames.filter(n=>n!=='생기부'&&n!=='안내'&&n!=='_복원용'));
-  for(const nm of order){ const w=wb.Sheets[nm]; if(!w) continue; const rr=XLSX.utils.sheet_to_json(w,{header:1,raw:false,defval:''});
-    for(let i=0;i<Math.min(15,rr.length);i++){ const h=rr[i].map(HN); const hasName=h.some(x=>/^(이름|성명|학생명|학생이름|학생)$/.test(x)); const hasNo=h.some(x=>/^(번호|학번|번)$/.test(x)); if(hasName&&hasNo){ ws=w; rows=rr.slice(i); hi=i; break; } }
-    if(ws) break; }
-  if(!ws){ toast('학생 이름·번호 칸을 찾지 못했습니다. 위쪽에 [학년, 반, 번호, 이름] (또는 [학번, 이름]) 제목 줄이 있어야 합니다. [1. 양식 받기]로 받은 파일에 쓰면 제일 확실합니다.'); return; }
-  if(rows.length<2){ toast('학생 줄이 없는 파일입니다.'); return; }
-  const head=rows[0].map(x=>HN(x)), headRaw=rows[0].map(x=>String(x).trim());
-  const fi=re=>head.findIndex(h=>re.test(h));
-  const ci={g:fi(/^학년$/),c:fi(/^(반|학반)$/),n:fi(/^(번호|번)$/),name:fi(/^(이름|성명|학생명|학생이름|학생)$/),hb:fi(/^학번$/)};
-  ci.note=fi(/^(특이사항|비고)$/);
-  // 학년 칸이 없으면 지금 보고 있는 반의 학년으로
-  const curG=(!isGrp(UI.cls)&&UI.cls)? parseInt(UI.cls.split('-')[0],10) : 0;
-  const nameOnly=(name,g,c)=>{ const m=S.students.filter(s=>s.name===name&&(!g||s.g===g)&&(!c||s.c===c)); return m.length===1? m[0] : null; };
-  const keyOf=r=>{ const name=String(r[ci.name]||'').trim(); if(!name) return null;
-    let g=ci.g>=0? parseInt(r[ci.g],10):0, c=ci.c>=0? parseInt(r[ci.c],10):0, n=ci.n>=0? parseInt(r[ci.n],10):0;
-    if(ci.hb>=0 && !(g&&c&&n)){ const d=String(r[ci.hb]).replace(/\D/g,''); if(d.length===5){ g=+d[0]; c=+d.slice(1,3); n=+d.slice(3); } else if(d.length===4){ g=+d[0]; c=+d[1]; n=+d.slice(2); } }
-    if(!g && c && n) g=curG || (nameOnly(name,0,c)||{}).g || 0;
-    if(!(g&&c&&n)){ const s=nameOnly(name,g||curG,c); if(s){ g=s.g; c=s.c; n=s.n; } }
-    return (g>0&&c>0&&n>0)? {g,c,n,name} : null; };
-  const idCols=[ci.g,ci.c,ci.n,ci.name,ci.note,ci.hb];
-  // 영역 이름이 사이트와 다르면(예: '과세특', '세특', '내용', '초안') 지금 보고 있는 영역으로
+  // 제목 줄 찾기: 모든 시트(반마다 한 시트인 '나이스 붙이기' 엑셀도), 위쪽 15줄 안에서 '이름'과 (번호 또는 학번)이 있는 줄
+  const HN=x=>String(x||'').replace(/[\s　]/g,'');
+  const SKIP_COL=/^(바이트|상태|글자수|자수|바이트수|확인|완료)$/;          // 사이트가 만든 계산·표시 칸은 읽지 않음
+  const CUR_COL=/^(나이스에붙일내용|내용|초안|세특|과세특|기록|입력내용|특기사항)$/; // 이 이름은 '지금 보고 있는 영역'
   const curIt=itemBy(UI.item);
-  const findIt=nm=>S.items.find(i=>i.name===nm) || S.items.find(i=>normArea(i.name)===normArea(nm)) || null;
-  const unknownText=headRaw.map((nm,j)=>j).filter(j=>!idCols.includes(j) && rows.slice(1).some(r=>String(r[j]||'').trim().length>5) && !findIt(headRaw[j]));
-  const mapCur = curIt && unknownText.length===1 && !headRaw.some((nm,j)=>!idCols.includes(j)&&findIt(nm)&&rows.slice(1).some(r=>String(r[j]||'').trim())) ? unknownText[0] : -1;
   const limits={}; if(wb.Sheets['항목한도']) XLSX.utils.sheet_to_json(wb.Sheets['항목한도'],{header:1,defval:''}).slice(1).forEach(r=>{ if(r[0]&&+r[1]>0) limits[String(r[0]).trim()]=+r[1]; });
+  const findIt=nm=>S.items.find(i=>i.name===nm) || S.items.find(i=>normArea(i.name)===normArea(nm)) || null;
+  const sheets=[];
+  for(const nm of ['생기부'].concat(wb.SheetNames.filter(n=>n!=='생기부'))){ if(nm==='안내'||nm==='_복원용'||nm==='항목한도'||nm==='완료여부'||nm==='바이트확인') continue; const w=wb.Sheets[nm]; if(!w) continue;
+    const rr=XLSX.utils.sheet_to_json(w,{header:1,raw:false,defval:''});
+    for(let i=0;i<Math.min(15,rr.length);i++){ const h=rr[i].map(HN); if(h.some(x=>/^(이름|성명|학생명|학생이름|학생)$/.test(x)) && h.some(x=>/^(번호|학번|번)$/.test(x))){ sheets.push({nm,rows:rr.slice(i)}); break; } }
+    if(restored && sheets.length) break; }
+  if(!sheets.length){ toast('학생 이름·번호 칸을 찾지 못했습니다. 위쪽에 [학년, 반, 번호, 이름] (또는 [학번, 이름]) 제목 줄이 있어야 합니다. [1. 양식 받기]로 받은 파일에 쓰면 제일 확실합니다.'); return; }
+  const curCls=(!isGrp(UI.cls)&&UI.cls)? UI.cls : '';
+  const nameOnly=(name,g,c)=>{ const m=S.students.filter(s=>s.name===name&&(!g||s.g===g)&&(!c||s.c===c)); return m.length===1? m[0] : null; };
+  const cols=[]; let skipped=0; const plan=[]; const mapped=new Set();
+  sheets.forEach(sh=>{ const rows=sh.rows; const head=rows[0].map(HN), headRaw=rows[0].map(x=>String(x).trim()); const fi=re=>head.findIndex(h=>re.test(h));
+    const ci={g:fi(/^학년$/),c:fi(/^(반|학반)$/),n:fi(/^(번호|번)$/),name:fi(/^(이름|성명|학생명|학생이름|학생)$/),hb:fi(/^학번$/),note:fi(/^(특이사항|비고)$/)};
+    // 시트 이름이 '1학년 2반' / '1-2' 이면 그 반
+    const m=HN(sh.nm).match(/^(\d)학년(\d{1,2})반/)||HN(sh.nm).match(/^(\d)-(\d{1,2})$/); const shG=m? +m[1] : 0, shC=m? +m[2] : 0;
+    const dfG=shG|| (curCls? +curCls.split('-')[0] : 0), dfC=shC || (sheets.length===1&&curCls? +curCls.split('-')[1] : 0);
+    const idCols=[ci.g,ci.c,ci.n,ci.name,ci.note,ci.hb];
+    const scol=[]; headRaw.forEach((nm,j)=>{ if(!nm||idCols.includes(j)||SKIP_COL.test(HN(nm))) return; const has=rows.slice(1).some(r=>String(r[j]||'').trim()); if(!has) return;
+      let it=null; if(CUR_COL.test(HN(nm)) && curIt) it=curIt; else it=findIt(nm);
+      if(!it && nm==='세특: 과목명'){ const se=S.items.filter(i=>/^세특/.test(i.name)); if(curIt && /^세특/.test(curIt.name)) it=curIt; else if(se.length===1) it=se[0]; }
+      if(!it && curIt){ const textCols=headRaw.filter((x,k)=>x&&!idCols.includes(k)&&!SKIP_COL.test(HN(x))&&rows.slice(1).some(r=>String(r[k]||'').trim().length>5)); if(textCols.length===1) it=curIt; }
+      if(!it){ it={key:'i'+Date.now().toString(36)+j,name:nm,limit:limits[nm]||1500,mine:true,pick:true}; S.items.push(it); }
+      if(it.name!==nm) mapped.add(nm+' → '+it.name);
+      scol.push({j,it}); if(!cols.includes(it)) cols.push(it); });
+    rows.slice(1).forEach(r=>{ const name=String(r[ci.name]||'').trim(); if(!name) return;
+      let g=ci.g>=0? parseInt(r[ci.g],10):0, c=ci.c>=0? parseInt(r[ci.c],10):0, n=ci.n>=0? parseInt(r[ci.n],10):0;
+      if(ci.hb>=0 && !(g&&c&&n)){ const d=String(r[ci.hb]).replace(/\D/g,''); if(d.length===5){ g=+d[0]; c=+d.slice(1,3); n=+d.slice(3); } else if(d.length===4){ g=+d[0]; c=+d[1]; n=+d.slice(2); } }
+      if(!g) g=dfG; if(!c) c=dfC;
+      if(!(g&&c&&n)){ const st=nameOnly(name,g,c); if(st){ g=st.g; c=st.c; n=st.n; } }
+      if(!(g>0&&c>0&&n>0)){ skipped++; return; }
+      plan.push({g,c,n,name,r,ci,scol}); }); });
   const doneRows={}; if(wb.Sheets['완료여부']){ const dr=XLSX.utils.sheet_to_json(wb.Sheets['완료여부'],{header:1,defval:''}); const dh=(dr[0]||[]).map(x=>String(x).trim()); dr.slice(1).forEach(r=>{ const k=parseInt(r[0],10)+'-'+parseInt(r[1],10)+'-'+parseInt(r[2],10); doneRows[k]={}; dh.forEach((nm,j)=>{ if(j>3&&String(r[j]).trim()==='완료') doneRows[k][nm]=true; }); }); }
-  const cols=[]; headRaw.forEach((nm,j)=>{ if(!nm||idCols.includes(j)) return;
-    let it= j===mapCur? curIt : findIt(nm);
-    const hasText=rows.slice(1).some(r=>String(r[j]||'').trim());
-    if(!it && !hasText) return; // 빈 칸은 새 영역을 만들지 않음
-    if(!it && nm==='세특: 과목명'){ const se=S.items.filter(i=>/^세특/.test(i.name)); if(se.length===1) it=se[0]; else if(se.length>1){ const mineSe=se.filter(i=>itemOkFor(i,S.settings.homeroom||'')||myDuties().some(d=>/세특|교과/.test(d.field||'')&&areaSame(i.name.replace(/^세특\s*:?\s*/,''),d.sub||''))); if(mineSe.length===1) it=mineSe[0]; } }
-    if(!it && /^세특/.test(nm)){ const ph=S.items.find(i=>i.name==='세특: 과목명' && !Object.keys(S.records).some(k=>k.endsWith('|'+i.key)&&S.records[k].text.trim())); if(ph){ ph.name=nm; it=ph; if(limits[nm]) ph.limit=limits[nm]; } }
-    if(!it){ it={key:'i'+Date.now().toString(36)+j,name:nm,limit:limits[nm]||1500,mine:true}; S.items.push(it); }
-    cols.push({j,it}); });
   let filled=0, conflict=0, tidied=0;
-  const plan=[];
-  // 올린 초안도 바로 정리(두 칸 띄어쓰기·AI 꾸밈 기호·맞춤법). 엑셀 백업 되돌리기는 그대로 둠
   const clean=t=>{ if(restored||!t.trim()) return t; let x=mechFix(t).text; if(S.settings.autoSpell) x=spellFix(x,S.rules).text; return x; };
-  let skipped=0;
-  rows.slice(1).forEach(r=>{ if(!String(r[ci.name]||'').trim()) return; const kk=keyOf(r); if(!kk){ skipped++; return; } const {g,c,n,name}=kk;
-    plan.push({g,c,n,name,r}); const k=g+'-'+c+'-'+n; cols.forEach(o=>{ const t=clean(String(r[o.j]||'')); if(!t.trim()) return; const cur=peek(k,o.it.key).text; if(cur.trim()&&cur!==t) conflict++; }); });
+  plan.forEach(p=>{ const k=p.g+'-'+p.c+'-'+p.n; p.scol.forEach(o=>{ const t=clean(String(p.r[o.j]||'')); if(!t.trim()) return; const cur=peek(k,o.it.key).text; if(cur.trim()&&cur!==t) conflict++; }); });
+  if(!plan.length){ toast('학생 줄을 하나도 읽지 못했습니다. 번호·이름 칸이 있는지 확인해 주세요.'); return; }
   if(conflict && !restored && !confirm('이미 써 둔 내용과 다른 칸이 '+conflict+'개 있습니다.\n[확인] 파일 내용으로 덮어쓰기\n[취소] 불러오기 중단')){ return; }
   plan.forEach(p=>{ let s=S.students.find(x=>x.g===p.g&&x.c===p.c&&x.n===p.n); if(!s){ s={g:p.g,c:p.c,n:p.n,name:p.name}; S.students.push(s); } else s.name=p.name;
-    if(ci.note>=0){ const nt=String(p.r[ci.note]||'').trim(); if(nt) s.note=(NOTE_LIST.some(n=>nt.indexOf(n)===0)? nt : noteNorm(nt)); }
-    const k=sid(s); cols.forEach(o=>{ const raw=String(p.r[o.j]||''); const t=clean(raw); if(!t.trim()) return; if(t!==raw) tidied++; const rr=rec(k,o.it.key); if(rr.text!==t){ rr.text=t; rr.updated=Date.now(); rr.copied=0; } if(doneRows[k]&&doneRows[k][o.it.name]) rr.done=true; filled++; }); });
-  if(!plan.length){ toast('학생 줄을 하나도 읽지 못했습니다. 학년·반·번호 칸에 숫자가 들어 있는지 확인해 주세요.'); return; }
+    if(p.ci.note>=0){ const nt=String(p.r[p.ci.note]||'').trim(); if(nt) s.note=(NOTE_LIST.some(n=>nt.indexOf(n)===0)? nt : noteNorm(nt)); }
+    const k=sid(s); p.scol.forEach(o=>{ const raw=String(p.r[o.j]||''); const t=clean(raw); if(!t.trim()) return; if(t!==raw) tidied++; const rr=rec(k,o.it.key); if(rr.text!==t){ rr.text=t; rr.updated=Date.now(); rr.copied=0; } if(doneRows[k]&&doneRows[k][o.it.name]) rr.done=true; filled++; }); });
   if(!restored && !filled){ toast('학생 '+plan.length+'명은 찾았지만 내용 칸이 비어 있습니다. 영역 칸(예: '+(curIt?curIt.name:'세특: 도덕')+')에 초안을 썼는지 확인해 주세요.'); return; }
   const byCls={}; plan.forEach(p=>{ const k=p.g+'-'+p.c; byCls[k]=(byCls[k]||0)+1; }); const clsList=Object.keys(byCls).sort((a,b)=>byCls[b]-byCls[a]);
-  if(!restored){ const used=cols.filter(o=>plan.some(p=>String(p.r[o.j]||'').trim())).map(o=>o.it);
-    used.forEach(it=>{ if(it.pick===false) it.pick=true; if(it.mine===false) it.mine=true; });
+  if(!restored){ cols.forEach(it=>{ if(it.pick===false) it.pick=true; if(it.mine===false) it.mine=true; });
     if(clsList.length && !isGrp(UI.cls) && !byCls[UI.cls]) UI.cls=clsList[0];
-    if(used.length && !used.some(it=>it.key===UI.item)) UI.item=used[0].key; UI.forceItem=UI.item; }
-  sortStudents(); save(); toast((restored?'전부 되돌렸습니다. ':'✔ 들어갔습니다: ')+(restored?'':clsList.map(c=>clsName(c)+' '+byCls[c]+'명').join(', ')+' · ')+'학생 '+plan.length+'명, 내용 '+filled+'칸'+(mapCur>=0?' (\''+headRaw[mapCur]+'\' 칸 → '+curIt.name+')':'')+(skipped?' · 번호를 못 읽은 '+skipped+'줄 건너뜀':'')+(tidied?' (띄어쓰기·맞춤법 '+tidied+'칸 바로 정리)':'')); render();
+    if(cols.length && !cols.some(it=>it.key===UI.item)) UI.item=cols[0].key; UI.forceItem=UI.item; }
+  sortStudents(); save(); toast((restored?'전부 되돌렸습니다. ':'✔ 들어갔습니다: ')+(restored?'':clsList.map(c=>clsName(c)+' '+byCls[c]+'명').join(', ')+' · ')+'학생 '+plan.length+'명, 내용 '+filled+'칸'+(mapped.size?' ('+[...mapped].join(', ')+')':'')+(skipped?' · 번호를 못 읽은 '+skipped+'줄 건너뜀':'')+(tidied?' (띄어쓰기·맞춤법 '+tidied+'칸 바로 정리)':'')); render();
 }
 
 // 독서기록 불러오기(학생이 구글 폼으로 입력한 응답 파일)
@@ -1855,7 +1861,7 @@ function saveDuty(){ dutyBoxSave(); if(S.schoolClubs){ const mk=autoClubs(); if(
 // 브라우저 탭 제목에 숫자 표시 + 다른 탭을 보고 있을 때 새 알림이 오면 깜박임
 const BASE_TITLE='도디쌤의 생기발랄';
 // 새 버전 알림: 사이트가 고쳐져 올라오면 화면 위에 띠를 띄움(브라우저가 예전 화면을 기억하는 문제 해결)
-const BUILD_V='20261122-122710';
+const BUILD_V='20261122-123229';
 async function checkNewVersion(){ if(!/^https?:/.test(location.protocol)) return; try{ const r=await fetch('version.json?t='+Date.now(),{cache:'no-store'}); if(!r.ok) return; const j=await r.json();
   if(j && j.v && j.v!==BUILD_V && !document.getElementById('newVer')){ const d=document.createElement('div'); d.id='newVer'; d.innerHTML='✨ 생기발랄 새 버전이 나왔어요. <button class="b s" id="newVerGo">새로 고침</button> <span style="font-weight:600">또는 키보드 <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>R</kbd></span> <span class="hint" style="color:inherit;opacity:.8">· 써 둔 내용은 그대로 남아요</span>'; document.body.prepend(d); document.getElementById('newVerGo').onclick=()=>{ flush().finally(()=>{ location.replace(location.pathname+'?v='+encodeURIComponent(j.v)+location.hash); }); }; } }catch(e){} }
 const SUB_DEFAULT='선생님을 잇는 생기부 플랫폼';
