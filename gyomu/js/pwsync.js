@@ -51,7 +51,7 @@
     pwNow() { tick(true).then(() => { render(); toast(st.msg || '완료'); }); },
     pwOff() { sure('이 기기의 연동을 끌까요? (저장소의 내용은 그대로 남습니다)', () => { localStorage.removeItem(K_KEY); localStorage.removeItem(K_MK); st.msg = ''; render(); }); },
     pwUrl() { ask('연동 주소 넣기', [{ k: 'u', label: 'Firebase 실시간 DB 주소 (https://….firebasedatabase.app)', val: dbUrl(), req: 1 }], o => { if (!/^https:\/\/[\w.-]+\.(firebasedatabase\.app|firebaseio\.com)\/?$/.test(o.u.trim())) { toast('주소 형식이 아닙니다.'); return; } localStorage.setItem(K_DB, o.u.trim()); render(); }); },
-    async pwTest() { const u = dbUrl(); if (!u) { toast('연동 주소를 먼저 넣으세요.'); return; } try { const r = await fetch(`${u}/rooms/tfsync__probe.json`, { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ t: Date.now() }) }); if (r.ok) { fetch(`${u}/tfsync/_probe.json`, { method: 'DELETE' }); toast('✅ 저장소에 쓸 수 있습니다.'); } else toast(`⚠ 저장소가 막았습니다(${r.status}). 보안 규칙에 tfsync 경로를 열어야 합니다.`); } catch (e) { toast('⚠ 저장소에 닿지 못했습니다: ' + e.message); } }
+    async pwTest() { const u = dbUrl(); if (!u) { toast('연동 주소를 먼저 넣으세요.'); return; } try { const r = await fetch(`${u}/rooms/tfsync__probe.json`, { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ t: Date.now() }) }); if (r.ok) { fetch(`${u}/rooms/tfsync__probe.json`, { method: "DELETE" }); toast('✅ 저장소에 쓸 수 있습니다.'); } else toast(`⚠ 저장소가 막았습니다(${r.status}). 저장소 쓰기 규칙을 확인해야 합니다.`); } catch (e) { toast('⚠ 저장소에 닿지 못했습니다: ' + e.message); } }
   });
   { const _s = setView; setView = function () {
     const h = _s.apply(this, arguments), mark = '<h3 class="h3">여러 기기 동기화</h3>'; if (h.indexOf(mark) < 0) return h; const k = key();
