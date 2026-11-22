@@ -43,7 +43,7 @@ function hpProgWarn() {
 function hpCard() {
   const dow = new Date().getDay(), hot = dow === 5 || dow === 0, w = hpProgWarn(), fr = hpFreeHints();
   const warn = w.length ? `<div class="hpw">⚠️ ${w.map(x => x.g + '학년 ' + x.cs.map(c => c + '반 「' + esc(x.last[c].prog) + '」').join(' / ')).join(' · ')} — 같은 학년인데 진도가 달라요. <button type="button" class="btn sm" data-act="hpProg">자세히</button></div>` : '';
-  return `<details class="hpcard" ${S.profile.hpOpen === false ? '' : 'open'}><summary>🧰 오늘 도우미 <small>퇴근 전 정리 · 수업 후 기록 · 한 주 돌아보기 …</small></summary>
+  return `<details class="hpcard" ${S.profile.hpOpen === true ? 'open' : ''}><summary>🧰 오늘 도우미 <small>퇴근 전 정리 · 수업 후 기록 · 한 주 돌아보기 …</small></summary>
   ${fr || warn ? `<div class="hpin">${fr}${warn}</div>` : ''}
   <div class="tools"><button class="btn pri sm" data-act="hpEnd">🌇 퇴근 전 3분 정리</button><button class="btn sm" data-act="hpLog">📝 수업 후 한 줄 기록</button><button class="btn sm ${hot ? 'pri' : ''}" data-act="hpWeek">🗓 한 주 돌아보기${hot ? ' ✨' : ''}</button><button class="btn sm" data-act="hpProg">📊 반별 진도 점검</button></div>
   <div class="tools"><button class="btn sm pri" data-act="hpNow">▶ 지금 수업 자료 열기</button><button class="btn sm" data-act="hpLink">🔗 수업 자료 연결</button><button class="btn sm" data-act="hpIdea">💡 차시 아이디어 카드</button><button class="btn sm" data-act="hpDoc">📮 공문 기한 모아보기</button><button class="btn sm" data-act="hpMeet">📋 회의 노트 틀</button><button class="btn sm" data-act="hpChkOpen">✅ 나만의 점검표</button><button class="btn sm" data-act="hpTerm">🎓 학기말 점검표</button><button class="btn sm" data-act="hpStu">🔒 학생 메모(이 기기만)</button></div></details>`;

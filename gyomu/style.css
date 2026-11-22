@@ -928,3 +928,15 @@ html[data-nav=bottom] #chatfab{bottom:calc(var(--fb) + 6px)!important}
 html[data-nav=bottom] #chatbub,html #chatbub{bottom:calc(var(--fb) + 112px)!important}
 html[data-nav=right] #chatbub{max-width:130px;white-space:normal;text-align:center}
 html[data-nav=right] #chatbub{display:none!important}
+
+/* v93 단순 보기: 접는 구역 */
+.foldbar{display:flex;gap:8px;justify-content:flex-end;margin:6px 0 2px}.foldbar .btn{font-size:13px;padding:3px 10px;opacity:.85}
+details.afold{border:2px solid var(--ink);border-radius:14px;background:var(--card,#fffdf5);margin:10px 0;box-shadow:2px 2px 0 var(--ink)}
+details.afold>summary{cursor:pointer;padding:11px 14px;font-weight:800;font-size:1.05em;list-style:none;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+details.afold>summary::-webkit-details-marker{display:none}
+details.afold>summary::before{content:'▸';font-size:.9em;transition:transform .15s}
+details.afold[open]>summary::before{transform:rotate(90deg)}
+details.afold>summary small{font-weight:500;opacity:.7}
+details.afold>.afb{padding:2px 14px 14px}
+details.afold.help>summary{font-weight:600;font-size:.95em;opacity:.85}
+details.afold.help{box-shadow:none;background:transparent}

@@ -405,3 +405,9 @@ service cloud.firestore {
 ## v91 — 메신저 붙여넣기
 - inbox.js: ibxParse 재작성(인사·연락처·붙임 줄 버림, 번호·라벨 정리, 시간·장소 뽑기, 제목은 단어 단위로만 줄임, 과거·설명 문장은 기본 체크 해제). Claude 키가 있으면 ibxAI가 JSON으로 일정·마감만 추출(실패 시 규칙으로). arch.js·portal.js도 ibxParse를 그대로 씀.
 - v92: 날짜 줄 아래 이어지는 짧은 줄(행사 이름)·「주관:」을 한 제목으로 묶음(예: 7교시 자율자치 · 도박예방교육 (주관 학생인권부)).
+
+## v93 — 화면 단순 보기(fold.js)
+- 화면을 그린 뒤(render·TF.render 후킹) main 바로 아래의 `h3.h3` 구역을 `details.afold` 토글로 묶고(기본 접힘), `.steps2/.note2` 사용법 상자는 「💡 사용법」 토글로, 오늘 화면은 「📋 오늘의 게시판」을 한 토글로 묶음. 맨 위에 [모두 펼치기/접기].
+- 연 칸은 localStorage `tf.fold`(화면|제목)에 기억. 최초 1회(`tf.foldv`)는 예전에 열려 있던 줄(`tf.open`)·오늘 도우미를 모두 접음. `#/pages`는 제외.
+- 새 화면에 구역을 붙이려면 `<h3 class="h3">`로 시작하는 소제목을 main 바로 아래에 두면 자동으로 접힘.
+- 오늘 도우미(helper.js)는 기본 접힘(S.profile.hpOpen===true일 때만 열림).
