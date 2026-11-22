@@ -811,6 +811,10 @@ function freezeTab(){ if(FROZEN) return; FROZEN=true; clearTimeout(saveTimer);
   ov.style.display='flex'; }
 try{ BC=new BroadcastChannel('dodi-sgb-tab'); BC.onmessage=e=>{ const m=e.data||{}; if(m.id===TAB_ID) return;
   if(m.t==='hello') freezeTab(); }; }catch(e){}
+// 내 담당·담임은 따로 한 번 더 저장 → 예전 판 탭이 전체 자료를 옛것으로 덮어써도, 다음에 열 때 더 최근에 정한 담당이 이김
+function dutyBoxSave(){ const st=S.settings; st.dutiesAt=Date.now(); const box={at:st.dutiesAt,duties:st.duties||[],homeroom:st.homeroom||''}; try{ DB.set('dutyBox',box); }catch(e){} try{ localStorage.setItem('dodi-dutyBox',JSON.stringify(box)); }catch(e){} }
+async function dutyBoxLoad(){ let box=null; try{ box=await DB.get('dutyBox'); }catch(e){} try{ const l=JSON.parse(localStorage.getItem('dodi-dutyBox')||'null'); if(l && (!box || l.at>box.at)) box=l; }catch(e){}
+  const st=S.settings; if(box && Array.isArray(box.duties) && box.at>(st.dutiesAt||0)){ st.duties=box.duties; st.homeroom=box.homeroom||''; st.dutiesAt=box.at; save(); } }
 function tabHello(){ TAB_T0=Date.now(); try{ BC && BC.postMessage({t:'hello',id:TAB_ID}); }catch(e){} }
 function flush(){ if(FROZEN){ clearTimeout(saveTimer); return Promise.resolve(); } return flushReal(); }
 function flushReal(){ clearTimeout(saveTimer);
@@ -1841,11 +1845,11 @@ function teamHTML(){
   if(orphan.length) h+='<div class="neg" style="margin-top:6px">⚠ 요청이 있는데 담당자가 없는 분야: '+orphan.map(esc).join(', ')+' — 이 요청은 아무에게도 팝업이 가지 않습니다.</div>';
   return h+'<div class="hint" style="margin-top:4px">🟢 5분 안에 사이트를 열어 둔 선생님 · 🟡 오늘 들어옴 · ⚪ 며칠 전 · 🔴 담당은 있지만 접속 기록 없음. 90초마다 새로 고칩니다.</div></details></div>';
 }
-function saveDuty(){ if(S.schoolClubs){ const mk=autoClubs(); if(mk.length) setTimeout(()=>toast('🎲 내 동아리 명단이 자동으로 들어왔습니다: '+mk.join(', ')),1800); } S.reqs.forEach(r=>{ S.reqSeen[r.id]=r.status+'|'+r.text.length+'|'+r.memo.length; }); S.reqInit=true; save(); if(S.settings.sheetUrl&&S.settings.teacher) sendStats(true); refreshReqUI(); }
+function saveDuty(){ dutyBoxSave(); if(S.schoolClubs){ const mk=autoClubs(); if(mk.length) setTimeout(()=>toast('🎲 내 동아리 명단이 자동으로 들어왔습니다: '+mk.join(', ')),1800); } S.reqs.forEach(r=>{ S.reqSeen[r.id]=r.status+'|'+r.text.length+'|'+r.memo.length; }); S.reqInit=true; save(); if(S.settings.sheetUrl&&S.settings.teacher) sendStats(true); refreshReqUI(); }
 // 브라우저 탭 제목에 숫자 표시 + 다른 탭을 보고 있을 때 새 알림이 오면 깜박임
 const BASE_TITLE='도디쌤의 생기발랄';
 // 새 버전 알림: 사이트가 고쳐져 올라오면 화면 위에 띠를 띄움(브라우저가 예전 화면을 기억하는 문제 해결)
-const BUILD_V='20261122-120138';
+const BUILD_V='20261122-120415';
 async function checkNewVersion(){ if(!/^https?:/.test(location.protocol)) return; try{ const r=await fetch('version.json?t='+Date.now(),{cache:'no-store'}); if(!r.ok) return; const j=await r.json();
   if(j && j.v && j.v!==BUILD_V && !document.getElementById('newVer')){ const d=document.createElement('div'); d.id='newVer'; d.innerHTML='✨ 생기발랄 새 버전이 나왔어요. <button class="b s" id="newVerGo">새로 고침</button> <span style="font-weight:600">또는 키보드 <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>R</kbd></span> <span class="hint" style="color:inherit;opacity:.8">· 써 둔 내용은 그대로 남아요</span>'; document.body.prepend(d); document.getElementById('newVerGo').onclick=()=>{ flush().finally(()=>{ location.replace(location.pathname+'?v='+encodeURIComponent(j.v)+location.hash); }); }; } }catch(e){} }
 const SUB_DEFAULT='선생님을 잇는 생기부 플랫폼';
@@ -2355,7 +2359,7 @@ window.addEventListener('beforeunload',()=>{ flush(); });
 (async function init(){
   await DB.open();
   const d=await DB.get('state');
-  const start=()=>{ ensureItems(); $('#lockScr').style.display='none'; $('#lockBtn').style.display=LOCK.key?'inline-block':'none';
+  const start=async()=>{ await dutyBoxLoad(); ensureItems(); $('#lockScr').style.display='none'; $('#lockBtn').style.display=LOCK.key?'inline-block':'none';
     $('#savest').textContent=(LOCK.key?'🔒 ':'')+'자료 불러옴'+backupNote();
     render(); notifyDue(); setInterval(()=>{ renderBanner(); notifyDue(); },3600000);
     refreshReqUI(); fetchReqs(true); setInterval(()=>{ if(!document.hidden) fetchReqs(true); },90000);
