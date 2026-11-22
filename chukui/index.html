@@ -26,6 +26,8 @@ section[hidden]{display:none}
 .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
 .chip{flex:1 0 20%;min-height:46px;border:2px solid var(--pri2);background:var(--pri2);color:#b5456b;font-weight:800;font-size:17px;border-radius:12px;font-family:inherit}
 .chip:active{transform:scale(.96)}
+.chip.b{background:var(--mint2);border-color:var(--mint2);color:#1f6e5a}
+.chip{flex:1 0 18%}
 .big{margin-top:10px;padding:12px;border-radius:12px;background:var(--mint2);color:#1f6e5a;text-align:center;min-height:68px;display:flex;flex-direction:column;justify-content:center}
 .big .k{font-size:26px;font-weight:900;line-height:1.2}
 .big .n{font-size:15px;opacity:.85}
@@ -128,7 +130,7 @@ const pad=n=>String(n).padStart(3,'0');
 const hm=ts=>{const d=new Date(ts);return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')};
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,8);
 const RELS=['친척','지인','친구','직장','기타'];
-const METHODS=['현금','송금'];
+const METHODS=['현금','수표','송금'];
 const DIG='영일이삼사오육칠팔구';
 function spell4(n){const u=['','십','백','천'];const ds=String(n).padStart(4,'0');let s='';
   for(let i=0;i<4;i++){const d=+ds[i];if(!d)continue;const p=3-i;s+=(d===1&&p>0?'':DIG[d])+u[p];}return s;}
@@ -141,7 +143,7 @@ function parseAmt(str){const v=parseFloat(String(str||'').replace(/[,\s원]/g,''
 /* ====== 저장 ====== */
 const LS='chukui_ledger_v1';
 let mem=null;
-function fresh(){return{v:1,set:{groom:'',bride:'',date:'',venue:'',seat:'A',meals:1,who:''},entries:[],cash:{50000:0,10000:0,5000:0,1000:0,etc:0},last:{rel:'친척',method:'현금'},since:0}}
+function fresh(){return{v:1,set:{groom:'',bride:'',date:'',venue:'',seat:'A',meals:1,who:'',big:100},entries:[],cash:{50000:0,10000:0,5000:0,1000:0,etc:0},last:{rel:'친척',method:'현금'},since:0}}
 const LS2='chukui_ledger_copy',LST='chukui_trash';
 function idbOpen(){return new Promise((res,rej)=>{try{const r=indexedDB.open('chukui',1);r.onupgradeneeded=()=>r.result.createObjectStore('k');r.onsuccess=()=>res(r.result);r.onerror=()=>rej();}catch(e){rej();}});}
 function idbPut(s){idbOpen().then(db=>{db.transaction('k','readwrite').objectStore('k').put(s,'S');}).catch(()=>{});}
@@ -161,6 +163,8 @@ function undo(){const s=undoStack.pop();if(!s){toast('되돌릴 작업이 없습
 
 /* ====== 계산 ====== */
 const act=()=>S.entries.filter(e=>!e.del);
+const bigWon=()=>Math.round((S.set.big||100)*10000);
+const isBig=e=>!e.del&&e.won>=bigWon();
 const sum=a=>a.reduce((t,e)=>t+e.won,0);
 const noStr=e=>e.seat+'-'+pad(e.no);
 function nextNo(){const m=S.entries.filter(e=>e.seat===S.set.seat).reduce((t,e)=>Math.max(t,e.no),0);return m+1;}
@@ -191,12 +195,13 @@ function fh(p,e){e=e||{};
   <div id="${p}dup" class="warn" hidden></div>
   <label class="lb">금액 <small>만원 단위로 쓰세요 (10 = 10만원, 3.5 = 3만5천원)</small></label>
   <input id="${p}amt" data-p="${p}" data-k="amt" class="in amt" inputmode="decimal" autocomplete="off" placeholder="0" value="${e.won?won2in(e.won):''}">
-  <div class="chips">${[3,5,10,20,30,50,100].map(n=>`<button type="button" class="chip" data-chip="${n}" data-p="${p}">${n}만</button>`).join('')}</div>
+  <div class="chips">${[1,2,3,5,10,20,30,50].map(n=>`<button type="button" class="chip" data-chip="${n}" data-p="${p}">${n}만</button>`).join('')}</div>
+  <div class="chips">${[70,100,150,200,300,500,1000].map(n=>`<button type="button" class="chip b" data-chip="${n}" data-p="${p}">${n}만</button>`).join('')}</div>
   <div id="${p}big" class="big empty">금액을 누르면 한글로 크게 보여드립니다</div>
   <label class="lb">관계</label>
   <div class="segs">${RELS.map(r=>`<label class="seg"><input type="radio" name="${p}rel" value="${r}" ${r===rel?'checked':''}><span>${r}</span></label>`).join('')}</div>
   <label class="lb">받은 방식</label>
-  <div class="segs">${METHODS.map(r=>`<label class="seg"><input type="radio" name="${p}met" value="${r}" ${r===met?'checked':''}><span>${r==='현금'?'💵 현금(봉투)':'📱 계좌·앱 송금'}</span></label>`).join('')}</div>
+  <div class="segs">${METHODS.map(r=>`<label class="seg"><input type="radio" name="${p}met" value="${r}" ${r===met?'checked':''}><span>${r==='현금'?'💵 현금':r==='수표'?'🧾 수표':'📱 송금'}</span></label>`).join('')}</div>
   <label class="lb">식권 (장)</label>
   <div class="step"><button type="button" data-step="-1" data-p="${p}">−</button><input id="${p}meals" inputmode="numeric" value="${meals}"><button type="button" data-step="1" data-p="${p}">＋</button></div>
   <label class="lb">메모 <small>(선택: 소속, 동행 인원 등)</small></label>
@@ -233,13 +238,24 @@ function renderIn(){
 function lastHTML(e){return `<div class="card last"><div class="no">✅ 저장됐습니다 · 봉투에 이 번호를 적어 주세요</div>
   <div class="env">${noStr(e)}</div><div class="who">${esc(e.name)} <span class="tag">${esc(e.rel)}</span></div>
   <div class="amt">${krw(e.won)} (${fmt(e.won)})</div>
+  ${isBig(e)?'<div class="warn" style="font-size:17px;margin-top:8px">💎 고액 접수입니다. 혼주께 바로 알리고, 봉투는 따로 보관하세요.</div>':''}
   <button class="btn bad full" data-act="undoLast">잘못 입력했어요 · 방금 건 취소</button></div>`;}
 function rowHTML(e){return `<div class="row ${e.del?'del':''}" data-edit="${e.id}"><div class="no">${noStr(e)}</div>
-  <div class="mid"><div class="nm">${esc(e.name)} <span class="tag">${esc(e.rel)}</span></div>
+  <div class="mid"><div class="nm">${isBig(e)?'💎 ':''}${esc(e.name)} <span class="tag">${esc(e.rel)}</span></div>
   <div class="mt">${krw(e.won)} · 식권 ${e.meals} · ${e.method}${e.memo?' · '+esc(e.memo):''} · ${hm(e.ts)}</div></div>
   <div class="am">${fmt(e.won)}</div></div>`;}
+function confirmBig(f){return new Promise(res=>{
+  showModal(`<h3>💎 고액 접수 확인</h3><div style="text-align:center;margin:6px 0 12px"><div style="font-size:20px;font-weight:800">${esc(f.name)} 님</div><div style="font-size:34px;font-weight:900;color:var(--pri);line-height:1.2">${krw(f.won)}</div><div style="font-size:18px">${fmt(f.won)}</div></div>
+  <div class="note">정확한 접수를 위해 금액을 <b>한 번 더</b> 입력해 주세요. (만원 단위)</div>
+  <input class="in amt" id="bigRe" inputmode="decimal" autocomplete="off" placeholder="다시 입력">
+  <div id="bigMsg" class="warn" hidden></div>
+  <button class="go" id="bigOk">일치 확인 후 저장</button><button class="btn full" id="bigNo">다시 확인 (취소)</button>`);
+  $('#bigOk').onclick=()=>{if(parseAmt($('#bigRe').value).won===f.won){closeModal();res(true);}else{const m=$('#bigMsg');m.hidden=false;m.textContent='처음 입력한 금액과 다릅니다. 봉투를 다시 확인해 주세요.';}};
+  $('#bigNo').onclick=()=>{closeModal();res(false);};
+  setTimeout(()=>{const i=$('#bigRe');if(i)i.focus();},50);});}
 async function checkAmount(f){
   if(f.won>99990000){toast('금액이 너무 큽니다. 다시 확인해 주세요');return false;}
+  if(f.won>=bigWon())return confirmBig(f);
   const med=median(act().map(e=>e.won));
   let reason='';
   if(f.won<10000)reason='금액이 1만 원보다 적습니다.';
@@ -259,16 +275,18 @@ async function submitMain(){
   setTimeout(()=>{const n=$('#fname');if(n)n.focus({preventScroll:true});},50);}
 
 /* ====== 명부 탭 ====== */
-let q='',sortBy='recent',showDel=false;
+let q='',sortBy='recent',showDel=false,onlyBig=false;
 function renderList(){
   $('#tab-list').innerHTML=`<div class="tools"><input class="in" id="q" placeholder="🔍 이름·번호·메모 검색" value="${esc(q)}">
   <select class="in" id="sortBy"><option value="recent">최근순</option><option value="no">번호순</option><option value="amt">금액순</option><option value="name">이름순</option></select></div>
   <div class="tools"><label class="note"><input type="checkbox" id="showDel" ${showDel?'checked':''}> 삭제한 건도 보기</label>
+  <label class="note"><input type="checkbox" id="onlyBig" ${onlyBig?'checked':''}> 💎 고액만</label>
   <button class="btn" data-act="undo" style="margin-left:auto">↶ 되돌리기</button></div>
   <div class="card" id="lbody"></div>`;
   $('#sortBy').value=sortBy;fillList();}
 function fillList(){
   let a=S.entries.filter(e=>showDel||!e.del);
+  if(onlyBig)a=a.filter(isBig);
   const k=q.trim().toLowerCase();
   if(k)a=a.filter(e=>(e.name+noStr(e)+(e.memo||'')+e.rel).toLowerCase().includes(k));
   a.sort({recent:(x,y)=>y.ts-x.ts,no:(x,y)=>x.seat.localeCompare(y.seat)||x.no-y.no,amt:(x,y)=>y.won-x.won,name:(x,y)=>x.name.localeCompare(y.name,'ko')}[sortBy]);
@@ -295,12 +313,15 @@ function groupRows(a,key,order){const m={};a.forEach(e=>{const k=e[key];m[k]=m[k
   const keys=(order||Object.keys(m)).filter(k=>m[k]);
   return keys.map(k=>`<tr><td>${esc(k)}</td><td class="r">${m[k].n}건</td><td class="r"><b>${fmt(m[k].w)}</b></td></tr>`).join('')||'<tr><td colspan="3" class="note">내역 없음</td></tr>';}
 function cashTotal(){const c=S.cash;return 50000*(c[50000]||0)+10000*(c[10000]||0)+5000*(c[5000]||0)+1000*(c[1000]||0)+(c.etc||0);}
+function bigCardHTML(){const b=act().filter(isBig).sort((x,y)=>y.won-x.won);
+  return `<div class="card"><h3>💎 고액 접수 (${S.set.big||100}만 원 이상)</h3>${b.length?`<table>${b.map(e=>`<tr><td><b>${noStr(e)}</b></td><td>${esc(e.name)} <span class="tag">${esc(e.rel)}</span>${e.memo?'<div class="note">'+esc(e.memo)+'</div>':''}</td><td class="r"><b>${fmt(e.won)}</b><div class="note">${krw(e.won)}</div></td></tr>`).join('')}</table><div class="note" style="margin-top:6px">${b.length}명 · 합계 ${fmt(sum(b))} · 혼주께 따로 전달·확인해 주세요.</div>`:'<div class="note">아직 없습니다.</div>'}</div>`;}
 function renderCalc(){
   const a=act();const ms=missing(),dp=dupNos();
   $('#tab-calc').innerHTML=`
   <div class="grid3"><div class="stat"><b>${a.length}</b><span>봉투 수</span></div><div class="stat"><b>${fmt(sum(a)).replace('원','')}</b><span>총액(원)</span></div><div class="stat"><b>${a.reduce((t,e)=>t+e.meals,0)}</b><span>식권(장)</span></div></div>
   <div class="card"><h3>번호 점검</h3>${ms.length?`<div class="ng">빠진 번호: ${ms.join(', ')}</div><div class="note">병합했거나 번호가 비어 있는 경우입니다. 해당 봉투를 확인해 주세요.</div>`:'<div class="ok">빠진 번호 없음 ✓</div>'}
   ${dp.length?`<div class="ng" style="margin-top:6px">중복 번호: ${dp.join(', ')}</div>`:''}</div>
+  ${bigCardHTML()}
   <div class="card"><h3>관계별</h3><table>${groupRows(a,'rel',RELS)}</table></div>
   <div class="card"><h3>방식별</h3><table>${groupRows(a,'method',METHODS)}</table></div>
   <div class="card"><h3>현금 실사 대조</h3><div class="note" style="margin-bottom:8px">봉투를 다 연 뒤 권종별 장수를 세어 넣으면, 장부의 현금 합계와 차이를 바로 계산합니다.</div>
@@ -311,23 +332,23 @@ function renderCalc(){
   <button class="btn full" data-act="share">💬 요약을 카톡·문자로 보내기</button>`;
   calcDiff();}
 function calcDiff(){const el=$('#diff');if(!el)return;
-  const book=sum(act().filter(e=>e.method==='현금')),real=cashTotal(),d=real-book;
-  el.innerHTML=`<table style="margin-top:8px"><tr><td>장부 현금 합계</td><td class="r"><b>${fmt(book)}</b></td></tr>
-  <tr><td>실사 현금 합계</td><td class="r"><b>${fmt(real)}</b></td></tr>
+  const book=sum(act().filter(e=>e.method!=='송금')),real=cashTotal(),d=real-book;
+  el.innerHTML=`<table style="margin-top:8px"><tr><td>장부 현금·수표 합계</td><td class="r"><b>${fmt(book)}</b></td></tr>
+  <tr><td>실사 현금·수표 합계</td><td class="r"><b>${fmt(real)}</b></td></tr>
   <tr><td>차액</td><td class="r ${d===0?'ok':'ng'}">${real?(d===0?'일치 ✓':(d>0?'+':'')+fmt(d)):'장수를 입력하세요'}</td></tr></table>`;}
 function summaryText(){const a=act(),s=S.set;
   const by=k=>RELS.map(r=>{const x=a.filter(e=>e.rel===r);return x.length?`${r} ${x.length}건 ${fmt(sum(x))}`:''}).filter(Boolean).join('\n');
-  return `[축의금 접수 현황] ${[s.groom,s.bride].filter(Boolean).join('♥')}\n${new Date().toLocaleString('ko-KR')}\n봉투 ${a.length}건 / 총 ${fmt(sum(a))}\n현금 ${fmt(sum(a.filter(e=>e.method==='현금')))} / 송금 ${fmt(sum(a.filter(e=>e.method==='송금')))}\n식권 ${a.reduce((t,e)=>t+e.meals,0)}장\n${by()}`;}
+  return `[축의금 접수 현황] ${[s.groom,s.bride].filter(Boolean).join('♥')}\n${new Date().toLocaleString('ko-KR')}\n봉투 ${a.length}건 / 총 ${fmt(sum(a))}\n현금·수표 ${fmt(sum(a.filter(e=>e.method!=='송금')))} / 송금 ${fmt(sum(a.filter(e=>e.method==='송금')))}\n식권 ${a.reduce((t,e)=>t+e.meals,0)}장\n${by()}`;}
 async function shareText(){const t=summaryText();
   try{if(navigator.share){await navigator.share({text:t});return;}}catch(e){if(e&&e.name==='AbortError')return;}
   try{await navigator.clipboard.writeText(t);toast('요약을 복사했습니다. 카톡에 붙여넣으세요');}catch(e){showModal(`<h3>요약</h3><textarea class="in" style="height:200px;font-size:15px">${esc(t)}</textarea><button class="btn full" id="mClose2">닫기</button>`);$('#mClose2').onclick=closeModal;}}
-function printSheet(){const a=act(),s=S.set;const book=sum(a.filter(e=>e.method==='현금')),real=cashTotal();
+function printSheet(){const a=act(),s=S.set;const book=sum(a.filter(e=>e.method!=='송금')),real=cashTotal();
   const one=`<div class="sheet"><h2>축의금 접수 정산서</h2>
   <div>${esc([s.groom,s.bride].filter(Boolean).join(' ♥ '))} ${esc(s.date)} ${esc(s.venue)} · 접수자 ${esc(s.who||s.seat)} · 출력 ${new Date().toLocaleString('ko-KR')}</div>
   <table style="width:100%;border-collapse:collapse;margin-top:8px"><tr><th>봉투 수</th><td>${a.length}건</td><th>식권</th><td>${a.reduce((t,e)=>t+e.meals,0)}장</td></tr>
-  <tr><th>명부 총액</th><td>${fmt(sum(a))}</td><th>명부 현금</th><td>${fmt(book)}</td></tr>
+  <tr><th>명부 총액</th><td>${fmt(sum(a))}</td><th>명부 현금·수표</th><td>${fmt(book)}</td></tr>
   <tr><th>실사 현금</th><td>${real?fmt(real):'(미입력)'}</td><th>차액</th><td>${real?fmt(real-book):'-'}</td></tr>
-  <tr><th>송금 합계</th><td>${fmt(sum(a.filter(e=>e.method==='송금')))}</td><th>빠진 번호</th><td>${missing().join(', ')||'없음'}</td></tr></table>
+  <tr><th>송금 합계</th><td>${fmt(sum(a.filter(e=>e.method==='송금')))}</td><th>빠진 번호</th><td>${missing().join(', ')||'없음'}</td></tr>${a.filter(isBig).length?`<tr><th>고액 ${S.set.big||100}만↑</th><td colspan="3">${a.filter(isBig).map(e=>esc(noStr(e)+' '+e.name+' '+fmt(e.won))).join(' / ')}</td></tr>`:''}</table>
   <div class="sign"><div>접수자 서명</div><div>혼주(인수자) 서명</div></div></div>`;
   $('#printArea').innerHTML=one+one;window.print();}
 
@@ -344,6 +365,7 @@ function renderSet(){const s=S.set;
   <label class="lb">접수자 코드 <small>(접수대가 2곳이면 서로 다른 글자. 봉투 번호 앞에 붙습니다)</small></label>
   <select class="in" data-set="seat">${'ABCDEF'.split('').map(c=>`<option ${c===s.seat?'selected':''}>${c}</option>`).join('')}</select>
   <label class="lb">식권 기본 장수</label><input class="in" inputmode="numeric" data-set="meals" value="${s.meals}">
+  <label class="lb">고액 기준 <small>(만원 이상이면 💎 표시 · 금액 재입력 확인)</small></label><input class="in" inputmode="numeric" data-set="big" value="${s.big}">
   </div>
   <div class="card"><h3>백업·내보내기</h3>
   <div class="note">핸드폰 브라우저에 저장되므로, <b>중간중간 백업</b>해 두면 안심입니다. (${S.since}건 미백업)</div>
@@ -413,13 +435,14 @@ document.addEventListener('input',e=>{const t=e.target;
   else if(t.dataset.k==='name')updDup(t.dataset.p);
   else if(t.id==='q'){q=t.value;fillList();}
   else if(t.dataset.cash){const v=t.dataset.cash;S.cash[v]=Math.max(0,parseInt(String(t.value).replace(/\D/g,''))||0);save();calcDiff();}
-  else if(t.dataset.set){const k=t.dataset.set;S.set[k]=k==='meals'?Math.max(0,parseInt(t.value)||0):t.value;save();topbar();}});
+  else if(t.dataset.set){const k=t.dataset.set;S.set[k]=(k==='meals'||k==='big')?Math.max(0,parseInt(t.value)||0):t.value;save();topbar();}});
 document.addEventListener('change',e=>{const t=e.target;
   if(t.id==='sortBy'){sortBy=t.value;fillList();}
   else if(t.id==='showDel'){showDel=t.checked;fillList();}
+  else if(t.id==='onlyBig'){onlyBig=t.checked;fillList();}
   else if(t.id==='imp'&&t.files[0]){mergeFile(t.files[0]);t.value='';}
   else if(t.dataset.set==='seat'){S.set.seat=t.value;save();topbar();}});
-$('#modal').addEventListener('click',e=>{if(e.target.id==='modal'&&!document.getElementById('aOk')){editingId=null;closeModal();}});
+$('#modal').addEventListener('click',e=>{if(e.target.id==='modal'&&!document.getElementById('aOk')&&!document.getElementById('bigOk')){editingId=null;closeModal();}});
 document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.dataset&&e.target.dataset.p==='f'&&e.target.dataset.k==='amt'){e.preventDefault();submitMain();}});
 
 topbar();renderIn();tryRestore();
