@@ -90,6 +90,8 @@ nav button.on{color:var(--pri)}
 select.in{flex:0 0 auto;min-width:0;width:auto}
 .banner{background:var(--warn2);color:var(--warn);padding:12px;border-radius:12px;font-weight:700;margin-bottom:12px}
 #printArea{display:none}
+#newVer{position:fixed;top:62px;left:8px;right:8px;z-index:75;background:#fff1de;color:#b3641a;padding:10px 12px;border-radius:12px;font-weight:700;box-shadow:0 2px 8px rgba(0,0,0,.18);display:flex;justify-content:space-between;align-items:center;gap:8px}
+#newVer[hidden]{display:none}
 #rep{position:fixed;inset:0;z-index:70;background:#f4efeb;overflow:auto;-webkit-overflow-scrolling:touch}
 #rep[hidden]{display:none}
 .repbar{position:sticky;top:0;z-index:2;background:#fff;display:flex;gap:6px;align-items:center;padding:8px 10px;border-bottom:1px solid var(--line);flex-wrap:wrap}
@@ -134,12 +136,15 @@ select.in{flex:0 0 auto;min-width:0;width:auto}
   <button data-tab="set"><i>⚙️</i>설정·저장</button>
 </nav>
 <div id="modal" hidden><div id="mbox"></div></div>
+<div id="newVer" hidden></div>
 <div id="rep" hidden></div>
 <div id="toast" hidden></div>
 <div id="printArea"></div>
 
 <script>
 /* ====== 기본 도구 ====== */
+const APP_V=8;
+const isKakao=/KAKAOTALK/i.test(navigator.userAgent||'');
 const $=s=>document.querySelector(s);
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fmt=n=>(Math.round(n)||0).toLocaleString('ko-KR')+'원';
@@ -201,7 +206,7 @@ function ask(title,msg,ok,cancel){return new Promise(res=>{
   <button class="btn full" id="aNo">${esc(cancel||'다시 확인')}</button>`);
   $('#aOk').onclick=()=>{closeModal();res(true)};$('#aNo').onclick=()=>{closeModal();res(false)};});}
 function topbar(){const a=act();$('#sCnt').textContent=a.length+'건 접수';$('#sTot').textContent=fmt(sum(a));
-  const s=S.set;const nm=[s.groom,s.bride].filter(Boolean).join(' ♥ ');$('#ttlSub').textContent=(nm?nm+' · ':'')+'접수자 '+s.seat;}
+  const s=S.set;const nm=[s.groom,s.bride].filter(Boolean).join(' ♥ ');$('#ttlSub').textContent=(nm?nm+' · ':'')+'접수자 '+s.seat+' · v'+APP_V;}
 
 /* ====== 입력 폼 ====== */
 function won2in(w){return String(w/10000);}
@@ -335,8 +340,8 @@ function renderCalc(){
   const a=act();const ms=missing(),dp=dupNos();
   $('#tab-calc').innerHTML=`
   <div class="grid3"><div class="stat"><b>${a.length}</b><span>봉투 수</span></div><div class="stat"><b>${fmt(sum(a)).replace('원','')}</b><span>총액(원)</span></div><div class="stat"><b>${a.reduce((t,e)=>t+e.meals,0)}</b><span>식권(장)</span></div></div>
-  <button class="go" data-act="share" style="margin:0 0 8px;background:#f5c518;box-shadow:0 3px 0 #d9aa00;color:#3a3340">💬 카톡으로 보내기 (전체 명단+총액)</button>
-  <button class="btn full" data-act="pdf" style="margin:0 0 12px">📋 정산서 한눈에 보기 (PDF·이미지)</button>
+  ${kakaoBoxHTML()}
+  <button class="go" data-act="pdf" style="margin:0 0 12px">📋 정산서 보기 · PDF·이미지로 보내기</button>
   <div class="card"><h3>번호 점검</h3>${ms.length?`<div class="ng">빠진 번호: ${ms.join(', ')}</div><div class="note">병합했거나 번호가 비어 있는 경우입니다. 해당 봉투를 확인해 주세요.</div>`:'<div class="ok">빠진 번호 없음 ✓</div>'}
   ${dp.length?`<div class="ng" style="margin-top:6px">중복 번호: ${dp.join(', ')}</div>`:''}</div>
   ${bigCardHTML()}
@@ -411,7 +416,7 @@ function renderSet(){const s=S.set;
   ${trashInfo()?`<div class="card"><h3>↩️ 초기화 직전 상태 복구</h3><div class="note">마지막으로 지우기 직전의 ${trashInfo()}건이 폰에 남아 있습니다.</div><button class="btn mint full" data-act="restoreTrash">복구하기</button></div>`:''}
   <div class="card"><h3>⚠️ 초기화</h3><button class="btn bad full" data-act="reset">모든 접수 내역 지우기</button>
   <div class="note" style="margin-top:6px">행사 당일 전에 연습으로 입력해 보신 뒤, 시작 전에 한 번 지우세요.</div></div>
-  <div class="note" style="text-align:center;margin:14px 0">프로그램 버전 <b>v7</b> (11/22 오후) · 카톡 글 보내기 포함</div>`;}
+  <div class="note" style="text-align:center;margin:14px 0">프로그램 버전 <b>v${APP_V}</b> · 새 버전이 나오면 화면 위에 알림이 뜹니다</div>`;}
 function dl(name,text,type,blob){try{const b=blob||new Blob([text],{type});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{a.remove();URL.revokeObjectURL(u)},1500);}catch(e){toast('이 화면에서는 파일 저장이 막혀 있습니다');}}
 async function outFile(name,text,type){
   try{const f=new File([text],name,{type});if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],title:name});return 'shared';}}catch(e){if(e&&e.name==='AbortError')return 'cancel';}
@@ -498,7 +503,8 @@ let repPages=null;
 function showReport(){
   try{repPages=reportPages();}catch(e){toast('정산서를 만들지 못했습니다');return;}
   const el=$('#rep');
-  el.innerHTML=`<div class="repbar"><b>정산서</b><button class="btn pri" data-act="share">💬 카톡 글 보내기</button><button class="btn" data-act="repPdf">📄 PDF</button><button class="btn mint" data-act="repImg">🖼️ 이미지 보내기</button><button class="btn" data-act="repClose">닫기</button></div>
+  el.innerHTML=`<div class="repbar"><b>정산서</b><button class="btn pri" data-act="repPdf">📄 PDF</button><button class="btn mint" data-act="repImg">🖼️ 이미지 보내기</button><button class="btn" data-act="repClose">닫기</button></div>
+  <div style="padding:8px 8px 0">${kakaoBoxHTML()}</div>
   <div class="note" style="padding:8px 12px">두 손가락으로 벌려 크게 볼 수 있습니다. 보내기가 안 되면 <b>화면 캡처</b>해서 카톡으로 보내시면 됩니다.</div>
   <div style="padding:0 8px 40px">${repPages.map(pc=>`<img alt="정산서" src="${pc.toDataURL('image/jpeg',0.9)}" style="width:100%;display:block;border:1px solid #ddd;margin-bottom:10px;background:#fff">`).join('')}</div>`;
   el.hidden=false;el.scrollTop=0;document.body.style.overflow='hidden';}
@@ -553,6 +559,22 @@ async function doCopy(i){const t=ktChunks[i];if(t==null)return;const ok=await co
   else{const ta=$('#kt'+i);if(ta){ta.focus();ta.select();ta.setSelectionRange(0,t.length);}toast('자동 복사가 안 됩니다. 선택된 글을 길게 눌러 [복사]를 누르세요');}}
 async function textShare(){try{await navigator.share({text:ktChunks.join('\n\n')});}catch(e){if(e&&e.name!=='AbortError')toast('공유창을 열 수 없습니다. 복사 버튼을 이용하세요');}}
 
+
+/* ====== 카톡 안 화면 → 기본 브라우저로 넘기기 / 새 버전 확인 ====== */
+function bar(html,onBtn,btnText){const b=$('#newVer');b.hidden=false;b.innerHTML='<span>'+html+'</span><button class="btn pri" id="barBtn" style="padding:7px 12px;white-space:nowrap">'+btnText+'</button>';$('#barBtn').onclick=onBtn;}
+async function openExternal(){
+  try{await copyText(JSON.stringify(S));}catch(e){}
+  toast('접수 내용을 복사해 뒀습니다. 열리면 [불러오기]를 누르세요');
+  setTimeout(()=>{location.href='kakaotalk://web/openExternal?url='+encodeURIComponent(location.origin+location.pathname+'?from=kakao&t='+Date.now());},700);}
+async function importFromClipboard(){
+  try{const t=await navigator.clipboard.readText();if(t&&t.trim().startsWith('{')){mergeText(t);$('#newVer').hidden=true;return;}}catch(e){}
+  showModal(`<h3>접수 내용 불러오기</h3><div class="note">카톡 화면에서 복사해 둔 내용을 아래 칸에 길게 눌러 <b>붙여넣기</b> 하세요.</div><textarea class="in" id="impBox" style="height:140px;font-size:14px" placeholder="여기에 붙여넣기"></textarea><button class="go" id="impGo">불러오기</button><button class="btn full" id="mClose2">닫기</button>`);
+  $('#mClose2').onclick=closeModal;$('#impGo').onclick=()=>{const v=$('#impBox').value;if(!v.trim()){toast('붙여넣은 내용이 없습니다');return;}closeModal();mergeText(v);$('#newVer').hidden=true;};}
+async function checkVersion(){try{const r=await fetch(location.pathname+'?_='+Date.now(),{cache:'no-store'});const t=await r.text();const m=t.match(/const APP_V=(\d+)/);
+  if(m&&+m[1]>APP_V)bar('🔄 새 버전(v'+m[1]+')이 있습니다',()=>{location.replace(location.pathname+'?v='+m[1]+'&t='+Date.now());},'새로 불러오기');}catch(e){}}
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)checkVersion();});
+function kakaoBoxHTML(){return isKakao?`<div class="card" style="background:#fff8d6;border:2px solid #f5c518"><b>📱 지금은 카톡 안 화면입니다.</b><div style="font-size:15px;margin:6px 0 10px">이 화면에서는 PDF·이미지 저장·전달이 막혀 있습니다. 아래 버튼으로 <b>기본 브라우저(크롬 등)</b>에서 열면 정산서를 PDF로 만들어 카톡으로 보낼 수 있습니다. 지금까지 접수한 내용은 자동으로 가져갑니다.</div><button class="go" data-act="openExt" style="margin:0;background:#f5c518;box-shadow:0 3px 0 #d9aa00;color:#3a3340">🌐 기본 브라우저로 열기</button></div>`:'';}
+
 /* ====== 탭·이벤트 ====== */
 let tab='in';
 function show(t){tab=t;['in','list','calc','set'].forEach(k=>$('#tab-'+k).hidden=k!==t);
@@ -572,7 +594,7 @@ document.addEventListener('click',e=>{
   if(a==='undoLast'||a==='undo'){undo();}
   else if(a==='copyBackup')copyBackup();
   else if(a==='pasteMerge'){const v=$('#pasteBox').value;if(!v.trim()){toast('붙여넣은 내용이 없습니다');}else{mergeText(v);}}
-  else if(a==='backup')doBackup();else if(a==='csv')doCsv();else if(a==='share')kakaoText();else if(a==='textShare')textShare();
+  else if(a==='backup')doBackup();else if(a==='csv')doCsv();else if(a==='share')kakaoText();else if(a==='openExt')openExternal();else if(a==='textShare')textShare();
   else if(a==='print')printSheet();else if(a==='pdf')showReport();else if(a==='repClose')closeReport();else if(a==='repPdf')repPdf();else if(a==='repImg')repImg();else if(a==='reset')resetAll();else if(a==='restoreTrash')restoreTrash();});
 document.addEventListener('input',e=>{const t=e.target;
   if(t.dataset.k==='amt')updBig(t.dataset.p);
@@ -589,7 +611,8 @@ document.addEventListener('change',e=>{const t=e.target;
 $('#modal').addEventListener('click',e=>{if(e.target.id==='modal'&&!document.getElementById('aOk')&&!document.getElementById('bigOk')){editingId=null;closeModal();}});
 document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.dataset&&e.target.dataset.p==='f'&&e.target.dataset.k==='amt'){e.preventDefault();submitMain();}});
 
-topbar();renderIn();tryRestore();
+topbar();renderIn();tryRestore();checkVersion();
+try{const u=new URLSearchParams(location.search);if(u.get('from')==='kakao'){history.replaceState(null,'',location.pathname);setTimeout(()=>bar('📥 카톡에서 가져온 접수 내용이 있습니다',importFromClipboard,'불러오기'),600);}}catch(e){}
 </script>
 </body>
 </html>
