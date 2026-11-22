@@ -90,6 +90,8 @@ nav button.on{color:var(--pri)}
 select.in{flex:0 0 auto;min-width:0;width:auto}
 .banner{background:var(--warn2);color:var(--warn);padding:12px;border-radius:12px;font-weight:700;margin-bottom:12px}
 #printArea{display:none}
+#land{position:fixed;inset:0;z-index:90;background:var(--bg);overflow:auto}
+#land[hidden]{display:none}
 #newVer{position:fixed;top:62px;left:8px;right:8px;z-index:75;background:#fff1de;color:#b3641a;padding:10px 12px;border-radius:12px;font-weight:700;box-shadow:0 2px 8px rgba(0,0,0,.18);display:flex;justify-content:space-between;align-items:center;gap:8px}
 #newVer[hidden]{display:none}
 #rep{position:fixed;inset:0;z-index:70;background:#f4efeb;overflow:auto;-webkit-overflow-scrolling:touch}
@@ -136,6 +138,7 @@ select.in{flex:0 0 auto;min-width:0;width:auto}
   <button data-tab="set"><i>⚙️</i>설정·저장</button>
 </nav>
 <div id="modal" hidden><div id="mbox"></div></div>
+<div id="land" hidden></div>
 <div id="newVer" hidden></div>
 <div id="rep" hidden></div>
 <div id="toast" hidden></div>
@@ -143,7 +146,7 @@ select.in{flex:0 0 auto;min-width:0;width:auto}
 
 <script>
 /* ====== 기본 도구 ====== */
-const APP_V=10;
+const APP_V=11;
 const isKakao=/KAKAOTALK/i.test(navigator.userAgent||'');
 const $=s=>document.querySelector(s);
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -587,6 +590,19 @@ async function openExternal(){
   if(hash&&hash.length<70000)url+='#kd='+hash;
   toast('기본 브라우저로 이동합니다…');
   setTimeout(()=>{location.href='kakaotalk://web/openExternal?url='+encodeURIComponent(url);},500);}
+
+function showLanding(){
+  const n=act().length,el=$('#land');
+  el.innerHTML=`<div style="max-width:520px;margin:0 auto;padding:36px 18px;text-align:center">
+  <div style="font-size:56px">📱</div><h2 style="margin:8px 0 12px">기본 브라우저에서 사용합니다</h2>
+  <div style="font-size:17px;line-height:1.65;margin-bottom:20px">카톡 안 화면에서는 <b>정산서 PDF·이미지 저장과 전달이 막힙니다.</b><br>삼성 인터넷·크롬·엣지·사파리 등 <b>폰의 기본 브라우저</b>로 열어서 쓰면 모두 됩니다.${n?`<br><br>이 화면에 접수한 <b>${n}건</b>은 자동으로 가져갑니다.`:''}</div>
+  <button class="go" id="landGo" style="background:#f5c518;box-shadow:0 3px 0 #d9aa00;color:#3a3340">🌐 기본 브라우저로 열기</button>
+  <div class="note" style="margin-top:12px;min-height:22px" id="landMsg">잠시 후 자동으로 열립니다.</div>
+  <button class="btn" id="landStay" style="margin-top:24px;font-size:14px">그냥 카톡 화면에서 쓸게요 (PDF 저장 불가)</button></div>`;
+  el.hidden=false;
+  $('#landGo').onclick=()=>{openExternal();$('#landMsg').textContent='열리지 않으면 한 번 더 눌러 주세요.';};
+  $('#landStay').onclick=()=>{el.hidden=true;};
+  try{if(!sessionStorage.getItem('autoExt')){sessionStorage.setItem('autoExt','1');setTimeout(()=>{if(!el.hidden)openExternal();},1500);}else{$('#landMsg').textContent='';}}catch(e){}}
 async function importKd(h){
   try{const o=await unpackLedger(h.slice(4));
     ['groom','bride','date','venue','who'].forEach(k=>{if(!S.set[k]&&o.set&&o.set[k])S.set[k]=o.set[k];});
@@ -642,6 +658,7 @@ topbar();renderIn();tryRestore();checkVersion();
   const kd=location.hash||'';let done=false;
   try{if(fromK||kd.startsWith('#kd='))history.replaceState(null,'',location.pathname);}catch(e){}
   if(kd.startsWith('#kd='))done=await importKd(kd);
+  if(isKakao&&!fromK&&!kd.startsWith('#kd='))showLanding();
   if(fromK&&!done)setTimeout(()=>bar('📥 카톡에서 가져온 접수 내용이 있습니다',importFromClipboard,'불러오기'),600);})();
 </script>
 </body>
