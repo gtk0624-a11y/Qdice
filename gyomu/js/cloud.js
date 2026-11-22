@@ -17,7 +17,7 @@ async function cloudKeys() {
 async function sealObj(o) { const iv = crypto.getRandomValues(new Uint8Array(12)); const ct = new Uint8Array(await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, CLOUD.key, _enc.encode(JSON.stringify(o)))); return b64(iv) + '.' + b64(ct); }
 async function openObj(s) { const [a, b] = s.split('.'); return JSON.parse(_dec.decode(await crypto.subtle.decrypt({ name: 'AES-GCM', iv: unb64(a) }, CLOUD.key, unb64(b)))); }
 const cloudSet = (state, msg) => { CLOUD.info = { state, msg, at: Date.now() }; const el = document.getElementById('cloudst'); if (el) el.textContent = msg; };
-async function cloudGet(path) { const r = await fetch(`${CLOUD_URL}/tf/${CLOUD.id}${path}.json`, { cache: 'no-store' }); if (r.status === 401 || r.status === 403) throw new Error('perm'); if (!r.ok) throw new Error('net'); return r.json(); }
+async function cloudGet(path) { const r = await fetch(`${CLOUD_URL}/rooms/tfcloud_${CLOUD.id}${path}.json`, { cache: 'no-store' }); if (r.status === 401 || r.status === 403) throw new Error('perm'); if (!r.ok) throw new Error('net'); return r.json(); }
 async function cloudMedia() {
   const ink = {}; for (const n of S.notes) { const v = await idb.get('ink:' + n.id); if (v) ink[n.id] = v; }
   return { mascot: MASCOT, logo: LOGO, mystk: typeof MYSTK !== 'undefined' ? MYSTK : [], ink };
@@ -25,7 +25,7 @@ async function cloudMedia() {
 async function cloudPush() {
   await cloudKeys();
   const body = JSON.stringify({ t: S.updatedAt, s: await sealObj(S), l: await sealObj(LIB), m: await sealObj(await cloudMedia()), a: await sealObj(ARCH) });
-  const r = await fetch(`${CLOUD_URL}/tf/${CLOUD.id}.json`, { method: 'PUT', body });
+  const r = await fetch(`${CLOUD_URL}/rooms/tfcloud_${CLOUD.id}.json`, { method: 'PUT', body });
   if (r.status === 401 || r.status === 403) throw new Error('perm'); if (!r.ok) throw new Error('net');
 }
 async function cloudPull(t) {
