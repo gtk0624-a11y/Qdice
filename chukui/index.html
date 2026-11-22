@@ -333,7 +333,8 @@ function renderCalc(){
   const a=act();const ms=missing(),dp=dupNos();
   $('#tab-calc').innerHTML=`
   <div class="grid3"><div class="stat"><b>${a.length}</b><span>봉투 수</span></div><div class="stat"><b>${fmt(sum(a)).replace('원','')}</b><span>총액(원)</span></div><div class="stat"><b>${a.reduce((t,e)=>t+e.meals,0)}</b><span>식권(장)</span></div></div>
-  <button class="go" data-act="pdf" style="margin:0 0 12px">📋 정산서 한눈에 보기 · 보내기</button>
+  <button class="go" data-act="share" style="margin:0 0 8px;background:#f5c518;box-shadow:0 3px 0 #d9aa00;color:#3a3340">💬 카톡으로 보내기 (전체 명단+총액)</button>
+  <button class="btn full" data-act="pdf" style="margin:0 0 12px">📋 정산서 한눈에 보기 (PDF·이미지)</button>
   <div class="card"><h3>번호 점검</h3>${ms.length?`<div class="ng">빠진 번호: ${ms.join(', ')}</div><div class="note">병합했거나 번호가 비어 있는 경우입니다. 해당 봉투를 확인해 주세요.</div>`:'<div class="ok">빠진 번호 없음 ✓</div>'}
   ${dp.length?`<div class="ng" style="margin-top:6px">중복 번호: ${dp.join(', ')}</div>`:''}</div>
   ${bigCardHTML()}
@@ -344,7 +345,7 @@ function renderCalc(){
   <tr><td>수표·기타</td><td class="r"><input class="in" style="width:140px;font-size:18px;padding:8px;text-align:right" inputmode="numeric" data-cash="etc" value="${S.cash.etc||''}"> 원</td></tr></table>
   <div id="diff"></div></div>
   <button class="btn full" data-act="print">🖨️ 명단·정산서 인쇄</button>
-  <button class="btn full" data-act="share">💬 요약을 카톡·문자로 보내기</button>`;
+  <button class="btn full" data-act="share">💬 카톡으로 보내기 (전체 명단 글 복사)</button>`;
   calcDiff();}
 function calcDiff(){const el=$('#diff');if(!el)return;
   const book=sum(act().filter(e=>e.method!=='송금')),real=cashTotal(),d=real-book;
@@ -398,7 +399,7 @@ function renderSet(){const s=S.set;
   <button class="btn mint full" data-act="backup">💾 백업 파일 저장·카톡으로 보내기</button>
   <button class="btn full" data-act="copyBackup">📋 백업 내용 복사 (파일 저장이 안 될 때)</button>
   <button class="btn full" data-act="csv">📊 엑셀용 파일(CSV) 저장</button>
-  <button class="btn full" data-act="share">💬 요약을 카톡·문자로 보내기</button></div>
+  <button class="btn full" data-act="share">💬 카톡으로 보내기 (전체 명단 글 복사)</button></div>
   <div class="card"><h3>다른 접수자 장부 합치기</h3>
   <div class="note">두 명이 따로 접수했다면 각자 백업 파일을 받아 한 폰에서 합칩니다. 번호 앞 글자(A, B)가 달라야 겹치지 않습니다.</div>
   <input type="file" id="imp" accept=".json,application/json" style="margin-top:8px;width:100%">
@@ -494,7 +495,7 @@ let repPages=null;
 function showReport(){
   try{repPages=reportPages();}catch(e){toast('정산서를 만들지 못했습니다');return;}
   const el=$('#rep');
-  el.innerHTML=`<div class="repbar"><b>정산서</b><button class="btn pri" data-act="repPdf">📄 PDF</button><button class="btn mint" data-act="repImg">🖼️ 이미지 보내기</button><button class="btn" data-act="repClose">닫기</button></div>
+  el.innerHTML=`<div class="repbar"><b>정산서</b><button class="btn pri" data-act="share">💬 카톡 글 보내기</button><button class="btn" data-act="repPdf">📄 PDF</button><button class="btn mint" data-act="repImg">🖼️ 이미지 보내기</button><button class="btn" data-act="repClose">닫기</button></div>
   <div class="note" style="padding:8px 12px">두 손가락으로 벌려 크게 볼 수 있습니다. 보내기가 안 되면 <b>화면 캡처</b>해서 카톡으로 보내시면 됩니다.</div>
   <div style="padding:0 8px 40px">${repPages.map(pc=>`<img alt="정산서" src="${pc.toDataURL('image/jpeg',0.9)}" style="width:100%;display:block;border:1px solid #ddd;margin-bottom:10px;background:#fff">`).join('')}</div>`;
   el.hidden=false;el.scrollTop=0;document.body.style.overflow='hidden';}
@@ -511,6 +512,44 @@ async function repImg(){
   catch(e){if(e&&e.name==='AbortError')return;}
   toast('이 폰에서는 바로 보내기가 안 됩니다. 화면 캡처 후 카톡으로 보내세요');}
 
+
+/* ====== 카톡 글로 보내기 (복사·붙여넣기: 모든 폰에서 동작) ====== */
+function reportText(){
+  const a=[...act()].sort((x,z)=>x.seat.localeCompare(z.seat)||x.no-z.no),st=S.set,won=n=>(n||0).toLocaleString('ko-KR');
+  const book=sum(a.filter(e=>e.method!=='송금')),real=cashTotal(),big=a.filter(isBig),meals=a.reduce((t,e)=>t+e.meals,0);
+  const L=[];
+  L.push('[축의금 접수 명단·정산] '+[[st.groom,st.bride].filter(Boolean).join('♥'),st.date,st.venue].filter(Boolean).join(' '));
+  L.push('접수자 '+(st.who||st.seat)+' · '+new Date().toLocaleString('ko-KR'));
+  L.push('■ 봉투 '+a.length+'건 / 총액 '+won(sum(a))+'원');
+  L.push('■ 현금·수표 '+won(book)+'원 / 송금 '+won(sum(a.filter(e=>e.method==='송금')))+'원');
+  L.push('■ 식권 '+meals+'장');
+  if(real)L.push('■ 실사 현금·수표 '+won(real)+'원 / 차액 '+(real-book>0?'+':'')+won(real-book)+'원');
+  const ms=missing();if(ms.length)L.push('■ 빠진 번호: '+ms.join(', '));
+  if(big.length)L.push('★ 고액('+(S.set.big||100)+'만↑) '+big.length+'건: '+big.map(e=>e.name+' '+won(e.won)+'원').join(', '));
+  L.push('――― 명단 ―――');
+  a.forEach(e=>L.push(noStr(e)+' '+(isBig(e)?'★':'')+e.name+' · '+e.rel+' · '+won(e.won)+'원 · '+e.method+' · 식권'+e.meals+(e.memo?' · '+e.memo:'')));
+  L.push('―――――――――');
+  L.push('합계 '+a.length+'건 / '+won(sum(a))+'원 / 식권 '+meals+'장');
+  return L.join('\n');}
+function chunkText(t,max){max=max||2800;const out=[];let cur='';t.split('\n').forEach(l=>{if(cur&&(cur+'\n'+l).length>max){out.push(cur);cur=l;}else cur=cur?cur+'\n'+l:l;});if(cur)out.push(cur);return out;}
+function legacyCopy(t){try{const ta=document.createElement('textarea');ta.value=t;ta.setAttribute('readonly','');ta.style.cssText='position:fixed;top:0;left:0;opacity:0;font-size:16px';document.body.appendChild(ta);ta.focus();ta.select();ta.setSelectionRange(0,t.length);const ok=document.execCommand('copy');ta.remove();return ok;}catch(e){return false;}}
+function copyText(t){return new Promise(res=>{try{if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(()=>res(true),()=>res(legacyCopy(t)));return;}}catch(e){}res(legacyCopy(t));});}
+let ktChunks=[];
+function kakaoText(){
+  ktChunks=chunkText(reportText());const n=ktChunks.length;
+  showModal(`<h3>💬 카톡으로 보내기</h3>
+  <div style="font-size:16px;line-height:1.6;margin-bottom:8px"><b>① 복사</b> 버튼을 누르고 → <b>② 카카오톡 대화창</b>에 붙여넣기 → <b>③ 전송</b>${n>1?`<br>명단이 길어서 <b>${n}개로 나눴습니다.</b> 1번부터 차례로 보내 주세요.`:''}</div>
+  ${ktChunks.map((c,i)=>`<div class="card" style="padding:10px"><b>${i+1} / ${n}</b>
+  <textarea readonly id="kt${i}" class="in" style="height:120px;font-size:13px;margin-top:6px" onfocus="this.select()">${esc(c)}</textarea>
+  <button class="go" data-copy="${i}" style="margin-top:8px;padding:14px;font-size:19px">📋 ${n>1?(i+1)+'번 ':''}복사하기</button></div>`).join('')}
+  ${navigator.share?`<button class="btn mint full" data-act="textShare">📤 공유창으로 보내기 (카톡 선택)</button>`:''}
+  <button class="btn full" id="mClose2">닫기</button>`);
+  $('#mClose2').onclick=closeModal;}
+async function doCopy(i){const t=ktChunks[i];if(t==null)return;const ok=await copyText(t);
+  if(ok)toast('복사했습니다. 카톡에 붙여넣으세요');
+  else{const ta=$('#kt'+i);if(ta){ta.focus();ta.select();ta.setSelectionRange(0,t.length);}toast('자동 복사가 안 됩니다. 선택된 글을 길게 눌러 [복사]를 누르세요');}}
+async function textShare(){try{await navigator.share({text:ktChunks.join('\n\n')});}catch(e){if(e&&e.name!=='AbortError')toast('공유창을 열 수 없습니다. 복사 버튼을 이용하세요');}}
+
 /* ====== 탭·이벤트 ====== */
 let tab='in';
 function show(t){tab=t;['in','list','calc','set'].forEach(k=>$('#tab-'+k).hidden=k!==t);
@@ -521,6 +560,7 @@ function refreshAll(){topbar();if(tab==='in')updateIn();else if(tab==='list')ren
 document.addEventListener('click',e=>{
   const t=e.target.closest('button,[data-edit]');if(!t)return;
   if(t.dataset.tab){show(t.dataset.tab);return;}
+  if(t.dataset.copy!=null){doCopy(parseInt(t.dataset.copy));return;}
   if(t.dataset.chip){const p=t.dataset.p;const i=document.getElementById(p+'amt');i.value=t.dataset.chip;updBig(p);return;}
   if(t.dataset.step){const p=t.dataset.p;const i=document.getElementById(p+'meals');i.value=Math.max(0,(parseInt(i.value)||0)+parseInt(t.dataset.step));return;}
   if(t.id==='fGo'){submitMain();return;}
@@ -529,7 +569,7 @@ document.addEventListener('click',e=>{
   if(a==='undoLast'||a==='undo'){undo();}
   else if(a==='copyBackup')copyBackup();
   else if(a==='pasteMerge'){const v=$('#pasteBox').value;if(!v.trim()){toast('붙여넣은 내용이 없습니다');}else{mergeText(v);}}
-  else if(a==='backup')doBackup();else if(a==='csv')doCsv();else if(a==='share')shareText();
+  else if(a==='backup')doBackup();else if(a==='csv')doCsv();else if(a==='share')kakaoText();else if(a==='textShare')textShare();
   else if(a==='print')printSheet();else if(a==='pdf')showReport();else if(a==='repClose')closeReport();else if(a==='repPdf')repPdf();else if(a==='repImg')repImg();else if(a==='reset')resetAll();else if(a==='restoreTrash')restoreTrash();});
 document.addEventListener('input',e=>{const t=e.target;
   if(t.dataset.k==='amt')updBig(t.dataset.p);
