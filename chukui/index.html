@@ -88,6 +88,11 @@ nav button.on{color:var(--pri)}
 select.in{flex:0 0 auto;min-width:0;width:auto}
 .banner{background:var(--warn2);color:var(--warn);padding:12px;border-radius:12px;font-weight:700;margin-bottom:12px}
 #printArea{display:none}
+#rep{position:fixed;inset:0;z-index:70;background:#f4efeb;overflow:auto;-webkit-overflow-scrolling:touch}
+#rep[hidden]{display:none}
+.repbar{position:sticky;top:0;z-index:2;background:#fff;display:flex;gap:6px;align-items:center;padding:8px 10px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.repbar b{margin-right:auto;font-size:17px}
+.repbar .btn{padding:9px 11px;font-size:15px}
 @media print{
  @page{size:A4;margin:12mm}
  body{background:#fff;padding:0;font-size:11pt}
@@ -127,6 +132,7 @@ select.in{flex:0 0 auto;min-width:0;width:auto}
   <button data-tab="set"><i>⚙️</i>설정·저장</button>
 </nav>
 <div id="modal" hidden><div id="mbox"></div></div>
+<div id="rep" hidden></div>
 <div id="toast" hidden></div>
 <div id="printArea"></div>
 
@@ -327,6 +333,7 @@ function renderCalc(){
   const a=act();const ms=missing(),dp=dupNos();
   $('#tab-calc').innerHTML=`
   <div class="grid3"><div class="stat"><b>${a.length}</b><span>봉투 수</span></div><div class="stat"><b>${fmt(sum(a)).replace('원','')}</b><span>총액(원)</span></div><div class="stat"><b>${a.reduce((t,e)=>t+e.meals,0)}</b><span>식권(장)</span></div></div>
+  <button class="go" data-act="pdf" style="margin:0 0 12px">📋 정산서 한눈에 보기 · 보내기</button>
   <div class="card"><h3>번호 점검</h3>${ms.length?`<div class="ng">빠진 번호: ${ms.join(', ')}</div><div class="note">병합했거나 번호가 비어 있는 경우입니다. 해당 봉투를 확인해 주세요.</div>`:'<div class="ok">빠진 번호 없음 ✓</div>'}
   ${dp.length?`<div class="ng" style="margin-top:6px">중복 번호: ${dp.join(', ')}</div>`:''}</div>
   ${bigCardHTML()}
@@ -336,7 +343,6 @@ function renderCalc(){
   <table>${[[50000,'5만원'],[10000,'1만원'],[5000,'5천원'],[1000,'1천원']].map(([v,l])=>`<tr><td>${l}</td><td class="r"><input class="in" style="width:110px;font-size:18px;padding:8px;text-align:right" inputmode="numeric" data-cash="${v}" value="${S.cash[v]||''}"> 장</td></tr>`).join('')}
   <tr><td>수표·기타</td><td class="r"><input class="in" style="width:140px;font-size:18px;padding:8px;text-align:right" inputmode="numeric" data-cash="etc" value="${S.cash.etc||''}"> 원</td></tr></table>
   <div id="diff"></div></div>
-  <button class="go" data-act="pdf" style="margin-top:4px">📄 PDF로 저장·혼주에게 보내기</button>
   <button class="btn full" data-act="print">🖨️ 명단·정산서 인쇄</button>
   <button class="btn full" data-act="share">💬 요약을 카톡·문자로 보내기</button>`;
   calcDiff();}
@@ -402,7 +408,7 @@ function renderSet(){const s=S.set;
   ${trashInfo()?`<div class="card"><h3>↩️ 초기화 직전 상태 복구</h3><div class="note">마지막으로 지우기 직전의 ${trashInfo()}건이 폰에 남아 있습니다.</div><button class="btn mint full" data-act="restoreTrash">복구하기</button></div>`:''}
   <div class="card"><h3>⚠️ 초기화</h3><button class="btn bad full" data-act="reset">모든 접수 내역 지우기</button>
   <div class="note" style="margin-top:6px">행사 당일 전에 연습으로 입력해 보신 뒤, 시작 전에 한 번 지우세요.</div></div>`;}
-function dl(name,text,type,blob){const b=blob||new Blob([text],{type});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{a.remove();URL.revokeObjectURL(u)},1500);}
+function dl(name,text,type,blob){try{const b=blob||new Blob([text],{type});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{a.remove();URL.revokeObjectURL(u)},1500);}catch(e){toast('이 화면에서는 파일 저장이 막혀 있습니다');}}
 async function outFile(name,text,type){
   try{const f=new File([text],name,{type});if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],title:name});return 'shared';}}catch(e){if(e&&e.name==='AbortError')return 'cancel';}
   dl(name,text,type);return 'saved';}
@@ -484,13 +490,26 @@ function pagesToPdf(pages){
   for(let id=1;id<total;id++)x+=String(offs[id]).padStart(10,'0')+' 00000 n \n';
   x+='trailer\n<</Size '+total+'/Root 1 0 R>>\nstartxref\n'+xo+'\n%%EOF';str(x);
   return new Blob(parts,{type:'application/pdf'});}
-async function exportPdf(){
-  let blob;try{blob=pagesToPdf(reportPages());}catch(e){toast('PDF 만들기에 실패했습니다. 인쇄 기능을 이용해 주세요');return;}
+let repPages=null;
+function showReport(){
+  try{repPages=reportPages();}catch(e){toast('정산서를 만들지 못했습니다');return;}
+  const el=$('#rep');
+  el.innerHTML=`<div class="repbar"><b>정산서</b><button class="btn pri" data-act="repPdf">📄 PDF</button><button class="btn mint" data-act="repImg">🖼️ 이미지 보내기</button><button class="btn" data-act="repClose">닫기</button></div>
+  <div class="note" style="padding:8px 12px">두 손가락으로 벌려 크게 볼 수 있습니다. 보내기가 안 되면 <b>화면 캡처</b>해서 카톡으로 보내시면 됩니다.</div>
+  <div style="padding:0 8px 40px">${repPages.map(pc=>`<img alt="정산서" src="${pc.toDataURL('image/jpeg',0.9)}" style="width:100%;display:block;border:1px solid #ddd;margin-bottom:10px;background:#fff">`).join('')}</div>`;
+  el.hidden=false;el.scrollTop=0;document.body.style.overflow='hidden';}
+function closeReport(){const el=$('#rep');el.hidden=true;el.innerHTML='';document.body.style.overflow='';repPages=null;}
+async function repPdf(){
+  let blob;try{blob=pagesToPdf(repPages||reportPages());}catch(e){toast('PDF를 만들지 못했습니다. 이미지로 보내 주세요');return;}
   const name='축의금_명단정산서_'+stamp()+'.pdf';
   try{const f=new File([blob],name,{type:'application/pdf'});if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],title:name});return;}}catch(e){if(e&&e.name==='AbortError')return;}
-  const url=URL.createObjectURL(blob);dl(name,'',null,blob);
-  showModal(`<h3>📄 PDF를 만들었습니다</h3><div style="font-size:17px;line-height:1.6">자동으로 저장되지 않았다면 아래 버튼을 누르세요.<br>열린 PDF 화면에서 <b>공유 → 카톡</b>으로 혼주께 보내면 됩니다.</div>
-  <a class="go" style="display:block;text-align:center;text-decoration:none;margin-top:12px" href="${url}" target="_blank" download="${esc(name)}">📄 PDF 열기·저장</a><button class="btn full" id="mClose2">닫기</button>`);$('#mClose2').onclick=closeModal;}
+  dl(name,'',null,blob);toast('저장을 시도했습니다. 안 되면 [이미지 보내기]나 화면 캡처를 이용하세요');}
+async function repImg(){
+  const toB=c=>new Promise(r=>c.toBlob(r,'image/jpeg',0.92));
+  try{const pg=repPages||reportPages();const files=[];for(let i=0;i<pg.length;i++){files.push(new File([await toB(pg[i])],'축의금정산서_'+(i+1)+'.jpg',{type:'image/jpeg'}));}
+    if(navigator.canShare&&navigator.canShare({files})){await navigator.share({files,title:'축의금 정산서'});return;}}
+  catch(e){if(e&&e.name==='AbortError')return;}
+  toast('이 폰에서는 바로 보내기가 안 됩니다. 화면 캡처 후 카톡으로 보내세요');}
 
 /* ====== 탭·이벤트 ====== */
 let tab='in';
@@ -511,7 +530,7 @@ document.addEventListener('click',e=>{
   else if(a==='copyBackup')copyBackup();
   else if(a==='pasteMerge'){const v=$('#pasteBox').value;if(!v.trim()){toast('붙여넣은 내용이 없습니다');}else{mergeText(v);}}
   else if(a==='backup')doBackup();else if(a==='csv')doCsv();else if(a==='share')shareText();
-  else if(a==='print')printSheet();else if(a==='pdf')exportPdf();else if(a==='reset')resetAll();else if(a==='restoreTrash')restoreTrash();});
+  else if(a==='print')printSheet();else if(a==='pdf')showReport();else if(a==='repClose')closeReport();else if(a==='repPdf')repPdf();else if(a==='repImg')repImg();else if(a==='reset')resetAll();else if(a==='restoreTrash')restoreTrash();});
 document.addEventListener('input',e=>{const t=e.target;
   if(t.dataset.k==='amt')updBig(t.dataset.p);
   else if(t.dataset.k==='name')updDup(t.dataset.p);
