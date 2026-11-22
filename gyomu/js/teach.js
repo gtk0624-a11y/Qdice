@@ -70,10 +70,10 @@ function swapCands(me, k1, onlySame) {
 const T = () => (UI.tch = UI.tch || { q: '', sel: '', slot: '', pick: null, free: false });
 function tchHtml() {
   if (window.TF_DEMO && (!CMC || !PEOPLE.length)) cmcDemo();
-  if (!CMC) { cmcLoad().then(() => { if (/^#\/class/.test(location.hash)) render(); }); return `<h3 class="h3">③ 선생님 시간표 · 공강 · 수업 교환</h3><p class="mu">컴시간 전체 시간표를 불러오는 중입니다…</p>`; }
+  if (!CMC) { cmcLoad().then(() => { if (/^#\/class/.test(location.hash)) render(); }); return `<h3 class="h3">다른 선생님 시간표 · 공강 · 수업 교환</h3><p class="mu">컴시간 전체 시간표를 불러오는 중입니다…</p>`; }
   if (!PEOPLE.length) cmcBuild();
   const t = T(), me = tchMe(), P = cmcP(), q = norm(t.q), match = q ? PEOPLE.filter(p => norm(p.name + p.t).includes(q)) : [], sel = PEOPLE.find(p => p.id === t.sel) || (match.length === 1 ? match[0] : null);
-  let h = `<h3 class="h3">③ 선생님 시간표 · 공강 · 수업 교환</h3><p class="mu">${window.TF_DEMO ? '<b>체험용 가상 시간표</b>입니다(실제 학교 자료가 아님). ' : ''}컴시간 자료(${esc((CMC.updated || '').slice(0, 10))} 기준, 이름이 두 글자라 같은 이름은 과목으로 구분)로 찾습니다. ${me ? `나는 <b>${esc(me.name)}</b>로 인식했어요.` : '<b>설정의 이름·교과로 내 시간표를 찾지 못했습니다.</b> (이름 확인 필요)'} <button class="x" data-act="tchReload">컴시간 새로고침</button></p>`;
+  let h = `<h3 class="h3">다른 선생님 시간표 · 공강 · 수업 교환</h3><p class="mu">${window.TF_DEMO ? '<b>체험용 가상 시간표</b>입니다(실제 학교 자료가 아님). ' : ''}컴시간 자료(${esc((CMC.updated || '').slice(0, 10))} 기준, 이름이 두 글자라 같은 이름은 과목으로 구분)로 찾습니다. ${me ? `나는 <b>${esc(me.name)}</b>로 인식했어요.` : '<b>설정의 이름·교과로 내 시간표를 찾지 못했습니다.</b> (이름 확인 필요)'} <button class="x" data-act="tchReload">컴시간 새로고침</button></p>`;
   h += `<div class="tbox"><b>🔎 선생님 시간표 보기</b><div class="row2c"><input class="srch" data-tq placeholder="선생님 이름 (예: 김병)" value="${esc(t.q)}" list="tchList" aria-label="선생님 이름"><datalist id="tchList">${PEOPLE.map(p => `<option value="${esc(p.name)}">`).join('')}</datalist></div>${match.length > 1 ? `<div class="clg2">${match.map(p => `<button class="chp ${sel && sel.id === p.id ? 'on' : ''}" data-act="tchSel" data-id="${esc(p.id)}">${esc(p.name)}</button>`).join('')}</div>` : ''}${q && !match.length ? '<p class="mu">찾는 선생님이 없습니다.</p>' : ''}${sel ? `<p><b>${esc(sel.name)}</b> 선생님 시간표 <span class="mu">(${Object.keys(sel.cells).length}시간${sel.amb ? ' · 이름이 같은 분이 있어 자율·동아리 칸은 같이 표시됩니다' : ''})</span></p>${gridTable(pGet(sel), { P })}` : ''}</div>`;
   if (me) {
     const fr = PEOPLE.filter(b => b !== me).map(b => ({ b, c: commonFree(me, b, P) })).filter(x => x.c.length).sort((a, b) => b.c.length - a.c.length).slice(0, 12), myFree = [];
@@ -124,7 +124,9 @@ const _cv2 = classView;
 classView = function () {
   let h = _cv2(); const gc = `<div class="gcrow"><b>학년별 색</b> ${[1, 2, 3].map(g => `<label>${g}학년 <input type="color" data-gcol="${g}" value="${gcol(g)}"></label>`).join('')}<button class="x" data-act="gcolReset">처음 색으로</button></div>`;
   const i = h.indexOf('<table class="tbl tt"'); if (i >= 0) h = h.slice(0, i) + gc + h.slice(i);
-  const j = h.indexOf('<h3 class="h3">이 화면의 자료'); const sec = tchHtml(); return j >= 0 ? h.slice(0, j) + sec + h.slice(j) : h + sec;
+  const sec = `<div id="tchSec">${tchHtml()}</div>`, t0 = h.indexOf('<table class="tbl tt"'), t1 = t0 >= 0 ? h.indexOf('</table>', t0) : -1;
+  if (t1 >= 0) { const e = t1 + 8; return h.slice(0, e) + sec + h.slice(e); }
+  const j = h.indexOf('<h3 class="h3">이 화면의 자료'); return j >= 0 ? h.slice(0, j) + sec + h.slice(j) : h + sec;
 };
 function ttColor() { document.querySelectorAll('input[data-tt]').forEach(i => { const td = i.closest('td'); if (td) td.style.background = gradeOf(i.value) ? gcol(gradeOf(i.value)) : ''; }); }
 const _r2 = TF.render; TF.render = function () { const v = _r2.apply(this, arguments); ttColor(); return v; };
