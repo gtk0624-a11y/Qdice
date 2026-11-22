@@ -336,7 +336,8 @@ function renderCalc(){
   <table>${[[50000,'5만원'],[10000,'1만원'],[5000,'5천원'],[1000,'1천원']].map(([v,l])=>`<tr><td>${l}</td><td class="r"><input class="in" style="width:110px;font-size:18px;padding:8px;text-align:right" inputmode="numeric" data-cash="${v}" value="${S.cash[v]||''}"> 장</td></tr>`).join('')}
   <tr><td>수표·기타</td><td class="r"><input class="in" style="width:140px;font-size:18px;padding:8px;text-align:right" inputmode="numeric" data-cash="etc" value="${S.cash.etc||''}"> 원</td></tr></table>
   <div id="diff"></div></div>
-  <button class="go" data-act="print" style="margin-top:4px">🖨️ 명단·정산서 인쇄</button>
+  <button class="go" data-act="pdf" style="margin-top:4px">📄 PDF로 저장·혼주에게 보내기</button>
+  <button class="btn full" data-act="print">🖨️ 명단·정산서 인쇄</button>
   <button class="btn full" data-act="share">💬 요약을 카톡·문자로 보내기</button>`;
   calcDiff();}
 function calcDiff(){const el=$('#diff');if(!el)return;
@@ -401,7 +402,7 @@ function renderSet(){const s=S.set;
   ${trashInfo()?`<div class="card"><h3>↩️ 초기화 직전 상태 복구</h3><div class="note">마지막으로 지우기 직전의 ${trashInfo()}건이 폰에 남아 있습니다.</div><button class="btn mint full" data-act="restoreTrash">복구하기</button></div>`:''}
   <div class="card"><h3>⚠️ 초기화</h3><button class="btn bad full" data-act="reset">모든 접수 내역 지우기</button>
   <div class="note" style="margin-top:6px">행사 당일 전에 연습으로 입력해 보신 뒤, 시작 전에 한 번 지우세요.</div></div>`;}
-function dl(name,text,type){const b=new Blob([text],{type});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{a.remove();URL.revokeObjectURL(u)},1500);}
+function dl(name,text,type,blob){const b=blob||new Blob([text],{type});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{a.remove();URL.revokeObjectURL(u)},1500);}
 async function outFile(name,text,type){
   try{const f=new File([text],name,{type});if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],title:name});return 'shared';}}catch(e){if(e&&e.name==='AbortError')return 'cancel';}
   dl(name,text,type);return 'saved';}
@@ -429,6 +430,68 @@ function resetAll(){showModal(`<h3>정말 모두 지울까요?</h3><div style="f
 function restoreTrash(){try{const o=JSON.parse(localStorage.getItem(LST));if(!o||!o.entries||!o.entries.length)throw 0;snap();S=adopt(o);save();refreshAll();toast('초기화 직전 상태로 복구했습니다');}catch(e){toast('복구할 내역이 없습니다');}}
 function trashInfo(){try{const o=JSON.parse(localStorage.getItem(LST));if(o&&o.entries&&o.entries.length)return o.entries.filter(e=>!e.del).length;}catch(e){}return 0;}
 
+
+/* ====== PDF 저장 (외부 프로그램 없이 직접 생성) ====== */
+function reportPages(){
+  const W=1240,H=1754,M=80,CW=W-2*M,pages=[];let c,g,y;
+  const FF='"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR","Noto Sans CJK KR",sans-serif';
+  const font=(sz,b)=>{g.font=(b?'bold ':'')+sz+'px '+FF;};
+  const won=n=>(n||0).toLocaleString('ko-KR');
+  const newPage=()=>{c=document.createElement('canvas');c.width=W;c.height=H;g=c.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,W,H);g.fillStyle='#000';g.textBaseline='middle';y=M;pages.push(c);};
+  const clip=(t,w)=>{t=String(t==null?'':t);if(g.measureText(t).width<=w)return t;while(t.length>1&&g.measureText(t+'…').width>w)t=t.slice(0,-1);return t+'…';};
+  const a=[...act()].sort((x,z)=>x.seat.localeCompare(z.seat)||x.no-z.no);const st=S.set;
+  const book=sum(a.filter(e=>e.method!=='송금')),real=cashTotal(),delN=S.entries.length-a.length;
+  const meals=a.reduce((t,e)=>t+e.meals,0),big=a.filter(isBig);
+  const cols=[{w:120,t:'번호'},{w:190,t:'이름'},{w:110,t:'관계'},{w:190,t:'금액(원)',r:1},{w:100,t:'방식'},{w:80,t:'식권',r:1},{w:210,t:'메모'},{w:80,t:'시각'}];
+  const RH=46;
+  const cell=(txt,x,w,r,bold)=>{g.textAlign=r?'right':'left';font(24,bold);g.fillStyle='#000';g.fillText(clip(txt,w-16),r?x+w-8:x+8,y+RH/2);};
+  const rowLines=(fill)=>{if(fill){g.fillStyle=fill;g.fillRect(M,y,CW,RH);}g.strokeStyle='#777';g.lineWidth=1.5;g.strokeRect(M,y,CW,RH);let x=M;cols.forEach(k=>{x+=k.w;if(x<M+CW){g.beginPath();g.moveTo(x,y);g.lineTo(x,y+RH);g.stroke();}});};
+  const head=()=>{rowLines('#eee');let x=M;cols.forEach(k=>{cell(k.t,x,k.w,k.r,true);x+=k.w;});y+=RH;};
+  newPage();
+  g.textAlign='left';font(44,true);g.fillText('축의금 접수 명부 및 정산서',M,y+24);y+=64;
+  font(24);g.fillStyle='#000';g.fillText(clip([[st.groom,st.bride].filter(Boolean).join(' ♥ '),st.date,st.venue,'접수자 '+(st.who||st.seat),'출력 '+new Date().toLocaleString('ko-KR')].filter(Boolean).join('  ·  '),CW),M,y+14);y+=44;
+  const sum4=[['봉투 수',a.length+'건','명부 총액',won(sum(a))+'원'],['현금·수표',won(book)+'원','송금',won(sum(a.filter(e=>e.method==='송금')))+'원'],['실사 현금·수표',real?won(real)+'원':'(미입력)','차액',real?(real-book>0?'+':'')+won(real-book)+'원':'-'],['식권 합계',meals+'장','빠진 번호',(missing().join(', ')||'없음')+(delN?' · 삭제 '+delN+'건':'')]];
+  const sw=[200,340,200,340];
+  sum4.forEach(r=>{g.strokeStyle='#777';g.lineWidth=1.5;g.strokeRect(M,y,CW,RH);let x=M;r.forEach((t,i)=>{if(i%2===0){g.fillStyle='#eee';g.fillRect(x,y,sw[i],RH);g.strokeRect(x,y,sw[i],RH);}else{g.strokeRect(x,y,sw[i],RH);}g.textAlign='left';font(24,i%2===0||i===3&&r[2]==='명부 총액');g.fillStyle='#000';g.fillText(clip(t,sw[i]-16),x+8,y+RH/2);x+=sw[i];});y+=RH;});
+  y+=26;g.textAlign='left';font(30,true);g.fillText('접수 명단 ('+a.length+'건)',M,y+14);y+=42;
+  head();
+  const bottom=H-M-70;
+  a.forEach(e=>{if(y+RH>bottom){newPage();font(24);g.fillText('축의금 접수 명단 (계속)',M,y+14);y+=38;head();}
+    rowLines();let x=M;const vals=[noStr(e),(isBig(e)?'★ ':'')+e.name,e.rel,won(e.won),e.method,String(e.meals),e.memo||'',hm(e.ts)];
+    cols.forEach((k,i)=>{cell(vals[i],x,k.w,k.r,i===3);x+=k.w;});y+=RH;});
+  if(y+RH>bottom){newPage();}
+  rowLines('#eee');{let x=M;const tv=['합계','','',won(sum(a)),'',String(meals),a.length+'건',''];cols.forEach((k,i)=>{cell(tv[i],x,k.w,k.r,true);x+=k.w;});}y+=RH+30;
+  if(big.length){if(y+130>bottom)newPage();g.textAlign='left';font(28,true);g.fillText('★ 고액 접수 ('+(S.set.big||100)+'만 원 이상) '+big.length+'건 · '+won(sum(big))+'원',M,y+14);y+=40;font(24);
+    big.forEach(e=>{if(y+34>bottom)newPage();g.fillText(clip(noStr(e)+'  '+e.name+'  '+won(e.won)+'원  ('+krw(e.won)+')',CW),M,y+14);y+=36;});y+=20;}
+  if(y+150>bottom){newPage();}
+  y+=60;g.strokeStyle='#000';g.lineWidth=2;g.beginPath();g.moveTo(M,y);g.lineTo(M+480,y);g.moveTo(M+CW-480,y);g.lineTo(M+CW,y);g.stroke();
+  g.textAlign='left';font(24);g.fillText('접수자 서명',M,y+30);g.fillText('혼주(인수자) 서명',M+CW-480,y+30);
+  pages.forEach((pc,i)=>{const q=pc.getContext('2d');q.textAlign='center';q.textBaseline='middle';q.fillStyle='#555';q.font='22px '+FF;q.fillText((i+1)+' / '+pages.length,W/2,H-45);});
+  return pages;}
+function pagesToPdf(pages){
+  const enc=new TextEncoder(),parts=[];let off=0;const offs={};
+  const push=u=>{parts.push(u);off+=u.length;};const str=t=>push(enc.encode(t));
+  const b64=d=>{const bin=atob(d.split(',')[1]);const u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);return u;};
+  const n=pages.length;
+  push(new Uint8Array([0x25,0x50,0x44,0x46,0x2d,0x31,0x2e,0x34,0x0a,0x25,0xe2,0xe3,0xcf,0xd3,0x0a]));
+  offs[1]=off;str('1 0 obj\n<</Type/Catalog/Pages 2 0 R>>\nendobj\n');
+  offs[2]=off;str('2 0 obj\n<</Type/Pages/Count '+n+'/Kids ['+pages.map((_,i)=>(3+3*i)+' 0 R').join(' ')+']>>\nendobj\n');
+  pages.forEach((pc,i)=>{const jpg=b64(pc.toDataURL('image/jpeg',0.92));const pid=3+3*i,cid=4+3*i,iid=5+3*i;const cs='q 595.28 0 0 841.89 0 0 cm /Im0 Do Q';
+    offs[pid]=off;str(pid+' 0 obj\n<</Type/Page/Parent 2 0 R/MediaBox [0 0 595.28 841.89]/Resources<</XObject<</Im0 '+iid+' 0 R>>>>/Contents '+cid+' 0 R>>\nendobj\n');
+    offs[cid]=off;str(cid+' 0 obj\n<</Length '+cs.length+'>>\nstream\n'+cs+'\nendstream\nendobj\n');
+    offs[iid]=off;str(iid+' 0 obj\n<</Type/XObject/Subtype/Image/Width '+pc.width+'/Height '+pc.height+'/ColorSpace/DeviceRGB/BitsPerComponent 8/Filter/DCTDecode/Length '+jpg.length+'>>\nstream\n');push(jpg);str('\nendstream\nendobj\n');});
+  const total=3*n+3,xo=off;let x='xref\n0 '+total+'\n0000000000 65535 f \n';
+  for(let id=1;id<total;id++)x+=String(offs[id]).padStart(10,'0')+' 00000 n \n';
+  x+='trailer\n<</Size '+total+'/Root 1 0 R>>\nstartxref\n'+xo+'\n%%EOF';str(x);
+  return new Blob(parts,{type:'application/pdf'});}
+async function exportPdf(){
+  let blob;try{blob=pagesToPdf(reportPages());}catch(e){toast('PDF 만들기에 실패했습니다. 인쇄 기능을 이용해 주세요');return;}
+  const name='축의금_명단정산서_'+stamp()+'.pdf';
+  try{const f=new File([blob],name,{type:'application/pdf'});if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],title:name});return;}}catch(e){if(e&&e.name==='AbortError')return;}
+  const url=URL.createObjectURL(blob);dl(name,'',null,blob);
+  showModal(`<h3>📄 PDF를 만들었습니다</h3><div style="font-size:17px;line-height:1.6">자동으로 저장되지 않았다면 아래 버튼을 누르세요.<br>열린 PDF 화면에서 <b>공유 → 카톡</b>으로 혼주께 보내면 됩니다.</div>
+  <a class="go" style="display:block;text-align:center;text-decoration:none;margin-top:12px" href="${url}" target="_blank" download="${esc(name)}">📄 PDF 열기·저장</a><button class="btn full" id="mClose2">닫기</button>`);$('#mClose2').onclick=closeModal;}
+
 /* ====== 탭·이벤트 ====== */
 let tab='in';
 function show(t){tab=t;['in','list','calc','set'].forEach(k=>$('#tab-'+k).hidden=k!==t);
@@ -448,7 +511,7 @@ document.addEventListener('click',e=>{
   else if(a==='copyBackup')copyBackup();
   else if(a==='pasteMerge'){const v=$('#pasteBox').value;if(!v.trim()){toast('붙여넣은 내용이 없습니다');}else{mergeText(v);}}
   else if(a==='backup')doBackup();else if(a==='csv')doCsv();else if(a==='share')shareText();
-  else if(a==='print')printSheet();else if(a==='reset')resetAll();else if(a==='restoreTrash')restoreTrash();});
+  else if(a==='print')printSheet();else if(a==='pdf')exportPdf();else if(a==='reset')resetAll();else if(a==='restoreTrash')restoreTrash();});
 document.addEventListener('input',e=>{const t=e.target;
   if(t.dataset.k==='amt')updBig(t.dataset.p);
   else if(t.dataset.k==='name')updDup(t.dataset.p);
