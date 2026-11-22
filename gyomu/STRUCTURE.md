@@ -412,3 +412,6 @@ service cloud.firestore {
 - 새 화면에 구역을 붙이려면 `<h3 class="h3">`로 시작하는 소제목을 main 바로 아래에 두면 자동으로 접힘.
 - 오늘 도우미(helper.js)는 기본 접힘(S.profile.hpOpen===true일 때만 열림).
 - v94: 오늘 화면에서 「오늘의 게시판」을 「오늘 꼭 할 일」 위로(placeBoard). 학급 관리는 최초 1회 navHide에 cm를 넣어 기본 숨김(메뉴 고르기에서 선택해야 메뉴·오늘 카드·떠 있는 단추가 보임, tf.cmhide).
+
+## v95 — 한글 읽기 보강(hwpfix.js)
+- 브라우저 DecompressionStream 실패("Failed to fetch") 시 자체 inflateJS로 다시 풀고, hwp는 SheetJS CFB로 2차 시도. 실패 시 안내 문구(HWPX·PDF로 저장).
