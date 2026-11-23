@@ -2012,6 +2012,7 @@ function scheduleDialog(text) {
 
 /* ---------- 꿈송이 챗봇 ---------- */
 const CH = [{ role: 'bot', blocks: [], text: '안녕하세요, 꿈송이입니다. 올려 두신 계획서·예산·회의록·업무 분장·연락망·규정 안에서 찾아 드립니다. 말이 대충이어도 괜찮아요.' }];
+let TF_renderMark = () => { };
 let chatOpen = false, busy = false;
 function openChat() { if (chatOpen) return; chatOpen = true; renderChat(); setTimeout(() => { const q = $('#chq'); q && q.focus(); }, 50); }
 function closeChat(viaLink) { if (!chatOpen) return; chatOpen = false; renderChat(); }
@@ -2097,7 +2098,10 @@ function sampleData() {
   render();
   TF.sync.start().catch(e => console.warn('동기화 시작 실패', e));
   if (!DEMO && 'serviceWorker' in navigator && /^https?:/.test(location.protocol)) navigator.serviceWorker.register('sw.js').catch(() => { });
-  setInterval(() => { if (!document.hidden && /today/.test(location.hash || '#/today') && !document.querySelector('dialog[open]') && !(document.activeElement && /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName))) render(); }, 60000);
+  { let lastTouch = Date.now(); ['pointerdown', 'keydown', 'wheel', 'touchstart'].forEach(ev => addEventListener(ev, () => { lastTouch = Date.now(); }, { passive: true }));
+    let lastRender = Date.now(), lastDay = today(); TF_renderMark = () => { lastRender = Date.now(); lastDay = today(); };
+    /* 화면 깜빡임 방지: 쓰고 있거나(30초 안 터치) 스크롤 내려 본 중이면 다시 그리지 않고, 날이 바뀌었거나 5분이 지났을 때만 새로 그립니다 */
+    setInterval(() => { if (document.hidden || !/today/.test(location.hash || '#/today') || document.querySelector('dialog[open]') || (document.activeElement && /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName))) return; if (Date.now() - lastTouch < 30000 || window.scrollY > 40) return; if (today() === lastDay && Date.now() - lastRender < 300000) return; const y = window.scrollY; render(); lastRender = Date.now(); lastDay = today(); window.scrollTo(0, y); }, 30000); }
 })();
 
 document.addEventListener('toggle', e => { const d = e.target; if (d && d.dataset && d.dataset.fonts && d.open) FONTS50.forEach(loadFont); }, true);
@@ -2348,6 +2352,7 @@ async function cloudPull(t) {
 }
 async function cloudTick(force) {
   if (!CLOUD.pass || CLOUD.busy || !navigator.onLine) return;
+  if (typeof TF_PW_ON === 'function' && TF_PW_ON()) return; /* 비밀번호 연동이 켜져 있으면 옛 연동은 쉬어서 서로 덮어쓰며 깜빡이는 일을 막음 */
   const ae = document.activeElement; if (!force && ae && /INPUT|TEXTAREA/.test(ae.tagName) && ae.id !== 'cloudpass') { CLOUD.again = true; return; }
   CLOUD.busy = true;
   try {
@@ -3712,7 +3717,7 @@ function clkDraw() {
   if (!on) { if (el) el.remove(); return; }
   if (!el) { el = document.createElement('div'); el.id = 'tfclock'; el.setAttribute('role', 'status'); document.body.appendChild(el); }
   const n = new Date(), st = clkState();
-  el.className = 'clk-' + st.cls; el.innerHTML = `<div class="ct">${clkHM(n.getHours() * 60 + n.getMinutes())}</div><div class="cd2">${n.getMonth() + 1}월 ${n.getDate()}일 (${DOW[n.getDay()]})</div><div class="cb">${esc(st.big)}</div><div class="cs">${esc(st.sub)}</div>${clkOffHtml()}${S.profile.cheerClk ? `<div class="cc">💌 ${esc(cheerPick(_cheerShift))}</div>` : ''}`; document.body.classList.toggle('hascc', !!S.profile.cheerClk);
+  el.className = 'clk-' + st.cls; const _h = `<div class="ct">${clkHM(n.getHours() * 60 + n.getMinutes())}</div><div class="cd2">${n.getMonth() + 1}월 ${n.getDate()}일 (${DOW[n.getDay()]})</div><div class="cb">${esc(st.big)}</div><div class="cs">${esc(st.sub)}</div>${clkOffHtml()}${S.profile.cheerClk ? `<div class="cc">💌 ${esc(cheerPick(_cheerShift))}</div>` : ''}`; if (el.__h !== _h) { el.__h = _h; el.innerHTML = _h; } document.body.classList.toggle('hascc', !!S.profile.cheerClk);
 }
 setInterval(clkDraw, 15000);
 /* ---------- 다꾸 ---------- */
@@ -5445,7 +5450,7 @@ buildChunks = function () {
 };
 
 /* 화면 맨 아래에 버전 표시 — 옛 화면을 보고 있는지 바로 알 수 있게 */
-const TF_VER = 'v103', _cmFt = footer;
+const TF_VER = 'v104', _cmFt = footer;
 footer = function () { return _cmFt.apply(this, arguments).replace('</footer>', ` · <span class="mu">버전 ${TF_VER} (학급 관리 포함)</span></footer>`); };
 
 /* 새 버전 알림: 옛 화면이 남아 있으면 한 번 눌러 새로 받게 함 */
@@ -6765,6 +6770,7 @@ function fabFit() {
    저장소 주소(Firebase 실시간 DB)는 코드에 넣지 않고 localStorage 'tf.db'에 둡니다(링크 ?sync=이름 으로 한 번 넣음). 대상: 일정·예산·수업·업무 등 S 전체(잠금 노트·올린 문서 원본·AI 키 제외). */
 (function () {
   const K_DB = 'tf.db', K_KEY = 'tf.pwk', K_MK = 'tf.pwm', enc = new TextEncoder(), dec = new TextDecoder();
+  window.TF_PW_ON = () => on();
   const st = { msg: '', busy: false }; let timer = 0, applying = false;
   const get = (k, d) => { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch (e) { return d; } };
   const mk = () => get(K_MK, { base: 0, rseen: 0, h: null }), setMk = m => localStorage.setItem(K_MK, JSON.stringify(m));

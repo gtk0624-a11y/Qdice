@@ -40,6 +40,7 @@ async function cloudPull(t) {
 }
 async function cloudTick(force) {
   if (!CLOUD.pass || CLOUD.busy || !navigator.onLine) return;
+  if (typeof TF_PW_ON === 'function' && TF_PW_ON()) return; /* 비밀번호 연동이 켜져 있으면 옛 연동은 쉬어서 서로 덮어쓰며 깜빡이는 일을 막음 */
   const ae = document.activeElement; if (!force && ae && /INPUT|TEXTAREA/.test(ae.tagName) && ae.id !== 'cloudpass') { CLOUD.again = true; return; }
   CLOUD.busy = true;
   try {

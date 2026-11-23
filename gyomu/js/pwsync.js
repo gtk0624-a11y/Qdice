@@ -3,6 +3,7 @@
    저장소 주소(Firebase 실시간 DB)는 코드에 넣지 않고 localStorage 'tf.db'에 둡니다(링크 ?sync=이름 으로 한 번 넣음). 대상: 일정·예산·수업·업무 등 S 전체(잠금 노트·올린 문서 원본·AI 키 제외). */
 (function () {
   const K_DB = 'tf.db', K_KEY = 'tf.pwk', K_MK = 'tf.pwm', enc = new TextEncoder(), dec = new TextDecoder();
+  window.TF_PW_ON = () => on();
   const st = { msg: '', busy: false }; let timer = 0, applying = false;
   const get = (k, d) => { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch (e) { return d; } };
   const mk = () => get(K_MK, { base: 0, rseen: 0, h: null }), setMk = m => localStorage.setItem(K_MK, JSON.stringify(m));

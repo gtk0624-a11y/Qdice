@@ -43,7 +43,7 @@ function clkDraw() {
   if (!on) { if (el) el.remove(); return; }
   if (!el) { el = document.createElement('div'); el.id = 'tfclock'; el.setAttribute('role', 'status'); document.body.appendChild(el); }
   const n = new Date(), st = clkState();
-  el.className = 'clk-' + st.cls; el.innerHTML = `<div class="ct">${clkHM(n.getHours() * 60 + n.getMinutes())}</div><div class="cd2">${n.getMonth() + 1}월 ${n.getDate()}일 (${DOW[n.getDay()]})</div><div class="cb">${esc(st.big)}</div><div class="cs">${esc(st.sub)}</div>${clkOffHtml()}${S.profile.cheerClk ? `<div class="cc">💌 ${esc(cheerPick(_cheerShift))}</div>` : ''}`; document.body.classList.toggle('hascc', !!S.profile.cheerClk);
+  el.className = 'clk-' + st.cls; const _h = `<div class="ct">${clkHM(n.getHours() * 60 + n.getMinutes())}</div><div class="cd2">${n.getMonth() + 1}월 ${n.getDate()}일 (${DOW[n.getDay()]})</div><div class="cb">${esc(st.big)}</div><div class="cs">${esc(st.sub)}</div>${clkOffHtml()}${S.profile.cheerClk ? `<div class="cc">💌 ${esc(cheerPick(_cheerShift))}</div>` : ''}`; if (el.__h !== _h) { el.__h = _h; el.innerHTML = _h; } document.body.classList.toggle('hascc', !!S.profile.cheerClk);
 }
 setInterval(clkDraw, 15000);
 /* ---------- 다꾸 ---------- */

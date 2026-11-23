@@ -475,6 +475,7 @@ function scheduleDialog(text) {
 
 /* ---------- 꿈송이 챗봇 ---------- */
 const CH = [{ role: 'bot', blocks: [], text: '안녕하세요, 꿈송이입니다. 올려 두신 계획서·예산·회의록·업무 분장·연락망·규정 안에서 찾아 드립니다. 말이 대충이어도 괜찮아요.' }];
+let TF_renderMark = () => { };
 let chatOpen = false, busy = false;
 function openChat() { if (chatOpen) return; chatOpen = true; renderChat(); setTimeout(() => { const q = $('#chq'); q && q.focus(); }, 50); }
 function closeChat(viaLink) { if (!chatOpen) return; chatOpen = false; renderChat(); }
@@ -560,7 +561,10 @@ function sampleData() {
   render();
   TF.sync.start().catch(e => console.warn('동기화 시작 실패', e));
   if (!DEMO && 'serviceWorker' in navigator && /^https?:/.test(location.protocol)) navigator.serviceWorker.register('sw.js').catch(() => { });
-  setInterval(() => { if (!document.hidden && /today/.test(location.hash || '#/today') && !document.querySelector('dialog[open]') && !(document.activeElement && /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName))) render(); }, 60000);
+  { let lastTouch = Date.now(); ['pointerdown', 'keydown', 'wheel', 'touchstart'].forEach(ev => addEventListener(ev, () => { lastTouch = Date.now(); }, { passive: true }));
+    let lastRender = Date.now(), lastDay = today(); TF_renderMark = () => { lastRender = Date.now(); lastDay = today(); };
+    /* 화면 깜빡임 방지: 쓰고 있거나(30초 안 터치) 스크롤 내려 본 중이면 다시 그리지 않고, 날이 바뀌었거나 5분이 지났을 때만 새로 그립니다 */
+    setInterval(() => { if (document.hidden || !/today/.test(location.hash || '#/today') || document.querySelector('dialog[open]') || (document.activeElement && /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName))) return; if (Date.now() - lastTouch < 30000 || window.scrollY > 40) return; if (today() === lastDay && Date.now() - lastRender < 300000) return; const y = window.scrollY; render(); lastRender = Date.now(); lastDay = today(); window.scrollTo(0, y); }, 30000); }
 })();
 
 document.addEventListener('toggle', e => { const d = e.target; if (d && d.dataset && d.dataset.fonts && d.open) FONTS50.forEach(loadFont); }, true);
