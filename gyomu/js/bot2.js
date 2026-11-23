@@ -127,7 +127,7 @@ agDo = function (a) {
 /* ---- 비서 루프 ---- */
 const B2_SYS = `당신은 교사 업무수첩 「업무파탈」 안의 비서 꿈송이입니다. 늘 존댓말로 짧고 정확하게 답합니다.
 - 질문에 답하려면 먼저 도구로 수첩을 직접 확인하세요. 추측하거나 기억으로 지어내지 마세요. 필요하면 도구를 여러 번, 여러 개 연달아 부르세요.
-- 규정·지침·절차·기한·가능 여부 질문은 반드시 find_rule을 먼저 부르고, 답에 근거 파일 이름을 「파일명」으로 밝히세요. 문서에 없으면 "올려 주신 자료에서는 찾지 못했습니다"라고 말하고 일반 상식으로 단정하지 마세요. 조항 원문은 짧게 인용합니다.
+- 규정·지침·학칙·조항을 묻는 질문은 당신의 영역이 아닙니다. "규정은 위쪽 📜 규정줍줍 탭에서 찾아 드려요"라고만 안내하세요. 문서에 없으면 "올려 주신 자료에서는 찾지 못했습니다"라고 말하고 일반 상식으로 단정하지 마세요. 조항 원문은 짧게 인용합니다.
 - 일정·할 일·업무 카드·예산·연수표를 넣거나 고치라는 요청은 쓰기 도구로 "제안"하세요. 제안은 사용자가 [적용]을 눌러야 반영됩니다. 날짜는 YYYY-MM-DD로, "내일·다음 주 금요일"은 오늘 날짜 기준으로 계산하세요. 삭제는 하지 않습니다.
 - 정리·요약·비교를 부탁받으면 읽은 내용을 표나 목록으로 깔끔하게 정리하세요. 어느 화면에서 볼 수 있는지 go_to로 링크를 붙이세요.
 - 정보가 모호하면 도구 호출 전에 한 가지만 되물으세요. 학생·교직원의 실명 명단은 이 수첩에 없으며 만들지도 않습니다.`;
@@ -140,7 +140,7 @@ const B2_LBL = { search_site: '사이트 검색', find_rule: '규정 찾기', li
 async function b2Loop(q) {
   const hist = CH.slice(-9, -1).filter(m => m.text).map(m => (m.role === 'me' ? '사용자: ' : '꿈송이: ') + b2Cut(m.text, 300)).join('\n');
   const msgs = [{ role: 'user', content: agContext() + (hist ? '\n\n[앞선 대화]\n' + hist : '') + '\n\n[요청]\n' + q }];
-  const tools = [...B2_READ, ...AG_TOOLS, ...B2_WRITE, B2_NAV], acts = [], links = [], seen = [];
+  const tools = [...B2_READ.filter(x => x.name !== 'find_rule'), ...AG_TOOLS, ...B2_WRITE, B2_NAV], acts = [], links = [], seen = [];
   let text = '';
   for (let n = 0; n < 9; n++) {
     const j = await b2Call({ model: B2_MODEL(), max_tokens: 2500, system: B2_SYS, tools, messages: msgs });
@@ -161,7 +161,7 @@ async function b2Loop(q) {
   }
   if (!text && !acts.length) return false;
   acts.forEach(a => { a.plan = agPlan(a); });
-  const rb = /find_rule/.test(seen.join()) ? b2RuleBlocks(q).slice(0, 3) : [];
+  const rb = [];
   const m = { role: 'bot', q, text: (text || '이렇게 처리하려고 합니다.') + (seen.length ? '\n\n🔎 확인한 곳: ' + seen.join(' · ') : ''), blocks: [...rb, ...links] };
   if (acts.length) { m.act = acts; m.applied = false; }
   CH.push(m); return true;
@@ -172,7 +172,7 @@ ask1 = async function (q) {
   q = q.trim(); if (!q || busy) return;
   CH.push({ role: 'me', text: q }); busy = true; renderChat();
   if (agKey()) { let ok = false; try { ok = await b2Loop(q); } catch (e) { CH.push({ role: 'bot', text: '비서 기능을 쓰지 못했습니다(' + e.message + '). 대신 수첩에서 직접 찾아 드릴게요.', blocks: [] }); } if (ok) { busy = false; renderChat(); return; } }
-  const rb = b2RuleIntent(q) || (LIB || []).some(d => d.kind === '규정') ? b2RuleBlocks(q) : [];
+  const rb = [];
   const dir = direct(q), hits = search(q), seenT = new Set(rb.map(b => b.text));
   const blocks = [...rb, ...dir.map(d => ({ src: d.src, text: d.text, ref: d.ref })), ...hits.filter(h => !seenT.has(h.c.text)).map(h => ({ src: h.c.src, text: h.c.text, ref: h.c.ref }))];
   const text = blocks.length ? '' : '올려 주신 자료에서 찾지 못했습니다. 규정·지침 파일은 [자료실]에 올려 두면 조항 단위로 찾아 드립니다. 다른 말로 한 번 더 물어봐 주세요.';

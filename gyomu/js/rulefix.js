@@ -31,15 +31,16 @@ renderChat = function () {
 addEventListener('resize', () => ruleFit());
 document.addEventListener('click', e => { const b = e.target.closest('[data-ctab]'); if (!b) return; window.__chTab = b.dataset.ctab; if (window.__chTab === 'rule') ruleFrame(); renderChat(); });
 const _ruleOpen = openChat; openChat = function () { ruleFrame(); return _ruleOpen.apply(this, arguments); };
-/* 규정·지침을 묻는 말이고, 규정줍줍에 문서가 들어 있으면 → 규정줍줍 탭으로 바로 넘겨 거기서 찾아 줍니다 */
+/* 영역 나누기: 규정·지침·학칙·조항을 묻는 말은 꿈송이 비서가 아니라 📜 규정줍줍 탭이 맡는다(문서가 없으면 탭만 열어 PDF 넣기를 안내).
+   일정·예산·업무·메모·자료실 질문과 시키는 일은 💬 꿈송이 비서가 맡는다. */
+const RULE_Q = /규정|지침|조항|학칙|규칙|복무|출장|결시|길라잡이|인정\s?(결석|점|사유)|며칠|해도\s?되|안\s?되|가능한가|처리\s?절차|제\s?\d+\s?조/;
 const _ruleAsk = ask1;
 ask1 = async function (q) {
   q = String(q || '').trim();
-  try {
-    const d = ruleFrame().contentDocument, n = d && d.getElementById('docCnt'), qi = d && d.getElementById('q'), fm = d && d.getElementById('ask');
-    if (q && n && qi && fm && +n.textContent > 0 && typeof b2RuleIntent === 'function' && b2RuleIntent(q)) {
-      window.__chTab = 'rule'; renderChat(); qi.value = q; fm.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true })); return;
-    }
-  } catch (e) { }
+  if (q && RULE_Q.test(q)) {
+    window.__chTab = 'rule'; renderChat();
+    try { const d = ruleFrame().contentDocument, n = d.getElementById('docCnt'), qi = d.getElementById('q'), fm = d.getElementById('ask'); if (n && +n.textContent > 0) { qi.value = q; fm.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true })); } } catch (e) { }
+    return;
+  }
   return _ruleAsk.apply(this, arguments);
 };
