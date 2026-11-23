@@ -962,6 +962,13 @@ details.afold.help{box-shadow:none;background:transparent}
 .dwv2 .dwl a{flex:1;min-width:0;display:flex!important;flex-direction:row!important;align-items:center;gap:10px;text-decoration:none!important;border:0!important}.dwic{width:38px;height:38px;border-radius:11px;color:#fff;display:flex;align-items:center;justify-content:center;font-style:normal;font-weight:800;font-size:18px;flex:none}
 .dwtx{display:flex;flex-direction:column;min-width:0}.dwtx b{font-size:16px!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.dwtx small{font-size:12px;color:#6b7280}
 .dwv2 .dwst{font-size:22px;min-width:40px;min-height:40px}.dwg[hidden]{display:none}
+/* v113 서랍 밖 즐겨찾기: 크게, 한 번에 보이게, 바로 누르기 */
+.dw,.dw:has(details[open]){width:100%!important;max-width:none!important;display:block!important;box-sizing:border-box}
+.dw .dwf{max-width:none!important;flex-wrap:wrap!important;overflow:visible!important;white-space:normal!important;gap:8px!important;align-items:center!important;padding:2px 0 6px}
+.dw .dwf>b{font-size:15px!important;margin-right:2px}
+.dw .dwf a{display:inline-flex;align-items:center;gap:4px;background:#fff;border:1px solid rgba(0,0,0,.18)!important;border-radius:99px;padding:8px 14px;font-size:15px;font-weight:700;text-decoration:none!important;color:inherit;min-height:40px;box-shadow:0 1px 0 rgba(0,0,0,.06)}
+.dw .dwf a:hover,.dw .dwf a:focus{background:#fff8dc;outline:2px solid #C8960C}
+.dw>details{width:100%!important}
 </style>
 </head>
 <body>
@@ -5543,7 +5550,7 @@ buildChunks = function () {
 };
 
 /* 화면 맨 아래에 버전 표시 — 옛 화면을 보고 있는지 바로 알 수 있게 */
-const TF_VER = 'v112', _cmFt = footer;
+const TF_VER = 'v113', _cmFt = footer;
 footer = function () { return _cmFt.apply(this, arguments).replace('</footer>', ` · <span class="mu">버전 ${TF_VER} (학급 관리 포함)</span></footer>`); };
 
 /* 새 버전 알림: 옛 화면이 남아 있으면 한 번 눌러 새로 받게 함 */
