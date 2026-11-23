@@ -117,12 +117,22 @@ function bellEditor() {
   <p class="mu">시각 칸을 누르고 바꾸면 바로 저장되고, 시계의 "지금은 몇 교시"와 오늘 화면에 반영됩니다.</p>
   <table class="tbl"><thead><tr><th>교시</th><th>시작</th><th>끝</th><th></th></tr></thead><tbody>${base.map(x => `<tr><td>${x.p}교시</td><td><input type="time" data-bellp="${x.p}" data-w="s" value="${clkHM(x.s)}"></td><td><input type="time" data-bellp="${x.p}" data-w="e" value="${clkHM(x.e)}"></td><td><button class="x" data-act="bellDelP" data-p="${x.p}">삭제</button></td></tr>`).join('')}
   <tr><td><b>급식</b></td><td><input type="time" data-belll="s" value="${clkHM(L[0])}"></td><td><input type="time" data-belll="e" value="${clkHM(L[1])}"></td><td></td></tr></tbody></table>
-  <div class="tools"><button class="btn sm" data-act="bellAddP">+ 교시 추가</button><button class="btn sm" data-act="bellReset">기본값으로 되돌리기</button></div>
+  <div class="tools"><button class="btn sm pri" data-act="bellAlign">급식 뒤로 교시 자동 정렬</button><button class="btn sm" data-act="bellAddP">+ 교시 추가</button><button class="btn sm" data-act="bellReset">기본값으로 되돌리기</button></div>
   ${ov.length ? `<p class="mu"><b>행사 일과(그날만 적용)</b></p>${ov.map(o => `<div class="ls"><span class="lu">${esc(o.label || '행사 일과')} · ${md(o.from)}${o.to > o.from ? '~' + md(o.to) : ''} · ${o.bell.map(x => x.p + '교시 ' + clkHM(x.s) + '~' + clkHM(x.e)).join(', ')}${o.lunch ? ' · 급식 ' + clkHM(o.lunch[0]) + '~' + clkHM(o.lunch[1]) : ''}</span><button class="x" data-act="bellOvDel" data-id="${o.id}">삭제</button></div>`).join('')}` : ''}
   </details>`;
 }
 const _classView1 = classView;
 classView = function () { const h = _classView1(), i = h.indexOf('<h3 class="h3">② 교수학습'); return i < 0 ? h : h.slice(0, i) + bellEditor() + h.slice(i); };
+
+/* 급식 시간과 겹치는 교시는 급식이 끝난 뒤로 자동으로 밀기(이후 교시는 같은 간격 유지) */
+function bellAlignLunch() {
+  const L = (S.profile.bell || []).map(x => ({ ...x })).sort((a, b) => a.s - b.s), lu = clkParse(S.profile.lunchS) != null && clkParse(S.profile.lunchE) != null ? [clkParse(S.profile.lunchS), clkParse(S.profile.lunchE)] : null;
+  if (!lu || L.length < 2) return false;
+  const i = L.findIndex(x => x.e > lu[0] && x.s < lu[1] || x.s >= lu[0]); if (i < 0) return false;
+  const d = lu[1] - L[i].s; if (d <= 0) return false;
+  for (let k = i; k < L.length; k++) { L[k].s += d; L[k].e += d; }
+  S.profile.bell = L.sort((a, b) => a.p - b.p); return true;
+}
 function bellSaveFrom(root) {
   const rows = {}; root.querySelectorAll('[data-bellp]').forEach(i => { const p = +i.dataset.bellp, v = clkParse(i.value); (rows[p] = rows[p] || { p })[i.dataset.w] = v; });
   const L = Object.values(rows).filter(x => x.s != null && x.e != null && x.e > x.s).sort((a, b) => a.p - b.p);
@@ -131,12 +141,13 @@ function bellSaveFrom(root) {
   S.profile.bell = L; S.profile.start = clkHM(L[0].s); S.profile.classMin = modeOf(dur); if (gaps.length) S.profile.breakMin = modeOf(gaps);
   const a = root.querySelector('[data-belll="s"]'), b = root.querySelector('[data-belll="e"]');
   if (a && b && clkParse(a.value) != null && clkParse(b.value) != null && clkParse(b.value) > clkParse(a.value)) { S.profile.lunchS = a.value; S.profile.lunchE = b.value; }
-  commit(); toast('일과표를 저장했습니다.');
+  const moved = bellAlignLunch(); commit(); toast(moved ? '급식 시간과 겹치는 교시를 급식 뒤로 옮겼습니다.' : '일과표를 저장했습니다.');
 }
 document.addEventListener('change', e => { const t = e.target; if (t.dataset && (t.dataset.bellp || t.dataset.belll)) bellSaveFrom(t.closest('table') || document); });
 Object.assign(A, {
   bellAddP() { const L = (S.profile.bell && S.profile.bell.length) ? S.profile.bell.slice() : _clkP0().map(x => ({ ...x })); const last = L[L.length - 1] || { p: 0, e: 8 * 60 + 50 }, len = +S.profile.classMin || 45; L.push({ p: last.p + 1, s: last.e + (+S.profile.breakMin || 10), e: last.e + (+S.profile.breakMin || 10) + len }); S.profile.bell = L; commit(); },
   bellDelP(el) { const L = _clkP0().filter(x => x.p !== +el.dataset.p); if (!L.length) return toast('교시가 하나는 있어야 합니다.'); S.profile.bell = L; commit(); },
+  bellAlign() { if (bellAlignLunch()) { commit(); toast('급식 뒤로 교시를 옮겼습니다.'); } else toast('겹치는 교시가 없습니다.'); },
   bellReset() { sure('일과표를 기본값(9시 시작·45분 수업·10분 쉬는 시간)으로 되돌릴까요?', () => { S.profile.bell = []; S.profile.lunchS = ''; S.profile.lunchE = ''; commit(); }); },
   bellOvDel(el) { S.profile.bellOv = bellOvs().filter(o => o.id !== el.dataset.id); commit(); }
 });

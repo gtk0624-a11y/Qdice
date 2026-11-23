@@ -438,3 +438,4 @@ service cloud.firestore {
 - v116: 시간표 줄 순서(교시·급식)를 ▲▼로 바꾸기(S.profile.ttRows, app.js ttTokens/ttBase), 「순서 기본으로」.
 - v117: 시간표 급식 줄은 기본으로 4교시 다음(시각과 무관), ▲▼로 이동 가능.
 - v118: 시간표 줄 머리의 시작·끝 시각을 표에서 바로 고침(교시·급식), 일과표 자동 저장(class2.js bellSaveFrom은 가장 가까운 표 기준).
+- v119: 급식과 겹치는 교시는 급식 뒤로 자동 밀기(class2.js bellAlignLunch, 시각 수정 시 자동 + 「급식 뒤로 교시 자동 정렬」 버튼).
