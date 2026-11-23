@@ -33,7 +33,8 @@
     try {
       const r = await remote(), m = mk(), dirty = hsh() !== m.h, at = () => new Date().toLocaleTimeString('ko-KR');
       if (!r) { await push(); st.msg = '올렸습니다 ' + at(); }
-      else if (r.u > m.rseen && !(dirty && (S.updatedAt || 0) > r.u)) { await applyRemote(r, key()); st.msg = '불러왔습니다 ' + at(); }
+      else if (r.u > m.rseen && dirty) { await applyRemote(r, key(), true); await push(); st.msg = '두 기기 내용을 합쳤습니다 ' + at(); } /* 양쪽 다 바뀐 경우: 어느 쪽도 버리지 않고 합침 */
+      else if (r.u > m.rseen) { await applyRemote(r, key()); st.msg = '불러왔습니다 ' + at(); }
       else if (dirty || force) { await push(); st.msg = '올렸습니다 ' + at(); }
       else st.msg = '최신입니다 ' + at();
     } catch (e) { st.msg = '⚠ ' + e.message; }
