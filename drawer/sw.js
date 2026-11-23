@@ -1,6 +1,6 @@
 /* 도디쌤 서랍 - 서비스워커
    네트워크를 먼저 시도하고(항상 최신 목록), 인터넷이 안 될 때만 저장된 복사본을 보여줍니다. */
-const CACHE = "dosam-drawer-v4";
+const CACHE = "dosam-drawer-v5";
 const SHELL = ["./", "./index.html", "./manifest.json", "./icon-32.png", "./icon-192.png", "./icon-512.png"];
 
 self.addEventListener("install", e => {
