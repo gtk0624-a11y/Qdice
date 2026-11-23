@@ -36,9 +36,9 @@ const _ruleAsk = ask1;
 ask1 = async function (q) {
   q = String(q || '').trim();
   try {
-    const f = ruleFrame(), w = f.contentWindow;
-    if (q && w && typeof w.ask === 'function' && +w.eval('S.docs.length') > 0 && typeof b2RuleIntent === 'function' && b2RuleIntent(q)) {
-      window.__chTab = 'rule'; renderChat(); w.ask(q); return;
+    const d = ruleFrame().contentDocument, n = d && d.getElementById('docCnt'), qi = d && d.getElementById('q'), fm = d && d.getElementById('ask');
+    if (q && n && qi && fm && +n.textContent > 0 && typeof b2RuleIntent === 'function' && b2RuleIntent(q)) {
+      window.__chTab = 'rule'; renderChat(); qi.value = q; fm.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true })); return;
     }
   } catch (e) { }
   return _ruleAsk.apply(this, arguments);
