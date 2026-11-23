@@ -58,4 +58,31 @@
     return h.replace(mark, `<h3 class="h3">📱 비밀번호로 폰·PC 연동</h3><p class="mu">같은 비밀번호를 넣은 기기끼리 일정·예산·업무가 같아집니다(암호화되어 올라갑니다).</p><p>${!dbUrl() ? '연동 주소가 없습니다.' : !k ? '주소 준비됨 · 비밀번호를 정하면 켜집니다.' : '✅ 연동 켜짐'} ${esc(st.msg)}</p><div class="tools">${k ? '<button class="btn pri" data-act="pwNow">지금 동기화</button><button class="btn" data-act="pwOff">연동 끄기</button>' : '<button class="btn pri" data-act="pwOn">비밀번호 정하고 연동 켜기</button>'}<button class="btn sm" data-act="pwUrl">연동 주소 넣기</button><button class="btn sm" data-act="pwTest">연결 시험</button></div>${mark}`);
   }; }
   (async () => { try { const n = new URLSearchParams(location.search).get('sync'); if (!n || !/^[\w-]{3,40}$/.test(n)) return; const r = await fetch('kits/' + n + '.json', { cache: 'no-store' }); if (!r.ok) throw new Error('연동 정보를 찾지 못했습니다'); const j = await r.json(); if (j.tf !== 'sync' || !/^https:\/\//.test(j.db || '')) throw new Error('형식이 아닙니다'); localStorage.setItem(K_DB, j.db); history.replaceState(null, '', location.pathname + '#/set'); toast('연동 주소를 넣었습니다. 설정에서 비밀번호를 정하세요.'); location.hash = '#/set'; TF.render && TF.render(); } catch (e) { toast('연동 링크 실패: ' + e.message); } })();
+
+  /* v103: 비밀번호를 다시 치지 않고 한 번에 연결 — 연결 링크(주소 뒤 # 부분은 서버로 가지 않음)를 카톡 나에게 보내기 등으로 다른 기기에서 열면 끝 */
+  const b64u = t => btoa(unescape(encodeURIComponent(t))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''), unb64u = t => decodeURIComponent(escape(atob(t.replace(/-/g, '+').replace(/_/g, '/'))));
+  async function joinWith(j) {
+    try {
+      localStorage.setItem(K_DB, j.db.replace(/\/+$/, '')); localStorage.setItem(K_KEY, JSON.stringify(j.k)); setMk({ base: 0, rseen: 0, h: null });
+      const r = await remote(j.k); if (r) { await applyRemote(r, j.k); st.msg = '연동 켜짐 · 불러왔습니다'; } else { await push(); st.msg = '연동 켜짐 · 처음 올렸습니다'; }
+      render();
+    } catch (e) { localStorage.removeItem(K_KEY); toast('연동 실패: ' + e.message); }
+  }
+  Object.assign(A, {
+    pwLink() {
+      if (!on()) { toast('먼저 이 기기에서 비밀번호로 연동을 켜 주세요.'); return; }
+      const link = location.href.split('#')[0].split('?')[0] + '#join=' + b64u(JSON.stringify({ db: dbUrl(), k: key() })), msg = '업무파탈 연결 링크입니다. 다른 기기에서 열면 바로 연동됩니다(남에게 보내지 마세요).\n' + link;
+      const d = document.createElement('dialog'); d.className = 'dlg';
+      d.innerHTML = `<form method="dialog"><h3>🔗 다른 기기 연결 링크</h3><p class="mu">폰·태블릿에서 이 링크를 한 번 열면 비밀번호 없이 바로 연동됩니다. <b>링크가 곧 열쇠</b>이므로 카톡 나에게 보내기 등으로 본인만 받으세요. 연결 뒤 메시지는 지우세요.</p><textarea readonly rows="4" style="width:100%">${esc(link)}</textarea><div class="btns"><button type="button" class="pri" data-x="share">📤 보내기·공유</button><button type="button" data-x="copy">복사</button><button value="ok">닫기</button></div></form>`;
+      document.body.appendChild(d); d.addEventListener('click', async e => { const x = e.target.dataset && e.target.dataset.x; if (x === 'copy') { try { await navigator.clipboard.writeText(link); toast('복사했습니다.'); } catch (er) { d.querySelector('textarea').select(); toast('길게 눌러 복사하세요.'); } } if (x === 'share') { if (navigator.share) { try { await navigator.share({ title: '업무파탈 연결', text: msg }); } catch (er) { } } else { try { await navigator.clipboard.writeText(msg); toast('복사했습니다. 카톡 나에게 보내기에 붙여넣으세요.'); } catch (er) { toast('복사 버튼을 눌러 주세요.'); } } } });
+      d.addEventListener('close', () => d.remove()); d.showModal();
+    }
+  });
+  { const _s2 = setView; setView = function () { const h = _s2.apply(this, arguments), m = '<h3 class="h3">📱 비밀번호로 폰·PC 연동</h3>'; return h.indexOf(m) < 0 ? h : h.replace(m, m + (on() ? '<div class="tools"><button class="btn pri" data-act="pwLink">🔗 다른 기기 연결 링크 만들기 (한 번에 연동)</button></div>' : '')); }; }
+  setTimeout(() => {
+    const m = /^#join=([\w-]+)$/.exec(location.hash); if (!m) return;
+    let j; try { j = JSON.parse(unb64u(m[1])); if (!/^https:\/\/[\w.-]+\.(firebasedatabase\.app|firebaseio\.com)\/?$/.test(j.db) || !j.k || !j.k.id || !j.k.k) throw 0; } catch (e) { history.replaceState(null, '', location.pathname + location.search + '#/today'); toast('연결 링크가 올바르지 않습니다.'); return; }
+    history.replaceState(null, '', location.pathname + location.search + '#/today');
+    sure('이 기기를 연동할까요? 이 기기의 내용은 연동된 최신 내용으로 바뀝니다(되돌리기 가능).', () => joinWith(j), '연동하기');
+  }, 1200);
 })();
