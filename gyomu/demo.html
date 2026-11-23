@@ -950,6 +950,9 @@ details.afold>summary small{font-weight:500;opacity:.7}
 details.afold>.afb{padding:2px 14px 14px}
 details.afold.help>summary{font-weight:600;font-size:.95em;opacity:.85}
 details.afold.help{box-shadow:none;background:transparent}
+/* v98 규정줍줍 화면 */
+.ruleWrap{max-width:980px;margin:0 auto}.ruleframe{display:block;width:100%;height:calc(100vh - 210px);height:calc(100dvh - 210px);min-height:480px;border:1.5px solid var(--line,#ddd);border-radius:12px;background:#fff}
+@media(max-width:700px){.ruleframe{height:calc(100dvh - 170px)}}
 </style>
 </head>
 <body>
@@ -1588,7 +1591,7 @@ function masthead() {
   return `<header class="mast"><div class="mast1"><img class="logo" src="${LOGO || DEFLOGO}" alt="내 이미지"><h1 data-act="editTitle" title="눌러서 제목 고치기">${esc(titleOf())}</h1><span class="fr" data-act="editTitle">${esc(p.sub || 'Travail Fatal')}</span><button class="x" data-act="editTitle" aria-label="제목 고치기">✎</button></div><div class="mast2"><div class="dt">${n.getFullYear()}년 ${n.getMonth() + 1}월 ${n.getDate()}일 (${DOW[n.getDay()]})</div><div>${esc([p.school, p.name && p.name + ' 선생님'].filter(Boolean).join(' · '))}</div></div></header>`;
 }
 function nav(page) {
-  const L0 = [['today', '오늘'], ['cal', '캘린더'], ['work', '내 업무'], ['hub', '총괄'], ['wlog', '업무일지'], ['class', '수업 및 시간표'], ['eval', '평가'], ['budget', '예산'], ['notes', '기록'], ['pages', '페이지'], ['lib', '자료·연락'], ['files', '자료 아카이브'], ['yp', '연간 교육·훈련'], ...(typeof cmCfg === 'function' && cmCfg().on ? [['cm', cmCfg().title || '학급 관리']] : []), ['set', '설정']];
+  const L0 = [['today', '오늘'], ['cal', '캘린더'], ['work', '내 업무'], ['hub', '총괄'], ['wlog', '업무일지'], ['class', '수업 및 시간표'], ['eval', '평가'], ['budget', '예산'], ['notes', '기록'], ['pages', '페이지'], ['lib', '자료·연락'], ['files', '자료 아카이브'], ['rule', '규정줍줍'], ['yp', '연간 교육·훈련'], ...(typeof cmCfg === 'function' && cmCfg().on ? [['cm', cmCfg().title || '학급 관리']] : []), ['set', '설정']];
   const L = (typeof navOrder === 'function' ? navOrder(L0) : L0).filter(([k]) => k === 'today' || k === 'set' || k === (page === 'note' ? 'notes' : page === 'page' ? 'pages' : page) || !(S.navHide || []).includes(k));
   return `<nav class="nav" aria-label="메뉴">${L.map(([k, v]) => `<a href="#/${k}" ${page === k || (k === 'notes' && page === 'note') || (k === 'pages' && page === 'page') ? 'aria-current="page"' : ''}>${v}</a>`).join('')}<button class="nvx" data-act="navPick" title="위쪽 메뉴 고르기">☰ 메뉴 고르기</button><button class="nvx" data-act="ibx">📨 메신저 붙여넣기</button></nav>`;
 }
@@ -1823,7 +1826,7 @@ function render() {
   if (!S.setup) { app.innerHTML = welcome(); if (cbx) cbx.hidden = true; return; }
   if (cbx) cbx.hidden = false;
   const [, page = 'today', arg] = (location.hash || '#/today').split('/');
-  const body = { today: todayView, cal: calView, class: classView, budget: budgetView, notes: () => notesView(), note: () => notesView(arg), pages: () => pagesView(), page: () => pagesView(arg), lib: libView, files: () => (typeof filesView === 'function' ? filesView() : libView()), eval: () => (typeof evalView === 'function' ? evalView() : classView()), set: setView, arch: () => archView(arg), cm: () => (typeof cmView === 'function' ? cmView() : todayView()), yp: () => (typeof ypView === 'function' ? ypView() : todayView()), work: () => (typeof workView === 'function' ? workView() : todayView()), wlog: () => (typeof wlogView === 'function' ? wlogView() : todayView()), hub: () => (typeof hubView === 'function' ? hubView() : todayView()) }[page] || todayView;
+  const body = { today: todayView, cal: calView, class: classView, budget: budgetView, notes: () => notesView(), note: () => notesView(arg), pages: () => pagesView(), page: () => pagesView(arg), lib: libView, files: () => (typeof filesView === 'function' ? filesView() : libView()), eval: () => (typeof evalView === 'function' ? evalView() : classView()), set: setView, arch: () => archView(arg), cm: () => (typeof cmView === 'function' ? cmView() : todayView()), yp: () => (typeof ypView === 'function' ? ypView() : todayView()), work: () => (typeof workView === 'function' ? workView() : todayView()), wlog: () => (typeof wlogView === 'function' ? wlogView() : todayView()), hub: () => (typeof hubView === 'function' ? hubView() : todayView()), rule: () => (typeof ruleView === 'function' ? ruleView() : todayView()) }[page] || todayView;
   app.innerHTML = masthead() + nav(page) + `<main>${typeof backBtn === 'function' ? backBtn(page) : ''}${typeof pageMemo === 'function' ? pageMemo(page) : ''}${body()}${typeof pageFiles === 'function' ? pageFiles(page) : ''}</main>` + footer();
   if (page === 'note') mountNote(arg);
   if (page === 'page') mountPage();
@@ -2025,7 +2028,7 @@ function renderChat() {
   <div class="ch-b" id="chlog">${CH.length ? '' : `<div class="hello"><img src="${mas()}" alt="꿈송이"><div class="bb"><b>안녕하세요, 꿈송이예요!</b><br>회의록·계획서·예산·일정·연락망·연수 이수번호까지, 이 수첩에 적은 건 뭐든 물어보세요. 말을 대충 해도 찾아 드려요.</div></div>`}${CH.map((m, mi) => m.role === 'me' ? `<div class="me">${esc(m.text)}</div>` : `<div class="bot">${m.text ? `<p>${esc(m.text).replace(/\n/g, '<br>')}</p>` : ''}${typeof agentCard === 'function' && m.act ? agentCard(m, mi) : ''}${(m.blocks || []).map((b, i) => `<div class="hit"><span class="no">${i + 1}</span><div><div>${b.html || snippet(b.text, m.q || '')}</div><div class="src">출처: ${esc(b.src)} ${b.ref ? `<a href="${esc(b.ref)}" ${/^http/.test(b.ref) ? 'target="_blank" rel="noopener"' : 'data-chat="go"'}>원문 열기</a>` : ''}</div></div></div>`).join('')}${m.blocks && m.blocks.length || m.text.length > 60 ? `<div class="ch-act"><button class="x" data-chat="copy" data-i="${mi}">복사</button><button class="x" data-chat="export" data-i="${mi}">문서로 내보내기</button><button class="x" data-chat="print" data-i="${mi}">🖍 형광펜 PDF</button></div>` : ''}</div>`).join('')}${busy ? '<div class="bot"><p class="mu">찾는 중…</p></div>' : ''}</div>
   <div class="ch-q">${['내 담당 업무', '예산 잔액', '이번 주 마감', '연수 이수 현황', '출장 규정 알려줘', '이번 달 할 일 정리'].map(s => `<button class="chip" data-chat="ask" data-q="${s}">${s}</button>`).join('')}</div>
   ${chatKeyBar()}
-  <form class="ch-f" data-chatform><label class="btn sm file" title="규정·지침 PDF/한글/워드 올리기">📎<input type="file" id="chatUp" accept=".pdf,.hwp,.hwpx,.docx,.txt,.xlsx,.xls,.csv" multiple hidden></label><label class="sr" for="chq">질문</label><input id="chq" autocomplete="off" placeholder="찾기: 저번 회의에서 체육관 돈 누가… / 시키기(키 필요): 내일 3시 회의 일정 넣어줘" ><button class="btn pri">묻기</button></form>`;
+  <form class="ch-f" data-chatform><a class="btn sm" href="#/rule" data-chat="go" title="규정줍줍 화면 열기">📜</a><label class="btn sm file" title="규정·지침 PDF/한글/워드 올리기">📎<input type="file" id="chatUp" accept=".pdf,.hwp,.hwpx,.docx,.txt,.xlsx,.xls,.csv" multiple hidden></label><label class="sr" for="chq">질문</label><input id="chq" autocomplete="off" placeholder="찾기: 저번 회의에서 체육관 돈 누가… / 시키기(키 필요): 내일 3시 회의 일정 넣어줘" ><button class="btn pri">묻기</button></form>`;
   const l = $('#chlog'); l.scrollTop = l.scrollHeight;
 }
 async function ask1(q) {
@@ -3143,7 +3146,7 @@ Object.assign(A, {
 
 /* 화면 순서 바꾸기: 오늘 게시판의 줄 순서 + 위쪽 메뉴 순서. 사람마다 중요한 것이 다르므로 직접 정합니다. */
 const ORD_ROWS = [['r1', '일과'], ['r2', '할 일'], ['r3', '공문'], ['r4', '수업'], ['r5', '평가'], ['r6', '예산'], ['r7', '연수'], ['r8', '기록'], ['r9', '업무 분장표'], ['r11', '내 업무'], ['r12', '급식'], ['r10', '교내 연락망'], ['r13', '디데이·기한 알림']];
-const ORD_NAV = [['today', '오늘'], ['cal', '캘린더'], ['class', '수업 및 시간표'], ['eval', '평가'], ['budget', '예산'], ['notes', '기록'], ['pages', '페이지'], ['lib', '자료·연락'], ['files', '자료 아카이브']];
+const ORD_NAV = [['today', '오늘'], ['cal', '캘린더'], ['class', '수업 및 시간표'], ['eval', '평가'], ['budget', '예산'], ['notes', '기록'], ['pages', '페이지'], ['lib', '자료·연락'], ['files', '자료 아카이브'], ['rule', '규정줍줍']];
 const ORD_PRESETS = {
   '업무 중심': { rows: ['r3', 'r2', 'r9', 'r11', 'r1', 'r6', 'r7', 'r5', 'r4', 'r8', 'r12', 'r10'], nav: ['today', 'cal', 'budget', 'notes', 'lib', 'class', 'pages'] },
   '예산 중심': { rows: ['r6', 'r3', 'r2', 'r7', 'r1', 'r11', 'r5', 'r4', 'r8', 'r9', 'r12', 'r10'], nav: ['budget', 'today', 'cal', 'notes', 'lib', 'class', 'pages'] },
@@ -5437,7 +5440,7 @@ buildChunks = function () {
 };
 
 /* 화면 맨 아래에 버전 표시 — 옛 화면을 보고 있는지 바로 알 수 있게 */
-const TF_VER = 'v97', _cmFt = footer;
+const TF_VER = 'v98', _cmFt = footer;
 footer = function () { return _cmFt.apply(this, arguments).replace('</footer>', ` · <span class="mu">버전 ${TF_VER} (학급 관리 포함)</span></footer>`); };
 
 /* 새 버전 알림: 옛 화면이 남아 있으면 한 번 눌러 새로 받게 함 */

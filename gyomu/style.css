@@ -940,3 +940,6 @@ details.afold>summary small{font-weight:500;opacity:.7}
 details.afold>.afb{padding:2px 14px 14px}
 details.afold.help>summary{font-weight:600;font-size:.95em;opacity:.85}
 details.afold.help{box-shadow:none;background:transparent}
+/* v98 규정줍줍 화면 */
+.ruleWrap{max-width:980px;margin:0 auto}.ruleframe{display:block;width:100%;height:calc(100vh - 210px);height:calc(100dvh - 210px);min-height:480px;border:1.5px solid var(--line,#ddd);border-radius:12px;background:#fff}
+@media(max-width:700px){.ruleframe{height:calc(100dvh - 170px)}}

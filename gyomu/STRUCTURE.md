@@ -417,3 +417,4 @@ service cloud.firestore {
 - 브라우저 DecompressionStream 실패("Failed to fetch") 시 자체 inflateJS로 다시 풀고, hwp는 SheetJS CFB로 2차 시도. 실패 시 안내 문구(HWPX·PDF로 저장).
 - v96: 연동 시험 잔여 경로 정리(pwTest DELETE/안내문), 라이브 전수 점검(파일 7종·14개 화면 이상 없음)
 - v97: 챗봇 📎 규정 올리기(자료실 '규정'으로 저장→규정줍줍 검색), 🖍 형광펜 PDF(찾은 조항에 노란 형광펜, 인쇄창에서 PDF 저장)/문서 내보내기에도 형광펜. app.js chHl, bot2.js 끝부분
+- v98: 메뉴 '규정줍줍' 추가 — 도디쌤의 규정줍줍(gyujeong/, 원본 PDF 화면·쪽수·형광펜 인쇄·AI 키 선택)을 iframe으로 통째로 넣음. js/rulefix.js(ruleView, 챗봇 Claude 키→gj.aiKey 자동 복사). 저장은 같은 사이트 주소의 IndexedDB를 규정줍줍 단독 앱과 공유. 규정줍줍 고칠 때는 gyujeong/index.html(원본 /Qdice/gyujeong와 같은 파일을 복사한 것)

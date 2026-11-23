@@ -1,0 +1,1384 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>도디쌤의 규정줍줍</title>
+<meta name="description" content="규정·길라잡이·각종 계획서에서 근거를 찾아 드립니다.">
+<meta name="theme-color" content="#1f3a68">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+/* ===== [화면 꾸밈] 색은 여기 :root 에서 바꿉니다 ===== */
+:root{--navy:#1f3a68;--navy2:#2d4f8a;--yel:#f9cf7a;--yel2:#fdeec9;--mint:#8fe3c0;--bg:#f4f6fa;--line:#d9dee8;--red:#d93025;--grn:#1a8f55;--txt:#1c2533;--sub:#667085;color-scheme:light}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{font-family:"Pretendard","Malgun Gothic","맑은 고딕","Apple SD Gothic Neo",system-ui,sans-serif;font-size:15px;line-height:1.55;color:var(--txt);background:var(--bg);display:flex;flex-direction:column;max-width:640px;margin:0 auto;border-left:1px solid var(--line);border-right:1px solid var(--line)}
+button{font:inherit;cursor:pointer}
+header.top{display:flex;align-items:center;gap:6px;padding:9px 10px;background:var(--navy);color:#fff;flex:none}
+.ava{width:38px;height:38px;border-radius:50%;background:#fff;flex:none;object-fit:cover}
+.ttl{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.25;cursor:pointer;border-radius:8px}
+.ttl:hover{background:rgba(255,255,255,.1)}
+.tin{width:100%;border:1.5px solid var(--line);border-radius:9px;padding:7px 10px;font:inherit;font-size:14px;margin-top:4px}
+.ttl b{font-size:15.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ttl span{font-size:11.5px;opacity:.82;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hb{position:relative;border:0;background:rgba(255,255,255,.14);color:#fff;border-radius:10px;min-width:36px;height:38px;font-size:17px;padding:0 6px;flex:none}
+.hb:hover{background:rgba(255,255,255,.26)}
+.hb i[hidden]{display:none}
+.hb i{position:absolute;right:-3px;top:-4px;background:var(--yel);color:#222;font-style:normal;font-size:11px;font-weight:700;border-radius:9px;min-width:18px;height:18px;line-height:18px;text-align:center;padding:0 4px}
+#warn{background:#fff4e5;border-bottom:1px solid #f1c27d;color:#7a4b00;font-size:13px;padding:8px 12px;flex:none}
+#warn button{margin-left:6px}
+#msgs{flex:1;overflow-y:auto;padding:12px 10px 6px;scroll-behavior:smooth}
+.m{display:flex;gap:7px;margin-bottom:11px;align-items:flex-start}
+.m.me{justify-content:flex-end}
+.m img.a{width:32px;height:32px;flex:none;object-fit:contain;margin-top:1px}
+.bb{background:#fff;border:1px solid var(--line);border-radius:4px 14px 14px 14px;padding:9px 11px;max-width:calc(100% - 38px);min-width:0;overflow-wrap:anywhere}
+.m.me .bb{background:var(--navy);color:#fff;border-color:var(--navy);border-radius:14px 4px 14px 14px;max-width:84%}
+.hello{display:flex;gap:10px;align-items:center}
+.hello img{width:74px;height:auto;flex:none}
+.note{font-size:13.5px;color:#3b2a00;margin:10px 0 0;padding:9px 12px 9px 28px;background:#fff4d6;border:1.5px solid #f1c96b;border-radius:10px;font-weight:600;line-height:1.6}
+.note b{color:#b42318}
+.note li{margin:3px 0}
+.note li::marker{color:#d97706}
+.mine{border:1px solid #f1d58a;background:#fffaf0;border-radius:10px;padding:8px 10px;margin-top:9px;font-size:13px;line-height:1.6}
+.mine b:first-child{color:#7a4b00}
+.mine ul{margin:4px 0 0;padding-left:1.1em}
+.mine li{margin:2px 0}
+.must{margin-top:10px;border:2.5px solid #d92d20;background:#fef3f2;border-radius:12px;padding:10px 12px 10px 12px}
+.must .mt{font-size:15.5px;font-weight:800;color:#b42318;margin-bottom:4px}
+.must ul{margin:0;padding-left:1.2em;font-size:15px;line-height:1.65;color:#55160c;font-weight:600}
+.must li{margin:4px 0}
+.must li::marker{color:#d92d20}
+.must b{color:#b42318}
+ol.guide.tg{padding-left:1.5em}
+ol.guide.tg li{margin:0 0 4px}
+ol.guide.tg summary{cursor:pointer;padding:5px 2px;list-style:none}
+ol.guide.tg summary::-webkit-details-marker{display:none}
+ol.guide.tg summary::after{content:' ▾';color:var(--sub);font-size:12px}
+ol.guide.tg details[open] summary::after{content:' ▴'}
+ol.guide.tg summary:hover{background:var(--yel2);border-radius:6px}
+ol.guide.tg .gd{padding:2px 0 6px 2px;color:#344054}
+.pinbox{border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin-top:8px;background:#fbfcfe}
+.pinbox>b:first-child{color:var(--navy)}
+ol.guide{margin:6px 0 0;padding-left:1.4em;font-size:13.5px;line-height:1.6}
+ol.guide li{margin:0 0 7px}
+ol.guide li b:first-child{color:var(--navy)}
+.b{border:1px solid var(--navy);background:var(--navy);color:#fff;border-radius:9px;padding:7px 12px;font-size:14px;font-weight:600}
+.b:hover{background:var(--navy2)}
+.b.g{background:#fff;color:var(--navy)}
+.b.g:hover{background:#eef2f9}
+.b.s{padding:4px 9px;font-size:12.5px;font-weight:500}
+.b.r{background:#fff;color:var(--red);border-color:var(--red)}
+.b:disabled{opacity:.45;cursor:default}
+.row{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:8px}
+/* 찾은 결과 카드 */
+.c{border:1px solid var(--line);border-left:4px solid var(--navy);border-radius:8px;background:#fbfcfe;margin-top:8px;padding:8px 9px}
+.c.f{border-left-color:#98a2b3}
+.ch{display:flex;flex-wrap:wrap;gap:5px;align-items:center;font-size:12px;color:var(--sub)}
+.pg{background:var(--yel);color:#3b2a00;font-weight:700;border-radius:6px;padding:1px 7px;font-size:12px;white-space:nowrap}
+.src{margin:5px 0 3px;font-size:14.5px;font-weight:800;color:#0b2a5b;background:#eaf1ff;border-left:4px solid var(--navy);border-radius:6px;padding:4px 8px;line-height:1.4;overflow-wrap:anywhere}
+.c.f .src{background:#f2f4f7;border-left-color:#98a2b3}
+.up{font-size:11.5px;color:var(--sub);margin-top:3px}
+.ct{font-weight:700;font-size:14.5px;margin:2px 0 4px;color:var(--navy)}
+.cx{white-space:pre-wrap;font-size:14px;line-height:1.6}
+.cx.cut{color:#344054}
+mark{background:#ffe27a;color:inherit;border-radius:3px;padding:0 1px}
+mark.a{background:#bff0dc;font-weight:700}
+.an{font-size:12px;color:var(--sub);margin-top:6px}
+.an b{color:var(--navy)}
+.dchips{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}
+.dchips button{border:1px solid var(--line);background:#fff;border-radius:14px;padding:2px 9px;font-size:12px;color:var(--navy)}
+.dchips button.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+.cb{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}
+.w{font-size:12px;color:var(--sub);margin-top:8px}
+.w b{color:#7a4b00}
+/* 추천 질문 */
+#btnPin.pinbar{display:flex;align-items:center;gap:4px;width:calc(100% - 20px);margin:4px 10px 0;border:1.5px dashed #e3b453;background:#fff7e3;color:#5c3d00;border-radius:10px;padding:6px 10px;font-size:13px;flex:none;text-align:left}
+#btnPin.pinbar span{margin-left:auto;font-weight:700}
+#btnPin.pinbar:hover{background:var(--yel2)}
+#btnPin.pinbar[hidden]{display:none}
+#chips{display:flex;gap:6px;overflow-x:auto;padding:6px 10px 2px;flex:none;scrollbar-width:thin}
+#chips:empty{display:none}
+#chips button{flex:none;border:1px solid var(--line);background:#fff;border-radius:16px;padding:4px 11px;font-size:12.5px;color:var(--navy);white-space:nowrap}
+#chips button:hover{background:var(--yel2);border-color:var(--yel)}
+form#ask{display:flex;gap:6px;padding:8px 10px 10px;flex:none;background:var(--bg)}
+#q{flex:1;min-width:0;border:1.5px solid var(--line);border-radius:12px;padding:10px 12px;font:inherit;font-size:16px;background:#fff}
+#q:focus{outline:0;border-color:var(--navy)}
+form#ask button{border:0;background:var(--navy);color:#fff;border-radius:12px;padding:0 16px;font-weight:700;font-size:15px}
+form#ask button.clr{background:#fff;color:var(--navy);border:1.5px solid var(--line);padding:0 11px;font-size:18px;font-weight:700}
+form#ask button.clr:hover{background:var(--yel2);border-color:var(--yel)}
+/* 문서·설정 창 */
+.panel{position:fixed;inset:0;background:rgba(15,25,45,.45);display:none;z-index:20;justify-content:center;align-items:flex-end}
+.panel.on{display:flex}
+.sheet{background:#fff;width:100%;max-width:640px;max-height:92%;border-radius:16px 16px 0 0;display:flex;flex-direction:column}
+.sh{display:flex;align-items:center;padding:12px 14px;border-bottom:1px solid var(--line);font-weight:700;font-size:16px;flex:none}
+.sh span{flex:1}
+.sh button{border:0;background:#eef1f6;border-radius:8px;width:34px;height:32px;font-size:15px}
+.sb{padding:12px 14px 18px;overflow-y:auto}
+.dz{border:2px dashed #9fb0cc;border-radius:12px;padding:16px 10px;text-align:center;background:#f7f9fd;color:var(--navy);cursor:pointer}
+.dz:hover{background:var(--yel2);border-color:var(--yel)}
+.dz small{display:block;color:var(--sub);margin-top:3px}
+.prog{margin-top:10px;font-size:13px}
+.bar{height:8px;background:#e6eaf2;border-radius:6px;overflow:hidden;margin-top:4px}
+.bar i{display:block;height:100%;background:var(--navy);width:0;transition:width .15s}
+.doc{display:flex;gap:8px;align-items:flex-start;border:1px solid var(--line);border-radius:10px;padding:9px 10px;margin-top:8px}
+.doc.off{opacity:.55}
+.doc .dn{flex:1;min-width:0}
+.doc .dn b{display:block;overflow-wrap:anywhere;font-size:14px}
+.doc .dn span{font-size:12px;color:var(--sub)}
+.sw{position:relative;width:42px;height:24px;flex:none;margin-top:2px}
+.sw input{opacity:0;width:100%;height:100%;margin:0;cursor:pointer;position:absolute;z-index:1}
+.sw i{position:absolute;inset:0;background:#c9d0dc;border-radius:12px;transition:.15s}
+.sw i:after{content:"";position:absolute;left:3px;top:3px;width:18px;height:18px;background:#fff;border-radius:50%;transition:.15s}
+.sw input:checked+i{background:var(--grn)}
+.sw input:checked+i:after{left:21px}
+h3{font-size:14.5px;margin:18px 0 6px;color:var(--navy)}
+h3:first-child{margin-top:0}
+.ai{background:#eef6ff;border:1px solid #b9d4f5;border-radius:10px;padding:8px 10px;margin-bottom:8px;font-size:14px}.ai .ait{margin:4px 0;line-height:1.7;font-size:15px;white-space:pre-line}.aiw{font-size:12px;color:var(--sub);font-weight:400}
+.hint{font-size:12.5px;color:var(--sub);margin:4px 0}
+textarea{width:100%;min-height:150px;border:1.5px solid var(--line);border-radius:10px;padding:8px 10px;font:inherit;font-size:13.5px;line-height:1.6;resize:vertical}
+ol.steps{margin:6px 0 0;padding-left:1.3em;font-size:13.5px}
+ol.steps li{margin:3px 0}
+.ix{display:flex;gap:7px;align-items:baseline;width:100%;text-align:left;border:0;border-bottom:1px solid #eef1f6;background:none;padding:7px 2px;font-size:14px;color:var(--txt)}
+.ix:hover{background:var(--yel2)}
+.ix .pg{flex:none}
+.ix.lv2{padding-left:16px}
+.ixg{font-size:12px;color:var(--sub);font-weight:700;margin:12px 0 2px}
+#idxDoc{flex:1;min-width:0;border:1.5px solid var(--line);border-radius:9px;padding:6px 8px;font:inherit;font-size:13.5px;background:#fff}
+#idxQ{width:100%;margin-top:8px;border:1.5px solid var(--line);border-radius:9px;padding:7px 10px;font:inherit;font-size:14px}
+.rq{display:inline-block;border:1px solid var(--line);background:#fff;border-radius:14px;padding:3px 10px;margin:0 5px 5px 0;font-size:12.5px;color:var(--navy)}
+.rq:hover{background:var(--yel2)}
+.sv{border:1px solid var(--line);border-left:4px solid var(--yel);border-radius:8px;padding:8px 9px;margin-top:8px}
+.sv .st{font-weight:700;color:var(--navy);font-size:14px;margin:2px 0}
+.sv .sx{font-size:13px;color:#344054;white-space:pre-wrap;max-height:4.8em;overflow:hidden}
+.sv textarea{min-height:44px;margin-top:6px;font-size:13px}
+.copy{font-size:11.5px;color:var(--sub);text-align:center;margin-top:18px}
+ #pv{position:fixed;inset:0;z-index:30;background:#525659;display:flex;flex-direction:column}
+#pv[hidden]{display:none}
+.pvh{display:flex;align-items:center;gap:4px;padding:6px 6px;background:var(--navy);color:#fff;flex:none}
+.pvt{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.2;padding:0 4px}
+.pvt b{font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pvt span{font-size:11.5px;opacity:.85;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pvb{border:0;background:rgba(255,255,255,.16);color:#fff;border-radius:8px;min-width:32px;height:32px;font-size:15px;flex:none}
+.pvb:hover{background:rgba(255,255,255,.3)}
+#pvNo{font-size:12.5px;min-width:52px;text-align:center;flex:none}
+#pvBody{flex:1;overflow:auto;padding:10px 8px}
+#pvMenu{position:absolute;right:6px;top:46px;z-index:2;background:#fff;border-radius:12px;box-shadow:0 6px 24px rgba(0,0,0,.35);padding:6px;display:flex;flex-direction:column;min-width:230px}
+#pvMenu[hidden]{display:none}
+#pvMenu button{border:0;background:none;text-align:left;padding:9px 10px;border-radius:8px;font-size:14px;color:var(--txt);font-weight:600}
+#pvMenu button:hover{background:var(--yel2)}
+#pvMenu small{display:block;font-weight:400;font-size:11.5px;color:var(--sub)}
+#pv{position:fixed}
+.pvp{position:relative;margin:0 auto 10px;flex:none;background:#fff;box-shadow:0 1px 6px rgba(0,0,0,.35)}
+.pvp canvas{display:block;width:100%;height:100%}
+.pvp .pvl{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#98a2b3;font-size:13px}
+.pvp .hl{position:absolute;background:rgba(255,213,0,.45);mix-blend-mode:multiply;border-radius:2px;pointer-events:none}
+.pvp.tg{outline:3px solid #f59e0b}
+.pvp .pvn{position:absolute;right:6px;bottom:4px;font-size:11px;color:#667085;background:rgba(255,255,255,.8);padding:0 4px;border-radius:4px}
+#drop{position:fixed;inset:0;background:rgba(31,58,104,.88);color:#fff;z-index:40;display:none;align-items:center;justify-content:center;font-size:20px;font-weight:700;text-align:center;padding:20px}
+#drop.on{display:flex}
+#toast{position:fixed;left:50%;bottom:76px;transform:translateX(-50%);background:#222c3d;color:#fff;border-radius:10px;padding:8px 14px;font-size:13.5px;z-index:50;opacity:0;pointer-events:none;transition:opacity .2s;max-width:90%;text-align:center}
+#toast.on{opacity:1}
+@media (max-width:380px){ body{font-size:14.5px} .hello img{width:58px} .ttl span{display:none} }
+</style>
+<script>if(window.parent!==window)document.documentElement.classList.add("emb")</script><style>.emb #btnPin,.emb #installBox{display:none!important}</style></head>
+<body>
+
+<header class="top">
+  <img class="ava" src="dodi.jpg" alt="도디쌤">
+  <div class="ttl" id="ttlBox" title="눌러서 제목·부제 바꾸기" role="button" tabindex="0"><b id="tMain">도디쌤의 규정줍줍</b><span id="tSub">규정·길라잡이·각종 계획서에서 근거를 찾아 드립니다.</span></div>
+  <button class="hb" id="btnIdx" type="button" title="색인(목차·가나다)" aria-label="색인">📑</button>
+  <button class="hb" id="btnSaved" type="button" title="저장함" aria-label="저장함">⭐<i id="savCnt" hidden>0</i></button>
+  <button class="hb" id="btnDocs" type="button" title="문서 넣기·관리" aria-label="문서 넣기·관리">📚<i id="docCnt">0</i></button>
+  <button class="hb" id="btnSet" type="button" title="설정" aria-label="설정">⚙</button>
+</header>
+<div id="warn" hidden></div>
+
+<main id="msgs" aria-live="polite"></main>
+<button type="button" id="btnPin" class="pinbar" hidden>📌 화면 맨 아래 <b>작업표시줄</b>에 꽂아 두기 <span>›</span></button>
+<div id="chips"></div>
+<form id="ask" autocomplete="off">
+  <button type="button" id="btnClear" class="clr" data-act="clearChat" title="대화 초기화 (넣은 문서는 그대로)" aria-label="대화 초기화">↺</button>
+  <input id="q" type="text" placeholder="궁금한 것을 물어보세요" enterkeyhint="search" aria-label="질문">
+  <button type="submit">찾기</button>
+</form>
+
+<!-- 문서 창 -->
+<div class="panel" id="pDocs" role="dialog" aria-label="내 문서">
+  <div class="sheet">
+    <div class="sh"><span>📚 내 문서</span><button type="button" data-act="close" aria-label="닫기">✕</button></div>
+    <div class="sb">
+      <div class="dz" id="dz" data-act="pick" role="button" tabindex="0"><b>📄 PDF를 여기에 끌어다 놓거나 눌러서 고르세요</b><small>여러 개를 한 번에 넣어도 됩니다 · 이 컴퓨터에만 저장됩니다</small></div>
+      <div id="prog"></div>
+      <div id="docList"></div>
+      <p class="hint">· 한글(.hwp) 파일은 한글에서 <b>[파일] → [PDF로 저장하기]</b> 후 넣어 주세요.<br>· 스캔한 그림 PDF(글자를 드래그해 복사할 수 없는 것)는 찾을 수 없습니다.<br>· <b style="color:var(--red)">학생 이름·개인정보가 든 문서는 넣지 마세요.</b></p>
+    </div>
+  </div>
+</div>
+
+<!-- 색인 창 -->
+<div class="panel" id="pIdx" role="dialog" aria-label="색인">
+  <div class="sheet">
+    <div class="sh"><span>📑 색인</span><button type="button" data-act="close" aria-label="닫기">✕</button></div>
+    <div class="sb">
+      <div class="row" style="margin-top:0">
+        <select id="idxDoc" aria-label="문서 고르기"></select>
+        <button class="b s" type="button" data-act="idxMode" data-m="toc" id="idxToc">목차순</button>
+        <button class="b g s" type="button" data-act="idxMode" data-m="abc" id="idxAbc">가나다순</button>
+      </div>
+      <input id="idxQ" type="text" placeholder="제목 안에서 거르기 (예: 재심)" aria-label="색인 거르기">
+      <div id="idxList"></div>
+    </div>
+  </div>
+</div>
+
+<!-- 저장함 -->
+<div class="panel" id="pSaved" role="dialog" aria-label="저장함">
+  <div class="sheet">
+    <div class="sh"><span>⭐ 저장함</span><button type="button" data-act="close" aria-label="닫기">✕</button></div>
+    <div class="sb">
+      <h3>🕘 최근 검색</h3>
+      <div id="recentList"></div>
+      <h3>⭐ 저장한 조항</h3>
+      <p class="hint">찾은 결과의 <b>[⭐ 저장]</b>을 누르면 여기에 모여요. 메모도 적을 수 있어요.</p>
+      <div id="savedList"></div>
+    </div>
+  </div>
+</div>
+
+<!-- 설정 창 -->
+<div class="panel" id="pSet" role="dialog" aria-label="설정">
+  <div class="sheet">
+    <div class="sh"><span>⚙ 설정</span><button type="button" data-act="close" aria-label="닫기">✕</button></div>
+    <div class="sb">
+      <div class="row" style="margin-top:0"><button class="b g s" type="button" data-act="guide">📖 사용법 보기</button></div>
+      <div id="mineBox"></div>
+      <h3 id="tHead">🏷 제목·부제 바꾸기</h3>
+      <p class="hint">위쪽 띠에 보이는 제목과 부제를 내 업무에 맞게 바꿀 수 있어요. (이 컴퓨터에만 적용)</p>
+      <label class="hint">제목</label><input id="tMainIn" class="tin" maxlength="30" placeholder="도디쌤의 규정줍줍">
+      <label class="hint">부제</label><input id="tSubIn" class="tin" maxlength="60" placeholder="규정·길라잡이·각종 계획서에서 근거를 찾아 드립니다.">
+      <div class="row"><button class="b s" type="button" data-act="tSave">저장</button><button class="b g s" type="button" data-act="tReset">처음 제목으로</button></div>
+      <h3>📌 화면 맨 아래 작업표시줄에 꽂아 두기</h3>
+      <div id="installBox"></div>
+
+      <h3>🤖 AI 한 줄 답변 (선택)</h3>
+      <p class="hint">Claude 키를 넣으면 찾은 조항을 바탕으로 <b>한 줄 답</b>을 원문 위에 얹어 줍니다. 키가 없으면 지금처럼 원문만 보여 줍니다. 키는 <b>이 컴퓨터에만</b> 저장되고, 질문과 찾은 조항 몇 개가 Anthropic으로 전송됩니다(Haiku 5.5 · 질문 1번에 1원 안팎). 학생 개인정보가 든 문서는 넣지 마세요. 키는 platform.claude.com 에서 선불 충전 후 만듭니다.</p>
+      <input id="aiKeyIn" class="tin" type="password" autocomplete="off" placeholder="sk-ant-…">
+      <div class="row"><button class="b s" type="button" data-act="aiSave">키 저장</button><button class="b g s" type="button" data-act="aiClear">키 지우기</button><span id="aiState" class="hint"></span></div>
+      <h3>🔁 같은 뜻 낱말 (동의어 사전)</h3>
+      <p class="hint">한 줄에 한 묶음, 쉼표로 나눕니다. 질문에 한 낱말이 있으면 같은 줄의 낱말도 함께 찾습니다.<br>예) <b>휴대폰, 휴대전화, 스마트폰</b></p>
+      <textarea id="synBox" spellcheck="false"></textarea>
+      <div class="row"><button class="b s" type="button" data-act="synSave">저장</button><button class="b g s" type="button" data-act="synReset">기본값으로 되돌리기</button></div>
+
+      <h3>📦 문서 묶음 주고받기</h3>
+      <p class="hint">넣어 둔 문서를 파일 하나로 내보내 같은 업무 선생님이나 후임자에게 줄 수 있습니다. 받는 분은 [묶음 가져오기]만 누르면 됩니다. 브라우저 기록을 지우기 전 백업으로도 쓰세요.</p>
+      <div id="packList"></div>
+      <div class="row"><button class="b s" type="button" data-act="packOut">묶음 내보내기</button><button class="b g s" type="button" data-act="packIn">묶음 가져오기</button></div>
+
+      <h3>↺ 대화 초기화</h3>
+      <p class="hint">화면의 질문·답만 지웁니다. 넣어 둔 문서와 같은 뜻 낱말은 그대로 남습니다. (입력창 왼쪽 ↺ 버튼과 같아요)</p>
+      <div class="row"><button class="b g s" type="button" data-act="clearChat">대화 초기화</button></div>
+
+      <h3>🧹 모두 지우기</h3>
+      <p class="hint">이 컴퓨터에 넣어 둔 문서, 동의어 사전, 저장함, 최근 검색을 모두 지웁니다.</p>
+      <div class="row"><button class="b r s" type="button" data-act="wipe">모두 지우기</button></div>
+
+      <div class="copy">도디쌤의 규정줍줍 <span id="ver"></span><br>© 김정환 · M.A.D.T (Moral And Digital Teacher)</div>
+    </div>
+  </div>
+</div>
+
+<!-- 원문 PDF 보기 창 -->
+<div id="pv" hidden>
+  <div class="pvh">
+    <button type="button" class="pvb" data-act="pvClose" aria-label="닫기">✕</button>
+    <div class="pvt"><b id="pvName"></b><span id="pvInfo"></span></div>
+    <button type="button" class="pvb" data-act="pvGo" data-d="-1" aria-label="이전 쪽">◀</button>
+    <span id="pvNo">-</span>
+    <button type="button" class="pvb" data-act="pvGo" data-d="1" aria-label="다음 쪽">▶</button>
+    <button type="button" class="pvb" data-act="pvZoom" data-d="-1" aria-label="작게">－</button>
+    <button type="button" class="pvb" data-act="pvZoom" data-d="1" aria-label="크게">＋</button>
+    <button type="button" class="pvb" data-act="pvPrintMenu" title="인쇄" aria-label="인쇄">🖨</button>
+    <button type="button" class="pvb" data-act="pvNew" title="크롬 PDF 보기로 새 창에서 열기" aria-label="새 창">⧉</button>
+  </div>
+  <div id="pvMenu" hidden>
+    <button type="button" data-act="pvPrint" data-m="hit">🖍 찾은 부분만 인쇄<small>형광펜이 있는 부분과 앞뒤 몇 줄</small></button>
+    <button type="button" data-act="pvPrint" data-m="half">📄 그 쪽만 인쇄<small>한 장에 두 쪽이면 찾은 쪽 한 면만</small></button>
+    <button type="button" data-act="pvPrint" data-m="page">🗒 지금 보이는 장 전체 인쇄</button>
+  </div>
+  <div id="pvBody"></div>
+</div>
+<div id="drop">📄 여기에 놓으면 문서를 넣습니다</div>
+<input type="file" id="file" accept=".pdf,application/pdf" multiple hidden>
+<input type="file" id="filePack" accept=".json,application/json" hidden>
+<div id="toast" role="status"></div>
+
+<script>
+/* ===== 엔진: 글자 정리 · 문서 자르기 · 찾기 (화면과 무관한 순수 계산) ===== */
+const Engine=(function(){
+'use strict';
+
+/* ---------- 1. 글자 조각 → 줄 ---------- */
+function itemsToLines(items){
+  const its=items.filter(i=>i.s && i.s.trim()!=='');
+  its.sort((a,b)=>(b.y-a.y)||(a.x-b.x));
+  const lines=[];
+  for(const it of its){
+    const h=it.h||10; let ln=null;
+    for(let k=lines.length-1;k>=0 && k>=lines.length-4;k--){
+      if(Math.abs(lines[k].y-it.y)<=Math.max(2,Math.min(h,lines[k].h)*0.45)){ ln=lines[k]; break; }
+    }
+    if(!ln){ ln={y:it.y,h:h,items:[]}; lines.push(ln); }
+    ln.items.push(it);
+  }
+  return lines.map(ln=>{
+    ln.items.sort((a,b)=>a.x-b.x);
+    let s='', end=null;
+    for(const it of ln.items){
+      if(end!==null){
+        const gap=it.x-end, fh=it.h||ln.h||10;
+        if(gap>fh*1.5) s+='  ';
+        else if(gap>fh*0.18 && !/\s$/.test(s) && !/^\s/.test(it.s)) s+=' ';
+      }
+      s+=it.s; end=it.x+(it.w||0);
+    }
+    return {y:ln.y,x:ln.items[0].x,h:ln.h,s:s.replace(/[ \t]+$/,'')};
+  });
+}
+
+/* ---------- 2. 한 장에 두 쪽이 나란히 인쇄된 PDF(모아찍기) 나누기 ---------- */
+function splitSheet(items,W,H){
+  if(!(W>H*1.15)) return [items];
+  const mid=W/2, band=W*0.025; let L=0,R=0,cross=0;
+  for(const i of items){
+    if(!i.s || !i.s.trim()) continue;
+    const x2=i.x+(i.w||0);
+    if(i.x<mid+band && x2>mid-band) cross++;
+    else if(x2<=mid-band) L++; else R++;
+  }
+  const n=L+R+cross;
+  if(n<10 || L<3 || R<3) return [items];
+  if(cross<=Math.max(1,n*0.01)) return [items.filter(i=>i.x+(i.w||0)/2<mid), items.filter(i=>i.x+(i.w||0)/2>=mid)];
+  return [items];
+}
+
+/* ---------- 3. 쪽 정리: 인쇄된 쪽 번호 찾기, 반복되는 머리말·꼬리말 빼기 ---------- */
+const PAGENO=/^[-–—‐]?\s*(\d{1,4})\s*[-–—‐]?$/;
+function buildPages(sheets){
+  // sheets: [{W,H,items}] → pages: [{label,lines:[글자]}]
+  const pages=[];
+  sheets.forEach((sh,si)=>{
+    const halves=splitSheet(sh.items,sh.W,sh.H);
+    halves.forEach((its,hi)=>{
+      const lines=itemsToLines(its);
+      pages.push({sheet:si+1, half:halves.length>1?(hi===0?'왼쪽':'오른쪽'):'', H:sh.H, lines, no:null});
+    });
+  });
+  const inBand=(ln,H)=>ln.y<H*0.09 || ln.y>H*0.93;
+  const cnt={};
+  pages.forEach(p=>{
+    const seen=new Set();
+    p.lines.forEach(ln=>{
+      if(!inBand(ln,p.H)) return;
+      const t=ln.s.trim(); const m=t.match(PAGENO);
+      if(m && p.no===null){ p.no=m[1]; ln.drop=true; return; }
+      const k=t.replace(/\d+/g,'#'); if(k.length>=2 && !seen.has(k)){ seen.add(k); cnt[k]=(cnt[k]||0)+1; }
+    });
+  });
+  const need=Math.max(3,Math.ceil(pages.length*0.4));
+  pages.forEach(p=>{
+    p.lines.forEach(ln=>{ if(!ln.drop && inBand(ln,p.H)){ const k=ln.s.trim().replace(/\d+/g,'#'); if(cnt[k]>=need) ln.drop=true; } });
+  });
+  return pages.map(p=>({
+    label: p.no!==null ? 'p.'+p.no : ('PDF '+p.sheet+'번째 쪽'+(p.half?'('+p.half+')':'')),
+    printed: p.no!==null,
+    sheet: p.sheet,
+    lines: p.lines.filter(l=>!l.drop).map(l=>l.s.replace(/[ \t]{3,}/g,'  ').trim()).filter(Boolean)
+  }));
+}
+
+/* ---------- 4. 문서 자르기: 조항(제○조) → 제목(1 / 가. / 1)) → 길이 순 ---------- */
+const RE_JO=/^(제\s?(\d+)\s?조(?:\s?의\s?\d+)?\s*[\(（\[【〔][^\)）\]】〕]*[\)）\]】〕])\s*(.*)$/;
+const RE_JANG=/^제\s?(\d+)\s?[장편]\s*\S/;
+const RE_ROMAN=/^(?:[ⅠⅡⅢⅣⅤⅥⅦⅧⅨⅩ]+[\.\s]\s*|(?:I{1,3}|IV|V|VI{1,3}|IX|X)\.\s+)\S/;
+const RE_NSP=/^(\d{1,2})\s{2,}(\S.*)$/;
+const RE_NDOT=/^(\d{1,2})\.\s+(\S.*)$/;
+const RE_L2=/^[가-하]\.\s+\S/;
+const RE_L3=/^\d{1,2}\)\s*\S/;
+const RE_SUB=/^(?:\d{1,2}\)|[①-⑳]|[가-하]\))\s*\S/;
+const RE_FORM=/^\[?\s*((?:서식|별지|별표|붙임|부록)\s*(?:제\s?)?\d+(?:-\d+)?\s*(?:호)?)\s*\]?\s*(.*)$/;
+const RE_QA=/^(?:Q\s?\d*\s?[\.\):]|문\s?\d+\s?[\.\)])\s*\S/;
+function isSentence(s){ return /(?:다|요|함|음|임|됨|것)[\.\s]*$/.test(s) || /[,·ㆍ]$/.test(s); }
+function tableish(s){ return /\s{2,}|\/|□|▢|\[\s*\]|\(\s{1,}\)|:\s*$/.test(s); }
+const MAXLEN=900, MINLEN=70;
+function chunkPages(pages){
+  const raw=[]; let cur=null;
+  const st={l0:'',l1:'',l2:'',reg:'',lastN:0,style:'',romanSince:false,lastJo:0,inJo:false,inForm:false,prevLine:''};
+  const path=(...a)=>a.filter(Boolean).join(' › ');
+  let curSheet=1;
+  const start=(t,up,label,kind)=>{ cur={t,up,pg:label,sh:curSheet,x:[],kind:kind||''}; raw.push(cur); };
+  const size=c=>c.x.reduce((a,b)=>a+b.length+1,0);
+  const clean=s=>s.replace(/\s{2,}/g,' ').trim();
+  pages.forEach(pg=>{ curSheet=pg.sheet||curSheet;
+    for(let li=0;li<pg.lines.length;li++){
+      const line=pg.lines[li]; let m;
+      // (1) 조항
+      if((m=line.match(RE_JO))){
+        const n=+m[2];
+        const ok = n===1 || (st.lastJo>0 && n>=st.lastJo && n<=st.lastJo+3);
+        if(ok){
+          if(n===1 && st.lastJo!==0 && !st.jangFresh) { st.l0=''; }
+          if(n===1 && !st.jangFresh){ const p=st.prevLine; st.reg=(p && p.length<=40 && !isSentence(p) && !tableish(p))?clean(p):''; }
+          st.jangFresh=false; st.lastJo=n; st.inJo=true; st.inForm=false; st.l1=''; st.l2='';
+          start(clean(m[1]),path(st.reg,st.l0),pg.label,'jo'); if(m[3]) cur.x.push(m[3]);
+          st.prevLine=line; continue;
+        }
+      }
+      // (2) 장·편
+      if((m=line.match(RE_JANG)) && line.length<50 && !isSentence(line)){
+        if(+m[1]===1){ const p=st.prevLine; st.reg=(p && p.length<=40 && !isSentence(p) && !tableish(p))?clean(p):st.reg; st.jangFresh=true; st.lastJo=st.lastJo||0; }
+        st.l0=clean(line); st.l1=''; st.l2=''; st.romanSince=true; st.inForm=false; st.inJo=false;
+        start(st.l0,st.reg,pg.label,'top'); st.prevLine=line; continue;
+      }
+      // (3) 서식·별지·별표
+      if((m=line.match(RE_FORM)) && line.length<50 && !isSentence(line) && !(/^\[/.test(line) && m[2])){
+        let t=clean(m[1])+(m[2]?' '+clean(m[2]):'');
+        const nx=pg.lines[li+1];
+        if(!m[2] && nx && nx.length<=40 && !RE_FORM.test(nx) && !/\s{2,}/.test(nx)){ t+=' '+clean(nx); li++; }
+        st.inForm=true; st.inJo=false; st.l1=''; st.l2='';
+        start(t,'',pg.label,'form'); st.prevLine=line; continue;
+      }
+      const free=!st.inForm && !st.inJo;
+      // (4) 로마 숫자 큰 제목
+      if(free && RE_ROMAN.test(line) && line.length<=46 && !isSentence(line) && !tableish(line)){
+        st.l0=clean(line); st.l1=''; st.l2=''; st.romanSince=true;
+        start(st.l0,'',pg.label,'top'); st.prevLine=line; continue;
+      }
+      // (5) 숫자 제목: 1  제목 / 1. 제목 (번호가 차례로 이어질 때만)
+      if(!st.inJo && line.length<=46 && !isSentence(line)){
+        let sty=''; if((m=line.match(RE_NSP))) sty='sp'; else if((m=line.match(RE_NDOT))) sty='dot';
+        if(sty && !tableish(m[2])){
+          const n=+m[1];
+          const ok = st.style==='' ? (n===1 && !st.inForm) : (sty===st.style && (n===st.lastN+1 || (n===1 && st.romanSince && !st.inForm)));
+          if(ok){
+            st.style=sty; st.lastN=n; st.romanSince=false; st.inForm=false;
+            st.l1=clean(line); st.l2='';
+            start(st.l1,st.l0,pg.label,'top'); st.prevLine=line; continue;
+          }
+        }
+      }
+      // (6) 가. 나. 다. / 1) 2) 3) / Q&A
+      if(free && line.length<=46 && !isSentence(line) && !tableish(line)){
+        if(RE_L2.test(line) || RE_QA.test(line)){ st.l2=clean(line); start(st.l2,path(st.l0,st.l1),pg.label,'h'); st.prevLine=line; continue; }
+        if(RE_L3.test(line) && line.length<=30){ start(clean(line),path(st.l0,st.l1,st.l2),pg.label,'h'); st.prevLine=line; continue; }
+      }
+      if(free && RE_QA.test(line) && line.length<90){ st.l2=clean(line); start(st.l2,path(st.l0,st.l1),pg.label,'h'); st.prevLine=line; continue; }
+      // (7) 본문
+      if(!cur) start('','',pg.label,'');
+      if((size(cur)>=MAXLEN*0.6 && RE_SUB.test(line)) || size(cur)>=MAXLEN){
+        const base=cur.t.replace(/ \(이어서\)$/,''), up=cur.up, kind=cur.kind==='top'?'h':cur.kind;
+        start(base?base+' (이어서)':'',up,pg.label,kind);
+      }
+      cur.x.push(line); st.prevLine=line;
+    }
+  });
+  // 너무 짧은 조각은 앞 조각(같은 제목 아래이거나 바로 위 제목)에 붙이고, 끝까지 본문이 없는 큰 제목은 버림
+  let out=[];
+  raw.forEach(c=>{
+    const body=c.x.join('\n').trim(); const prev=out[out.length-1];
+    if(!c.t && !body) return;
+    if(prev && c.kind==='h' && body.length<MINLEN && prev.kind!=='form' && prev.kind!=='jo' && (prev.x.length+body.length)<MAXLEN*1.2){
+      const parent=(prev.up?prev.up+' › ':'')+prev.t.replace(/ \(이어서\)$/,'');
+      if(c.up===parent || (c.up===prev.up && (prev.kind!=='top' || prev.x))){ prev.x+=(prev.x?'\n':'')+c.t+(body?'\n'+body:''); return; }
+    }
+    out.push({t:c.t,up:c.up,pg:c.pg,sh:c.sh,x:body,kind:c.kind});
+  });
+  out=out.filter(c=>!(c.kind==='top' && !c.x));
+  out.forEach((c,i)=>{ c.i=i; if(!c.t) c.t=c.pg; if(c.kind==='form') c.f=1; delete c.kind; });
+  return out;
+}
+
+/* ---------- 5. 찾기 ---------- */
+const compact=s=>String(s||'').toLowerCase().replace(/[\s ·ㆍ‧∙•,\.\-–—_~:;'"‘’“”「」『』\(\)（）\[\]【】〔〕<>《》〈〉\/\\!?]+/g,'');
+const STOP=new Set(['어떻게','어떡해','무엇','뭐','뭘','뭐야','뭔가','언제','어디','누가','누구','왜','얼마','얼마나','몇','알려줘','알려주세요','알려줘요','가르쳐줘','찾아줘','찾아주세요','보여줘','있어','있나','있나요','있어요','없어','없나요','되나','되나요','돼','돼요','되요','될까','될까요','하나','하나요','해','해요','해도','해야','해야해','해야하나','해야하나요','해야돼','할','하는','한','하면','하려면','대해','대해서','대한','관련','관련된','관한','좀','수','것','거','건','게','때','경우','이거','그거','저거','그리고','또는','혹시','지금','우리','정도','무슨','어떤','어느','인지','인가','인가요','이야','야','요','가능','가능해','가능한가요','며칠','몇일','몇명','몇인','몇시간','몇번','몇회','몇차례','언제까지','언제부터','얼마동안','명','인','번','회','일','할수','있을까','있을까요','싶은데','싶어','하고','해도돼','해도되나요','괜찮아','괜찮나요','안돼','안되나요','뜻','의미']);
+const ENDING=['할수있나요','할수있어','할수있나','해야하나요','해야합니까','해야하나','해야해요','해야돼요','해야돼','해야해','하면되나요','하면돼요','하면돼','인가요','입니까','이에요','이예요','인데요','이야','예요','에요','하나요','합니까','할까요','하는지','한가요','해도돼','해도되나요','해요','해도','하면','하려면','하나','되나요','됩니까','될까요','되는지','돼요','되요','되나','인지','인가','이니','이냐','야','해','돼'];
+const JOSA=['한테는','에게는','께서','한테','께','으로부터','에게서','으로서','으로써','에서는','에서도','한테서','이라고','이라는','이라면','이란','에서','에게','한테','으로','부터','까지','처럼','보다','마다','조차','밖에','이나','이랑','하고','이면','이며','인데','인지','이고','은','는','이','가','을','를','에','의','로','도','만','과','와','랑','나','며','고','면'];
+function stripJosa(w){
+  // 말끝(…인가요, …해요)을 먼저 떼고, 그다음 조사(은·는·이·가…)를 뗌. 떼고 한 글자만 남으면 버림('')
+  for(const e of ENDING){ if(w.length>e.length && w.endsWith(e)){ const r=w.slice(0,-e.length); if(r.length<2) return /\d/.test(r)?r:''; w=r; break; } }
+  for(const j of JOSA){ if(w.length-j.length>=2 && w.endsWith(j)) return w.slice(0,-j.length); }
+  return w;
+}
+function parseSyn(text){
+  return String(text||'').split(/\n+/).map(l=>l.split(/[,，=]/).map(w=>compact(w)).filter(w=>w.length>=1)).filter(g=>g.length>=2);
+}
+/* 붙여 쓴 긴 말을 문서에 있는 낱말들로 쪼갬 (예: 출석정지기간 → 출석정지 + 기간) */
+function segment(w,has){
+  const out=[]; let i=0;
+  while(i<w.length){ let hit=''; for(let len=Math.min(8,w.length-i);len>=2;len--){ const p=w.substr(i,len); if(has(p)){ hit=p; break; } } if(hit){ out.push(hit); i+=hit.length; } else i++; }
+  return out;
+}
+function queryGroups(q,synGroups,has){
+  const words=String(q||'').split(/[\s,\.\?!·ㆍ\/\(\)\[\]「」"'“”‘’~]+/).map(w=>w.trim()).filter(Boolean);
+  const groups=[], seen=new Set();
+  const cq=compact(q);
+  const add=(base,cands,extra)=>{ if(seen.has(base)) return; seen.add(base); groups.push(Object.assign({base,cands},extra||{})); };
+  words.forEach(w=>{
+    const c=compact(w); if(!c) return;
+    if(STOP.has(c)) return;
+    const s=stripJosa(c);
+    if(!s || STOP.has(s)) return;
+    if(s.length<2 && !/\d/.test(s)) return;
+    const cands=[{w:c,k:1}]; if(s!==c) cands.push({w:s,k:1});
+    if(has && !cands.some(x=>has(x.w))){
+      // 문서에 없는 말 ①: 말끝을 한 글자씩 줄여, 문서에 있는 가장 긴 앞부분을 찾음 (통지해야 → 통지)
+      let stem=''; for(let cut=1;cut<=4 && s.length-cut>=2;cut++){ const p=s.slice(0,s.length-cut); if(has(p)){ stem=p; break; } }
+      if(stem && !STOP.has(stem)){ add(stem,[{w:stem,k:0.9}],{from:s}); return; }
+      // 문서에 없는 말 ②: 붙여 쓴 말을 문서에 있는 낱말로 쪼갬
+      if(s.length>=4){ const segs=segment(s,has).filter(x=>!STOP.has(x)); if(segs.length){ segs.forEach(x=>add(x,[{w:x,k:0.8}],{from:s})); return; } }
+    }
+    add(s,cands);
+  });
+  // 동의어: 질문 전체(띄어쓰기 무시)에 묶음의 낱말이 들어 있으면 같은 묶음 낱말도 함께 찾음
+  (synGroups||[]).forEach(g=>{
+    const hit=g.find(w=>w.length>=2 && cq.includes(w)); if(!hit) return;
+    let grp=groups.find(x=>x.cands.some(c=>c.w.includes(hit)||hit.includes(c.w)));
+    if(!grp){ grp={base:hit,cands:[{w:hit,k:1}]}; groups.push(grp); }
+    g.forEach(w=>{ if(!grp.cands.some(c=>c.w===w)) grp.cands.push({w,k:w===hit?1:0.8,syn:w!==hit}); });
+  });
+  return groups;
+}
+function count(hay,needle){ if(!needle) return 0; let n=0,i=0; while((i=hay.indexOf(needle,i))!==-1){ n++; i+=needle.length; if(n>=5) break; } return n; }
+
+/* corpus: [{doc, c(조각), ct(제목 압축), cx(본문 압축), dn(문서 이름 압축)}] + has(낱말이 문서 어딘가에 있는지) */
+function buildCorpus(docs){
+  const corpus=[], parts=[];
+  docs.forEach(d=>{ if(d.on===false) return; const dn=compact(d.name);
+    d.chunks.forEach(c=>{ const e={doc:d,c,ct:compact((c.up?c.up+' ':'')+c.t),cx:compact(c.x),dn}; corpus.push(e); parts.push(e.ct,e.cx); }); });
+  const all=parts.join('\n');
+  corpus.names=Array.from(new Set(corpus.map(e=>e.dn)));
+  corpus.hasText=w=>!!w && all.indexOf(w)!==-1;
+  corpus.has=w=>!!w && (all.indexOf(w)!==-1 || corpus.names.some(dn=>dn.includes(w)));   // 본문 또는 문서 이름에 있는 낱말
+  return corpus;
+}
+
+/* ---------- 질문 종류(무엇을 묻는가) → 답이 적혀 있을 법한 표현 ---------- */
+const INTENTS=[
+  {id:'기간',label:'기간·날짜',q:/며칠|몇일|언제까지|언제부터|언제|기한|얼마동안|얼마나오래|몇개월|몇달|몇주|몇년|기간/,a:'\\d+\\s*(?:일|개월|주일|주|년|시간)\\s*(?:이내|이상|이하|이전|전|후|까지|간|동안|내)|\\d+\\s*일|기한'},
+  {id:'인원',label:'인원',q:/몇명|몇인|몇사람|인원|정원/,a:'\\d+\\s*(?:명|인)(?:\\s*(?:이상|이하|이내|내외))?|과반수|\\d+\\s*분의\\s*\\d+'},
+  {id:'누구',label:'담당·주체',q:/누가|누구|담당자|담당은/,a:'(?:학교장|교장|교감|위원장|담임교사|담임|부장|담당\\s*교사|보호자|교육감|교육장|간사)(?:은|는|이|가)'},
+  {id:'금액',label:'금액',q:/얼마|금액|비용|단가|수당|여비/,a:'\\d[\\d,]*\\s*(?:원|천원|만원|%)'},
+  {id:'횟수',label:'횟수·시간',q:/몇번|몇회|몇차례|횟수|몇시간|몇차시/,a:'\\d+\\s*(?:회|번|차례|시간|차시)'},
+  {id:'가부',label:'가능 여부',q:/(?:해도|하면|써도|가도|받아도|줘도|어도|아도)(?:돼|되|될|괜찮)|가능|수있|수없|안돼|안되|금지|허용|되나요|되나|됩니까|돼요$|돼$/,a:'할\\s*수\\s*(?:있|없)|하여야\\s*한다|해야\\s*한다|아니\\s*된다|안\\s*된다|금지|제한|허용|불가'},
+  {id:'절차',label:'방법·절차',q:/어떻게|어떡해|방법|절차|순서|과정/,a:'절차|방법|순서|단계'},
+  {id:'정의',label:'뜻·정의',q:/뭐야|뭔가요|무엇|뜻|정의|의미|이란$|란$/,a:'(?:이)?란\\s|라\\s*함은|말한다|뜻한다|정의'},
+  {id:'서식',label:'서식',q:/서식|양식|별지|별표|붙임|서류/,a:''}
+];
+function detectIntents(q){ const cq=compact(q); return INTENTS.filter(it=>it.q.test(cq)); }
+function answerRegex(intents){ const p=(intents||[]).map(i=>i.a).filter(Boolean); if(!p.length) return null; try{ return new RegExp('('+p.join('|')+')','g'); }catch(e){ return null; } }
+
+function search(q,corpus,synGroups){
+  const has=corpus.has||(()=>true);
+  const groups=queryGroups(q,synGroups,has);
+  const intents=detectIntents(q);
+  const N=corpus.length; const res={groups,intents,hits:[],missing:[],total:0};
+  if(!groups.length || !N) return res;
+  const hasText=corpus.hasText||has; const names=corpus.names||[]; const nameWords=[];
+  groups.forEach(g=>{
+    g.cands=g.cands.filter(cd=>cd.w.length>=2||/\d/.test(cd.w));
+    if(g.cands.some(cd=>hasText(cd.w))) return;
+    // 본문에는 없고 문서 이름에만 있는 말(예: "학폭 길라잡이에서 …") → 그 문서를 위로 올리는 데만 씀
+    const nw=g.cands.filter(cd=>cd.w.length>=2 && names.some(dn=>dn.includes(cd.w))).map(cd=>cd.w);
+    if(nw.length && names.length>1){ g.name=true; nw.forEach(w=>nameWords.push(w)); } else g.none=true;
+  });
+  res.missing=groups.filter(g=>g.none).map(g=>g.base);
+  res.nameRefs=groups.filter(g=>g.name).map(g=>g.base);
+  const live=groups.filter(g=>!g.none && !g.name);
+  if(!live.length) return res;
+  live.forEach(g=>{ g.cands=g.cands.filter(cd=>hasText(cd.w)); let df=0; corpus.forEach(e=>{ if(g.cands.some(cd=>e.cx.includes(cd.w)||e.ct.includes(cd.w))) df++; }); g.w=Math.log(1+N/Math.max(1,df))+0.3; });
+  const cq=compact(q);
+  const wantForm=intents.some(i=>i.id==='서식');
+  const ansG=answerRegex(intents);
+  const wantHow=intents.some(i=>i.id==='절차');
+  // 질문에 문서 이름이 들어 있으면 그 문서를 위로 (문서가 여러 개일 때만)
+  if(names.length>1) live.forEach(g=>g.cands.forEach(cd=>{ if(cd.w.length<2) return; const n=names.filter(dn=>dn.includes(cd.w)).length; if(n>0 && n<=names.length/2) nameWords.push(cd.w); }));
+  corpus.forEach(e=>{
+    let score=0, matched=0; const words=[], pos=[];
+    live.forEach(g=>{
+      let best=0, bw='';
+      g.cands.forEach(cd=>{
+        const inT=e.ct.includes(cd.w), tf=count(e.cx,cd.w);
+        if(!inT && !tf) return;
+        const v=cd.k*(1+0.35*Math.min(tf,3)+(inT?1.6:0));
+        if(v>best){ best=v; bw=cd.w; }
+        if(!words.includes(cd.w)) words.push(cd.w);
+      });
+      if(best>0){ matched++; score+=g.w*best; const p=e.cx.indexOf(bw); if(p>=0) pos.push(p); }
+    });
+    if(!matched) return;
+    score*=0.55+0.45*(matched/live.length);
+    if(matched===live.length && live.length>1) score*=1.35;
+    if(pos.length>=2){ const span=Math.max.apply(null,pos)-Math.min.apply(null,pos); if(span<=40) score*=1.3; else if(span<=120) score*=1.15; }
+    if(cq.length>=4 && (e.cx.includes(cq)||e.ct.includes(cq))) score*=1.5;
+    if(e.cx.length<40) score*=0.6;                    // 본문이 거의 없는 조각은 뒤로
+    if(e.c.f) score*= wantForm ? 1.25 : 0.7;          // 서식은 서식을 물을 때만 위로
+    let ans=false;
+    if(ansG && !e.c.f){
+      // 질문 종류에 맞는 표현(○일 이내, ○인 이상 …)이 있으면 위로, 찾는 낱말 바로 곁에 있으면 더 위로
+      ansG.lastIndex=0; let m, n=0, near=false;
+      while((m=ansG.exec(e.c.x)) && n<8){ if(m[0]===''){ ansG.lastIndex++; continue; } n++; ans=true;
+        const win=compact(e.c.x.slice(Math.max(0,m.index-28),m.index+m[0].length+12)); if(words.some(w=>win.includes(w))){ near=true; break; } }
+      if(ans) score*= near ? 1.6 : 1.25;
+    }
+    if(wantHow && /절차|방법|순서|단계/.test(e.c.t+' '+e.c.up)) score*=1.2;
+    if(nameWords.length && nameWords.some(w=>e.dn.includes(w))) score*= res.nameRefs.length ? 2.5 : 1.4;
+    res.hits.push({e,score,matched,words,ans});
+  });
+  res.hits.sort((a,b)=>b.score-a.score || a.e.c.i-b.e.c.i);
+  res.total=live.length;
+  return res;
+}
+
+/* 본문에서 찾은 낱말 위치(띄어쓰기가 달라도 표시되도록 글자 사이 공백 허용) */
+function hlRegex(words){
+  const ws=words.filter(w=>w&&w.length>=1).sort((a,b)=>b.length-a.length).slice(0,20);
+  if(!ws.length) return null;
+  const esc=ch=>ch.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+  const pats=ws.map(w=>Array.from(w).map(esc).join('[\\s·ㆍ]*'));
+  try{ return new RegExp('('+pats.join('|')+')','gi'); }catch(e){ return null; }
+}
+
+return {itemsToLines,splitSheet,buildPages,chunkPages,compact,parseSyn,queryGroups,buildCorpus,search,hlRegex,stripJosa,detectIntents,answerRegex,segment};
+})();
+</script>
+<script>
+/* ===== 화면 동작 ===== */
+(function(){
+'use strict';
+const APP_VER='v1.8';
+const PACK_ID='dodi-gyujeong';
+
+/* ===== [자주 고칠 곳 ①] 기본 동의어 사전: 한 줄에 한 묶음 ===== */
+const DEFAULT_SYN=[
+'휴대폰, 휴대전화, 핸드폰, 스마트폰, 전자기기',
+'학부모, 보호자, 부모',
+'학폭, 학교폭력',
+'교권, 교육활동 침해, 교육활동 보호',
+'생교위, 학생생활교육위원회, 선도위원회',
+'학운위, 학교운영위원회',
+'징계, 선도, 조치',
+'재심, 재심의, 이의신청, 불복',
+'정학, 출석정지',
+'교내봉사, 학교 내의 봉사, 학교내봉사',
+'결석, 지각, 조퇴, 출결',
+'흡연, 담배, 금연',
+'복장, 교복, 용의복장, 용모',
+'체험학습, 현장체험학습, 교외체험학습',
+'출장, 여비',
+'휴가, 연가, 병가, 공가',
+'통지, 통보, 안내',
+'금액, 비용, 한도'
+].join('\n');
+
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const S={tMain:'',tSub:'',saved:[],recent:[],memoT:null,docs:[],syn:DEFAULT_SYN,synGroups:[],synLabel:{},corpus:[],saveOk:true,installEvt:null,answers:{},seq:0,busy:false};
+const standalone=()=>window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone===true;
+
+/* ===== 저장소(이 컴퓨터의 브라우저 안, IndexedDB) ===== */
+const DB={db:null,
+  open(){ return new Promise(res=>{ try{
+      const r=indexedDB.open('dodi-gyujeong',2);
+      r.onupgradeneeded=()=>{ const d=r.result; if(!d.objectStoreNames.contains('docs')) d.createObjectStore('docs',{keyPath:'id'}); if(!d.objectStoreNames.contains('kv')) d.createObjectStore('kv'); if(!d.objectStoreNames.contains('pdfs')) d.createObjectStore('pdfs'); };
+      r.onsuccess=()=>{ DB.db=r.result; res(true); }; r.onerror=()=>res(false); r.onblocked=()=>res(false);
+    }catch(e){ res(false); } }); },
+  tx(store,mode,fn){ return new Promise((res,rej)=>{ if(!DB.db){ res(undefined); return; }
+      try{ const t=DB.db.transaction(store,mode), rq=fn(t.objectStore(store)); t.oncomplete=()=>res(rq&&rq.result); t.onerror=()=>rej(t.error); t.onabort=()=>rej(t.error); }catch(e){ rej(e); } }); },
+  allDocs(){ return DB.tx('docs','readonly',o=>o.getAll()).then(r=>r||[]); },
+  putDoc(d){ return DB.tx('docs','readwrite',o=>o.put(d)); },
+  delDoc(id){ return DB.tx('docs','readwrite',o=>o.delete(id)); },
+  get(k){ return DB.tx('kv','readonly',o=>o.get(k)); },
+  set(k,v){ return DB.tx('kv','readwrite',o=>o.put(v,k)); },
+  putPdf(id,b){ return DB.tx('pdfs','readwrite',o=>o.put(b,id)); },
+  getPdf(id){ return DB.tx('pdfs','readonly',o=>o.get(id)); },
+  delPdf(id){ return DB.tx('pdfs','readwrite',o=>o.delete(id)); },
+  clear(){ return Promise.all([DB.tx('docs','readwrite',o=>o.clear()),DB.tx('kv','readwrite',o=>o.clear()),DB.tx('pdfs','readwrite',o=>o.clear())]); }
+};
+async function saveDoc(d){ try{ await DB.putDoc(d); }catch(e){ S.saveOk=false; toast('저장 공간이 부족해 이 문서는 창을 닫으면 사라집니다.'); } }
+
+/* ===== 공통 화면 도구 ===== */
+let toastT=null;
+function toast(t){ const e=$('toast'); e.textContent=t; e.classList.add('on'); clearTimeout(toastT); toastT=setTimeout(()=>e.classList.remove('on'),2600); }
+function bot(html){ const d=document.createElement('div'); d.className='m bot'; d.innerHTML='<img class="a" src="ggumsong.png" alt="꿈송이"><div class="bb">'+html+'</div>'; $('msgs').appendChild(d); d.scrollIntoView({block:'start',behavior:'smooth'}); return d; }
+function me(text){ const d=document.createElement('div'); d.className='m me'; d.innerHTML='<div class="bb">'+esc(text)+'</div>'; $('msgs').appendChild(d); d.scrollIntoView({block:'end'}); }
+function openPanel(id){ $(id).classList.add('on'); if(id==='pSet') fillTitleInputs(); if(id==='pSet') $('mineBox').innerHTML=mineHTML(); if(id==='pIdx') renderIdx(); if(id==='pSaved') renderSaved(); if(id==='pSet'){ $('synBox').value=S.syn; renderInstall(); renderPack(); } if(id==='pDocs') renderDocs(); }
+function closePanels(){ document.querySelectorAll('.panel.on').forEach(p=>p.classList.remove('on')); }
+function liveDocs(){ return S.docs.filter(d=>d.on!==false); }
+function rebuild(){
+  S.synGroups=Engine.parseSyn(S.syn);
+  S.synLabel={}; S.syn.split(/\n+/).forEach(l=>l.split(/[,，=]/).forEach(w=>{ const k=Engine.compact(w); if(k) S.synLabel[k]=w.trim(); }));
+  S.corpus=Engine.buildCorpus(S.docs);
+  $('docCnt').textContent=S.docs.length;
+  renderChips();
+}
+
+/* ===== 추천 질문(넣은 문서의 제목에서 뽑음) ===== */
+function renderChips(){
+  const pool=[], seen=new Set();
+  liveDocs().forEach(d=>d.chunks.forEach(c=>{
+    if(c.f) return;
+    let t=c.t.replace(/ \(이어서\)$/,'');
+    const jo=t.match(/^제\s?\d+\s?조(?:\s?의\s?\d+)?\s*[\(（\[【〔]([^\)）\]】〕]+)/);
+    t= jo? jo[1] : t.replace(/^(?:[가-하]\.|\d{1,2}\)|\d{1,2}\.?|[ⅠⅡⅢⅣⅤⅥⅦⅧⅨⅩ]+\.?|Q\s?\d*[\.\):]?)\s*/,'');
+    t=t.trim();
+    if(t.length<2 || t.length>16 || /^(p\.|PDF )/.test(t) || /[\d○〇]/.test(t) || seen.has(t)) return;
+    seen.add(t); pool.push(t);
+  }));
+  for(let i=pool.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [pool[i],pool[j]]=[pool[j],pool[i]]; }
+  $('chips').innerHTML=pool.slice(0,8).map(t=>'<button type="button" data-q="'+esc(t)+'">'+esc(t)+'</button>').join('');
+}
+
+/* ===== 결과 카드 ===== */
+function hl1(text,re,cls){
+  if(!re) return null;
+  re.lastIndex=0; const parts=[]; let last=0, m;
+  while((m=re.exec(text))){ if(m[0]===''){ re.lastIndex++; continue; } if(m.index>last) parts.push([text.slice(last,m.index),'']); parts.push([m[0],cls]); last=m.index+m[0].length; }
+  if(last<text.length) parts.push([text.slice(last),'']); return parts;
+}
+function hl(text,R){
+  const re=R&&R.re, re2=R&&R.re2;
+  let parts=hl1(text,re,'k')||[[text,'']];
+  if(re2){ const out=[]; parts.forEach(p=>{ if(p[1]) out.push(p); else (hl1(p[0],re2,'a')||[[p[0],'']]).forEach(x=>out.push(x)); }); parts=out; }
+  return parts.map(p=>p[1]==='k'?'<mark>'+esc(p[0])+'</mark>':p[1]==='a'?'<mark class="a">'+esc(p[0])+'</mark>':esc(p[0])).join('');
+}
+function snippet(text,R){
+  if(text.length<=460) return {t:text,cut:false};
+  const re=R&&R.re, re2=R&&R.re2;
+  let idx=0; if(re){ re.lastIndex=0; const m=re.exec(text); if(m) idx=m.index; }
+  // 답일 법한 표현이 찾은 낱말보다 한참 뒤에 있으면 그쪽을 보여 줌
+  if(re2){ re2.lastIndex=0; const m2=re2.exec(text); if(m2 && (m2.index<idx || m2.index>idx+300)) idx=Math.max(0,Math.min(idx,m2.index)); if(m2 && m2.index>idx+300) idx=m2.index; }
+  let s=Math.max(0,idx-110); const nl=text.lastIndexOf('\n',idx); if(nl>=s) s=nl+1; else if(s>0){ const sp=text.indexOf(' ',s); if(sp>0 && sp<idx) s=sp+1; }
+  let e=Math.min(text.length,s+380); const nl2=text.indexOf('\n',e); if(nl2>0 && nl2-e<60) e=nl2;
+  return {t:(s>0?'… ':'')+text.slice(s,e)+(e<text.length?' …':''),cut:true};
+}
+/* ===== 줄바꿈 다듬기: PDF가 쪽 폭 때문에 끊어 놓은 줄을 문장으로 다시 이어 붙임 (저장된 원문은 그대로) ===== */
+const RF_START=/^(?:[가-하]\)|[가-하]\.\s|\d{1,2}\)|\d{1,2}\.\s|\(\d{1,2}\)|\([가-하]\)|[①-⑳]|[ⓐ-ⓩ]|[○●◦■□▢▪▶►◆◇※＊*·ㆍ•\-–—]|제\s?\d+\s?[조장절항호]|[ⅠⅡⅢⅣⅤⅥⅦⅧⅨⅩ]+[\.\s]|Q\s?\d*[\.\):]|A\s?[\.\):]|<|\[|【|〔|「)/;
+const RF_END=/(?:다\.?\s*|[요음함임됨것]\.\s*|[\.\?!:;。]|[\)）\]】〕」』>]\s*)$/;
+const ONE=new Set('및등수것각그이또더할될본위후전중내외간별시와과의를을은는에도로만'.split(''));
+function reflow(x){
+  const L=String(x||'').split('\n'); if(L.length<2) return x||'';
+  const out=[L[0]];
+  for(let k=1;k<L.length;k++){
+    const prev=out[out.length-1], cur=L[k], p=prev.trim(), c=cur.trim();
+    // "설치 / ·운영"처럼 가운뎃점으로 이어지는 말은 글머리표가 아니라 이어지는 말로 봄
+    const midDot=/^[·ㆍ]\s*[가-힣]/.test(c) && !RF_END.test(p) && p.length>=20;
+    if(midDot){ out[out.length-1]=prev.replace(/\s+$/,'')+'·'+c.replace(/^[·ㆍ]\s*/,''); continue; }
+    if(!p || !c || RF_START.test(c) || RF_END.test(p) || (cur.match(/\S\s{2,}\S/g)||[]).length>=2 || (prev.match(/\S\s{2,}\S/g)||[]).length>=2){ out.push(cur); continue; }
+    // 끊긴 자리: 앞줄 끝이 한 글자짜리 조각이면(예: "보 / 호자와") 붙여 쓰고, 아니면 띄어 씀
+    const last=(p.match(/(\S+)$/)||['',''])[1];
+    const first=(c.match(/^(\S+)/)||['',''])[1];
+    const glue= ( (/위$/.test(p) && /^(?:하여|한|해|함|하)/.test(c))
+              || (last.length===1 && /[가-힣]/.test(last) && !ONE.has(last) && /^[가-힣]/.test(c))
+              || (first.length===1 && /[가-힣]/.test(first) && !ONE.has(first) && /[가-힣]$/.test(p) && p.length>=20) ) ? '' : ' ';
+    out[out.length-1]=prev.replace(/\s+$/,'')+glue+cur.replace(/^\s+/,'');
+  }
+  return out.join('\n');
+}
+function card(doc,c,R,tag){
+  c=Object.assign({},c,{x:reflow(c.x)});
+  const sn=snippet(c.x||'',R); const re=R;
+  const src=c.pg+(/^p\./.test(c.pg)?'':'');
+  let h='<div class="c'+(c.f?' f':'')+'" data-doc="'+esc(doc.id)+'" data-i="'+c.i+'">'
+    +'<div class="ch"><span class="pg">'+esc(src)+'</span>'+(tag?'<b>· '+esc(tag)+'</b>':'')+'</div>'
+    +'<div class="src">📘 근거: 「'+esc(doc.name)+'」 '+esc(src)+'</div>'
+    +(c.up?'<div class="up">'+esc(c.up)+'</div>':'')
+    +(c.t && c.t!==c.pg?'<div class="ct">'+hl(c.t,re)+'</div>':'')
+    +'<div class="cx'+(sn.cut?' cut':'')+'">'+(c.x?hl(sn.t,re):'<span style="color:var(--sub)">(제목만 있고 본문이 없는 부분입니다. [뒤 내용]을 눌러 보세요.)</span>')+'</div>'
+    +'<div class="cb">'+(sn.cut?'<button class="b g s" type="button" data-act="full">전체 보기</button>':'')
+    +'<button class="b g s" type="button" data-act="adj" data-dir="-1">◀ 앞 내용</button><button class="b g s" type="button" data-act="adj" data-dir="1">뒤 내용 ▶</button><button class="b s" type="button" data-act="pdf">📄 원문 PDF</button><button class="b g s" type="button" data-act="copy">복사</button>'+(savedKey(doc,c)?'<button class="b s" type="button" data-act="save" disabled>★ 저장됨</button>':'<button class="b g s" type="button" data-act="save">⭐ 저장</button>')+'</div></div>';
+  return h;
+}
+
+/* ===== 검색 저장: 최근 검색 + 저장함 ===== */
+function savedKey(doc,c){ return S.saved.find(s=>s.docId===doc.id && s.x===c.x && s.t===c.t); }
+function addRecent(q){ S.recent=[q].concat(S.recent.filter(x=>x!==q)).slice(0,15); DB.set('recent',S.recent).catch(()=>{}); }
+function saveSaved(){ DB.set('saved',S.saved).catch(()=>{}); const n=S.saved.length; $('savCnt').hidden=!n; $('savCnt').textContent=n; }
+function renderSaved(){
+  $('recentList').innerHTML= S.recent.length ? S.recent.map(q=>'<button type="button" class="rq" data-q="'+esc(q)+'">'+esc(q)+'</button>').join('')+'<div class="row"><button class="b g s" type="button" data-act="clrRecent">최근 검색 지우기</button></div>' : '<p class="hint">아직 없어요.</p>';
+  $('savedList').innerHTML= S.saved.length ? S.saved.slice().reverse().map(s=>'<div class="sv" data-sid="'+esc(s.id)+'">'
+    +'<div class="ch"><span class="pg">'+esc(s.pg)+'</span><span>'+esc(s.doc)+'</span>'+(s.q?'<span>· 검색: '+esc(s.q)+'</span>':'')+'</div>'
+    +(s.t&&s.t!==s.pg?'<div class="st">'+esc(s.t)+'</div>':'')
+    +'<div class="sx">'+esc(reflow(s.x||'').slice(0,160))+'</div>'
+    +'<textarea data-act="memo" placeholder="메모 (예: 학운위 안건에 넣을 조항) · 학생 이름은 적지 마세요">'+esc(s.memo||'')+'</textarea>'
+    +'<div class="cb"><button class="b s" type="button" data-act="openSaved">보기</button><button class="b g s" type="button" data-act="copySaved">복사</button><button class="b r s" type="button" data-act="delSaved">지우기</button></div></div>').join('') : '<p class="hint">아직 저장한 조항이 없어요.</p>';
+}
+function openSaved(s){
+  const doc=S.docs.find(d=>d.id===s.docId);
+  const live= doc && doc.chunks[s.i] && doc.chunks[s.i].x===s.x;
+  const d= live? doc : {id:'',name:s.doc}; const c= live? doc.chunks[s.i] : {t:s.t,up:s.up,pg:s.pg,x:s.x,i:-1};
+  bot('⭐ 저장한 조항이에요.'+(s.memo?'<div class="w">메모: '+esc(s.memo)+'</div>':'')+(live?'':'<div class="w">원본 문서가 지워졌거나 바뀌어서 앞뒤 내용은 볼 수 없어요.</div>')+'<div>'+card(d,c,null,'')+'</div>');
+}
+
+/* ===== 색인: 목차순 / 가나다순 ===== */
+const IX={mode:'toc'};
+function ixKey(t){ const jo=t.match(/^제\s?\d+\s?조(?:\s?의\s?\d+)?\s*[\(（\[【〔]([^\)）\]】〕]+)/); return (jo?jo[1]:t.replace(/^(?:서식|별지|별표|붙임|부록)\s*(?:제\s?)?\d+(?:-\d+)?\s*(?:호)?\s*/,'').replace(/^(?:[가-하]\.|\d{1,2}\)|\d{1,2}\.?|[ⅠⅡⅢⅣⅤⅥⅦⅧⅨⅩ]+\.?|Q\s?\d*[\.\):]?)\s*/,'')).trim(); }
+function ixItems(){
+  const sel=$('idxDoc').value; const docs=S.docs.filter(d=>!sel||d.id===sel);
+  const out=[];
+  docs.forEach(d=>d.chunks.forEach(c=>{ if(/ \(이어서\)$/.test(c.t) || /^(p\.|PDF )/.test(c.t)) return; out.push({d,c,k:ixKey(c.t)||c.t}); }));
+  return out;
+}
+function renderIdx(){
+  const sel=$('idxDoc'), cur=sel.value;
+  sel.innerHTML=(S.docs.length>1?'<option value="">모든 문서</option>':'')+S.docs.map(d=>'<option value="'+esc(d.id)+'">'+esc(d.name)+'</option>').join('');
+  if(cur && S.docs.some(d=>d.id===cur)) sel.value=cur;
+  $('idxToc').className='b s'+(IX.mode==='toc'?'':' g'); $('idxAbc').className='b s'+(IX.mode==='abc'?'':' g');
+  if(!S.docs.length){ $('idxList').innerHTML='<p class="hint" style="margin-top:12px">문서를 넣으면 목차가 생겨요.</p>'; return; }
+  const f=Engine.compact($('idxQ').value);
+  let items=ixItems(); if(f) items=items.filter(x=>Engine.compact(x.c.t+' '+x.c.up).includes(f));
+  if(!items.length){ $('idxList').innerHTML='<p class="hint" style="margin-top:12px">맞는 제목이 없어요.</p>'; return; }
+  let html='';
+  if(IX.mode==='toc'){
+    let lastG=null, lastDoc=null;
+    items.slice(0,1500).forEach(x=>{
+      if(x.d!==lastDoc && !$('idxDoc').value){ html+='<div class="ixg" style="color:var(--navy)">📄 '+esc(x.d.name)+'</div>'; lastDoc=x.d; lastG=null; }
+      const g=x.c.up||''; if(g!==lastG){ if(g) html+='<div class="ixg">'+esc(g)+'</div>'; lastG=g; }
+      html+='<button type="button" class="ix'+(g?' lv2':'')+'" data-act="ixOpen" data-doc="'+esc(x.d.id)+'" data-i="'+x.c.i+'"><span class="pg">'+esc(x.c.pg)+'</span><span>'+esc(x.c.t)+'</span></button>';
+    });
+  } else {
+    const seen=new Set();
+    items.sort((a,b)=>a.k.localeCompare(b.k,'ko'));
+    let lastCh='';
+    items.slice(0,1500).forEach(x=>{
+      const key=x.k+'|'+x.d.id+'|'+x.c.pg; if(seen.has(key)) return; seen.add(key);
+      const ch=initial(x.k); if(ch!==lastCh){ html+='<div class="ixg">'+esc(ch)+'</div>'; lastCh=ch; }
+      html+='<button type="button" class="ix" data-act="ixOpen" data-doc="'+esc(x.d.id)+'" data-i="'+x.c.i+'"><span class="pg">'+esc(x.c.pg)+'</span><span><b>'+esc(x.k)+'</b>'+(x.k!==x.c.t?' <span class="hint">'+esc(x.c.t)+'</span>':'')+(S.docs.length>1?' <span class="hint">· '+esc(x.d.name)+'</span>':'')+'</span></button>';
+    });
+  }
+  if(items.length>1500) html+='<p class="hint">앞의 1,500개만 보여요. 위 칸에 낱말을 넣어 걸러 주세요.</p>';
+  $('idxList').innerHTML=html;
+}
+function initial(s){ const c=s.charCodeAt(0); if(c>=0xAC00&&c<=0xD7A3){ return 'ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍㅎ'[Math.floor((c-0xAC00)/588)]; } return /[0-9]/.test(s[0])?'0-9':/[A-Za-z]/.test(s[0])?'A-Z':'기타'; }
+
+/* ===== 제목·부제 바꾸기 (이 컴퓨터에만 저장) ===== */
+const T_MAIN='도디쌤의 규정줍줍', T_SUB='규정·길라잡이·각종 계획서에서 근거를 찾아 드립니다.';
+function applyTitle(){ const m=(S.tMain||'').trim()||T_MAIN, s=(S.tSub||'').trim()||T_SUB; $('tMain').textContent=m; $('tSub').textContent=s; document.title=m; }
+function fillTitleInputs(){ $('tMainIn').value=S.tMain||''; $('tSubIn').value=S.tSub||''; }
+
+/* ===== 질문 → 찾기 → 답 ===== */
+function ask(q){
+  q=String(q||'').trim(); if(!q) return;
+  me(q);
+  if(/^(사용법|도움말|도움|help|\?|어떻게 써|어떻게 써\?|사용 방법)$/i.test(q.replace(/\s+/g,' '))){ bot('<b>📖 사용법</b>'+guideHTML()+mineHTML()+mustHTML()); return; }
+  if(!S.docs.length){ bot('아직 넣은 문서가 없습니다. 먼저 규정집이나 길라잡이 PDF를 넣어 주세요.<div class="row"><button class="b" type="button" data-act="pick">📄 PDF 넣기</button></div>'); return; }
+  if(!liveDocs().length){ bot('문서가 모두 <b>꺼져</b> 있습니다. [📚 내 문서]에서 찾을 문서를 켜 주세요.<div class="row"><button class="b g s" type="button" data-act="docs">내 문서 열기</button></div>'); return; }
+  const r=Engine.search(q,S.corpus,S.synGroups);
+  const names=liveDocs().map(d=>'「'+esc(d.name)+'」').join(', ');
+  if(!r.groups.length){ bot('찾을 낱말을 고르지 못했습니다. <b>"출석정지 기간"</b>, <b>"재심의 신청"</b>처럼 핵심 낱말을 넣어 다시 물어봐 주세요.'); return; }
+  if(!r.hits.length && r.nameRefs && r.nameRefs.length && !r.groups.some(g=>g.none)){ bot('문서 이름(<b>'+r.nameRefs.map(esc).join(', ')+'</b>)만 알아들었습니다. 그 문서에서 <b>무엇을</b> 찾을지 낱말을 함께 적어 주세요. (예: "'+esc(r.nameRefs[0])+' 출석정지 기간")'); return; }
+  const top=r.hits.length? r.hits[0].score : 0;
+  const hits=r.hits.filter(h=>h.score>=top*0.22);
+  const miss=r.groups.filter(g=>g.none).map(g=>g.base), part=r.groups.filter(g=>g.partial);
+  if(!hits.length){
+    bot('<b>찾지 못했습니다.</b> '+miss.map(w=>'「'+esc(w)+'」').join(', ')+' 낱말이 넣은 문서 어디에도 없습니다.'
+      +'<ul class="note"><li>문서에 적혀 있을 법한 <b>다른 낱말</b>로 물어봐 주세요. (예: 휴대폰 → 전자기기)</li><li>자주 쓰는 말은 [⚙ 설정]의 <b>같은 뜻 낱말</b>에 넣어 두면 다음부터 함께 찾습니다.</li><li>찾아본 문서: '+names+'</li></ul>'
+      +'<div class="w">저는 AI가 아니라 문서 속 낱말을 찾는 프로그램입니다. 문서에 없는 내용은 답하지 못합니다.</div>');
+    return;
+  }
+  const words=[]; hits.slice(0,40).forEach(h=>h.words.forEach(w=>{ if(!words.includes(w)) words.push(w); }));
+  const R={re:Engine.hlRegex(words),re2:Engine.answerRegex(r.intents)};
+  addRecent(q);
+  const id='a'+(++S.seq); S.answers[id]={all:diversify(hits),hits:null,R,shown:0,q,words}; S.answers[id].hits=S.answers[id].all;
+  const syn=[]; r.groups.forEach(g=>g.cands.forEach(cd=>{ if(cd.syn && words.includes(cd.w) && !syn.includes(cd.w)) syn.push(cd.w); }));
+  const weak=hits[0].matched<r.total || miss.length>0;
+  let h=(weak?'질문 낱말이 <b>모두 들어 있는 곳은 없습니다.</b> 일부만 맞는 곳 ':'가장 가까운 곳 ')+'<b>'+Math.min(3,hits.length)+'건</b>입니다'+(hits.length>3?' (모두 '+hits.length+'건)':'')+'. <b>원문을 꼭 확인해 주세요.</b>';
+  // 질문을 어떻게 이해했는지 보여 줌
+  const live=r.groups.filter(g=>!g.none && !g.name);
+  h+='<div class="an">찾은 낱말: '+live.map(g=>'<b>'+esc(S.synLabel[g.base]||g.base)+'</b>').join(' · ')
+    +(r.intents.length?' &nbsp;|&nbsp; 질문 종류: '+r.intents.map(i=>'<b>'+esc(i.label)+'</b>').join(' · ')+(R.re2?' <mark class="a">초록</mark> 표시가 답일 가능성이 높은 곳':''):'')+'</div>';
+  if(r.nameRefs && r.nameRefs.length) h+='<div class="w">문서 이름에 <b>'+r.nameRefs.map(w=>'「'+esc(w)+'」').join(', ')+'</b>이(가) 들어간 문서를 먼저 보여 드립니다.</div>';
+  if(miss.length) h+='<div class="w"><b>'+miss.map(w=>'「'+esc(w)+'」').join(', ')+'</b> 낱말은 문서에 없어서 빼고 찾았습니다.</div>';
+  const cut=r.groups.filter(g=>g.from && !g.none); const froms=[...new Set(cut.map(g=>g.from))];
+  if(froms.length) h+='<div class="w">'+froms.map(f=>'<b>「'+esc(f)+'」</b> → <b>'+cut.filter(g=>g.from===f).map(g=>'「'+esc(g.base)+'」').join(' + ')+'</b>').join(', ')+'(으)로 바꿔 찾았습니다.</div>';
+  if(syn.length) h+='<div class="w">같은 뜻 낱말로 함께 찾음: '+syn.slice(0,6).map(w=>esc(S.synLabel[w]||w)).join(', ')+'</div>';
+  // 문서가 여러 개면 문서별로 골라 볼 수 있게
+  const by={}; hits.forEach(x=>{ by[x.e.doc.id]=(by[x.e.doc.id]||0)+1; });
+  const ids=Object.keys(by).sort((a,b)=>by[b]-by[a]);
+  if(ids.length>1) h+='<div class="dchips" data-dc="'+id+'"><button type="button" class="on" data-act="bydoc" data-id="'+id+'" data-doc="">전체 '+hits.length+'</button>'+ids.map(d=>{ const doc=S.docs.find(x=>x.id===d); return '<button type="button" data-act="bydoc" data-id="'+id+'" data-doc="'+esc(d)+'">'+esc(doc?doc.name:'')+' '+by[d]+'</button>'; }).join('')+'</div>';
+  h+='<div data-list="'+id+'"></div><div class="row" data-more="'+id+'"></div>';
+  if(aiKey()) h='<div class="ai" data-ai="'+id+'">🤖 AI가 정리하는 중…</div>'+h;
+  bot(h); showMore(id,3); aiAsk(q,hits,id);
+}
+/* 처음 3건이 한 문서로만 채워지지 않게(다른 문서에도 비슷하게 맞는 곳이 있을 때) */
+
+/* ===== AI 한 줄 답변 (선택: 키가 있을 때만) ===== */
+function aiKey(){ try{ return localStorage.getItem('gj.aiKey')||''; }catch(e){ return ''; } }
+function aiState(){ const e=$('aiState'); if(e) e.textContent= aiKey()? '✅ 키가 저장되어 있습니다.' : '키 없음 (원문 검색만 사용)'; }
+async function aiAsk(q,hits,id){
+  const key=aiKey(); if(!key) return;
+  const box=document.querySelector('[data-ai="'+id+'"]'); if(!box) return;
+  const top=hits.slice(0,8);
+  const ctx=top.map((h,i)=>'['+(i+1)+'] 「'+h.e.doc.name+'」 '+h.e.c.pg+'\n'+String(h.e.c.x||'').replace(/\s+/g,' ').slice(0,900)).join('\n\n');
+  try{
+    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'content-type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:'claude-haiku-5-5',max_tokens:800,system:'당신은 학교 교사의 규정 안내 비서입니다. 아래 [자료](선생님이 올린 학교 내규·규정) 안의 내용만 근거로 답하세요. 존댓말로 쓰고, 근거는 [1]처럼 번호로 표시하세요. 형식: ①첫 줄에 결론 한 문장. ②처리해야 하는 일이면 "해야 할 일"을 1. 2. 3. 단계로(해당 없으면 생략). ③기한·제출 서류·담당 부서가 자료에 있으면 한 줄씩. 전체 8줄 이내. 자료에 답이 없으면 "찾은 자료에는 답이 없습니다"라고만 하고 어떤 낱말로 다시 물어보면 좋을지 한 줄 제안하세요. 자료에 없는 내용을 지어내거나 추측하지 마세요.',messages:[{role:'user',content:'[질문]\n'+q+'\n\n[자료]\n'+ctx}]})});
+    if(!r.ok) throw new Error(r.status===401?'키가 올바르지 않습니다':r.status===400||r.status===402?'잔액(크레딧)이 부족할 수 있습니다':'응답 오류 '+r.status);
+    const j=await r.json(); const t=(j.content||[]).map(x=>x.text||'').join('').trim();
+    const refs=top.map((h,i)=>'['+(i+1)+'] '+esc(h.e.doc.name)+' '+esc(h.e.c.pg)).join(' · ');
+    box.innerHTML='<b>🤖 AI 한 줄 답 <span class="aiw">(참고용 · 아래 원문과 쪽수로 꼭 확인)</span></b><div class="ait">'+esc(t).replace(/\n/g,'<br>').replace(/\[(\d+)\]/g,'<b>[$1]</b>')+'</div><div class="aiw">근거: '+refs+'</div>';
+  }catch(e){ box.innerHTML='<span class="aiw">AI 답은 건너뛰었습니다('+esc(e.message||'연결 실패')+'). 아래 원문 검색 결과를 보세요.</span>'; }
+}
+function diversify(hits){
+  if(hits.length<4) return hits;
+  const top=hits[0].score, head=[], rest=[], cnt={};
+  hits.forEach(h=>{ const d=h.e.doc.id; if(head.length<3 && ((cnt[d]||0)<2 || h.score<top*0.6)){ head.push(h); cnt[d]=(cnt[d]||0)+1; } else rest.push(h); });
+  if(head.length<3) return hits;
+  const third=head[2], alt=rest.find(h=>h.e.doc.id!==head[0].e.doc.id && h.score>=top*0.6);
+  if(head[0].e.doc.id===head[1].e.doc.id && head[1].e.doc.id===third.e.doc.id && alt){ rest.splice(rest.indexOf(alt),1); rest.unshift(third); head[2]=alt; }
+  return head.concat(rest.sort((a,b)=>b.score-a.score));
+}
+function showMore(id,n){
+  const a=S.answers[id]; if(!a) return;
+  const box=document.querySelector('[data-list="'+id+'"]'), more=document.querySelector('[data-more="'+id+'"]'); if(!box) return;
+  const part=a.hits.slice(a.shown,a.shown+n); a.shown+=part.length;
+  box.insertAdjacentHTML('beforeend',part.map(h=>card(h.e.doc,h.e.c,a.R,'')).join(''));
+  box.dataset.ans=id;
+  const left=a.hits.length-a.shown;
+  more.innerHTML= left>0 ? '<button class="b g s" type="button" data-act="more" data-id="'+id+'">더 보기 ('+left+'건 남음)</button>' : '';
+}
+function byDoc(id,docId,btn){
+  const a=S.answers[id]; if(!a) return;
+  a.hits= docId ? a.all.filter(h=>h.e.doc.id===docId).sort((x,y)=>y.score-x.score) : a.all; a.shown=0;
+  const box=document.querySelector('[data-list="'+id+'"]'); if(box) box.innerHTML='';
+  btn.parentNode.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b===btn));
+  showMore(id,3);
+}
+function findCard(el){ const c=el.closest('.c'); if(!c) return null; const doc=S.docs.find(d=>d.id===c.dataset.doc); if(!doc) return null; const ch=doc.chunks[+c.dataset.i]; if(!ch) return null; const list=c.closest('[data-ans]'); const a=list?S.answers[list.dataset.ans]:null; return {el:c,doc,ch,re:a?a.R:null}; }
+function copyText(t){
+  const done=()=>toast('복사했습니다. 붙여넣기(Ctrl+V) 하세요.');
+  if(navigator.clipboard && window.isSecureContext){ navigator.clipboard.writeText(t).then(done,()=>fallback()); } else fallback();
+  function fallback(){ const ta=document.createElement('textarea'); ta.value=t; ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.select(); try{ document.execCommand('copy'); done(); }catch(e){ toast('복사하지 못했습니다. 글자를 직접 드래그해 복사해 주세요.'); } ta.remove(); }
+}
+
+/* ===== 중복 걸러내기: 문서 글자로 만든 지문(내용이 같으면 같은 값) ===== */
+function fpOf(chunks){
+  // FNV-1a 두 갈래(52비트쯤) — 띄어쓰기는 무시하고 글자만 봄
+  let a=0x811c9dc5, b=0x01000193^0x5bd1e995;
+  for(const c of chunks){ const s=c.x||''; for(let i=0;i<s.length;i++){ const k=s.charCodeAt(i); if(k===32||k===10||k===9) continue; a^=k; a=Math.imul(a,16777619)>>>0; b^=k; b=Math.imul(b,0x5bd1e995)>>>0; b^=b>>>15; } }
+  return a.toString(36)+'-'+b.toString(36)+'-'+chunks.length;
+}
+function fpDoc(d){ if(!d.fp) d.fp=fpOf(d.chunks||[]); return d.fp; }
+function dupOf(fp,exceptName){ return S.docs.find(d=>d.name!==exceptName && fpDoc(d)===fp); }
+
+/* ===== 원문 PDF 보기 창: 줍줍이 안에서 PDF를 펼치고 그 쪽으로 이동, 찾은 낱말에 형광펜 ===== */
+const PV={pdf:null,blob:null,doc:null,n:0,cur:1,zoom:1,words:[],target:1,obs:null,done:{},busy:{}};
+async function openViewer(doc,blob,page,ch,words){
+  try{ await needPDF(); }catch(e){ toast('PDF 보기 부품을 불러오지 못했어요. 인터넷 연결을 확인해 주세요.'); return; }
+  closeViewer(true);
+  PV.doc=doc; PV.ch=ch; PV.blob=blob; PV.zoom=1; PV.done={}; PV.busy={}; PV.target=page;
+  PV.words=(words||[]).filter(w=>w&&w.length>=2).slice(0,12);
+  $('pvName').textContent=doc.name; $('pvInfo').textContent=(ch?ch.pg+' · '+(ch.t||''):'')+' — 노란 표시가 찾은 곳';
+  $('pv').hidden=false; $('pvBody').innerHTML='<p style="color:#fff;text-align:center;margin-top:30px">원문을 펼치는 중…</p>';
+  try{
+    const data=new Uint8Array(await blob.arrayBuffer());
+    PV.pdf=await window.pdfjsLib.getDocument({data,cMapUrl:'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/cmaps/',cMapPacked:true}).promise;
+  }catch(e){ $('pvBody').innerHTML='<p style="color:#fff;text-align:center;margin-top:30px">원문 PDF를 열지 못했어요. PDF를 다시 넣어 주세요.</p>'; return; }
+  PV.n=PV.pdf.numPages; if(page>PV.n) page=PV.n; PV.target=page;
+  // 한 장에 두 쪽씩 인쇄된 가로 PDF는 글자가 작으니 처음부터 크게 보여 줌
+  try{ const v=(await PV.pdf.getPage(page)).getViewport({scale:1}); if(v.width>v.height*1.15) PV.zoom=1.9; }catch(e){}
+  await layoutViewer();
+  goPage(page,true);
+}
+async function layoutViewer(){
+  const body=$('pvBody'); const W=Math.min(body.clientWidth-16,1100)*PV.zoom;
+  const first=await PV.pdf.getPage(1); const vp=first.getViewport({scale:1}); const ratio=vp.height/vp.width;
+  PV.done={};
+  if(PV.obs) PV.obs.disconnect();
+  let html=''; for(let i=1;i<=PV.n;i++) html+='<div class="pvp'+(i===PV.target?' tg':'')+'" data-p="'+i+'" style="width:'+Math.round(W)+'px;height:'+Math.round(W*ratio)+'px"><div class="pvl">'+i+'쪽</div><span class="pvn">'+i+' / '+PV.n+'</span></div>';
+  body.innerHTML=html;
+  PV.obs=new IntersectionObserver(ents=>{ ents.forEach(en=>{ if(en.isIntersecting) renderPage(+en.target.dataset.p); }); },{root:body,rootMargin:'800px 0px'});
+  body.querySelectorAll('.pvp').forEach(el=>PV.obs.observe(el));
+  body.onscroll=()=>{ const els=body.querySelectorAll('.pvp'); const top=body.scrollTop+body.clientHeight*0.35; let c=1; for(const el of els){ if(el.offsetTop<=top) c=+el.dataset.p; else break; } if(c!==PV.cur){ PV.cur=c; $('pvNo').textContent=c+' / '+PV.n; } };
+}
+async function renderPage(i){
+  if(PV.done[i]||PV.busy[i]||!PV.pdf) return; PV.busy[i]=true;
+  const box=$('pvBody').querySelector('.pvp[data-p="'+i+'"]'); if(!box){ PV.busy[i]=false; return; }
+  try{
+    const pg=await PV.pdf.getPage(i); const vp1=pg.getViewport({scale:1});
+    const W=box.clientWidth; box.style.height=Math.round(W*vp1.height/vp1.width)+'px';
+    const dpr=Math.min(window.devicePixelRatio||1,2); const vp=pg.getViewport({scale:W/vp1.width*dpr});
+    const cv=document.createElement('canvas'); cv.width=Math.round(vp.width); cv.height=Math.round(vp.height);
+    await pg.render({canvasContext:cv.getContext('2d'),viewport:vp}).promise;
+    box.querySelector('.pvl')&&box.querySelector('.pvl').remove(); box.prepend(cv);
+    if(PV.words.length){
+      const tc=await pg.getTextContent(); const vpc=pg.getViewport({scale:W/vp1.width});
+      const keys=PV.words.map(w=>Engine.compact(w));
+      tc.items.forEach(it=>{
+        const s=Engine.compact(it.str); if(!s) return;
+        if(!keys.some(k=>s.includes(k)||(k.length>=3&&s.length>=2&&k.includes(s)&&s.length>=Math.min(3,k.length)))) return;
+        const r=vpc.convertToViewportRectangle([it.transform[4],it.transform[5]-(it.height||10)*0.25,it.transform[4]+it.width,it.transform[5]+(it.height||10)*0.95]);
+        const d=document.createElement('div'); d.className='hl';
+        d.style.left=Math.min(r[0],r[2])+'px'; d.style.top=Math.min(r[1],r[3])+'px'; d.style.width=Math.abs(r[2]-r[0])+'px'; d.style.height=Math.abs(r[3]-r[1])+'px';
+        box.appendChild(d);
+      });
+    }
+    PV.done[i]=true;
+  }catch(e){} PV.busy[i]=false;
+}
+function goPage(p,first){
+  p=Math.max(1,Math.min(PV.n,p)); const el=$('pvBody').querySelector('.pvp[data-p="'+p+'"]'); if(!el) return;
+  $('pvBody').scrollTop=el.offsetTop-8; PV.cur=p; $('pvNo').textContent=p+' / '+PV.n;
+  if(first){ renderPage(p).then(()=>{ const hl=el.querySelector('.hl'); if(hl){ const B=$('pvBody'); const y=el.offsetTop+hl.offsetTop-B.clientHeight*0.3; B.scrollTop=Math.max(el.offsetTop-8,y); B.scrollLeft=Math.max(0,el.offsetLeft+hl.offsetLeft-B.clientWidth*0.15); } }); }
+}
+/* ===== 원문 인쇄: 찾은 부분 / 그 쪽 / 장 전체 ===== */
+async function printFromViewer(mode){
+  $('pvMenu').hidden=true;
+  if(!PV.pdf) return;
+  const p=PV.cur; const box=$('pvBody').querySelector('.pvp[data-p="'+p+'"]'); if(!box) return;
+  toast('인쇄할 그림을 만드는 중이에요…');
+  if(!PV.done[p]) await renderPage(p);
+  const pg=await PV.pdf.getPage(p); const vp1=pg.getViewport({scale:1});
+  const scale=Math.min(3, 2400/Math.max(vp1.width,vp1.height)*1.4);
+  const vp=pg.getViewport({scale}); const cv=document.createElement('canvas'); cv.width=Math.round(vp.width); cv.height=Math.round(vp.height);
+  await pg.render({canvasContext:cv.getContext('2d'),viewport:vp}).promise;
+  // 형광펜 위치(화면 기준) → 인쇄 그림 기준
+  const k=cv.width/box.clientWidth; const hls=[...box.querySelectorAll('.hl')].map(d=>({x:d.offsetLeft*k,y:d.offsetTop*k,w:d.offsetWidth*k,h:d.offsetHeight*k}));
+  let x0=0,y0=0,x1=cv.width,y1=cv.height;
+  const wide=vp1.width>vp1.height*1.15;
+  if(mode!=='page' && wide){ // 한 장에 두 쪽: 형광펜이 많은 쪽 면만
+    const mid=cv.width/2; const L=hls.filter(r=>r.x+r.w/2<mid).length, Rn=hls.length-L;
+    if(Rn>L){ x0=mid; } else { x1=mid; }
+  }
+  const inHalf=hls.filter(r=>r.x+r.w/2>=x0 && r.x+r.w/2<=x1);
+  if(mode==='hit'){
+    if(!inHalf.length){ toast('이 장에는 형광펜이 없어서 그 쪽 전체를 인쇄해요.'); }
+    else { const pad=(y1-y0)*0.07; y0=Math.max(0,Math.min(...inHalf.map(r=>r.y))-pad*1.6); y1=Math.min(cv.height,Math.max(...inHalf.map(r=>r.y+r.h))+pad*2.2); }
+  }
+  // 형광펜도 인쇄에 같이
+  const out=document.createElement('canvas'); out.width=Math.round(x1-x0); out.height=Math.round(y1-y0);
+  const g=out.getContext('2d'); g.fillStyle='#fff'; g.fillRect(0,0,out.width,out.height); g.drawImage(cv,x0,y0,x1-x0,y1-y0,0,0,out.width,out.height);
+  g.globalCompositeOperation='multiply'; g.fillStyle='rgba(255,213,0,.45)'; inHalf.forEach(r=>g.fillRect(r.x-x0,r.y-y0,r.w,r.h));
+  const img=out.toDataURL('image/png');
+  const land= out.width>out.height*1.15;
+  const ch=PV.ch; const head=esc(PV.doc.name)+(ch?' · '+esc(ch.pg)+(ch.t&&ch.t!==ch.pg?' · '+esc(ch.t):''):'')+' · PDF '+p+'번째 장';
+  const html='<!DOCTYPE html><html><head><meta charset="utf-8"><title>'+esc(PV.doc.name)+'</title><style>@page{size:A4 '+(land?'landscape':'portrait')+';margin:12mm}body{margin:0;font-family:"Malgun Gothic",sans-serif}h1{font-size:11pt;margin:0 0 6px;color:#333}img{width:100%;'+(mode==='hit'?'':'max-height:'+(land?'175mm':'260mm')+';object-fit:contain;')+'border:1px solid #ccc}p{font-size:8pt;color:#888;margin:4px 0 0}</style></head><body><h1>'+head+'</h1><img src="'+img+'"><p>도디쌤의 규정줍줍에서 인쇄 · 원문 확인용</p></body></html>';
+  const fr=document.createElement('iframe'); fr.style.cssText='position:fixed;right:0;bottom:0;width:0;height:0;border:0'; document.body.appendChild(fr);
+  const d=fr.contentDocument; d.open(); d.write(html); d.close();
+  const im=d.querySelector('img');
+  const go=()=>{ try{ fr.contentWindow.focus(); fr.contentWindow.print(); }catch(e){ toast('인쇄 창을 열지 못했어요.'); } setTimeout(()=>fr.remove(),60000); };
+  if(im.complete) setTimeout(go,100); else im.onload=()=>setTimeout(go,100);
+}
+function closeViewer(silent){
+  $('pvMenu').hidden=true;
+  if(PV.obs){ PV.obs.disconnect(); PV.obs=null; }
+  if(PV.pdf){ try{ PV.pdf.destroy(); }catch(e){} PV.pdf=null; }
+  $('pvBody').innerHTML=''; $('pv').hidden=true;
+}
+
+/* ===== PDF 읽기 ===== */
+let pdfP=null;
+function needPDF(){
+  if(window.pdfjsLib) return Promise.resolve();
+  if(!pdfP) pdfP=new Promise((res,rej)=>{ const s=document.createElement('script'); s.src='lib/pdf.min.js'; s.onload=()=>{ window.pdfjsLib.GlobalWorkerOptions.workerSrc='lib/pdf.worker.min.js'; res(); }; s.onerror=()=>{ pdfP=null; rej(new Error('lib')); }; document.head.appendChild(s); });
+  return pdfP;
+}
+function setProg(html){ $('prog').innerHTML=html; }
+async function readPDF(file,onPage){
+  await needPDF();
+  const buf=await file.arrayBuffer();
+  const pdf=await window.pdfjsLib.getDocument({data:new Uint8Array(buf),cMapUrl:'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/cmaps/',cMapPacked:true}).promise;
+  const sheets=[];
+  for(let p=1;p<=pdf.numPages;p++){
+    const pg=await pdf.getPage(p), vp=pg.getViewport({scale:1}), tc=await pg.getTextContent();
+    sheets.push({W:vp.width,H:vp.height,items:tc.items.map(it=>({s:it.str,x:it.transform[4],y:it.transform[5],w:it.width,h:it.height||Math.abs(it.transform[3])}))});
+    pg.cleanup(); onPage(p,pdf.numPages);
+    if(p%8===0) await new Promise(r=>setTimeout(r,0));
+  }
+  try{ pdf.destroy(); }catch(e){}
+  const pages=Engine.buildPages(sheets);
+  const chars=pages.reduce((a,p)=>a+p.lines.reduce((x,l)=>x+l.length,0),0);
+  return {sheets:sheets.length,pages:pages.length,chars,chunks:chars?Engine.chunkPages(pages):[]};
+}
+async function addFiles(files){
+  files=Array.from(files||[]); if(!files.length) return;
+  if(S.busy){ toast('지금 읽는 문서가 끝난 뒤에 넣어 주세요.'); return; }
+  S.busy=true; openPanel('pDocs');
+  let fi=0;
+  for(const f of files){
+    fi++; const nth=files.length>1?'('+fi+'/'+files.length+') ':'';
+    const name=f.name.replace(/\.pdf$/i,'');
+    if(/\.json$/i.test(f.name)){ await importPack(f); continue; }
+    if(/\.(hwp|hwpx)$/i.test(f.name)){ bot('「'+esc(f.name)+'」은 한글 파일입니다. 한글에서 <b>[파일] → [PDF로 저장하기]</b>를 한 뒤 그 PDF를 넣어 주세요.'); continue; }
+    if(!/\.pdf$/i.test(f.name)){ bot('「'+esc(f.name)+'」은 넣을 수 없습니다. <b>PDF 파일</b>만 넣을 수 있습니다.'); continue; }
+    setProg('<div class="prog">'+nth+'「'+esc(name)+'」 읽을 준비 중…<div class="bar"><i id="barI"></i></div></div>');
+    try{
+      const t0=Date.now();
+      const r=await readPDF(f,(p,n)=>{ setProg('<div class="prog">'+nth+'「'+esc(name)+'」 <b>'+n+'장 중 '+p+'장</b> 읽는 중…<div class="bar"><i style="width:'+Math.round(p/n*100)+'%"></i></div></div>'); });
+      if(r.chars<12*r.sheets){ bot('「'+esc(f.name)+'」은 <b>글자를 읽을 수 없는 PDF</b>입니다. 스캔한 그림 PDF로 보입니다.<br>PDF를 열어 글자가 마우스로 드래그되는지 확인해 주세요. 드래그되지 않으면 원본 한글 파일을 PDF로 다시 저장해 넣어야 합니다.'); continue; }
+      const fp=fpOf(r.chunks); const twin=dupOf(fp,name);
+      if(twin){ bot('「'+esc(f.name)+'」은 이미 넣은 <b>「'+esc(twin.name)+'」</b>와 내용이 똑같아서 <b>넣지 않았어요.</b><div class="w">같은 문서가 두 번 들어가면 검색 결과에 같은 조항이 겹쳐 나와요. 이름만 바꾸고 싶으면 「'+esc(twin.name)+'」을 지우고 다시 넣어 주세요.</div>'); continue; }
+      const old=S.docs.find(d=>d.name===name);
+      const same=old && fpDoc(old)===fp;
+      const doc={fp,id:old?old.id:('d'+Date.now().toString(36)+Math.random().toString(36).slice(2,6)),name,addedAt:Date.now(),sheets:r.sheets,pages:r.pages,chars:r.chars,chunks:r.chunks,on:true};
+      if(old) S.docs[S.docs.indexOf(old)]=doc; else S.docs.push(doc);
+      try{ await DB.putPdf(doc.id,new Blob([f],{type:'application/pdf'})); doc.hasPdf=true; }catch(e){ doc.hasPdf=false; }
+      await saveDoc(doc); rebuild(); renderDocs();
+      const jo=doc.chunks.filter(c=>/^제\s?\d+\s?조/.test(c.t)).length;
+      if(same){ bot('「'+esc(name)+'」은 이미 똑같은 문서가 있어서 <b>새로 넣지 않고</b> 원본 PDF만 다시 저장했어요.'+(doc.hasPdf?' 이제 [📄 원문 PDF]가 열려요.':'')); continue; }
+      bot('「'+esc(name)+'」을(를) '+(old?'새로 바꿔 ':'')+'넣었습니다. ('+r.pages+'쪽, '+doc.chunks.length+'개 부분'+(jo>=3?', 조항 '+jo+'개':'')+', '+Math.max(1,Math.round((Date.now()-t0)/1000))+'초)<br>이제 궁금한 것을 물어보세요.'
+        +(r.pages!==r.sheets?'<div class="w">한 장에 두 쪽씩 인쇄된 PDF라서 왼쪽·오른쪽을 나눠 읽었습니다.</div>':'')
+        +(S.saveOk&&DB.db?'':'<div class="w"><b>이 브라우저에서는 저장이 되지 않아</b> 창을 닫으면 문서가 사라집니다.</div>'));
+      if(navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(()=>{});
+    }catch(e){
+      const pw=e && (e.name==='PasswordException'||/password/i.test(e.message||''));
+      const lib=e && e.message==='lib';
+      bot('「'+esc(f.name)+'」을(를) 읽지 못했습니다. '+(pw?'<b>암호가 걸린 PDF</b>입니다. 암호를 푼 PDF를 넣어 주세요.':lib?'PDF 읽는 부품(lib 폴더)을 불러오지 못했습니다. 인터넷 연결을 확인하고 새로 고침(F5) 해 주세요.':'파일이 깨졌거나 PDF가 아닐 수 있습니다.'));
+    }
+  }
+  setProg(''); S.busy=false; closePanels();
+}
+
+/* ===== 문서 목록 ===== */
+function renderDocs(){
+  const seen={};
+  const b=$('docList');
+  if(!S.docs.length){ b.innerHTML='<p class="hint" style="text-align:center;margin-top:14px">아직 넣은 문서가 없습니다.</p>'; return; }
+  b.innerHTML=S.docs.map(d=>{ const f=fpDoc(d), first=seen[f]; if(!first) seen[f]=d.name; return '<div class="doc'+(d.on===false?' off':'')+'" data-id="'+esc(d.id)+'">'
+    +'<label class="sw" title="켜면 이 문서에서 찾습니다"><input type="checkbox" data-act="toggle"'+(d.on===false?'':' checked')+'><i></i></label>'
+    +'<div class="dn"><b>'+esc(d.name)+'</b><span>'+d.pages+'쪽 · '+d.chunks.length+'개 부분 · '+(d.hasPdf?'원본 PDF 있음 · ':'<b style="color:#b54708">원본 PDF 없음</b> · ')+new Date(d.addedAt).toLocaleDateString('ko-KR')+' 넣음'+(d.on===false?' · 꺼짐':'')+'</span>'
+    +(first?'<div style="color:#b42318;font-size:12.5px;font-weight:700;margin-top:2px">⚠ 「'+esc(first)+'」와 내용이 똑같아요. 하나를 지워 주세요.</div>':'')+'</div>'
+    +'<button class="b r s" type="button" data-act="del">지우기</button></div>'; }).join('');
+}
+
+/* ===== 문서 묶음 내보내기·가져오기 ===== */
+function renderPack(){
+  $('packList').innerHTML= S.docs.length ? S.docs.map(d=>'<label style="display:block;font-size:13.5px;margin:3px 0"><input type="checkbox" data-pk="'+esc(d.id)+'" checked> '+esc(d.name)+' ('+d.pages+'쪽)</label>').join('') : '<p class="hint">내보낼 문서가 없습니다.</p>';
+}
+function packOut(){
+  const ids=Array.from(document.querySelectorAll('#packList [data-pk]')).filter(x=>x.checked).map(x=>x.dataset.pk);
+  const docs=S.docs.filter(d=>ids.includes(d.id));
+  if(!docs.length){ toast('내보낼 문서를 하나 이상 골라 주세요.'); return; }
+  const pack={app:PACK_ID,v:1,made:new Date().toISOString().slice(0,10),syn:S.syn,docs:docs.map(d=>({name:d.name,addedAt:d.addedAt,sheets:d.sheets,pages:d.pages,chars:d.chars,chunks:d.chunks}))};
+  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([JSON.stringify(pack)],{type:'application/json'}));
+  a.download='규정묶음_'+pack.made.replace(/-/g,'')+'.json'; document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },600);
+  closePanels();
+  bot('문서 '+docs.length+'개를 <b>'+esc(a.download)+'</b> 파일로 내보냈습니다(내려받기 폴더). 이 파일을 받는 선생님은 [⚙ 설정] → [묶음 가져오기]로 넣으면 됩니다.<div class="w"><b>학교 내부 자료가 들어 있다면</b> 공개된 곳(단체 대화방, 공개 사이트)에 올리지 말고 필요한 분께만 보내 주세요.</div>');
+}
+async function importPack(file){
+  try{
+    const p=JSON.parse(await file.text());
+    if(!p || p.app!==PACK_ID || !Array.isArray(p.docs)) throw new Error('fmt');
+    let n=0, skip=0;
+    for(const d of p.docs){
+      if(!d || typeof d.name!=='string' || !Array.isArray(d.chunks)) continue;
+      const chunks=d.chunks.filter(c=>c && typeof c.x==='string').map((c,i)=>({t:String(c.t||''),up:String(c.up||''),pg:String(c.pg||''),sh:+c.sh||0,x:c.x,i,...(c.f?{f:1}:{})}));
+      const fp=fpOf(chunks); if(dupOf(fp,d.name)){ skip++; continue; }
+      const old=S.docs.find(x=>x.name===d.name);
+      const doc={id:old?old.id:('d'+Date.now().toString(36)+Math.random().toString(36).slice(2,6)),fp,hasPdf:!!(old&&old.hasPdf),name:d.name,addedAt:+d.addedAt||Date.now(),sheets:+d.sheets||0,pages:+d.pages||0,chars:+d.chars||0,chunks,on:true};
+      if(old) S.docs[S.docs.indexOf(old)]=doc; else S.docs.push(doc);
+      await saveDoc(doc); n++;
+    }
+    // 동의어는 내 것에 없는 줄만 더함
+    if(typeof p.syn==='string'){ const mine=new Set(S.syn.split('\n').map(l=>l.trim())); const add=p.syn.split('\n').map(l=>l.trim()).filter(l=>l && !mine.has(l)); if(add.length){ S.syn=S.syn.trim()+'\n'+add.join('\n'); await DB.set('syn',S.syn).catch(()=>{}); } }
+    rebuild(); renderDocs(); closePanels();
+    bot('묶음에서 문서 <b>'+n+'개</b>를 가져왔습니다.'+(skip?' (이미 있는 문서와 내용이 같은 '+skip+'개는 건너뛰었어요)':'')+' 이제 궁금한 것을 물어보세요.');
+  }catch(e){ bot('이 파일은 「규정줍줍」의 문서 묶음이 아닙니다. [묶음 내보내기]로 만든 <b>규정묶음_날짜.json</b> 파일을 골라 주세요.'); }
+}
+
+/* ===== 설치(작업표시줄) 안내 ===== */
+const isKakao=/KAKAOTALK/i.test(navigator.userAgent);
+const isMobile=/Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+const isChromium=!!window.chrome || /Chrome\/|Edg\//.test(navigator.userAgent);
+function installHTML(){
+  if(standalone()) return '<p class="hint"><b style="color:var(--grn)">설치된 창으로 쓰고 계십니다.</b><br>작업표시줄의 꿈송이 아이콘을 <b>마우스 오른쪽 단추</b>로 눌러 <b>[작업 표시줄에 고정]</b>을 해 두면, 다음부터 아이콘만 눌러 바로 열 수 있습니다.</p>';
+  if(isKakao) return '<p class="hint"><b style="color:var(--red)">카카오톡 화면에서는 설치할 수 없습니다.</b> 주소를 복사해 PC의 크롬에서 열어 주세요.</p><div class="row"><button class="b s" type="button" data-act="copyUrl">주소 복사</button></div>';
+  if(S.installEvt) return '<p class="hint">설치하면 주소창 없는 작은 창으로 열리고, 작업표시줄에 꿈송이 아이콘이 생깁니다.</p><div class="row"><button class="b" type="button" data-act="install">🖥 내 컴퓨터에 설치</button></div>'+pinSteps();
+  if(isChromium && !isMobile) return '<p class="hint">크롬 주소창 <b>오른쪽 끝의 설치 아이콘</b>(모니터에 ↓ 모양)을 누르거나, 오른쪽 위 <b>⋮ → [전송, 저장, 공유] → [페이지를 앱으로 설치]</b>를 누르세요. 이미 설치했다면 작업표시줄이나 시작 메뉴의 꿈송이 아이콘으로 여시면 됩니다.</p>'+pinSteps();
+  return '<p class="hint">설치는 <b>PC의 크롬 또는 엣지</b>에서 할 수 있습니다. 이 주소를 크롬에서 열어 주세요.</p><div class="row"><button class="b s" type="button" data-act="copyUrl">주소 복사</button></div>';
+}
+/* 설치 창이 바로 안 뜰 때: 브라우저별 손으로 설치하는 길 */
+function pinHelp(){
+  const ua=navigator.userAgent, edge=/Edg\//.test(ua);
+  if(isKakao) return '<b>카카오톡 화면에서는 안 돼요.</b><br>아래 버튼으로 주소를 복사해서 <b>PC 크롬</b>에 붙여넣어 주세요.<div class="row"><button class="b s" type="button" data-act="copyUrl">주소 복사</button></div>';
+  if(isMobile) return '작업표시줄은 <b>PC</b>에서만 만들 수 있어요.';
+  return '<b>📌 화면 맨 아래 작업표시줄에 꽂기</b> — 둘 중 하나만 하면 돼요'
+   +'<div class="pinbox"><b>방법 1</b> (메뉴가 보이면 이게 제일 쉬워요)'
+   +'<ol class="guide">'
+   +(edge?'<li>엣지 창 오른쪽 위 <b>⋯</b> 누르기</li><li><b>[앱]</b> → <b>[이 사이트를 앱으로 설치]</b> → <b>[설치]</b></li>'
+         :'<li>크롬 창 오른쪽 위 <b>⋮</b>(점 세 개) 누르기</li><li><b>[전송, 저장, 공유]</b> → <b>[페이지를 앱으로 설치]</b> → <b>[설치]</b></li>')
+   +'<li><b>화면 맨 아래 작업표시줄</b>에 생긴 <b>꿈송이</b>를 <b>오른쪽 클릭</b> → <b>[작업 표시줄에 고정]</b></li></ol></div>'
+   +'<div class="pinbox"><b>방법 2</b> (메뉴에 설치가 없을 때)'
+   +'<ol class="guide">'
+   +'<li>아래 <b>[글 복사]</b> 누르기<div class="row"><button class="b s" type="button" data-act="copyApp">글 복사</button></div></li>'
+   +'<li>바탕화면 빈 곳 <b>오른쪽 클릭</b> → <b>[새로 만들기]</b> → <b>[바로 가기]</b></li>'
+   +'<li>칸에 <b>Ctrl+V</b>(붙여넣기) → <b>[다음]</b> → 이름 <b>규정줍줍</b> → <b>[마침]</b></li>'
+   +'<li>바탕화면에 생긴 아이콘 <b>오른쪽 클릭</b> → <b>[작업 표시줄에 고정]</b><br><span class="hint">안 보이면 [추가 옵션 표시] 안에 있어요</span></li></ol>'
+   +'<div class="hint">[다음]에서 "찾을 수 없습니다"가 뜨면 → <button class="b g s" type="button" data-act="copyApp86">다른 글 복사</button> 후 다시 붙여넣기</div></div>'
+   +'<div class="w">끝나면 <b>화면 맨 아래 작업표시줄</b>의 꿈송이만 누르면 바로 열려요. 넣어 둔 문서도 그대로예요.</div>';
+}
+function pinSteps(){ return '<ol class="steps"><li>설치하면 새 창이 뜨고 <b>화면 맨 아래 작업표시줄</b>에 <b>꿈송이 아이콘</b>이 생깁니다.</li><li>그 아이콘을 <b>마우스 오른쪽 단추</b>로 누르고 <b>[작업 표시줄에 고정]</b>을 누릅니다.</li><li>다음부터는 아이콘만 누르면 됩니다. 창 크기는 모서리를 끌어 좁게 맞추세요.</li></ol>'; }
+function renderInstall(){ $('installBox').innerHTML= standalone()? installHTML() : (S.installEvt? installHTML() : pinHelp()); }
+async function doInstall(){
+  const ev=S.installEvt; if(!ev){ openPanel('pSet'); return; }
+  ev.prompt(); let ok=false; try{ ok=(await ev.userChoice).outcome==='accepted'; }catch(e){}
+  S.installEvt=null; renderInstall();
+  if(!ok) toast('설치를 취소했습니다. [⚙ 설정]에서 다시 할 수 있습니다.');
+}
+
+/* ===== 첫 인사 ===== */
+/* 나만의 줍줍이: 학교 내 업무 PC에서 쓰는 커스텀 프로그램이라는 안내 */
+function mineHTML(){
+  return '<div class="mine"><b>🏫 학교 내 업무 PC에서 쓰는, 나만의 줍줍이예요</b>'
+   +'<ul><li>같은 주소를 받아도 선생님마다 <b>자기 업무에 맞게 채우는 나만의 프로그램</b>이 돼요. 넣은 문서·저장함은 다른 선생님과 섞이지 않아요.</li>'
+   +'<li>모든 것이 <b>이 컴퓨터의 크롬 안에만</b> 저장돼요. 인터넷 어디로도 보내지 않아요.</li>'
+   +'<li>그래서 <b>학교 업무 PC 한 대에서</b> 쓰세요. 집 PC나 다른 PC에서 열면 빈 줍줍이가 나와요.</li>'
+   +'<li>여러 선생님이 같이 쓰는 <b>공용 PC</b>에서는 줍줍이도 같이 쓰게 되니 피해 주세요.</li>'
+   +'<li>크롬의 <b>[인터넷 사용 기록 삭제]</b>에서 쿠키·사이트 데이터를 지우거나, 학교 PC가 초기화되면 넣은 문서가 사라져요. 가끔 <b>[⚙ 설정 → 묶음 내보내기]</b>로 백업해 두세요.</li></ul></div>';
+}
+function mustHTML(){
+  return '<div class="must"><div class="mt">⚠️ 꼭 알아 두세요</div><ul>'
+   +'<li><b>AI가 아니에요.</b> 문서에 <u>적힌 낱말</u>로 찾아요. 답은 <b>꼭 원문으로 확인</b>해 주세요.</li>'
+   +'<li><b>학생 이름·개인정보</b>가 든 문서는 <b>넣지 마세요.</b></li></ul></div>';
+}
+function guideHTML(){
+  const inst=!standalone() && !isMobile && !isKakao;
+  return '<div class="hint" style="margin-top:6px">▸ 단계를 누르면 자세한 설명이 펼쳐져요.</div><ol class="guide tg">'
+   +'<li><details><summary><b>내 업무 규정을 PDF로 준비해요</b></summary><div class=\"gd\">선생님 업무에 맞는 규정집·길라잡이·지침이면 무엇이든 됩니다. (학교 규정, 학폭·교권·안전 길라잡이, 교육청 지침 등)<br>· 한글(.hwp) 파일은 한글에서 <b>[파일] → [PDF로 저장하기]</b><br>· 이미 PDF면 그대로 쓰면 돼요<br>· 스캔한 그림 PDF(글자를 드래그해 복사할 수 없는 것)는 찾을 수 없어요</div></details></li>'
+   +'<li><details><summary><b>PDF를 넣어요</b></summary><div class=\"gd\">이 창에 <b>끌어다 놓거나</b> 아래 [📄 PDF 넣기]를 눌러요. 여러 개를 한 번에 넣어도 돼요. 처음 한 번만 하면 됩니다.</div></details></li>'
+   +(inst?'<li><details><summary><b>화면 맨 아래 작업표시줄에 꽂아 둬요</b></summary><div class=\"gd\">입력창 바로 위의 <b>[📌 작업표시줄에 꽂아 두기]</b>를 누르면 방법이 나와요. 끝나면 <b>화면 맨 아래 작업표시줄</b>에 꿈송이가 생겨요. 한글·나이스를 쓰다가도 그 꿈송이만 누르면 바로 꺼내 볼 수 있어요.</div></details></li>':'')
+   +'<li><details><summary><b>궁금한 것을 물어봐요</b></summary><div class=\"gd\">예) "출석정지는 며칠까지야?", "위원회 위원은 몇 명?", "재심의 신청 기간"<br>문서에 적힌 원문을 <b>쪽수와 함께</b> 찾아 드려요.<br><b>[📄 원문 PDF]</b>를 누르면 원본 PDF가 <b>그 쪽으로 펼쳐지고</b> 찾은 낱말에 노란 형광펜이 칠해져요.<br>펼쳐진 창의 <b>🖨 인쇄</b>로 <b>찾은 부분만</b>, <b>그 쪽만</b>, <b>장 전체</b> 중 골라 인쇄할 수 있어요. 형광펜도 같이 인쇄돼요.</div></details></li>'
+   +'<li><details><summary><b>모아 보고 다시 찾기</b></summary><div class=\"gd\"><b>📑 색인</b>: 넣은 문서의 목차와 가나다순 찾아보기<br><b>⭐ 저장함</b>: 결과의 [⭐ 저장]으로 모은 조항과 메모, 최근 검색</div></details></li>'
+   +'</ol><div class="w">화면이 길어지면 입력창 왼쪽 <b>↺</b>를 누르세요. 대화만 지워지고 넣어 둔 문서는 그대로예요.</div>';
+}
+function hello(){
+  const has=S.docs.length>0;
+  let h='<div class="hello"><img src="ggumsong.png" alt="꿈송이"><div>안녕하세요, <b>꿈송이</b>예요. '
+    +(has?'넣어 둔 문서 <b>'+S.docs.length+'개</b>에서 찾아 드릴게요. 궁금한 것을 물어보세요.':'선생님 업무의 <b>규정집·길라잡이</b>를 PDF로 넣어 주시면, 질문에 맞는 곳을 <b>원문 그대로 쪽수와 함께</b> 찾아 드려요. 이렇게 시작해요.')+'</div></div>';
+  h+=guideHTML();
+  if(!has){ h+='<div class="row"><button class="b" type="button" data-act="pick">📄 PDF 넣기</button>'+((!standalone()&&!isMobile&&!isKakao)?'<button class="b g" type="button" data-act="pin" id="helloInst">📌 작업표시줄(화면 맨 아래)에 꽂기</button>':'')+'</div>'; }
+  else if(!standalone() && !isMobile && !isKakao) h+='<div class="row"><button class="b g s" type="button" data-act="pin" id="helloInst">📌 작업표시줄(화면 맨 아래)에 꽂기</button><button class="b g s" type="button" data-act="guide">📖 사용법</button></div>';
+  else h+='<div class="row"><button class="b g s" type="button" data-act="guide">📖 사용법</button></div>';
+  h+=mineHTML()+mustHTML();
+  bot(h);
+}
+
+/* ===== 누르기·끌어다 놓기 ===== */
+document.addEventListener('click',async e=>{
+  if(!$('pvMenu').hidden && !e.target.closest('#pvMenu') && !e.target.closest('[data-act="pvPrintMenu"]')) $('pvMenu').hidden=true;
+  const qb=e.target.closest('[data-q]'); if(qb){ ask(qb.dataset.q); return; }
+  if(e.target.classList.contains('panel')){ closePanels(); return; }
+  const t=e.target.closest('[data-act]'); if(!t) return;
+  const act=t.dataset.act;
+  if(act==='close'){ closePanels(); }
+  else if(act==='pick'){ $('file').click(); }
+  else if(act==='docs'){ openPanel('pDocs'); }
+  else if(act==='set'){ openPanel('pSet'); aiState(); }
+  else if(act==='install'){ doInstall(); }
+  else if(act==='aiSave'){ const k=$('aiKeyIn').value.trim(); if(!/^sk-ant-/.test(k)){ toast('키는 sk-ant- 로 시작합니다. 다시 확인해 주세요.'); } else { try{ localStorage.setItem('gj.aiKey',k); }catch(e){} $('aiKeyIn').value=''; aiState(); toast('저장했습니다. 이제 답 위에 AI 한 줄 답이 나옵니다.'); } }
+  else if(act==='aiClear'){ try{ localStorage.removeItem('gj.aiKey'); }catch(e){} aiState(); toast('키를 지웠습니다.'); }
+  else if(act==='tSave'){ S.tMain=$('tMainIn').value.trim(); S.tSub=$('tSubIn').value.trim(); await DB.set('title',{m:S.tMain,s:S.tSub}).catch(()=>{}); applyTitle(); toast('제목을 바꿨어요.'); }
+  else if(act==='tReset'){ S.tMain=''; S.tSub=''; await DB.set('title',{m:'',s:''}).catch(()=>{}); fillTitleInputs(); applyTitle(); toast('처음 제목으로 되돌렸어요.'); }
+  else if(act==='pvClose'){ closeViewer(); }
+  else if(act==='pvPrintMenu'){ $('pvMenu').hidden=!$('pvMenu').hidden; }
+  else if(act==='pvPrint'){ printFromViewer(t.dataset.m); }
+  else if(act==='pvGo'){ goPage(PV.cur+(+t.dataset.d)); }
+  else if(act==='pvZoom'){ const z=Math.max(0.6,Math.min(2.5,PV.zoom+(+t.dataset.d)*0.25)); if(z===PV.zoom) return; const keep=PV.cur; PV.zoom=z; await layoutViewer(); goPage(keep); }
+  else if(act==='pvNew'){ if(!PV.blob) return; const url=URL.createObjectURL(PV.blob)+'#page='+PV.cur; const w=window.open(url,'_blank'); if(!w) toast('새 창이 막혔어요. 이 창에서 보시면 돼요.'); }
+  else if(act==='pdf'){ const c=t.closest('.c'); const doc=c&&S.docs.find(d=>d.id===c.dataset.doc); const ch=doc&&doc.chunks[+c.dataset.i];
+    if(!doc){ bot('이 조항의 원본 문서가 이 컴퓨터에 없어요. 같은 PDF를 다시 넣으면 원문을 열 수 있어요.'); return; }
+    let blob=null; try{ blob=await DB.getPdf(doc.id); }catch(e){}
+    if(!blob){ bot('「'+esc(doc.name)+'」은 <b>원본 PDF가 이 컴퓨터에 저장되어 있지 않아요.</b> (묶음으로 가져왔거나, 원문 보기 기능이 생기기 전에 넣은 문서예요)<br><b>같은 PDF를 한 번 더 넣으면</b> 그다음부터 원문이 바로 열려요. 검색·저장함은 그대로예요.<div class="row"><button class="b s" type="button" data-act="pick">📄 PDF 다시 넣기</button></div>'); return; }
+    const list=c.closest('[data-ans]'); const a=list?S.answers[list.dataset.ans]:null;
+    const hit=a&&a.all.find(x=>x.e.c===ch); openViewer(doc,blob,(ch&&ch.sh)||1,ch,hit?hit.words:(a?a.words:[])); }
+  else if(act==='save'){ const f=findCard(t); if(!f) return; if(savedKey(f.doc,f.ch)){ toast('이미 저장했어요.'); return; }
+    const list=f.el.closest('[data-ans]'); const a=list?S.answers[list.dataset.ans]:null;
+    S.saved.push({id:'s'+Date.now().toString(36)+Math.random().toString(36).slice(2,5),docId:f.doc.id,doc:f.doc.name,i:f.ch.i,t:f.ch.t,up:f.ch.up||'',pg:f.ch.pg,x:f.ch.x,q:a&&a.q||'',memo:'',at:Date.now()});
+    saveSaved(); t.textContent='★ 저장됨'; t.classList.remove('g'); t.disabled=true; toast('⭐ 저장함에 넣었어요.'); }
+  else if(act==='openSaved'){ const s=S.saved.find(x=>x.id===t.closest('.sv').dataset.sid); if(s){ closePanels(); openSaved(s); } }
+  else if(act==='copySaved'){ const s=S.saved.find(x=>x.id===t.closest('.sv').dataset.sid); if(s) copyText('「'+s.doc+'」 '+s.pg+'\n'+(s.up?s.up+' › ':'')+(s.t!==s.pg?s.t:'')+'\n'+reflow(s.x)+(s.memo?'\n[메모] '+s.memo:'')); }
+  else if(act==='delSaved'){ if(t.dataset.sure!=='1'){ t.dataset.sure='1'; t.textContent='정말 지우기'; setTimeout(()=>{ if(t.isConnected){ t.dataset.sure=''; t.textContent='지우기'; } },3000); return; }
+    const id=t.closest('.sv').dataset.sid; S.saved=S.saved.filter(x=>x.id!==id); saveSaved(); renderSaved(); toast('저장한 조항을 지웠어요.'); }
+  else if(act==='clrRecent'){ S.recent=[]; DB.set('recent',S.recent).catch(()=>{}); renderSaved(); }
+  else if(act==='idxMode'){ IX.mode=t.dataset.m; renderIdx(); }
+  else if(act==='ixOpen'){ const d=S.docs.find(x=>x.id===t.dataset.doc); const c=d&&d.chunks[+t.dataset.i]; if(!c) return; closePanels();
+    const box=bot('📑 색인에서 연 곳이에요.<div>'+card(d,c,null,'')+'</div>'); const x=box.querySelector('.cx'); if(x&&c.x){ x.classList.remove('cut'); x.textContent=reflow(c.x); const fb=box.querySelector('[data-act="full"]'); if(fb) fb.remove(); } }
+  else if(act==='clearChat'){ $('msgs').innerHTML=''; S.answers={}; closePanels(); hello(); toast('대화를 지웠어요. 넣어 둔 문서는 그대로예요.'); $('q').focus(); }
+  else if(act==='pin'){ if(S.installEvt) doInstall(); else bot(pinHelp()); }
+  else if(act==='guide'){ closePanels(); bot('<b>📖 사용법</b>'+guideHTML()+mineHTML()+mustHTML()+'<div class="w">같은 업무 선생님께 문서를 그대로 넘기고 싶으면 [⚙ 설정] → [묶음 내보내기]를 쓰세요.</div>'); }
+  else if(act==='copyUrl'){ copyText(location.href); }
+  else if(act==='copyApp86'){ copyText('"C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe" --app='+location.origin+location.pathname); }
+  else if(act==='copyApp'){ copyText('"C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe" --app='+location.origin+location.pathname); }
+  else if(act==='more'){ showMore(t.dataset.id,5); }
+  else if(act==='bydoc'){ byDoc(t.dataset.id,t.dataset.doc,t); }
+  else if(act==='full'){ const f=findCard(t); if(f){ const x=f.el.querySelector('.cx'); x.classList.remove('cut'); x.innerHTML=hl(reflow(f.ch.x),f.re); t.remove(); } }
+  else if(act==='copy'){ const f=findCard(t); if(f) copyText('「'+f.doc.name+'」 '+f.ch.pg+'\n'+(f.ch.up?f.ch.up+' › ':'')+(f.ch.t!==f.ch.pg?f.ch.t:'')+'\n'+reflow(f.ch.x)); }
+  else if(act==='adj'){ const f=findCard(t); if(!f) return; const n=f.doc.chunks[f.ch.i+(+t.dataset.dir)];
+    if(!n){ toast(+t.dataset.dir<0?'문서의 맨 처음입니다.':'문서의 맨 끝입니다.'); return; }
+    const d=bot((+t.dataset.dir<0?'바로 <b>앞</b>':'바로 <b>뒤</b>')+' 내용입니다.<div data-list="x"'+(f.el.closest('[data-ans]')?' data-ans="'+f.el.closest('[data-ans]').dataset.ans+'"':'')+'>'+card(f.doc,n,f.re,'')+'</div>'); const x=d.querySelector('.cx'); if(x && n.x){ x.classList.remove('cut'); x.innerHTML=hl(reflow(n.x),f.re); const fb=d.querySelector('[data-act="full"]'); if(fb) fb.remove(); } }
+  else if(act==='del'){ const row=t.closest('.doc');
+    if(t.dataset.sure!=='1'){ t.dataset.sure='1'; t.textContent='정말 지우기'; setTimeout(()=>{ if(t.isConnected){ t.dataset.sure=''; t.textContent='지우기'; } },3500); return; }
+    const id=row.dataset.id; S.docs=S.docs.filter(d=>d.id!==id); await DB.delDoc(id).catch(()=>{}); await DB.delPdf(id).catch(()=>{}); rebuild(); renderDocs(); toast('문서를 지웠습니다.'); }
+  else if(act==='synSave'){ S.syn=$('synBox').value; await DB.set('syn',S.syn).catch(()=>{}); rebuild(); toast('같은 뜻 낱말 '+S.synGroups.length+'묶음을 저장했습니다.'); }
+  else if(act==='synReset'){ $('synBox').value=DEFAULT_SYN; toast('기본값을 불러왔습니다. [저장]을 눌러야 적용됩니다.'); }
+  else if(act==='packOut'){ packOut(); }
+  else if(act==='packIn'){ $('filePack').click(); }
+  else if(act==='wipe'){
+    if(t.dataset.sure!=='1'){ t.dataset.sure='1'; t.textContent='정말 모두 지우기 (되돌릴 수 없음)'; setTimeout(()=>{ if(t.isConnected){ t.dataset.sure=''; t.textContent='모두 지우기'; } },4000); return; }
+    await DB.clear().catch(()=>{}); S.saved=[]; S.recent=[]; saveSaved(); S.docs=[]; S.syn=DEFAULT_SYN; S.answers={}; rebuild(); closePanels(); $('msgs').innerHTML=''; hello(); toast('모두 지웠습니다.'); }
+});
+document.addEventListener('input',e=>{ const t=e.target; if(t.dataset && t.dataset.act==='memo'){ const s=S.saved.find(x=>x.id===t.closest('.sv').dataset.sid); if(s){ s.memo=t.value; clearTimeout(S.memoT); S.memoT=setTimeout(saveSaved,400); } } });
+document.addEventListener('change',async e=>{
+  const t=e.target;
+  if(t.id==='file'){ const fs=Array.from(t.files); t.value=''; addFiles(fs); }
+  else if(t.id==='filePack'){ const f=t.files[0]; t.value=''; if(f) importPack(f); }
+  else if(t.dataset && t.dataset.act==='toggle'){ const id=t.closest('.doc').dataset.id, d=S.docs.find(x=>x.id===id); if(d){ d.on=t.checked; await saveDoc(d); rebuild(); renderDocs(); } }
+});
+$('ask').addEventListener('submit',e=>{ e.preventDefault(); const v=$('q').value; $('q').value=''; ask(v); });
+$('btnDocs').addEventListener('click',()=>openPanel('pDocs'));
+$('btnSet').addEventListener('click',()=>openPanel('pSet'));
+function editTitle(){ openPanel('pSet'); setTimeout(()=>{ $('tHead').scrollIntoView({block:'start'}); $('tMainIn').focus(); },50); }
+$('ttlBox').addEventListener('click',editTitle);
+$('ttlBox').addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); editTitle(); } });
+$('btnIdx').addEventListener('click',()=>openPanel('pIdx'));
+$('btnSaved').addEventListener('click',()=>openPanel('pSaved'));
+$('idxQ').addEventListener('input',()=>renderIdx());
+$('idxDoc').addEventListener('change',()=>renderIdx());
+$('btnPin').addEventListener('click',()=>{ if(S.installEvt) doInstall(); else bot(pinHelp()); });
+function showPin(){ $('btnPin').hidden = standalone() || isMobile || isKakao; }
+$('dz').addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); $('file').click(); } });
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ if(!$('pv').hidden) closeViewer(); else closePanels(); } if(!$('pv').hidden){ if(e.key==='PageDown'||e.key==='ArrowRight'&&e.altKey){ e.preventDefault(); goPage(PV.cur+1); } if(e.key==='PageUp'||e.key==='ArrowLeft'&&e.altKey){ e.preventDefault(); goPage(PV.cur-1); } } });
+let dragN=0;
+const hasFiles=e=>e.dataTransfer && Array.from(e.dataTransfer.types||[]).includes('Files');
+window.addEventListener('dragenter',e=>{ if(!hasFiles(e)) return; e.preventDefault(); dragN++; $('drop').classList.add('on'); });
+window.addEventListener('dragover',e=>{ if(hasFiles(e)) e.preventDefault(); });
+window.addEventListener('dragleave',e=>{ if(!hasFiles(e)) return; dragN=Math.max(0,dragN-1); if(!dragN) $('drop').classList.remove('on'); });
+window.addEventListener('drop',e=>{ if(!hasFiles(e)) return; e.preventDefault(); dragN=0; $('drop').classList.remove('on'); addFiles(e.dataTransfer.files); });
+
+window.addEventListener('beforeinstallprompt',e=>{ e.preventDefault(); S.installEvt=e; renderInstall(); const b=$('helloInst'); if(b) b.dataset.act='install'; });
+window.addEventListener('appinstalled',()=>{ S.installEvt=null; renderInstall(); $('btnPin').hidden=true; bot('<b>설치되었습니다.</b> <b>화면 맨 아래 작업표시줄</b>에 생긴 꿈송이 아이콘을 <b>마우스 오른쪽 단추</b>로 누르고 <b>[작업 표시줄에 고정]</b>을 눌러 두세요. 다음부터는 그 아이콘만 누르면 됩니다.'); });
+
+/* ===== 시작 ===== */
+(async function init(){
+  $('ver').textContent=APP_VER;
+  const ok=await DB.open();
+  if(ok){ try{ S.docs=(await DB.allDocs()).sort((a,b)=>a.addedAt-b.addedAt); const s=await DB.get('syn'); if(typeof s==='string' && s.trim()) S.syn=s; const tt=await DB.get('title'); if(tt&&typeof tt==='object'){ S.tMain=String(tt.m||''); S.tSub=String(tt.s||''); } const sv=await DB.get('saved'); if(Array.isArray(sv)) S.saved=sv; const rc=await DB.get('recent'); if(Array.isArray(rc)) S.recent=rc; }catch(e){} }
+  else S.saveOk=false;
+  saveSaved();
+  rebuild();
+  if(isKakao){ const w=$('warn'); w.hidden=false; w.innerHTML='카카오톡 화면에서는 설치와 저장이 잘 되지 않습니다. <b>PC의 크롬</b>에서 열어 주세요. <button class="b g s" type="button" data-act="copyUrl">주소 복사</button>'; }
+  else if(!ok){ const w=$('warn'); w.hidden=false; w.textContent='이 브라우저에서는 문서 저장이 되지 않습니다(시크릿 창 등). 창을 닫으면 넣은 문서가 사라집니다.'; }
+  applyTitle();
+  showPin();
+  hello();
+  // 설치된 창으로 처음 열릴 때 한 번만 좁고 길게 맞춤(브라우저가 막으면 그대로 둠)
+  try{ if(standalone() && !localStorage.getItem('gj-sized')){ localStorage.setItem('gj-sized','1'); window.resizeTo(440,780); } }catch(e){}
+  if('serviceWorker' in navigator && (location.protocol==='https:' || location.hostname==='localhost' || location.hostname==='127.0.0.1')) (window.parent===window) && navigator.serviceWorker.register('sw.js').catch(()=>{});
+  if(!isMobile) $('q').focus();
+})();
+
+window.GJ={S,ask,addFiles}; // 점검용
+})();
+</script>
+</body>
+</html>
