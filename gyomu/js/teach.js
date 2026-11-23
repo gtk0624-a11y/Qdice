@@ -131,3 +131,10 @@ classView = function () {
 function ttColor() { document.querySelectorAll('input[data-tt]').forEach(i => { const td = i.closest('td'); if (td) td.style.background = gradeOf(i.value) ? gcol(gradeOf(i.value)) : ''; }); }
 const _r2 = TF.render; TF.render = function () { const v = _r2.apply(this, arguments); ttColor(); return v; };
 setTimeout(() => { if (S.setup) cmcLoad(); }, window.TF_DEMO ? 300 : 3000);
+/* 시간표 칸: Enter = 아래 칸으로 이동, 방향키 위/아래 이동 */
+document.addEventListener('keydown', e => {
+  const i = e.target; if (!(i && i.matches && i.matches('input[data-tt]')) || e.isComposing) return;
+  if (e.key !== 'Enter' && e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+  const all = [...document.querySelectorAll('input[data-tt]')], d = i.dataset.tt.split('-')[0], col = all.filter(x => x.dataset.tt.split('-')[0] === d), k = col.indexOf(i), n = col[e.key === 'ArrowUp' ? k - 1 : k + 1];
+  e.preventDefault(); if (n) { n.focus(); n.select(); }
+});

@@ -960,3 +960,6 @@ details.afold.help{box-shadow:none;background:transparent}
 .dw .dwf a{display:inline-flex;align-items:center;gap:4px;background:#fff;border:1px solid rgba(0,0,0,.18)!important;border-radius:99px;padding:8px 14px;font-size:15px;font-weight:700;text-decoration:none!important;color:inherit;min-height:40px;box-shadow:0 1px 0 rgba(0,0,0,.06)}
 .dw .dwf a:hover,.dw .dwf a:focus{background:#fff8dc;outline:2px solid #C8960C}
 .dw>details{width:100%!important}
+/* v114 시간표: 일과표 시각 표시 + 급식 줄 */
+.tt .ttp{white-space:nowrap;text-align:center;line-height:1.25;min-width:92px}.tt .ttp b{display:block;font-size:15px}.tt .ttp small{display:block;font-size:12px;color:var(--mu,#666);font-weight:400}
+.tt .ttlunch th,.tt .ttlunch td{background:#fff3d6!important;text-align:center;padding:6px}.tt td input{width:100%;min-width:64px;box-sizing:border-box;padding:8px 6px;font-size:15px}

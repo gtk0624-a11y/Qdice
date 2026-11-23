@@ -201,7 +201,16 @@ function calView() {
 /* ---------- 수업·평가·시간표 ---------- */
 function classView() {
   let t = '<table class="tbl tt"><thead><tr><th></th>' + [1, 2, 3, 4, 5].map(d => `<th>${DOW[d]}</th>`).join('') + '</tr></thead><tbody>';
-  for (let p = 1; p <= 7; p++) { t += `<tr><th>${p}</th>` + [1, 2, 3, 4, 5].map(d => `<td><input data-tt="${d}-${p}" value="${esc(tt(d, p))}" aria-label="${DOW[d]} ${p}교시"></td>`).join('') + '</tr>'; }
+  const BP = (typeof _clkP0 === 'function' ? _clkP0() : clkPeriods()).map(x => ({ ...x })), have = new Set(BP.map(x => x.p));
+  Object.keys(S.timetable).forEach(k => { const p = +k.split('-')[1]; if (S.timetable[k] && p && !have.has(p)) { have.add(p); BP.push({ p, s: null, e: null }); } });
+  BP.sort((a, b) => a.p - b.p);
+  const LU = typeof _clkL0 === 'function' ? _clkL0(BP.filter(x => x.s != null)) : null; let lunchDone = !LU;
+  const lunchRow = () => { lunchDone = true; return `<tr class="ttlunch"><th class="ttp"><b>급식</b><small>${clkHM(LU[0])}~${clkHM(LU[1])}</small></th><td colspan="5">🍚 점심시간 <span class="mu">(일과표의 급식 시간 · 아래 「일과표 직접 고치기」에서 바꿀 수 있어요)</span></td></tr>`; };
+  BP.forEach(x => {
+    if (!lunchDone && x.s != null && x.s >= LU[1]) t += lunchRow();
+    t += `<tr><th class="ttp"><b>${x.p}교시</b>${x.s != null ? `<small>${clkHM(x.s)}~${clkHM(x.e)}</small>` : ''}</th>` + [1, 2, 3, 4, 5].map(d => `<td><input data-tt="${d}-${x.p}" value="${esc(tt(d, x.p))}" placeholder="수업 입력" aria-label="${DOW[d]} ${x.p}교시"></td>`).join('') + '</tr>';
+  });
+  if (!lunchDone) t += lunchRow();
   t += '</tbody></table>';
   return `<div class="bh"><h2>수업 및 시간표</h2><span class="mu">시간표 · 진도 · 수행평가를 한곳에서 고칩니다.</span></div>
   <h3 class="h3">시간표 · 일과표</h3><div class="tools"><button class="btn pri" data-act="comci">컴시간알리미에서 자동으로 가져오기</button><label class="btn file">시간표 파일 올리기<input type="file" id="ttUp" accept=".hwp,.hwpx,.docx,.xlsx,.xls,.csv,.txt,.pdf" hidden></label><button class="btn" data-act="ttPaste">시간표 붙여넣기</button><label class="btn file">일과표 파일 올리기<input type="file" id="bellUp" accept=".hwp,.hwpx,.docx,.xlsx,.xls,.csv,.txt,.pdf" hidden></label><button class="btn" data-act="bellPaste">일과표 붙여넣기</button></div><p class="mu">컴시간 연동은 설정한 내 이름(예: 김정*)으로 선생님 수업만 골라 자동으로 채웁니다. 한글·엑셀·PDF 파일을 올리거나 표를 복사해 붙여도 알아서 칸을 채웁니다. 고칠 때는 아래 칸에 직접 적으세요. 빈칸은 공강입니다.</p>${S.profile.bell && S.profile.bell.length ? `<p class="mu">적용된 일과표: ${S.profile.bell.map(x => `${x.p}교시 ${hm(x.s)}~${hm(x.e)}`).join(' · ')}</p>` : ''}${t}
