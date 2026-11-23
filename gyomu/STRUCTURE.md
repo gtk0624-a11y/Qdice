@@ -441,3 +441,4 @@ service cloud.firestore {
 - v119: 급식과 겹치는 교시는 급식 뒤로 자동 밀기(class2.js bellAlignLunch, 시각 수정 시 자동 + 「급식 뒤로 교시 자동 정렬」 버튼).
 - v120: 오늘 화면 「🎯 오늘 꼭 할 일·주의」 카드는 선택 기능(기본 꺼짐) — 설정 › 기능 켜고 끄기에서 켬(feat.js FEAT_OPT).
 - v121: 오늘 화면의 오늘 도우미·오늘 메모·학교(곡선중학교) 카드를 선택 기능(기본 꺼짐)으로 — 설정 › 기능 켜고 끄기(feat.js FEAT_OPT, style.css nf-hpcard/nf-sbanner).
+- v122: 서랍(사이트 찾기)도 선택 기능(기본 꺼짐) — 설정 › 기능 켜고 끄기.

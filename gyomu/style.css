@@ -967,3 +967,4 @@ details.afold.help{box-shadow:none;background:transparent}
 .tt .tti{display:flex;align-items:center;justify-content:center;gap:2px;margin-top:3px}.tt .tti input{width:86px!important;min-width:0!important;padding:4px 2px!important;font-size:13px!important;border:1px solid rgba(0,0,0,.2);border-radius:6px;background:#fff}
 
 .nf-hpcard details.hpcard{display:none!important}.nf-sbanner .sbanner{display:none!important}
+.nf-drawer .drawer,.nf-drawer .dw{display:none!important}
