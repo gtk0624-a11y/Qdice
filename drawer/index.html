@@ -70,7 +70,7 @@ input[type=text],input[type=url],select{width:100%;border:1px solid var(--line);
 #toast.show{opacity:.95}
 
 /* v2 가독성 개편 */
-@media(min-width:620px){.favgrid{grid-template-columns:repeat(4,1fr)}}
+.orph{background:#fff7ed;border:1px solid #fdba74;border-radius:12px;padding:10px 12px;margin:6px 0;font-size:13px;color:#9a3412;word-break:break-all}.orph button{margin-top:6px;border:0;background:#ea580c;color:#fff;border-radius:99px;padding:6px 14px;font:inherit;font-weight:700;cursor:pointer}
 body{font-size:16px}
 .tabs{display:none}
 .recentbar{display:flex;gap:6px;align-items:center;overflow-x:auto;padding:8px 0 0;scrollbar-width:none;font-size:12px;color:rgba(255,255,255,.85)}
@@ -118,7 +118,7 @@ body.edit .editbar button{background:var(--brand2);border-color:var(--brand2);co
   <main id="list"></main>
 </div>
 <button class="fab" id="btnAdd">＋ 추가</button>
-<div class="wm">© 김정환 · M.A.D.T (Moral And Digital Teacher) · v5</div>
+<div class="wm">© 김정환 · M.A.D.T (Moral And Digital Teacher) · v6</div>
 <div id="toast"></div>
 
 <!-- 추가·수정 창 -->
@@ -288,8 +288,10 @@ function render(){
   if(!pool.length){ box.appendChild(emptyMsg("검색 결과가 없습니다.")); return; }
   /* 즐겨찾기: 큰 타일(전부 한눈에) — 검색 중이면 결과에 포함된 것만 */
   const fv = pool.filter(isFav);
-  if(fv.length){ box.appendChild(el("div", "sec", "⭐ 즐겨찾기 (" + fv.length + ")")); const g = el("div", "favgrid"); fv.forEach(i => g.appendChild(makeTile(i))); box.appendChild(g); }
-  else if(!q) box.appendChild(emptyMsg("⭐ 아래 목록의 ☆ 를 누르면 여기 큰 버튼으로 모입니다."));
+  const orphan = q ? [] : Array.from(fav).filter(f => !items.some(i => favKey(i.id) === favKey(f)));
+  if(fv.length){ const h = el("div", "sec", "⭐ 즐겨찾기 (" + fv.length + ")"); box.appendChild(h); const g = el("div", "favlist"); fv.forEach(i => g.appendChild(makeRow(i))); box.appendChild(g); }
+  else if(!q) box.appendChild(emptyMsg("⭐ 아래 목록의 ☆ 를 누르면 여기에 모입니다."));
+  if(orphan.length){ const w = el("div", "orph"); w.appendChild(el("div", "", "⚠️ 즐겨찾기 " + orphan.length + "개가 서랍에서 찾아지지 않습니다 (주소를 고쳤거나 뺀 사이트): " + orphan.map(f => String(f).replace(/^m:/, "")).join(", "))); const b = el("button", "", "정리하기"); b.type = "button"; b.addEventListener("click", () => { orphan.forEach(f => fav.delete(f)); save(LS.fav, Array.from(fav)); render(); }); w.appendChild(b); box.appendChild(w); }
   /* 분류별 접이식 목록(즐겨찾기도 제자리에 그대로 보임) */
   const openMap = load(OPEN_KEY, {});
   const cats = CATS.concat(Array.from(new Set(pool.map(i => i.cat))).filter(c => !CATS.includes(c)));
