@@ -1000,3 +1000,5 @@ small.k-기록,.chp.k-기록{background:#d9f2e6}u.k-기록{color:#2f9a6a}
 .ncprop{display:grid;grid-template-columns:70px 1fr;gap:8px;align-items:center;padding:6px 0;border-bottom:1px dashed var(--rule2)}.ncprop.top{align-items:start}.ncprop label{color:var(--mu);font-size:13px}.ncprop textarea{width:100%;font:inherit;padding:6px;border:1px solid var(--rule2);border-radius:6px;box-sizing:border-box}.ncprop input[type=checkbox]{width:20px;height:20px}
 .ncdl{display:none}
 @media(max-width:760px){.ncc{min-height:62px}.ncard{padding:2px 3px}.ncm{display:none}.nct b{font-size:10.5px}.ncck{display:none}.ncplus{display:none}.ncdl{display:block}.ncrow{grid-template-columns:20px minmax(0,1fr) auto}.ncrow .mu,.ncrow i{display:none}}
+.ncpin{margin-left:auto;flex:none;border:0;background:transparent;font-size:12px;padding:0 2px;cursor:pointer;opacity:0;line-height:1}.ncard:hover .ncpin,.ncpin:focus{opacity:1}
+@media(hover:none){.ncpin{opacity:.7}}@media(max-width:760px){.ncpin{display:none}}

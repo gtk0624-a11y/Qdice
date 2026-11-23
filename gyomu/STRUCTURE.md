@@ -452,3 +452,6 @@ service cloud.firestore {
 - 보기 탭: 월간 / 다가오는 내 업무(`ncUpcoming`, 기한 지난 할 일 포함, `UI.calv`). 「새로 만들기」=`ncMake`.
 - 일정 항목에 `memo` 칸 추가(S.items[].memo). 모바일(≤760px)은 제목만 작게 + 아래 선택한 날 목록.
 - 고칠 곳: 카드 모양 `ncCard`, 창 항목 `ncPeek`, 스타일 style.css 「v126」.
+
+## v127
+- 캘린더 카드·편집창·날짜 목록에 📌(포스트잇으로 붙이기) 추가: `A.ncPin`(js/ncal.js). 일정/기록(📝)/자동 일정 모두 가능, 제목+날짜가 S.postits 로 들어감.

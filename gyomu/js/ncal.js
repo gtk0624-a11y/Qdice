@@ -9,8 +9,9 @@ function ncKindSel(i) {
 function ncCard(e) {
   const it = e.id ? S.items.find(x => x.id === e.id) : null, memo = it && it.memo ? String(it.memo).split('\n')[0] : '';
   const ck = it ? `<button class="ncck ${e.done ? 'on' : ''}" data-act="tog" data-id="${it.id}" aria-pressed="${!!e.done}" aria-label="완료 표시"></button>` : '';
+  const pin = `<button class="ncpin" data-act="ncPin" ${e.note ? `data-note="${e.note}"` : it ? `data-id="${it.id}"` : `data-t="${esc(e.t)}" data-d="${e.date}"`} title="포스트잇으로 붙이기" aria-label="포스트잇으로 붙이기">📌</button>`;
   const att = e.note ? `data-act="ncOpen" data-note="${e.note}"` : it ? `data-act="ncOpen" data-id="${it.id}"` : `data-act="ncOpen" data-d="${e.date}"`;
-  return `<div class="ncard ${e.done ? 'dn' : ''}" ${att} role="button" tabindex="0"><div class="nct">${ck}<b>${esc(e.t)}</b></div><div class="ncm"><i style="background:${NC_COL(e.kind)}">${esc(e.kind)}</i>${memo ? `<span>${esc(memo)}</span>` : ''}</div></div>`;
+  return `<div class="ncard ${e.done ? 'dn' : ''}" ${att} role="button" tabindex="0"><div class="nct">${ck}<b>${esc(e.t)}</b>${pin}</div><div class="ncm"><i style="background:${NC_COL(e.kind)}">${esc(e.kind)}</i>${memo ? `<span>${esc(memo)}</span>` : ''}</div></div>`;
 }
 function calView() {
   const [Y, M] = UI.cal.split('-').map(Number), first = new Date(Y, M - 1, 1), n = new Date(Y, M, 0).getDate(), ev = allEvents(), by = {};
@@ -26,7 +27,7 @@ function calView() {
   }
   const tail = (7 - ((off + n) % 7)) % 7; for (let i = 0; i < tail; i++) cells += '<div class="ncc e"></div>';
   const day = by[UI.day] || [];
-  const list = day.map(e => e.note ? `<div class="td"><span class="ck off"></span><a class="tl" href="#/note/${e.note}" data-act="noteGo" data-id="${e.note}">${esc(e.t)}</a><span class="mu">기록 · 누르면 이동</span></div>` : e.id ? `<div class="td ${e.done ? 'dn' : ''}"><button class="ck" data-act="tog" data-id="${e.id}" aria-pressed="${!!e.done}" aria-label="완료 표시"></button><a class="tl" data-act="ncOpen" data-id="${e.id}" href="#">${esc(e.t)}</a><span class="mu">${e.kind}</span>${xbtn('delItem', e.id)}</div>` : `<div class="td"><span class="ck off"></span><span class="tl">${esc(e.t)}</span><span class="mu">${e.kind}</span></div>`).join('') || '<p class="mu">이 날은 비어 있습니다.</p>';
+  const list = day.map(e => e.note ? `<div class="td"><span class="ck off"></span><a class="tl" href="#/note/${e.note}" data-act="noteGo" data-id="${e.note}">${esc(e.t)}</a><span class="mu">기록 · 누르면 이동</span><button class="btn sm" data-act="ncPin" data-note="${e.note}">📌</button></div>` : e.id ? `<div class="td ${e.done ? 'dn' : ''}"><button class="ck" data-act="tog" data-id="${e.id}" aria-pressed="${!!e.done}" aria-label="완료 표시"></button><a class="tl" data-act="ncOpen" data-id="${e.id}" href="#">${esc(e.t)}</a><span class="mu">${e.kind}</span><button class="btn sm" data-act="ncPin" data-id="${e.id}">📌</button>${xbtn('delItem', e.id)}</div>` : `<div class="td"><span class="ck off"></span><span class="tl">${esc(e.t)}</span><span class="mu">${e.kind}</span></div>`).join('') || '<p class="mu">이 날은 비어 있습니다.</p>';
   return `<div class="bh"><h2>캘린더</h2><span class="mu">카드를 누르면 가운데 창에서 바로 고칩니다. 칸에 마우스를 올리면 ＋ 가 나옵니다.</span></div>${tabs}
   <div class="calh"><button class="btn sm" data-act="calMove" data-d="-1" aria-label="이전 달">‹</button><b class="calt">${Y}년 ${M}월</b><button class="btn sm" data-act="calMove" data-d="1" aria-label="다음 달">›</button><button class="btn sm" data-act="calMove" data-d="0">오늘</button></div>
   ${typeof calLegend === 'function' ? calLegend() : ''}<div class="ncw">${['월', '화', '수', '목', '금', '토', '일'].map(d => `<span>${d}</span>`).join('')}</div><div class="ncg">${cells}</div>
@@ -56,7 +57,7 @@ function ncPeek(id, isNew) {
   <div class="ncprop"><label>날짜</label><span><input type="date" name="date" value="${esc(i.date || '')}"> ~ <input type="date" name="end" value="${esc(i.end || '')}" aria-label="끝 날짜"></span></div>
   <div class="ncprop"><label>완료</label><input type="checkbox" name="done" ${i.done ? 'checked' : ''} aria-label="완료"></div>
   <div class="ncprop top"><label>메모</label><textarea name="memo" rows="5" placeholder="메모를 적으세요">${esc(i.memo || '')}</textarea></div>
-  <div class="btns"><button class="btn" data-ncdel="1">🗑 삭제</button><button class="btn pri" data-ncclose="1">닫기</button></div>`;
+  <div class="btns"><button class="btn" data-act="ncPin" data-id="${i.id}">📌 포스트잇으로 붙이기</button><button class="btn" data-ncdel="1">🗑 삭제</button><button class="btn pri" data-ncclose="1">닫기</button></div>`;
   d.onclick = e => { if (e.target === d) d.close(); if (e.target.closest('[data-ncclose]')) d.close(); if (e.target.closest('[data-ncdel]')) sure('이 일정을 삭제할까요?', () => { NCP = null; S.items = S.items.filter(x => x.id !== id); d.close(); commit(); }); };
   if (!d.open) d.showModal(); if (isNew) { const t = d.querySelector('.nctitle'); t && t.focus(); }
 }
@@ -75,6 +76,14 @@ function ncClosed() {
   NCP = null; commit();
 }
 Object.assign(A, {
+  ncPin(el, e) {
+    e && e.stopPropagation(); let text, date;
+    if (el.dataset.note) { const n = (S.notes || []).find(x => x.id === el.dataset.note); if (!n) return; text = '📝 ' + (n.title || '제목 없음'); date = n.date; }
+    else if (el.dataset.id) { const i = S.items.find(x => x.id === el.dataset.id); if (!i) return; text = i.title; date = i.date; }
+    else { text = el.dataset.t; date = el.dataset.d; }
+    if (!text) { toast('제목을 먼저 적어 주세요.'); return; }
+    pstList().push({ id: pstId(), text, date, color: '노랑', done: false }); S.profile.pstDown = false; commit(); toast('포스트잇으로 붙였습니다.');
+  },
   ncView(el) { UI.calv = el.dataset.v; render(); },
   ncAdd(el, e) { e && e.stopPropagation(); ncMake(el.dataset.d); },
   ncNew() { ncMake(UI.day || today()); },
