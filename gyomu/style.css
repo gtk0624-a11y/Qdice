@@ -963,3 +963,4 @@ details.afold.help{box-shadow:none;background:transparent}
 /* v114 시간표: 일과표 시각 표시 + 급식 줄 */
 .tt .ttp{white-space:nowrap;text-align:center;line-height:1.25;min-width:92px}.tt .ttp b{display:block;font-size:15px}.tt .ttp small{display:block;font-size:12px;color:var(--mu,#666);font-weight:400}
 .tt .ttlunch th,.tt .ttlunch td{background:#fff3d6!important;text-align:center;padding:6px}.tt td input{width:100%;min-width:64px;box-sizing:border-box;padding:8px 6px;font-size:15px}
+.tt .ttmv{display:flex;justify-content:center;gap:4px;margin-top:4px}.tt .ttmv button{border:1px solid rgba(0,0,0,.25);background:#fff;border-radius:8px;min-width:34px;min-height:30px;font-size:13px;cursor:pointer;padding:0}

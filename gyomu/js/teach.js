@@ -138,3 +138,9 @@ document.addEventListener('keydown', e => {
   const all = [...document.querySelectorAll('input[data-tt]')], d = i.dataset.tt.split('-')[0], col = all.filter(x => x.dataset.tt.split('-')[0] === d), k = col.indexOf(i), n = col[e.key === 'ArrowUp' ? k - 1 : k + 1];
   e.preventDefault(); if (n) { n.focus(); n.select(); }
 });
+
+Object.assign(A, {
+  ttUp(el) { const T = ttTokens(), i = T.indexOf(String(el.dataset.k)); if (i > 0) { [T[i - 1], T[i]] = [T[i], T[i - 1]]; S.profile.ttRows = T; commit(); } },
+  ttDown(el) { const T = ttTokens(), i = T.indexOf(String(el.dataset.k)); if (i >= 0 && i < T.length - 1) { [T[i + 1], T[i]] = [T[i], T[i + 1]]; S.profile.ttRows = T; commit(); } },
+  ttOrderReset() { delete S.profile.ttRows; commit(); }
+});
