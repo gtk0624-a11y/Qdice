@@ -968,3 +968,12 @@ details.afold.help{box-shadow:none;background:transparent}
 
 .nf-hpcard details.hpcard{display:none!important}.nf-sbanner .sbanner{display:none!important}
 .nf-drawer .drawer,.nf-drawer .dw{display:none!important}
+
+/* v123 삐져나옴 방지: 오늘 화면 2단 배치, 시계·포스트잇은 항상 화면 안 */
+.spread{grid-template-columns:minmax(300px,380px) minmax(0,1fr)!important}.spread>*{min-width:0}
+@media(max-width:1100px){.spread{grid-template-columns:minmax(0,1fr)!important}}
+.spread .row,.spread .row>summary,.spread .hpcard{max-width:100%;box-sizing:border-box}
+#app,main{overflow-wrap:anywhere}
+@media(min-width:1540px){#tfclock{right:max(8px,calc((100vw - 1180px)/2 - 160px))!important;max-width:calc(100vw - 16px)}}
+#tfclock{max-width:calc(100vw - 12px);box-sizing:border-box}
+.pst{max-width:calc(100vw - 8px)}
