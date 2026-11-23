@@ -2858,14 +2858,52 @@ A.trSiteDel = el => { const x = trSites().find(v => v.id === el.dataset.id); if 
 const IBX = { kw: /(까지|마감|제출|기한|회신|신청|보고|입력|취합)/, ev: /(회의|연수|행사|협의회|평가|워크숍|설명회|간담회|공개수업|체육대회|시험|방문|점검|교육|조사기간|기간|실시|운영|개최|일시)/ };
 function ibxYear(m) { const n = new Date(), y = n.getFullYear(); return (m < n.getMonth() + 1 - 6) ? y + 1 : y; }
 function ibxDates(line) {
-  const out = []; let m;
-  const re = /(?:(20\d\d)\s*[.\-\/년]\s*)?(\d{1,2})\s*[.\-\/월]\s*(\d{1,2})\s*(?:일|\.)?(?!\d)/g;
-  while ((m = re.exec(line))) {
-    const mo = +m[2], d = +m[3]; if (mo < 1 || mo > 12 || d < 1 || d > 31) continue;
-    if (!m[1] && /\d\s*[.]\s*\d/.test(m[0]) && !/월|\/|일|\.$/.test(m[0]) && !/^\s*\(\s*[월화수목금토일]/.test(line.slice(m.index + m[0].length)) && /\d{2,}\.\d/.test(line.slice(Math.max(0, m.index - 1), m.index + m[0].length + 1))) continue;
-    const y = m[1] ? +m[1] : ibxYear(mo);
-    out.push({ date: `${y}-${String(mo).padStart(2, '0')}-${String(d).padStart(2, '0')}`, raw: m[0], idx: m.index });
+  const n = new Date(), td = n.getFullYear() * 10000 + (n.getMonth() + 1) * 100 + n.getDate(), pad2 = x => String(x).padStart(2, '0');
+  const ok = (y, mo, d) => { if (mo < 1 || mo > 12 || d < 1 || d > 31) return false; const t = new Date(y, mo - 1, d); return t.getMonth() === mo - 1 && t.getDate() === d; };
+  const iso = (y, mo, d) => `${y}-${pad2(mo)}-${pad2(d)}`;
+  const hasKw = /까지|부터|마감|제출|기한|일시|일정|기간|회신|신청|실시|개최|[~∼–]|\(\s*[월화수목금토일]\s*\)|[월화수목금토일]요일/.test(line);
+  const WD = { 일: 0, 월: 1, 화: 2, 수: 3, 목: 4, 금: 5, 토: 6 };
+  const tok = [];
+  const add = (m, date) => { if (date) tok.push({ date, raw: m[0], idx: m.index, end: m.index + m[0].length }); };
+  let m;
+  /* 1) 연도 있는 날짜: 2026.11.25 · 2026-11-25 · 2026/11/25 · 2026년 11월 25일 · 26.11.25 · 20261125 */
+  const re1 = /(?<![\d.])(20\d\d|\d\d)\s*([.\-\/]|년\s*)\s*(\d{1,2})\s*([.\-\/]|월\s*)\s*(\d{1,2})\s*(?:일|\.)?(?!\d)/g;
+  while ((m = re1.exec(line))) { let y = +m[1]; if (y < 100) { if (m[2].trim() !== '.' && !/년/.test(m[2])) continue; y += 2000; } if (ok(y, +m[3], +m[5])) add(m, iso(y, +m[3], +m[5])); }
+  const re2 = /(?<!\d)(20\d\d)(\d\d)(\d\d)(?!\d)/g; while ((m = re2.exec(line))) if (ok(+m[1], +m[2], +m[3])) add(m, iso(+m[1], +m[2], +m[3]));
+  /* 2) 월/일: 11월 25일 · 11월25일 · 11/25 · 11.25 · 11.25. · 11.25일(수) · 11-25 */
+  const re3 = /(?<![\d.\-\/])(\d{1,2})\s*(월|\/|\.|-)\s*(\d{1,2})\s*(일|\.)?(?![\d])/g;
+  while ((m = re3.exec(line))) {
+    const mo = +m[1], d = +m[3], sep = m[2], tail = m[4] || '', after = line.slice(m.index + m[0].length), before = line.slice(Math.max(0, m.index - 1), m.index);
+    if (!ok(2000, mo, d) && !(mo >= 1 && mo <= 12 && d >= 1 && d <= 31)) continue;
+    if (/^\s*(반|학년|교시|번|명|호|조|차시|차|회|개|%|점|시간|분|원|배|kg|cm|mm|m\b)/.test(after)) continue;       /* 1-1반, 3.5점 같은 것 */
+    if (/[A-Za-z]/.test(before)) continue;
+    const strong = sep === '월' || sep === '/' || tail === '일' || /^\s*\(\s*[월화수목금토일]/.test(after) || /^\.\s*(?!\d)/.test(tail + after.charAt(0)) && tail === '.';
+    if (!strong && !(hasKw && sep !== '-')) continue;                        /* 점·하이픈만 있는 숫자쌍은 날짜 단서가 있을 때만 */
+    if (sep === '-' && !strong) continue;
+    const y = ibxYear(mo); if (ok(y, mo, d)) add(m, iso(y, mo, d));
   }
+  /* 3) 일만 있는 날짜: 25일(수) · ~27일 · ~26(목) — 앞 날짜의 달을 이어받고, 없으면 오늘 기준 가장 가까운 날 */
+  const re4 = /(?<![\d.\/\-월])(\d{1,2})\s*(일|(?=\s*\(\s*[월화수목금토일]\s*\)))(?!\s*(간|째|동안|이내|전|후|이상|이하|\d))/g;
+  while ((m = re4.exec(line))) {
+    const d = +m[1]; if (d < 1 || d > 31) continue; const after = line.slice(m.index + m[0].length);
+    if (!(/^\s*\(\s*[월화수목금토일]/.test(after) || (m[2] === '일' && hasKw))) continue;
+    if (tok.some(t => m.index < t.end && m.index + m[0].length > t.idx)) continue;
+    const prev = tok.filter(t => t.end <= m.index).sort((x, y) => y.end - x.end)[0]; let y, mo;
+    if (prev && /[~∼–]\s*$/.test(line.slice(prev.end, m.index))) { y = +prev.date.slice(0, 4); mo = +prev.date.slice(5, 7); } else { y = n.getFullYear(); mo = n.getMonth() + 1; if (y * 10000 + mo * 100 + d < td - 7) { mo++; if (mo > 12) { mo = 1; y++; } } }
+    if (ok(y, mo, d)) add(m, iso(y, mo, d));
+  }
+  /* 4) 말로 쓴 날: 오늘·내일·모레·이번 주 수요일·다음 주 금요일·차주 월요일 */
+  const rel = (days, m) => { const t = new Date(n.getFullYear(), n.getMonth(), n.getDate() + days); add(m, iso(t.getFullYear(), t.getMonth() + 1, t.getDate())); };
+  const re5 = /(오늘|금일|내일|명일|모레|글피)(?![가-힣])/g; while ((m = re5.exec(line))) rel({ 오늘: 0, 금일: 0, 내일: 1, 명일: 1, 모레: 2, 글피: 3 }[m[1]], m);
+  const re6 = /(이번\s*주|금주|다음\s*주|차주|담주|다다음\s*주)?\s*([월화수목금토일])요일/g;
+  while ((m = re6.exec(line))) {
+    const wd = WD[m[2]], base = n.getDay(); let diff;
+    if (m[1]) { const w = /다다음/.test(m[1]) ? 2 : /다음|차주|담주/.test(m[1]) ? 1 : 0; diff = ((wd + 6) % 7) - ((base + 6) % 7) + 7 * w; }
+    else { if (!hasKw && !IBX.ev.test(line)) continue; if (tok.length) continue; diff = (wd - base + 7) % 7; }
+    rel(diff, m);
+  }
+  tok.sort((a, b) => a.idx - b.idx || (b.end - b.idx) - (a.end - a.idx));
+  const out = []; tok.forEach(t => { if (!out.some(o => t.idx < o.idx + o.raw.length && t.end > o.idx)) out.push({ date: t.date, raw: t.raw, idx: t.idx }); });
   return out;
 }
 function ibxClean(s) { return s.replace(/^[\s\-•▶▷□■○●※*◦·ㅇ]+/, '').replace(/^\d{1,2}[.)]\s+(?=[^\d\s])/, '').replace(/\[[^\]]{0,20}\]/g, '').replace(/\s+/g, ' ').trim(); }
@@ -2883,7 +2921,7 @@ function ibxTitle(l, ds) {
     .replace(/(하시기\s*)?바랍니다\.?|바람\.?|요망\.?|협조\s*부탁드립니다\.?|제출하여\s*주시기|해\s*주시기|하여\s*주시기/g, ' ');
   t = ibxClean(t).replace(/^[:：\s,.·\-]+|[:：\s,.·\-]+$/g, '').replace(/\s+/g, ' ');
   if (t.split(' ').length > 2) t = t.replace(/\s+\S+(으로|로)$/, '');
-  t = t.replace(/(은|는|을|를)$/, '');
+  t = t.replace(/\s*(을|를)?\s*하는\s*날입니다\.?$/, '').replace(/(입니다|이에요|예요|입니다만)\.?$/, '').replace(/(은|는|을|를)$/, '');
   return t;
 }
 function ibxParse(text) {
@@ -5451,7 +5489,7 @@ buildChunks = function () {
 };
 
 /* 화면 맨 아래에 버전 표시 — 옛 화면을 보고 있는지 바로 알 수 있게 */
-const TF_VER = 'v105', _cmFt = footer;
+const TF_VER = 'v106', _cmFt = footer;
 footer = function () { return _cmFt.apply(this, arguments).replace('</footer>', ` · <span class="mu">버전 ${TF_VER} (학급 관리 포함)</span></footer>`); };
 
 /* 새 버전 알림: 옛 화면이 남아 있으면 한 번 눌러 새로 받게 함 */
