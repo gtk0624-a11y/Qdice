@@ -2924,21 +2924,24 @@ function ibxTitle(l, ds) {
   return t;
 }
 function ibxParse(text) {
-  const raw = text.split(/\r?\n/).map(s => s.trim().replace(/^[\s\-•▶▷□■○●※*◦·ㅇ]+/, '').replace(/^(\d{1,2}[.)]|[①-⑩]|[가-하][.)])\s*(?=[^\d\s])/, '')).filter(Boolean), lines = raw.filter(l => !IBX_DROP.test(l));
+  const raw = text.split(/\r?\n/).map(s => s.trim().replace(/^[\s\-•▶▷□■○●※*◦·ㅇ]+/, '').replace(/^(\d{1,2}[.)]|[①-⑩]|[가-하][.)])\s*(?=[^\d\s])/, '')).filter(Boolean), norm = l => { let x = l.replace(/^(안녕하세요|안녕하십니까)[^.!~\n]{0,40}[.!~]+\s*/, ''); if (!ibxDates(x).length) return x; const org = ((x.match(/(?:주관|주최)\s*[:：]\s*([^\s,;]+)/) || [])[1]) || ''; x = x.replace(/\s+(주관|주최|담당|대상|문의|비고|장소)\s*[:：].*$/, '').replace(/\s*\S*(파이팅|화이팅|감사합니다|즐거운|되십시|되세요)[^\n]*$/, '').replace(/\s*:\)\s*$/, '').trim(); return org ? x + ' ‹주관 ' + org + '›' : x; },
+    lines = raw.map(norm).filter(Boolean).filter(l => !IBX_DROP.test(l));
   const head = lines.find(l => !IBX_META.test(l) && !ibxDates(l).length && l.length > 3) || '';
-  const subject = ibxClean(head).replace(/^\d{4}학년도\s*/, '').replace(/\s*(실시\s*)?(안내|알림|협조|요청|공문)\s*$/, '').slice(0, 30);
+  const subject = /(요|니다|세요|까요|해\s*주[^\s]*)[.!~\s]*$/.test(head) ? '' : ibxClean(head).replace(/^\d{4}학년도\s*/, '').replace(/\s*(실시\s*)?(안내|알림|협조|요청|공문)\s*$/, '').slice(0, 30);
   const res = [], seen = new Set();
   const push = (date, title, kind, on) => { title = ibxShort(title, 46); const k = date + '|' + title; if (seen.has(k)) return; seen.add(k); res.push({ date, title, kind, on }); };
-  lines.forEach((l, i) => {
+  lines.forEach((l0, i) => { let l = l0;
     if (l === head) return; const ds = ibxDates(l); if (!ds.length) return;
     const lab = (l.match(IBX_LABEL) || [])[1] || '', deadline = /(기한|마감)\s*[:：]|(기한|마감)\s*$/.test(l.replace(/(까지|부터).*$/, '')) || /기한|마감/.test(lab);
     const range = ds.length > 1 && /[~∼–]/.test(l.slice(ds[0].idx + ds[0].raw.length, ds[1].idx)) ? ds[1].date : '';
+    const mo2 = l.match(/‹주관 ([^›]+)›/); if (mo2) l = l.replace(/\s*‹주관 [^›]+›/, '');
     let t = ibxTitle(l, ds);
     t = t.replace(/[월화수목금토일]요일/g, ' ').replace(/\s+/g, ' ').trim();
+    t = t.replace(/(\S{2,})\s+\1$/, '$1'); if (t && t.length <= 4 && subject) t = subject + ' ' + t;
     const fb = !t; if (fb) t = (subject || '일정') + (deadline ? ' 마감' : '');
     else { /* 날짜 줄 아래 이어지는 짧은 줄(행사 이름·주관)을 한 제목으로 묶는다 */
-      const det = []; let org = '';
-      for (let j = i + 1; j < lines.length && j <= i + 5; j++) { const x = lines[j]; if (ibxDates(x).length) break; if (IBX_PLACE.test(x) || IBX_META.test(x) || /파이팅|화이팅|감사|수고|^[^가-힣A-Za-z0-9]+$|:\)/.test(x)) continue; const m = x.match(/^(주관|주최|주관부서)\s*[:：]\s*(.+)$/); if (m) { org = m[2].trim(); continue; } if (/^(담당|대상|비고|준비물)\s*[:：]/.test(x)) continue; if (x.length <= 30 && det.length < 1) det.push(ibxClean(x)); }
+      const det = []; let org = mo2 ? mo2[1] : '';
+      for (let j = i + 1; j < lines.length && j <= i + 5; j++) { const x = lines[j]; if (ibxDates(x).length) break; if (IBX_PLACE.test(x) || IBX_META.test(x) || /파이팅|화이팅|즐거운|하루|되십시|되세요|감사|수고|^[^가-힣A-Za-z0-9]+$|:\)/.test(x)) continue; const m = x.match(/^(주관|주최|주관부서)\s*[:：]\s*(.+)$/); if (m) { org = m[2].trim(); continue; } if (/^(담당|대상|비고|준비물)\s*[:：]/.test(x)) continue; if (x.length <= 30 && det.length < 1) det.push(ibxClean(x)); }
       if (det.length && !/마감/.test(t)) t += ' · ' + det[0]; if (org && org.length <= 12) t += ' (주관 ' + org + ')';
     }
     if (range) t += ` (~${+range.slice(5, 7)}/${+range.slice(8)})`;
@@ -5488,7 +5491,7 @@ buildChunks = function () {
 };
 
 /* 화면 맨 아래에 버전 표시 — 옛 화면을 보고 있는지 바로 알 수 있게 */
-const TF_VER = 'v106', _cmFt = footer;
+const TF_VER = 'v107', _cmFt = footer;
 footer = function () { return _cmFt.apply(this, arguments).replace('</footer>', ` · <span class="mu">버전 ${TF_VER} (학급 관리 포함)</span></footer>`); };
 
 /* 새 버전 알림: 옛 화면이 남아 있으면 한 번 눌러 새로 받게 함 */
