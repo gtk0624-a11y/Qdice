@@ -943,3 +943,4 @@ details.afold.help{box-shadow:none;background:transparent}
 /* v98 규정줍줍 화면 */
 .ruleWrap{max-width:980px;margin:0 auto}.ruleframe{display:block;width:100%;height:calc(100vh - 210px);height:calc(100dvh - 210px);min-height:480px;border:1.5px solid var(--line,#ddd);border-radius:12px;background:#fff}
 @media(max-width:700px){.ruleframe{height:calc(100dvh - 170px)}}
+.ch-tabs{display:flex;gap:0;background:#e9edf4;border-bottom:1px solid #c9d1df}.ch-tabs button{flex:1;border:0;background:transparent;padding:8px 4px;font:inherit;font-size:14px;font-weight:700;color:#4a5568;cursor:pointer}.ch-tabs button.on{background:#fff;color:#1f3a68;box-shadow:inset 0 -3px 0 #f9cf7a}
