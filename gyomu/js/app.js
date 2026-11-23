@@ -207,7 +207,7 @@ function classView() {
   const LU = typeof _clkL0 === 'function' ? _clkL0(BP.filter(x => x.s != null)) : null; let lunchDone = !LU;
   const lunchRow = () => { lunchDone = true; return `<tr class="ttlunch"><th class="ttp"><b>급식</b><small>${clkHM(LU[0])}~${clkHM(LU[1])}</small></th><td colspan="5">🍚 점심시간 <span class="mu">(일과표의 급식 시간 · 아래 「일과표 직접 고치기」에서 바꿀 수 있어요)</span></td></tr>`; };
   BP.forEach(x => {
-    if (!lunchDone && x.s != null && x.s >= LU[1]) t += lunchRow();
+    if (!lunchDone && (S.profile.bell && S.profile.bell.length ? x.s != null && x.s >= LU[0] : x.p === 5)) t += lunchRow();
     t += `<tr><th class="ttp"><b>${x.p}교시</b>${x.s != null ? `<small>${clkHM(x.s)}~${clkHM(x.e)}</small>` : ''}</th>` + [1, 2, 3, 4, 5].map(d => `<td><input data-tt="${d}-${x.p}" value="${esc(tt(d, x.p))}" placeholder="수업 입력" aria-label="${DOW[d]} ${x.p}교시"></td>`).join('') + '</tr>';
   });
   if (!lunchDone) t += lunchRow();
