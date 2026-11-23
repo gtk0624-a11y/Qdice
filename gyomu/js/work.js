@@ -67,6 +67,8 @@ function snapPush(label, j) { SNAPS.unshift({ t: Date.now(), label, j }); SNAPS 
   return _c.apply(this, arguments);
 }; }
 setTimeout(snapInit, 600);
+/* 하루 한 번 자동 보관: 사고가 나도 ↩ 되돌리기에서 어제 상태로 돌아갈 수 있게 */
+setTimeout(() => { try { if (S.setup && !SNAPS.some(x => Date.now() - x.t < 20 * 3600 * 1000)) snapPush('자동 보관(하루 1회)', JSON.stringify(snapPick())); } catch (e) { } }, 4000);
 function undoBtn() { return `<button class="btn sm" data-act="undoPick">↩ 되돌리기${SNAPS.length ? ' (' + SNAPS.length + ')' : ''}</button>`; }
 A.undoPick = () => {
   let d = document.getElementById('undodlg'); if (d) d.remove(); d = document.createElement('dialog'); d.id = 'undodlg'; d.className = 'dlg'; document.body.appendChild(d);

@@ -19,9 +19,13 @@
   async function open(r, k) { return JSON.parse(dec.decode(await crypto.subtle.decrypt({ name: 'AES-GCM', iv: unb64(r.iv) }, await aes(k), unb64(r.d)))); }
   async function remote(k) { const r = await fetch(url(k), { cache: 'no-store' }); if (!r.ok) throw new Error(r.status === 401 || r.status === 403 ? '저장소가 쓰기를 막았습니다(보안 규칙 확인)' : '저장소 응답 오류 ' + r.status); return r.json(); }
   async function push() { const body = await seal(), r = await fetch(url(), { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) }); if (!r.ok) throw new Error(r.status === 401 || r.status === 403 ? '저장소가 쓰기를 막았습니다(보안 규칙 확인)' : '올리기 실패 ' + r.status); setMk({ base: S.updatedAt || 0, rseen: body.u, h: hsh() }); }
-  async function applyRemote(r, k) {
+  async function applyRemote(r, k, merge) {
     const o = await open(r, k), keep = (S.notes || []).filter(n => n.lock), keepP = (S.pages || []).filter(n => n.lock); applying = true;
-    if (typeof snapshot === 'function') try { snapshot(); } catch (e) { }
+    try { if (typeof snapPush === 'function') snapPush(merge ? '연동 직전(이 기기 내용)' : '다른 기기 내용 불러오기 직전', JSON.stringify(snapPick())); if (typeof idb !== 'undefined') idb.set('prelink', { t: Date.now(), s: JSON.stringify(S) }).catch(() => { }); } catch (e) { }
+    if (merge) { /* 처음 연결할 때는 이 기기에 있던 내용을 버리지 않고 합칩니다(같은 id는 연동된 쪽 기준) */
+      ['items', 'wk', 'duties', 'mine', 'docLog', 'contacts', 'training', 'notes', 'pages', 'yp'].forEach(key => { const L = Array.isArray(S[key]) ? S[key] : null, R = Array.isArray(o[key]) ? o[key] : null; if (L && R && L.length) { const ids = new Set(R.map(x => x && x.id).filter(Boolean)); o[key] = R.concat(L.filter(x => x && (!x.id || !ids.has(x.id)))); } });
+      if (S.dayMemo && o.dayMemo && typeof S.dayMemo === 'object') o.dayMemo = Object.assign({}, S.dayMemo, o.dayMemo);
+    }
     Object.assign(S, o); S.notes = (o.notes || []).concat(keep); S.pages = (o.pages || []).concat(keepP); save(true); applying = false; setMk({ base: S.updatedAt || 0, rseen: r.u, h: hsh() }); TF.render && TF.render(); toast('다른 기기의 최신 내용을 불러왔습니다.');
   }
   async function tick(force) {
@@ -44,7 +48,7 @@
         if (o.pw.length < 8) { toast('8자 이상으로 정해 주세요.'); return; }
         try {
           const d = await derive(o.pw), r = await remote(d), turnOn = () => { localStorage.setItem(K_KEY, JSON.stringify(d)); setMk({ base: 0, rseen: 0, h: null }); };
-          if (r) sure('이 비밀번호로 저장된 내용이 있습니다. 이 기기의 내용을 그것으로 바꿀까요? (되돌리기 가능. 취소하면 연동을 켜지 않습니다)', async () => { try { await open(r, d); turnOn(); await applyRemote(r, d); st.msg = '연동 켜짐 · 불러왔습니다'; } catch (e) { toast('불러오지 못했습니다: ' + e.message); } render(); });
+          if (r) sure('이 비밀번호로 저장된 내용이 있습니다. 이 기기의 내용을 그것으로 바꿀까요? (되돌리기 가능. 취소하면 연동을 켜지 않습니다)', async () => { try { await open(r, d); turnOn(); await applyRemote(r, d, true); st.msg = '연동 켜짐 · 불러왔습니다'; } catch (e) { toast('불러오지 못했습니다: ' + e.message); } render(); });
           else sure('이 비밀번호로 저장된 내용이 없습니다. 새로 만들까요? (이미 다른 기기에서 연동했다면 그 비밀번호와 똑같은지 확인하세요. 다르면 따로따로 저장됩니다)', async () => { try { turnOn(); await push(); st.msg = '연동 켜짐 · 처음 올렸습니다'; toast('연동을 켰습니다. 폰에서도 같은 비밀번호를 넣으세요.'); } catch (e) { localStorage.removeItem(K_KEY); toast('연동 실패: ' + e.message); } render(); });
         } catch (e) { toast('연동 실패: ' + e.message); }
       }, '연동 켜기');
@@ -65,7 +69,7 @@
   async function joinWith(j) {
     try {
       localStorage.setItem(K_DB, j.db.replace(/\/+$/, '')); localStorage.setItem(K_KEY, JSON.stringify(j.k)); setMk({ base: 0, rseen: 0, h: null });
-      const r = await remote(j.k); if (r) { await applyRemote(r, j.k); st.msg = '연동 켜짐 · 불러왔습니다'; } else { await push(); st.msg = '연동 켜짐 · 처음 올렸습니다'; }
+      const r = await remote(j.k); if (r) { await applyRemote(r, j.k, true); st.msg = '연동 켜짐 · 불러왔습니다'; } else { await push(); st.msg = '연동 켜짐 · 처음 올렸습니다'; }
       render();
     } catch (e) { localStorage.removeItem(K_KEY); toast('연동 실패: ' + e.message); }
   }
