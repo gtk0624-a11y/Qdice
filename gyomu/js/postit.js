@@ -19,7 +19,7 @@ function pstDraw() {
 function pstDateSel() { const t = new Date(), y = t.getFullYear(), m = t.getMonth() + 1, d = t.getDate(); return `<span class="pdsel"><select name="py" aria-label="연도">${[y - 1, y, y + 1, y + 2].map(v => `<option value="${v}" ${v === y ? 'selected' : ''}>${v}년</option>`).join('')}</select><select name="pm" aria-label="월">${Array.from({ length: 12 }, (_, i) => `<option value="${i + 1}" ${i + 1 === m ? 'selected' : ''}>${i + 1}월</option>`).join('')}</select><select name="pd" aria-label="일">${Array.from({ length: 31 }, (_, i) => `<option value="${i + 1}" ${i + 1 === d ? 'selected' : ''}>${i + 1}일</option>`).join('')}</select></span>`; }
 function pstDateOf(o) { const y = +o.py, m = +o.pm, last = new Date(y, m, 0).getDate(), d = Math.min(+o.pd, last); return `${y}-${pad(m)}-${pad(d)}`; }
 function pstManage() {
-  const all = pstList(), ev = allEvents().filter(e => e.date >= today() && !e.done).sort((a, b) => a.date.localeCompare(b.date)).slice(0, 25);
+  const all = pstList(), ev = allEvents().filter(e => !e.note && e.date >= today() && !e.done).sort((a, b) => a.date.localeCompare(b.date)).slice(0, 25);
   return `<div class="pstm"><b>📌 포스트잇</b> <span class="mu">중요한 일정을 화면에 바로 붙여 두세요. 가리면 [내리기]를 누르면 됩니다.</span>
   <form class="inl" data-form="pstAdd"><input name="text" placeholder="붙일 내용 (예: 4교시 후 학폭위 자료 제출)" required aria-label="포스트잇 내용">${pstDateSel()}<select name="color" aria-label="색">${Object.keys(PST_COL).map(c => `<option>${c}</option>`).join('')}</select><button class="btn pri">붙이기</button></form>
   ${ev.length ? `<form class="inl" data-form="pstFromEv"><select name="ev" aria-label="일정에서 고르기">${ev.map((e, i) => `<option value="${i}">${md(e.date)} · ${esc(e.t)} (${esc(e.kind)})</option>`).join('')}</select><button class="btn">일정에서 포스트잇 만들기</button></form>` : ''}
@@ -40,7 +40,7 @@ Object.assign(A, {
 document.addEventListener('submit', e => {
   const f = e.target.closest && e.target.closest('form[data-form]'); if (!f) return; const k = f.dataset.form;
   if (k === 'pstAdd') { e.preventDefault(); const o = Object.fromEntries(new FormData(f)); pstList().push({ id: pstId(), text: o.text.trim(), date: pstDateOf(o), color: o.color, done: false }); S.profile.pstDown = false; commit(); }
-  else if (k === 'pstFromEv') { e.preventDefault(); const ev = allEvents().filter(x => x.date >= today() && !x.done).sort((a, b) => a.date.localeCompare(b.date)).slice(0, 25)[+new FormData(f).get('ev')]; if (ev) { pstList().push({ id: pstId(), text: ev.t, date: ev.date, color: '노랑', done: false }); S.profile.pstDown = false; commit(); toast('포스트잇으로 붙였습니다.'); } }
+  else if (k === 'pstFromEv') { e.preventDefault(); const ev = allEvents().filter(x => !x.note && x.date >= today() && !x.done).sort((a, b) => a.date.localeCompare(b.date)).slice(0, 25)[+new FormData(f).get('ev')]; if (ev) { pstList().push({ id: pstId(), text: ev.t, date: ev.date, color: '노랑', done: false }); S.profile.pstDown = false; commit(); toast('포스트잇으로 붙였습니다.'); } }
 }, true);
 /* 끌어서 옮기기 */
 let _pd = null;

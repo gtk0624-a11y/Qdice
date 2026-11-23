@@ -114,7 +114,7 @@ Object.assign(A, {
   weekRev() {
     const [a, b] = mtWeek(0), [na, nb] = mtWeek(7), inR = (d, x, y) => d && d >= x && d <= y;
     const done = S.items.filter(i => i.cat === 'todo' && i.done && inR(i.date, a, b)), logs = []; wkD().cards.forEach(c => (c.log || []).forEach(l => { if (inR(l.d, a, b)) logs.push(`${md(l.d)} ${c.title}: ${l.t}`); }));
-    const doneC = wkD().cards.filter(c => c.done && inR(c.sd, a, b)), nxt = allEvents().filter(e => !e.done && inR(e.date, na, nb)).sort((x, y) => x.date.localeCompare(y.date)).slice(0, 12), S2 = S.weekly = S.weekly || {};
+    const doneC = wkD().cards.filter(c => c.done && inR(c.sd, a, b)), nxt = allEvents().filter(e => !e.note && !e.done && inR(e.date, na, nb)).sort((x, y) => x.date.localeCompare(y.date)).slice(0, 12), S2 = S.weekly = S.weekly || {};
     let d = document.getElementById('wkrv'); if (d) d.remove(); d = document.createElement('dialog'); d.id = 'wkrv'; d.className = 'dlg wide'; document.body.appendChild(d);
     d.innerHTML = `<h3>🗓 주간 돌아보기 <small class="mu">${md(a)}~${md(b)}</small></h3>
     <h4 class="dlh">이번 주에 끝낸 일</h4>${done.map(i => `<div>✔ ${esc(i.title)}</div>`).join('')}${doneC.map(c => `<div>✔ [업무] ${esc(c.title)}</div>`).join('') || (done.length ? '' : '<p class="mu">기록된 완료가 없습니다.</p>')}

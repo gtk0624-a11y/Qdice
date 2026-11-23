@@ -20,11 +20,12 @@ function allEvents() {
   S.budget.forEach(p => p.lines.forEach(l => { if (l.deadline && (l.alloc - spentOf(l)) > 0) e.push({ date: l.deadline, t: `${p.name} ${l.item} 집행 (잔액 ${won(l.alloc - spentOf(l))}원)`, kind: '예산', done: false }); }));
   S.training.forEach(t => { if (t.due) e.push({ date: t.due, t: t.title + ' (연수)', kind: '연수', done: !!t.done }); });
   (S.dday || []).forEach(x => { if (x.date) e.push({ date: x.date, t: x.title, kind: '디데이', done: false }); });
+  (S.notes || []).forEach(n => { if (n.date) e.push({ date: n.date, t: '📝 ' + (n.title || '제목 없음'), kind: '기록', note: n.id, done: false }); });
   if (typeof ypEvents === 'function') ypEvents().forEach(x => e.push(x));
   if (typeof wkEvents === 'function') wkEvents().forEach(x => e.push(x));
   return e;
 }
-function upcoming(n) { const seen = new Set(); return allEvents().filter(e => !e.done && dd(e.date) !== null && dd(e.date) >= 0 && dd(e.date) <= n).sort((a, b) => a.date.localeCompare(b.date)).filter(e => { if (!e.span) return true; if (seen.has(e.id)) return false; seen.add(e.id); return true; }); }
+function upcoming(n) { const seen = new Set(); return allEvents().filter(e => !e.note && !e.done && dd(e.date) !== null && dd(e.date) >= 0 && dd(e.date) <= n).sort((a, b) => a.date.localeCompare(b.date)).filter(e => { if (!e.span) return true; if (seen.has(e.id)) return false; seen.add(e.id); return true; }); }
 function periodInfo() {
   const p = S.profile, [h, m] = p.start.split(':').map(Number), now = new Date(), mins = now.getHours() * 60 + now.getMinutes(), st = h * 60 + m;
   let cur = 0, next = 0;
@@ -185,10 +186,10 @@ function calView() {
   for (let i = 0; i < first.getDay(); i++) cells += '<span class="cd e"></span>';
   for (let d = 1; d <= n; d++) {
     const ds = `${Y}-${pad(M)}-${pad(d)}`, e = by[ds] || [];
-    cells += `<button class="cd ${ds === today() ? 'tdy' : ''} ${ds === UI.day ? 'sel' : ''}" data-act="calDay" data-d="${ds}"><span class="n">${d}${(S.dayMemo || {})[ds] ? ' 📝' : ''}</span>${e.slice(0, 3).map(x => `<small class="${kcls(x.kind)} ${x.done ? 'dn' : ''}">${esc(x.t)}</small>`).join('')}${e.length > 3 ? `<small class="mu">+${e.length - 3}건 더</small>` : ''}</button>`;
+    cells += `<button class="cd ${ds === today() ? 'tdy' : ''} ${ds === UI.day ? 'sel' : ''}" data-act="calDay" data-d="${ds}"><span class="n">${d}${(S.dayMemo || {})[ds] ? ' 📝' : ''}</span>${e.slice(0, 3).map(x => `<small class="${kcls(x.kind)} ${x.done ? 'dn' : ''}"${x.note ? ` data-nid="${x.note}" title="누르면 기록으로 이동" style="cursor:pointer;text-decoration:underline"` : ''}>${esc(x.t)}</small>`).join('')}${e.length > 3 ? `<small class="mu">+${e.length - 3}건 더</small>` : ''}</button>`;
   }
   const day = (by[UI.day] || []);
-  const list = day.map(e => e.id ? `<div class="td ${e.done ? 'dn' : ''}"><button class="ck" data-act="tog" data-id="${e.id}" aria-pressed="${!!e.done}" aria-label="완료 표시"></button><span class="tl">${esc(e.t)}</span><span class="mu">${e.kind}</span>${xbtn('delItem', e.id)}</div>` : `<div class="td"><span class="ck off"></span><span class="tl">${esc(e.t)}</span><span class="mu">${e.kind}</span></div>`).join('') || '<p class="mu">이 날은 비어 있습니다.</p>';
+  const list = day.map(e => e.note ? `<div class="td"><span class="ck off"></span><a class="tl" href="#/note/${e.note}" data-act="noteGo" data-id="${e.note}">${esc(e.t)}</a><span class="mu">기록 · 누르면 이동</span></div>` : e.id ? `<div class="td ${e.done ? 'dn' : ''}"><button class="ck" data-act="tog" data-id="${e.id}" aria-pressed="${!!e.done}" aria-label="완료 표시"></button><span class="tl">${esc(e.t)}</span><span class="mu">${e.kind}</span>${xbtn('delItem', e.id)}</div>` : `<div class="td"><span class="ck off"></span><span class="tl">${esc(e.t)}</span><span class="mu">${e.kind}</span></div>`).join('') || '<p class="mu">이 날은 비어 있습니다.</p>';
   return `<div class="bh"><h2>캘린더</h2><span class="mu">일정·할 일·평가·예산·연수 기한이 색으로 구분되어 자동으로 모입니다. 날짜에 마우스를 올려 보세요.</span></div>
   <div class="calh"><button class="btn sm" data-act="calMove" data-d="-1" aria-label="이전 달">‹</button><b class="calt">${Y}년 ${M}월</b><button class="btn sm" data-act="calMove" data-d="1" aria-label="다음 달">›</button><button class="btn sm" data-act="calMove" data-d="0">오늘</button></div>
   ${typeof calLegend === 'function' ? calLegend() : ''}<div class="calw">${DOW.map(d => `<span>${d}</span>`).join('')}</div><div class="cal">${cells}</div>${typeof calAgenda === 'function' ? calAgenda(ev) : ''}

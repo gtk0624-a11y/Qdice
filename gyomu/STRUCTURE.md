@@ -444,3 +444,4 @@ service cloud.firestore {
 - v122: 서랍(사이트 찾기)도 선택 기능(기본 꺼짐) — 설정 › 기능 켜고 끄기.
 - v123: 오늘 화면 삐져나옴 수정(.spread 2단 minmax(0,1fr)), 시계·포스트잇이 창 크기와 상관없이 화면 안에 들어오게 위치 보정(postit.js, style.css 하단 v123).
 - v124: 게시판 줄(.row>summary) 칸이 줄어들 수 있게 해 오른쪽 글자가 카드 밖으로 나가는 문제 수정(style.css 하단 v124).
+- v125: 기록(노트) 제목이 캘린더(월 칸·날짜 목록·날짜 창)에 📝 제목으로 뜨고, 누르면 해당 기록(#/note/id)으로 이동(app.js allEvents/calView, daypg.js noteGo). 기한 목록·포스트잇·주간 요약에는 섞이지 않음(e.note 제외).

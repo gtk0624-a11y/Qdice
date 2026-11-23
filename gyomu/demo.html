@@ -990,6 +990,7 @@ details.afold.help{box-shadow:none;background:transparent}
 /* v124 게시판 줄: 오른쪽 글자(오늘·다음 교시·▼)가 카드 밖으로 삐져나오지 않게 칸을 줄어들 수 있게 */
 @media(min-width:761px){.row>summary{grid-template-columns:76px minmax(0,1fr) minmax(0,1.5fr) minmax(64px,auto) 14px!important;gap:4px 10px!important}.row>summary>*{min-width:0;overflow-wrap:anywhere}.row{max-width:100%;box-sizing:border-box}}
 @media(min-width:761px) and (max-width:1250px){.row>summary{grid-template-columns:64px minmax(0,1fr) minmax(0,1.3fr) minmax(56px,auto) 14px!important}}
+small.k-기록,.chp.k-기록{background:#d9f2e6}u.k-기록{color:#2f9a6a}
 </style>
 </head>
 <body>
@@ -1594,11 +1595,12 @@ function allEvents() {
   S.budget.forEach(p => p.lines.forEach(l => { if (l.deadline && (l.alloc - spentOf(l)) > 0) e.push({ date: l.deadline, t: `${p.name} ${l.item} 집행 (잔액 ${won(l.alloc - spentOf(l))}원)`, kind: '예산', done: false }); }));
   S.training.forEach(t => { if (t.due) e.push({ date: t.due, t: t.title + ' (연수)', kind: '연수', done: !!t.done }); });
   (S.dday || []).forEach(x => { if (x.date) e.push({ date: x.date, t: x.title, kind: '디데이', done: false }); });
+  (S.notes || []).forEach(n => { if (n.date) e.push({ date: n.date, t: '📝 ' + (n.title || '제목 없음'), kind: '기록', note: n.id, done: false }); });
   if (typeof ypEvents === 'function') ypEvents().forEach(x => e.push(x));
   if (typeof wkEvents === 'function') wkEvents().forEach(x => e.push(x));
   return e;
 }
-function upcoming(n) { const seen = new Set(); return allEvents().filter(e => !e.done && dd(e.date) !== null && dd(e.date) >= 0 && dd(e.date) <= n).sort((a, b) => a.date.localeCompare(b.date)).filter(e => { if (!e.span) return true; if (seen.has(e.id)) return false; seen.add(e.id); return true; }); }
+function upcoming(n) { const seen = new Set(); return allEvents().filter(e => !e.note && !e.done && dd(e.date) !== null && dd(e.date) >= 0 && dd(e.date) <= n).sort((a, b) => a.date.localeCompare(b.date)).filter(e => { if (!e.span) return true; if (seen.has(e.id)) return false; seen.add(e.id); return true; }); }
 function periodInfo() {
   const p = S.profile, [h, m] = p.start.split(':').map(Number), now = new Date(), mins = now.getHours() * 60 + now.getMinutes(), st = h * 60 + m;
   let cur = 0, next = 0;
@@ -1759,10 +1761,10 @@ function calView() {
   for (let i = 0; i < first.getDay(); i++) cells += '<span class="cd e"></span>';
   for (let d = 1; d <= n; d++) {
     const ds = `${Y}-${pad(M)}-${pad(d)}`, e = by[ds] || [];
-    cells += `<button class="cd ${ds === today() ? 'tdy' : ''} ${ds === UI.day ? 'sel' : ''}" data-act="calDay" data-d="${ds}"><span class="n">${d}${(S.dayMemo || {})[ds] ? ' 📝' : ''}</span>${e.slice(0, 3).map(x => `<small class="${kcls(x.kind)} ${x.done ? 'dn' : ''}">${esc(x.t)}</small>`).join('')}${e.length > 3 ? `<small class="mu">+${e.length - 3}건 더</small>` : ''}</button>`;
+    cells += `<button class="cd ${ds === today() ? 'tdy' : ''} ${ds === UI.day ? 'sel' : ''}" data-act="calDay" data-d="${ds}"><span class="n">${d}${(S.dayMemo || {})[ds] ? ' 📝' : ''}</span>${e.slice(0, 3).map(x => `<small class="${kcls(x.kind)} ${x.done ? 'dn' : ''}"${x.note ? ` data-nid="${x.note}" title="누르면 기록으로 이동" style="cursor:pointer;text-decoration:underline"` : ''}>${esc(x.t)}</small>`).join('')}${e.length > 3 ? `<small class="mu">+${e.length - 3}건 더</small>` : ''}</button>`;
   }
   const day = (by[UI.day] || []);
-  const list = day.map(e => e.id ? `<div class="td ${e.done ? 'dn' : ''}"><button class="ck" data-act="tog" data-id="${e.id}" aria-pressed="${!!e.done}" aria-label="완료 표시"></button><span class="tl">${esc(e.t)}</span><span class="mu">${e.kind}</span>${xbtn('delItem', e.id)}</div>` : `<div class="td"><span class="ck off"></span><span class="tl">${esc(e.t)}</span><span class="mu">${e.kind}</span></div>`).join('') || '<p class="mu">이 날은 비어 있습니다.</p>';
+  const list = day.map(e => e.note ? `<div class="td"><span class="ck off"></span><a class="tl" href="#/note/${e.note}" data-act="noteGo" data-id="${e.note}">${esc(e.t)}</a><span class="mu">기록 · 누르면 이동</span></div>` : e.id ? `<div class="td ${e.done ? 'dn' : ''}"><button class="ck" data-act="tog" data-id="${e.id}" aria-pressed="${!!e.done}" aria-label="완료 표시"></button><span class="tl">${esc(e.t)}</span><span class="mu">${e.kind}</span>${xbtn('delItem', e.id)}</div>` : `<div class="td"><span class="ck off"></span><span class="tl">${esc(e.t)}</span><span class="mu">${e.kind}</span></div>`).join('') || '<p class="mu">이 날은 비어 있습니다.</p>';
   return `<div class="bh"><h2>캘린더</h2><span class="mu">일정·할 일·평가·예산·연수 기한이 색으로 구분되어 자동으로 모입니다. 날짜에 마우스를 올려 보세요.</span></div>
   <div class="calh"><button class="btn sm" data-act="calMove" data-d="-1" aria-label="이전 달">‹</button><b class="calt">${Y}년 ${M}월</b><button class="btn sm" data-act="calMove" data-d="1" aria-label="다음 달">›</button><button class="btn sm" data-act="calMove" data-d="0">오늘</button></div>
   ${typeof calLegend === 'function' ? calLegend() : ''}<div class="calw">${DOW.map(d => `<span>${d}</span>`).join('')}</div><div class="cal">${cells}</div>${typeof calAgenda === 'function' ? calAgenda(ev) : ''}
@@ -3999,7 +4001,7 @@ function pstDraw() {
 function pstDateSel() { const t = new Date(), y = t.getFullYear(), m = t.getMonth() + 1, d = t.getDate(); return `<span class="pdsel"><select name="py" aria-label="연도">${[y - 1, y, y + 1, y + 2].map(v => `<option value="${v}" ${v === y ? 'selected' : ''}>${v}년</option>`).join('')}</select><select name="pm" aria-label="월">${Array.from({ length: 12 }, (_, i) => `<option value="${i + 1}" ${i + 1 === m ? 'selected' : ''}>${i + 1}월</option>`).join('')}</select><select name="pd" aria-label="일">${Array.from({ length: 31 }, (_, i) => `<option value="${i + 1}" ${i + 1 === d ? 'selected' : ''}>${i + 1}일</option>`).join('')}</select></span>`; }
 function pstDateOf(o) { const y = +o.py, m = +o.pm, last = new Date(y, m, 0).getDate(), d = Math.min(+o.pd, last); return `${y}-${pad(m)}-${pad(d)}`; }
 function pstManage() {
-  const all = pstList(), ev = allEvents().filter(e => e.date >= today() && !e.done).sort((a, b) => a.date.localeCompare(b.date)).slice(0, 25);
+  const all = pstList(), ev = allEvents().filter(e => !e.note && e.date >= today() && !e.done).sort((a, b) => a.date.localeCompare(b.date)).slice(0, 25);
   return `<div class="pstm"><b>📌 포스트잇</b> <span class="mu">중요한 일정을 화면에 바로 붙여 두세요. 가리면 [내리기]를 누르면 됩니다.</span>
   <form class="inl" data-form="pstAdd"><input name="text" placeholder="붙일 내용 (예: 4교시 후 학폭위 자료 제출)" required aria-label="포스트잇 내용">${pstDateSel()}<select name="color" aria-label="색">${Object.keys(PST_COL).map(c => `<option>${c}</option>`).join('')}</select><button class="btn pri">붙이기</button></form>
   ${ev.length ? `<form class="inl" data-form="pstFromEv"><select name="ev" aria-label="일정에서 고르기">${ev.map((e, i) => `<option value="${i}">${md(e.date)} · ${esc(e.t)} (${esc(e.kind)})</option>`).join('')}</select><button class="btn">일정에서 포스트잇 만들기</button></form>` : ''}
@@ -4020,7 +4022,7 @@ Object.assign(A, {
 document.addEventListener('submit', e => {
   const f = e.target.closest && e.target.closest('form[data-form]'); if (!f) return; const k = f.dataset.form;
   if (k === 'pstAdd') { e.preventDefault(); const o = Object.fromEntries(new FormData(f)); pstList().push({ id: pstId(), text: o.text.trim(), date: pstDateOf(o), color: o.color, done: false }); S.profile.pstDown = false; commit(); }
-  else if (k === 'pstFromEv') { e.preventDefault(); const ev = allEvents().filter(x => x.date >= today() && !x.done).sort((a, b) => a.date.localeCompare(b.date)).slice(0, 25)[+new FormData(f).get('ev')]; if (ev) { pstList().push({ id: pstId(), text: ev.t, date: ev.date, color: '노랑', done: false }); S.profile.pstDown = false; commit(); toast('포스트잇으로 붙였습니다.'); } }
+  else if (k === 'pstFromEv') { e.preventDefault(); const ev = allEvents().filter(x => !x.note && x.date >= today() && !x.done).sort((a, b) => a.date.localeCompare(b.date)).slice(0, 25)[+new FormData(f).get('ev')]; if (ev) { pstList().push({ id: pstId(), text: ev.t, date: ev.date, color: '노랑', done: false }); S.profile.pstDown = false; commit(); toast('포스트잇으로 붙였습니다.'); } }
 }, true);
 /* 끌어서 옮기기 */
 let _pd = null;
@@ -4187,7 +4189,7 @@ const dpWeek = ds => DOW[new Date(ds + 'T00:00:00').getDay()];
 const dpShift = (ds, n) => { const d = new Date(ds + 'T00:00:00'); d.setDate(d.getDate() + n); return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`; };
 function dpList(ds) {
   const ev = allEvents().filter(e => e.date === ds);
-  return ev.map(e => e.id ? `<div class="td ${e.done ? 'dn' : ''}"><button class="ck" data-act="tog" data-id="${e.id}" aria-pressed="${!!e.done}" aria-label="완료 표시"></button><span class="tl">${esc(e.t)}</span><span class="mu">${esc(e.kind)}</span><button class="x" data-act="dpPst" data-id="${e.id}" aria-label="포스트잇으로 붙이기" title="포스트잇으로 붙이기">📌</button>${xbtn('delItem', e.id)}</div>` : `<div class="td"><span class="ck off"></span><span class="tl">${esc(e.t)}</span><span class="mu">${esc(e.kind)}</span></div>`).join('') || '<p class="mu">이 날은 비어 있습니다. 위에서 바로 추가하세요.</p>';
+  return ev.map(e => e.note ? `<div class="td"><span class="ck off"></span><a class="tl" href="#/note/${e.note}" data-act="noteGo" data-id="${e.note}">${esc(e.t)}</a><span class="mu">기록 · 누르면 이동</span></div>` : e.id ? `<div class="td ${e.done ? 'dn' : ''}"><button class="ck" data-act="tog" data-id="${e.id}" aria-pressed="${!!e.done}" aria-label="완료 표시"></button><span class="tl">${esc(e.t)}</span><span class="mu">${esc(e.kind)}</span><button class="x" data-act="dpPst" data-id="${e.id}" aria-label="포스트잇으로 붙이기" title="포스트잇으로 붙이기">📌</button>${xbtn('delItem', e.id)}</div>` : `<div class="td"><span class="ck off"></span><span class="tl">${esc(e.t)}</span><span class="mu">${esc(e.kind)}</span></div>`).join('') || '<p class="mu">이 날은 비어 있습니다. 위에서 바로 추가하세요.</p>';
 }
 function dpStk(ds) { const L = (S.stk || {})[ds] || []; return `<div class="dpsk">${L.map((s, i) => `<span class="sk big">${stkHtml(s)}<button class="x" data-act="stkDayDel" data-d="${ds}" data-i="${i}" aria-label="스티커 떼기">✕</button></span>`).join('') || '<span class="mu">아직 붙인 스티커가 없습니다.</span>'}</div>`; }
 async function dpImgs(ds) {
@@ -4241,6 +4243,10 @@ function cellMarks() {
   document.querySelectorAll('.cd[data-d]').forEach(c => { const ds = c.dataset.d, sk = '', im = (S.dayImg || {})[ds]; c.querySelector('.cdk')?.remove(); if (sk || im) { const s = document.createElement('span'); s.className = 'cdk'; s.innerHTML = sk + (im ? '<span class="sk">🖼</span>' : ''); c.appendChild(s); } });
 }
 const _r3 = TF.render; TF.render = function () { const v = _r3.apply(this, arguments); cellMarks(); if (DP && document.getElementById('daypg')) dpDraw(false); return v; };
+
+/* 기록(노트) 제목을 캘린더에서 누르면 그 기록으로 이동 */
+Object.assign(A, { noteGo(el) { const dlg = document.getElementById('daypg'); if (dlg && dlg.open) dlg.close(); location.hash = '#/note/' + el.dataset.id; } });
+document.addEventListener('click', e => { const s = e.target.closest && e.target.closest('small[data-nid]'); if (!s) return; e.preventDefault(); e.stopPropagation(); A.noteGo({ dataset: { id: s.dataset.nid } }); }, true);
 
 /* 종이에 손으로 쓴 메모·수첩 사진 → 일정/할 일/업무 인식 (Claude 비전, 본인 키 필요). 확인 창에서 고친 뒤 추가. */
 let SC = null;
@@ -5608,7 +5614,7 @@ buildChunks = function () {
 };
 
 /* 화면 맨 아래에 버전 표시 — 옛 화면을 보고 있는지 바로 알 수 있게 */
-const TF_VER = 'v124', _cmFt = footer;
+const TF_VER = 'v125', _cmFt = footer;
 footer = function () { return _cmFt.apply(this, arguments).replace('</footer>', ` · <span class="mu">버전 ${TF_VER} (학급 관리 포함)</span></footer>`); };
 
 /* 새 버전 알림: 옛 화면이 남아 있으면 한 번 눌러 새로 받게 함 */
@@ -6320,7 +6326,7 @@ Object.assign(A, {
   weekRev() {
     const [a, b] = mtWeek(0), [na, nb] = mtWeek(7), inR = (d, x, y) => d && d >= x && d <= y;
     const done = S.items.filter(i => i.cat === 'todo' && i.done && inR(i.date, a, b)), logs = []; wkD().cards.forEach(c => (c.log || []).forEach(l => { if (inR(l.d, a, b)) logs.push(`${md(l.d)} ${c.title}: ${l.t}`); }));
-    const doneC = wkD().cards.filter(c => c.done && inR(c.sd, a, b)), nxt = allEvents().filter(e => !e.done && inR(e.date, na, nb)).sort((x, y) => x.date.localeCompare(y.date)).slice(0, 12), S2 = S.weekly = S.weekly || {};
+    const doneC = wkD().cards.filter(c => c.done && inR(c.sd, a, b)), nxt = allEvents().filter(e => !e.note && !e.done && inR(e.date, na, nb)).sort((x, y) => x.date.localeCompare(y.date)).slice(0, 12), S2 = S.weekly = S.weekly || {};
     let d = document.getElementById('wkrv'); if (d) d.remove(); d = document.createElement('dialog'); d.id = 'wkrv'; d.className = 'dlg wide'; document.body.appendChild(d);
     d.innerHTML = `<h3>🗓 주간 돌아보기 <small class="mu">${md(a)}~${md(b)}</small></h3>
     <h4 class="dlh">이번 주에 끝낸 일</h4>${done.map(i => `<div>✔ ${esc(i.title)}</div>`).join('')}${doneC.map(c => `<div>✔ [업무] ${esc(c.title)}</div>`).join('') || (done.length ? '' : '<p class="mu">기록된 완료가 없습니다.</p>')}

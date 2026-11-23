@@ -7,7 +7,7 @@ const dpWeek = ds => DOW[new Date(ds + 'T00:00:00').getDay()];
 const dpShift = (ds, n) => { const d = new Date(ds + 'T00:00:00'); d.setDate(d.getDate() + n); return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`; };
 function dpList(ds) {
   const ev = allEvents().filter(e => e.date === ds);
-  return ev.map(e => e.id ? `<div class="td ${e.done ? 'dn' : ''}"><button class="ck" data-act="tog" data-id="${e.id}" aria-pressed="${!!e.done}" aria-label="완료 표시"></button><span class="tl">${esc(e.t)}</span><span class="mu">${esc(e.kind)}</span><button class="x" data-act="dpPst" data-id="${e.id}" aria-label="포스트잇으로 붙이기" title="포스트잇으로 붙이기">📌</button>${xbtn('delItem', e.id)}</div>` : `<div class="td"><span class="ck off"></span><span class="tl">${esc(e.t)}</span><span class="mu">${esc(e.kind)}</span></div>`).join('') || '<p class="mu">이 날은 비어 있습니다. 위에서 바로 추가하세요.</p>';
+  return ev.map(e => e.note ? `<div class="td"><span class="ck off"></span><a class="tl" href="#/note/${e.note}" data-act="noteGo" data-id="${e.note}">${esc(e.t)}</a><span class="mu">기록 · 누르면 이동</span></div>` : e.id ? `<div class="td ${e.done ? 'dn' : ''}"><button class="ck" data-act="tog" data-id="${e.id}" aria-pressed="${!!e.done}" aria-label="완료 표시"></button><span class="tl">${esc(e.t)}</span><span class="mu">${esc(e.kind)}</span><button class="x" data-act="dpPst" data-id="${e.id}" aria-label="포스트잇으로 붙이기" title="포스트잇으로 붙이기">📌</button>${xbtn('delItem', e.id)}</div>` : `<div class="td"><span class="ck off"></span><span class="tl">${esc(e.t)}</span><span class="mu">${esc(e.kind)}</span></div>`).join('') || '<p class="mu">이 날은 비어 있습니다. 위에서 바로 추가하세요.</p>';
 }
 function dpStk(ds) { const L = (S.stk || {})[ds] || []; return `<div class="dpsk">${L.map((s, i) => `<span class="sk big">${stkHtml(s)}<button class="x" data-act="stkDayDel" data-d="${ds}" data-i="${i}" aria-label="스티커 떼기">✕</button></span>`).join('') || '<span class="mu">아직 붙인 스티커가 없습니다.</span>'}</div>`; }
 async function dpImgs(ds) {
@@ -61,3 +61,7 @@ function cellMarks() {
   document.querySelectorAll('.cd[data-d]').forEach(c => { const ds = c.dataset.d, sk = '', im = (S.dayImg || {})[ds]; c.querySelector('.cdk')?.remove(); if (sk || im) { const s = document.createElement('span'); s.className = 'cdk'; s.innerHTML = sk + (im ? '<span class="sk">🖼</span>' : ''); c.appendChild(s); } });
 }
 const _r3 = TF.render; TF.render = function () { const v = _r3.apply(this, arguments); cellMarks(); if (DP && document.getElementById('daypg')) dpDraw(false); return v; };
+
+/* 기록(노트) 제목을 캘린더에서 누르면 그 기록으로 이동 */
+Object.assign(A, { noteGo(el) { const dlg = document.getElementById('daypg'); if (dlg && dlg.open) dlg.close(); location.hash = '#/note/' + el.dataset.id; } });
+document.addEventListener('click', e => { const s = e.target.closest && e.target.closest('small[data-nid]'); if (!s) return; e.preventDefault(); e.stopPropagation(); A.noteGo({ dataset: { id: s.dataset.nid } }); }, true);
