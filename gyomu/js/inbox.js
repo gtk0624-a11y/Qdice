@@ -6,7 +6,7 @@ function ibxDates(line) {
   const re = /(?:(20\d\d)\s*[.\-\/년]\s*)?(\d{1,2})\s*[.\-\/월]\s*(\d{1,2})\s*(?:일|\.)?(?!\d)/g;
   while ((m = re.exec(line))) {
     const mo = +m[2], d = +m[3]; if (mo < 1 || mo > 12 || d < 1 || d > 31) continue;
-    if (!m[1] && /\d\s*[.]\s*\d/.test(m[0]) && !/월|\//.test(m[0]) && /\d{2,}\.\d/.test(line.slice(Math.max(0, m.index - 1), m.index + m[0].length + 1))) continue;
+    if (!m[1] && /\d\s*[.]\s*\d/.test(m[0]) && !/월|\/|일|\.$/.test(m[0]) && !/^\s*\(\s*[월화수목금토일]/.test(line.slice(m.index + m[0].length)) && /\d{2,}\.\d/.test(line.slice(Math.max(0, m.index - 1), m.index + m[0].length + 1))) continue;
     const y = m[1] ? +m[1] : ibxYear(mo);
     out.push({ date: `${y}-${String(mo).padStart(2, '0')}-${String(d).padStart(2, '0')}`, raw: m[0], idx: m.index });
   }
