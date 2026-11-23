@@ -445,3 +445,10 @@ service cloud.firestore {
 - v123: 오늘 화면 삐져나옴 수정(.spread 2단 minmax(0,1fr)), 시계·포스트잇이 창 크기와 상관없이 화면 안에 들어오게 위치 보정(postit.js, style.css 하단 v123).
 - v124: 게시판 줄(.row>summary) 칸이 줄어들 수 있게 해 오른쪽 글자가 카드 밖으로 나가는 문제 수정(style.css 하단 v124).
 - v125: 기록(노트) 제목이 캘린더(월 칸·날짜 목록·날짜 창)에 📝 제목으로 뜨고, 누르면 해당 기록(#/note/id)으로 이동(app.js allEvents/calView, daypg.js noteGo). 기한 목록·포스트잇·주간 요약에는 섞이지 않음(e.note 제외).
+
+## v126 노션식 캘린더 (js/ncal.js)
+- `calView()` 를 대체: 월~일 격자, 날짜 칸 안에 카드(제목·☑완료·구분 태그·메모 첫 줄). 칸 호버 시 ＋ 로 추가.
+- 카드 클릭 → `ncPeek(id)` 가운데 창에서 제목·구분·날짜(~끝)·완료·메모 즉시 수정/삭제. 기록(📝) 카드는 기록으로 이동, 평가·예산·연수 등은 그날 창(dayOpen).
+- 보기 탭: 월간 / 다가오는 내 업무(`ncUpcoming`, 기한 지난 할 일 포함, `UI.calv`). 「새로 만들기」=`ncMake`.
+- 일정 항목에 `memo` 칸 추가(S.items[].memo). 모바일(≤760px)은 제목만 작게 + 아래 선택한 날 목록.
+- 고칠 곳: 카드 모양 `ncCard`, 창 항목 `ncPeek`, 스타일 style.css 「v126」.

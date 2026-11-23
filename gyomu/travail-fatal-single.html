@@ -990,6 +990,25 @@ details.afold.help{box-shadow:none;background:transparent}
 @media(min-width:761px){.row>summary{grid-template-columns:76px minmax(0,1fr) minmax(0,1.5fr) minmax(64px,auto) 14px!important;gap:4px 10px!important}.row>summary>*{min-width:0;overflow-wrap:anywhere}.row{max-width:100%;box-sizing:border-box}}
 @media(min-width:761px) and (max-width:1250px){.row>summary{grid-template-columns:64px minmax(0,1fr) minmax(0,1.3fr) minmax(56px,auto) 14px!important}}
 small.k-기록,.chp.k-기록{background:#d9f2e6}u.k-기록{color:#2f9a6a}
+
+/* v126 노션식 캘린더 */
+.nctabs{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin:8px 0;border-bottom:1px solid var(--rule2);padding-bottom:6px}.nctabs .grow{flex:1}
+.nctabs button:not(.btn){border:0;background:transparent;padding:6px 10px;border-radius:6px;font-size:14px;cursor:pointer;color:var(--mu)}.nctabs button.on{background:var(--pl);color:var(--ink);font-weight:700}
+.ncw,.ncg{display:grid;grid-template-columns:repeat(7,minmax(0,1fr))}.ncw span{font-size:12px;color:var(--mu);padding:6px 4px;text-align:center;border-bottom:1px solid var(--ink)}
+.ncc{min-height:118px;border-right:1px solid var(--rule2);border-bottom:1px solid var(--rule2);padding:3px;display:flex;flex-direction:column;gap:4px;cursor:pointer;min-width:0}
+.ncc.e{background:rgba(0,0,0,.02);cursor:default}.ncc.sel{background:var(--pl)}.ncc.su .n{color:#b3261e}.ncc.sa .n{color:#2f5fb3}
+.ncn{display:flex;align-items:center;gap:4px;font-size:13px}.ncn .n{padding:1px 6px;border-radius:10px}.ncc.tdy .n{background:var(--red);color:var(--paper);font-weight:700}
+.ncplus{margin-left:auto;border:0;background:transparent;font-size:15px;color:var(--mu);cursor:pointer;opacity:0;border-radius:4px}.ncc:hover .ncplus,.ncplus:focus{opacity:1}.ncplus:hover{background:var(--rule2)}
+.ncard{background:#fff;border:1px solid rgba(43,42,51,.14);border-radius:7px;padding:4px 6px;box-shadow:0 1px 2px rgba(0,0,0,.06);cursor:pointer;min-width:0}.ncard:hover{box-shadow:0 2px 6px rgba(0,0,0,.14)}
+.nct{display:flex;gap:5px;align-items:flex-start}.nct b{font-size:12.5px;line-height:1.3;word-break:break-all;overflow-wrap:anywhere}
+.ncck{flex:none;width:14px;height:14px;margin-top:1px;border:1.5px solid #8B8174;border-radius:3px;background:#fff;padding:0;cursor:pointer}.ncck.on{background:#2f7bd9;border-color:#2f7bd9;box-shadow:inset 0 0 0 2px #fff}
+.ncard.dn .nct b{text-decoration:line-through;opacity:.55}
+.ncm{display:flex;flex-wrap:wrap;gap:4px;margin-top:3px;font-size:11px;align-items:center;min-width:0}.ncm i{font-style:normal;border-radius:4px;padding:0 5px;color:#2b2a33}.ncm span{color:var(--mu);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
+.ncrow{display:grid;grid-template-columns:20px minmax(0,2fr) auto minmax(0,2fr) auto;gap:10px;align-items:center;padding:9px 6px;border-bottom:1px solid var(--rule2);cursor:pointer}.ncrow:hover{background:var(--pl)}.ncrow b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.ncrow i{font-style:normal;border-radius:4px;padding:0 6px;font-size:12px}.ncrow .mu{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.ncd{font-size:13px;white-space:nowrap}
+.ncpeek{width:min(560px,94vw);max-height:90vh;overflow:auto;border-radius:12px;padding:18px}.ncph{display:flex;gap:8px;align-items:center;margin-bottom:10px}.nctitle{flex:1;font-size:22px;font-weight:700;border:0;border-bottom:1px solid var(--rule2);background:transparent;padding:4px 0;color:var(--ink);min-width:0}
+.ncprop{display:grid;grid-template-columns:70px 1fr;gap:8px;align-items:center;padding:6px 0;border-bottom:1px dashed var(--rule2)}.ncprop.top{align-items:start}.ncprop label{color:var(--mu);font-size:13px}.ncprop textarea{width:100%;font:inherit;padding:6px;border:1px solid var(--rule2);border-radius:6px;box-sizing:border-box}.ncprop input[type=checkbox]{width:20px;height:20px}
+.ncdl{display:none}
+@media(max-width:760px){.ncc{min-height:62px}.ncard{padding:2px 3px}.ncm{display:none}.nct b{font-size:10.5px}.ncck{display:none}.ncplus{display:none}.ncdl{display:block}.ncrow{grid-template-columns:20px minmax(0,1fr) auto}.ncrow .mu,.ncrow i{display:none}}
 </style>
 </head>
 <body>
@@ -4247,6 +4266,95 @@ const _r3 = TF.render; TF.render = function () { const v = _r3.apply(this, argum
 Object.assign(A, { noteGo(el) { const dlg = document.getElementById('daypg'); if (dlg && dlg.open) dlg.close(); location.hash = '#/note/' + el.dataset.id; } });
 document.addEventListener('click', e => { const s = e.target.closest && e.target.closest('small[data-nid]'); if (!s) return; e.preventDefault(); e.stopPropagation(); A.noteGo({ dataset: { id: s.dataset.nid } }); }, true);
 
+/* 노션식 캘린더(v126): 월~일 달력 칸 안에 카드(제목·완료·구분·메모), 카드를 누르면 가운데 창에서 바로 수정, 「다가오는 내 업무」 보기.
+   기존 calView 를 대체합니다(학사일정 가져오기·날짜 메모·기록 이동은 그대로). 일정에 memo 칸이 새로 생깁니다. */
+const NC_COL = k => (typeof CAL_KINDS !== 'undefined' && CAL_KINDS[k]) || '#e8e4dc';
+function ncKindVal(i) { return i.tag && cusKinds().some(k => k.n === i.tag) ? 'c:' + i.tag : (i.cat === 'todo' ? 'todo' : 'event'); }
+function ncKindSel(i) {
+  const base = [['event', '일정'], ['todo', '할 일']].concat(cusKinds().map(k => ['c:' + k.n, k.n])), cur = ncKindVal(i);
+  return base.map(([v, n]) => `<option value="${esc(v)}" ${v === cur ? 'selected' : ''}>${esc(n)}</option>`).join('');
+}
+function ncCard(e) {
+  const it = e.id ? S.items.find(x => x.id === e.id) : null, memo = it && it.memo ? String(it.memo).split('\n')[0] : '';
+  const ck = it ? `<button class="ncck ${e.done ? 'on' : ''}" data-act="tog" data-id="${it.id}" aria-pressed="${!!e.done}" aria-label="완료 표시"></button>` : '';
+  const att = e.note ? `data-act="ncOpen" data-note="${e.note}"` : it ? `data-act="ncOpen" data-id="${it.id}"` : `data-act="ncOpen" data-d="${e.date}"`;
+  return `<div class="ncard ${e.done ? 'dn' : ''}" ${att} role="button" tabindex="0"><div class="nct">${ck}<b>${esc(e.t)}</b></div><div class="ncm"><i style="background:${NC_COL(e.kind)}">${esc(e.kind)}</i>${memo ? `<span>${esc(memo)}</span>` : ''}</div></div>`;
+}
+function calView() {
+  const [Y, M] = UI.cal.split('-').map(Number), first = new Date(Y, M - 1, 1), n = new Date(Y, M, 0).getDate(), ev = allEvents(), by = {};
+  ev.forEach(e => (by[e.date] = by[e.date] || []).push(e));
+  const v = UI.calv || 'm', tabs = `<div class="nctabs"><button class="${v === 'm' ? 'on' : ''}" data-act="ncView" data-v="m">📅 월간 캘린더</button><button class="${v === 'up' ? 'on' : ''}" data-act="ncView" data-v="up">⏳ 다가오는 내 업무</button><span class="grow"></span><button class="btn pri sm" data-act="ncNew">＋ 새로 만들기</button></div>`;
+  if (v === 'up') return `<div class="bh"><h2>캘린더</h2></div>${tabs}${ncUpcoming()}`;
+  let cells = '';
+  const off = (first.getDay() + 6) % 7;
+  for (let i = 0; i < off; i++) cells += '<div class="ncc e"></div>';
+  for (let d = 1; d <= n; d++) {
+    const ds = `${Y}-${pad(M)}-${pad(d)}`, e = by[ds] || [], wd = new Date(Y, M - 1, d).getDay();
+    cells += `<div class="ncc ${ds === today() ? 'tdy' : ''} ${ds === UI.day ? 'sel' : ''} ${wd === 0 ? 'su' : wd === 6 ? 'sa' : ''}" data-act="calDay" data-d="${ds}"><div class="ncn"><span class="n">${d}</span>${(S.dayMemo || {})[ds] ? '<span title="날짜 메모">📝</span>' : ''}<button class="ncplus" data-act="ncAdd" data-d="${ds}" aria-label="${M}월 ${d}일에 추가">＋</button></div>${e.map(ncCard).join('')}</div>`;
+  }
+  const tail = (7 - ((off + n) % 7)) % 7; for (let i = 0; i < tail; i++) cells += '<div class="ncc e"></div>';
+  const day = by[UI.day] || [];
+  const list = day.map(e => e.note ? `<div class="td"><span class="ck off"></span><a class="tl" href="#/note/${e.note}" data-act="noteGo" data-id="${e.note}">${esc(e.t)}</a><span class="mu">기록 · 누르면 이동</span></div>` : e.id ? `<div class="td ${e.done ? 'dn' : ''}"><button class="ck" data-act="tog" data-id="${e.id}" aria-pressed="${!!e.done}" aria-label="완료 표시"></button><a class="tl" data-act="ncOpen" data-id="${e.id}" href="#">${esc(e.t)}</a><span class="mu">${e.kind}</span>${xbtn('delItem', e.id)}</div>` : `<div class="td"><span class="ck off"></span><span class="tl">${esc(e.t)}</span><span class="mu">${e.kind}</span></div>`).join('') || '<p class="mu">이 날은 비어 있습니다.</p>';
+  return `<div class="bh"><h2>캘린더</h2><span class="mu">카드를 누르면 가운데 창에서 바로 고칩니다. 칸에 마우스를 올리면 ＋ 가 나옵니다.</span></div>${tabs}
+  <div class="calh"><button class="btn sm" data-act="calMove" data-d="-1" aria-label="이전 달">‹</button><b class="calt">${Y}년 ${M}월</b><button class="btn sm" data-act="calMove" data-d="1" aria-label="다음 달">›</button><button class="btn sm" data-act="calMove" data-d="0">오늘</button></div>
+  ${typeof calLegend === 'function' ? calLegend() : ''}<div class="ncw">${['월', '화', '수', '목', '금', '토', '일'].map(d => `<span>${d}</span>`).join('')}</div><div class="ncg">${cells}</div>
+  <h3 class="h3 ncdl">${md(UI.day)} (${DOW[new Date(UI.day + 'T00:00:00').getDay()]})</h3><div class="ncdl">${list}</div>
+  ${typeof dayMemoBox === 'function' ? dayMemoBox(UI.day) : ''}
+  <form class="inl" data-form="evt"><input name="title" placeholder="일정·할 일 추가" required aria-label="내용"><select name="cat" aria-label="종류" data-cus="kind">${cusKindOpts(false, 'event')}</select><button class="btn">추가</button></form>
+  ${typeof calAgenda === 'function' ? calAgenda(ev) : ''}
+  <div class="tools"><button class="btn pri" data-act="schedNeis">🏫 나이스에서 학사일정 전부 가져오기</button><label class="btn file">학사일정 파일 올리기<input type="file" id="schedUp" accept=".txt,.csv,.xlsx,.xls,.pdf,.hwp,.hwpx,.docx" hidden></label><button class="btn" data-act="schedPaste">학사일정 붙여넣기</button></div><p class="mu">학사일정(PDF·엑셀·텍스트, 또는 나이스·홈페이지에서 복사한 글)을 넣으면 날짜와 행사를 찾아 캘린더에 한꺼번에 넣어 드립니다.</p>`;
+}
+function ncUpcoming() {
+  const t = today(), its = S.items.filter(i => i.date && !i.done && !i.rep).sort((a, b) => a.date.localeCompare(b.date));
+  const late = its.filter(i => i.date < t && i.cat === 'todo'), soon = its.filter(i => i.date >= t);
+  const row = i => `<div class="ncrow" data-act="ncOpen" data-id="${i.id}" role="button" tabindex="0"><button class="ncck" data-act="tog" data-id="${i.id}" aria-label="완료 표시"></button><b>${esc(i.title)}</b><i style="background:${NC_COL(i.tag || (i.cat === 'todo' ? '할 일' : '일정'))}">${esc(i.tag || (i.cat === 'todo' ? '할 일' : '일정'))}</i><span class="mu">${i.memo ? esc(String(i.memo).split('\n')[0]) : ''}</span><span class="ncd">${md(i.date)} ${DOW[new Date(i.date + 'T00:00:00').getDay()]}${i.date >= t ? ' · ' + ddText(dd(i.date)) : ''}</span></div>`;
+  let out = '';
+  if (late.length) out += `<h3 class="h3">⚠️ 기한이 지난 할 일</h3>${late.map(row).join('')}`;
+  out += `<h3 class="h3">다가오는 일정·할 일</h3>${soon.map(row).join('') || '<p class="mu">다가오는 일정이 없습니다. 위의 「새로 만들기」를 눌러 보세요.</p>'}`;
+  return out;
+}
+/* 가운데 창(노션의 페이지 미리보기) */
+let NCP = null;
+function ncPeek(id, isNew) {
+  const i = S.items.find(x => x.id === id); if (!i) return;
+  NCP = { id, isNew: !!isNew }; let d = document.getElementById('ncpeek');
+  if (!d) { d = document.createElement('dialog'); d.id = 'ncpeek'; d.className = 'dlg ncpeek'; document.body.appendChild(d); d.addEventListener('close', ncClosed); d.addEventListener('change', ncSave); d.addEventListener('click', e => { if (e.target === d) d.close(); }); }
+  d.innerHTML = `<div class="ncph"><input name="title" class="nctitle" value="${esc(i.title)}" placeholder="제목 없음" aria-label="제목"><button class="btn sm" data-ncclose="1" aria-label="닫기">✕</button></div>
+  <div class="ncprop"><label>구분</label><select name="kind">${ncKindSel(i)}</select></div>
+  <div class="ncprop"><label>날짜</label><span><input type="date" name="date" value="${esc(i.date || '')}"> ~ <input type="date" name="end" value="${esc(i.end || '')}" aria-label="끝 날짜"></span></div>
+  <div class="ncprop"><label>완료</label><input type="checkbox" name="done" ${i.done ? 'checked' : ''} aria-label="완료"></div>
+  <div class="ncprop top"><label>메모</label><textarea name="memo" rows="5" placeholder="메모를 적으세요">${esc(i.memo || '')}</textarea></div>
+  <div class="btns"><button class="btn" data-ncdel="1">🗑 삭제</button><button class="btn pri" data-ncclose="1">닫기</button></div>`;
+  d.onclick = e => { if (e.target === d) d.close(); if (e.target.closest('[data-ncclose]')) d.close(); if (e.target.closest('[data-ncdel]')) sure('이 일정을 삭제할까요?', () => { NCP = null; S.items = S.items.filter(x => x.id !== id); d.close(); commit(); }); };
+  if (!d.open) d.showModal(); if (isNew) { const t = d.querySelector('.nctitle'); t && t.focus(); }
+}
+function ncSave(e) {
+  if (!NCP) return; const i = S.items.find(x => x.id === NCP.id), t = e.target; if (!i || !t.name) return;
+  if (t.name === 'title') i.title = t.value.trim(); else if (t.name === 'memo') { if (t.value.trim()) i.memo = t.value; else delete i.memo; }
+  else if (t.name === 'date') { if (t.value) { i.date = t.value; if (i.end && i.end < i.date) delete i.end; } }
+  else if (t.name === 'end') { if (t.value && t.value > i.date) i.end = t.value; else delete i.end; }
+  else if (t.name === 'done') i.done = t.checked;
+  else if (t.name === 'kind') { const o = cusMk(t.value, ''); i.cat = o.cat; if (o.tag) i.tag = o.tag; else delete i.tag; }
+  commit();
+}
+function ncClosed() {
+  const d = document.getElementById('ncpeek'); if (d) d.remove();
+  if (NCP) { const i = S.items.find(x => x.id === NCP.id); if (i && !i.title) { S.items = S.items.filter(x => x !== i); } }
+  NCP = null; commit();
+}
+Object.assign(A, {
+  ncView(el) { UI.calv = el.dataset.v; render(); },
+  ncAdd(el, e) { e && e.stopPropagation(); ncMake(el.dataset.d); },
+  ncNew() { ncMake(UI.day || today()); },
+  ncOpen(el) {
+    if (el.dataset.note) { location.hash = '#/note/' + el.dataset.note; return; }
+    if (el.dataset.id) { const i = S.items.find(x => x.id === el.dataset.id); if (i) return ncPeek(i.id); }
+    if (el.dataset.d) dayOpen(el.dataset.d);
+  }
+});
+function ncMake(ds) { const i = { id: uid(), title: '', cat: 'event', date: ds, done: false }; S.items.push(i); UI.day = ds; ncPeek(i.id, true); }
+document.addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && e.target.matches && e.target.matches('.ncard,.ncrow')) { e.preventDefault(); e.target.click(); } });
+
 /* 종이에 손으로 쓴 메모·수첩 사진 → 일정/할 일/업무 인식 (Claude 비전, 본인 키 필요). 확인 창에서 고친 뒤 추가. */
 let SC = null;
 const scImg = f => new Promise((res, rej) => { const im = new Image(), u = URL.createObjectURL(f); im.onload = () => { const k = Math.min(1, 1600 / Math.max(im.width, im.height)), c = document.createElement('canvas'); c.width = Math.round(im.width * k); c.height = Math.round(im.height * k); c.getContext('2d').drawImage(im, 0, 0, c.width, c.height); URL.revokeObjectURL(u); res(c.toDataURL('image/jpeg', 0.85).split(',')[1]); }; im.onerror = () => rej(new Error('사진을 읽지 못했습니다')); im.src = u; });
@@ -5613,7 +5721,7 @@ buildChunks = function () {
 };
 
 /* 화면 맨 아래에 버전 표시 — 옛 화면을 보고 있는지 바로 알 수 있게 */
-const TF_VER = 'v125', _cmFt = footer;
+const TF_VER = 'v126', _cmFt = footer;
 footer = function () { return _cmFt.apply(this, arguments).replace('</footer>', ` · <span class="mu">버전 ${TF_VER} (학급 관리 포함)</span></footer>`); };
 
 /* 새 버전 알림: 옛 화면이 남아 있으면 한 번 눌러 새로 받게 함 */
