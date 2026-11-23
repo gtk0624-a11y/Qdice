@@ -188,3 +188,9 @@ chatKeyBar = function () {
   return h + `<div class="ckb on"><span>🧠 모델</span><select data-b2model aria-label="비서 모델">${B2_MODELS.map(([v, l]) => `<option value="${v}" ${B2_MODEL() === v ? 'selected' : ''}>${l}</option>`).join('')}</select></div>`;
 };
 document.addEventListener('change', e => { if (e.target.matches('[data-b2model]')) { localStorage.setItem('tf.botModel', e.target.value); toast('모델을 바꿨습니다: ' + e.target.selectedOptions[0].textContent); } });
+
+/* ---- 챗봇에서 바로 규정 올리기(📎) → 규정줍줍이 찾는 자료실에 '규정'으로 저장 ---- */
+document.addEventListener('change', async e => {
+  if (e.target.id !== 'chatUp') return; const fs = [...e.target.files]; e.target.value = ''; if (!fs.length) return;
+  try { await ingestFiles(fs, { kind: '규정', from: 'lib', noAsk: true }); toast('규정으로 올렸습니다. 이제 바로 물어보세요.'); } catch (er) { toast('올리지 못했습니다: ' + (er.message || er)); }
+}, true);
