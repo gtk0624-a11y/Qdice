@@ -138,6 +138,11 @@ function direct(q) {
     const t = btot();
     if (S.budget.length) out.push({ src: '예산 장부(계산)', text: `전체 배정 ${won(t.a)}원 · 집행 ${won(t.s)}원 · 잔액 ${won(t.b)}원 (집행 ${t.a ? Math.round(t.s / t.a * 100) : 0}%)`, ref: '#/budget' });
   }
+  if (/번호|전화|연락처|내선|연락\s?망|핸드폰|폰번/.test(q) && (S.contacts || []).length) {
+    const toks = q.replace(/번호|전화|연락처|내선|연락\s?망|핸드폰|폰번|알려줘|알려|찾아줘|찾아|좀|뭐야|뭐지|어디|선생님|샘|쌤|님|[은는이가의을를도]\b/g, ' ').split(/[\s,?.!]+/).filter(w => w.length >= 2);
+    const hit = (S.contacts || []).filter(c => toks.some(t => (c.dept + ' ' + c.name).includes(t) || t.includes(c.name || '\u0000') || t.includes(c.dept || '\u0000')));
+    if (hit.length) out.push({ src: '교내 연락망', text: hit.slice(0, 8).map(c => `${c.dept} ${c.name} · 내선 ${c.ext || '-'} · 전화 ${c.phone || '-'}`).join(' / '), ref: '#/lib' });
+  }
   if (/급식|점심|중식|석식|메뉴|밥/.test(q) && typeof mealFor === 'function') {
     const k = /모레/.test(q) ? 2 : /내일/.test(q) ? 1 : 0, d = new Date(Date.now() + k * 864e5), ds = d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()), m = mealFor(ds);
     out.push({ src: '급식 · ' + md(ds), text: m.length ? m.map(x => `${x.kind}: ${x.dishes.map(cleanDish).join(', ')} ${x.kcal || ''}`).join(' / ') : `${md(ds)}에는 급식 자료가 없습니다(주말·방학이거나 아직 받지 못함).`, ref: '#/' });

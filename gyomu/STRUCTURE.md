@@ -420,3 +420,4 @@ service cloud.firestore {
 - v98: 메뉴 '규정줍줍' 추가 — 도디쌤의 규정줍줍(gyujeong/, 원본 PDF 화면·쪽수·형광펜 인쇄·AI 키 선택)을 iframe으로 통째로 넣음. js/rulefix.js(ruleView, 챗봇 Claude 키→gj.aiKey 자동 복사). 저장은 같은 사이트 주소의 IndexedDB를 규정줍줍 단독 앱과 공유. 규정줍줍 고칠 때는 gyujeong/index.html(원본 /Qdice/gyujeong와 같은 파일을 복사한 것)
 - v99: 챗봇 창에 '📜 규정줍줍' 탭(원본 규정줍줍 iframe, 앞내용·뒷내용·원문 PDF·복사·저장 전부). 규정·지침 질문이면 문서가 있을 때 자동으로 그 탭으로 넘겨 거기서 검색(rulefix.js 아래쪽, ask1 감쌈)
 - v101: 영역 분리 — 규정·지침·학칙 질문은 📜 규정줍줍 탭만(RULE_Q), 💬 꿈송이 비서는 일정·예산·업무·메모·자료실만(find_rule 도구·규정 블록·📎 제거)
+- v102: 챗봇 연락망 질문(교장 번호 등)은 direct()에서 연락망을 먼저 정확히 찾음(search.js)
