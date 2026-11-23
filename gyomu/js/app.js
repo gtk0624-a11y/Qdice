@@ -204,9 +204,7 @@ function ttBase() { const BP = (typeof _clkP0 === 'function' ? _clkP0() : clkPer
 function ttTokens() {
   const BP = ttBase(), ps = BP.map(x => String(x.p)), saved = Array.isArray(S.profile.ttRows) ? S.profile.ttRows.map(String).filter(k => k === 'L' || ps.includes(k)) : null;
   if (saved && saved.length) { ps.forEach(p => { if (!saved.includes(p)) saved.push(p); }); if (!saved.includes('L')) saved.splice(Math.min(4, saved.length), 0, 'L'); return saved; }
-  const LU = typeof _clkL0 === 'function' ? _clkL0(BP.filter(x => x.s != null)) : null, out = []; let done = !LU;
-  BP.forEach(x => { if (!done && (S.profile.bell && S.profile.bell.length ? x.s != null && x.s >= LU[0] : x.p === 5)) { out.push('L'); done = true; } out.push(String(x.p)); });
-  if (!done) out.push('L'); return out;
+  const out = BP.map(x => String(x.p)), at = out.indexOf('4'); out.splice(at >= 0 ? at + 1 : Math.min(4, out.length), 0, 'L'); return out;
 }
 function classView() {
   let t = '<table class="tbl tt"><thead><tr><th></th>' + [1, 2, 3, 4, 5].map(d => `<th>${DOW[d]}</th>`).join('') + '</tr></thead><tbody>';
