@@ -16,7 +16,7 @@ let _cheerShift = 0;
 function clkPeriods() { const p = S.profile; if (p.bell && p.bell.length) return p.bell.map(x => ({ p: x.p, s: x.s, e: x.e })).sort((a, b) => a.s - b.s); const [h, m] = (p.start || '09:00').split(':').map(Number), st = h * 60 + m, L = []; for (let i = 1; i <= 7; i++) { const a = st + (i - 1) * (+p.classMin + +p.breakMin); L.push({ p: i, s: a, e: a + +p.classMin }); } return L; }
 const clkHM = n => String(Math.floor(n / 60)).padStart(2, '0') + ':' + String(n % 60).padStart(2, '0');
 const clkParse = s => { const m = String(s || '').match(/^(\d{1,2}):(\d{2})$/); return m ? +m[1] * 60 + +m[2] : null; };
-function clkLunch(P) { const p = S.profile, a = clkParse(p.lunchS), b = clkParse(p.lunchE); if (a != null && b != null) return [a, b]; let best = null; for (let i = 0; i + 1 < P.length; i++) { const g = P[i + 1].s - P[i].e; if (g >= 30 && (!best || g > best[1] - best[0])) best = [P[i].e, P[i + 1].s]; } return best || [12 * 60 + 30, 13 * 60 + 20]; }
+function clkLunch(P) { const p = S.profile, a = clkParse(p.lunchS), b = clkParse(p.lunchE); if (a != null && b != null) return [a, b]; let best = null; for (let i = 0; i + 1 < P.length; i++) { const g = P[i + 1].s - P[i].e; if (g >= 30 && (!best || g > best[1] - best[0])) best = [P[i].e, P[i + 1].s]; } return best || [12 * 60 + 40, 13 * 60 + 30]; }
 function clkState() {
   const n = new Date(), mins = n.getHours() * 60 + n.getMinutes(), dow = n.getDay(), P = clkPeriods(), L = clkLunch(P);
   if (dow === 0 || dow === 6) return { big: '주말입니다', sub: '푹 쉬세요 🌿', cls: 'we' };

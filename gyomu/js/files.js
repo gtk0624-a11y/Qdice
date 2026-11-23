@@ -53,7 +53,7 @@ function bellDialog(text) {
   const L = extractBell(text); if (!L.length) return toast('일과표(1교시 08:50~09:35 같은 시각)를 찾지 못했습니다. 아래 "붙여넣기"를 써 보세요.');
   const d = document.createElement('dialog'); d.className = 'dlg';
   d.innerHTML = `<form method="dialog"><h3>일과표를 찾았습니다</h3><table class="tbl"><tbody>${L.map(x => `<tr><td>${x.p}교시</td><td>${hm(x.s)} ~ ${hm(x.e)}</td></tr>`).join('')}</tbody></table><p class="mu">적용하면 오늘 화면의 "지금 몇 교시"가 이 시각표대로 움직입니다.</p><div class="btns"><button value="no">취소</button><button value="ok" class="pri">적용</button></div></form>`;
-  document.body.appendChild(d); d.addEventListener('close', () => { if (d.returnValue === 'ok') { applyBell(L); toast('일과표를 적용했습니다.'); } d.remove(); }); d.showModal();
+  document.body.appendChild(d); d.addEventListener('close', () => { if (d.returnValue === 'ok') { applyBell(L); const lu = typeof bellLunch === 'function' ? bellLunch(text) : null; if (lu) { S.profile.lunchS = clkHM(lu[0]); S.profile.lunchE = clkHM(lu[1]); commit(); } toast('일과표를 적용했습니다.'); } d.remove(); }); d.showModal();
 }
 
 /* ---- 시간표(반 이름) 인식: 표를 복사해 붙이거나 파일로 올립니다 ---- */
