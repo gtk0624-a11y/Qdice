@@ -133,7 +133,7 @@ function bellSaveFrom(root) {
   if (a && b && clkParse(a.value) != null && clkParse(b.value) != null && clkParse(b.value) > clkParse(a.value)) { S.profile.lunchS = a.value; S.profile.lunchE = b.value; }
   commit(); toast('일과표를 저장했습니다.');
 }
-document.addEventListener('change', e => { const t = e.target; if (t.dataset && (t.dataset.bellp || t.dataset.belll)) bellSaveFrom(t.closest('details') || document); });
+document.addEventListener('change', e => { const t = e.target; if (t.dataset && (t.dataset.bellp || t.dataset.belll)) bellSaveFrom(t.closest('table') || document); });
 Object.assign(A, {
   bellAddP() { const L = (S.profile.bell && S.profile.bell.length) ? S.profile.bell.slice() : _clkP0().map(x => ({ ...x })); const last = L[L.length - 1] || { p: 0, e: 8 * 60 + 50 }, len = +S.profile.classMin || 45; L.push({ p: last.p + 1, s: last.e + (+S.profile.breakMin || 10), e: last.e + (+S.profile.breakMin || 10) + len }); S.profile.bell = L; commit(); },
   bellDelP(el) { const L = _clkP0().filter(x => x.p !== +el.dataset.p); if (!L.length) return toast('교시가 하나는 있어야 합니다.'); S.profile.bell = L; commit(); },

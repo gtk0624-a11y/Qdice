@@ -211,9 +211,9 @@ function classView() {
   const toks = ttTokens(), BP = ttBase(), byP = Object.fromEntries(BP.map(x => [x.p, x])), LU = typeof _clkL0 === 'function' ? _clkL0(BP.filter(x => x.s != null)) : null;
   const mv = k => `<span class="ttmv"><button type="button" data-act="ttUp" data-k="${k}" aria-label="위로">▲</button><button type="button" data-act="ttDown" data-k="${k}" aria-label="아래로">▼</button></span>`;
   toks.forEach(k => {
-    if (k === 'L') { if (LU) t += `<tr class="ttlunch"><th class="ttp"><b>급식</b><small>${clkHM(LU[0])}~${clkHM(LU[1])}</small>${mv('L')}</th><td colspan="5">🍚 점심시간 <span class="mu">(시각은 아래 「일과표 직접 고치기」에서)</span></td></tr>`; return; }
+    if (k === 'L') { if (LU) t += `<tr class="ttlunch"><th class="ttp"><b>급식</b><small class="tti"><input type="time" data-belll="s" value="${clkHM(LU[0])}" aria-label="급식 시작"> ~ <input type="time" data-belll="e" value="${clkHM(LU[1])}" aria-label="급식 끝"></small>${mv('L')}</th><td colspan="5">🍚 점심시간 <span class="mu">(시각은 아래 「일과표 직접 고치기」에서)</span></td></tr>`; return; }
     const x = byP[k]; if (!x) return;
-    t += `<tr><th class="ttp"><b>${x.p}교시</b>${x.s != null ? `<small>${clkHM(x.s)}~${clkHM(x.e)}</small>` : ''}${mv(x.p)}</th>` + [1, 2, 3, 4, 5].map(d => `<td><input data-tt="${d}-${x.p}" value="${esc(tt(d, x.p))}" placeholder="수업 입력" aria-label="${DOW[d]} ${x.p}교시"></td>`).join('') + '</tr>';
+    t += `<tr><th class="ttp"><b>${x.p}교시</b>${x.s != null ? `<small class="tti"><input type="time" data-bellp="${x.p}" data-w="s" value="${clkHM(x.s)}" aria-label="${x.p}교시 시작"> ~ <input type="time" data-bellp="${x.p}" data-w="e" value="${clkHM(x.e)}" aria-label="${x.p}교시 끝"></small>` : ''}${mv(x.p)}</th>` + [1, 2, 3, 4, 5].map(d => `<td><input data-tt="${d}-${x.p}" value="${esc(tt(d, x.p))}" placeholder="수업 입력" aria-label="${DOW[d]} ${x.p}교시"></td>`).join('') + '</tr>';
   });
   t += '</tbody></table><div class="tools"><span class="mu">줄 왼쪽 ▲▼로 교시·급식 순서를 바꿀 수 있어요.</span> <button class="btn sm" data-act="ttOrderReset">순서 기본으로</button></div>';
   return `<div class="bh"><h2>수업 및 시간표</h2><span class="mu">시간표 · 진도 · 수행평가를 한곳에서 고칩니다.</span></div>
