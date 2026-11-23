@@ -443,3 +443,4 @@ service cloud.firestore {
 - v121: 오늘 화면의 오늘 도우미·오늘 메모·학교(곡선중학교) 카드를 선택 기능(기본 꺼짐)으로 — 설정 › 기능 켜고 끄기(feat.js FEAT_OPT, style.css nf-hpcard/nf-sbanner).
 - v122: 서랍(사이트 찾기)도 선택 기능(기본 꺼짐) — 설정 › 기능 켜고 끄기.
 - v123: 오늘 화면 삐져나옴 수정(.spread 2단 minmax(0,1fr)), 시계·포스트잇이 창 크기와 상관없이 화면 안에 들어오게 위치 보정(postit.js, style.css 하단 v123).
+- v124: 게시판 줄(.row>summary) 칸이 줄어들 수 있게 해 오른쪽 글자가 카드 밖으로 나가는 문제 수정(style.css 하단 v124).

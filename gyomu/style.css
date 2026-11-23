@@ -977,3 +977,6 @@ details.afold.help{box-shadow:none;background:transparent}
 @media(min-width:1540px){#tfclock{right:max(8px,calc((100vw - 1180px)/2 - 160px))!important;max-width:calc(100vw - 16px)}}
 #tfclock{max-width:calc(100vw - 12px);box-sizing:border-box}
 .pst{max-width:calc(100vw - 8px)}
+/* v124 게시판 줄: 오른쪽 글자(오늘·다음 교시·▼)가 카드 밖으로 삐져나오지 않게 칸을 줄어들 수 있게 */
+@media(min-width:761px){.row>summary{grid-template-columns:76px minmax(0,1fr) minmax(0,1.5fr) minmax(64px,auto) 14px!important;gap:4px 10px!important}.row>summary>*{min-width:0;overflow-wrap:anywhere}.row{max-width:100%;box-sizing:border-box}}
+@media(min-width:761px) and (max-width:1250px){.row>summary{grid-template-columns:64px minmax(0,1fr) minmax(0,1.3fr) minmax(56px,auto) 14px!important}}
