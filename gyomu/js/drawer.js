@@ -10,15 +10,25 @@ function dwList() {
   if (DWTAB !== '최근') L.sort((a, b) => (b.fav ? 1 : 0) - (a.fav ? 1 : 0));
   return L;
 }
+let DWEDIT = false;
+const dwHost = u => { try { return new URL(u).hostname.replace(/^www\./, ''); } catch (e) { return u; } };
+const DW_COL = { '수업': '#2563eb', '업무': '#059669', '개인': '#ea580c', '기타': '#6b7280' };
+const dwColor = c => DW_COL[c] || ['#7c3aed', '#db2777', '#0891b2', '#ca8a04', '#4f46e5'][[...String(c)].reduce((n, ch) => n + ch.charCodeAt(0), 0) % 5];
+function dwRow(l) {
+  const c = l.cat || '기타', ic = [...String(l.name || '?')][0];
+  return `<li class="dwr" data-q="${esc((l.name + ' ' + l.url + ' ' + c).toLowerCase())}"><button class="dwst ${l.fav ? 'on' : ''}" data-act="dwFav" data-id="${l.id}" aria-label="즐겨찾기">${l.fav ? '★' : '☆'}</button><a data-dwgo="${l.id}" href="${esc(l.url)}" target="_blank" rel="noopener"><i class="dwic" style="background:${dwColor(c)}">${esc(ic)}</i><span class="dwtx"><b>${esc(l.name)}</b><small>${esc(dwHost(l.url))}</small></span></a>${DWEDIT ? `<button class="x" data-act="dwEdit" data-id="${l.id}" aria-label="고치기">✎</button><button class="x" data-act="dwDel" data-id="${l.id}" aria-label="빼기">✕</button>` : ''}</li>`;
+}
 function drawerHtml() {
-  const L = S.links, favs = L.filter(l => l.fav);
-  const tabs = ['전체', '즐겨찾기', '최근', ...dwCats()];
-  const items = dwList().map(l => `<li data-q="${esc((l.name + ' ' + l.url + ' ' + (l.cat || '')).toLowerCase())}"><button class="dwst ${l.fav ? 'on' : ''}" data-act="dwFav" data-id="${l.id}" aria-label="즐겨찾기">${l.fav ? '★' : '☆'}</button><a data-dwgo="${l.id}" href="${esc(l.url)}" target="_blank" rel="noopener"><b>${esc(l.name)}</b>${l.cat ? `<small>${esc(l.cat)}</small>` : ''}</a><button class="x" data-act="dwEdit" data-id="${l.id}" aria-label="고치기">✎</button><button class="x" data-act="dwDel" data-id="${l.id}" aria-label="빼기">✕</button></li>`).join('');
+  const L = S.links, favs = L.filter(l => l.fav), recent = L.filter(l => l.last).sort((a, b) => b.last - a.last).slice(0, 4);
+  const cats = [...new Set(L.map(l => l.cat || '기타'))].sort((a, b) => { const o = ['수업', '업무', '개인', '기타'], ia = o.indexOf(a), ib = o.indexOf(b); return (ia < 0 ? 9 : ia) - (ib < 0 ? 9 : ib); });
+  const groups = cats.map(c => { const g = L.filter(l => (l.cat || '기타') === c); return `<details class="dwg" open><summary><i style="background:${dwColor(c)}"></i><b>${esc(c)}</b><em>${g.length}</em></summary><ul class="dwl">${g.map(dwRow).join('')}</ul></details>`; }).join('');
   return `<section class="drawer dw"><div class="dwf"><b>서랍</b>${favs.map(l => `<a data-dwgo="${l.id}" href="${esc(l.url)}" target="_blank" rel="noopener">★ ${esc(l.name)}</a>`).join('') || '<span class="mu">자주 가는 사이트를 넣고 ☆를 누르면 여기에 바로 보입니다</span>'}</div>
-<details class="dwd" data-k="dw" ${OPEN.has('dw') ? 'open' : ''}><summary>서랍 열기 (${L.length}개)<i class="chev"></i></summary><div class="dwb">
-<div class="tools"><input type="search" class="dws" data-dsearch placeholder="사이트 검색 (이름·주소·분류)"><button class="btn sm pri" data-act="add_links">+ 사이트 넣기</button><button class="btn sm" data-act="dwSave">백업 저장</button><label class="btn sm">백업 불러오기<input type="file" accept=".json,application/json" id="dwUp" hidden></label></div>
-<div class="dwt">${tabs.map(t => `<button class="${t === DWTAB ? 'on' : ''}" data-act="dwTab" data-t="${esc(t)}">${esc(t)}</button>`).join('')}</div>
-<ul class="dwl">${items || '<li class="mu">이 분류에 사이트가 없습니다.</li>'}</ul>
+<details class="dwd" data-k="dw" ${OPEN.has('dw') ? 'open' : ''}><summary>사이트 찾기 · 서랍 열기 (${L.length}개)<i class="chev"></i></summary><div class="dwb dwv2">
+<div class="dwbar"><input type="search" class="dws" data-dsearch placeholder="🔍 이름으로 찾기"><button class="btn sm pri" data-act="add_links">+ 추가</button><button class="btn sm ${DWEDIT ? 'pri' : ''}" data-act="dwEditMode">${DWEDIT ? '✔ 편집 끝' : '✎ 편집'}</button></div>
+${recent.length ? `<div class="dwrc"><span>🕘 최근</span>${recent.map(l => `<a data-dwgo="${l.id}" href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.name)}</a>`).join('')}</div>` : ''}
+${favs.length ? `<details class="dwg dwfav" open><summary><i style="background:#f59e0b"></i><b>⭐ 즐겨찾기</b><em>${favs.length}</em></summary><ul class="dwl">${favs.map(dwRow).join('')}</ul></details>` : ''}
+${groups || '<p class="mu">서랍이 비어 있습니다. 「+ 추가」로 자주 가는 사이트의 주소를 넣어 보세요.</p>'}
+<div class="tools"><button class="btn sm" data-act="dwSave">백업 저장</button><label class="btn sm">백업 불러오기<input type="file" accept=".json,application/json" id="dwUp" hidden></label></div>
 <p class="mu">주소만 저장합니다(아이디·비밀번호 저장 안 함). 평소 업무포털에 로그인하는 같은 브라우저에서 열어야 로그인이 이어집니다. 다른 컴퓨터로 옮길 때는 백업 저장 → 백업 불러오기를 쓰세요.</p></div></details></section>`;
 }
 const dwFind = id => S.links.find(l => l.id === id);
@@ -29,6 +39,7 @@ Object.assign(A, {
   dwDel(el) { const l = dwFind(el.dataset.id); if (!l) return; sure(`「${l.name}」을(를) 서랍에서 뺄까요?`, () => { S.links = S.links.filter(x => x.id !== l.id); commit(); }); },
   dwFav(el) { const l = dwFind(el.dataset.id); if (!l) return; l.fav = !l.fav; commit(); },
   dwTab(el) { DWTAB = el.dataset.t; render(); },
+  dwEditMode() { DWEDIT = !DWEDIT; OPEN.add('dw'); render(); },
   dwSave() { download('업무파탈_서랍_' + today() + '.json', JSON.stringify(S.links.map(({ name, url, cat, fav }) => ({ name, url, cat, fav })), null, 1), 'application/json'); toast('서랍 목록을 파일로 저장했습니다.'); },
   manageLinks() { }
 });
@@ -36,6 +47,7 @@ document.addEventListener('input', e => {
   if (!e.target.matches('[data-dsearch]')) return;
   const q = e.target.value.trim().toLowerCase();
   document.querySelectorAll('.dwl li[data-q]').forEach(li => { li.hidden = !!q && !li.dataset.q.includes(q); });
+  document.querySelectorAll('.dwg').forEach(g => { g.hidden = !!q && ![...g.querySelectorAll('li[data-q]')].some(li => !li.hidden); if (q) g.open = true; });
 });
 document.addEventListener('click', e => {
   const a = e.target.closest('[data-dwgo]'); if (!a) return;
