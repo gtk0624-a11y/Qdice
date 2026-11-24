@@ -461,3 +461,8 @@ service cloud.firestore {
 
 ## v129
 - 시계: profile.clock 값이 없으면(동기화로 지워진 경우 등) 기본 켜짐. 설정에서 끄면 false 로 저장(js/deco.js clkDraw·설정 체크박스).
+
+## v130
+- 오늘 화면: 「📅 캘린더」「🗂 업무들」 둘 다 토글(UI.nccal/UI.ncwork). 캘린더 토글 안에 날짜 메모·그날 기록(ncNotes, 기록 쓰기)·일정 추가. 범례 제거, 선·글씨 진하게.
+- 토요휴업(휴업일) 일정은 allEvents 래퍼(js/ncal.js)에서 숨김(데이터는 그대로).
+- 시계: 1100~1539px 폭에서도 오른쪽 옆 카드로 표시(style.css v130).

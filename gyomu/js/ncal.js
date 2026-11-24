@@ -30,15 +30,20 @@ function ncMonth() {
   const list = day.map(e => e.note ? `<div class="td"><span class="ck off"></span><a class="tl" href="#/note/${e.note}" data-act="noteGo" data-id="${e.note}">${esc(e.t)}</a><span class="mu">기록 · 누르면 이동</span><button class="btn sm" data-act="ncPin" data-note="${e.note}">📌</button></div>` : e.id ? `<div class="td ${e.done ? 'dn' : ''}"><button class="ck" data-act="tog" data-id="${e.id}" aria-pressed="${!!e.done}" aria-label="완료 표시"></button><a class="tl" data-act="ncOpen" data-id="${e.id}" href="#">${esc(e.t)}</a><span class="mu">${e.kind}</span><button class="btn sm" data-act="ncPin" data-id="${e.id}">📌</button>${xbtn('delItem', e.id)}</div>` : `<div class="td"><span class="ck off"></span><span class="tl">${esc(e.t)}</span><span class="mu">${e.kind}</span></div>`).join('') || '<p class="mu">이 날은 비어 있습니다.</p>';
   return `<div class="bh"><h2>캘린더</h2><span class="mu">카드를 누르면 가운데 창에서 바로 고칩니다. 칸에 마우스를 올리면 ＋ 가 나옵니다.</span></div>${tabs}
   <div class="calh"><button class="btn sm" data-act="calMove" data-d="-1" aria-label="이전 달">‹</button><b class="calt">${Y}년 ${M}월</b><button class="btn sm" data-act="calMove" data-d="1" aria-label="다음 달">›</button><button class="btn sm" data-act="calMove" data-d="0">오늘</button></div>
-  ${typeof calLegend === 'function' ? calLegend() : ''}<div class="ncw">${['월', '화', '수', '목', '금', '토', '일'].map(d => `<span>${d}</span>`).join('')}</div><div class="ncg">${cells}</div>
+  <div class="ncw">${['월', '화', '수', '목', '금', '토', '일'].map(d => `<span>${d}</span>`).join('')}</div><div class="ncg">${cells}</div>
   <h3 class="h3 ncdl">${md(UI.day)} (${DOW[new Date(UI.day + 'T00:00:00').getDay()]})</h3><div class="ncdl">${list}</div>
   ${typeof dayMemoBox === 'function' ? dayMemoBox(UI.day) : ''}
+  ${ncNotes(UI.day)}
   <form class="inl" data-form="evt"><input name="title" placeholder="일정·할 일 추가" required aria-label="내용"><select name="cat" aria-label="종류" data-cus="kind">${cusKindOpts(false, 'event')}</select><button class="btn">추가</button></form>
   `;
 }
 function calView() {
   return ncMonth() + (UI.calv === 'up' ? '' : `${typeof calAgenda === 'function' ? calAgenda(allEvents()) : ''}
   <div class="tools"><button class="btn pri" data-act="schedNeis">🏫 나이스에서 학사일정 전부 가져오기</button><label class="btn file">학사일정 파일 올리기<input type="file" id="schedUp" accept=".txt,.csv,.xlsx,.xls,.pdf,.hwp,.hwpx,.docx" hidden></label><button class="btn" data-act="schedPaste">학사일정 붙여넣기</button></div><p class="mu">학사일정(PDF·엑셀·텍스트, 또는 나이스·홈페이지에서 복사한 글)을 넣으면 날짜와 행사를 찾아 캘린더에 한꺼번에 넣어 드립니다.</p>`);
+}
+function ncNotes(ds) {
+  const N = (S.notes || []).filter(n => n.date === ds);
+  return `<div class="ncnotes"><b>📝 ${md(ds)} 기록</b>${N.map(n => `<a class="chp" href="#/note/${n.id}" data-act="noteGo" data-id="${n.id}">${esc(n.title || '제목 없음')} <small>${esc(n.kind || '')}</small></a>`).join('') || '<span class="mu"> 이 날 쓴 기록이 없습니다.</span>'}<button class="btn sm" data-act="ncNoteNew" data-d="${ds}">＋ 이 날 기록 쓰기</button></div>`;
 }
 function ncUpcoming() {
   const t = today(), its = S.items.filter(i => i.date && !i.done && !i.rep).sort((a, b) => a.date.localeCompare(b.date));
@@ -87,6 +92,7 @@ Object.assign(A, {
     if (!text) { toast('제목을 먼저 적어 주세요.'); return; }
     pstList().push({ id: pstId(), text, date, color: '노랑', done: false }); S.profile.pstDown = false; commit(); toast('포스트잇으로 붙였습니다.');
   },
+  ncNoteNew(el) { const n = { id: uid(), title: '', date: el.dataset.d || today(), kind: '회의', body: '', decisions: '', followups: '', lock: false }; S.notes.push(n); save(); location.hash = '#/note/' + n.id; },
   ncView(el) { UI.calv = el.dataset.v; render(); },
   ncAdd(el, e) { e && e.stopPropagation(); ncMake(el.dataset.d); },
   ncNew() { ncMake(UI.day || today()); },
@@ -104,7 +110,10 @@ document.addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === 
   const _today = todayView, MARK = '<div class="bh"><h2>오늘의 게시판</h2>';
   todayView = function () {
     const h = _today(), k = h.indexOf(MARK), top = k >= 0 ? h.slice(0, k) : '', rest = k >= 0 ? h.slice(k) : h;
-    return `${top}<div class="ncwrap">${ncMonth()}</div><details class="ncwork" ${UI.ncwork ? 'open' : ''}><summary>🗂 업무들 <small>게시판 줄 · 연수 · 예산 · 평가 등</small></summary>${rest}</details>`;
+    return `${top}<details class="ncwork nccal" ${UI.nccal === false ? '' : 'open'}><summary>📅 캘린더 <small>일정 · 메모 · 기록</small></summary>${ncMonth()}</details><details class="ncwork" ${UI.ncwork ? 'open' : ''}><summary>🗂 업무들 <small>게시판 줄 · 연수 · 예산 · 평가 등</small></summary>${rest}</details>`;
   };
-  document.addEventListener('toggle', e => { if (e.target.classList && e.target.classList.contains('ncwork')) UI.ncwork = e.target.open; }, true);
+  document.addEventListener('toggle', e => { if (e.target.classList && e.target.classList.contains('ncwork')) { if (e.target.classList.contains('nccal')) UI.nccal = e.target.open; else UI.ncwork = e.target.open; } }, true);
 })();
+
+/* 토요휴업일은 캘린더·기한 목록에서 모두 뺍니다 */
+(function () { const _ae = allEvents; allEvents = function () { return _ae().filter(e => !/토요\s*휴업/.test(e.t || '')); }; })();
