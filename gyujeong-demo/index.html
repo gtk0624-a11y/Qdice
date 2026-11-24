@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>도디쌤의 규정줍줍 — 소개</title>
+<meta name="description" content="두꺼운 규정집, 이제 넘기지 마세요. 물으면 원문을 쪽수와 함께 찾아 주는 학교 업무용 규정 찾기 프로그램">
+<meta property="og:title" content="도디쌤의 규정줍줍">
+<meta property="og:description" content="규정·길라잡이·각종 계획서에서 근거를 찾아 드립니다. 무료 · 로그인 없음">
+<meta property="og:image" content="img/s1_answer.jpg">
+<link rel="icon" href="ggumsong.png">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+/* ===== 색은 여기서 바꿉니다 ===== */
+:root{--ink:#1f3a68;--ink2:#2d4f8a;--yel:#f9cf7a;--yel2:#fdf1d3;--mint:#d9f2e6;--bg:#f3f5f9;--line:#dde3ee;--red:#c2402e;--grn:#1a8f55;--txt:#1c2533;--sub:#5f6b7d}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{animation:none!important;transition:none!important}}
+body{margin:0;font-family:"Pretendard","Malgun Gothic","맑은 고딕","Apple SD Gothic Neo",sans-serif;background:var(--bg);color:var(--txt);font-size:16px;line-height:1.65;word-break:keep-all}
+a{color:var(--ink)}
+img{max-width:100%}
+:focus-visible{outline:3px solid var(--yel);outline-offset:2px}
+.wrap{max-width:1080px;margin:0 auto;padding:0 20px}
+.mark{background:linear-gradient(transparent 58%,var(--yel) 58%);padding:0 2px}
+
+/* 첫 화면 */
+.hero{background:var(--ink);color:#fff;padding:52px 0 64px;position:relative;overflow:hidden}
+.hero:after{content:"";position:absolute;left:0;right:0;bottom:0;height:10px;background:repeating-linear-gradient(90deg,var(--yel) 0 40px,transparent 40px 56px);opacity:.9}
+.hero .wrap{display:grid;grid-template-columns:1.2fr .8fr;gap:40px;align-items:center}
+.brand{display:flex;align-items:center;gap:12px;margin-bottom:22px}
+.brand img{width:56px;height:56px;border-radius:50%;border:3px solid var(--yel);background:#fff;object-fit:cover}
+.brand span{font-size:15px;opacity:.85}
+.brand strong{display:block;font-size:22px;letter-spacing:-.01em}
+.hero h1{font-size:clamp(30px,4.4vw,48px);line-height:1.25;margin:0 0 18px;letter-spacing:-.02em;font-weight:800}
+.hero h1 em{font-style:normal;color:var(--yel)}
+.hero p.lead{font-size:18px;opacity:.92;margin:0 0 26px;max-width:34em}
+.cta{display:flex;gap:10px;flex-wrap:wrap}
+.btn{display:inline-block;border:0;border-radius:12px;padding:14px 22px;font-size:17px;font-weight:800;cursor:pointer;text-decoration:none;text-align:center}
+.btn.y{background:var(--yel);color:var(--ink);box-shadow:0 6px 0 #d9a84a}
+.btn.y:hover{transform:translateY(1px);box-shadow:0 5px 0 #d9a84a}
+.btn.o{background:transparent;color:#fff;border:2px solid rgba(255,255,255,.6)}
+.btn.k{background:var(--ink);color:#fff}
+.btn.w{background:#fff;color:var(--ink);border:1.5px solid var(--line)}
+.tiny{font-size:13px;opacity:.8;margin-top:12px}
+.phone{position:relative;justify-self:center}
+.phone img{width:300px;border-radius:26px;border:8px solid #0f2347;box-shadow:0 24px 50px rgba(0,0,0,.35);display:block}
+.phone .ggs{position:absolute;left:-46px;bottom:-12px;width:104px;border:0;box-shadow:none;border-radius:0;filter:drop-shadow(0 6px 10px rgba(0,0,0,.25))}
+.bubble{position:absolute;right:-18px;top:24px;background:#fff;color:var(--ink);font-weight:800;font-size:14px;border-radius:14px;padding:8px 12px;box-shadow:0 8px 20px rgba(0,0,0,.25);transform:rotate(3deg)}
+
+section{padding:64px 0}
+section h2{font-size:clamp(24px,3vw,32px);line-height:1.3;margin:0 0 10px;letter-spacing:-.02em;color:var(--ink)}
+section .sub{color:var(--sub);margin:0 0 28px;max-width:42em}
+
+/* 카드 공통 */
+.cards{display:grid;gap:16px}
+.c2{grid-template-columns:repeat(2,1fr)}.c3{grid-template-columns:repeat(3,1fr)}.c4{grid-template-columns:repeat(4,1fr)}
+.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:20px;box-shadow:0 2px 0 rgba(31,58,104,.05)}
+.card .ic{font-size:30px;line-height:1;margin-bottom:10px}
+.card h3{margin:0 0 6px;font-size:18px;color:var(--ink)}
+.card p{margin:0;color:var(--sub);font-size:15px}
+
+/* 불편 */
+.pain{background:#fff}
+.pain .card{background:#fff8f6;border-color:#f3d2cb}
+.pain .card h3{color:var(--red)}
+.verdict{margin-top:24px;background:var(--ink);color:#fff;border-radius:16px;padding:22px 24px;font-size:19px;display:flex;gap:14px;align-items:center}
+.verdict img{width:64px;flex:none}
+.verdict b{color:var(--yel)}
+
+/* 기능: 그림 카드 */
+.shot{background:#fff;border:1px solid var(--line);border-radius:18px;overflow:hidden;display:flex;flex-direction:column}
+.shot .pic{background:#e9eef7;height:300px;overflow:hidden;display:flex;justify-content:center;align-items:flex-start;padding-top:14px}
+.shot .pic img{width:78%;border-radius:12px;box-shadow:0 8px 20px rgba(31,58,104,.18)}
+.shot .pic.wide{align-items:center;padding:14px}
+.shot .pic.wide img{width:100%}
+.shot .tx{padding:16px 18px 20px}
+.shot .no{display:inline-block;background:var(--yel);color:var(--ink);font-weight:800;border-radius:20px;padding:1px 10px;font-size:13px;margin-bottom:6px}
+.shot h3{margin:0 0 4px;font-size:19px;color:var(--ink)}
+.shot p{margin:0;color:var(--sub);font-size:15px}
+
+/* 쓰임 */
+.use .card{text-align:center}
+.use .card .ic{font-size:36px}
+
+/* 학기 초 */
+.year{background:var(--yel2)}
+.year .card{border:2px solid #f1d58a}
+.year .card .tag{display:inline-block;background:var(--ink);color:#fff;border-radius:6px;font-size:12px;padding:1px 8px;margin-bottom:8px}
+.year .big{margin-top:22px;font-size:20px;font-weight:800;color:var(--ink);text-align:center}
+
+/* 어디서나 */
+.any .card{display:flex;gap:16px;align-items:flex-start}
+.any .card .ic{font-size:40px;margin:0}
+
+/* 안심 */
+.safe .card{border-left:5px solid var(--grn)}
+.safe .card h3{color:var(--grn)}
+
+/* 시작 */
+.start{background:#fff}
+.start ol{counter-reset:s;list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.start li{counter-increment:s;background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:16px;font-size:15px}
+.start li:before{content:counter(s);display:inline-grid;place-items:center;width:32px;height:32px;border-radius:50%;background:var(--yel);color:var(--ink);font-weight:800;margin-bottom:8px}
+.start li b{display:block;margin-bottom:4px;color:var(--ink)}
+.final{margin-top:30px;background:var(--ink);border-radius:20px;padding:30px 24px;text-align:center;color:#fff}
+.final h3{margin:0 0 6px;font-size:24px}
+.final p{margin:0 0 18px;opacity:.9}
+.final .cta{justify-content:center}
+.note{font-size:13px;color:var(--sub);margin-top:12px}
+footer{background:#14284a;color:#c9d6ea;font-size:13px;padding:26px 0;text-align:center}
+
+/* 아래 고정 버튼(폰) */
+.stick{position:fixed;left:12px;right:12px;bottom:12px;z-index:9;display:none}
+.stick .btn{display:block;width:100%}
+
+@media (max-width:900px){
+  .hero .wrap{grid-template-columns:1fr}
+  .phone{margin-top:10px}
+  .c3,.c4{grid-template-columns:repeat(2,1fr)}
+  .start ol{grid-template-columns:repeat(2,1fr)}
+}
+@media (max-width:600px){
+  section{padding:46px 0}
+  .c2,.c3,.c4{grid-template-columns:1fr}
+  .start ol{grid-template-columns:1fr}
+  .phone img{width:250px}
+  .phone .ggs{left:-24px;width:84px}
+  .bubble{right:-6px}
+  .verdict{flex-direction:column;text-align:center}
+  .stick{display:block}
+  footer{padding-bottom:84px}
+}
+</style>
+</head>
+<body>
+
+<!-- ① 첫 화면 -->
+<header class="hero">
+  <div class="wrap">
+    <div>
+      <div class="brand"><img src="dodi.jpg" alt="도디쌤"><div><span>현직 교사가 만든</span><strong>도디쌤의 규정줍줍</strong></div></div>
+      <h1>두꺼운 규정집,<br>이제 넘기지 말고<br><em>줍줍</em>하세요.</h1>
+      <p class="lead">"출석정지 며칠까지?"처럼 물으면, 선생님이 넣은 규정집·길라잡이·계획서에서 <b>원문을 쪽수와 함께</b> 바로 찾아 드립니다.</p>
+      <div class="cta">
+        <a class="btn y" href="../gyujeong/?demo">🧪 체험판 바로 해 보기</a>
+        <a class="btn o" href="../gyujeong/">진짜 줍줍이 시작하기</a>
+      </div>
+      <div class="tiny">무료 · 로그인 없음 · 설치 없이 바로 · PC·폰·태블릿</div>
+    </div>
+    <div class="phone">
+      <img src="img/s1_answer.jpg" alt="질문하면 원문과 쪽수가 나오는 화면">
+      <img class="ggs" src="ggumsong.png" alt="꿈송이">
+      <div class="bubble">📘 근거 p.3 찾았어요!</div>
+    </div>
+  </div>
+</header>
+
+<!-- ② 불편 -->
+<section class="pain">
+  <div class="wrap">
+    <h2>이런 적, 한 번쯤 있으시죠</h2>
+    <p class="sub">규정은 두껍고, 업무는 많고, 근거는 늘 급하게 필요합니다.</p>
+    <div class="cards c4">
+      <div class="card"><div class="ic">📚</div><h3>매일 넘기는 규정집</h3><p>"이거 규정에 어떻게 돼 있더라?" 하며 두꺼운 책자를 오늘도 처음부터 넘깁니다.</p></div>
+      <div class="card"><div class="ic">😰</div><h3>상담 중 진땀</h3><p>학부모가 "근거가 뭐예요?" 하는데 그 조항이 몇 쪽인지 바로 안 떠오릅니다.</p></div>
+      <div class="card"><div class="ic">🗂</div><h3>펼쳐 놓은 길라잡이</h3><p>회의 준비하려고 학폭·생교위·교권 길라잡이를 몇 권씩 책상에 펼쳐 놓습니다.</p></div>
+      <div class="card"><div class="ic">🔎</div><h3>Ctrl+F의 한계</h3><p>파일마다 따로 찾아야 하고, "휴대폰"으로 찾으면 "휴대전화"는 안 나옵니다.</p></div>
+    </div>
+    <div class="verdict"><img src="ggumsong.png" alt=""><div>그래서 만들었습니다. <b>한 번 넣어 두면, 그다음부터는 묻기만 하세요.</b></div></div>
+  </div>
+</section>
+
+<!-- ③ 이렇게 해결 -->
+<section>
+  <div class="wrap">
+    <h2>물으면, 원문으로 답합니다</h2>
+    <p class="sub">AI처럼 지어낸 답이 아니라, 선생님이 넣은 문서에 <span class="mark">적힌 그대로</span>를 쪽수와 함께 보여 드립니다.</p>
+    <div class="cards c3">
+      <div class="shot"><div class="pic"><img src="img/s1_answer.jpg" alt="질문 결과 화면"></div>
+        <div class="tx"><span class="no">1 · 물으면 바로</span><h3>원문 + 쪽수 + 책자 이름</h3><p>"며칠까지?"는 기간을, "몇 명?"은 인원을 알아듣고 답이 될 만한 곳을 초록색으로 짚어 줍니다.</p></div></div>
+      <div class="shot"><div class="pic"><img src="img/s2_pdf.jpg" alt="원문 PDF가 그 쪽으로 펼쳐진 화면"></div>
+        <div class="tx"><span class="no">2 · 원문 그대로</span><h3>원본 PDF가 그 쪽으로</h3><p>[📄 원문 PDF]를 누르면 원본이 그 쪽으로 펼쳐지고, 찾은 낱말에 노란 형광펜이 칠해집니다.</p></div></div>
+      <div class="shot"><div class="pic wide"><img src="img/s4_printout.jpg" alt="찾은 부분만 잘라 인쇄한 결과"></div>
+        <div class="tx"><span class="no">3 · 바로 인쇄</span><h3>찾은 부분만 잘라 인쇄</h3><p>형광펜 부분과 앞뒤 몇 줄만, 그 쪽만, 장 전체 중 골라 인쇄. 회의·상담 자료가 바로 나옵니다.</p></div></div>
+    </div>
+    <div class="cards c4" style="margin-top:16px">
+      <div class="card"><div class="ic">🎯</div><h3>내 업무만 커스텀</h3><p>내가 넣은 규정만 모아 보는 나만의 규정집. 제목·부제도 바꿀 수 있어요.</p></div>
+      <div class="card"><div class="ic">📑</div><h3>색인·목차</h3><p>넣은 문서의 목차와 가나다순 찾아보기가 저절로 만들어집니다.</p></div>
+      <div class="card"><div class="ic">⭐</div><h3>저장함</h3><p>자주 보는 조항은 별표로 모아 두고 메모까지. 최근 검색도 남아요.</p></div>
+      <div class="card"><div class="ic">🔁</div><h3>같은 뜻 낱말</h3><p>휴대폰=휴대전화, 학폭=학교폭력처럼 다르게 물어도 함께 찾습니다.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ④ 이럴 때 -->
+<section class="use" style="background:#fff">
+  <div class="wrap">
+    <h2>이럴 때 꺼내 쓰세요</h2>
+    <p class="sub">필요한 순간, 근거를 3초 만에.</p>
+    <div class="cards c4">
+      <div class="card"><div class="ic">👪</div><h3>학부모 상담</h3><p>"근거가 뭐예요?"에 조항과 쪽수로 바로 답합니다.</p></div>
+      <div class="card"><div class="ic">🧾</div><h3>회의 때 근거 제시</h3><p>회의 중 질문이 나와도 그 자리에서 원문을 띄웁니다.</p></div>
+      <div class="card"><div class="ic">🗂</div><h3>회의·위원회 준비</h3><p>필요한 조항만 찾아 인쇄해 자료로 씁니다.</p></div>
+      <div class="card"><div class="ic">⚖️</div><h3>사안 처리·계획서</h3><p>학폭·교권 사안, 계획서·공문 작성의 근거를 챙깁니다.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ⑤ 학기 초 -->
+<section class="year">
+  <div class="wrap">
+    <h2>학기 초 10분이면, 1년이 편합니다</h2>
+    <p class="sub">PDF로 끌어다 놓기만 하면 끝. 한글 파일은 [파일] → [PDF로 저장하기] 후 넣으세요.</p>
+    <div class="cards c3">
+      <div class="card"><span class="tag">학교</span><h3>🏫 학교 규정집</h3><p>학생생활인권규정, 학업성적관리규정, 각종 학교 내규</p></div>
+      <div class="card"><span class="tag">길라잡이</span><h3>📘 학폭·교권·생교위</h3><p>학교폭력 사안처리 가이드북, 교육활동 보호, 학생생활교육위원회 운영 지침</p></div>
+      <div class="card"><span class="tag">내 업무</span><h3>🗃 내 업무 문서</h3><p>담당 업무 지침, 사업 계획서, 연수 자료, 교육청 공문 붙임</p></div>
+    </div>
+    <div class="big">한 번 넣어 두면, 그다음부터는 <span class="mark">묻기만</span> 하세요 🙌</div>
+  </div>
+</section>
+
+<!-- ⑥ 어디서나 -->
+<section class="any">
+  <div class="wrap">
+    <h2>늘 곁에, 어디서나</h2>
+    <p class="sub">직관적인 화면이라 설명서가 필요 없습니다.</p>
+    <div class="cards c2">
+      <div class="card"><div class="ic">🖥</div><div><h3>PC: 작업표시줄에 꽂아 두기</h3><p>화면 맨 아래 작업표시줄의 꿈송이를 누르면 바로 열립니다. 한글·나이스를 쓰다가도 곧장 꺼내 보세요.</p></div></div>
+      <div class="card"><div class="ic">📱</div><div><h3>폰·태블릿: 홈 화면에 추가</h3><p>상담실·회의실에서도 폰으로 바로. 기기마다 저장이 따로라 PDF를 한 번씩 넣어 두면 됩니다.</p></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ⑦ 안심 -->
+<section class="safe" style="background:#fff">
+  <div class="wrap">
+    <h2>믿고 쓸 수 있어요</h2>
+    <div class="cards c3">
+      <div class="card"><h3>✅ 지어낸 답이 없어요</h3><p>늘 문서에 적힌 원문을 쪽수와 함께 보여 줍니다. 답은 원문으로 확인하세요.</p></div>
+      <div class="card"><h3>🔒 내 기기에만 저장</h3><p>넣은 문서는 어디로도 보내지 않습니다. 서버도 로그인도 없습니다.</p></div>
+      <div class="card"><h3>🆓 무료</h3><p>현직 교사가 선생님들 시간을 아껴 드리려고 만든 프로그램입니다.</p></div>
+    </div>
+    <p class="note">※ 학생 이름·개인정보가 든 문서는 넣지 마세요. 공용 PC보다 내 업무 PC에서 쓰시길 권합니다.</p>
+  </div>
+</section>
+
+<!-- ⑧ 시작 -->
+<section class="start">
+  <div class="wrap">
+    <h2>시작은 이렇게</h2>
+    <p class="sub">처음 한 번만 하면 됩니다.</p>
+    <ol>
+      <li><b>크롬에서 열기</b>PC 크롬(또는 폰 브라우저)에서 진짜 줍줍이 주소를 엽니다. 카톡에서 바로 누르면 설치가 안 돼요.</li>
+      <li><b>작업표시줄에 꽂기</b>입력창 위 [📌] 띠를 누르고 꿈송이 안내대로 따라 합니다. 폰은 홈 화면에 추가.</li>
+      <li><b>PDF 넣기</b>내 업무 규정집·길라잡이를 끌어다 놓습니다. 같은 문서는 알아서 걸러요.</li>
+      <li><b>묻기</b>"출석정지 며칠까지?"처럼 물어보세요. [📄 원문 PDF]와 🖨 인쇄도 눌러 보세요.</li>
+    </ol>
+    <div class="final">
+      <h3>먼저 눌러 보세요 👇</h3>
+      <p>가상 규정집이 미리 들어 있어 아무것도 넣지 않고 바로 체험할 수 있어요.</p>
+      <div class="cta">
+        <a class="btn y" href="../gyujeong/?demo">🧪 체험판 바로 해 보기</a>
+        <a class="btn o" href="../gyujeong/">진짜 줍줍이 시작하기</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>도디쌤의 규정줍줍 · 규정·길라잡이·각종 계획서에서 근거를 찾아 드립니다.<br>© 김정환 · M.A.D.T (Moral And Digital Teacher)</footer>
+
+<div class="stick"><a class="btn y" href="../gyujeong/?demo">🧪 체험판 바로 해 보기</a></div>
+</body>
+</html>

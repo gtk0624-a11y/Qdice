@@ -685,7 +685,7 @@ return {itemsToLines,splitSheet,buildPages,chunkPages,compact,parseSyn,queryGrou
 /* ===== 화면 동작 ===== */
 (function(){
 'use strict';
-const APP_VER='v1.9';
+const APP_VER='v1.9.1';
 const PACK_ID='dodi-gyujeong';
 
 /* ===== [자주 고칠 곳 ①] 기본 동의어 사전: 한 줄에 한 묶음 ===== */
@@ -896,31 +896,8 @@ function initial(s){ const c=s.charCodeAt(0); if(c>=0xAC00&&c<=0xD7A3){ return '
 
 /* ===== 체험판 소개글 ===== */
 function introHTML(){
-  return '<div class="intro">'
-  +'<div class="ih"><img src="ggumsong.png" alt="꿈송이"><div><div class="ik">도디쌤의</div><div class="it">규정줍줍</div><div class="is">두꺼운 규정집, 이제 넘기지 말고 <b>줍줍</b>하세요</div></div></div>'
-  +'<div class="isec"><div class="ist">😩 이런 적 있으시죠?</div><ul>'
-  +'<li>"이거 규정에 어떻게 돼 있더라?" 하며 <b>두꺼운 규정집</b>을 매일 넘겨 본 적</li>'
-  +'<li>학부모 상담 중에 <b>근거 조항</b>이 바로 안 떠올라 진땀 흘린 적</li>'
-  +'<li>회의 자료 만들다 학폭·생교위·교권 길라잡이를 <b>몇 권씩 펼쳐 놓은</b> 적</li></ul></div>'
-  +'<div class="isec"><div class="ist">✨ 규정줍줍이 해결해요</div><div class="igrid">'
-  +'<div><b>💬 물으면 바로</b>"출석정지 며칠까지?"처럼 물으면 원문을 <u>쪽수와 함께</u></div>'
-  +'<div><b>📄 원문 그대로</b>원본 PDF가 그 쪽으로 펼쳐지고 찾은 곳에 형광펜</div>'
-  +'<div><b>🖨 바로 인쇄</b>찾은 부분만 잘라 인쇄 — 회의·상담 자료로 끝</div>'
-  +'<div><b>🎯 내 업무만</b>내가 넣은 규정만 모아 보는 나만의 커스텀 규정집</div>'
-  +'<div><b>📌 늘 곁에</b>PC 작업표시줄에 꽂아 두고 꿈송이만 누르면 열림</div>'
-  +'<div><b>📱 어디서나</b>폰·태블릿·PC 어디서든 열려요. 직관적이라 설명서가 필요 없어요</div>'
-  +'</div></div>'
-  +'<div class="isec"><div class="ist">🙋 이럴 때 써요</div><div class="itag"><span>👪 학부모 상담</span><span>🧾 회의 때 근거 제시</span><span>🗂 회의·위원회 준비</span><span>📝 계획서·공문 작성</span><span>⚖️ 학폭·교권 사안 처리</span></div></div>'
-  +'<div class="isec ibig"><div class="ist">🗓 학기 초 10분이면 1년이 편해요</div>'
-  +'<ol><li>학교 <b>학생생활인권규정</b>·<b>학업성적관리규정</b></li><li><b>학교폭력</b>·<b>교권</b>·<b>생활교육위원회</b> 길라잡이</li><li><b>내 업무</b> 관련 지침·계획서</li></ol>'
-  +'<div class="isub">PDF로 끌어다 놓기만 하면 끝. 그다음부터는 묻기만 하세요.</div></div>'
-  +'<div class="isec"><div class="ist">✅ 믿고 쓸 수 있어요</div><ul>'
-  +'<li><b>AI처럼 지어낸 답이 없어요.</b> 늘 문서에 적힌 원문을 쪽수와 함께 보여 줘요.</li>'
-  +'<li>무료 · 로그인 없음 · 넣은 문서는 <b>내 기기에만</b> 저장되고 어디로도 보내지 않아요.</li>'
-  +'<li>폰·태블릿·PC는 저장이 따로라, <b>기기마다 한 번씩</b> PDF를 넣어 두면 돼요.</li></ul></div>'
-  +'<div class="icta">👇 아래 <b>예시 질문</b>을 눌러 바로 체험해 보세요<div class="row" style="justify-content:center"><a class="b" href="./" style="text-decoration:none">진짜 줍줍이 시작하기 →</a></div></div>'
-  +'<div class="icopy">© 김정환 · M.A.D.T (Moral And Digital Teacher)</div>'
-  +'</div>';
+  return '<div class="hello"><img src="ggumsong.png" alt="꿈송이"><div>안녕하세요, <b>꿈송이</b>예요. 여기는 <b>체험판</b>이라 <b>가상 규정집</b>이 미리 들어 있어요. 아래 예시 질문을 눌러 바로 써 보세요.</div></div>'
+   +'<div class="row"><a class="b g s" href="../gyujeong-demo/" style="text-decoration:none">📖 규정줍줍 소개 보기</a><a class="b s" href="./" style="text-decoration:none">진짜 줍줍이 시작하기 →</a></div>';
 }
 
 /* ===== 제목·부제 바꾸기 (이 컴퓨터에만 저장) ===== */
@@ -1327,7 +1304,7 @@ function hello(){
   let h='<div class="hello"><img src="ggumsong.png" alt="꿈송이"><div>안녕하세요, <b>꿈송이</b>예요. '
     +(has?'넣어 둔 문서 <b>'+S.docs.length+'개</b>에서 찾아 드릴게요. 궁금한 것을 물어보세요.':'선생님 업무의 <b>규정집·길라잡이</b>를 PDF로 넣어 주시면, 질문에 맞는 곳을 <b>원문 그대로 쪽수와 함께</b> 찾아 드려요. 이렇게 시작해요.')+'</div></div>';
   h+=guideHTML();
-  if(!has && !DEMO){ h+='<div class="w" style="margin-top:8px">아직 넣을 PDF가 없나요? <a href="./?demo" target="_blank" rel="noopener"><b>🧪 체험판</b></a>에서 가상 규정집으로 먼저 써 볼 수 있어요.</div>'; }
+  if(!has && !DEMO){ h+='<div class="w" style="margin-top:8px">아직 넣을 PDF가 없나요? <a href="./?demo" target="_blank" rel="noopener"><b>🧪 체험판</b></a>에서 가상 규정집으로 먼저 써 볼 수 있어요. (<a href="../gyujeong-demo/" target="_blank" rel="noopener">소개 보기</a>)</div>'; }
   if(!has){ h+='<div class="row"><button class="b" type="button" data-act="pick">📄 PDF 넣기</button>'+((!standalone()&&!isMobile&&!isKakao)?'<button class="b g" type="button" data-act="pin" id="helloInst">📌 작업표시줄(화면 맨 아래)에 꽂기</button>':'')+'</div>'; }
   else if(!standalone() && !isMobile && !isKakao) h+='<div class="row"><button class="b g s" type="button" data-act="pin" id="helloInst">📌 작업표시줄(화면 맨 아래)에 꽂기</button><button class="b g s" type="button" data-act="guide">📖 사용법</button></div>';
   else h+='<div class="row"><button class="b g s" type="button" data-act="guide">📖 사용법</button></div>';
