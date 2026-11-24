@@ -98,7 +98,7 @@ function ncSave(e) {
 }
 function ncClosed() {
   const d = document.getElementById('ncpeek'); if (d) { try { ncFlush(d); } catch (e) { } d.remove(); }
-  if (NCP) { const i = S.items.find(x => x.id === NCP.id); if (i && !i.title) { S.items = S.items.filter(x => x !== i); } }
+  if (NCP) { const i = S.items.find(x => x.id === NCP.id); if (i && !i.title) { const m = String(i.memo || '').trim(); if (m) i.title = m.split('\n')[0].slice(0, 60); else S.items = S.items.filter(x => x !== i); } }
   NCP = null; commit();
 }
 Object.assign(A, {
