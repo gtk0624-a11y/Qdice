@@ -6,12 +6,14 @@ function ncKindSel(i) {
   const base = [['event', '일정'], ['todo', '할 일']].concat(cusKinds().map(k => ['c:' + k.n, k.n])), cur = ncKindVal(i);
   return base.map(([v, n]) => `<option value="${esc(v)}" ${v === cur ? 'selected' : ''}>${esc(n)}</option>`).join('');
 }
+function ncUrls(t) { return (String(t || '').match(/(?:https?:\/\/|www\.)[^\s<>"'）)]+/g) || []).map(u => u.replace(/[.,;]+$/, '')); }
+function ncLinks(t) { const U = ncUrls(t); return U.length ? U.map(u => { const h = /^www\./.test(u) ? 'https://' + u : u; let lab = u; try { lab = new URL(h).hostname.replace(/^www\./, ''); } catch (e) { } return `<a class="nclk" href="${esc(h)}" target="_blank" rel="noopener noreferrer" title="${esc(u)}">🔗 ${esc(lab)}</a>`; }).join('') : ''; }
 function ncCard(e) {
   const it = e.id ? S.items.find(x => x.id === e.id) : null, memo = it && it.memo ? String(it.memo).split('\n')[0] : '';
   const ck = it ? `<button class="ncck ${e.done ? 'on' : ''}" data-act="tog" data-id="${it.id}" aria-pressed="${!!e.done}" aria-label="완료 표시"></button>` : '';
   const pin = `<button class="ncpin" data-act="ncPin" ${e.note ? `data-note="${e.note}"` : it ? `data-id="${it.id}"` : `data-t="${esc(e.t)}" data-d="${e.date}"`} title="포스트잇으로 붙이기" aria-label="포스트잇으로 붙이기">📌</button>`;
   const att = e.note ? `data-act="ncOpen" data-note="${e.note}"` : it ? `data-act="ncOpen" data-id="${it.id}"` : `data-act="ncOpen" data-d="${e.date}"`;
-  return `<div class="ncard ${e.done ? 'dn' : ''}" ${att} role="button" tabindex="0"><div class="nct"><b>${esc(e.t)}</b>${pin}</div>${it ? `<div class="ncdn">${ck}<span>완료</span></div>` : ''}<div class="ncm"><i style="background:${NC_COL(e.kind)}">${esc(e.kind)}</i>${memo ? `<span>${esc(memo)}</span>` : ''}</div></div>`;
+  return `<div class="ncard ${e.done ? 'dn' : ''}" ${att} role="button" tabindex="0"><div class="nct"><b>${esc(e.t)}</b>${pin}</div>${it ? `<div class="ncdn">${ck}<span>완료</span></div>` : ''}<div class="ncm"><i style="background:${NC_COL(e.kind)}">${esc(e.kind)}</i>${memo ? `<span>${esc(memo.replace(/(?:https?:\/\/|www\.)\S+/g, '').trim())}</span>` : ''}${it && it.memo ? ncLinks(it.memo) : ''}</div></div>`;
 }
 function ncMonth() {
   const [Y, M] = UI.cal.split('-').map(Number), first = new Date(Y, M - 1, 1), n = new Date(Y, M, 0).getDate(), ev = allEvents(), by = {};
@@ -32,7 +34,7 @@ function ncMonth() {
   <div class="calh"><button class="btn sm" data-act="calMove" data-d="-1" aria-label="이전 달">‹</button><b class="calt">${Y}년 ${M}월</b><button class="btn sm" data-act="calMove" data-d="1" aria-label="다음 달">›</button><button class="btn sm" data-act="calMove" data-d="0">오늘</button></div>
   <div class="ncw">${['월', '화', '수', '목', '금', '토', '일'].map(d => `<span>${d}</span>`).join('')}</div><div class="ncg">${cells}</div>
   <h3 class="h3 ncdl">${md(UI.day)} (${DOW[new Date(UI.day + 'T00:00:00').getDay()]})</h3><div class="ncdl">${list}</div>
-  ${typeof dayMemoBox === 'function' ? dayMemoBox(UI.day) : ''}
+  ${typeof dayMemoBox === 'function' ? dayMemoBox(UI.day) : ''}<div class="nclinks" id="ncdmlinks">${ncLinks((S.dayMemo || {})[UI.day])}</div>
   ${ncNotes(UI.day)}
   <form class="inl" data-form="evt"><input name="title" placeholder="일정·할 일 추가" required aria-label="내용"><select name="cat" aria-label="종류" data-cus="kind">${cusKindOpts(false, 'event')}</select><button class="btn">추가</button></form>
   `;
@@ -59,12 +61,13 @@ let NCP = null;
 function ncPeek(id, isNew) {
   const i = S.items.find(x => x.id === id); if (!i) return;
   NCP = { id, isNew: !!isNew }; let d = document.getElementById('ncpeek');
-  if (!d) { d = document.createElement('dialog'); d.id = 'ncpeek'; d.className = 'dlg ncpeek'; document.body.appendChild(d); d.addEventListener('close', ncClosed); d.addEventListener('change', ncSave); d.addEventListener('click', e => { if (e.target === d) d.close(); }); }
+  if (!d) { d = document.createElement('dialog'); d.id = 'ncpeek'; d.className = 'dlg ncpeek'; document.body.appendChild(d); d.addEventListener('close', ncClosed); d.addEventListener('change', ncSave); d.addEventListener('input', e => { if (e.target.name === 'memo') { const b = d.querySelector('.nclinks'); if (b) b.innerHTML = ncLinks(e.target.value) || '<span class="mu">메모에 주소(https://…)를 쓰면 여기에 바로가기가 생깁니다.</span>'; } }); d.addEventListener('click', e => { if (e.target === d) d.close(); }); }
   d.innerHTML = `<div class="ncph"><input name="title" class="nctitle" value="${esc(i.title)}" placeholder="제목 없음" aria-label="제목"><button class="btn sm" data-ncclose="1" aria-label="닫기">✕</button></div>
   <div class="ncprop"><label>구분</label><select name="kind">${ncKindSel(i)}</select></div>
   <div class="ncprop"><label>날짜</label><span><input type="date" name="date" value="${esc(i.date || '')}"> ~ <input type="date" name="end" value="${esc(i.end || '')}" aria-label="끝 날짜"></span></div>
   <div class="ncprop"><label>완료</label><input type="checkbox" name="done" ${i.done ? 'checked' : ''} aria-label="완료"></div>
-  <div class="ncprop top"><label>메모</label><textarea name="memo" rows="5" placeholder="메모를 적으세요">${esc(i.memo || '')}</textarea></div>
+  <div class="ncprop top"><label>메모</label><textarea name="memo" rows="5" placeholder="메모를 적으세요 (주소를 쓰면 아래에 바로가기가 생깁니다)">${esc(i.memo || '')}</textarea></div>
+  <div class="ncprop"><label>링크</label><div class="nclinks">${ncLinks(i.memo) || '<span class="mu">메모에 주소(https://…)를 쓰면 여기에 바로가기가 생깁니다.</span>'}</div></div>
   <div class="ncrep"><button class="btn sm" data-act="ncCopy" data-id="${i.id}">📋 복사</button><span>매주 반복 복사: <input type="number" name="rep" min="1" max="40" value="4" style="width:52px"> 주</span><button class="btn sm" data-act="ncRepeat" data-id="${i.id}">🔁 반복 만들기</button></div>
   <div class="btns"><button class="btn" data-act="ncPin" data-id="${i.id}">📌 포스트잇으로 붙이기</button><button class="btn" data-ncdel="1">🗑 삭제</button><button class="btn pri" data-ncclose="1">닫기</button></div>`;
   d.onclick = e => { if (e.target === d) d.close(); if (e.target.closest('[data-ncclose]')) d.close(); if (e.target.closest('[data-ncdel]')) sure('이 일정을 삭제할까요?', () => { NCP = null; S.items = S.items.filter(x => x.id !== id); d.close(); commit(); }); };
@@ -106,7 +109,8 @@ Object.assign(A, {
   ncView(el) { UI.calv = el.dataset.v; render(); },
   ncAdd(el, e) { e && e.stopPropagation(); ncMake(el.dataset.d); },
   ncNew() { ncMake(UI.day || today()); },
-  ncOpen(el) {
+  ncOpen(el, e) {
+    if (e && e.target && e.target.closest && e.target.closest('a[href]')) return;
     if (el.dataset.note) { location.hash = '#/note/' + el.dataset.note; return; }
     if (el.dataset.id) { const i = S.items.find(x => x.id === el.dataset.id); if (i) return ncPeek(i.id); }
     if (el.dataset.d) dayOpen(el.dataset.d);
@@ -162,3 +166,7 @@ function clkDock() {
   const _c = clkDraw; clkDraw = function () { const r = _c.apply(this, arguments); clkDock(); return r; };
   setTimeout(() => { clkDraw(); }, 400); setInterval(clkDock, 1500);
 })();
+
+/* 날짜 메모에 주소를 쓰면 바로가기 갱신 */
+document.addEventListener('input', e => { const t = e.target; if (!t.dataset || !t.dataset.dmemo) return; const b = document.getElementById('ncdmlinks'); if (b) b.innerHTML = ncLinks(t.value); });
+document.addEventListener('click', e => { if (e.target.closest && e.target.closest('a.nclk')) e.stopPropagation(); }, true);

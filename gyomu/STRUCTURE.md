@@ -478,3 +478,6 @@ service cloud.firestore {
 
 ## v136
 - 「이번 주 기한」(ncSoon)을 캘린더 토글 밑에 항상 표시(업무들 안 중복 제거). 일정 복사(ncCopy)→날짜 칸 📋 붙여넣기(ncPaste), 편집창 「매주 반복 복사」(ncRepeat), 그날 기록 🗑 삭제(ncNoteDel).
+
+## v137
+- 메모의 주소(http/www)를 🔗 바로가기 칩으로: 카드·편집창(입력 즉시 갱신)·날짜 메모 밑(ncLinks/ncUrls, js/ncal.js). 링크 클릭은 capture 단계에서 막아 data-act 가 가로채지 않게 함.

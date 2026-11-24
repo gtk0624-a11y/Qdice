@@ -1035,3 +1035,4 @@ body.clk-docked.hasclk.hascc{padding-top:0!important}
 .ncs{display:flex;gap:10px;align-items:baseline;padding:5px 2px;border-top:1px dashed #b9ad94;cursor:pointer;font-size:14px}.ncs:hover{background:#fff0c4}.ncs .ddb{min-width:34px}.ncs .tl{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ncrep{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:10px 0;padding:8px;background:var(--pl);border-radius:8px;font-size:13px}
 .ncpaste{opacity:1!important}
+.nclinks{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}.nclk{display:inline-block;background:#e4efff;border:1px solid #2f5fb3;border-radius:14px;padding:2px 10px;font-size:13px;color:#1a3f86!important;text-decoration:none;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.nclk:hover{background:#cfe2ff}
