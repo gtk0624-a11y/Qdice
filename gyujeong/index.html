@@ -685,7 +685,7 @@ return {itemsToLines,splitSheet,buildPages,chunkPages,compact,parseSyn,queryGrou
 /* ===== 화면 동작 ===== */
 (function(){
 'use strict';
-const APP_VER='v1.9.1';
+const APP_VER='v1.9.2';
 const PACK_ID='dodi-gyujeong';
 
 /* ===== [자주 고칠 곳 ①] 기본 동의어 사전: 한 줄에 한 묶음 ===== */
@@ -897,7 +897,7 @@ function initial(s){ const c=s.charCodeAt(0); if(c>=0xAC00&&c<=0xD7A3){ return '
 /* ===== 체험판 소개글 ===== */
 function introHTML(){
   return '<div class="hello"><img src="ggumsong.png" alt="꿈송이"><div>안녕하세요, <b>꿈송이</b>예요. 여기는 <b>체험판</b>이라 <b>가상 규정집</b>이 미리 들어 있어요. 아래 예시 질문을 눌러 바로 써 보세요.</div></div>'
-   +'<div class="row"><a class="b g s" href="../gyujeong-demo/" style="text-decoration:none">📖 규정줍줍 소개 보기</a><a class="b s" href="./" style="text-decoration:none">진짜 줍줍이 시작하기 →</a></div>';
+   +'<div class="row"><a class="b g s" href="../gyujeong-demo/" style="text-decoration:none">📖 규정줍줍 소개 보기</a><span class="b s" style="cursor:default">📮 정식판은 곧 공개돼요</span></div>';
 }
 
 /* ===== 제목·부제 바꾸기 (이 컴퓨터에만 저장) ===== */
@@ -1422,7 +1422,7 @@ window.addEventListener('appinstalled',()=>{ S.installEvt=null; renderInstall();
   showPin();
   if(DEMO){
     const w=$('warn'); w.hidden=false; w.className='demo';
-    w.innerHTML='🧪 <b>체험판</b>이에요. 가상 규정집이 미리 들어 있어요. 여기서 한 일은 <b>진짜 줍줍이와 섞이지 않아요.</b><div class="row" style="margin-top:5px"><a class="b s" href="./" style="text-decoration:none">진짜 줍줍이 시작하기 →</a><button class="b g s" type="button" data-act="demoReset">체험판 처음으로</button></div>';
+    w.innerHTML='🧪 <b>체험판</b>이에요. 가상 규정집이 미리 들어 있어요. 마음껏 눌러 보세요.<div class="row" style="margin-top:5px"><span class="b s" style="cursor:default">📮 정식판은 곧 공개돼요</span><button class="b g s" type="button" data-act="demoReset">체험판 처음으로</button></div>';
   }
   if(DEMO) bot(introHTML()); else hello();
   if(DEMO){
