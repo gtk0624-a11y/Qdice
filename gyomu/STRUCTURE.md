@@ -455,3 +455,6 @@ service cloud.firestore {
 
 ## v127
 - 캘린더 카드·편집창·날짜 목록에 📌(포스트잇으로 붙이기) 추가: `A.ncPin`(js/ncal.js). 일정/기록(📝)/자동 일정 모두 가능, 제목+날짜가 S.postits 로 들어감.
+
+## v128 캘린더 중심 오늘 화면
+- `todayView` 를 감싸(js/ncal.js) 위=노션식 월 캘린더(`ncMonth`), 아래=「업무들」 토글(`details.ncwork`, 열림 상태 UI.ncwork)에 기존 게시판 줄. 카드에 ☑완료 줄 추가.

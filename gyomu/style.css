@@ -1002,3 +1002,9 @@ small.k-기록,.chp.k-기록{background:#d9f2e6}u.k-기록{color:#2f9a6a}
 @media(max-width:760px){.ncc{min-height:62px}.ncard{padding:2px 3px}.ncm{display:none}.nct b{font-size:10.5px}.ncck{display:none}.ncplus{display:none}.ncdl{display:block}.ncrow{grid-template-columns:20px minmax(0,1fr) auto}.ncrow .mu,.ncrow i{display:none}}
 .ncpin{margin-left:auto;flex:none;border:0;background:transparent;font-size:12px;padding:0 2px;cursor:pointer;opacity:0;line-height:1}.ncard:hover .ncpin,.ncpin:focus{opacity:1}
 @media(hover:none){.ncpin{opacity:.7}}@media(max-width:760px){.ncpin{display:none}}
+/* v128 캘린더 중심 오늘 화면 */
+.ncdn{display:flex;align-items:center;gap:6px;margin-top:4px;font-size:12px}.ncdn .ncck{margin:0}
+.ncard .nct b{font-size:13.5px}
+.ncwork{margin-top:18px;border-top:2px solid var(--ink);padding-top:6px}.ncwork>summary{cursor:pointer;font-size:18px;font-weight:700;padding:8px 2px;list-style:none}.ncwork>summary::-webkit-details-marker{display:none}.ncwork>summary::before{content:'▸ ';color:var(--mu)}.ncwork[open]>summary::before{content:'▾ '}.ncwork>summary small{font-size:12px;font-weight:400;color:var(--mu);margin-left:6px}
+.ncwork .mcal{display:none}.ncwork .spread{grid-template-columns:minmax(0,1fr)!important}.ncwork .pgL:empty{display:none}
+@media(max-width:760px){.ncdn{display:none}}

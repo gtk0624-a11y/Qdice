@@ -11,13 +11,13 @@ function ncCard(e) {
   const ck = it ? `<button class="ncck ${e.done ? 'on' : ''}" data-act="tog" data-id="${it.id}" aria-pressed="${!!e.done}" aria-label="완료 표시"></button>` : '';
   const pin = `<button class="ncpin" data-act="ncPin" ${e.note ? `data-note="${e.note}"` : it ? `data-id="${it.id}"` : `data-t="${esc(e.t)}" data-d="${e.date}"`} title="포스트잇으로 붙이기" aria-label="포스트잇으로 붙이기">📌</button>`;
   const att = e.note ? `data-act="ncOpen" data-note="${e.note}"` : it ? `data-act="ncOpen" data-id="${it.id}"` : `data-act="ncOpen" data-d="${e.date}"`;
-  return `<div class="ncard ${e.done ? 'dn' : ''}" ${att} role="button" tabindex="0"><div class="nct">${ck}<b>${esc(e.t)}</b>${pin}</div><div class="ncm"><i style="background:${NC_COL(e.kind)}">${esc(e.kind)}</i>${memo ? `<span>${esc(memo)}</span>` : ''}</div></div>`;
+  return `<div class="ncard ${e.done ? 'dn' : ''}" ${att} role="button" tabindex="0"><div class="nct"><b>${esc(e.t)}</b>${pin}</div>${it ? `<div class="ncdn">${ck}<span>완료</span></div>` : ''}<div class="ncm"><i style="background:${NC_COL(e.kind)}">${esc(e.kind)}</i>${memo ? `<span>${esc(memo)}</span>` : ''}</div></div>`;
 }
-function calView() {
+function ncMonth() {
   const [Y, M] = UI.cal.split('-').map(Number), first = new Date(Y, M - 1, 1), n = new Date(Y, M, 0).getDate(), ev = allEvents(), by = {};
   ev.forEach(e => (by[e.date] = by[e.date] || []).push(e));
   const v = UI.calv || 'm', tabs = `<div class="nctabs"><button class="${v === 'm' ? 'on' : ''}" data-act="ncView" data-v="m">📅 월간 캘린더</button><button class="${v === 'up' ? 'on' : ''}" data-act="ncView" data-v="up">⏳ 다가오는 내 업무</button><span class="grow"></span><button class="btn pri sm" data-act="ncNew">＋ 새로 만들기</button></div>`;
-  if (v === 'up') return `<div class="bh"><h2>캘린더</h2></div>${tabs}${ncUpcoming()}`;
+  if (v === 'up') return `${UI.view === 'cal' || location.hash.includes('cal') ? '<div class="bh"><h2>캘린더</h2></div>' : ''}${tabs}${ncUpcoming()}`;
   let cells = '';
   const off = (first.getDay() + 6) % 7;
   for (let i = 0; i < off; i++) cells += '<div class="ncc e"></div>';
@@ -34,8 +34,11 @@ function calView() {
   <h3 class="h3 ncdl">${md(UI.day)} (${DOW[new Date(UI.day + 'T00:00:00').getDay()]})</h3><div class="ncdl">${list}</div>
   ${typeof dayMemoBox === 'function' ? dayMemoBox(UI.day) : ''}
   <form class="inl" data-form="evt"><input name="title" placeholder="일정·할 일 추가" required aria-label="내용"><select name="cat" aria-label="종류" data-cus="kind">${cusKindOpts(false, 'event')}</select><button class="btn">추가</button></form>
-  ${typeof calAgenda === 'function' ? calAgenda(ev) : ''}
-  <div class="tools"><button class="btn pri" data-act="schedNeis">🏫 나이스에서 학사일정 전부 가져오기</button><label class="btn file">학사일정 파일 올리기<input type="file" id="schedUp" accept=".txt,.csv,.xlsx,.xls,.pdf,.hwp,.hwpx,.docx" hidden></label><button class="btn" data-act="schedPaste">학사일정 붙여넣기</button></div><p class="mu">학사일정(PDF·엑셀·텍스트, 또는 나이스·홈페이지에서 복사한 글)을 넣으면 날짜와 행사를 찾아 캘린더에 한꺼번에 넣어 드립니다.</p>`;
+  `;
+}
+function calView() {
+  return ncMonth() + (UI.calv === 'up' ? '' : `${typeof calAgenda === 'function' ? calAgenda(allEvents()) : ''}
+  <div class="tools"><button class="btn pri" data-act="schedNeis">🏫 나이스에서 학사일정 전부 가져오기</button><label class="btn file">학사일정 파일 올리기<input type="file" id="schedUp" accept=".txt,.csv,.xlsx,.xls,.pdf,.hwp,.hwpx,.docx" hidden></label><button class="btn" data-act="schedPaste">학사일정 붙여넣기</button></div><p class="mu">학사일정(PDF·엑셀·텍스트, 또는 나이스·홈페이지에서 복사한 글)을 넣으면 날짜와 행사를 찾아 캘린더에 한꺼번에 넣어 드립니다.</p>`);
 }
 function ncUpcoming() {
   const t = today(), its = S.items.filter(i => i.date && !i.done && !i.rep).sort((a, b) => a.date.localeCompare(b.date));
@@ -95,3 +98,13 @@ Object.assign(A, {
 });
 function ncMake(ds) { const i = { id: uid(), title: '', cat: 'event', date: ds, done: false }; S.items.push(i); UI.day = ds; ncPeek(i.id, true); }
 document.addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && e.target.matches && e.target.matches('.ncard,.ncrow')) { e.preventDefault(); e.target.click(); } });
+
+/* 오늘 화면 = 캘린더 중심. 기존 게시판 줄들은 달력 밑 「업무들」 토글로 */
+(function () {
+  const _today = todayView, MARK = '<div class="bh"><h2>오늘의 게시판</h2>';
+  todayView = function () {
+    const h = _today(), k = h.indexOf(MARK), top = k >= 0 ? h.slice(0, k) : '', rest = k >= 0 ? h.slice(k) : h;
+    return `${top}<div class="ncwrap">${ncMonth()}</div><details class="ncwork" ${UI.ncwork ? 'open' : ''}><summary>🗂 업무들 <small>게시판 줄 · 연수 · 예산 · 평가 등</small></summary>${rest}</details>`;
+  };
+  document.addEventListener('toggle', e => { if (e.target.classList && e.target.classList.contains('ncwork')) UI.ncwork = e.target.open; }, true);
+})();
