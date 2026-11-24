@@ -511,3 +511,6 @@ service cloud.firestore {
 
 ## v147
 - 노션처럼 단정한 외형: 캘린더·카드·토글·편집창의 굵은 선/그림자 제거, 얇은 회색선·옅은 그림자·파란 포인트(style.css 「v147」). 색 변경은 거기서.
+
+## v148
+- 「planner」 등 스킨(html[data-skin])의 굵은 테두리가 편집창·캘린더를 덮지 않도록 v147 규칙을 html[data-skin] 접두로 한 번 더 선언(style.css 끝).
