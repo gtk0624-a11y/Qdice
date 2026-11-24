@@ -213,3 +213,37 @@ function ncPageLinks() { const b = document.getElementById('ncpagelinks'); if (!
 document.addEventListener('input', e => { if (e.target && e.target.tagName === 'TEXTAREA') ncPageLinks(); });
 (function () { const _r2 = render; render = function () { const r = _r2.apply(this, arguments); ncPageLinks(); return r; }; })();
 setInterval(ncPageLinks, 2000);
+
+/* 카드를 마우스(또는 꾹 눌러서 손가락)로 끌어 다른 날짜 칸으로 옮기기 */
+(function () {
+  let g = null, ghost = null, hot = null, moved = false, tm = null;
+  const days = d => Math.round(new Date(d + 'T00:00:00') / 864e5);
+  const shift = (d, n) => { const x = new Date(d + 'T00:00:00'); x.setDate(x.getDate() + n); return ymd(x); };
+  const cellAt = (x, y) => { const e = document.elementFromPoint(x, y); return e && e.closest ? e.closest('.ncc[data-d]') : null; };
+  const clear = () => { if (hot) hot.classList.remove('ncdrop'); hot = null; if (ghost) ghost.remove(); ghost = null; document.body.classList.remove('ncdragging'); };
+  const begin = (e) => { moved = true; const r = g.card.getBoundingClientRect(); ghost = g.card.cloneNode(true); ghost.className += ' ncghost'; ghost.style.width = r.width + 'px'; ghost.style.left = e.clientX + 6 + 'px'; ghost.style.top = e.clientY + 6 + 'px'; document.body.appendChild(ghost); document.body.classList.add('ncdragging'); g.card.classList.add('ncsrc'); };
+  document.addEventListener('pointerdown', e => {
+    const c = e.target.closest && e.target.closest('.ncard'); if (!c || e.target.closest('button,a,input') || (e.button && e.button !== 0)) return;
+    if (!c.dataset.id && !c.dataset.note) return; const from = c.closest('.ncc'); if (!from) return;
+    g = { card: c, from: from.dataset.d, x: e.clientX, y: e.clientY, touch: e.pointerType === 'touch', on: false }; moved = false;
+    if (g.touch) tm = setTimeout(() => { if (g) { g.on = true; begin(e); if (navigator.vibrate) navigator.vibrate(15); } }, 380);
+  });
+  document.addEventListener('pointermove', e => {
+    if (!g) return;
+    if (!g.on) { if (Math.hypot(e.clientX - g.x, e.clientY - g.y) < 6) return; if (g.touch) { clearTimeout(tm); g = null; return; } g.on = true; begin(e); }
+    e.preventDefault(); ghost.style.left = e.clientX + 6 + 'px'; ghost.style.top = e.clientY + 6 + 'px';
+    const c = cellAt(e.clientX, e.clientY); if (c !== hot) { if (hot) hot.classList.remove('ncdrop'); hot = c; if (hot) hot.classList.add('ncdrop'); }
+  }, { passive: false });
+  const end = e => {
+    clearTimeout(tm); if (!g) return; const s = g; g = null;
+    if (!s.on) return; const c = cellAt(e.clientX, e.clientY); clear(); s.card.classList.remove('ncsrc');
+    if (!c || c.dataset.d === s.from) return;
+    const to = c.dataset.d, delta = days(to) - days(s.from);
+    if (s.card.dataset.note) { const n = (S.notes || []).find(x => x.id === s.card.dataset.note); if (n) { n.date = to; commit(); toast(`기록을 ${md(to)}로 옮겼습니다.`); } return; }
+    const it = S.items.find(x => x.id === s.card.dataset.id); if (!it) return;
+    if (it.rep) { toast('반복 일정은 카드를 눌러 날짜를 바꿔 주세요.'); return; }
+    it.date = shift(it.date, delta); if (it.end) it.end = shift(it.end, delta); commit(); toast(`${md(to)}로 옮겼습니다.`);
+  };
+  document.addEventListener('pointerup', end); document.addEventListener('pointercancel', e => { if (g && g.on) { clear(); g.card.classList.remove('ncsrc'); } g = null; clearTimeout(tm); });
+  document.addEventListener('click', e => { if (moved) { moved = false; if (e.target.closest && e.target.closest('.ncard')) { e.stopPropagation(); e.preventDefault(); } } }, true);
+})();
