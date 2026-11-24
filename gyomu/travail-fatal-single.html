@@ -1061,6 +1061,37 @@ details.ncsub{border:1.5px solid #5b5446;border-radius:8px;margin:8px 0;padding:
 .ncpin.ncx{margin-left:2px}.ncard:hover .ncx,.ncx:focus{opacity:1}@media(max-width:760px){.ncx{display:none}}
 textarea.nctitle{font:inherit;font-size:clamp(15px,2.6vw,19px);font-weight:700;line-height:1.35;resize:none;overflow:hidden;white-space:pre-wrap;word-break:break-all;overflow-wrap:anywhere;border:1px solid var(--rule2);border-radius:8px;padding:6px 8px;background:#fff}
 .ncph{align-items:flex-start}
+/* v147 노션처럼 단정하게: 얇은 선·옅은 그림자·부드러운 색 (공장 느낌 제거) */
+.nccal,.ncsoon,.ncwork,.ncsub{--nl:#e9e9e7;--nt:#37352f;--ng:#787774;--nh:#f7f6f3}
+details.ncwork,details.ncsoon{border:0!important;border-top:1px solid var(--nl)!important;border-radius:0;box-shadow:none!important;background:transparent!important;margin:14px 0 0;padding:0 2px 8px}
+.ncwork>summary,.nccal>summary,.ncsoon>summary{background:transparent!important;border:0!important;border-radius:6px!important;padding:8px 6px!important;margin:0!important;font-size:16px;font-weight:700;color:var(--nt)}
+.ncwork>summary:hover,.ncsoon>summary:hover{background:var(--nh)!important}
+.ncwork>summary small,.ncsoon>summary small{color:var(--ng);font-weight:400;font-size:12.5px}
+details.ncsub{border:1px solid var(--nl)!important;border-radius:8px;background:#fff;box-shadow:none}details.ncsub>summary{color:var(--nt);font-weight:600}
+.ncw span{font-size:12.5px!important;font-weight:500!important;color:var(--ng)!important;border-bottom:1px solid var(--nl)!important;padding:6px 4px!important}
+.ncg{border-left:1px solid var(--nl)!important;background:#fff!important}.ncg .ncc,.ncc{border-right:1px solid var(--nl)!important;border-bottom:1px solid var(--nl)!important;background:#fff;min-height:120px;padding:4px 5px!important}
+.ncc.e{background:#fbfbfa!important}.ncc.sel{background:#f4f8ff!important;outline:0}.ncc:hover{background:#fafafa}
+.ncn{font-size:13px!important;font-weight:400!important;color:var(--ng)}.ncn .n{font-size:13px!important;font-weight:400!important;color:var(--ng)}.ncc.su .n{color:#c4554d}.ncc.sa .n{color:#5a7fb8}
+.ncc.tdy .n{background:#eb5757!important;color:#fff!important;font-weight:600!important}
+.ncard{background:#fff!important;border:1px solid var(--nl)!important;box-shadow:0 1px 2px rgba(15,15,15,.07)!important;border-radius:6px!important;padding:5px 7px!important}
+.ncard:hover{background:var(--nh)!important;box-shadow:0 1px 3px rgba(15,15,15,.14)!important}
+.ncard .nct b{font-size:13px!important;font-weight:600!important;color:var(--nt)!important}
+.ncdn{font-size:12px;color:var(--nt)}.ncm i{font-size:11.5px!important;font-weight:500!important;color:var(--nt)!important;border-radius:4px!important;padding:0 6px!important}.ncm span{color:var(--ng)!important}
+.ncck{border:1.5px solid #b5b3ad!important;border-radius:3px!important}.ncck.on{background:#2383e2!important;border-color:#2383e2!important}
+.calh .btn,.nctabs .btn,.nccal .btn.sm{border:1px solid var(--nl)!important;box-shadow:none!important;background:#fff;border-radius:6px;color:var(--nt)}
+.nctabs{border-bottom:1px solid var(--nl)!important}.nctabs button.on{background:var(--nh)!important;font-weight:600}
+.nctabs .btn.pri{background:#2383e2!important;border-color:#2383e2!important;color:#fff!important}
+.ncsoon .ncs{border-top:1px solid var(--nl)!important;border-radius:6px}.ncsoon .ncs:hover{background:var(--nh)!important}
+/* 편집창 */
+dialog.ncpeek{border:0!important;border-radius:12px!important;box-shadow:0 12px 48px rgba(15,15,15,.22)!important;background:#fff!important;color:var(--nt);padding:20px 22px!important;width:min(600px,94vw)}
+dialog.ncpeek::backdrop{background:rgba(15,15,15,.3)}
+.ncpeek textarea.nctitle{border:0!important;border-radius:6px;padding:4px 6px!important;font-size:clamp(17px,3vw,22px)!important;font-weight:700;background:transparent;color:var(--nt)}.ncpeek textarea.nctitle:focus{background:var(--nh);outline:0}
+.ncpeek .btn{border:1px solid var(--nl)!important;box-shadow:none!important;background:#fff!important;color:var(--nt)!important;border-radius:6px!important;padding:6px 12px!important;font-size:14px!important;font-weight:500}
+.ncpeek .btn:hover{background:var(--nh)!important}.ncpeek .btn.pri{background:#2383e2!important;border-color:#2383e2!important;color:#fff!important}
+.ncpeek select,.ncpeek input[type=date],.ncpeek input[type=number],.ncpeek textarea:not(.nctitle){border:1px solid var(--nl)!important;border-radius:6px!important;box-shadow:none!important;background:#fff!important;font-size:14px!important;padding:6px 9px!important;height:auto!important;color:var(--nt)}
+.ncpeek .ncprop{border-bottom:0!important;padding:5px 0!important}.ncpeek .ncprop label{color:var(--ng)}
+.ncpeek .ncrep{background:var(--nh)!important;border-radius:8px}.ncpeek .btns{margin-top:12px;gap:8px;display:flex;flex-wrap:wrap}
+.ncpeek .nclk{background:#e7f3f8;border:0;color:#1b5e86!important}
 </style>
 </head>
 <body>
@@ -5880,7 +5911,7 @@ buildChunks = function () {
 };
 
 /* 화면 맨 아래에 버전 표시 — 옛 화면을 보고 있는지 바로 알 수 있게 */
-const TF_VER = 'v146', _cmFt = footer;
+const TF_VER = 'v147', _cmFt = footer;
 footer = function () { return _cmFt.apply(this, arguments).replace('</footer>', ` · <span class="mu">버전 ${TF_VER} (학급 관리 포함)</span></footer>`); };
 
 /* 새 버전 알림: 옛 화면이 남아 있으면 한 번 눌러 새로 받게 함 */
