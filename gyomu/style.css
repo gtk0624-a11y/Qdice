@@ -1024,3 +1024,9 @@ small.k-기록,.chp.k-기록{background:#d9f2e6}u.k-기록{color:#2f9a6a}
 .ncnotes{margin:10px 0;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
 .nccal .calt{font-size:20px;font-weight:700}
 @media(min-width:1100px) and (max-width:1539px){#tfclock{top:130px!important;left:auto!important;right:4px!important;width:122px!important;display:block!important;padding:8px 6px!important;box-sizing:border-box}#tfclock .ct{font-size:24px!important}#tfclock .cb{font-size:14px!important;margin-top:4px!important}#tfclock .cd2,#tfclock .cs,#tfclock .co,#tfclock .cc{display:block;font-size:11px!important;margin-top:3px!important;-webkit-line-clamp:unset}body.hasclk.hascc{padding-top:0}}
+/* v132 시계: 머리말 날짜 칸 안 */
+body.clk-docked .mast2{min-width:190px}
+.mast2 #tfclock{position:static!important;width:auto!important;max-width:none!important;display:block!important;left:auto!important;right:auto!important;top:auto!important;margin:0 0 6px;padding:4px 8px!important;box-shadow:1px 2px 0 #333!important;border-width:1.5px;border-radius:10px;text-align:center;z-index:auto}
+.mast2 #tfclock .ct{font-size:24px!important;line-height:1.1}.mast2 #tfclock .cb{font-size:13px!important;margin-top:2px!important}
+.mast2 #tfclock .cd2,.mast2 #tfclock .cs,.mast2 #tfclock .cc{display:none!important}.mast2 #tfclock .co{font-size:12px!important;margin-top:2px!important}
+body.clk-docked.hasclk.hascc{padding-top:0!important}

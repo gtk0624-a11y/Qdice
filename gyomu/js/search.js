@@ -36,7 +36,7 @@ function buildChunksCur() {
     if (n.followups) add('note', head + ' · 후속 조치', n.followups, '#/note/' + n.id, n.lock);
     String(n.body || '').split(/\n{1,}/).filter(x => x.trim()).forEach(p => add('note', head, p, '#/note/' + n.id, n.lock));
   });
-  S.items.forEach(i => add('item', i.src === '학사' ? '학사일정' : (i.cat === 'todo' ? '할 일' : '일정'), `${i.title} ${i.date ? i.date : ''}${i.end ? ' ~ ' + i.end : ''} ${i.cat === 'todo' ? (i.done ? '완료' : '미완료') : (i.src === '학사' ? '학사일정' : '일정')}`, '#/cal'));
+  S.items.forEach(i => add('item', i.src === '학사' ? '학사일정' : (i.cat === 'todo' ? '할 일' : '일정'), `${i.title} ${i.memo || ''} ${i.date ? i.date : ''}${i.end ? ' ~ ' + i.end : ''} ${i.cat === 'todo' ? (i.done ? '완료' : '미완료') : (i.src === '학사' ? '학사일정' : '일정')}`, '#/cal'));
   { const dn = ['', '월', '화', '수', '목', '금'];
     for (let d = 1; d <= 5; d++) { const l = [1, 2, 3, 4, 5, 6, 7].filter(p => S.timetable[d + '-' + p]).map(p => `${p}교시 ${S.timetable[d + '-' + p]}`); if (l.length) add('timetable', '시간표 · ' + dn[d] + '요일', `${dn[d]}요일 시간표 ${l.join(', ')}`, '#/class'); } }
   Object.keys(S.docs || {}).forEach(k => { const d = S.docs[k]; if (d && (d.recv || d.done)) add('docs', '공문 현황', `${k} 공문 접수 ${d.recv} 처리 ${d.done} 남음 ${d.recv - d.done}`, '#/today'); });

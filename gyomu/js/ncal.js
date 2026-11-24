@@ -127,3 +127,15 @@ document.addEventListener('click', e => {
   if (location.hash !== '#/today' && location.hash !== '' && location.hash !== '#/') location.hash = '#/today'; else render();
   setTimeout(() => ncPeek(i.id), 150);
 });
+
+/* 시계를 머리말 오른쪽(날짜·학교·선생님 칸) 안으로 */
+function clkDock() {
+  const el = document.getElementById('tfclock'), box = document.querySelector('.mast2');
+  document.body.classList.toggle('clk-docked', !!(el && box));
+  if (el && box && el.parentNode !== box) box.insertBefore(el, box.firstChild);
+}
+(function () {
+  const _r = render; render = function () { const r = _r.apply(this, arguments); clkDock(); return r; };
+  const _c = clkDraw; clkDraw = function () { const r = _c.apply(this, arguments); clkDock(); return r; };
+  setTimeout(clkDock, 300);
+})();

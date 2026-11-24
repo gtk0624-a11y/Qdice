@@ -469,3 +469,6 @@ service cloud.firestore {
 
 ## v131
 - 포스트잇에 원본 참조(note/item) 저장(A.ncPin) → 포스트잇 글을 누르면 기록으로, 일정이면 캘린더 편집창으로 이동(js/ncal.js 끝, postit.js data-pnote/data-pitem).
+
+## v132
+- 시계(#tfclock)를 머리말 .mast2(날짜·학교·선생님 칸) 안에 넣음: clkDock()(js/ncal.js), render·clkDraw 뒤에 재배치. 검색에 일정 메모(memo) 포함(search.js).
