@@ -34,7 +34,7 @@ function ncMonth() {
   <div class="calh"><button class="btn sm" data-act="calMove" data-d="-1" aria-label="이전 달">‹</button><b class="calt">${Y}년 ${M}월</b><button class="btn sm" data-act="calMove" data-d="1" aria-label="다음 달">›</button><button class="btn sm" data-act="calMove" data-d="0">오늘</button></div>
   <div class="ncw">${['월', '화', '수', '목', '금', '토', '일'].map(d => `<span>${d}</span>`).join('')}</div><div class="ncg">${cells}</div>
   <h3 class="h3 ncdl">${md(UI.day)} (${DOW[new Date(UI.day + 'T00:00:00').getDay()]})</h3><div class="ncdl">${list}</div>
-  ${typeof dayMemoBox === 'function' ? dayMemoBox(UI.day) : ''}<div class="nclinks" id="ncdmlinks">${ncLinks((S.dayMemo || {})[UI.day])}</div>
+  <details class="ncsub ncdm" ${UI.ncdm === false ? '' : 'open'}><summary>📝 ${md(UI.day)} 메모</summary>${typeof dayMemoBox === 'function' ? dayMemoBox(UI.day) : ''}<div class="nclinks" id="ncdmlinks">${ncLinks((S.dayMemo || {})[UI.day])}</div></details>
   ${ncNotes(UI.day)}
   <form class="inl" data-form="evt"><input name="title" placeholder="일정·할 일 추가" required aria-label="내용"><select name="cat" aria-label="종류" data-cus="kind">${cusKindOpts(false, 'event')}</select><button class="btn">추가</button></form>
   `;
@@ -45,7 +45,7 @@ function calView() {
 }
 function ncNotes(ds) {
   const N = (S.notes || []).filter(n => n.date === ds);
-  return `<div class="ncnotes"><b>📝 ${md(ds)} 기록</b>${N.map(n => `<a class="chp" href="#/note/${n.id}" data-act="noteGo" data-id="${n.id}">${esc(n.title || '제목 없음')} <small>${esc(n.kind || '')}</small></a><button class="btn sm" data-act="ncNoteDel" data-id="${n.id}" aria-label="기록 삭제">🗑</button>`).join('') || '<span class="mu"> 이 날 쓴 기록이 없습니다.</span>'}<button class="btn sm" data-act="ncNoteNew" data-d="${ds}">＋ 이 날 기록 쓰기</button>${UI.ncclip ? `<button class="btn sm" data-act="ncPaste" data-d="${ds}">📋 복사한 일정 붙여넣기 (${esc(UI.ncclip.title)})</button>` : ''}</div>`;
+  return `<details class="ncsub ncdn" ${UI.ncdn === false ? '' : 'open'}><summary>📝 ${md(ds)} 기록 <small>${N.length}건</small></summary><div class="ncnotes">${N.map(n => `<a class="chp" href="#/note/${n.id}" data-act="noteGo" data-id="${n.id}">${esc(n.title || '제목 없음')} <small>${esc(n.kind || '')}</small></a><button class="btn sm" data-act="ncNoteDel" data-id="${n.id}" aria-label="기록 삭제">🗑</button>`).join('') || '<span class="mu"> 이 날 쓴 기록이 없습니다.</span>'}<button class="btn sm" data-act="ncNoteNew" data-d="${ds}">＋ 이 날 기록 쓰기</button>${UI.ncclip ? `<button class="btn sm" data-act="ncPaste" data-d="${ds}">📋 복사한 일정 붙여넣기 (${esc(UI.ncclip.title)})</button>` : ''}</div></details>`;
 }
 function ncUpcoming() {
   const t = today(), its = S.items.filter(i => i.date && !i.done && !i.rep).sort((a, b) => a.date.localeCompare(b.date));
@@ -130,7 +130,7 @@ document.addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === 
     const h = _today(), k = h.indexOf(MARK), top = k >= 0 ? h.slice(0, k) : '', rest = (k >= 0 ? h.slice(k) : h).replace(/<p class="soon">[\s\S]*?<\/p>/, '');
     return `${top}<details class="ncwork nccal" ${UI.nccal === false ? '' : 'open'}><summary>📅 캘린더 <small>일정 · 메모 · 기록</small></summary>${ncMonth()}</details>${ncSoon()}<details class="ncwork" ${UI.ncwork ? 'open' : ''}><summary>🗂 업무들 <small>게시판 줄 · 연수 · 예산 · 평가 등</small></summary>${rest}</details>`;
   };
-  document.addEventListener('toggle', e => { if (e.target.classList && e.target.classList.contains('ncwork')) { if (e.target.classList.contains('nccal')) UI.nccal = e.target.open; else if (e.target.classList.contains('ncsoon')) UI.ncsoon = e.target.open; else UI.ncwork = e.target.open; } }, true);
+  document.addEventListener('toggle', e => { if (e.target.classList && e.target.classList.contains('ncsub')) { if (e.target.classList.contains('ncdm')) UI.ncdm = e.target.open; else UI.ncdn = e.target.open; return; } if (e.target.classList && e.target.classList.contains('ncwork')) { if (e.target.classList.contains('nccal')) UI.nccal = e.target.open; else if (e.target.classList.contains('ncsoon')) UI.ncsoon = e.target.open; else UI.ncwork = e.target.open; } }, true);
 })();
 
 /* 토요휴업일은 캘린더·기한 목록에서 모두 뺍니다 */

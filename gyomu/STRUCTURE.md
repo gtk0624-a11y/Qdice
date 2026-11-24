@@ -484,3 +484,6 @@ service cloud.firestore {
 
 ## v138
 - 이번 주 기한도 토글(details.ncsoon, 상태 UI.ncsoon).
+
+## v139
+- 날짜 메모·그날 기록도 토글(details.ncsub, UI.ncdm/UI.ncdn).
