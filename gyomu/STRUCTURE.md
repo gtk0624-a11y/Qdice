@@ -517,3 +517,6 @@ service cloud.firestore {
 
 ## v150
 - 편집창 구분 = 업무·수업·개인·기타 + 내가 만든 구분 + 「＋ 직접 입력…」(ncSeed 가 S.profile.lists.kind 에 기본 4개를 한 번 넣음, 일정/할 일 선택지는 편집창에서 제외). 색은 NC_COL.
+
+## v151
+- 모든 메모·기록 글칸에서 주소(http/www)를 누르면 새 창으로 열림(ncUrlAt, 클릭 처리). 기록 화면 위에 🔗 링크 칩 모음(ncPageLinks). 주소 글자를 고치려면 방향키 사용.

@@ -194,7 +194,22 @@ document.addEventListener('click', e => { if (e.target.closest && e.target.close
 /* 기록 화면 맨 위에 눈에 띄는 삭제 단추 */
 (function () {
   const _nv = notesView;
-  notesView = function (id) { const h = _nv.apply(this, arguments); if (!id || !(S.notes || []).some(n => n.id === id)) return h; return `<div class="ncnd"><button class="btn pri ncsavebtn" data-act="ncNoteSave">💾 저장</button><button class="btn ncdelbtn" data-act="noteDel" data-id="${id}">🗑 이 기록 삭제</button></div>` + h; };
+  notesView = function (id) { const h = _nv.apply(this, arguments); if (!id || !(S.notes || []).some(n => n.id === id)) return h; return `<div class="ncnd"><span class="nclinks" id="ncpagelinks"></span><button class="btn pri ncsavebtn" data-act="ncNoteSave">💾 저장</button><button class="btn ncdelbtn" data-act="noteDel" data-id="${id}">🗑 이 기록 삭제</button></div>` + h; };
 })();
 
 document.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.classList && e.target.classList.contains('nctitle')) { e.preventDefault(); e.target.blur(); } });
+
+/* 글 안의 주소를 누르면 바로 새 창으로 (모든 메모·기록 칸) */
+function ncUrlAt(el) {
+  if (!el || el.selectionStart == null || el.selectionStart !== el.selectionEnd) return null; const v = el.value, c = el.selectionStart, re = /(?:https?:\/\/|www\.)[^\s<>"'）)]+/g; let m;
+  while ((m = re.exec(v))) { const a = m.index, b = a + m[0].replace(/[.,;]+$/, '').length; if (c >= a && c <= b) return v.slice(a, b); }
+  return null;
+}
+document.addEventListener('click', e => {
+  const t = e.target; if (!t || t.tagName !== 'TEXTAREA' || t.closest('#ncpeek') && t.name === 'title') return;
+  const u = ncUrlAt(t); if (!u) return; window.open(/^www\./.test(u) ? 'https://' + u : u, '_blank', 'noopener'); toast('링크를 열었습니다. (글자를 고치려면 방향키로 옮겨 주세요)');
+});
+function ncPageLinks() { const b = document.getElementById('ncpagelinks'); if (!b) return; const h = ncLinks([...document.querySelectorAll('#app textarea')].map(x => x.value).join('\n')); if (b.innerHTML !== h) b.innerHTML = h; }
+document.addEventListener('input', e => { if (e.target && e.target.tagName === 'TEXTAREA') ncPageLinks(); });
+(function () { const _r2 = render; render = function () { const r = _r2.apply(this, arguments); ncPageLinks(); return r; }; })();
+setInterval(ncPageLinks, 2000);
