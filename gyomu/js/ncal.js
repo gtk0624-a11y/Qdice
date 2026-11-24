@@ -106,6 +106,7 @@ Object.assign(A, {
     commit(); toast(`매주 ${n}번 복사했습니다.`);
   },
   ncNoteDel(el) { const n = (S.notes || []).find(x => x.id === el.dataset.id); if (!n) return; sure(`기록 「${n.title || '제목 없음'}」을 삭제할까요?`, () => { S.notes = S.notes.filter(x => x !== n); commit(); }); },
+  ncNoteSave() { try { save(true); } catch (e) { save(); } toast('저장했습니다.'); },
   ncView(el) { UI.calv = el.dataset.v; render(); },
   ncAdd(el, e) { e && e.stopPropagation(); ncMake(el.dataset.d); },
   ncNew() { ncMake(UI.day || today()); },
@@ -176,5 +177,5 @@ document.addEventListener('click', e => { if (e.target.closest && e.target.close
 /* 기록 화면 맨 위에 눈에 띄는 삭제 단추 */
 (function () {
   const _nv = notesView;
-  notesView = function (id) { const h = _nv.apply(this, arguments); if (!id || !(S.notes || []).some(n => n.id === id)) return h; return `<div class="ncnd"><button class="btn ncdelbtn" data-act="noteDel" data-id="${id}">🗑 이 기록 삭제</button></div>` + h; };
+  notesView = function (id) { const h = _nv.apply(this, arguments); if (!id || !(S.notes || []).some(n => n.id === id)) return h; return `<div class="ncnd"><button class="btn pri ncsavebtn" data-act="ncNoteSave">💾 저장</button><button class="btn ncdelbtn" data-act="noteDel" data-id="${id}">🗑 이 기록 삭제</button></div>` + h; };
 })();

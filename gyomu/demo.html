@@ -1058,7 +1058,7 @@ details.ncsub{border:1.5px solid #5b5446;border-radius:8px;margin:8px 0;padding:
 .ncs:has(.cute){background:#fff3ec;border-radius:8px}
 #alarmbar .al-b.cute{background:#ffe0d2;color:#8a3b1f}
 @media(prefers-reduced-motion:reduce){.cute::before{animation:none!important}}
-.ncnd{display:flex;justify-content:flex-end;margin:0 0 6px}.ncdelbtn{background:#ffe3e0;border:1.5px solid #c0392b;color:#8a1f14;font-weight:700}
+.ncnd{display:flex;justify-content:flex-end;gap:8px;margin:0 0 6px}.ncdelbtn{background:#ffe3e0;border:1.5px solid #c0392b;color:#8a1f14;font-weight:700}
 </style>
 </head>
 <body>
@@ -4425,6 +4425,7 @@ Object.assign(A, {
     commit(); toast(`매주 ${n}번 복사했습니다.`);
   },
   ncNoteDel(el) { const n = (S.notes || []).find(x => x.id === el.dataset.id); if (!n) return; sure(`기록 「${n.title || '제목 없음'}」을 삭제할까요?`, () => { S.notes = S.notes.filter(x => x !== n); commit(); }); },
+  ncNoteSave() { try { save(true); } catch (e) { save(); } toast('저장했습니다.'); },
   ncView(el) { UI.calv = el.dataset.v; render(); },
   ncAdd(el, e) { e && e.stopPropagation(); ncMake(el.dataset.d); },
   ncNew() { ncMake(UI.day || today()); },
@@ -4495,7 +4496,7 @@ document.addEventListener('click', e => { if (e.target.closest && e.target.close
 /* 기록 화면 맨 위에 눈에 띄는 삭제 단추 */
 (function () {
   const _nv = notesView;
-  notesView = function (id) { const h = _nv.apply(this, arguments); if (!id || !(S.notes || []).some(n => n.id === id)) return h; return `<div class="ncnd"><button class="btn ncdelbtn" data-act="noteDel" data-id="${id}">🗑 이 기록 삭제</button></div>` + h; };
+  notesView = function (id) { const h = _nv.apply(this, arguments); if (!id || !(S.notes || []).some(n => n.id === id)) return h; return `<div class="ncnd"><button class="btn pri ncsavebtn" data-act="ncNoteSave">💾 저장</button><button class="btn ncdelbtn" data-act="noteDel" data-id="${id}">🗑 이 기록 삭제</button></div>` + h; };
 })();
 
 /* 종이에 손으로 쓴 메모·수첩 사진 → 일정/할 일/업무 인식 (Claude 비전, 본인 키 필요). 확인 창에서 고친 뒤 추가. */
@@ -5864,7 +5865,7 @@ buildChunks = function () {
 };
 
 /* 화면 맨 아래에 버전 표시 — 옛 화면을 보고 있는지 바로 알 수 있게 */
-const TF_VER = 'v143', _cmFt = footer;
+const TF_VER = 'v144', _cmFt = footer;
 footer = function () { return _cmFt.apply(this, arguments).replace('</footer>', ` · <span class="mu">버전 ${TF_VER} (학급 관리 포함)</span></footer>`); };
 
 /* 새 버전 알림: 옛 화면이 남아 있으면 한 번 눌러 새로 받게 함 */

@@ -499,3 +499,6 @@ service cloud.firestore {
 
 ## v143
 - 기록(노트) 화면 맨 위에 「🗑 이 기록 삭제」 단추(notesView 래퍼, js/ncal.js). 기존 맨 아래 「노트 삭제」도 그대로.
+
+## v144
+- 기록 화면 맨 위에 「💾 저장」(ncNoteSave) + 「🗑 삭제」 함께 표시.
