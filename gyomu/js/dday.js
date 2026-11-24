@@ -33,7 +33,7 @@ function renderAlarm() {
   bar.hidden = false; document.body.classList.add('hasalarm');
   bar.innerHTML = open
     ? `<div class="al-h"><b>⏰ 기한이 다가옵니다</b><span class="mu">${alarmDays() === 0 ? '오늘' : alarmDays() + '일 안'} · ${items.length}건</span><button class="al-x" data-act="alToggle" aria-label="접기">접기</button></div>
-       <div class="al-l">${items.slice(0, 8).map(i => `<div class="al-i"><span class="al-b ${i.n <= 1 ? 'hot' : ''}">${ddBadge(i.n)}</span><span class="al-t">${esc(i.t)}</span><span class="al-d">${md(i.date)}</span></div>`).join('')}${items.length > 8 ? `<div class="mu">외 ${items.length - 8}건</div>` : ''}</div>
+       <div class="al-l">${items.slice(0, 8).map(i => `<div class="al-i"><span class="al-b ${i.n <= 1 ? 'hot cute d' + i.n : ''}">${ddBadge(i.n)}</span><span class="al-t">${esc(i.t)}</span><span class="al-d">${md(i.date)}</span></div>`).join('')}${items.length > 8 ? `<div class="mu">외 ${items.length - 8}건</div>` : ''}</div>
        <div class="al-f"><button class="btn sm" data-act="alClose">오늘은 그만 보기</button><button class="btn sm" data-act="ddAlarm">알림 설정</button></div>`
     : `<button class="al-main" data-act="alToggle" aria-label="기한 알림 펼치기"><span class="al-ic">⏰</span><span class="al-b ${f.n <= 1 ? 'hot' : ''}">${ddBadge(f.n)}</span><span class="al-t">${esc(f.t)}</span>${items.length > 1 ? `<span class="al-more">외 ${items.length - 1}건</span>` : ''}<i class="al-chev"></i></button><button class="al-x" data-act="alClose" aria-label="오늘은 그만 보기">×</button>`;
   ddNotify(items, sig);
@@ -54,13 +54,13 @@ function ddNotify(items, sig) {
 function ddayStrip() {
   const L = ddList().map(x => ({ ...x, n: dd(x.date) })).filter(x => x.n !== null && x.n >= 0).sort((a, b) => a.n - b.n).slice(0, 4);
   if (!L.length) return '';
-  return `<div class="ddstrip" aria-label="디데이">${L.map(x => `<span class="ddc ${x.n <= 1 ? 'hot' : ''}"><b>${ddBadge(x.n)}</b>${esc(x.title)}</span>`).join('')}</div>`;
+  return `<div class="ddstrip" aria-label="디데이">${L.map(x => `<span class="ddc ${x.n <= 1 ? 'hot cute d' + x.n : ''}" data-act="ddEdit" data-id="${x.id}" title="눌러서 고치기" style="cursor:pointer"><b>${ddBadge(x.n)}</b>${esc(x.title)}</span>`).join('')}</div>`;
 }
 function ddayRow() {
   const L = ddList().slice().sort((a, b) => a.date.localeCompare(b.date)), nx = L.find(x => dd(x.date) >= 0);
   const perm = ('Notification' in window) ? Notification.permission : 'none', N = alarmDays();
   const st = nx ? `${esc(nx.title)} <b>${ddBadge(dd(nx.date))}</b>` : '기다리는 날을 추가해 보세요';
-  const body = (L.length ? L.map(x => `<div class="td"><span class="ddn ${dd(x.date) < 0 ? 'past' : ''}">${ddBadge(dd(x.date))}</span><span class="tl">${esc(x.title)}</span><span class="mu">${md(x.date)}</span>${xbtn('ddDel', x.id)}</div>`).join('') : '<p class="mu">수능·시험·행사처럼 기다리는 날을 추가하면 오늘 화면 위쪽에 작게 보입니다.</p>')
+  const body = (L.length ? L.map(x => `<div class="td"><span class="ddn ${dd(x.date) < 0 ? 'past' : ''} ${dd(x.date) >= 0 && dd(x.date) <= 1 ? 'cute d' + dd(x.date) : ''}">${ddBadge(dd(x.date))}</span><span class="tl">${esc(x.title)}</span><span class="mu">${md(x.date)}</span><button class="btn sm" data-act="ddEdit" data-id="${x.id}" aria-label="고치기">✎ 고치기</button>${xbtn('ddDel', x.id)}</div>`).join('') : '<p class="mu">수능·시험·행사처럼 기다리는 날을 추가하면 오늘 화면 위쪽에 작게 보입니다.</p>')
     + `<div class="tools"><button class="btn sm pri" data-act="ddAdd">+ 디데이 추가</button><button class="btn sm" data-act="ddAlarm">알림 설정 (${alarmOff() ? '꺼짐' : N === 0 ? '당일만' : N + '일 전부터'})</button>${perm === 'default' ? '<button class="btn sm" data-act="ddPerm">브라우저 알림 켜기</button>' : ''}</div>`
     + `<p class="mu">할 일·수행평가·예산·연수 기한이 ${N}일 안으로 다가오면 화면 아래에 작은 막대로 알려 드립니다.${perm === 'granted' ? ' 브라우저 알림도 함께 받습니다.' : ''} 앱을 열어 둔 동안 알려 주며, 닫아 둔 동안에는 보낼 수 없습니다.</p>`;
   return row('r13', '일정', '디데이·기한 알림', st, '', body);
@@ -68,6 +68,7 @@ function ddayRow() {
 
 Object.assign(A, {
   ddAdd() { ask('디데이 추가', [{ k: 'title', label: '이름 (예: 수능, 기말고사, 체육대회)', req: 1 }, { k: 'date', label: '날짜', type: 'date', req: 1 }], o => { ddList().push({ id: uid(), title: o.title.trim(), date: o.date }); OPEN.add('r13'); try { localStorage.setItem('tf.open', JSON.stringify([...OPEN])); } catch (e) { } commit(); toast('디데이를 추가했습니다.'); }); },
+  ddEdit(el) { const x = ddList().find(z => z.id === el.dataset.id); if (!x) return; ask('디데이 고치기', [{ k: 'title', label: '이름', val: x.title, req: 1 }, { k: 'date', label: '날짜', type: 'date', val: x.date, req: 1 }], o => { x.title = o.title.trim(); x.date = o.date; commit(); toast('고쳤습니다.'); }); },
   ddDel(el) { S.dday = ddList().filter(x => x.id !== el.dataset.id); commit(); },
   ddAlarm() { ask('기한 알림 설정', [{ k: 'n', label: '기한 며칠 전부터 알릴까요? (0=당일만, 최대 14, 끄려면 -1)', type: 'number', val: alarmOff() ? -1 : alarmDays() }], o => { const n = parseInt(o.n, 10); S.profile.alarmDays = isNaN(n) ? 2 : Math.max(-1, Math.min(14, n)); lsSet(ALK, {}); commit(); toast(alarmOff() ? '기한 알림을 껐습니다.' : '기한 ' + alarmDays() + '일 전부터 화면 아래에 알려 드립니다.'); }); },
   ddPerm() { if (!('Notification' in window)) return toast('이 브라우저는 알림을 지원하지 않습니다.'); Notification.requestPermission().then(p => { toast(p === 'granted' ? '브라우저 알림을 켰습니다.' : '알림이 허용되지 않았습니다.'); lsSet(ALN, {}); commit(); }); },

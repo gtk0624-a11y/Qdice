@@ -1039,3 +1039,12 @@ body.clk-docked.hasclk.hascc{padding-top:0!important}
 details.ncsoon{border:2px solid var(--ink);border-top:2px solid var(--ink);margin:10px 0;padding:0 12px 8px}details.ncsoon>summary{font-size:16px;padding:8px 0}
 details.ncsub{border:1.5px solid #5b5446;border-radius:8px;margin:8px 0;padding:0 10px 6px;background:#fff}details.ncsub>summary{cursor:pointer;font-weight:700;font-size:15px;padding:7px 0;list-style:none}details.ncsub>summary::-webkit-details-marker{display:none}details.ncsub>summary::before{content:'▸ ';color:var(--mu)}details.ncsub[open]>summary::before{content:'▾ '}details.ncsub small{font-weight:400;color:var(--mu)}
 .ncsb{margin-top:12px}.nf-sbanner .ncsb .sbanner{display:block!important}
+/* v142 D-1·D-Day: 귀엽고 부드러운 긴급 표시 */
+@keyframes cutehop{0%,100%{transform:translateY(0) rotate(0)}30%{transform:translateY(-2px) rotate(-3deg)}60%{transform:translateY(0) rotate(3deg)}}
+.cute{background:#ffe0d2!important;color:#8a3b1f!important;border:1.5px solid #ffb89a;border-radius:999px;padding:1px 10px!important;font-weight:800;display:inline-block;box-shadow:0 2px 0 #ffcdb5}
+.cute.d1::before{content:'🐣 ';display:inline-block;animation:cutehop 2.4s ease-in-out infinite}
+.cute.d0{background:#fff0a8!important;border-color:#ffd84d;color:#7a5a00!important;box-shadow:0 2px 0 #ffe685}.cute.d0::before{content:'🌟 ';display:inline-block;animation:cutehop 2.4s ease-in-out infinite}
+.ddc.cute{background:#ffe9de!important;border-color:#ffb89a!important;color:#6b2f17}.ddc.cute b{background:transparent;color:#8a3b1f}
+.ncs:has(.cute){background:#fff3ec;border-radius:8px}
+#alarmbar .al-b.cute{background:#ffe0d2;color:#8a3b1f}
+@media(prefers-reduced-motion:reduce){.cute::before{animation:none!important}}
