@@ -505,3 +505,6 @@ service cloud.firestore {
 
 ## v145
 - 캘린더 모든 카드·날짜 목록에 🗑: 일정·기록·디데이는 실제 삭제, 평가·예산·연수·학사 등은 S.evHide(date|제목)로 캘린더에서만 숨김(allEvents 래퍼) + 「숨긴 항목 되살리기」(ncUnhide).
+
+## v146
+- 편집창 제목을 자동으로 늘어나는 여러 줄 칸(textarea.nctitle, ncFit)으로 바꿔 긴 제목도 전부 보임.

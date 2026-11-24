@@ -59,11 +59,12 @@ function ncUpcoming() {
 }
 /* 가운데 창(노션의 페이지 미리보기) */
 let NCP = null;
+function ncFit(t) { if (!t) return; t.style.height = 'auto'; t.style.height = t.scrollHeight + 'px'; }
 function ncPeek(id, isNew) {
   const i = S.items.find(x => x.id === id); if (!i) return;
   NCP = { id, isNew: !!isNew }; let d = document.getElementById('ncpeek');
-  if (!d) { d = document.createElement('dialog'); d.id = 'ncpeek'; d.className = 'dlg ncpeek'; document.body.appendChild(d); d.addEventListener('close', ncClosed); d.addEventListener('change', ncSave); d.addEventListener('input', e => { if (e.target.name === 'memo') { const b = d.querySelector('.nclinks'); if (b) b.innerHTML = ncLinks(e.target.value) || '<span class="mu">메모에 주소(https://…)를 쓰면 여기에 바로가기가 생깁니다.</span>'; } }); d.addEventListener('click', e => { if (e.target === d) d.close(); }); }
-  d.innerHTML = `<div class="ncph"><input name="title" class="nctitle" value="${esc(i.title)}" placeholder="제목 없음" aria-label="제목"><button class="btn sm" data-ncclose="1" aria-label="닫기">✕</button></div>
+  if (!d) { d = document.createElement('dialog'); d.id = 'ncpeek'; d.className = 'dlg ncpeek'; document.body.appendChild(d); d.addEventListener('close', ncClosed); d.addEventListener('change', ncSave); d.addEventListener('input', e => { if (e.target.classList.contains('nctitle')) ncFit(e.target); if (e.target.name === 'memo') { const b = d.querySelector('.nclinks'); if (b) b.innerHTML = ncLinks(e.target.value) || '<span class="mu">메모에 주소(https://…)를 쓰면 여기에 바로가기가 생깁니다.</span>'; } }); d.addEventListener('click', e => { if (e.target === d) d.close(); }); }
+  d.innerHTML = `<div class="ncph"><textarea name="title" class="nctitle" rows="1" placeholder="제목 없음" aria-label="제목">${esc(i.title)}</textarea><button class="btn sm" data-ncclose="1" aria-label="닫기">✕</button></div>
   <div class="ncprop"><label>구분</label><select name="kind">${ncKindSel(i)}</select></div>
   <div class="ncprop"><label>날짜</label><span><input type="date" name="date" value="${esc(i.date || '')}"> ~ <input type="date" name="end" value="${esc(i.end || '')}" aria-label="끝 날짜"></span></div>
   <div class="ncprop"><label>완료</label><input type="checkbox" name="done" ${i.done ? 'checked' : ''} aria-label="완료"></div>
@@ -72,7 +73,7 @@ function ncPeek(id, isNew) {
   <div class="ncrep"><button class="btn sm" data-act="ncCopy" data-id="${i.id}">📋 복사</button><span>매주 반복 복사: <input type="number" name="rep" min="1" max="40" value="4" style="width:52px"> 주</span><button class="btn sm" data-act="ncRepeat" data-id="${i.id}">🔁 반복 만들기</button></div>
   <div class="btns"><button class="btn" data-act="ncPin" data-id="${i.id}">📌 포스트잇으로 붙이기</button><button class="btn" data-ncdel="1">🗑 삭제</button><button class="btn pri" data-ncclose="1">닫기</button></div>`;
   d.onclick = e => { if (e.target === d) d.close(); if (e.target.closest('[data-ncclose]')) d.close(); if (e.target.closest('[data-ncdel]')) sure('이 일정을 삭제할까요?', () => { NCP = null; S.items = S.items.filter(x => x.id !== id); d.close(); commit(); }); };
-  if (!d.open) d.showModal(); if (isNew) { const t = d.querySelector('.nctitle'); t && t.focus(); }
+  if (!d.open) d.showModal(); ncFit(d.querySelector('.nctitle')); if (isNew) { const t = d.querySelector('.nctitle'); t && t.focus(); }
 }
 function ncSave(e) {
   if (!NCP) return; const i = S.items.find(x => x.id === NCP.id), t = e.target; if (!i || !t.name) return;
@@ -189,3 +190,5 @@ document.addEventListener('click', e => { if (e.target.closest && e.target.close
   const _nv = notesView;
   notesView = function (id) { const h = _nv.apply(this, arguments); if (!id || !(S.notes || []).some(n => n.id === id)) return h; return `<div class="ncnd"><button class="btn pri ncsavebtn" data-act="ncNoteSave">💾 저장</button><button class="btn ncdelbtn" data-act="noteDel" data-id="${id}">🗑 이 기록 삭제</button></div>` + h; };
 })();
+
+document.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.classList && e.target.classList.contains('nctitle')) { e.preventDefault(); e.target.blur(); } });

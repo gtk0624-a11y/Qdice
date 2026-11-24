@@ -1059,6 +1059,8 @@ details.ncsub{border:1.5px solid #5b5446;border-radius:8px;margin:8px 0;padding:
 @media(prefers-reduced-motion:reduce){.cute::before{animation:none!important}}
 .ncnd{display:flex;justify-content:flex-end;gap:8px;margin:0 0 6px}.ncdelbtn{background:#ffe3e0;border:1.5px solid #c0392b;color:#8a1f14;font-weight:700}
 .ncpin.ncx{margin-left:2px}.ncard:hover .ncx,.ncx:focus{opacity:1}@media(max-width:760px){.ncx{display:none}}
+textarea.nctitle{font:inherit;font-size:clamp(15px,2.6vw,19px);font-weight:700;line-height:1.35;resize:none;overflow:hidden;white-space:pre-wrap;word-break:break-all;overflow-wrap:anywhere;border:1px solid var(--rule2);border-radius:8px;padding:6px 8px;background:#fff}
+.ncph{align-items:flex-start}
 </style>
 </head>
 <body>
@@ -4378,11 +4380,12 @@ function ncUpcoming() {
 }
 /* 가운데 창(노션의 페이지 미리보기) */
 let NCP = null;
+function ncFit(t) { if (!t) return; t.style.height = 'auto'; t.style.height = t.scrollHeight + 'px'; }
 function ncPeek(id, isNew) {
   const i = S.items.find(x => x.id === id); if (!i) return;
   NCP = { id, isNew: !!isNew }; let d = document.getElementById('ncpeek');
-  if (!d) { d = document.createElement('dialog'); d.id = 'ncpeek'; d.className = 'dlg ncpeek'; document.body.appendChild(d); d.addEventListener('close', ncClosed); d.addEventListener('change', ncSave); d.addEventListener('input', e => { if (e.target.name === 'memo') { const b = d.querySelector('.nclinks'); if (b) b.innerHTML = ncLinks(e.target.value) || '<span class="mu">메모에 주소(https://…)를 쓰면 여기에 바로가기가 생깁니다.</span>'; } }); d.addEventListener('click', e => { if (e.target === d) d.close(); }); }
-  d.innerHTML = `<div class="ncph"><input name="title" class="nctitle" value="${esc(i.title)}" placeholder="제목 없음" aria-label="제목"><button class="btn sm" data-ncclose="1" aria-label="닫기">✕</button></div>
+  if (!d) { d = document.createElement('dialog'); d.id = 'ncpeek'; d.className = 'dlg ncpeek'; document.body.appendChild(d); d.addEventListener('close', ncClosed); d.addEventListener('change', ncSave); d.addEventListener('input', e => { if (e.target.classList.contains('nctitle')) ncFit(e.target); if (e.target.name === 'memo') { const b = d.querySelector('.nclinks'); if (b) b.innerHTML = ncLinks(e.target.value) || '<span class="mu">메모에 주소(https://…)를 쓰면 여기에 바로가기가 생깁니다.</span>'; } }); d.addEventListener('click', e => { if (e.target === d) d.close(); }); }
+  d.innerHTML = `<div class="ncph"><textarea name="title" class="nctitle" rows="1" placeholder="제목 없음" aria-label="제목">${esc(i.title)}</textarea><button class="btn sm" data-ncclose="1" aria-label="닫기">✕</button></div>
   <div class="ncprop"><label>구분</label><select name="kind">${ncKindSel(i)}</select></div>
   <div class="ncprop"><label>날짜</label><span><input type="date" name="date" value="${esc(i.date || '')}"> ~ <input type="date" name="end" value="${esc(i.end || '')}" aria-label="끝 날짜"></span></div>
   <div class="ncprop"><label>완료</label><input type="checkbox" name="done" ${i.done ? 'checked' : ''} aria-label="완료"></div>
@@ -4391,7 +4394,7 @@ function ncPeek(id, isNew) {
   <div class="ncrep"><button class="btn sm" data-act="ncCopy" data-id="${i.id}">📋 복사</button><span>매주 반복 복사: <input type="number" name="rep" min="1" max="40" value="4" style="width:52px"> 주</span><button class="btn sm" data-act="ncRepeat" data-id="${i.id}">🔁 반복 만들기</button></div>
   <div class="btns"><button class="btn" data-act="ncPin" data-id="${i.id}">📌 포스트잇으로 붙이기</button><button class="btn" data-ncdel="1">🗑 삭제</button><button class="btn pri" data-ncclose="1">닫기</button></div>`;
   d.onclick = e => { if (e.target === d) d.close(); if (e.target.closest('[data-ncclose]')) d.close(); if (e.target.closest('[data-ncdel]')) sure('이 일정을 삭제할까요?', () => { NCP = null; S.items = S.items.filter(x => x.id !== id); d.close(); commit(); }); };
-  if (!d.open) d.showModal(); if (isNew) { const t = d.querySelector('.nctitle'); t && t.focus(); }
+  if (!d.open) d.showModal(); ncFit(d.querySelector('.nctitle')); if (isNew) { const t = d.querySelector('.nctitle'); t && t.focus(); }
 }
 function ncSave(e) {
   if (!NCP) return; const i = S.items.find(x => x.id === NCP.id), t = e.target; if (!i || !t.name) return;
@@ -4508,6 +4511,8 @@ document.addEventListener('click', e => { if (e.target.closest && e.target.close
   const _nv = notesView;
   notesView = function (id) { const h = _nv.apply(this, arguments); if (!id || !(S.notes || []).some(n => n.id === id)) return h; return `<div class="ncnd"><button class="btn pri ncsavebtn" data-act="ncNoteSave">💾 저장</button><button class="btn ncdelbtn" data-act="noteDel" data-id="${id}">🗑 이 기록 삭제</button></div>` + h; };
 })();
+
+document.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.classList && e.target.classList.contains('nctitle')) { e.preventDefault(); e.target.blur(); } });
 
 /* 종이에 손으로 쓴 메모·수첩 사진 → 일정/할 일/업무 인식 (Claude 비전, 본인 키 필요). 확인 창에서 고친 뒤 추가. */
 let SC = null;
@@ -5875,7 +5880,7 @@ buildChunks = function () {
 };
 
 /* 화면 맨 아래에 버전 표시 — 옛 화면을 보고 있는지 바로 알 수 있게 */
-const TF_VER = 'v145', _cmFt = footer;
+const TF_VER = 'v146', _cmFt = footer;
 footer = function () { return _cmFt.apply(this, arguments).replace('</footer>', ` · <span class="mu">버전 ${TF_VER} (학급 관리 포함)</span></footer>`); };
 
 /* 새 버전 알림: 옛 화면이 남아 있으면 한 번 눌러 새로 받게 함 */

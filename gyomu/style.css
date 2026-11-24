@@ -1050,3 +1050,5 @@ details.ncsub{border:1.5px solid #5b5446;border-radius:8px;margin:8px 0;padding:
 @media(prefers-reduced-motion:reduce){.cute::before{animation:none!important}}
 .ncnd{display:flex;justify-content:flex-end;gap:8px;margin:0 0 6px}.ncdelbtn{background:#ffe3e0;border:1.5px solid #c0392b;color:#8a1f14;font-weight:700}
 .ncpin.ncx{margin-left:2px}.ncard:hover .ncx,.ncx:focus{opacity:1}@media(max-width:760px){.ncx{display:none}}
+textarea.nctitle{font:inherit;font-size:clamp(15px,2.6vw,19px);font-weight:700;line-height:1.35;resize:none;overflow:hidden;white-space:pre-wrap;word-break:break-all;overflow-wrap:anywhere;border:1px solid var(--rule2);border-radius:8px;padding:6px 8px;background:#fff}
+.ncph{align-items:flex-start}
