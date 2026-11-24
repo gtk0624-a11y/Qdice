@@ -514,3 +514,6 @@ service cloud.firestore {
 
 ## v148
 - 「planner」 등 스킨(html[data-skin])의 굵은 테두리가 편집창·캘린더를 덮지 않도록 v147 규칙을 html[data-skin] 접두로 한 번 더 선언(style.css 끝).
+
+## v150
+- 편집창 구분 = 업무·수업·개인·기타 + 내가 만든 구분 + 「＋ 직접 입력…」(ncSeed 가 S.profile.lists.kind 에 기본 4개를 한 번 넣음, 일정/할 일 선택지는 편집창에서 제외). 색은 NC_COL.

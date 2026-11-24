@@ -1,10 +1,12 @@
 /* 노션식 캘린더(v126): 월~일 달력 칸 안에 카드(제목·완료·구분·메모), 카드를 누르면 가운데 창에서 바로 수정, 「다가오는 내 업무」 보기.
    기존 calView 를 대체합니다(학사일정 가져오기·날짜 메모·기록 이동은 그대로). 일정에 memo 칸이 새로 생깁니다. */
-const NC_COL = k => (typeof CAL_KINDS !== 'undefined' && CAL_KINDS[k]) || '#e8e4dc';
-function ncKindVal(i) { return i.tag && cusKinds().some(k => k.n === i.tag) ? 'c:' + i.tag : (i.cat === 'todo' ? 'todo' : 'event'); }
+const NC_BASE = { '업무': ['#d3e5ef', 'todo'], '수업': ['#dbeddb', 'event'], '개인': ['#f5e0e9', 'event'], '기타': ['#e3e2e0', 'event'] };
+const NC_PAL = ['#fdecc8', '#e8deee', '#ffe2dd', '#d3f0e7', '#dde7f7', '#f1e7d0'];
+const NC_COL = k => (NC_BASE[k] && NC_BASE[k][0]) || (typeof CAL_KINDS !== 'undefined' && CAL_KINDS[k]) || NC_PAL[[...String(k || '')].reduce((a, c) => a + c.charCodeAt(0), 0) % NC_PAL.length];
+function ncSeed() { const L = cusL(); if (L.kindSeed) return; L.kindSeed = 1; L.kind = L.kind || []; Object.keys(NC_BASE).forEach(n => { if (!L.kind.some(k => k.n === n)) L.kind.push({ n, b: NC_BASE[n][1] }); }); }
 function ncKindSel(i) {
-  const base = [['event', '일정'], ['todo', '할 일']].concat(cusKinds().map(k => ['c:' + k.n, k.n])), cur = ncKindVal(i);
-  return base.map(([v, n]) => `<option value="${esc(v)}" ${v === cur ? 'selected' : ''}>${esc(n)}</option>`).join('');
+  ncSeed(); const names = cusKinds().map(k => k.n); if (i.tag && !names.includes(i.tag)) names.push(i.tag);
+  return (i.tag ? '' : '<option value="" selected>미지정</option>') + names.map(n => `<option value="${esc(n)}" ${n === i.tag ? 'selected' : ''}>${esc(n)}</option>`).join('') + '<option value="_new">＋ 직접 입력…</option>';
 }
 function ncUrls(t) { return (String(t || '').match(/(?:https?:\/\/|www\.)[^\s<>"'）)]+/g) || []).map(u => u.replace(/[.,;]+$/, '')); }
 function ncLinks(t) { const U = ncUrls(t); return U.length ? U.map(u => { const h = /^www\./.test(u) ? 'https://' + u : u; let lab = u; try { lab = new URL(h).hostname.replace(/^www\./, ''); } catch (e) { } return `<a class="nclk" href="${esc(h)}" target="_blank" rel="noopener noreferrer" title="${esc(u)}">🔗 ${esc(lab)}</a>`; }).join('') : ''; }
@@ -17,6 +19,7 @@ function ncCard(e) {
   return `<div class="ncard ${e.done ? 'dn' : ''}" ${att} role="button" tabindex="0"><div class="nct"><b>${esc(e.t)}</b>${pin}${ncDelBtn(e, 'ncpin ncx')}</div>${it ? `<div class="ncdn">${ck}<span>완료</span></div>` : ''}<div class="ncm"><i style="background:${NC_COL(e.kind)}">${esc(e.kind)}</i>${memo ? `<span>${esc(memo.replace(/(?:https?:\/\/|www\.)\S+/g, '').trim())}</span>` : ''}${it && it.memo ? ncLinks(it.memo) : ''}</div></div>`;
 }
 function ncMonth() {
+  ncSeed();
   const [Y, M] = UI.cal.split('-').map(Number), first = new Date(Y, M - 1, 1), n = new Date(Y, M, 0).getDate(), ev = allEvents(), by = {};
   ev.forEach(e => (by[e.date] = by[e.date] || []).push(e));
   const v = UI.calv || 'm', tabs = `<div class="nctabs"><button class="${v === 'm' ? 'on' : ''}" data-act="ncView" data-v="m">📅 월간 캘린더</button><button class="${v === 'up' ? 'on' : ''}" data-act="ncView" data-v="up">⏳ 다가오는 내 업무</button><span class="grow"></span><button class="btn pri sm" data-act="ncNew">＋ 새로 만들기</button></div>`;
@@ -81,7 +84,10 @@ function ncSave(e) {
   else if (t.name === 'date') { if (t.value) { i.date = t.value; if (i.end && i.end < i.date) delete i.end; } }
   else if (t.name === 'end') { if (t.value && t.value > i.date) i.end = t.value; else delete i.end; }
   else if (t.name === 'done') i.done = t.checked;
-  else if (t.name === 'kind') { const o = cusMk(t.value, ''); i.cat = o.cat; if (o.tag) i.tag = o.tag; else delete i.tag; }
+  else if (t.name === 'kind') {
+    if (t.value === '_new') { const id = i.id; ask('구분 직접 입력', [{ k: 'n', label: '새 구분 이름 (예: 시험감독, 회의, 연수)', req: 1 }], o => { const n = o.n.trim(), it = S.items.find(x => x.id === id); if (!n || !it) return; ncSeed(); if (!cusKinds().some(k => k.n === n)) cusKinds().push({ n, b: 'event' }); it.tag = n; commit(); ncPeek(id); }); ncPeek(i.id); return; }
+    if (!t.value) delete i.tag; else { i.tag = t.value; const k = cusKinds().find(x => x.n === t.value); if (k && k.b) i.cat = k.b; }
+  }
   commit();
 }
 function ncClosed() {
