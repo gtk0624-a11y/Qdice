@@ -12,6 +12,9 @@ pre{white-space:pre-wrap;background:#fff;border-radius:12px;padding:12px;font-si
 <button class="btn" data-copy="body">📋 게시글 문구 복사</button>
 <button class="btn" data-copy="dm">💌 DM 문구 복사</button>
 <div id="msg"></div>
+<h1>🎬 릴스 영상</h1><video src="reels.mp4?v=1" controls playsinline style="width:100%;border-radius:12px"></video>
+<button class="btn y" id="rv">🎬 릴스 영상 저장·공유</button>
+
 <figure><img src="card1.jpg?v=3" alt="카드 1"><figcaption>1 / 8</figcaption></figure><figure><img src="card2.jpg?v=3" alt="카드 2"><figcaption>2 / 8</figcaption></figure><figure><img src="card3.jpg?v=3" alt="카드 3"><figcaption>3 / 8</figcaption></figure><figure><img src="card4.jpg?v=3" alt="카드 4"><figcaption>4 / 8</figcaption></figure><figure><img src="card5.jpg?v=3" alt="카드 5"><figcaption>5 / 8</figcaption></figure><figure><img src="card6.jpg?v=3" alt="카드 6"><figcaption>6 / 8</figcaption></figure><figure><img src="card7.jpg?v=3" alt="카드 7"><figcaption>7 / 8</figcaption></figure><figure><img src="card8.jpg?v=3" alt="카드 8"><figcaption>8 / 8</figcaption></figure>
 <h1>게시글 문구</h1><pre id="body">규정집 200쪽, 아직도 넘기고 계세요? 📚
 
@@ -55,4 +58,7 @@ try{const files=await Promise.all([1,2,3,4,5,6,7,8].map(async i=>new File([await
 if(navigator.canShare&&navigator.canShare({files})){await navigator.share({files});msg('완료!');return}
 for(const f of files){const a=document.createElement('a');a.href=URL.createObjectURL(f);a.download=f.name;document.body.appendChild(a);a.click();a.remove();await new Promise(r=>setTimeout(r,400))}msg('다운로드 폴더에 저장됐어요.')}
 catch(e){msg(e.name==='AbortError'?'':'사진을 꾹 눌러 저장해 주세요.')}};
+document.getElementById('rv').onclick=async()=>{msg('불러오는 중…');try{const f=new File([await (await fetch('reels.mp4?v=1')).blob()],'규정줍줍_릴스.mp4',{type:'video/mp4'});
+if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f]});msg('완료!');return}
+const a=document.createElement('a');a.href=URL.createObjectURL(f);a.download=f.name;a.click();msg('다운로드 폴더에 저장됐어요.')}catch(e){msg(e.name==='AbortError'?'':'영상 오른쪽 아래 ⋮ → 다운로드를 눌러 주세요.')}};
 </script></body></html>
