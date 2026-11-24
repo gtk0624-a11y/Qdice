@@ -502,3 +502,6 @@ service cloud.firestore {
 
 ## v144
 - 기록 화면 맨 위에 「💾 저장」(ncNoteSave) + 「🗑 삭제」 함께 표시.
+
+## v145
+- 캘린더 모든 카드·날짜 목록에 🗑: 일정·기록·디데이는 실제 삭제, 평가·예산·연수·학사 등은 S.evHide(date|제목)로 캘린더에서만 숨김(allEvents 래퍼) + 「숨긴 항목 되살리기」(ncUnhide).
