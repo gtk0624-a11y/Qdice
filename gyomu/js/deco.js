@@ -39,7 +39,7 @@ function clkOffTxt() {
 const clkOffHtml = () => { const t = clkOffTxt(); return t ? `<div class="co">${esc(t)}</div>` : ''; };
 setInterval(() => { const e = document.querySelector('#tfclock .co'), t = clkOffTxt(); if (e && t) e.textContent = t; else if (!!e !== !!t) clkDraw(); }, 1000);
 function clkDraw() {
-  let el = document.getElementById('tfclock'); const on = S.setup && S.profile.clock; document.body.classList.toggle('hasclk', !!on);
+  let el = document.getElementById('tfclock'); const on = S.setup && S.profile.clock !== false; document.body.classList.toggle('hasclk', !!on);
   if (!on) { if (el) el.remove(); return; }
   if (!el) { el = document.createElement('div'); el.id = 'tfclock'; el.setAttribute('role', 'status'); document.body.appendChild(el); }
   const n = new Date(), st = clkState();
@@ -62,7 +62,7 @@ function decoPhoto(file) {
 function decoCard() {
   const p = S.profile, d = DEC(), cm = p.cheer || 'off';
   return `<section class="decoset"><h3 class="h3">⏰ 시계 · 🎨 꾸미기 · 💌 격려 (선택)</h3>
-  <div class="dset"><label class="chk"><input type="checkbox" data-dset="clock" ${p.clock ? 'checked' : ''}> <b>시계 보이기</b> — 일과표 기준으로 "지금은 3교시입니다 / 급식시간입니다"를 알려 줘요. 컴퓨터는 화면 오른쪽, 폰·태블릿은 화면 위쪽에 맞춰 나옵니다.</label>
+  <div class="dset"><label class="chk"><input type="checkbox" data-dset="clock" ${p.clock !== false ? 'checked' : ''}> <b>시계 보이기</b> — 일과표 기준으로 "지금은 3교시입니다 / 급식시간입니다"를 알려 줘요. 컴퓨터는 화면 오른쪽, 폰·태블릿은 화면 위쪽에 맞춰 나옵니다.</label>
   <div class="row2c"><label>급식 시작 <input type="time" data-dset="lunchS" value="${esc(p.lunchS || '')}"></label><label>급식 끝 <input type="time" data-dset="lunchE" value="${esc(p.lunchE || '')}"></label><span class="mu">비워 두면 일과표에서 가장 긴 쉬는 시간을 급식으로 봅니다.</span></div></div>
   <div class="dset"><label class="chk"><input type="checkbox" data-dset="deco.on" ${d.on ? 'checked' : ''}> <b>꾸미기(다꾸) 켜기</b> — 우리 반 단체사진 같은 사진을 배경으로 깝니다. 글씨는 반투명 종이 위에 놓여서 사진 때문에 읽기 어렵지 않아요.</label>
   <div class="row2c"><label class="btn sm file">📷 배경 사진 고르기<input type="file" accept="image/*" data-decophoto hidden></label><button class="x" data-act="decoPhotoDel">사진 지우기</button></div>

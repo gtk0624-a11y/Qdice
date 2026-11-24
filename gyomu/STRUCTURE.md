@@ -458,3 +458,6 @@ service cloud.firestore {
 
 ## v128 캘린더 중심 오늘 화면
 - `todayView` 를 감싸(js/ncal.js) 위=노션식 월 캘린더(`ncMonth`), 아래=「업무들」 토글(`details.ncwork`, 열림 상태 UI.ncwork)에 기존 게시판 줄. 카드에 ☑완료 줄 추가.
+
+## v129
+- 시계: profile.clock 값이 없으면(동기화로 지워진 경우 등) 기본 켜짐. 설정에서 끄면 false 로 저장(js/deco.js clkDraw·설정 체크박스).
