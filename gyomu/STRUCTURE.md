@@ -532,3 +532,6 @@ service cloud.firestore {
 
 ## v155
 - 🔗 링크 칩에 밑줄.
+
+## v156
+- 모든 글칸(textarea)에서 주소를 파란 밑줄로 표시: 글칸 위에 투명 복제본(.ncmir)을 겹쳐 주소만 칠함(js/ncal.js 끝). 주소가 화면에서 어긋나 보이면 이 부분(sync)을 확인.

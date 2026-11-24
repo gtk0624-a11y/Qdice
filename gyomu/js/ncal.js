@@ -254,3 +254,33 @@ setInterval(ncPageLinks, 2000);
   document.addEventListener('pointerup', end); document.addEventListener('pointercancel', e => { if (g && g.on) { clear(); g.card.classList.remove('ncsrc'); } g = null; clearTimeout(tm); });
   document.addEventListener('click', e => { if (moved) { moved = false; if (e.target.closest && e.target.closest('.ncard')) { e.stopPropagation(); e.preventDefault(); } } }, true);
 })();
+
+/* 글칸 안의 주소에 파란 밑줄(글칸 위에 같은 글자를 투명하게 겹쳐 주소만 칠함) */
+(function () {
+  const MIR = new Map(), URL_RE = /(?:https?:\/\/|www\.)[^\s<>"'）)]+/g;
+  const has = v => { URL_RE.lastIndex = 0; return URL_RE.test(v || ''); };
+  function html(v) {
+    let out = '', last = 0, m; URL_RE.lastIndex = 0;
+    while ((m = URL_RE.exec(v))) { const u = m[0].replace(/[.,;]+$/, ''); out += esc(v.slice(last, m.index)) + '<u>' + esc(u) + '</u>'; last = m.index + u.length; URL_RE.lastIndex = last; }
+    return out + esc(v.slice(last)) + '\n';
+  }
+  function sync(t) {
+    let mir = MIR.get(t);
+    if (!t.isConnected || !t.offsetParent && getComputedStyle(t).position !== 'fixed' || !has(t.value)) { if (mir) { mir.remove(); MIR.delete(t); } return; }
+    const host = t.closest('dialog') || document.body;
+    if (!mir) { mir = document.createElement('div'); mir.className = 'ncmir'; MIR.set(t, mir); }
+    if (mir.parentNode !== host) host.appendChild(mir);
+    const cs = getComputedStyle(t), r = t.getBoundingClientRect();
+    ['fontFamily', 'fontSize', 'fontWeight', 'lineHeight', 'letterSpacing', 'wordSpacing', 'textIndent', 'tabSize', 'whiteSpace', 'overflowWrap', 'wordBreak', 'paddingTop', 'paddingRight', 'paddingBottom', 'paddingLeft', 'textAlign'].forEach(k => { mir.style[k] = cs[k]; });
+    if (cs.whiteSpace === 'nowrap' || cs.whiteSpace === 'normal') mir.style.whiteSpace = 'pre-wrap';
+    mir.style.left = r.left + t.clientLeft + 'px'; mir.style.top = r.top + t.clientTop + 'px'; mir.style.width = t.clientWidth + 'px'; mir.style.height = t.clientHeight + 'px';
+    const h = html(t.value); if (mir.dataset.h !== h) { mir.innerHTML = h; mir.dataset.h = h; }
+    mir.scrollTop = t.scrollTop; mir.scrollLeft = t.scrollLeft;
+    const vis = r.bottom > 0 && r.top < innerHeight && r.width > 0; mir.style.display = vis ? 'block' : 'none';
+  }
+  function all() { document.querySelectorAll('textarea').forEach(sync); MIR.forEach((m, t) => { if (!t.isConnected) { m.remove(); MIR.delete(t); } }); }
+  document.addEventListener('input', e => { if (e.target.tagName === 'TEXTAREA') sync(e.target); });
+  document.addEventListener('scroll', e => { if (e.target && e.target.tagName === 'TEXTAREA') sync(e.target); else all(); }, true);
+  window.addEventListener('resize', all); document.addEventListener('toggle', () => setTimeout(all, 0), true);
+  setInterval(all, 500);
+})();

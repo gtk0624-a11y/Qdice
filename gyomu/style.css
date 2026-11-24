@@ -1135,3 +1135,5 @@ dialog.ncpeek,.ncpeek,.ncnd{--nl:#e3e2e0;--nt:#37352f;--ng:#787774;--nh:#f7f6f3}
 body.ncdragging{user-select:none;cursor:grabbing}.ncard[data-id],.ncard[data-note]{touch-action:pan-y}
 /* v155 링크는 밑줄 */
 .nclk,html[data-skin] .nclk,html[data-skin] .ncpeek .nclk{text-decoration:underline!important;text-underline-offset:3px;text-decoration-thickness:1px}
+.ncmir{position:fixed;z-index:2147483000;pointer-events:none;color:transparent;overflow:hidden;margin:0;border:0;box-sizing:border-box;background:transparent}
+.ncmir u{color:#0b47c9;text-decoration:underline;text-decoration-thickness:1.5px;text-underline-offset:3px}
