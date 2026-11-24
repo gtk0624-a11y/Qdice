@@ -481,3 +481,6 @@ service cloud.firestore {
 
 ## v137
 - 메모의 주소(http/www)를 🔗 바로가기 칩으로: 카드·편집창(입력 즉시 갱신)·날짜 메모 밑(ncLinks/ncUrls, js/ncal.js). 링크 클릭은 capture 단계에서 막아 data-act 가 가로채지 않게 함.
+
+## v138
+- 이번 주 기한도 토글(details.ncsoon, 상태 UI.ncsoon).

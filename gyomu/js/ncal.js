@@ -118,7 +118,7 @@ Object.assign(A, {
 });
 function ncClone(c, ds) { const i = { id: uid(), title: c.title, cat: c.cat || 'event', date: ds, done: false }; if (c.tag) i.tag = c.tag; if (c.memo) i.memo = c.memo; if (c.span > 0) { const e = new Date(ds + 'T00:00:00'); e.setDate(e.getDate() + c.span); i.end = ymd(e); } S.items.push(i); return i; }
 function ncSoon() {
-  const L = upcoming(7); return `<div class="ncsoon"><b>⏰ 이번 주 기한</b>${L.length ? L.map(e => `<div class="ncs" ${e.note ? `data-act="ncOpen" data-note="${e.note}"` : e.id ? `data-act="ncOpen" data-id="${e.id}"` : `data-act="ncOpen" data-d="${e.date}"`} role="button" tabindex="0"><b class="ddb">${ddText(dd(e.date))}</b><span>${md(e.date)} ${DOW[new Date(e.date + 'T00:00:00').getDay()]}</span><span class="tl">${esc(e.t)}</span></div>`).join('') : '<span class="mu"> 이번 주 기한이 없습니다.</span>'}</div>`;
+  const L = upcoming(7); return `<details class="ncsoon ncwork" ${UI.ncsoon === false ? '' : 'open'}><summary>⏰ 이번 주 기한 <small>${L.length}건</small></summary>${L.length ? L.map(e => `<div class="ncs" ${e.note ? `data-act="ncOpen" data-note="${e.note}"` : e.id ? `data-act="ncOpen" data-id="${e.id}"` : `data-act="ncOpen" data-d="${e.date}"`} role="button" tabindex="0"><b class="ddb">${ddText(dd(e.date))}</b><span>${md(e.date)} ${DOW[new Date(e.date + 'T00:00:00').getDay()]}</span><span class="tl">${esc(e.t)}</span></div>`).join('') : '<span class="mu"> 이번 주 기한이 없습니다.</span>'}</details>`;
 }
 function ncMake(ds) { const i = { id: uid(), title: '', cat: 'event', date: ds, done: false }; S.items.push(i); UI.day = ds; ncPeek(i.id, true); }
 document.addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && e.target.matches && e.target.matches('.ncard,.ncrow')) { e.preventDefault(); e.target.click(); } });
@@ -130,7 +130,7 @@ document.addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === 
     const h = _today(), k = h.indexOf(MARK), top = k >= 0 ? h.slice(0, k) : '', rest = (k >= 0 ? h.slice(k) : h).replace(/<p class="soon">[\s\S]*?<\/p>/, '');
     return `${top}<details class="ncwork nccal" ${UI.nccal === false ? '' : 'open'}><summary>📅 캘린더 <small>일정 · 메모 · 기록</small></summary>${ncMonth()}</details>${ncSoon()}<details class="ncwork" ${UI.ncwork ? 'open' : ''}><summary>🗂 업무들 <small>게시판 줄 · 연수 · 예산 · 평가 등</small></summary>${rest}</details>`;
   };
-  document.addEventListener('toggle', e => { if (e.target.classList && e.target.classList.contains('ncwork')) { if (e.target.classList.contains('nccal')) UI.nccal = e.target.open; else UI.ncwork = e.target.open; } }, true);
+  document.addEventListener('toggle', e => { if (e.target.classList && e.target.classList.contains('ncwork')) { if (e.target.classList.contains('nccal')) UI.nccal = e.target.open; else if (e.target.classList.contains('ncsoon')) UI.ncsoon = e.target.open; else UI.ncwork = e.target.open; } }, true);
 })();
 
 /* 토요휴업일은 캘린더·기한 목록에서 모두 뺍니다 */
