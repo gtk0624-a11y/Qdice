@@ -172,3 +172,9 @@ function clkDock() {
 /* 날짜 메모에 주소를 쓰면 바로가기 갱신 */
 document.addEventListener('input', e => { const t = e.target; if (!t.dataset || !t.dataset.dmemo) return; const b = document.getElementById('ncdmlinks'); if (b) b.innerHTML = ncLinks(t.value); });
 document.addEventListener('click', e => { if (e.target.closest && e.target.closest('a.nclk')) e.stopPropagation(); }, true);
+
+/* 기록 화면 맨 위에 눈에 띄는 삭제 단추 */
+(function () {
+  const _nv = notesView;
+  notesView = function (id) { const h = _nv.apply(this, arguments); if (!id || !(S.notes || []).some(n => n.id === id)) return h; return `<div class="ncnd"><button class="btn ncdelbtn" data-act="noteDel" data-id="${id}">🗑 이 기록 삭제</button></div>` + h; };
+})();

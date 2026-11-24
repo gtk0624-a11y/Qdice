@@ -1048,3 +1048,4 @@ details.ncsub{border:1.5px solid #5b5446;border-radius:8px;margin:8px 0;padding:
 .ncs:has(.cute){background:#fff3ec;border-radius:8px}
 #alarmbar .al-b.cute{background:#ffe0d2;color:#8a3b1f}
 @media(prefers-reduced-motion:reduce){.cute::before{animation:none!important}}
+.ncnd{display:flex;justify-content:flex-end;margin:0 0 6px}.ncdelbtn{background:#ffe3e0;border:1.5px solid #c0392b;color:#8a1f14;font-weight:700}
