@@ -1129,3 +1129,4 @@ html[data-skin] .ncpeek .ncprop label{color:var(--ng)}
 html[data-skin] .ncpeek .ncrep{background:var(--nh)!important;border-radius:8px}
 html[data-skin] .ncpeek .btns{margin-top:12px;gap:8px;display:flex;flex-wrap:wrap}
 html[data-skin] .ncpeek .nclk{background:#e7f3f8;border:0;color:#1b5e86!important}
+dialog.ncpeek,.ncpeek,.ncnd{--nl:#e3e2e0;--nt:#37352f;--ng:#787774;--nh:#f7f6f3}
