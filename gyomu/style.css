@@ -1137,3 +1137,9 @@ body.ncdragging{user-select:none;cursor:grabbing}.ncard[data-id],.ncard[data-not
 .nclk,html[data-skin] .nclk,html[data-skin] .ncpeek .nclk{text-decoration:underline!important;text-underline-offset:3px;text-decoration-thickness:1px}
 .ncmir{position:fixed;z-index:2147483000;pointer-events:none;color:transparent;overflow:hidden;margin:0;border:0;box-sizing:border-box;background:transparent}
 .ncmir u{color:#0b47c9;text-decoration:underline;text-decoration-thickness:1.5px;text-underline-offset:3px}
+
+/* v159: 손글씨 추가 버튼이 달력 하단 기한을 가리지 않게 — 작은 동그라미로 줄이고 평소엔 흐리게 */
+html[data-skin] .scfab,.scfab{padding:0!important;width:34px;height:34px;justify-content:center;border-width:1.5px!important;opacity:.45;box-shadow:0 1px 4px #0002!important;font-size:16px!important;left:8px!important}
+html[data-skin] .scfab span,.scfab span{display:none!important}
+.scfab:hover,.scfab:focus-visible,.scfab:active{opacity:1}
+main,#app,.wrap{padding-bottom:max(var(--pb,0px),64px)}
