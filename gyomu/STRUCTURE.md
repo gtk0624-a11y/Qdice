@@ -472,3 +472,6 @@ service cloud.firestore {
 
 ## v132
 - 시계(#tfclock)를 머리말 .mast2(날짜·학교·선생님 칸) 안에 넣음: clkDock()(js/ncal.js), render·clkDraw 뒤에 재배치. 검색에 일정 메모(memo) 포함(search.js).
+
+## v135
+- 포스트잇 클릭 이동은 pointerup(끌지 않았을 때)에서 처리(pstGo) — 예전 포스트잇은 제목으로 기록/일정 추측. 시계 안의 「지금은 공강시간입니다」 등 안내글(.cs,.cc)·남은시간 다시 표시.

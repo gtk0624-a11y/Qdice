@@ -118,15 +118,24 @@ document.addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === 
 /* 토요휴업일은 캘린더·기한 목록에서 모두 뺍니다 */
 (function () { const _ae = allEvents; allEvents = function () { return _ae().filter(e => !/토요\s*휴업/.test(e.t || '')); }; })();
 
-/* 포스트잇 글을 누르면 원래 기록·일정으로 */
-document.addEventListener('click', e => {
-  const t = e.target.closest && e.target.closest('.pst .pt[data-pnote],.pst .pt[data-pitem]'); if (!t) return;
-  if (t.dataset.pnote) { location.hash = '#/note/' + t.dataset.pnote; return; }
-  const i = S.items.find(x => x.id === t.dataset.pitem); if (!i) { toast('원래 일정이 지워졌습니다.'); return; }
-  if (i.date) { UI.cal = i.date.slice(0, 7); UI.day = i.date; } UI.nccal = true;
+/* 포스트잇을 누르면 원래 기록·일정으로(끌어 옮길 때는 이동하지 않음) */
+function pstGo(x) {
+  let nid = x.note, iid = x.item; const tx = String(x.text || '').replace(/^📝\s*/, '');
+  if (!nid && !iid) { const n = (S.notes || []).find(n => (n.title || '제목 없음') === tx && (!x.date || n.date === x.date)) || (/^📝/.test(x.text || '') ? (S.notes || []).find(n => n.title === tx) : null); if (n) nid = n.id; else { const i = S.items.find(i => i.title === tx && (!x.date || i.date === x.date)); if (i) iid = i.id; } }
+  if (nid) { location.hash = '#/note/' + nid; return; }
+  const i = iid ? S.items.find(z => z.id === iid) : null, ds = (i && i.date) || x.date;
+  if (!i && !ds) { toast('연결된 기록·일정이 없는 포스트잇입니다.'); return; }
+  if (ds) { UI.cal = ds.slice(0, 7); UI.day = ds; } UI.nccal = true;
   if (location.hash !== '#/today' && location.hash !== '' && location.hash !== '#/') location.hash = '#/today'; else render();
-  setTimeout(() => ncPeek(i.id), 150);
-});
+  if (i) setTimeout(() => ncPeek(i.id), 200);
+}
+let _pg = null;
+document.addEventListener('pointerdown', e => { const n = e.target.closest && e.target.closest('.pst'); _pg = n && !e.target.closest('button') ? { id: n.dataset.id, x: e.clientX, y: e.clientY } : null; }, true);
+document.addEventListener('pointerup', e => {
+  if (!_pg) return; const g = _pg; _pg = null;
+  if (Math.abs(e.clientX - g.x) > 6 || Math.abs(e.clientY - g.y) > 6) return;
+  const x = pstList().find(n => n.id === g.id); if (x) pstGo(x);
+}, true);
 
 /* 시계를 머리말 오른쪽(날짜·학교·선생님 칸) 안으로 */
 function clkDock() {
