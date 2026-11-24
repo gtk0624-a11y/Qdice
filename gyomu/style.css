@@ -1143,3 +1143,5 @@ html[data-skin] .scfab,.scfab{padding:0!important;width:34px;height:34px;justify
 html[data-skin] .scfab span,.scfab span{display:none!important}
 .scfab:hover,.scfab:focus-visible,.scfab:active{opacity:1}
 main,#app,.wrap{padding-bottom:max(var(--pb,0px),64px)}
+/* v160: 깜빡임 줄이기 — 시계 이동 시 전환 없이 */
+#tfclock{transition:none!important}

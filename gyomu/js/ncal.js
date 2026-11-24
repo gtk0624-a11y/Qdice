@@ -189,7 +189,7 @@ function clkDock() {
   if (el && box && el.parentNode !== box) box.insertBefore(el, box.firstChild);
 }
 (function () {
-  const _r = render; render = function () { const r = _r.apply(this, arguments); clkDock(); return r; };
+  const _r = render; render = function () { const c = document.getElementById('tfclock'); if (c && c.parentNode !== document.body) document.body.appendChild(c); const r = _r.apply(this, arguments); clkDock(); return r; };
   const _c = clkDraw; clkDraw = function () { const r = _c.apply(this, arguments); clkDock(); return r; };
   setTimeout(() => { clkDraw(); }, 400); setInterval(clkDock, 1500);
 })();
@@ -282,5 +282,5 @@ setInterval(ncPageLinks, 2000);
   document.addEventListener('input', e => { if (e.target.tagName === 'TEXTAREA') sync(e.target); });
   document.addEventListener('scroll', e => { if (e.target && e.target.tagName === 'TEXTAREA') sync(e.target); else all(); }, true);
   window.addEventListener('resize', all); document.addEventListener('toggle', () => setTimeout(all, 0), true);
-  setInterval(all, 500);
+  setInterval(() => { if (!document.hidden && document.querySelector('textarea')) all(); }, 1000);
 })();
