@@ -85,12 +85,12 @@ function ncClosed() {
 }
 Object.assign(A, {
   ncPin(el, e) {
-    e && e.stopPropagation(); let text, date;
-    if (el.dataset.note) { const n = (S.notes || []).find(x => x.id === el.dataset.note); if (!n) return; text = '📝 ' + (n.title || '제목 없음'); date = n.date; }
-    else if (el.dataset.id) { const i = S.items.find(x => x.id === el.dataset.id); if (!i) return; text = i.title; date = i.date; }
+    e && e.stopPropagation(); let text, date, ref = {};
+    if (el.dataset.note) { const n = (S.notes || []).find(x => x.id === el.dataset.note); if (!n) return; text = '📝 ' + (n.title || '제목 없음'); date = n.date; ref = { note: n.id }; }
+    else if (el.dataset.id) { const i = S.items.find(x => x.id === el.dataset.id); if (!i) return; text = i.title; date = i.date; ref = { item: i.id }; }
     else { text = el.dataset.t; date = el.dataset.d; }
     if (!text) { toast('제목을 먼저 적어 주세요.'); return; }
-    pstList().push({ id: pstId(), text, date, color: '노랑', done: false }); S.profile.pstDown = false; commit(); toast('포스트잇으로 붙였습니다.');
+    pstList().push(Object.assign({ id: pstId(), text, date, color: '노랑', done: false }, ref)); S.profile.pstDown = false; commit(); toast('포스트잇으로 붙였습니다.');
   },
   ncNoteNew(el) { const n = { id: uid(), title: '', date: el.dataset.d || today(), kind: '회의', body: '', decisions: '', followups: '', lock: false }; S.notes.push(n); save(); location.hash = '#/note/' + n.id; },
   ncView(el) { UI.calv = el.dataset.v; render(); },
@@ -117,3 +117,13 @@ document.addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === 
 
 /* 토요휴업일은 캘린더·기한 목록에서 모두 뺍니다 */
 (function () { const _ae = allEvents; allEvents = function () { return _ae().filter(e => !/토요\s*휴업/.test(e.t || '')); }; })();
+
+/* 포스트잇 글을 누르면 원래 기록·일정으로 */
+document.addEventListener('click', e => {
+  const t = e.target.closest && e.target.closest('.pst .pt[data-pnote],.pst .pt[data-pitem]'); if (!t) return;
+  if (t.dataset.pnote) { location.hash = '#/note/' + t.dataset.pnote; return; }
+  const i = S.items.find(x => x.id === t.dataset.pitem); if (!i) { toast('원래 일정이 지워졌습니다.'); return; }
+  if (i.date) { UI.cal = i.date.slice(0, 7); UI.day = i.date; } UI.nccal = true;
+  if (location.hash !== '#/today' && location.hash !== '' && location.hash !== '#/') location.hash = '#/today'; else render();
+  setTimeout(() => ncPeek(i.id), 150);
+});
