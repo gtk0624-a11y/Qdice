@@ -487,3 +487,6 @@ service cloud.firestore {
 
 ## v139
 - 날짜 메모·그날 기록도 토글(details.ncsub, UI.ncdm/UI.ncdn).
+
+## v140
+- 곡선중 학교 카드(details.sbanner)를 오늘 화면 맨 아래로 옮기고 항상 표시(선택 기능 꺼져 있어도 .ncsb 안에서는 보임).

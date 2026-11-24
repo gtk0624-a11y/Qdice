@@ -127,8 +127,9 @@ document.addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === 
 (function () {
   const _today = todayView, MARK = '<div class="bh"><h2>오늘의 게시판</h2>';
   todayView = function () {
-    const h = _today(), k = h.indexOf(MARK), top = k >= 0 ? h.slice(0, k) : '', rest = (k >= 0 ? h.slice(k) : h).replace(/<p class="soon">[\s\S]*?<\/p>/, '');
-    return `${top}<details class="ncwork nccal" ${UI.nccal === false ? '' : 'open'}><summary>📅 캘린더 <small>일정 · 메모 · 기록</small></summary>${ncMonth()}</details>${ncSoon()}<details class="ncwork" ${UI.ncwork ? 'open' : ''}><summary>🗂 업무들 <small>게시판 줄 · 연수 · 예산 · 평가 등</small></summary>${rest}</details>`;
+    const h = _today(), k = h.indexOf(MARK); let top = k >= 0 ? h.slice(0, k) : '', sb = ''; top = top.replace(/<details class="sbanner"[\s\S]*?<\/details>/, m => { sb = m; return ''; }); 
+    const rest = (k >= 0 ? h.slice(k) : h).replace(/<p class="soon">[\s\S]*?<\/p>/, '');
+    return `${top}<details class="ncwork nccal" ${UI.nccal === false ? '' : 'open'}><summary>📅 캘린더 <small>일정 · 메모 · 기록</small></summary>${ncMonth()}</details>${ncSoon()}<details class="ncwork" ${UI.ncwork ? 'open' : ''}><summary>🗂 업무들 <small>게시판 줄 · 연수 · 예산 · 평가 등</small></summary>${rest}</details>${sb ? `<div class="ncsb">${sb}</div>` : ''}`;
   };
   document.addEventListener('toggle', e => { if (e.target.classList && e.target.classList.contains('ncsub')) { if (e.target.classList.contains('ncdm')) UI.ncdm = e.target.open; else UI.ncdn = e.target.open; return; } if (e.target.classList && e.target.classList.contains('ncwork')) { if (e.target.classList.contains('nccal')) UI.nccal = e.target.open; else if (e.target.classList.contains('ncsoon')) UI.ncsoon = e.target.open; else UI.ncwork = e.target.open; } }, true);
 })();
