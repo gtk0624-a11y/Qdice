@@ -231,7 +231,7 @@ setInterval(ncPageLinks, 2000);
   document.addEventListener('pointermove', e => {
     if (!g) return;
     if (!g.on) { if (Math.hypot(e.clientX - g.x, e.clientY - g.y) < 6) return; if (g.touch) { clearTimeout(tm); g = null; return; } g.on = true; begin(e); }
-    e.preventDefault(); ghost.style.left = e.clientX + 6 + 'px'; ghost.style.top = e.clientY + 6 + 'px';
+    e.preventDefault(); if (e.clientY > innerHeight - 70) window.scrollBy(0, 18); else if (e.clientY < 70) window.scrollBy(0, -18); ghost.style.left = e.clientX + 6 + 'px'; ghost.style.top = e.clientY + 6 + 'px';
     const c = cellAt(e.clientX, e.clientY); if (c !== hot) { if (hot) hot.classList.remove('ncdrop'); hot = c; if (hot) hot.classList.add('ncdrop'); }
   }, { passive: false });
   const end = e => {
