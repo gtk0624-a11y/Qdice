@@ -137,5 +137,5 @@ function clkDock() {
 (function () {
   const _r = render; render = function () { const r = _r.apply(this, arguments); clkDock(); return r; };
   const _c = clkDraw; clkDraw = function () { const r = _c.apply(this, arguments); clkDock(); return r; };
-  setTimeout(clkDock, 300);
+  setTimeout(clkDock, 300); setInterval(clkDock, 1500);
 })();
