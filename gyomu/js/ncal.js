@@ -16,7 +16,7 @@ function ncCard(e) {
   const ck = it ? `<button class="ncck ${e.done ? 'on' : ''}" data-act="tog" data-id="${it.id}" aria-pressed="${!!e.done}" aria-label="완료 표시"></button>` : '';
   const pin = `<button class="ncpin" data-act="ncPin" ${e.note ? `data-note="${e.note}"` : it ? `data-id="${it.id}"` : `data-t="${esc(e.t)}" data-d="${e.date}"`} title="포스트잇으로 붙이기" aria-label="포스트잇으로 붙이기">📌</button>`;
   const att = e.note ? `data-act="ncOpen" data-note="${e.note}"` : it ? `data-act="ncOpen" data-id="${it.id}"` : `data-act="ncOpen" data-d="${e.date}"`;
-  return `<div class="ncard ${e.done ? 'dn' : ''}" ${att} role="button" tabindex="0"><div class="nct"><b>${esc(e.t)}</b>${pin}${ncDelBtn(e, 'ncpin ncx')}</div>${it ? `<div class="ncdn">${ck}<span>완료</span></div>` : ''}<div class="ncm"><i style="background:${NC_COL(e.kind)}">${esc(e.kind)}</i>${memo ? `<span>${esc(memo.replace(/(?:https?:\/\/|www\.)\S+/g, '').trim())}</span>` : ''}${it && it.memo ? ncLinks(it.memo) : ''}</div></div>`;
+  return `<div class="ncard ${e.done ? 'dn' : ''}" ${att} role="button" tabindex="0"><div class="nct"><b>${esc(e.t || memo.replace(/(?:https?:\/\/|www\.)\S+/g, '').trim() || '제목 없음')}</b>${pin}${ncDelBtn(e, 'ncpin ncx')}</div>${it ? `<div class="ncdn">${ck}<span>완료</span></div>` : ''}<div class="ncm"><i style="background:${NC_COL(e.kind)}">${esc(e.kind)}</i>${memo ? `<span>${esc(memo.replace(/(?:https?:\/\/|www\.)\S+/g, '').trim())}</span>` : ''}${it && it.memo ? ncLinks(it.memo) : ''}</div></div>`;
 }
 function ncMonth() {
   ncSeed();
@@ -86,7 +86,7 @@ function ncFlush(d) {
 }
 function ncSave(e) {
   if (!NCP) return; const i = S.items.find(x => x.id === NCP.id), t = e.target; if (!i || !t.name) return;
-  if (t.name === 'title') i.title = t.value.trim(); else if (t.name === 'memo') { if (t.value.trim()) i.memo = t.value; else delete i.memo; }
+  if (t.name === 'title') i.title = t.value.trim(); else if (t.name === 'memo') { if (t.value.trim()) { i.memo = t.value; if (!i.title) i.title = t.value.trim().split('\n')[0].slice(0, 60); } else delete i.memo; }
   else if (t.name === 'date') { if (t.value) { i.date = t.value; if (i.end && i.end < i.date) delete i.end; } }
   else if (t.name === 'end') { if (t.value && t.value > i.date) i.end = t.value; else delete i.end; }
   else if (t.name === 'done') i.done = t.checked;
