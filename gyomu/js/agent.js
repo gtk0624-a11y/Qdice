@@ -2,6 +2,10 @@
    Claude 키가 있을 때만 켜지고, 바로 고치지 않고 "이렇게 하겠습니다" 카드를 보여 준 뒤 [적용]을 눌러야 반영된다. 삭제는 하지 않는다. */
 const AG_VERB = /(추가|넣어|등록|수정|바꿔|변경|고쳐|집행|처리|완료|체크|기록해|적어|정리해|만들어|잡아|올려|배정|사용했|결제|지출)/;
 const agKey = () => localStorage.getItem('tf.claudeKey') || '';
+async function agErr(r) { let m = ''; try { const j = await r.json(); m = (j.error && j.error.message) || ''; } catch (e) { } const h = r.status === 401 ? '키가 올바르지 않습니다. console.anthropic.com에서 만든 sk-ant- 로 시작하는 API 키인지 확인해 주세요' : /credit|balance|billing/i.test(m) ? 'API 크레딧이 없습니다. claude.ai 유료 구독과는 별개라서, console.anthropic.com의 Billing에서 API 크레딧을 충전해야 합니다' : r.status === 403 ? '이 키로는 쓸 수 없습니다(권한)' : r.status === 404 ? '모델을 찾을 수 없습니다' : r.status === 429 ? '요청이 몰렸거나 한도를 넘었습니다' : '응답 오류 ' + r.status; return h + (m ? ' [' + m.slice(0, 140) + ']' : ''); }
+async function agPing() { const r = await fetch('https://api.anthropic.com/v1/messages', { method: 'POST', headers: { 'content-type': 'application/json', 'x-api-key': agKey(), 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' }, body: JSON.stringify({ model: 'claude-haiku-5-5', max_tokens: 8, messages: [{ role: 'user', content: '안녕' }] }) }); if (!r.ok) throw new Error(await agErr(r)); }
+document.addEventListener('submit', e => { if (!e.target.matches || !e.target.matches('[data-chatkey],[data-form=claude]')) return; setTimeout(async () => { if (!agKey()) return; try { await agPing(); toast('✅ 키가 정상입니다. 꿈송이 비서를 쓸 수 있어요.'); } catch (x) { alert('키는 저장했지만 사용할 수 없습니다.\n\n' + x.message); } }, 300); });
+
 const agN = s => String(s || '').replace(/\s+/g, '').toLowerCase();
 const agWon = n => (+n || 0).toLocaleString() + '원';
 const AG_TOOLS = [
@@ -72,7 +76,7 @@ async function agentTry(q) {
       method: 'POST', headers: { 'content-type': 'application/json', 'x-api-key': agKey(), 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
       body: JSON.stringify({ model: 'claude-haiku-5-5', max_tokens: 1200, tools: AG_TOOLS, tool_choice: { type: 'auto' }, system: '당신은 교사의 업무 비서 꿈송이입니다. 사용자가 일정·할 일·업무·예산·회의기록을 넣거나 고치라고 하면 알맞은 도구를 호출해 제안하세요(한 번에 여러 개 가능). 날짜는 YYYY-MM-DD, "내일·다음 주 금요일" 같은 말은 오늘 날짜 기준으로 계산하세요. 금액은 원 단위 정수입니다. 사업·항목 이름은 [예산]에 있는 이름을 쓰세요. 필요한 정보(금액·날짜·어느 항목인지)가 모호하면 도구를 호출하지 말고 존댓말로 짧게 되물으세요. 삭제는 하지 않습니다. 긴 공문·메신저 글이 붙으면 일정(event)·할 일(todo, 마감이 있는 것)·내 업무로 나눠 여러 도구를 한꺼번에 호출하세요. 단순 질문이면 도구 없이 "찾아보기" 안내만 하세요. 도구를 호출할 때 앞에 한 줄로 무엇을 하려는지 존댓말로 말하세요.', messages: [{ role: 'user', content: agContext() + '\n\n[요청]\n' + q }] })
     });
-    if (!r.ok) throw new Error(r.status === 401 ? '키가 올바르지 않습니다' : r.status === 400 || r.status === 402 ? '잔액(크레딧)이 부족할 수 있습니다' : '응답 오류 ' + r.status);
+    if (!r.ok) throw new Error(await agErr(r));
     j = await r.json();
   } catch (e) { CH.push({ role: 'bot', text: '비서 기능을 쓰지 못했습니다(' + e.message + '). 대신 찾아서 보여 드릴게요.', blocks: [] }); return false; }
   const text = (j.content || []).filter(c => c.type === 'text').map(c => c.text).join('\n').trim();

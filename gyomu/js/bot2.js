@@ -133,7 +133,7 @@ const B2_SYS = `당신은 교사 업무수첩 「업무파탈」 안의 비서 �
 - 정보가 모호하면 도구 호출 전에 한 가지만 되물으세요. 학생·교직원의 실명 명단은 이 수첩에 없으며 만들지도 않습니다.`;
 async function b2Call(body) {
   const r = await fetch('https://api.anthropic.com/v1/messages', { method: 'POST', headers: { 'content-type': 'application/json', 'x-api-key': agKey(), 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' }, body: JSON.stringify(body) });
-  if (!r.ok) throw new Error(r.status === 401 ? '키가 올바르지 않습니다' : r.status === 429 ? '요청이 몰렸습니다. 잠시 뒤 다시 해 주세요' : r.status === 400 || r.status === 402 ? '잔액(크레딧)이나 요청 형식을 확인해 주세요' : '응답 오류 ' + r.status);
+  if (!r.ok) throw new Error(await agErr(r));
   return r.json();
 }
 const B2_LBL = { search_site: '사이트 검색', find_rule: '규정 찾기', list_library: '자료실', read_library: '자료 읽기', get_calendar: '캘린더', get_day: '하루 보기', list_work_cards: '내 업무 카드', get_budget: '예산', list_training: '연수표', list_notes: '회의·연수 노트', get_worklog: '업무일지' };

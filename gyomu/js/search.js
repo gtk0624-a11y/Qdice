@@ -177,7 +177,7 @@ async function askClaude(q, hits) {
     headers: { 'content-type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
     body: JSON.stringify({ model: 'claude-haiku-5-5', max_tokens: 700, system: '당신은 학교 교사의 업무 비서 꿈송이입니다. 아래 [자료] 안에서만 존댓말로 짧게 답하고, 근거 번호를 [1]처럼 붙이세요. 자료에 없으면 없다고 말하세요. 질문이 맞춤법·말투가 엉망이어도 의도를 파악하세요.', messages: [{ role: 'user', content: `질문: ${q}\n\n[자료]\n${ctx}` }] })
   });
-  if (!r.ok) throw new Error('Claude 응답 오류 ' + r.status);
+  if (!r.ok) throw new Error(await agErr(r));
   const j = await r.json(); return (j.content || []).map(x => x.text || '').join('');
 }
 
