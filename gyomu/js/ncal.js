@@ -22,7 +22,8 @@ function ncMonth() {
   ncSeed();
   const [Y, M] = UI.cal.split('-').map(Number), first = new Date(Y, M - 1, 1), n = new Date(Y, M, 0).getDate(), ev = allEvents(), by = {};
   ev.forEach(e => (by[e.date] = by[e.date] || []).push(e));
-  const v = UI.calv || 'm', tabs = `<div class="nctabs"><button class="${v === 'm' ? 'on' : ''}" data-act="ncView" data-v="m">📅 월간 캘린더</button><button class="${v === 'up' ? 'on' : ''}" data-act="ncView" data-v="up">⏳ 다가오는 내 업무</button><span class="grow"></span><button class="btn pri sm" data-act="ncNew">＋ 새로 만들기</button></div>`;
+  const v = UI.calv || 'm', tabs = `<div class="nctabs"><button class="${v === 'm' ? 'on' : ''}" data-act="ncView" data-v="m">📅 월간 캘린더</button><button class="${v === 'w' ? 'on' : ''}" data-act="ncView" data-v="w">🗓 주간</button><button class="${v === 'up' ? 'on' : ''}" data-act="ncView" data-v="up">⏳ 다가오는 내 업무</button><span class="grow"></span><button class="btn sm" data-act="tfTools">🧰 도구</button><button class="btn pri sm" data-act="ncNew">＋ 새로 만들기</button></div>`;
+  if (v === 'w' && typeof ncWeek === 'function') return `${UI.view === 'cal' || location.hash.includes('cal') ? '<div class="bh"><h2>캘린더</h2></div>' : ''}${tabs}${ncWeek()}`;
   if (v === 'up') return `${UI.view === 'cal' || location.hash.includes('cal') ? '<div class="bh"><h2>캘린더</h2></div>' : ''}${tabs}${ncUpcoming()}`;
   let cells = '';
   const off = (first.getDay() + 6) % 7;

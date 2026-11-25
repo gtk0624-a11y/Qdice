@@ -134,6 +134,7 @@ const B2_SYS = `당신은 교사 업무수첩 「업무파탈」 안의 비서 �
 - 공문·메신저 글을 길게 붙여 주면 안에 든 일정·기한·준비물을 모두 뽑아 항목마다 add_cal_item을 한꺼번에 부르세요. 연도가 없으면 오늘 기준 가장 가까운 미래로 보고, 장소·시간·준비물은 memo에 넣으세요.
 - "오늘 뭐 해?", "이번 주 정리", "뭐부터 할까" 같은 말에는 daily_brief로 확인한 뒤 우선순위를 매겨 답하고, 가장 먼저 할 일 하나를 짚어 주세요. 밀린 일이 있으면 옮길 날짜까지 제안하세요.
 - 답은 먼저 결론 한 줄, 그다음 필요한 만큼만 목록·표로. 불필요한 인사·반복은 줄이세요.
+- 행사·업무 준비를 통째로 부탁하면("곡선제 준비 계획 짜줘") plan_project로 행사일 기준 단계별 할 일을 한 번에 제안하세요.
 - 정보가 모호하면 도구 호출 전에 한 가지만 되물으세요. 학생·교직원의 실명 명단은 이 수첩에 없으며 만들지도 않습니다.`;
 async function b2Call(body) {
   const r = await fetch('https://api.anthropic.com/v1/messages', { method: 'POST', headers: { 'content-type': 'application/json', 'x-api-key': agKey(), 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' }, body: JSON.stringify(body) });
