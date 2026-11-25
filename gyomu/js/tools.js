@@ -5,14 +5,15 @@ const tfAdd = (ds, n) => { const x = new Date(ds + 'T00:00:00'); x.setDate(x.get
 const tfDow = ds => '일월화수목금토'[new Date(ds + 'T00:00:00').getDay()];
 const tfMd = ds => { const [, m, d] = ds.split('-'); return +m + '/' + +d; };
 const tfOk = d => /^\d{4}-\d{2}-\d{2}$/.test(d || '');
-const tfMon = ds => { const x = new Date(ds + 'T00:00:00'); x.setDate(x.getDate() - ((x.getDay() + 6) % 7)); return ymd(x); };
+const tfWs = () => (((S.profile || {}).lay || {}).ws === 0 ? 0 : 1);
+const tfMon = ds => { const x = new Date(ds + 'T00:00:00'); x.setDate(x.getDate() - ((x.getDay() - tfWs() + 7) % 7)); return ymd(x); };
 function tfTag(n) { try { ncSeed(); if (n && !cusKinds().some(k => k.n === n)) cusKinds().push({ n, b: 'event' }); } catch (e) { } return n; }
 
 /* ===== 🗓 주간 보기 ===== */
 function ncWeek() {
   UI.wk = UI.wk || tfMon(today()); const mon = UI.wk, ev = allEvents(), by = {}; ev.forEach(e => (by[e.date] = by[e.date] || []).push(e));
   let cols = ''; for (let k = 0; k < 7; k++) {
-    const ds = tfAdd(mon, k), e = by[ds] || [], wd = (k + 1) % 7;
+    const ds = tfAdd(mon, k), e = by[ds] || [], wd = new Date(ds + 'T00:00:00').getDay();
     cols += `<div class="nwd ${ds === today() ? 'tdy' : ''} ${wd === 0 ? 'su' : wd === 6 ? 'sa' : ''}"><div class="nwh"><b>${tfMd(ds)}</b> (${tfDow(ds)})<button class="ncplus" data-act="ncAdd" data-d="${ds}" aria-label="${tfMd(ds)}에 추가">＋</button></div>${e.map(ncCard).join('') || '<p class="mu nwe">일정 없음</p>'}</div>`;
   }
   return `<div class="nwnav"><button class="btn sm" data-act="tfWk" data-n="-7">◀ 지난 주</button><button class="btn sm" data-act="tfWk" data-n="0">이번 주</button><button class="btn sm" data-act="tfWk" data-n="7">다음 주 ▶</button><b>${tfMd(mon)} ~ ${tfMd(tfAdd(mon, 6))}</b></div><div class="nwk">${cols}</div>`;
@@ -31,9 +32,7 @@ function tfBrief() {
   ${nx.length ? `<h4>내일 ${nx.length}건</h4><ul>${li(nx, e => `<li>${esc(e.t)}</li>`)}</ul>` : ''}
   ${dd.length ? `<h4>디데이</h4><ul>${dd.slice(0, 4).map(x => `<li>${esc(x.title)} <b>${x.n ? 'D-' + x.n : 'D-Day'}</b></li>`).join('')}</ul>` : ''}</div>`;
 }
-(function () {
-  const _tv = todayView; todayView = function () { const h = _tv.apply(this, arguments), M = '<details class="ncwork nccal"'; if (typeof h === 'string' && h.includes(M)) { const b = tfBrief(); if (b) return h.replace(M, b + M); } return h; };
-})();
+
 
 /* ===== 대화상자 틀 ===== */
 function tfDlg(html) {
@@ -44,6 +43,7 @@ function tfDlg(html) {
 const tfVal = n => { const e = document.querySelector('#tfdlg [name=' + n + ']'); return e ? (e.type === 'checkbox' ? e.checked : e.value) : ''; };
 function tfMenu() {
   tfDlg(`<h3>🧰 도구</h3><div class="tfm">
+  <button class="btn" data-tf="lay">🧩 화면 구조 편집<small>칸 순서·이름·메뉴·캘린더 옵션·구분 목록</small></button>
   <button class="btn" data-tf="tpl">📋 행사 템플릿<small>곡선제·수행평가·시험 등 D-30 준비표 한 번에</small></button>
   <button class="btn" data-tf="rec">📑 기록 모아보기<small>낱말·기간으로 일정·메모·회의록 모으기</small></button>
   <button class="btn" data-tf="hand">📘 인수인계서<small>업무·일정·예산을 문서로</small></button>
@@ -221,7 +221,7 @@ function tfChange(e) { const t = e.target; if (!t) return; if (t.name === 'tpl' 
 function tfClick(e) {
   const b = e.target.closest('[data-tf]'); if (!b) { if (e.target.id === 'tfdlg') e.target.close(); return; }
   const d = document.getElementById('tfdlg'), k = b.dataset.tf;
-  const M = { close: () => d.close(), menu: tfMenu, tpl: tfTplDlg, tplgo: tfTplGo, rec: () => tfRepDlg('rec'), hand: () => tfRepDlg('hand'), retro: () => tfRepDlg('retro'), imp: tfImpDlg, impgo: tfImpGo, exp: tfExpDlg, ics: tfIcs, csv: tfCsvOut, notif: tfNotifDlg,
+  const M = { lay: () => { d.close(); lyDlg(); }, close: () => d.close(), menu: tfMenu, tpl: tfTplDlg, tplgo: tfTplGo, rec: () => tfRepDlg('rec'), hand: () => tfRepDlg('hand'), retro: () => tfRepDlg('retro'), imp: tfImpDlg, impgo: tfImpGo, exp: tfExpDlg, ics: tfIcs, csv: tfCsvOut, notif: tfNotifDlg,
     copy: () => { const o = document.getElementById('tfout'); if (o) { o.select(); try { navigator.clipboard.writeText(o.value); } catch (x) { document.execCommand('copy'); } toast('복사했습니다.'); } },
     save: () => { const o = document.getElementById('tfout'); if (o) tfDl({ rec: '기록_모음', hand: '인수인계서', retro: '업무_회고' }[TFR.tab] + '.md', o.value, 'text/markdown'); },
     ai: () => sure('이 내용을 Claude(외부 서버)로 보내 다듬을까요? 학생 실명이 없는지 확인해 주세요.', tfAIRun),

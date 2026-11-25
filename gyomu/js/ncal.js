@@ -22,11 +22,11 @@ function ncMonth() {
   ncSeed();
   const [Y, M] = UI.cal.split('-').map(Number), first = new Date(Y, M - 1, 1), n = new Date(Y, M, 0).getDate(), ev = allEvents(), by = {};
   ev.forEach(e => (by[e.date] = by[e.date] || []).push(e));
-  const v = UI.calv || 'm', tabs = `<div class="nctabs"><button class="${v === 'm' ? 'on' : ''}" data-act="ncView" data-v="m">📅 월간 캘린더</button><button class="${v === 'w' ? 'on' : ''}" data-act="ncView" data-v="w">🗓 주간</button><button class="${v === 'up' ? 'on' : ''}" data-act="ncView" data-v="up">⏳ 다가오는 내 업무</button><span class="grow"></span><button class="btn sm" data-act="tfTools">🧰 도구</button><button class="btn pri sm" data-act="ncNew">＋ 새로 만들기</button></div>`;
+  const v = UI.calv || ((S.profile.lay || {}).v) || 'm', tabs = `<div class="nctabs"><button class="${v === 'm' ? 'on' : ''}" data-act="ncView" data-v="m">📅 월간 캘린더</button><button class="${v === 'w' ? 'on' : ''}" data-act="ncView" data-v="w">🗓 주간</button><button class="${v === 'up' ? 'on' : ''}" data-act="ncView" data-v="up">⏳ 다가오는 내 업무</button><span class="grow"></span><button class="btn sm" data-act="lyOpen">🧩 구조</button><button class="btn sm" data-act="tfTools">🧰 도구</button><button class="btn pri sm" data-act="ncNew">＋ 새로 만들기</button></div>`;
   if (v === 'w' && typeof ncWeek === 'function') return `${UI.view === 'cal' || location.hash.includes('cal') ? '<div class="bh"><h2>캘린더</h2></div>' : ''}${tabs}${ncWeek()}`;
   if (v === 'up') return `${UI.view === 'cal' || location.hash.includes('cal') ? '<div class="bh"><h2>캘린더</h2></div>' : ''}${tabs}${ncUpcoming()}`;
   let cells = '';
-  const off = (first.getDay() + 6) % 7;
+  const ws = typeof tfWs === 'function' ? tfWs() : 1, off = (first.getDay() - ws + 7) % 7;
   for (let i = 0; i < off; i++) cells += '<div class="ncc e"></div>';
   for (let d = 1; d <= n; d++) {
     const ds = `${Y}-${pad(M)}-${pad(d)}`, e = by[ds] || [], wd = new Date(Y, M - 1, d).getDay();
@@ -37,7 +37,7 @@ function ncMonth() {
   const list = day.map(e => e.note ? `<div class="td"><span class="ck off"></span><a class="tl" href="#/note/${e.note}" data-act="noteGo" data-id="${e.note}">${esc(e.t)}</a><span class="mu">기록 · 누르면 이동</span><button class="btn sm" data-act="ncPin" data-note="${e.note}">📌</button>${ncDelBtn(e, 'btn sm')}</div>` : e.id ? `<div class="td ${e.done ? 'dn' : ''}"><button class="ck" data-act="tog" data-id="${e.id}" aria-pressed="${!!e.done}" aria-label="완료 표시"></button><a class="tl" data-act="ncOpen" data-id="${e.id}" href="#">${esc(e.t)}</a><span class="mu">${e.kind}</span><button class="btn sm" data-act="ncPin" data-id="${e.id}">📌</button>${xbtn('delItem', e.id)}</div>` : `<div class="td"><span class="ck off"></span><span class="tl">${esc(e.t)}</span><span class="mu">${e.kind}</span>${ncDelBtn(e, 'btn sm')}</div>`).join('') || '<p class="mu">이 날은 비어 있습니다.</p>';
   return `<div class="bh"><h2>캘린더</h2><span class="mu">카드를 누르면 가운데 창에서 바로 고칩니다. 칸에 마우스를 올리면 ＋ 가 나옵니다.</span></div>${tabs}
   <div class="calh"><button class="btn sm" data-act="calMove" data-d="-1" aria-label="이전 달">‹</button><b class="calt">${Y}년 ${M}월</b><button class="btn sm" data-act="calMove" data-d="1" aria-label="다음 달">›</button><button class="btn sm" data-act="calMove" data-d="0">오늘</button></div>
-  <div class="ncw">${['월', '화', '수', '목', '금', '토', '일'].map(d => `<span>${d}</span>`).join('')}</div><div class="ncg">${cells}</div>
+  <div class="ncw">${(ws ? ['월', '화', '수', '목', '금', '토', '일'] : ['일', '월', '화', '수', '목', '금', '토']).map(d => `<span>${d}</span>`).join('')}</div><div class="ncg">${cells}</div>
   <h3 class="h3 ncdl">${md(UI.day)} (${DOW[new Date(UI.day + 'T00:00:00').getDay()]})</h3><div class="ncdl">${list}</div>
   <details class="ncsub ncdm" ${UI.ncdm === false ? '' : 'open'}><summary>📝 ${md(UI.day)} 메모</summary>${typeof dayMemoBox === 'function' ? dayMemoBox(UI.day) : ''}<div class="nclinks" id="ncdmlinks">${ncLinks((S.dayMemo || {})[UI.day])}</div></details>
   ${ncNotes(UI.day)}
@@ -156,7 +156,8 @@ document.addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === 
     const h = _today(), k = h.indexOf(MARK); let top = k >= 0 ? h.slice(0, k) : '', sb = ''; top = top.replace(/<details class="sbanner"[\s\S]*?<\/details>/, m => { sb = m; return ''; }); 
     const rest = (k >= 0 ? h.slice(k) : h).replace(/<p class="soon">[\s\S]*?<\/p>/, '');
     if (!sb && typeof schoolBanner === 'function') { const hs = S.hide && S.hide.sb; try { if (S.hide) S.hide.sb = false; sb = schoolBanner() || ''; } catch (e) { sb = ''; } finally { if (S.hide && hs) S.hide.sb = hs; } }
-    return `${top}<details class="ncwork nccal" ${UI.nccal === false ? '' : 'open'}><summary>📅 캘린더 <small>일정 · 메모 · 기록</small></summary>${ncMonth()}</details>${ncSoon()}<details class="ncwork" ${UI.ncwork ? 'open' : ''}><summary>🗂 업무들 <small>게시판 줄 · 연수 · 예산 · 평가 등</small></summary>${rest}</details>${sb ? `<div class="ncsb">${sb}</div>` : ''}`;
+    const P = { brief: typeof tfBrief === 'function' ? tfBrief() : '', cal: `<details class="ncwork nccal" ${(UI.nccal === undefined ? lyDef('cal') : UI.nccal) ? 'open' : ''}><summary>${esc(lyName('cal', '📅 캘린더'))} <small>일정 · 메모 · 기록</small></summary>${ncMonth()}</details>`, soon: ncSoon(), work: `<details class="ncwork" ${(UI.ncwork === undefined ? lyDef('work', false) : UI.ncwork) ? 'open' : ''}><summary>${esc(lyName('work', '🗂 업무들'))} <small>게시판 줄 · 연수 · 예산 · 평가 등</small></summary>${rest}</details>`, sb: sb ? `<div class="ncsb">${sb}</div>` : '' };
+    return top + (typeof lyOrder === 'function' ? lyOrder(P) : P.brief + P.cal + P.soon + P.work + P.sb);
   };
   document.addEventListener('toggle', e => { if (e.target.classList && e.target.classList.contains('ncsub')) { if (e.target.classList.contains('ncdm')) UI.ncdm = e.target.open; else UI.ncdn = e.target.open; return; } if (e.target.classList && e.target.classList.contains('ncwork')) { if (e.target.classList.contains('nccal')) UI.nccal = e.target.open; else if (e.target.classList.contains('ncsoon')) UI.ncsoon = e.target.open; else UI.ncwork = e.target.open; } }, true);
 })();

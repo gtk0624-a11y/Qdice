@@ -1166,6 +1166,9 @@ main,#app,.wrap{padding-bottom:max(var(--pb,0px),64px)}
 .tfbrief{border:1px solid #e6e3dc;background:#fffdf7;border-radius:12px;padding:10px 12px;margin:10px 0}.tfbrief h4{margin:8px 0 2px;font-size:13px;color:#666}.tfbrief ul{margin:2px 0 4px 18px;padding:0}.tfbh{display:flex;gap:6px;align-items:center}
 .tfdlg{max-width:min(560px,94vw);width:100%;padding:16px}.tfdlg h3{margin:0 0 8px}.tfm{display:grid;gap:8px;margin:10px 0}.tfm .btn{text-align:left}.tfm .btn small{display:block;font-weight:400;font-size:12px;opacity:.7}
 .tfl{margin:6px 0 6px 16px;padding:0;font-size:13px}.tfout{width:100%;box-sizing:border-box;font-size:13px;line-height:1.5;margin:8px 0}.tfrow{display:flex;gap:8px;flex-wrap:wrap}.tfrow .dpl{flex:1;min-width:130px}
+/* v164: 화면 구조 편집 */
+.lydlg h4{margin:14px 0 4px}.lyr{display:flex;gap:6px;align-items:center;flex-wrap:wrap;padding:5px 0;border-bottom:1px solid #eee}.lyr.off .lyn{opacity:.45;text-decoration:line-through}.lyn{flex:1 1 150px;font-weight:700}.lyb{display:flex;gap:4px}.lyr input[name^=nm_],.lyr input[name^=kn_]{flex:1 1 140px;min-width:0}.lyo{font-size:12px;white-space:nowrap}
+.lymg{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px 10px;margin-top:6px}.lym{display:flex;flex-direction:column;font-size:12px}.lym input{min-width:0}@media(max-width:520px){.lymg{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -4452,11 +4455,11 @@ function ncMonth() {
   ncSeed();
   const [Y, M] = UI.cal.split('-').map(Number), first = new Date(Y, M - 1, 1), n = new Date(Y, M, 0).getDate(), ev = allEvents(), by = {};
   ev.forEach(e => (by[e.date] = by[e.date] || []).push(e));
-  const v = UI.calv || 'm', tabs = `<div class="nctabs"><button class="${v === 'm' ? 'on' : ''}" data-act="ncView" data-v="m">📅 월간 캘린더</button><button class="${v === 'w' ? 'on' : ''}" data-act="ncView" data-v="w">🗓 주간</button><button class="${v === 'up' ? 'on' : ''}" data-act="ncView" data-v="up">⏳ 다가오는 내 업무</button><span class="grow"></span><button class="btn sm" data-act="tfTools">🧰 도구</button><button class="btn pri sm" data-act="ncNew">＋ 새로 만들기</button></div>`;
+  const v = UI.calv || ((S.profile.lay || {}).v) || 'm', tabs = `<div class="nctabs"><button class="${v === 'm' ? 'on' : ''}" data-act="ncView" data-v="m">📅 월간 캘린더</button><button class="${v === 'w' ? 'on' : ''}" data-act="ncView" data-v="w">🗓 주간</button><button class="${v === 'up' ? 'on' : ''}" data-act="ncView" data-v="up">⏳ 다가오는 내 업무</button><span class="grow"></span><button class="btn sm" data-act="lyOpen">🧩 구조</button><button class="btn sm" data-act="tfTools">🧰 도구</button><button class="btn pri sm" data-act="ncNew">＋ 새로 만들기</button></div>`;
   if (v === 'w' && typeof ncWeek === 'function') return `${UI.view === 'cal' || location.hash.includes('cal') ? '<div class="bh"><h2>캘린더</h2></div>' : ''}${tabs}${ncWeek()}`;
   if (v === 'up') return `${UI.view === 'cal' || location.hash.includes('cal') ? '<div class="bh"><h2>캘린더</h2></div>' : ''}${tabs}${ncUpcoming()}`;
   let cells = '';
-  const off = (first.getDay() + 6) % 7;
+  const ws = typeof tfWs === 'function' ? tfWs() : 1, off = (first.getDay() - ws + 7) % 7;
   for (let i = 0; i < off; i++) cells += '<div class="ncc e"></div>';
   for (let d = 1; d <= n; d++) {
     const ds = `${Y}-${pad(M)}-${pad(d)}`, e = by[ds] || [], wd = new Date(Y, M - 1, d).getDay();
@@ -4467,7 +4470,7 @@ function ncMonth() {
   const list = day.map(e => e.note ? `<div class="td"><span class="ck off"></span><a class="tl" href="#/note/${e.note}" data-act="noteGo" data-id="${e.note}">${esc(e.t)}</a><span class="mu">기록 · 누르면 이동</span><button class="btn sm" data-act="ncPin" data-note="${e.note}">📌</button>${ncDelBtn(e, 'btn sm')}</div>` : e.id ? `<div class="td ${e.done ? 'dn' : ''}"><button class="ck" data-act="tog" data-id="${e.id}" aria-pressed="${!!e.done}" aria-label="완료 표시"></button><a class="tl" data-act="ncOpen" data-id="${e.id}" href="#">${esc(e.t)}</a><span class="mu">${e.kind}</span><button class="btn sm" data-act="ncPin" data-id="${e.id}">📌</button>${xbtn('delItem', e.id)}</div>` : `<div class="td"><span class="ck off"></span><span class="tl">${esc(e.t)}</span><span class="mu">${e.kind}</span>${ncDelBtn(e, 'btn sm')}</div>`).join('') || '<p class="mu">이 날은 비어 있습니다.</p>';
   return `<div class="bh"><h2>캘린더</h2><span class="mu">카드를 누르면 가운데 창에서 바로 고칩니다. 칸에 마우스를 올리면 ＋ 가 나옵니다.</span></div>${tabs}
   <div class="calh"><button class="btn sm" data-act="calMove" data-d="-1" aria-label="이전 달">‹</button><b class="calt">${Y}년 ${M}월</b><button class="btn sm" data-act="calMove" data-d="1" aria-label="다음 달">›</button><button class="btn sm" data-act="calMove" data-d="0">오늘</button></div>
-  <div class="ncw">${['월', '화', '수', '목', '금', '토', '일'].map(d => `<span>${d}</span>`).join('')}</div><div class="ncg">${cells}</div>
+  <div class="ncw">${(ws ? ['월', '화', '수', '목', '금', '토', '일'] : ['일', '월', '화', '수', '목', '금', '토']).map(d => `<span>${d}</span>`).join('')}</div><div class="ncg">${cells}</div>
   <h3 class="h3 ncdl">${md(UI.day)} (${DOW[new Date(UI.day + 'T00:00:00').getDay()]})</h3><div class="ncdl">${list}</div>
   <details class="ncsub ncdm" ${UI.ncdm === false ? '' : 'open'}><summary>📝 ${md(UI.day)} 메모</summary>${typeof dayMemoBox === 'function' ? dayMemoBox(UI.day) : ''}<div class="nclinks" id="ncdmlinks">${ncLinks((S.dayMemo || {})[UI.day])}</div></details>
   ${ncNotes(UI.day)}
@@ -4586,7 +4589,8 @@ document.addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === 
     const h = _today(), k = h.indexOf(MARK); let top = k >= 0 ? h.slice(0, k) : '', sb = ''; top = top.replace(/<details class="sbanner"[\s\S]*?<\/details>/, m => { sb = m; return ''; }); 
     const rest = (k >= 0 ? h.slice(k) : h).replace(/<p class="soon">[\s\S]*?<\/p>/, '');
     if (!sb && typeof schoolBanner === 'function') { const hs = S.hide && S.hide.sb; try { if (S.hide) S.hide.sb = false; sb = schoolBanner() || ''; } catch (e) { sb = ''; } finally { if (S.hide && hs) S.hide.sb = hs; } }
-    return `${top}<details class="ncwork nccal" ${UI.nccal === false ? '' : 'open'}><summary>📅 캘린더 <small>일정 · 메모 · 기록</small></summary>${ncMonth()}</details>${ncSoon()}<details class="ncwork" ${UI.ncwork ? 'open' : ''}><summary>🗂 업무들 <small>게시판 줄 · 연수 · 예산 · 평가 등</small></summary>${rest}</details>${sb ? `<div class="ncsb">${sb}</div>` : ''}`;
+    const P = { brief: typeof tfBrief === 'function' ? tfBrief() : '', cal: `<details class="ncwork nccal" ${(UI.nccal === undefined ? lyDef('cal') : UI.nccal) ? 'open' : ''}><summary>${esc(lyName('cal', '📅 캘린더'))} <small>일정 · 메모 · 기록</small></summary>${ncMonth()}</details>`, soon: ncSoon(), work: `<details class="ncwork" ${(UI.ncwork === undefined ? lyDef('work', false) : UI.ncwork) ? 'open' : ''}><summary>${esc(lyName('work', '🗂 업무들'))} <small>게시판 줄 · 연수 · 예산 · 평가 등</small></summary>${rest}</details>`, sb: sb ? `<div class="ncsb">${sb}</div>` : '' };
+    return top + (typeof lyOrder === 'function' ? lyOrder(P) : P.brief + P.cal + P.soon + P.work + P.sb);
   };
   document.addEventListener('toggle', e => { if (e.target.classList && e.target.classList.contains('ncsub')) { if (e.target.classList.contains('ncdm')) UI.ncdm = e.target.open; else UI.ncdn = e.target.open; return; } if (e.target.classList && e.target.classList.contains('ncwork')) { if (e.target.classList.contains('nccal')) UI.nccal = e.target.open; else if (e.target.classList.contains('ncsoon')) UI.ncsoon = e.target.open; else UI.ncwork = e.target.open; } }, true);
 })();
@@ -6082,7 +6086,7 @@ buildChunks = function () {
 };
 
 /* 화면 맨 아래에 버전 표시 — 옛 화면을 보고 있는지 바로 알 수 있게 */
-const TF_VER = 'v163', _cmFt = footer;
+const TF_VER = 'v164', _cmFt = footer;
 footer = function () { return _cmFt.apply(this, arguments).replace('</footer>', ` · <span class="mu">버전 ${TF_VER} (학급 관리 포함)</span></footer>`); };
 
 /* 새 버전 알림: 옛 화면이 남아 있으면 한 번 눌러 새로 받게 함 */
@@ -7626,7 +7630,8 @@ agDo = function (a) {
 
 /* ---- 비서 루프 ---- */
 const B2_SYS = `당신은 교사 업무수첩 「업무파탈」 안의 비서 꿈송이입니다. 늘 존댓말로 짧고 정확하게 답합니다.
-- 질문에 답하려면 먼저 도구로 수첩을 직접 확인하세요. 추측하거나 기억으로 지어내지 마세요. 필요하면 도구를 여러 번, 여러 개 연달아 부르세요.
+- 수첩과 상관없는 잡담·안부·고민 이야기·아이디어 브레인스토밍·글 다듬기도 편하게 받아 주세요. 이럴 땐 도구 없이 친구 같은 따뜻한 말투(존댓말)로 짧게 대화하고, 필요하면 되물어 주세요. 수첩 내용이 필요한 질문일 때만 도구를 쓰세요.
+- 수첩에 대한 질문에 답하려면 먼저 도구로 수첩을 직접 확인하세요. 추측하거나 기억으로 지어내지 마세요. 필요하면 도구를 여러 번, 여러 개 연달아 부르세요.
 - 규정·지침·학칙·조항을 묻는 질문은 당신의 영역이 아닙니다. "규정은 위쪽 📜 규정줍줍 탭에서 찾아 드려요"라고만 안내하세요. 문서에 없으면 "올려 주신 자료에서는 찾지 못했습니다"라고 말하고 일반 상식으로 단정하지 마세요. 조항 원문은 짧게 인용합니다.
 - 일정·할 일·업무 카드·예산·연수표를 넣거나 고치라는 요청은 쓰기 도구로 "제안"하세요. 제안은 사용자가 [적용]을 눌러야 반영됩니다. 날짜는 YYYY-MM-DD로, "내일·다음 주 금요일"은 오늘 날짜 기준으로 계산하세요. 삭제도 delete_cal_item으로 "제안"만 하며 사용자가 [적용]을 눌러야 지워집니다.
 - 정리·요약·비교를 부탁받으면 읽은 내용을 표나 목록으로 깔끔하게 정리하세요. 어느 화면에서 볼 수 있는지 go_to로 링크를 붙이세요.
@@ -7801,14 +7806,15 @@ const tfAdd = (ds, n) => { const x = new Date(ds + 'T00:00:00'); x.setDate(x.get
 const tfDow = ds => '일월화수목금토'[new Date(ds + 'T00:00:00').getDay()];
 const tfMd = ds => { const [, m, d] = ds.split('-'); return +m + '/' + +d; };
 const tfOk = d => /^\d{4}-\d{2}-\d{2}$/.test(d || '');
-const tfMon = ds => { const x = new Date(ds + 'T00:00:00'); x.setDate(x.getDate() - ((x.getDay() + 6) % 7)); return ymd(x); };
+const tfWs = () => (((S.profile || {}).lay || {}).ws === 0 ? 0 : 1);
+const tfMon = ds => { const x = new Date(ds + 'T00:00:00'); x.setDate(x.getDate() - ((x.getDay() - tfWs() + 7) % 7)); return ymd(x); };
 function tfTag(n) { try { ncSeed(); if (n && !cusKinds().some(k => k.n === n)) cusKinds().push({ n, b: 'event' }); } catch (e) { } return n; }
 
 /* ===== 🗓 주간 보기 ===== */
 function ncWeek() {
   UI.wk = UI.wk || tfMon(today()); const mon = UI.wk, ev = allEvents(), by = {}; ev.forEach(e => (by[e.date] = by[e.date] || []).push(e));
   let cols = ''; for (let k = 0; k < 7; k++) {
-    const ds = tfAdd(mon, k), e = by[ds] || [], wd = (k + 1) % 7;
+    const ds = tfAdd(mon, k), e = by[ds] || [], wd = new Date(ds + 'T00:00:00').getDay();
     cols += `<div class="nwd ${ds === today() ? 'tdy' : ''} ${wd === 0 ? 'su' : wd === 6 ? 'sa' : ''}"><div class="nwh"><b>${tfMd(ds)}</b> (${tfDow(ds)})<button class="ncplus" data-act="ncAdd" data-d="${ds}" aria-label="${tfMd(ds)}에 추가">＋</button></div>${e.map(ncCard).join('') || '<p class="mu nwe">일정 없음</p>'}</div>`;
   }
   return `<div class="nwnav"><button class="btn sm" data-act="tfWk" data-n="-7">◀ 지난 주</button><button class="btn sm" data-act="tfWk" data-n="0">이번 주</button><button class="btn sm" data-act="tfWk" data-n="7">다음 주 ▶</button><b>${tfMd(mon)} ~ ${tfMd(tfAdd(mon, 6))}</b></div><div class="nwk">${cols}</div>`;
@@ -7827,9 +7833,7 @@ function tfBrief() {
   ${nx.length ? `<h4>내일 ${nx.length}건</h4><ul>${li(nx, e => `<li>${esc(e.t)}</li>`)}</ul>` : ''}
   ${dd.length ? `<h4>디데이</h4><ul>${dd.slice(0, 4).map(x => `<li>${esc(x.title)} <b>${x.n ? 'D-' + x.n : 'D-Day'}</b></li>`).join('')}</ul>` : ''}</div>`;
 }
-(function () {
-  const _tv = todayView; todayView = function () { const h = _tv.apply(this, arguments), M = '<details class="ncwork nccal"'; if (typeof h === 'string' && h.includes(M)) { const b = tfBrief(); if (b) return h.replace(M, b + M); } return h; };
-})();
+
 
 /* ===== 대화상자 틀 ===== */
 function tfDlg(html) {
@@ -7840,6 +7844,7 @@ function tfDlg(html) {
 const tfVal = n => { const e = document.querySelector('#tfdlg [name=' + n + ']'); return e ? (e.type === 'checkbox' ? e.checked : e.value) : ''; };
 function tfMenu() {
   tfDlg(`<h3>🧰 도구</h3><div class="tfm">
+  <button class="btn" data-tf="lay">🧩 화면 구조 편집<small>칸 순서·이름·메뉴·캘린더 옵션·구분 목록</small></button>
   <button class="btn" data-tf="tpl">📋 행사 템플릿<small>곡선제·수행평가·시험 등 D-30 준비표 한 번에</small></button>
   <button class="btn" data-tf="rec">📑 기록 모아보기<small>낱말·기간으로 일정·메모·회의록 모으기</small></button>
   <button class="btn" data-tf="hand">📘 인수인계서<small>업무·일정·예산을 문서로</small></button>
@@ -8017,7 +8022,7 @@ function tfChange(e) { const t = e.target; if (!t) return; if (t.name === 'tpl' 
 function tfClick(e) {
   const b = e.target.closest('[data-tf]'); if (!b) { if (e.target.id === 'tfdlg') e.target.close(); return; }
   const d = document.getElementById('tfdlg'), k = b.dataset.tf;
-  const M = { close: () => d.close(), menu: tfMenu, tpl: tfTplDlg, tplgo: tfTplGo, rec: () => tfRepDlg('rec'), hand: () => tfRepDlg('hand'), retro: () => tfRepDlg('retro'), imp: tfImpDlg, impgo: tfImpGo, exp: tfExpDlg, ics: tfIcs, csv: tfCsvOut, notif: tfNotifDlg,
+  const M = { lay: () => { d.close(); lyDlg(); }, close: () => d.close(), menu: tfMenu, tpl: tfTplDlg, tplgo: tfTplGo, rec: () => tfRepDlg('rec'), hand: () => tfRepDlg('hand'), retro: () => tfRepDlg('retro'), imp: tfImpDlg, impgo: tfImpGo, exp: tfExpDlg, ics: tfIcs, csv: tfCsvOut, notif: tfNotifDlg,
     copy: () => { const o = document.getElementById('tfout'); if (o) { o.select(); try { navigator.clipboard.writeText(o.value); } catch (x) { document.execCommand('copy'); } toast('복사했습니다.'); } },
     save: () => { const o = document.getElementById('tfout'); if (o) tfDl({ rec: '기록_모음', hand: '인수인계서', retro: '업무_회고' }[TFR.tab] + '.md', o.value, 'text/markdown'); },
     ai: () => sure('이 내용을 Claude(외부 서버)로 보내 다듬을까요? 학생 실명이 없는지 확인해 주세요.', tfAIRun),
@@ -8032,6 +8037,71 @@ Object.assign(A, { tfWk(el) { UI.wk = +el.dataset.n === 0 ? tfMon(today()) : tfA
 const _t4Kb = chatKeyBar;
 chatKeyBar = function () { return _t4Kb.apply(this, arguments) + `<div class="b3q"><button type="button" class="btn sm" data-tfq="file">📷 사진·PDF로 일정</button><button type="button" class="btn sm" data-tfq="mic">🎤 말로 입력</button><button type="button" class="btn sm" data-tfq="tpl">📋 행사 템플릿</button><button type="button" class="btn sm" data-tfq="tools">🧰 도구</button></div>`; };
 document.addEventListener('click', e => { const b = e.target.closest('[data-tfq]'); if (!b) return; e.preventDefault(); ({ file: () => tfFileInput().click(), mic: tfVoice, tpl: tfTplDlg, tools: tfMenu })[b.dataset.tfq](); });
+
+/* 화면 구조 편집(v164): 오늘 화면 칸(브리핑·캘린더·이번 주 기한·업무들·곡선중 카드)의 순서·숨김·이름·처음 펼침, 위쪽 메뉴 이름·시작 화면,
+   캘린더 시작 요일·기본 보기, 일정 구분 목록(이름·순서·삭제·추가). 저장 위치: S.profile.lay (기기 연동에 함께 올라갑니다). */
+const LY_BLOCKS = [['brief', '☀️ 오늘 브리핑 카드', false], ['cal', '📅 캘린더', true], ['soon', '⏰ 이번 주 기한', true], ['work', '🗂 업무들', true], ['sb', '🏫 곡선중 카드(학교 소개·바로가기)', true]];
+const LY_MENU = [['today', '오늘'], ['cal', '캘린더'], ['work', '내 업무'], ['hub', '총괄'], ['wlog', '업무일지'], ['class', '수업 및 시간표'], ['eval', '평가'], ['budget', '예산'], ['notes', '기록'], ['pages', '페이지'], ['lib', '자료·연락'], ['files', '자료 아카이브'], ['rule', '규정줍줍'], ['yp', '연간 교육·훈련'], ['set', '설정']];
+const lyD = () => ((S.profile = S.profile || {}).lay = S.profile.lay || {});
+const lyName = (k, d) => (lyD().name || {})[k] || d;
+const lyDef = (k, d) => { const o = lyD().open || {}; return o[k] === undefined ? (d === undefined ? true : d) : !!o[k]; };
+function lyOrder(P) {
+  const L = lyD(), all = LY_BLOCKS.map(b => b[0]), ord = [...(L.blocks || []).filter(k => all.includes(k)), ...all.filter(k => !(L.blocks || []).includes(k))], hide = L.hide || {};
+  return ord.filter(k => !hide[k] && P[k]).map(k => {
+    let h = P[k]; const nm = (L.name || {})[k];
+    if (nm && (k === 'soon' || k === 'sb')) h = h.replace(/(<summary[^>]*>)([^<]*)/, (m, a) => a + esc(nm) + ' ');
+    return h;
+  }).join('');
+}
+/* 위쪽 메뉴 이름 바꾸기 */
+(function () {
+  const _nav = nav; nav = function () { let h = _nav.apply(this, arguments); const nm = lyD().nav || {}; Object.keys(nm).forEach(k => { if (nm[k]) h = h.replace(new RegExp('(<a href="#/' + k + '"[^>]*>)[^<]*(</a>)'), (m, a, b) => a + esc(nm[k]) + b); }); return h; };
+  /* 시작 화면(그날 처음 열 때만) */
+  setTimeout(() => { try { const st = lyD().start; if (st && st !== 'today' && !sessionStorage.getItem('tf.started') && (!location.hash || location.hash === '#/' || location.hash === '#/today')) location.hash = '#/' + st; sessionStorage.setItem('tf.started', '1'); } catch (e) { } }, 0);
+})();
+
+function lyDlg() {
+  const L = lyD(), all = LY_BLOCKS.map(b => b[0]), ord = [...(L.blocks || []).filter(k => all.includes(k)), ...all.filter(k => !(L.blocks || []).includes(k))], hide = L.hide || {}, nm = L.name || {}, kinds = (typeof ncSeed === 'function' && (ncSeed(), cusKinds())) || [];
+  let d = document.getElementById('lydlg');
+  if (!d) { d = document.createElement('dialog'); d.id = 'lydlg'; d.className = 'dlg tfdlg lydlg'; document.body.appendChild(d); d.addEventListener('click', lyClick); d.addEventListener('change', lyChange); }
+  const blockRows = ord.map((k, i) => { const b = LY_BLOCKS.find(x => x[0] === k); return `<div class="lyr ${hide[k] ? 'off' : ''}"><span class="lyn">${esc(b[1])}</span><span class="lyb"><button class="btn sm" data-ly="up" data-k="${k}" ${i ? '' : 'disabled'} aria-label="위로">▲</button><button class="btn sm" data-ly="dn" data-k="${k}" ${i < ord.length - 1 ? '' : 'disabled'} aria-label="아래로">▼</button><button class="btn sm" data-ly="vis" data-k="${k}">${hide[k] ? '숨김 → 보이기' : '👁 보임'}</button></span>${k === 'brief' ? '' : `<input name="nm_${k}" value="${esc(nm[k] || '')}" placeholder="이름 바꾸기(예: ${esc(b[1].replace(/^\S+\s/, ''))})" aria-label="이름">`}${b[2] && k !== 'sb' && k !== 'soon' || k === 'soon' ? `<label class="lyo"><input type="checkbox" name="op_${k}" ${lyDef(k, k !== 'work') ? 'checked' : ''}> 처음엔 펼침</label>` : ''}</div>`; }).join('');
+  const menuRows = LY_MENU.map(([k, v]) => `<label class="lym"><span>${esc(v)}</span><input name="mn_${k}" value="${esc((L.nav || {})[k] || '')}" placeholder="${esc(v)}"></label>`).join('');
+  const kindRows = kinds.map((k, i) => `<div class="lyr"><input name="kn_${i}" value="${esc(k.n)}" aria-label="구분 이름"><span class="lyb"><button class="btn sm" data-ly="kup" data-i="${i}" ${i ? '' : 'disabled'}>▲</button><button class="btn sm" data-ly="kdn" data-i="${i}" ${i < kinds.length - 1 ? '' : 'disabled'}>▼</button><button class="btn sm" data-ly="kdel" data-i="${i}">삭제</button></span></div>`).join('');
+  d.innerHTML = `<h3>🧩 화면 구조 편집</h3><p class="mu">바꾸는 즉시 저장되고 화면에 반영됩니다. 내 기기 연동을 켜 두셨다면 다른 기기에도 따라갑니다.</p>
+  <h4>① 오늘 화면의 칸</h4><p class="mu" style="font-size:12px">▲▼로 순서를, 보임/숨김과 이름, 처음 열었을 때 펼쳐 둘지를 정합니다.</p>${blockRows}
+  <h4>② 위쪽 메뉴 이름 · 시작 화면</h4><p class="mu" style="font-size:12px">이름을 비우면 원래 이름으로 돌아갑니다. 메뉴 순서·숨김은 위쪽 「☰ 메뉴 고르기」에서 바꿉니다.</p>
+  <label class="dpl">앱을 열면 처음 보이는 화면<select name="start">${LY_MENU.filter(x => x[0] !== 'set').map(([k, v]) => `<option value="${k}" ${(L.start || 'today') === k ? 'selected' : ''}>${esc((L.nav || {})[k] || v)}</option>`).join('')}</select></label><div class="lymg">${menuRows}</div>
+  <h4>③ 캘린더</h4><div class="tfrow"><label class="dpl">한 주의 시작<select name="ws"><option value="1" ${L.ws === 0 ? '' : 'selected'}>월요일</option><option value="0" ${L.ws === 0 ? 'selected' : ''}>일요일</option></select></label><label class="dpl">처음 보이는 모양<select name="cv"><option value="m" ${(L.v || 'm') === 'm' ? 'selected' : ''}>월간</option><option value="w" ${L.v === 'w' ? 'selected' : ''}>주간</option><option value="up" ${L.v === 'up' ? 'selected' : ''}>다가오는 내 업무</option></select></label></div>
+  <h4>④ 일정 구분 목록</h4><p class="mu" style="font-size:12px">이름을 고치면 이미 넣은 일정의 구분도 같이 바뀝니다. 삭제해도 기존 일정의 구분 글자는 남습니다.</p>${kindRows}<div class="lyr"><input name="kn_new" placeholder="새 구분 이름 (예: 시험감독, 회의)"><span class="lyb"><button class="btn sm pri" data-ly="kadd">＋ 추가</button></span></div>
+  <div class="btns"><button class="btn" data-ly="reset">처음 모양으로 되돌리기</button><button class="btn pri" data-ly="close">닫기</button></div>`;
+  if (!d.open) d.showModal();
+}
+function lyChange(e) {
+  const t = e.target, n = t.name || '', L = lyD(); if (!n) return; let redo = false;
+  if (/^nm_/.test(n)) { (L.name = L.name || {})[n.slice(3)] = t.value.trim(); if (!t.value.trim()) delete L.name[n.slice(3)]; }
+  else if (/^op_/.test(n)) { (L.open = L.open || {})[n.slice(3)] = t.checked; UI[{ cal: 'nccal', soon: 'ncsoon', work: 'ncwork' }[n.slice(3)]] = undefined; }
+  else if (/^mn_/.test(n)) { (L.nav = L.nav || {})[n.slice(3)] = t.value.trim(); if (!t.value.trim()) delete L.nav[n.slice(3)]; redo = true; }
+  else if (n === 'start') L.start = t.value;
+  else if (n === 'ws') { L.ws = +t.value === 0 ? 0 : 1; UI.wk = undefined; }
+  else if (n === 'cv') { L.v = t.value; UI.calv = undefined; }
+  else if (/^kn_\d+$/.test(n)) { const i = +n.slice(3), ks = cusKinds(), nv = t.value.trim(); if (!ks[i]) return; if (!nv) { t.value = ks[i].n; return; } const old = ks[i].n; if (nv !== old) { S.items.forEach(x => { if (x.tag === old) x.tag = nv; }); ks[i].n = nv; } }
+  else return;
+  commit(); if (redo) lyDlg();
+}
+function lyClick(e) {
+  const b = e.target.closest('[data-ly]'); if (!b) { if (e.target.id === 'lydlg') e.target.close(); return; }
+  const L = lyD(), k = b.dataset.k, a = b.dataset.ly, all = LY_BLOCKS.map(x => x[0]), ord = [...(L.blocks || []).filter(x => all.includes(x)), ...all.filter(x => !(L.blocks || []).includes(x))];
+  const mv = (arr, i, dlt) => { const j = i + dlt; if (j < 0 || j >= arr.length) return; [arr[i], arr[j]] = [arr[j], arr[i]]; };
+  if (a === 'close') return document.getElementById('lydlg').close();
+  if (a === 'up' || a === 'dn') { mv(ord, ord.indexOf(k), a === 'up' ? -1 : 1); L.blocks = ord; }
+  else if (a === 'vis') { L.hide = L.hide || {}; L.hide[k] = !L.hide[k]; if (!L.hide[k]) delete L.hide[k]; }
+  else if (a === 'kup' || a === 'kdn') mv(cusKinds(), +b.dataset.i, a === 'kup' ? -1 : 1);
+  else if (a === 'kdel') { const ks = cusKinds(), i = +b.dataset.i; if (ks[i]) ks.splice(i, 1); }
+  else if (a === 'kadd') { const v = (document.querySelector('#lydlg [name=kn_new]').value || '').trim(); if (!v) return toast('새 구분 이름을 적어 주세요.'); ncSeed(); if (cusKinds().some(x => x.n === v)) return toast('이미 있는 이름입니다.'); cusKinds().push({ n: v, b: 'event' }); }
+  else if (a === 'reset') return sure('오늘 화면 칸·메뉴 이름·시작 화면·캘린더 옵션을 처음 모양으로 되돌릴까요? (구분 목록은 그대로 둡니다)', () => { S.profile.lay = {}; UI.nccal = UI.ncsoon = UI.ncwork = UI.calv = UI.wk = undefined; commit(); lyDlg(); toast('처음 모양으로 되돌렸습니다.'); });
+  commit(); lyDlg();
+}
+Object.assign(A, { lyOpen: lyDlg });
 
 /* setui.js — 설정의 "작업표시줄에 고정 · 위젯" 안내 칸(app.js `.guide`) 위에 [앱으로 설치하기]·[위젯 열기] 버튼을 붙입니다.
    (설정 칸 접기는 extra.js `setFold()`가 맡습니다.) */

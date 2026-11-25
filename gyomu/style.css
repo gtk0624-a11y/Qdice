@@ -1156,3 +1156,6 @@ main,#app,.wrap{padding-bottom:max(var(--pb,0px),64px)}
 .tfbrief{border:1px solid #e6e3dc;background:#fffdf7;border-radius:12px;padding:10px 12px;margin:10px 0}.tfbrief h4{margin:8px 0 2px;font-size:13px;color:#666}.tfbrief ul{margin:2px 0 4px 18px;padding:0}.tfbh{display:flex;gap:6px;align-items:center}
 .tfdlg{max-width:min(560px,94vw);width:100%;padding:16px}.tfdlg h3{margin:0 0 8px}.tfm{display:grid;gap:8px;margin:10px 0}.tfm .btn{text-align:left}.tfm .btn small{display:block;font-weight:400;font-size:12px;opacity:.7}
 .tfl{margin:6px 0 6px 16px;padding:0;font-size:13px}.tfout{width:100%;box-sizing:border-box;font-size:13px;line-height:1.5;margin:8px 0}.tfrow{display:flex;gap:8px;flex-wrap:wrap}.tfrow .dpl{flex:1;min-width:130px}
+/* v164: 화면 구조 편집 */
+.lydlg h4{margin:14px 0 4px}.lyr{display:flex;gap:6px;align-items:center;flex-wrap:wrap;padding:5px 0;border-bottom:1px solid #eee}.lyr.off .lyn{opacity:.45;text-decoration:line-through}.lyn{flex:1 1 150px;font-weight:700}.lyb{display:flex;gap:4px}.lyr input[name^=nm_],.lyr input[name^=kn_]{flex:1 1 140px;min-width:0}.lyo{font-size:12px;white-space:nowrap}
+.lymg{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px 10px;margin-top:6px}.lym{display:flex;flex-direction:column;font-size:12px}.lym input{min-width:0}@media(max-width:520px){.lymg{grid-template-columns:1fr}}
