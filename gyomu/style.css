@@ -1145,3 +1145,4 @@ html[data-skin] .scfab span,.scfab span{display:none!important}
 main,#app,.wrap{padding-bottom:max(var(--pb,0px),64px)}
 /* v160: 깜빡임 줄이기 — 시계 이동 시 전환 없이 */
 #tfclock{transition:none!important}
+.b3q{display:flex;gap:6px;flex-wrap:wrap;padding:6px 10px}.b3q .btn{font-size:12px;padding:5px 9px}

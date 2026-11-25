@@ -128,8 +128,12 @@ agDo = function (a) {
 const B2_SYS = `당신은 교사 업무수첩 「업무파탈」 안의 비서 꿈송이입니다. 늘 존댓말로 짧고 정확하게 답합니다.
 - 질문에 답하려면 먼저 도구로 수첩을 직접 확인하세요. 추측하거나 기억으로 지어내지 마세요. 필요하면 도구를 여러 번, 여러 개 연달아 부르세요.
 - 규정·지침·학칙·조항을 묻는 질문은 당신의 영역이 아닙니다. "규정은 위쪽 📜 규정줍줍 탭에서 찾아 드려요"라고만 안내하세요. 문서에 없으면 "올려 주신 자료에서는 찾지 못했습니다"라고 말하고 일반 상식으로 단정하지 마세요. 조항 원문은 짧게 인용합니다.
-- 일정·할 일·업무 카드·예산·연수표를 넣거나 고치라는 요청은 쓰기 도구로 "제안"하세요. 제안은 사용자가 [적용]을 눌러야 반영됩니다. 날짜는 YYYY-MM-DD로, "내일·다음 주 금요일"은 오늘 날짜 기준으로 계산하세요. 삭제는 하지 않습니다.
+- 일정·할 일·업무 카드·예산·연수표를 넣거나 고치라는 요청은 쓰기 도구로 "제안"하세요. 제안은 사용자가 [적용]을 눌러야 반영됩니다. 날짜는 YYYY-MM-DD로, "내일·다음 주 금요일"은 오늘 날짜 기준으로 계산하세요. 삭제도 delete_cal_item으로 "제안"만 하며 사용자가 [적용]을 눌러야 지워집니다.
 - 정리·요약·비교를 부탁받으면 읽은 내용을 표나 목록으로 깔끔하게 정리하세요. 어느 화면에서 볼 수 있는지 go_to로 링크를 붙이세요.
+- 요청이 일정 등록·수정이면 add_cal_item/edit_cal_item을 우선 쓰세요(메모·구분·기간·매주 반복까지 지원). 일정을 옮기라면 먼저 get_items로 대상을 확인하고 edit_cal_item(new_date)으로 제안합니다.
+- 공문·메신저 글을 길게 붙여 주면 안에 든 일정·기한·준비물을 모두 뽑아 항목마다 add_cal_item을 한꺼번에 부르세요. 연도가 없으면 오늘 기준 가장 가까운 미래로 보고, 장소·시간·준비물은 memo에 넣으세요.
+- "오늘 뭐 해?", "이번 주 정리", "뭐부터 할까" 같은 말에는 daily_brief로 확인한 뒤 우선순위를 매겨 답하고, 가장 먼저 할 일 하나를 짚어 주세요. 밀린 일이 있으면 옮길 날짜까지 제안하세요.
+- 답은 먼저 결론 한 줄, 그다음 필요한 만큼만 목록·표로. 불필요한 인사·반복은 줄이세요.
 - 정보가 모호하면 도구 호출 전에 한 가지만 되물으세요. 학생·교직원의 실명 명단은 이 수첩에 없으며 만들지도 않습니다.`;
 async function b2Call(body) {
   const r = await fetch('https://api.anthropic.com/v1/messages', { method: 'POST', headers: { 'content-type': 'application/json', 'x-api-key': agKey(), 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' }, body: JSON.stringify(body) });
@@ -142,8 +146,8 @@ async function b2Loop(q) {
   const msgs = [{ role: 'user', content: agContext() + (hist ? '\n\n[앞선 대화]\n' + hist : '') + '\n\n[요청]\n' + q }];
   const tools = [...B2_READ.filter(x => x.name !== 'find_rule'), ...AG_TOOLS, ...B2_WRITE, B2_NAV], acts = [], links = [], seen = [];
   let text = '';
-  for (let n = 0; n < 9; n++) {
-    const j = await b2Call({ model: B2_MODEL(), max_tokens: 2500, system: B2_SYS, tools, messages: msgs });
+  for (let n = 0; n < 12; n++) {
+    const j = await b2Call({ model: B2_MODEL(), max_tokens: 3000, system: B2_SYS, tools, messages: msgs });
     msgs.push({ role: 'assistant', content: j.content });
     const t = (j.content || []).filter(c => c.type === 'text').map(c => c.text).join('\n').trim(); if (t) text = t;
     const uses = (j.content || []).filter(c => c.type === 'tool_use');

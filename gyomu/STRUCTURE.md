@@ -542,3 +542,4 @@ service cloud.firestore {
 - v159: 손글씨 추가(📷) 버튼을 34px 반투명 원형으로 축소(달력 하단 기한 가림 해소), 본문 하단 여백 64px.
 - v160: 화면 깜빡임 — 다시 그릴 때 시계가 지워졌다 되살아나던 것을 방지(render 전 시계를 body로 대피), 글칸 밑줄 동기화 주기 1초·글칸 있을 때만.
 - v161: 비서(Claude 키) 오류를 실제 원인으로 표시(agErr), 키 저장 직후 자동 테스트(agPing). 흔한 원인: claude.ai 유료구독≠API 크레딧.
+- v162: js/bot3.js 신규 — 꿈송이 비서 강화(add/edit/delete_cal_item·add_dday, daily_brief·get_items·free_days·get_dday, 빠른 질문 버튼, 컨텍스트에 현재시각·밀린 일·디데이). bot2.js 시스템 프롬프트·루프 12회.
