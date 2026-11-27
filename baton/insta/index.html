@@ -1,0 +1,48 @@
+<!DOCTYPE html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><title>바통터치 인스타 자료</title>
+<style>body{margin:0;font-family:-apple-system,"Malgun Gothic",sans-serif;background:#faf5e8;color:#222;word-break:keep-all}.w{max-width:560px;margin:0 auto;padding:18px}h1{font-size:22px;color:#2f6f5e}
+.btn{display:block;width:100%;border:0;border-radius:14px;padding:16px;font-size:18px;font-weight:800;margin:10px 0;background:#2f6f5e;color:#fff}.btn.y{background:#e8a317;color:#222}
+figure{margin:16px 0}img{width:100%;border-radius:12px;display:block;box-shadow:0 6px 18px rgba(0,0,0,.12)}figcaption{text-align:center;font-size:13px;color:#888;margin-top:4px}
+pre{white-space:pre-wrap;background:#fff;border-radius:12px;padding:12px;font-size:14px;font-family:inherit}#msg{text-align:center;font-weight:700;color:#2f9e6b;min-height:22px}</style></head><body><div class="w">
+<h1>📸 바통터치 인스타 카드뉴스</h1>
+<button class="btn y" id="all">📥 7장 한 번에 저장·공유</button>
+<button class="btn" data-copy="body">📋 게시글 문구 복사</button>
+<button class="btn" data-copy="dm">💌 DM 문구 복사</button>
+<div id="msg"></div><figure><img src="card1.jpg?v=1" alt="카드 1"><figcaption>1 / 7</figcaption></figure><figure><img src="card2.jpg?v=1" alt="카드 2"><figcaption>2 / 7</figcaption></figure><figure><img src="card3.jpg?v=1" alt="카드 3"><figcaption>3 / 7</figcaption></figure><figure><img src="card4.jpg?v=1" alt="카드 4"><figcaption>4 / 7</figcaption></figure><figure><img src="card5.jpg?v=1" alt="카드 5"><figcaption>5 / 7</figcaption></figure><figure><img src="card6.jpg?v=1" alt="카드 6"><figcaption>6 / 7</figcaption></figure><figure><img src="card7.jpg?v=1" alt="카드 7"><figcaption>7 / 7</figcaption></figure>
+<h1>게시글 문구</h1><pre id="body">바통 넘길 때마다 기억 더듬으시죠? 🏃
+
+2월 마지막 주, 1년치 업무를 하루에 떠올리려면
+누구나 빠뜨립니다. 기억은 2월에 없어요.
+
+그래서 만들었습니다.
+「도디쌤의 바통터치」
+
+✔ 일하다가 1분, 업무 카드 한 장
+✔ 3월~2월 1년 시간표로 한눈에
+✔ 코드 한 줄·파일·PDF로 카톡 인계
+✔ 받는 선생님은 이해 체크·질문·이어쓰기
+✔ 로그인·서버 없이 내 기기에만 저장, 무료
+
+이 프로그램은 제가 만들고 있는 「업무파탈」의 구성 요소 중 하나입니다.
+일과·진도·평가·예산·연수·공문·캘린더까지, 하나씩 먼저 공개하고 마지막에 업무파탈 전체를 소개할게요.
+
+💬 댓글에 "바통" 남겨 주시면 DM으로 링크 보내 드릴게요.
+
+#도디쌤의바통터치 #업무파탈 #인수인계 #교사업무 #에듀테크 #M_A_D_T</pre>
+<h1>DM 문구</h1><pre id="dm">안녕하세요, 도디쌤입니다 🙌
+「도디쌤의 바통터치」 링크 보내 드려요!
+
+👉 https://gtk0624-a11y.github.io/Qdice/baton/
+
+처음 열면 [예시 5개 불러보기]로 써 보실 수 있어요.
+카톡으로 열리면 오른쪽 위 메뉴에서 [다른 브라우저로 열기]를 눌러 주세요.
+내용은 내 기기에만 저장되니, 인계할 때는 [인계하기]에서 코드를 복사해 카톡으로 보내시면 됩니다 😊</pre></div>
+<script>
+const msg=t=>{document.getElementById('msg').textContent=t};
+document.querySelectorAll('[data-copy]').forEach(b=>b.onclick=async()=>{const t=document.getElementById(b.dataset.copy).textContent;
+try{await navigator.clipboard.writeText(t);msg('복사됐어요! 붙여 넣으세요.')}catch(e){const r=document.createRange();r.selectNodeContents(document.getElementById(b.dataset.copy));getSelection().removeAllRanges();getSelection().addRange(r);msg('글이 선택됐어요. [복사]를 누르세요.')}});
+document.getElementById('all').onclick=async()=>{msg('불러오는 중…');
+try{const files=await Promise.all([1,2,3,4,5,6,7].map(async i=>new File([await (await fetch('card'+i+'.jpg?v=1')).blob()],'바통터치_'+i+'.jpg',{type:'image/jpeg'})));
+if(navigator.canShare&&navigator.canShare({files})){await navigator.share({files});msg('완료!');return}
+for(const f of files){const a=document.createElement('a');a.href=URL.createObjectURL(f);a.download=f.name;document.body.appendChild(a);a.click();a.remove();await new Promise(r=>setTimeout(r,400))}msg('다운로드 폴더에 저장됐어요.')}
+catch(e){msg(e.name==='AbortError'?'':'사진을 꾹 눌러 저장해 주세요.')}};
+</script></body></html>
