@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="ko"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="일정줍줍">
 <meta name="theme-color" content="#FBF7F0">
 <title>도디쌤의 일정줍줍 · 공문 붙여넣기 일정관리 [체험판] — 도디쌤</title>
-<meta name="description" content="경기도 메신저·공문을 붙여넣으면 일정과 마감이 자동으로 캘린더에. 학사일정 파일은 끌어다 놓기만. 현직 교사가 만든 노션 스타일 일정 캘린더.">
+<meta name="description" content="경기도 메신저 글이나 공문 내용을 붙여넣으면 일정과 마감이 자동으로 캘린더에. 학사일정 파일은 끌어다 놓기만. 현직 교사가 만든 노션 스타일 일정 캘린더.">
 <style>*{box-sizing:border-box}
 :root{--bg:#FBF7F0;--paper:#fff;--ink:#2F3550;--mu:#7a7f95;--line:#e8e1d3;--acc:#31406E;--acc2:#F2B84B;--accink:#fff;--sun:#d9534f;--shadow:0 6px 22px rgba(40,40,70,.12);--f:system-ui,-apple-system,'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif;--r:14px}
 html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f);-webkit-text-size-adjust:100%}
@@ -168,7 +169,7 @@ dialog input:focus,dialog select:focus,dialog textarea:focus{outline:2px solid c
   <div class="tools"><button class="tb" id="bAdd">＋ 일정</button><button class="tb" id="bDes">🎨 디자인</button><button class="tb" id="bExp">⬇ 내보내기</button><button class="tb" id="bInfo">ℹ️ 소개</button></div>
  </div>
  <div class="cta">
-  <button class="big a" id="bPaste"><span class="ic">📋</span><span>메신저·공문 붙여넣기<em>통째로 붙여넣으면 일정·마감으로 정리</em></span></button>
+  <button class="big a" id="bPaste"><span class="ic">📋</span><span>메신저 글 붙여넣기<em>공문 내용도 OK · 통째로 붙여넣으면 날짜별 정리</em></span></button>
   <button class="big b" id="bFile"><span class="ic">📅</span><span>학사일정 파일 끌어넣기<em>한글·엑셀·PDF를 화면에 끌어다 놓기</em></span></button>
  </div>
  <div class="bar"><span id="nav" style="display:contents"><button class="nb" id="prev" aria-label="이전 달">◀</button><h2 id="ymt"></h2><button class="nb" id="next" aria-label="다음 달">▶</button><button class="nb t" id="today">오늘</button></span>
@@ -746,18 +747,58 @@ function dayDlg(iso) {
 }
 
 /* ---------- 읽은 결과 확인 창(붙여넣기·파일 공용) ---------- */
+function tidyProse(t) {
+  let loc = '';
+  const lm = t.match(/(\S*(?:실|관|강당|교실|도서관|운동장))(?:에서는|에서)/); if (lm) { loc = lm[1]; t = t.replace(lm[0], ' '); }
+  t = t.replace(/^(먼저|그리고|또한|아울러|참고로|한편|다만|우선)\s+/, '');
+  const ev = /(실시|개최|열립|열리|진행되|예정|있으니|있습니다)/.test(t);
+  t = t.replace(/\s*(?:이|가)\s*있으니.*$/, '').replace(/\s*(?:이|가)?\s*(열립니다|열리며|있습니다|진행됩니다|진행되며|예정입니다|예정이며|예정되어).*$/, '').replace(/\s*(실시|개최)(?:됩니다|되며|합니다|하며|예정).*$/, '');
+  t = t.replace(/(?:이|가)\s*필요하신\s*분은\s*\S*\s*/, ' ');
+  t = t.replace(/\s*(입력|제출|회신|신청|보고|취합|배부|확인|점검|작성|발송|요청|정정|수정|제작|마감)(?:해|하|드|합|하시|하겠|하여|하며|하고|바랍|부탁|주).*$/, ' $1');
+  t = t.replace(/\s*(?:에는|에|까지|부터)(?=\s|$)/g, ' ').replace(/(?<=[가-힣]{2})(은|는|을|를)(?=\s|$)/g, '');
+  t = t.replace(/(\S+)\s+\1(?=\s|$)/g, '$1').replace(/(마감)\s+마감/g, '$1');
+  if (ev) t = t.replace(/\s*마감$/, '');
+  return { t: t.replace(/\s{2,}/g, ' ').trim(), loc, ev };
+}
 function fromMsg(list) {
   return list.map(x => {
     let t = x.title, time = '', end = '', memo = '';
     const tm = t.match(/(\d{1,2}:\d{2})(?:\s*[~\-–]\s*(\d{1,2}:\d{2}))?/); if (tm) { time = tm[1] + (tm[2] ? '~' + tm[2] : ''); t = t.replace(tm[0], ' '); }
     const rg = t.match(/\(~(\d{1,2})\/(\d{1,2})\)/); if (rg && x.date) { const y = +x.date.slice(0, 4); let e = y + '-' + pad(+rg[1]) + '-' + pad(+rg[2]); if (e < x.date) e = (y + 1) + e.slice(4); end = e; t = t.replace(rg[0], ' '); }
     const pl = t.match(/\s@(.+)$/); if (pl) { memo = '장소: ' + pl[1].trim(); t = t.replace(pl[0], ' '); }
-    t = t.replace(/\s{2,}/g, ' ').trim();
-    return { on: x.on !== false, date: x.date, end, time, title: t, memo, kind: x.kind === 'event' ? '일정' : '업무' };
+    t = t.replace(/\s{2,}/g, ' ').trim(); let evp = false;
+    if (/(니다|세요|시고|으니|며|하고|바랍|주시|드립|있어|합니다|필요하신)/.test(t)) { const r = tidyProse(t); t = r.t; evp = r.ev; if (!evp && x.kind === 'todo' && !/마감/.test(t)) t += ' 마감'; if (r.loc && !memo) memo = '장소: ' + r.loc; }
+    return { on: x.on !== false, date: x.date, end, time, title: t, memo, kind: (x.kind === 'event' || evp) ? '일정' : '업무' };
   }).filter(x => x.title && x.date).sort((a, b) => (a.date || '9').localeCompare(b.date || '9') || a.time.localeCompare(b.time));
 }
 function fromSched(list) { return list.filter(x => !/^(까지|부터|~)$/.test(x.title)).map(x => ({ on: x.on !== false, date: x.date, end: x.end || '', time: '', title: x.title, memo: '', kind: '학사' })); }
-const prep = t => String(t || '').replace(/\r/g, '').replace(/^[ \t]*\d{1,2}[.)]\s+(?=\S)/gm, '');
+/* 줄바꿈 없이 길게 이어 쓴 메신저 글을 문장·절 단위로 나눠 날짜별로 읽히게 한다 */
+const DRE = /\d{1,2}\s*월\s*\d{1,2}\s*일/g;
+function splitProse(t) {
+  return t.split('\n').map(line => {
+    if (line.length < 60 || (line.match(DRE) || []).length < 2) return line;
+    const out = [];
+    line.split(/(?<=[.!?。])\s+/).forEach(sn => {
+      if ((sn.match(DRE) || []).length < 2) { out.push(sn); return; }
+      let cur = '';
+      sn.split(/(?<=[,，])\s*/).forEach(c => {
+        if (cur && DRE.test(cur) && (DRE.lastIndex = 0, DRE.test(c))) { DRE.lastIndex = 0; out.push(cur.replace(/[,，]\s*$/, '')); cur = c; }
+        else { DRE.lastIndex = 0; cur += (cur ? ' ' : '') + c; }
+      });
+      DRE.lastIndex = 0; if (cur) out.push(cur);
+    });
+    return out.join('\n');
+  }).join('\n');
+}
+const p2 = n => String(n).padStart(2, '0');
+function normKo(t) {
+  const H = (ap, h) => { h = +h; if (ap === '오후' && h < 12) h += 12; if (ap === '오전' && h === 12) h = 0; return h; };
+  t = t.replace(/(\d{1,2}월\s*\d{1,2}일)(\([월화수목금토일]\))?\s*부터\s*((?:\d{1,2}월\s*)?\d{1,2}일)(\([월화수목금토일]\))?\s*까지/g, (m, a, w, b) => a + '~' + (/월/.test(b) ? b : a.replace(/\d{1,2}일/, b)));
+  t = t.replace(/(오전|오후)?\s*(\d{1,2})시(?:\s*(\d{1,2})분)?\s*(?:부터|~)\s*(오전|오후)?\s*(\d{1,2})시(?:\s*(\d{1,2})분)?(?:\s*까지)?/g, (m, a1, h1, m1, a2, h2, m2) => { let s0 = H(a1, h1), e = H(a2 || a1, h2); if (!a1 && s0 < 8) s0 += 12; if (!a2 && e <= s0 && e < 12) e += 12; return ' ' + p2(s0) + ':' + p2(m1 || 0) + '~' + p2(e) + ':' + p2(m2 || 0) + ' '; });
+  t = t.replace(/(오전|오후)\s*(\d{1,2})시(?:\s*(\d{1,2})분)?/g, (m, a, h, mi) => ' ' + p2(H(a, h)) + ':' + p2(mi || 0) + ' ');
+  return t;
+}
+const prep = t => splitProse(normKo(String(t || '').replace(/\r/g, ''))).replace(/^[ \t]*\d{1,2}[.)]\s+(?=\S)/gm, '');
 function markDup(c) { c.forEach(x => { x.dup = S.items.some(i => i.date === x.date && i.title === x.title); if (x.dup) x.on = false; }); return c; }
 function previewDlg(opt) {
   /* opt: {title, sub, build(mode,sy)→cands, mode, modes, sy} */
@@ -790,16 +831,16 @@ function previewDlg(opt) {
 }
 /* ---------- 공문·메신저 붙여넣기 ---------- */
 function sampleMsg() {
-  const t0 = ymd(new Date()), f = n => { const iso = dAdd(t0, n); return `${+iso.slice(5, 7)}월 ${+iso.slice(8)}일(${DOW[wdOf(iso)]})`; };
-  return `[경기도교육청] 교직원 정보보안 연수 안내\n안녕하세요. 연수 일정을 안내드립니다.\n\n1. 일시: ${f(6)} 14:30~16:00\n2. 장소: 본교 시청각실\n3. 대상: 전 교직원\n4. 학교폭력 실태조사 입력 기한: ${f(8)}까지\n5. 2학기 수행평가 점수 입력 마감: ${f(13)}까지\n\n담당자: 홍길동 031-000-0000\n붙임 1. 계획서 1부. 끝.`;
+  const t0 = ymd(new Date()), f = n => { const iso = dAdd(t0, n); return `${+iso.slice(5, 7)}월 ${+iso.slice(8)}일(${DOW[wdOf(iso)]})`; }, g = n => { const iso = dAdd(t0, n); return `${+iso.slice(5, 7)}월 ${+iso.slice(8)}일`; };
+  return `선생님들 안녕하세요, 교무부입니다. 학기말을 맞아 몇 가지 안내드립니다. 먼저 ${f(6)} 오후 2시 30분부터 4시까지 시청각실에서 교직원 정보보안 연수가 있으니 빠짐없이 참석해 주시기 바랍니다. 학교폭력 실태조사 결과는 ${f(8)}까지 입력해 주시고, 2학기 수행평가 점수는 ${f(13)}까지 나이스에 입력해 주세요. 기말고사는 ${g(16)}부터 ${g(20)}까지 실시되며, 시험 감독표는 ${g(10)}에 배부하겠습니다. 성적 처리는 ${f(24)}에 마감하고, ${f(26)}에는 겨울방학식이 열립니다. 생활기록부 정정이 필요하신 분은 ${f(41)}까지 교무부로 요청해 주시기 바랍니다. 한 학기 동안 수고 많으셨습니다.`;
 }
 function pasteDlg(pre) {
-  const d = openDlg(`<form method="dialog"><h3>📋 메신저·공문 붙여넣기</h3><p class="sub">경기도 메신저, 카카오톡, 공문 내용을 <b>통째로</b> 붙여넣으세요. 인사말·연락처·붙임이 섞여 있어도 날짜가 있는 줄만 골라 일정과 마감으로 정리합니다.</p>
+  const d = openDlg(`<form method="dialog"><h3>📋 메신저 글·공문 내용 붙여넣기</h3><p class="sub">경기도 메신저 글이든 공문 내용이든 <b>통째로</b> 붙여넣으세요. 줄바꿈 없이 길게 이어진 글도, 인사말·연락처가 섞여 있어도 날짜가 있는 문장만 골라 날짜별 일정과 마감으로 정리합니다.</p>
   <textarea name="text" rows="11" placeholder="여기에 붙여넣기 (Ctrl+V / 길게 눌러 붙여넣기)" required>${esc(pre || '')}</textarea>
-  <div class="btns"><button type="button" id="smp" style="margin-right:auto">예시 공문 넣어 보기</button><button value="no">취소</button><button value="ok" class="pri">정리하기</button></div></form>`, d => {
+  <div class="btns"><button type="button" id="smp" style="margin-right:auto">예시 글 넣어 보기</button><button value="no">취소</button><button value="ok" class="pri">정리하기</button></div></form>`, d => {
     if (d.returnValue !== 'ok') return; const txt = prep(new FormData(d.querySelector('form')).get('text'));
     const c = fromMsg(ibxParse(txt)); if (!c.length) return toast('일정으로 읽을 날짜를 찾지 못했습니다. 날짜(예: 12월 3일)가 들어 있는지 확인해 주세요.');
-    previewDlg({ title: '이렇게 정리했습니다', sub: '날짜가 있는 줄을 일정(파랑)과 마감(주황)으로 나눴습니다.', mode: 'msg', build: () => c.map(x => ({ ...x })) });
+    previewDlg({ title: '이렇게 정리했습니다', sub: '긴 글에서 날짜가 있는 문장만 골라 일정(파랑)과 마감(주황)으로 나눴습니다.', mode: 'msg', build: () => c.map(x => ({ ...x })) });
   });
   $('#smp', d).onclick = () => { d.querySelector('textarea').value = sampleMsg(); };
   d.querySelector('textarea').focus();
@@ -875,7 +916,8 @@ function loadSample() {
 /* ---------- 소개 ---------- */
 function introDlg() {
   const d = openDlg(`<div class="in"><div class="hero"><img src="${DODI}" alt="도디쌤"><div><h2>공문 읽고 달력에 옮기던 시간,<br>이제 붙여넣기 한 번.</h2><p>도디쌤의 일정줍줍 <span class="badge">체험판</span><br>업무파탈(Travail Fatal)의 첫 번째 조각 · 현직 교사 도디쌤이 직접 쓰려고 만들었습니다.</p></div></div>
-  <div class="ibody"><div class="feat"><div><b>📋 메신저 붙여넣기</b>경기도 메신저·공문을 통째로 붙여넣으면 일정과 마감을 나눠 정리합니다.</div><div><b>📅 학사일정 끌어넣기</b>학사일정 파일(한글·엑셀·PDF)을 화면에 끌어다 놓으면 1년치가 한 번에 들어갑니다.</div><div><b>🗓 노션 스타일 캘린더</b>날짜 칸 안에 카드가 보이고, 누르면 바로 고칩니다. 완료 체크도 한 번에.</div><div><b>🎨 내 마음대로 디자인</b>색 테마 8종·글꼴·종류별 색을 취향대로 바꿉니다.</div></div>
+  <div class="ibody"><div class="feat"><div><b>📋 메신저 붙여넣기</b>경기도 메신저 글이나 공문 내용을 통째로 붙여넣으면 날짜별 일정과 마감으로 나눠 정리합니다. 줄바꿈 없는 긴 글도 괜찮아요.</div><div><b>📅 학사일정 끌어넣기</b>학사일정 파일(한글·엑셀·PDF)을 화면에 끌어다 놓으면 1년치가 한 번에 들어갑니다.</div><div><b>🗓 노션 스타일 캘린더</b>날짜 칸 안에 카드가 보이고, 누르면 바로 고칩니다. 완료 체크도 한 번에.</div><div><b>🎨 내 마음대로 디자인</b>색 테마 8종·글꼴·종류별 색을 취향대로 바꿉니다.</div></div>
+  <h4>📌 작업표시줄·홈 화면에 두고 쓰기</h4><ol class="steps"><li><b>PC 크롬</b> — 주소창 오른쪽 ⋮ → <b>저장 및 공유 → 바로가기 만들기</b> → <b>창으로 열기</b> 체크 → 만들어진 앱 아이콘을 <b>작업표시줄에 고정</b>. 작은 창으로 화면 한쪽에 띄워 두면 위젯처럼 쓸 수 있어요.</li><li><b>PC 엣지</b> — ⋯ → <b>앱 → 이 사이트를 앱으로 설치</b> → 작업표시줄에 고정.</li><li><b>폰</b> — 크롬 ⋮ → <b>홈 화면에 추가</b> (아이폰은 사파리 공유 → 홈 화면에 추가). 카카오톡에서 링크를 열었다면 먼저 <b>다른 브라우저로 열기</b>를 누르세요.</li></ol>
   <h4>이렇게 쓰세요</h4><ol class="steps"><li><b>📋 붙여넣기</b>를 누르고 메신저 내용을 붙여넣습니다.</li><li>정리된 목록에서 <b>필요한 것만 체크</b>하고 날짜를 확인합니다.</li><li><b>캘린더에 넣기</b>를 누르면 끝. 잘못 넣어도 <b>되돌리기</b>가 있어요.</li></ol>
   <div class="note">🔒 <b>업무파탈은 조각이 하나씩 열립니다.</b> 일정줍줍이 첫 번째이고, 2월에 완전 공개됩니다. 다음 조각 소식은 도디쌤 인스타그램 댓글에 「다음」이라고 남기시면 먼저 알려 드려요.</div>
   <div class="note" style="margin-top:10px">🔒 <b>내 일정은 내 기기(브라우저)에만 저장됩니다.</b> 서버로 보내지 않고, 로그인도 없습니다. 학생 이름·성적처럼 민감한 내용은 붙여넣지 마세요. 파일은 이 화면 안에서만 읽습니다.<br>✔ 한글(hwp·hwpx)·엑셀·PDF·워드·텍스트를 읽습니다. ✔ 구글·아이폰 캘린더로 내보내기(.ics) 가능.</div></div>

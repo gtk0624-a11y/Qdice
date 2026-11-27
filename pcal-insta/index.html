@@ -21,7 +21,8 @@ pre{white-space:pre-wrap;background:#fff;border-radius:12px;padding:12px;font-si
 그래서 만들었습니다.
 「도디쌤의 일정줍줍」 (업무파탈 Travail Fatal의 첫 번째 조각)
 
-✔ 메신저·공문을 통째로 붙여넣으면 일정과 마감으로 자동 정리
+✔ 메신저 글이든 공문이든 통째로 붙여넣으면 날짜별 일정과 마감으로 자동 정리 (줄바꿈 없는 긴 글도 OK)
+✔ 작업표시줄·폰 홈 화면에 고정해서 앱처럼 (작은 창으로 띄우면 위젯처럼)
 ✔ 학사일정 파일(한글·엑셀·PDF·워드)은 화면에 끌어다 놓기만
 ✔ 날짜 칸 안에 카드가 보이는 노션 스타일 캘린더, 누르면 바로 수정
 ✔ 색 테마 8종·글꼴 5종, 디자인은 내 맘대로
@@ -42,7 +43,7 @@ pre{white-space:pre-wrap;background:#fff;border-radius:12px;padding:12px;font-si
 
 👉 https://gtk0624-a11y.github.io/Qdice/pcal/
 
-[📋 메신저·공문 붙여넣기]를 누르고 [예시 공문 넣어 보기] → [정리하기]를 눌러 보세요.
+[📋 메신저 글 붙여넣기]를 누르고 [예시 글 넣어 보기] → [정리하기]를 눌러 보세요.
 학사일정 파일은 화면에 끌어다 놓으면 됩니다.
 ※ 학생 이름·성적처럼 민감한 내용은 붙여넣지 마세요. (일정은 내 기기에만 저장돼요)
 다음 조각도 곧 소개할게요 😊</pre>
@@ -51,7 +52,7 @@ const msg=t=>{document.getElementById('msg').textContent=t};
 document.querySelectorAll('[data-copy]').forEach(b=>b.onclick=async()=>{const t=document.getElementById(b.dataset.copy).textContent;
 try{await navigator.clipboard.writeText(t);msg('복사됐어요! 붙여 넣으세요.')}catch(e){const r=document.createRange();r.selectNodeContents(document.getElementById(b.dataset.copy));getSelection().removeAllRanges();getSelection().addRange(r);msg('글이 선택됐어요. [복사]를 누르세요.')}});
 document.getElementById('all').onclick=async()=>{msg('불러오는 중…');
-try{const files=await Promise.all([1,2,3,4,5,6,7,8,9].map(async i=>new File([await (await fetch('card'+i+'.jpg')).blob()],'일정줍줍_'+i+'.jpg',{type:'image/jpeg'})));
+try{const files=await Promise.all([1,2,3,4,5,6,7,8,9,10,11,12,13,14,15].map(async i=>new File([await (await fetch('card'+i+'.jpg')).blob()],'일정줍줍_'+i+'.jpg',{type:'image/jpeg'})));
 if(navigator.canShare&&navigator.canShare({files})){await navigator.share({files});msg('완료!');return}
 for(const f of files){const a=document.createElement('a');a.href=URL.createObjectURL(f);a.download=f.name;document.body.appendChild(a);a.click();a.remove();await new Promise(r=>setTimeout(r,400))}msg('다운로드 폴더에 저장됐어요.')}
 catch(e){msg(e.name==='AbortError'?'':'사진을 꾹 눌러 저장해 주세요.')}};
