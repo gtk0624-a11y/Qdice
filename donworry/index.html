@@ -118,7 +118,7 @@ footer{text-align:center;font-size:12px;color:var(--mu);margin-top:26px}
       <h1>도디쌤의 돈워리 비해피</h1>
       <div class="sub">돈 걱정은 행복하지 않아 — 내 업무 예산을 세우고 · 쓰고 · 정리</div>
     </div>
-    <div><img class="mascot" src="ggumsong.png" alt="꿈송이" onerror="this.style.display='none'"><div class="sub" id="ownerLine"></div></div>
+    <div><img class="mascot" src="ggumsong.png" alt="꿈송이" onerror="this.hidden=true"><div class="sub" id="ownerLine"></div></div>
   </header>
   <nav class="tabs" id="tabs"></nav>
   <main id="view"></main>
@@ -312,7 +312,7 @@ function vSummary() {
   return '<div class="sumrow"><div class="sumbox"><small>총 배정</small><b>' + won(t.alloc) + '</b></div><div class="sumbox"><small>집행</small><b>' + won(t.spent) + '</b></div><div class="sumbox bal"><small>남은 예산(잔액)</small><b>' + won(t.bal) + '</b></div></div>';
 }
 function vHome() {
-  if (!S.items.length) return '<div class="card"><div class="empty"><img src="ggumsong.png" alt="" style="width:120px" onerror="this.style.display='none'"><b>아직 예산이 없어요</b>계획서를 올리거나 직접 넣으면 잔액·기한이 자동으로 정리돼요.<div class="row" style="justify-content:center;margin-top:14px"><button class="btn pri" data-act="tab" data-k="import">📄 계획서 올리기</button><button class="btn" data-act="tab" data-k="ledger">✍️ 직접 추가</button></div></div></div>';
+  if (!S.items.length) return '<div class="card"><div class="empty"><img src="ggumsong.png" alt="" style="width:120px" onerror="this.hidden=true"><b>아직 예산이 없어요</b>계획서를 올리거나 직접 넣으면 잔액·기한이 자동으로 정리돼요.<div class="row" style="justify-content:center;margin-top:14px"><button class="btn pri" data-act="tab" data-k="import">📄 계획서 올리기</button><button class="btn" data-act="tab" data-k="ledger">✍️ 직접 추가</button></div></div></div>';
   const due = S.items.filter(it => it.deadline && calc(it).bal > 0).sort((a, b) => a.deadline.localeCompare(b.deadline)).slice(0, 6);
   const evs = S.events.filter(e => !e.done && e.date).sort((a, b) => a.date.localeCompare(b.date)).slice(0, 3);
   let h = vSummary();
