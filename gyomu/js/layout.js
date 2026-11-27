@@ -1,12 +1,12 @@
 /* 화면 구조 편집(v164): 오늘 화면 칸(브리핑·캘린더·이번 주 기한·업무들·곡선중 카드)의 순서·숨김·이름·처음 펼침, 위쪽 메뉴 이름·시작 화면,
    캘린더 시작 요일·기본 보기, 일정 구분 목록(이름·순서·삭제·추가). 저장 위치: S.profile.lay (기기 연동에 함께 올라갑니다). */
-const LY_BLOCKS = [['brief', '☀️ 오늘 브리핑 카드', false], ['cal', '📅 캘린더', true], ['soon', '⏰ 이번 주 기한', true], ['work', '🗂 업무들', true], ['sb', '🏫 곡선중 카드(학교 소개·바로가기)', true]];
+const LY_BLOCKS = [['dw', '🗄 서랍(자주 가는 사이트)', true], ['brief', '☀️ 오늘 브리핑 카드', false], ['cal', '📅 캘린더', true], ['soon', '⏰ 이번 주 기한', true], ['work', '🗂 업무들', true], ['sb', '🏫 곡선중 카드(학교 소개·바로가기)', true]];
 const LY_MENU = [['today', '오늘'], ['cal', '캘린더'], ['work', '내 업무'], ['hub', '총괄'], ['wlog', '업무일지'], ['class', '수업 및 시간표'], ['eval', '평가'], ['budget', '예산'], ['notes', '기록'], ['pages', '페이지'], ['lib', '자료·연락'], ['files', '자료 아카이브'], ['rule', '규정줍줍'], ['yp', '연간 교육·훈련'], ['set', '설정']];
 const lyD = () => ((S.profile = S.profile || {}).lay = S.profile.lay || {});
 const lyName = (k, d) => (lyD().name || {})[k] || d;
 const lyDef = (k, d) => { const o = lyD().open || {}; return o[k] === undefined ? (d === undefined ? true : d) : !!o[k]; };
 function lyOrder(P) {
-  const L = lyD(), all = LY_BLOCKS.map(b => b[0]), ord = [...(L.blocks || []).filter(k => all.includes(k)), ...all.filter(k => !(L.blocks || []).includes(k))], hide = L.hide || { sb: true };
+  const L = lyD(), all = LY_BLOCKS.map(b => b[0]), ord = [...(L.blocks || []).includes('dw') ? [] : ['dw'], ...(L.blocks || []).filter(k => all.includes(k)), ...all.filter(k => k !== 'dw' && !(L.blocks || []).includes(k))], hide = L.hide || { sb: true };
   return ord.filter(k => !hide[k] && P[k]).map(k => {
     let h = P[k]; const nm = (L.name || {})[k];
     if (nm && (k === 'soon' || k === 'sb')) h = h.replace(/(<summary[^>]*>)([^<]*)/, (m, a) => a + esc(nm) + ' ');

@@ -67,7 +67,7 @@ function nav(page) {
   return `<nav class="nav" aria-label="메뉴">${L.map(([k, v]) => `<a href="#/${k}" ${page === k || (k === 'notes' && page === 'note') || (k === 'pages' && page === 'page') ? 'aria-current="page"' : ''}>${v}</a>`).join('')}<button class="nvx" data-act="navPick" title="위쪽 메뉴 고르기">☰ 메뉴 고르기</button><button class="nvx" data-act="ibx">📨 메신저 붙여넣기</button></nav>`;
 }
 function footer() {
-  return `${drawerHtml()}<footer class="cp">© 김정환 · M.A.D.T (Moral And Digital Teacher)</footer>`;
+  return `${/^#\/(today)?$|^$/.test(location.hash) ? '' : drawerHtml()}<footer class="cp">© 김정환 · M.A.D.T (Moral And Digital Teacher)</footer>`;
 }
 
 /* ---------- 오늘 ---------- */
