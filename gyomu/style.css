@@ -1191,3 +1191,4 @@ dialog.dlg,dialog{max-width:96vw!important}
 body{padding-bottom:52px!important}
 #alarmbar{bottom:58px!important}#chatfab{bottom:58px!important}
 @media print{#dwbar{display:none!important}}
+#dwbar{padding-left:64px!important}

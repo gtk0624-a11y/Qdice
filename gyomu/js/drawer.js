@@ -95,7 +95,15 @@ function dwBarRender() {
   if (!b) { b = document.createElement('div'); b.id = 'dwbar'; document.body.appendChild(b); }
   if (!Array.isArray(S.links)) S.links = [];
   const fav = S.links.filter(l => l && l.fav && l.url).slice(0, 6);
-  b.innerHTML = '<button type="button" class="dwbtn" data-act="dwJump">🗄 서랍 열기 <small>(' + S.links.length + '개)</small></button>' + fav.map(l => '<a href="' + esc(l.url) + '" target="_blank" rel="noopener" data-dwgo="' + esc(l.id) + '">★ ' + esc(l.name) + '</a>').join('');
+  const lost = !S.links.length && typeof RS !== 'undefined' && RS.some(e => { try { const o = JSON.parse(e.j); return Array.isArray(o.links) && o.links.length; } catch (x) { return false; } });
+  b.innerHTML = (lost ? '<button type="button" class="dwbtn" style="background:#ffd0d8" data-act="dwRestore">🛟 서랍 목록 되살리기</button>' : '') + '<button type="button" class="dwbtn" data-act="dwJump">🗄 서랍 열기 <small>(' + S.links.length + '개)</small></button>' + fav.map(l => '<a href="' + esc(l.url) + '" target="_blank" rel="noopener" data-dwgo="' + esc(l.id) + '">★ ' + esc(l.name) + '</a>').join('');
 }
 { const _rD = render; render = function () { const r = _rD.apply(this, arguments); try { dwBarRender(); } catch (e) { } return r; }; }
 setTimeout(() => { try { dwBarRender(); } catch (e) { } }, 500);
+
+Object.assign(A, { dwRestore() {
+  let best = null; (typeof RS !== 'undefined' ? RS : []).forEach(e => { try { const o = JSON.parse(e.j); if (Array.isArray(o.links) && o.links.length && (!best || o.links.length > best.length)) best = o.links; } catch (x) { } });
+  if (!best) return toast('복구할 사본에 서랍 목록이 없습니다.');
+  const have = new Set((S.links || []).map(l => l.id || l.url)); S.links = (S.links || []).concat(best.filter(l => !have.has(l.id || l.url)));
+  commit(); toast('서랍 사이트 ' + best.length + '개를 되살렸습니다.');
+} });

@@ -564,3 +564,4 @@ service cloud.firestore {
 - v179: 서랍 데이터(S.links)가 비정상이어도 서랍 칸이 나오도록 방어(drawer.js, app.js footer try/catch)
 - v180: 위쪽 메뉴 줄에 🗄 서랍 버튼(A.dwJump, drawer.js) — 맨 아래로 안 내려가도 서랍 창 열림
 - v181: 서랍을 화면 맨 아래 고정 막대(#dwbar, drawer.js dwBarRender)로. 화면 끝 푸터 서랍 제거
+- v182: 서랍이 0개일 때 복구 사본(RS)에서 사이트 목록 되살리기 버튼(dwRestore), 서랍 막대 왼쪽 여백
