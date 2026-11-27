@@ -64,7 +64,7 @@ function masthead() {
 function nav(page) {
   const L0 = [['today', '오늘'], ['cal', '캘린더'], ['work', '내 업무'], ['hub', '총괄'], ['wlog', '업무일지'], ['class', '수업 및 시간표'], ['eval', '평가'], ['budget', '예산'], ['notes', '기록'], ['pages', '페이지'], ['lib', '자료·연락'], ['files', '자료 아카이브'], ['rule', '규정줍줍'], ['yp', '연간 교육·훈련'], ...(typeof cmCfg === 'function' && cmCfg().on ? [['cm', cmCfg().title || '학급 관리']] : []), ['set', '설정']];
   const L = (typeof navOrder === 'function' ? navOrder(L0) : L0).filter(([k]) => k === 'today' || k === 'set' || k === (page === 'note' ? 'notes' : page === 'page' ? 'pages' : page) || !(S.navHide || []).includes(k));
-  return `<nav class="nav" aria-label="메뉴">${L.map(([k, v]) => `<a href="#/${k}" ${page === k || (k === 'notes' && page === 'note') || (k === 'pages' && page === 'page') ? 'aria-current="page"' : ''}>${v}</a>`).join('')}<button class="nvx" data-act="navPick" title="위쪽 메뉴 고르기">☰ 메뉴 고르기</button><button class="nvx" data-act="ibx">📨 메신저 붙여넣기</button></nav>`;
+  return `<nav class="nav" aria-label="메뉴">${L.map(([k, v]) => `<a href="#/${k}" ${page === k || (k === 'notes' && page === 'note') || (k === 'pages' && page === 'page') ? 'aria-current="page"' : ''}>${v}</a>`).join('')}<button class="nvx" data-act="navPick" title="위쪽 메뉴 고르기">☰ 메뉴 고르기</button><button class="nvx" data-act="dwJump">🗄 서랍</button><button class="nvx" data-act="ibx">📨 메신저 붙여넣기</button></nav>`;
 }
 function footer() {
   return `${(() => { try { return drawerHtml(); } catch (e) { return '<section class="drawer dw"><div class="dwf"><b>서랍</b> <span class="mu">불러오는 중 문제가 생겼습니다(' + esc(e.message) + ')</span></div></section>'; } })()}<footer class="cp">© 김정환 · M.A.D.T (Moral And Digital Teacher)</footer>`;

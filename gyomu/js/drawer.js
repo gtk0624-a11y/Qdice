@@ -79,3 +79,12 @@ const trSiteForm = (x, done) => ask(x ? '연수 사이트 고치기' : '연수 �
 A.trSiteAdd = () => trSiteForm(null, (name, url) => trSites().push({ id: uid(), name, url }));
 A.trSiteEdit = el => { const x = trSites().find(v => v.id === el.dataset.id); if (x) trSiteForm(x, (name, url) => { x.name = name; x.url = url; }); };
 A.trSiteDel = el => { const x = trSites().find(v => v.id === el.dataset.id); if (x) sure('「' + x.name + '」를 목록에서 뺄까요?', () => { S.trSites = trSites().filter(v => v !== x); commit(); }); };
+
+/* v180: 위쪽 메뉴의 「🗄 서랍」 버튼 — 화면 맨 아래까지 내려가지 않고 서랍을 바로 연다 */
+Object.assign(A, { dwJump() {
+  let d = document.getElementById('dwdlg'); if (d) d.remove();
+  d = document.createElement('dialog'); d.id = 'dwdlg'; d.className = 'dlg';
+  let h = ''; try { h = drawerHtml(); } catch (e) { h = '<p class="mu">서랍을 불러오지 못했습니다: ' + esc(e.message) + '</p>'; }
+  d.innerHTML = '<form method="dialog"><h3>🗄 서랍</h3>' + h.replace('<details class="dwd"', '<details class="dwd" open') + '<div class="btns"><button value="x" class="pri">닫기</button></div></form>';
+  document.body.appendChild(d); d.addEventListener('close', () => d.remove()); d.showModal();
+} });

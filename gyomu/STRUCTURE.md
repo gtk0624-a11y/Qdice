@@ -562,3 +562,4 @@ service cloud.firestore {
 - v177: 서랍을 오늘 화면 맨 위 블록(dw)으로(ncal.js P.dw, layout.js), 오늘 화면 푸터의 중복 서랍 제거(app.js footer)
 - v178: 서랍을 다시 화면 맨 아래(푸터)로, "궁금하면 눌러보세요" 말풍선 숨김(style.css #chatbub)
 - v179: 서랍 데이터(S.links)가 비정상이어도 서랍 칸이 나오도록 방어(drawer.js, app.js footer try/catch)
+- v180: 위쪽 메뉴 줄에 🗄 서랍 버튼(A.dwJump, drawer.js) — 맨 아래로 안 내려가도 서랍 창 열림
