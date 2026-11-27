@@ -575,3 +575,4 @@ service cloud.firestore {
 - v191: 서랍 팝업 overflow 수정
 - v192: 폰(<=600px) 월간 캘린더 칸=날짜+색점, 상세는 아래 목록(style.css 끝)
 - v193: 폰 캘린더 점 가로 배치
+- v194: 폰 캘린더 점 위치 보정
