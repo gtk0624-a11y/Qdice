@@ -554,3 +554,4 @@ service cloud.firestore {
 - v169: teach.js 공강 같은 선생님 전체 명단(12명 제한 해제)
 - v170: 일과표 입력값 자동 이동 제거(class2.js bellSaveFrom), rsMerge가 bell 등 설정 배열은 합치지 않음(RS_CFG)
 - v171: 오늘 시간표 줄에 급식 칸(4교시 뒤, ttTokens 순서) app.js tfTok
+- v172: 급식과 겹친 교시 자동 정렬 복구(저장 시 + 열 때 bellFixNow, class2.js)

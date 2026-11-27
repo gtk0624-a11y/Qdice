@@ -141,7 +141,7 @@ function bellSaveFrom(root) {
   S.profile.bell = L; S.profile.start = clkHM(L[0].s); S.profile.classMin = modeOf(dur); if (gaps.length) S.profile.breakMin = modeOf(gaps);
   const a = root.querySelector('[data-belll="s"]'), b = root.querySelector('[data-belll="e"]');
   if (a && b && clkParse(a.value) != null && clkParse(b.value) != null && clkParse(b.value) > clkParse(a.value)) { S.profile.lunchS = a.value; S.profile.lunchE = b.value; }
-  commit(); toast('일과표를 입력하신 그대로 저장했습니다.'); /* 자동 정렬은 「급식 뒤로 교시 자동 정렬」 버튼을 누를 때만 */
+  const moved = bellAlignLunch(); commit(); toast(moved ? '급식 시간과 겹쳐서 5교시부터 급식 끝난 뒤로 옮겼습니다.' : '일과표를 저장했습니다.');
 }
 document.addEventListener('change', e => { const t = e.target; if (t.dataset && (t.dataset.bellp || t.dataset.belll)) bellSaveFrom(t.closest('table') || document); });
 Object.assign(A, {
@@ -151,3 +151,7 @@ Object.assign(A, {
   bellReset() { sure('일과표를 기본값(9시 시작·45분 수업·10분 쉬는 시간)으로 되돌릴까요?', () => { S.profile.bell = []; S.profile.lunchS = ''; S.profile.lunchE = ''; commit(); }); },
   bellOvDel(el) { S.profile.bellOv = bellOvs().filter(o => o.id !== el.dataset.id); commit(); }
 });
+
+/* v172: 열 때마다 급식과 겹친 교시가 있으면 급식 뒤로 자동 정렬(교시 길이·쉬는시간은 유지) */
+function bellFixNow() { try { if (S.profile.bell && S.profile.bell.length && bellAlignLunch()) { commit(); toast('급식 시간과 겹친 교시를 급식 뒤로 맞췄습니다.'); } } catch (e) { } }
+setTimeout(bellFixNow, 1200);
