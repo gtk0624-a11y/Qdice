@@ -1243,3 +1243,12 @@ body{padding-bottom:52px!important}
  html body .ncdl .td{padding:10px 4px;font-size:15px;line-height:1.45}
  html body .ncdl .td .tl{font-size:15px;white-space:normal;word-break:keep-all}
 }
+/* v193 점을 가로로, 둥글고 선명하게 */
+@media(max-width:600px){
+ html body .ncc{display:block!important;text-align:center;min-height:56px!important}
+ html body .ncc .ncn{display:flex!important;width:100%!important}
+ html body .ncc .ncard{display:inline-block!important;vertical-align:top;width:10px!important;height:10px!important;margin:2px 1.5px 0!important;border-radius:50%!important;opacity:1!important;background:transparent!important}
+ html body .ncc .ncard.dn{opacity:.4!important}
+ html body .ncc .ncard .ncm{display:block!important;width:10px!important;height:10px!important;margin:0!important;padding:0!important}
+ html body .ncc .ncard .ncm i{display:block!important;width:10px!important;height:10px!important;border-radius:50%!important;padding:0!important;margin:0!important;opacity:1!important;border:1px solid rgba(0,0,0,.25)!important}
+}

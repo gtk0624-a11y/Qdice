@@ -574,3 +574,4 @@ service cloud.firestore {
 - v190: 서랍을 좌하단 작은 토글 버튼으로(style.css 끝)
 - v191: 서랍 팝업 overflow 수정
 - v192: 폰(<=600px) 월간 캘린더 칸=날짜+색점, 상세는 아래 목록(style.css 끝)
+- v193: 폰 캘린더 점 가로 배치
