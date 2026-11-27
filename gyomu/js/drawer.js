@@ -94,6 +94,7 @@ function dwBarRender() {
   let b = document.getElementById('dwbar');
   if (!b) { b = document.createElement('div'); b.id = 'dwbar'; document.body.appendChild(b); }
   if (!Array.isArray(S.links)) S.links = [];
+  try { if (typeof featOn === 'function' && !featOn('drawer')) { S.feat = S.feat || {}; S.feat.drawer = true; if (typeof featApply === 'function') featApply(); save(true); } } catch (e) { } /* 서랍은 항상 보이게: 연동으로 「기능 끄기」가 섞여도 켜 둠 */
   if (b.querySelector('input:focus')) return; /* 입력 중이면 다시 그리지 않음 */
   const lost = !S.links.length && typeof RS !== 'undefined' && RS.some(e => { try { const o = JSON.parse(e.j); return Array.isArray(o.links) && o.links.length; } catch (x) { return false; } });
   let h = ''; try { h = drawerHtml(); } catch (e) { h = '<section class="drawer dw"><b>서랍</b> <span class="mu">불러오지 못했습니다(' + esc(e.message) + ')</span></section>'; }
