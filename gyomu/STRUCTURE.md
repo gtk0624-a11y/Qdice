@@ -571,3 +571,4 @@ service cloud.firestore {
 - v187: 서랍이 안 보인 진짜 원인 = 설정의 선택 기능 「서랍」이 꺼짐(feat.js nf-drawer). 서랍 막대가 스스로 켬
 - v188: 서랍 막대를 한 줄(약 34px)로 축소(style.css 끝)
 - v189: 서랍 막대 한 줄 고정(:has 선택자 버그 수정)
+- v190: 서랍을 좌하단 작은 토글 버튼으로(style.css 끝)
