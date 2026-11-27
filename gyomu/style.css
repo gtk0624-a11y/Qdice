@@ -1166,3 +1166,4 @@ main,#app,.wrap{padding-bottom:max(var(--pb,0px),64px)}
 #chatpan{z-index:90!important}
 body:has(#chatpan:not([hidden])) .scfab,body:has(#chatpan:not([hidden])) #chatbub,body:has(#chatpan:not([hidden])) #pstLayer{display:none!important}
 .tfq1{display:flex;gap:6px;flex-wrap:nowrap;overflow-x:auto;padding:4px 8px}.tfq1 .chip{white-space:nowrap}
+.pc.done{background-image:none!important;opacity:.82}.pc.done b{text-decoration:line-through}

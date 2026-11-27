@@ -1176,6 +1176,7 @@ main,#app,.wrap{padding-bottom:max(var(--pb,0px),64px)}
 #chatpan{z-index:90!important}
 body:has(#chatpan:not([hidden])) .scfab,body:has(#chatpan:not([hidden])) #chatbub,body:has(#chatpan:not([hidden])) #pstLayer{display:none!important}
 .tfq1{display:flex;gap:6px;flex-wrap:nowrap;overflow-x:auto;padding:4px 8px}.tfq1 .chip{white-space:nowrap}
+.pc.done{background-image:none!important;opacity:.82}.pc.done b{text-decoration:line-through}
 </style>
 </head>
 <body>
@@ -1853,7 +1854,7 @@ function todayView() {
     const wk = P.dow === 0 || P.dow === 6, sd = UI.tdDay || (wk ? 1 : P.dow), isT = !wk && sd === P.dow;
     const mon = new Date(); mon.setHours(0, 0, 0, 0); mon.setDate(mon.getDate() - ((mon.getDay() + 6) % 7) + (wk ? 7 : 0)); const dd = d => { const x = new Date(mon); x.setDate(x.getDate() + d - 1); return (x.getMonth() + 1) + '/' + x.getDate(); }, dfull = d => { const x = new Date(mon); x.setDate(x.getDate() + d - 1); return ymd(x); };
     const tabs = `<div class="tdtabs" role="tablist">` + [1, 2, 3, 4, 5].map(d => `<button class="${d === sd ? 'on' : ''}${!wk && d === P.dow ? ' tdy' : ''}" role="tab" aria-selected="${d === sd}" data-act="tdDay" data-d="${d}">${DOW[d]}<small>${dd(d)}</small></button>`).join('') + '</div>';
-    let b = `<p class="mu"><b>${DOW[sd]}요일(${dd(sd)}) 시간표${isT ? ' · 오늘' : wk && sd === 1 && !UI.tdDay ? ' · 다음 수업일' : ''}</b></p>${tabs}<div class="strip">` + tfPList(sd).map(p => { const PL = typeof clkPeriods === 'function' ? clkPeriods() : [], nw = new Date(), mn = nw.getHours() * 60 + nw.getMinutes(), pp = PL.find(y => y.p === p), ended = isT && pp && mn >= pp.e, THX = ['수고했어요^^', '고생했어요♡', '잘했어요!', '오늘도 굿~', '한 시간 끝!', '멋졌어요✿', '푹 쉬어요^^'], has = tt(sd, p); return `<div class="pc ${isT && P.cur === p ? 'now' : ''} ${ended ? 'done' : ''}" style="${typeof cellBg === 'function' && has && !ended ? cellBg(has) : ''}"><b>${p}</b>${esc(has || '—')}${typeof cellLinkHtml === 'function' && has ? cellLinkHtml(sd, p) : ''}${typeof cusSlot === 'function' ? cusSlot(dfull(sd), p) : ''}${ended && has ? `<span class="okm">✅ 수업 완료</span><span class="thx">${THX[(p * 3 + sd) % THX.length]}</span>` : ''}</div>`; }).join('') + '</div>';
+    let b = `<p class="mu"><b>${DOW[sd]}요일(${dd(sd)}) 시간표${isT ? ' · 오늘' : wk && sd === 1 && !UI.tdDay ? ' · 다음 수업일' : ''}</b></p>${tabs}<div class="strip">` + tfPList(sd).map(p => { const PL = typeof clkPeriods === 'function' ? clkPeriods() : [], nw = new Date(), mn = nw.getHours() * 60 + nw.getMinutes(), pp = PL.find(y => y.p === p), ended = isT && pp && mn >= pp.e, THX = ['수고했어요^^', '고생했어요♡', '잘했어요!', '오늘도 굿~', '한 시간 끝!', '멋졌어요✿', '푹 쉬어요^^'], has = tt(sd, p); return `<div class="pc ${isT && P.cur === p ? 'now' : ''} ${ended ? 'done' : ''}" style="${typeof cellBg === 'function' && has ? cellBg(has) : ''}"><b>${p}</b>${esc(has || '—')}${typeof cellLinkHtml === 'function' && has ? cellLinkHtml(sd, p) : ''}${typeof cusSlot === 'function' ? cusSlot(dfull(sd), p) : ''}${ended && has ? `<span class="okm">✅ 수업 완료</span><span class="thx">${THX[(p * 3 + sd) % THX.length]}</span>` : ''}</div>`; }).join('') + '</div>';
     if (typeof wkGrid === 'function') b += wkGrid(wk);
     b += `<div class="tools"><a class="btn pri" href="#/class">✏️ 시간표 입력·수정하기</a><button class="btn" data-act="comci">🔄 컴시간알리미에서 가져오기</button></div><p class="mu">${has ? '시간표를 고치려면 위 버튼(수업 화면의 시간표 표)을 누르세요. 컴시간과 연동해 자동으로 가져옵니다.' : '<b>아직 시간표가 비어 있어요.</b> 위 [시간표 입력·수정하기]에서 칸에 직접 적거나, [컴시간알리미에서 가져오기]를 누르세요.'}</p>`;
     rows.push(row('r1', '오늘', '일과', st, due, b));
@@ -6100,7 +6101,7 @@ buildChunks = function () {
 };
 
 /* 화면 맨 아래에 버전 표시 — 옛 화면을 보고 있는지 바로 알 수 있게 */
-const TF_VER = 'v167', _cmFt = footer;
+const TF_VER = 'v168', _cmFt = footer;
 footer = function () { return _cmFt.apply(this, arguments).replace('</footer>', ` · <span class="mu">버전 ${TF_VER} (학급 관리 포함)</span></footer>`); };
 
 /* 새 버전 알림: 옛 화면이 남아 있으면 한 번 눌러 새로 받게 함 */
@@ -7438,6 +7439,7 @@ function rsMerge(cur, old) { /* cur에 없는 것을 old에서 채웁니다(같�
   Object.keys(old).forEach(k => {
     const a = cur[k], b = old[k]; if (b === undefined) return;
     if (a === undefined || a === null) { cur[k] = b; return; }
+    if (a === '' && typeof b === 'string' && b !== '') { cur[k] = b; return; }
     if (Array.isArray(a) && Array.isArray(b)) {
       if (!a.length) { cur[k] = b; return; }
       if (b.length && b.every(rsObj)) { const ids = new Set(a.filter(x => rsObj(x) && x.id != null).map(x => x.id)), sg = new Set(a.filter(x => rsObj(x) && x.id == null).map(x => JSON.stringify(x))); b.forEach(x => { if (x.id != null ? !ids.has(x.id) : !sg.has(JSON.stringify(x))) a.push(x); }); }

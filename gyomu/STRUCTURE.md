@@ -550,3 +550,4 @@ service cloud.firestore {
 ## v166
 - rescue.js(자료 복구·합치기·손실 가드), pwsync 병합/가드/서버 7일 백업, 챗봇 단순화(tools.js 끝), 일과표 교시목록 tfPList(app.js), 자비스 말투(bot2.js)
 - v167: inbox.js ibxNorm(메신저 정리 결과를 날짜→시간→내용 순, 시간 제목 앞으로)
+- v168: 시간표 칸 색 유지(지난 교시도 app.js cellBg, style.css .pc.done), rsMerge 빈 문자열 칸 채우기

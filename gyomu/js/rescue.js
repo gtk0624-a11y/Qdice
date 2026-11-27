@@ -15,6 +15,7 @@ function rsMerge(cur, old) { /* cur에 없는 것을 old에서 채웁니다(같�
   Object.keys(old).forEach(k => {
     const a = cur[k], b = old[k]; if (b === undefined) return;
     if (a === undefined || a === null) { cur[k] = b; return; }
+    if (a === '' && typeof b === 'string' && b !== '') { cur[k] = b; return; }
     if (Array.isArray(a) && Array.isArray(b)) {
       if (!a.length) { cur[k] = b; return; }
       if (b.length && b.every(rsObj)) { const ids = new Set(a.filter(x => rsObj(x) && x.id != null).map(x => x.id)), sg = new Set(a.filter(x => rsObj(x) && x.id == null).map(x => JSON.stringify(x))); b.forEach(x => { if (x.id != null ? !ids.has(x.id) : !sg.has(JSON.stringify(x))) a.push(x); }); }
