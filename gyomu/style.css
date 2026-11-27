@@ -1192,3 +1192,6 @@ body{padding-bottom:52px!important}
 #alarmbar{bottom:58px!important}#chatfab{bottom:58px!important}
 @media print{#dwbar{display:none!important}}
 #dwbar{padding-left:64px!important}
+/* v183 서랍 막대 = 원래 서랍 디자인을 화면 맨 아래에 고정 */
+#dwbar{display:block!important;max-height:70vh;overflow:auto;padding:2px 12px 2px 64px!important;white-space:normal!important}
+#dwbar .drawer,#dwbar .dw{margin:0!important;border:0!important;padding:4px 0!important}
