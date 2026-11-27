@@ -1,0 +1,547 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>도디쌤의 돈워리 비해피 · 업무파탈 시리즈3</title>
+<meta name="theme-color" content="#E3F6EC">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap">
+<style>
+/* ===== 도디쌤의 돈워리 비해피 — 스타일 (색은 :root 변수에서 바꾸세요) ===== */
+:root{--ink:#2b2a33;--mint:#E3F6EC;--mint2:#9FE3C8;--green:#1f8a68;--cream:#FFF6DF;--yellow:#FFE07A;--coral:#FFD3CB;--red:#c8432e;--sky:#EAF2FF;--line:#e6e2d6;--mu:#6a6773}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--mint);color:var(--ink);font-family:'Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:16px;line-height:1.55}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+[hidden]{display:none!important}
+#app{max-width:980px;margin:0 auto;padding:18px 18px 70px}
+.demo-banner{background:var(--ink);color:#fff;border-radius:16px;padding:12px 18px;font-size:14px;display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;margin-bottom:14px}
+.demo-banner b{color:var(--yellow)}.demo-banner a{color:var(--yellow);font-weight:700}
+header.top{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:8px;margin:8px 0 14px}
+.series{display:inline-block;background:var(--ink);color:#fff;border-radius:40px;padding:3px 14px;font-size:13px;font-weight:700}
+h1{margin:6px 0 0;font-size:32px;font-weight:900;letter-spacing:-1px;line-height:1.2}
+.sub{color:var(--mu);font-size:14px}
+.mascot{width:78px;height:auto;display:block;margin-left:auto}
+nav.tabs{display:flex;gap:8px;overflow-x:auto;padding:4px 2px 12px;scrollbar-width:none}
+nav.tabs button{flex:none;border:3px solid var(--ink);background:#fff;border-radius:40px;padding:8px 18px;font-weight:700;font-size:15px}
+nav.tabs button.on{background:var(--ink);color:#fff}
+.card{background:#fff;border:3px solid var(--ink);border-radius:22px;padding:20px 22px;margin:0 0 18px;box-shadow:0 7px 0 rgba(43,42,51,.14)}
+.card.flat{box-shadow:none}
+h2{margin:0 0 4px;font-size:22px;font-weight:900;letter-spacing:-.5px}
+h3{margin:0 0 8px;font-size:17px;font-weight:900}
+.hint{color:var(--mu);font-size:14px;margin:2px 0 10px}
+.btn{border:3px solid var(--ink);background:#fff;border-radius:40px;padding:7px 16px;font-weight:700;font-size:14px;line-height:1.3}
+.btn:hover{background:var(--yellow)}
+.btn.pri{background:var(--ink);color:#fff}.btn.pri:hover{background:#000}
+.btn.yel{background:var(--yellow)}
+.btn.sm{padding:3px 11px;font-size:13px;border-width:2px}
+.btn.del{border-color:var(--red);color:var(--red)}
+.btn.del:hover{background:var(--coral)}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.grow{flex:1 1 160px}
+input,select,textarea{border:2px solid var(--ink);border-radius:12px;padding:8px 11px;background:#fff;max-width:100%}
+input:focus,select:focus,textarea:focus{outline:3px solid var(--mint2);outline-offset:1px}
+textarea{width:100%;min-height:120px;resize:vertical}
+label.f{display:block;font-size:13px;font-weight:700;color:var(--mu)}
+label.f input,label.f select{display:block;width:100%;margin-top:3px;font-weight:400;color:var(--ink);font-size:16px}
+.form{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;align-items:end}
+.sumrow{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+.sumbox{border:3px solid var(--ink);border-radius:18px;padding:12px 16px;background:var(--cream)}
+.sumbox small{display:block;font-size:13px;font-weight:700;color:var(--mu)}
+.sumbox b{font-size:26px;font-weight:900;letter-spacing:-1px;font-variant-numeric:tabular-nums}
+.sumbox.bal{background:var(--mint2)}
+.bar{height:16px;background:#eee;border-radius:10px;overflow:hidden;border:2px solid var(--ink)}
+.bar i{display:block;height:100%;background:var(--yellow)}
+.bar i.over{background:var(--red)}
+.chip{display:inline-block;border-radius:40px;padding:2px 12px;font-size:13px;font-weight:700;border:2px solid var(--ink);background:#fff;white-space:nowrap}
+.chip.soon{background:var(--coral);border-color:var(--red);color:#a3331f}
+.chip.ok{background:var(--mint)}.chip.done{background:#eee;color:var(--mu);border-color:#bbb}.chip.over{background:var(--red);color:#fff;border-color:var(--red)}
+.num{font-variant-numeric:tabular-nums;text-align:right}
+table{width:100%;border-collapse:collapse;font-size:15px}
+th{font-size:13px;text-align:left;color:#fff;background:var(--ink);padding:8px 10px;white-space:nowrap}
+th:first-child{border-radius:12px 0 0 0}th:last-child{border-radius:0 12px 0 0}
+th.num{text-align:right}
+td{padding:9px 10px;border-bottom:2px solid var(--line);vertical-align:middle}
+tr.total td{background:var(--cream);font-weight:900;border-bottom:0}
+td input.cell{width:100%;border-width:1.5px;padding:5px 8px;border-radius:8px}
+td input.cell.amt{text-align:right;min-width:90px}
+.tw{overflow-x:auto}
+.item{border:3px solid var(--ink);border-radius:20px;margin-bottom:12px;background:#fff;overflow:hidden}
+.item>.hd{display:grid;grid-template-columns:1fr auto;gap:6px 12px;padding:14px 18px;cursor:pointer;align-items:center}
+.item>.hd .nm{font-weight:900;font-size:18px;letter-spacing:-.4px}
+.item>.hd .dp{font-size:13px;color:var(--mu)}
+.item>.hd .nums{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:4px 18px;font-size:14px;color:var(--mu)}
+.item>.hd .nums b{color:var(--ink)}
+.item>.hd .nums .bl{color:var(--green);font-weight:900}
+.item>.hd .barw{grid-column:1/-1}
+.item .bd{padding:4px 18px 18px;border-top:3px dashed var(--line);background:#fffdf7}
+.empty{text-align:center;padding:34px 10px;color:var(--mu)}
+.empty b{display:block;font-size:20px;color:var(--ink);margin-bottom:6px}
+.tag{font-size:12px;font-weight:700;color:var(--green)}
+.todo{display:flex;gap:8px;align-items:center;padding:4px 0}
+.todo.done span{text-decoration:line-through;color:var(--mu)}
+.todo input[type=checkbox]{width:20px;height:20px;accent-color:var(--ink)}
+.drop{border:3px dashed var(--ink);border-radius:20px;padding:22px;text-align:center;background:var(--cream);cursor:pointer;display:block}
+.drop.over{background:var(--mint2)}
+.drop b{font-size:18px}
+.warn{background:var(--coral);border:2px solid var(--red);border-radius:14px;padding:9px 14px;font-size:14px;margin:8px 0}
+.note{background:var(--sky);border-radius:14px;padding:10px 14px;font-size:14px;margin:8px 0}
+footer{text-align:center;font-size:12px;color:var(--mu);margin-top:26px}
+#toast{position:fixed;left:50%;bottom:26px;transform:translate(-50%,20px);background:var(--ink);color:#fff;padding:11px 20px;border-radius:40px;font-size:14px;font-weight:700;opacity:0;pointer-events:none;transition:.2s;z-index:50;max-width:92vw;text-align:center}
+#toast.show{opacity:1;transform:translate(-50%,0)}
+.printonly{display:none}
+@media (max-width:640px){
+ #app{padding:12px 12px 60px}h1{font-size:26px}.card{padding:16px}
+ .sumrow{grid-template-columns:1fr}.sumbox b{font-size:22px}
+ .item>.hd{padding:12px 14px}
+}
+@media print{
+ body{background:#fff}
+ header.top,nav.tabs,.noprint,footer,.demo-banner,#toast{display:none!important}
+ .card{box-shadow:none;border:0;padding:0}
+ .printonly{display:block}
+ th{background:#ddd!important;color:#000!important;-webkit-print-color-adjust:exact}
+ td input.cell{border:0;padding:0}
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="demo-banner" id="demoBanner" hidden>
+    <span><b>체험판</b> · 예시 데이터로 마음껏 눌러 보세요. 이 화면은 <b>저장되지 않아요</b>(새로고침하면 처음으로).</span>
+    <a href="../donworry/">실제판 열기 →</a>
+  </div>
+  <header class="top">
+    <div>
+      <span class="series">업무파탈 · SERIES 3</span>
+      <h1>도디쌤의 돈워리 비해피</h1>
+      <div class="sub">돈 걱정은 행복하지 않아 — 내 업무 예산을 세우고 · 쓰고 · 정리</div>
+    </div>
+    <div><img class="mascot" src="ggumsong.png" alt="꿈송이" onerror="this.style.display='none'"><div class="sub" id="ownerLine"></div></div>
+  </header>
+  <nav class="tabs" id="tabs"></nav>
+  <main id="view"></main>
+  <footer>© 김정환 · M.A.D.T (Moral And Digital Teacher)</footer>
+</div>
+<div id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js" async></script>
+<script>
+/* =====================================================================
+   도디쌤의 돈워리 비해피 — 구조 안내 (자세한 설명은 구조설명.md)
+   1) 데이터   : S (items 예산항목[집행내역 포함] / events 행사 / owner·year) — 이 기기 localStorage('dwb_v1')
+   2) 화면     : render() → 탭별 함수 vHome / vLedger / vImport / vEvents / vRequest / vSettings
+   3) 입력     : parseAny() — 엑셀·csv·붙여넣은 글에서 사업명·금액·기한을 뽑아 draft 로 만듦
+   4) 체험판   : DEMO=true 이면 예시 데이터로 시작하고 저장하지 않음
+   ===================================================================== */
+const DEMO = true;
+const KEY = 'dwb_v1';
+
+/* ---------- 도우미 ---------- */
+const uid = () => Math.random().toString(36).slice(2, 9);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const won = n => (Math.round(Number(n)) || 0).toLocaleString('ko-KR');
+const toNum = s => Number(String(s ?? '').replace(/[^\d.-]/g, '')) || 0;
+const today = () => { const d = new Date(); return new Date(d.getFullYear(), d.getMonth(), d.getDate()); };
+const iso = d => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+const addDays = n => { const t = today(); return iso(new Date(t.getFullYear(), t.getMonth(), t.getDate() + n)); };
+const dday = s => { if (!s) return null; const [y, m, d] = s.split('-').map(Number); if (!y) return null; return Math.round((new Date(y, m - 1, d) - today()) / 864e5); };
+const ddayTxt = n => n === 0 ? 'D-DAY' : n > 0 ? 'D-' + n : 'D+' + (-n);
+const $ = id => document.getElementById(id);
+function toast(m) { const t = $('toast'); t.textContent = m; t.classList.add('show'); clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove('show'), 2600); }
+
+/* ---------- 데이터 ---------- */
+function empty() { return { v: 1, owner: '', year: String(today().getFullYear()), items: [], events: [] }; }
+function sample() {
+  const s = empty();
+  s.owner = '도디쌤(예시)';
+  s.items = [
+    { id: uid(), name: '학생인권 교육 운영', dept: '학생인권부', alloc: 500000, deadline: addDays(14), memo: '강사료·교재',
+      spent: [{ id: uid(), date: addDays(-30), title: '교육 자료 인쇄', amount: 120000 }, { id: uid(), date: addDays(-12), title: '강사 사례비', amount: 200000 }] },
+    { id: uid(), name: '교권보호 연수', dept: '학생인권부', alloc: 300000, deadline: addDays(40), memo: '',
+      spent: [{ id: uid(), date: addDays(-50), title: '연수 강사비', amount: 300000 }] },
+    { id: uid(), name: '곡선제 운영', dept: '학생인권부', alloc: 800000, deadline: addDays(25), memo: '무대·음향·간식',
+      spent: [{ id: uid(), date: addDays(-8), title: '현수막 제작', amount: 195000 }] },
+    { id: uid(), name: '인권규정 개정 협의회', dept: '학생인권부', alloc: 200000, deadline: addDays(6), memo: '다과·회의 자료', spent: [] }
+  ];
+  s.events = [
+    { id: uid(), name: '제16회 곡선제', date: addDays(25), itemId: s.items[2].id, done: false,
+      todos: [{ t: '무대·음향 업체 확정', d: true }, { t: '현수막 시안 확인', d: true }, { t: '간식 구입 품의', d: false }, { t: '학부모 안내문 발송', d: false }] }
+  ];
+  return s;
+}
+function load() {
+  if (DEMO) return sample();
+  try { const r = localStorage.getItem(KEY); if (r) { const o = JSON.parse(r); return Object.assign(empty(), o, { items: Array.isArray(o.items) ? o.items : [], events: Array.isArray(o.events) ? o.events : [] }); } } catch (e) {}
+  return empty();
+}
+let S = load();
+function save() {
+  if (DEMO) return;
+  try { localStorage.setItem(KEY, JSON.stringify(S)); }
+  catch (e) { toast('이 브라우저에 저장하지 못했어요. 설정에서 백업을 내려받아 주세요'); }
+}
+const ui = { tab: 'home', open: new Set(), edit: null, draft: null, req: null, reqPct: 0, reqTitle: '' };
+
+function calc(it) {
+  const spent = (it.spent || []).reduce((a, b) => a + (Number(b.amount) || 0), 0);
+  const alloc = Number(it.alloc) || 0;
+  return { spent, alloc, bal: alloc - spent, pct: alloc > 0 ? Math.min(100, spent / alloc * 100) : (spent > 0 ? 100 : 0) };
+}
+function totals() { return S.items.reduce((t, it) => { const c = calc(it); t.alloc += c.alloc; t.spent += c.spent; t.bal += c.bal; return t; }, { alloc: 0, spent: 0, bal: 0 }); }
+function chipFor(it) {
+  const c = calc(it), d = dday(it.deadline);
+  if (c.bal < 0) return '<span class="chip over">예산 초과</span>';
+  if (c.alloc > 0 && c.bal === 0) return '<span class="chip done">전액 집행</span>';
+  if (d === null) return '';
+  if (d < 0) return '<span class="chip soon">기한 지남 ' + ddayTxt(d) + '</span>';
+  if (d <= 14) return '<span class="chip soon">' + ddayTxt(d) + '</span>';
+  return '<span class="chip ok">' + ddayTxt(d) + '</span>';
+}
+
+/* ---------- 계획서·표에서 사업명/금액/기한 뽑기 ---------- */
+function inferYear(m, d) {
+  const t = today(); let y = t.getFullYear();
+  if (new Date(y, m - 1, d) < new Date(t.getFullYear(), t.getMonth(), t.getDate() - 120)) y++;
+  return y;
+}
+function findDate(str) {
+  let m;
+  if ((m = str.match(/(20\d{2})\s*[.\-\/년]\s*(\d{1,2})\s*[.\-\/월]\s*(\d{1,2})\s*일?/))) return { iso: m[1] + '-' + String(m[2]).padStart(2, '0') + '-' + String(m[3]).padStart(2, '0'), raw: m[0] };
+  if ((m = str.match(/(\d{1,2})\s*월\s*(\d{1,2})\s*일/))) { const y = inferYear(+m[1], +m[2]); return { iso: y + '-' + String(m[1]).padStart(2, '0') + '-' + String(m[2]).padStart(2, '0'), raw: m[0] }; }
+  if ((m = str.match(/(\d{1,2})\/(\d{1,2})\s*까지/))) { const y = inferYear(+m[1], +m[2]); return { iso: y + '-' + String(m[1]).padStart(2, '0') + '-' + String(m[2]).padStart(2, '0'), raw: m[0] }; }
+  return null;
+}
+function findAmount(str) {
+  const re = /(\d{1,3}(?:,\d{3})+|\d+)\s*(천원|만원|원|명|회|학년|시간|차시|월|일|개|부|권|%|년|반|차)?/g;
+  let m, best = null;
+  while ((m = re.exec(str))) {
+    const hasComma = m[1].includes(','); const n = Number(m[1].replace(/,/g, '')); const u = m[2];
+    let v = 0;
+    if (u === '원') v = n; else if (u === '천원') v = n * 1000; else if (u === '만원') v = n * 10000;
+    else if (!u && (hasComma || n >= 10000)) v = n;
+    else continue;
+    if (v >= 1000 && (!best || v > best.v)) best = { v, raw: m[0] };
+  }
+  return best;
+}
+function cleanName(s) {
+  return s.replace(/^[\s\-–•·*▶▷■□○●◆◇※\d.)\]①②③④⑤⑥⑦⑧⑨⑩]+/, '').replace(/(기한|마감|집행기한|집행 기한)\s*[:：]?/g, '').replace(/까지/g, '').replace(/[\s:：,;|\/~\-–]+$/g, '').replace(/^[\s:：,;|\/~\-–]+/g, '').replace(/\s{2,}/g, ' ').trim();
+}
+function parseText(txt) {
+  const out = [];
+  String(txt || '').split(/\r?\n/).forEach(line0 => {
+    let line = line0.replace(/\t/g, ' | ').trim();
+    if (!line) return;
+    const dt = findDate(line); let rest = line; if (dt) rest = rest.replace(dt.raw, ' ');
+    const am = findAmount(rest); if (!am) return;
+    rest = rest.replace(am.raw, ' ');
+    const name = cleanName(rest);
+    if (/^(합계|총계|소계|계|총액)$/.test(name.replace(/\s/g, ''))) return;
+    out.push({ name: name || '(이름 없음)', amount: am.v, deadline: dt ? dt.iso : '', dept: '', on: true });
+  });
+  return out;
+}
+function cellDate(v) {
+  if (v instanceof Date && !isNaN(v)) return iso(v);
+  if (typeof v === 'string') { const d = findDate(v); if (d) return d.iso; const m = v.match(/^(20\d{2})-(\d{2})-(\d{2})/); if (m) return m[0]; }
+  return '';
+}
+function parseRows(rows) {
+  rows = rows.filter(r => r.some(c => String(c).trim() !== ''));
+  let hi = -1, ci = {};
+  for (let i = 0; i < Math.min(12, rows.length); i++) {
+    const r = rows[i].map(c => String(c));
+    const n = r.findIndex(c => /사업|항목|명칭|과제|내역|프로그램|행사/.test(c));
+    const a = r.findIndex(c => /금액|예산|배정|계획액|요구액/.test(c));
+    if (n >= 0 && a >= 0 && n !== a) {
+      hi = i; ci = { n, a, d: r.findIndex(c => /기한|마감|집행일|일자|날짜/.test(c)), p: r.findIndex(c => /부서|담당/.test(c)) }; break;
+    }
+  }
+  const out = [];
+  if (hi >= 0) {
+    rows.slice(hi + 1).forEach(r => {
+      const name = String(r[ci.n] ?? '').trim(); const amt = toNum(r[ci.a]);
+      if (!name || !amt || /^(합계|총계|소계|계|총액)$/.test(name.replace(/\s/g, ''))) return;
+      out.push({ name, amount: amt, deadline: ci.d >= 0 ? cellDate(r[ci.d]) : '', dept: ci.p >= 0 ? String(r[ci.p] ?? '').trim() : '', on: true });
+    });
+    if (out.length) return out;
+  }
+  rows.forEach(r => {
+    let name = '', amt = 0, dl = '';
+    r.forEach(c => {
+      if (c instanceof Date) { if (!dl) dl = cellDate(c); return; }
+      const s = String(c).trim(); if (!s) return;
+      if (typeof c === 'number') { if (c >= 1000 && c > amt) amt = c; return; }
+      const fd = cellDate(s); if (fd && !dl && s.length <= 16) { dl = fd; return; }
+      if (/^[\d,\s원]+$/.test(s)) { const v = toNum(s); if (v >= 1000 && v > amt) amt = v; return; }
+      if (!name && /[가-힣A-Za-z]/.test(s)) name = s;
+    });
+    if (name && amt && !/^(합계|총계|소계|계|총액)$/.test(name.replace(/\s/g, ''))) out.push({ name, amount: amt, deadline: dl, dept: '', on: true });
+  });
+  return out;
+}
+async function parseFile(file) {
+  const ext = (file.name.split('.').pop() || '').toLowerCase();
+  if (['xlsx', 'xls', 'csv'].includes(ext)) {
+    if (window.XLSX) {
+      const wb = XLSX.read(await file.arrayBuffer(), { type: 'array', cellDates: true });
+      let all = [];
+      wb.SheetNames.forEach(n => { all = all.concat(parseRows(XLSX.utils.sheet_to_json(wb.Sheets[n], { header: 1, raw: true, defval: '' }))); });
+      return all;
+    }
+    if (ext === 'csv') return parseText(await file.text());
+    throw new Error('엑셀 도구를 아직 못 불러왔어요. 인터넷을 확인하고 다시 시도하거나, 내용을 복사해 붙여넣어 주세요.');
+  }
+  if (['txt', 'md'].includes(ext)) return parseText(await file.text());
+  throw new Error('한글(hwp)·PDF·워드 파일은 내용을 직접 읽지 못해요. 파일을 열어 표/글을 복사한 뒤 아래 칸에 붙여넣어 주세요.');
+}
+
+/* ---------- 화면 ---------- */
+const TABS = [['home', '🏠 홈'], ['ledger', '📒 예산 장부'], ['import', '📄 계획서 올리기'], ['events', '🗓️ 행사'], ['request', '📝 예산요구서'], ['settings', '⚙️ 설정·백업']];
+function render() {
+  $('tabs').innerHTML = TABS.map(([k, v]) => '<button data-act="tab" data-k="' + k + '"' + (ui.tab === k ? ' class="on"' : '') + '>' + v + '</button>').join('');
+  $('ownerLine').textContent = (S.owner ? S.owner + ' · ' : '') + S.year + '학년도';
+  $('demoBanner').hidden = !DEMO;
+  const fn = { home: vHome, ledger: vLedger, import: vImport, events: vEvents, request: vRequest, settings: vSettings }[ui.tab];
+  $('view').innerHTML = fn();
+}
+function vSummary() {
+  const t = totals();
+  return '<div class="sumrow"><div class="sumbox"><small>총 배정</small><b>' + won(t.alloc) + '</b></div><div class="sumbox"><small>집행</small><b>' + won(t.spent) + '</b></div><div class="sumbox bal"><small>남은 예산(잔액)</small><b>' + won(t.bal) + '</b></div></div>';
+}
+function vHome() {
+  if (!S.items.length) return '<div class="card"><div class="empty"><img src="ggumsong.png" alt="" style="width:120px" onerror="this.style.display='none'"><b>아직 예산이 없어요</b>계획서를 올리거나 직접 넣으면 잔액·기한이 자동으로 정리돼요.<div class="row" style="justify-content:center;margin-top:14px"><button class="btn pri" data-act="tab" data-k="import">📄 계획서 올리기</button><button class="btn" data-act="tab" data-k="ledger">✍️ 직접 추가</button></div></div></div>';
+  const due = S.items.filter(it => it.deadline && calc(it).bal > 0).sort((a, b) => a.deadline.localeCompare(b.deadline)).slice(0, 6);
+  const evs = S.events.filter(e => !e.done && e.date).sort((a, b) => a.date.localeCompare(b.date)).slice(0, 3);
+  let h = vSummary();
+  h += '<div class="card"><h2>⏰ 다가오는 집행 기한</h2><div class="hint">기한 안에 써야 하는데 잔액이 남은 사업이에요.</div>';
+  if (!due.length) h += '<div class="empty">기한이 입력된 사업이 없거나, 모두 집행했어요 👏</div>';
+  else h += '<div class="tw"><table><tr><th>사업</th><th class="num">잔액</th><th>기한</th></tr>' + due.map(it => {
+    const d = dday(it.deadline);
+    return '<tr><td><b>' + esc(it.name) + '</b></td><td class="num">' + won(calc(it).bal) + '원</td><td>' + esc(it.deadline) + ' ' + chipFor(it) + '</td></tr>';
+  }).join('') + '</table></div>';
+  h += '</div>';
+  if (evs.length) h += '<div class="card"><h2>🗓️ 다가오는 행사</h2>' + evs.map(e => {
+    const it = S.items.find(x => x.id === e.itemId); const d = dday(e.date);
+    return '<div class="row" style="padding:6px 0;border-bottom:2px solid var(--line)"><b class="grow">' + esc(e.name) + '</b><span class="sub">' + esc(e.date) + '</span><span class="chip ' + (d !== null && d <= 14 ? 'soon' : 'ok') + '">' + (d === null ? '' : ddayTxt(d)) + '</span>' + (it ? '<span class="sub">잔액 ' + won(calc(it).bal) + '원</span>' : '') + '</div>';
+  }).join('') + '</div>';
+  const over = S.items.filter(it => calc(it).bal < 0);
+  if (over.length) h += '<div class="warn">⚠️ 예산을 넘긴 사업이 있어요: ' + over.map(i => esc(i.name)).join(', ') + '</div>';
+  return h;
+}
+function itemForm(it) {
+  const v = it || { name: '', dept: '', alloc: '', deadline: '', memo: '' };
+  return '<form data-form="' + (it ? 'saveItem' : 'addItem') + '"' + (it ? ' data-id="' + it.id + '"' : '') + '><div class="form">' +
+    '<label class="f">사업(예산) 이름<input name="name" required value="' + esc(v.name) + '" placeholder="예: 곡선제 운영"></label>' +
+    '<label class="f">부서<input name="dept" value="' + esc(v.dept) + '" placeholder="예: 학생인권부"></label>' +
+    '<label class="f">배정 예산(원)<input name="alloc" inputmode="numeric" required value="' + (v.alloc !== '' ? won(v.alloc) : '') + '" placeholder="500,000"></label>' +
+    '<label class="f">집행 기한<input type="date" name="deadline" value="' + esc(v.deadline) + '"></label>' +
+    '<label class="f">메모<input name="memo" value="' + esc(v.memo) + '"></label>' +
+    '</div><div class="row" style="margin-top:12px"><button class="btn pri">' + (it ? '저장' : '＋ 장부에 추가') + '</button>' + (it ? '<button type="button" class="btn" data-act="cancelEdit">취소</button>' : '') + '</div></form>';
+}
+function itemCard(it) {
+  const c = calc(it), open = ui.open.has(it.id), editing = ui.edit === it.id;
+  let h = '<div class="item"><div class="hd" data-act="toggle" data-id="' + it.id + '"><div><span class="nm">' + esc(it.name) + '</span> <span class="dp">' + esc(it.dept) + '</span></div><div>' + chipFor(it) + ' <span aria-hidden="true">' + (open ? '▲' : '▼') + '</span></div>' +
+    '<div class="nums"><span>배정 <b>' + won(c.alloc) + '</b></span><span>집행 <b>' + won(c.spent) + '</b></span><span>잔액 <b class="bl" style="' + (c.bal < 0 ? 'color:var(--red)' : '') + '">' + won(c.bal) + '</b></span>' + (it.deadline ? '<span>기한 <b>' + esc(it.deadline) + '</b></span>' : '') + '</div>' +
+    '<div class="barw"><div class="bar"><i class="' + (c.bal < 0 ? 'over' : '') + '" style="width:' + c.pct + '%"></i></div></div></div>';
+  if (open) {
+    h += '<div class="bd">';
+    if (editing) h += '<h3 style="margin-top:14px">사업 정보 고치기</h3>' + itemForm(it);
+    else {
+      if (it.memo) h += '<div class="hint" style="margin-top:12px">📌 ' + esc(it.memo) + '</div>';
+      h += '<h3 style="margin-top:14px">집행 내역</h3>';
+      const sp = (it.spent || []).slice().sort((a, b) => (a.date || '').localeCompare(b.date || ''));
+      if (sp.length) {
+        let run = c.alloc;
+        h += '<div class="tw"><table><tr><th>날짜</th><th>내용</th><th class="num">금액</th><th class="num">이후 잔액</th><th></th></tr>' + sp.map(s => { run -= Number(s.amount) || 0; return '<tr><td>' + esc(s.date) + '</td><td>' + esc(s.title) + '</td><td class="num">' + won(s.amount) + '</td><td class="num">' + won(run) + '</td><td><button class="btn sm del" data-act="delSpent" data-id="' + it.id + '" data-sid="' + s.id + '">삭제</button></td></tr>'; }).join('') + '</table></div>';
+      } else h += '<div class="hint">아직 쓴 내역이 없어요.</div>';
+      h += '<form data-form="addSpent" data-id="' + it.id + '" style="margin-top:12px"><div class="form"><label class="f">날짜<input type="date" name="date" value="' + iso(today()) + '"></label><label class="f">내용<input name="title" required placeholder="예: 간식 구입"></label><label class="f">금액(원)<input name="amount" inputmode="numeric" required placeholder="50,000"></label><button class="btn pri">＋ 집행 기록</button></div></form>';
+      h += '<div class="row" style="margin-top:14px"><button class="btn" data-act="editItem" data-id="' + it.id + '">✏️ 사업 정보 고치기</button><button class="btn del" data-act="delItem" data-id="' + it.id + '">🗑️ 이 사업 삭제</button></div>';
+    }
+    h += '</div>';
+  }
+  return h + '</div>';
+}
+function vLedger() {
+  let h = vSummary();
+  h += '<div class="card"><details' + (S.items.length ? '' : ' open') + '><summary class="btn pri" style="display:inline-block;list-style:none">＋ 예산 항목 추가</summary><div style="margin-top:14px">' + itemForm(null) + '</div></details><div class="hint" style="margin-top:12px">항목을 누르면 집행 내역을 쓰고 지울 수 있어요. 잔액은 자동 계산됩니다.</div></div>';
+  if (!S.items.length) return h + '<div class="empty">아직 항목이 없어요. 위에서 추가하거나 「📄 계획서 올리기」를 써 보세요.</div>';
+  h += S.items.map(itemCard).join('');
+  return h;
+}
+function vImport() {
+  let h = '<div class="card"><h2>📄 계획서를 올리면 알아서 정리</h2><div class="hint">엑셀(.xlsx)·csv 파일을 끌어다 놓거나 고르세요. 한글(hwp)·PDF는 열어서 표/글을 <b>복사 → 아래 칸에 붙여넣기</b> 하시면 됩니다.</div>' +
+    '<label class="drop" id="drop"><b>📂 여기에 파일 끌어놓기 / 눌러서 고르기</b><div class="sub">엑셀 · csv · txt</div><input type="file" id="fileIn" accept=".xlsx,.xls,.csv,.txt,.md,.hwp,.hwpx,.pdf,.docx" hidden></label>' +
+    '<h3 style="margin-top:16px">또는 붙여넣기</h3><textarea id="pasteTxt" placeholder="한 줄에 사업 하나씩. 예)&#10;학생인권 교육 운영 500,000원 12월 20일까지&#10;교권보호 연수 300,000원 2026-12-10"></textarea>' +
+    '<div class="row" style="margin-top:10px"><button class="btn pri" data-act="parse">✨ 정리하기</button><button class="btn" data-act="sampleTxt">예시 넣어 보기</button></div></div>';
+  if (ui.draft) {
+    if (!ui.draft.length) h += '<div class="warn">사업명·금액을 찾지 못했어요. 한 줄에 <b>사업 이름 + 금액(예: 500,000원)</b>이 함께 있어야 읽어요. 표라면 「사업명」「금액」 머리글을 넣으면 더 정확해요.</div>';
+    else {
+      h += '<div class="card"><h2>미리보기 — ' + ui.draft.length + '건 찾았어요</h2><div class="hint">틀린 곳은 바로 고치고, 장부에 넣을 것만 체크하세요.</div><div class="tw"><table><tr><th></th><th>사업</th><th>부서</th><th class="num">배정(원)</th><th>기한</th></tr>' +
+        ui.draft.map((d, i) => '<tr><td><input type="checkbox" data-di="' + i + '" data-f="on"' + (d.on ? ' checked' : '') + '></td><td><input class="cell" data-di="' + i + '" data-f="name" value="' + esc(d.name) + '"></td><td><input class="cell" data-di="' + i + '" data-f="dept" value="' + esc(d.dept) + '" style="min-width:80px"></td><td><input class="cell amt" data-di="' + i + '" data-f="amount" inputmode="numeric" value="' + won(d.amount) + '"></td><td><input class="cell" type="date" data-di="' + i + '" data-f="deadline" value="' + esc(d.deadline) + '"></td></tr>').join('') +
+        '</table></div><div class="row" style="margin-top:12px"><button class="btn pri" data-act="draftAdd">✅ 체크한 항목을 예산 장부에 추가</button><button class="btn" data-act="draftClear">지우기</button></div></div>';
+    }
+  }
+  return h;
+}
+function vEvents() {
+  let h = '<div class="card"><h2>🗓️ 행사 계획 + 예산</h2><div class="hint">행사를 예산 항목과 연결하면 잔액을 함께 볼 수 있어요.</div><form data-form="addEvent"><div class="form"><label class="f">행사 이름<input name="name" required placeholder="예: 곡선제"></label><label class="f">날짜<input type="date" name="date"></label><label class="f">연결할 예산<select name="itemId"><option value="">(연결 안 함)</option>' + S.items.map(i => '<option value="' + i.id + '">' + esc(i.name) + '</option>').join('') + '</select></label><button class="btn pri">＋ 행사 추가</button></div></form></div>';
+  if (!S.events.length) return h + '<div class="empty">등록된 행사가 없어요.</div>';
+  S.events.slice().sort((a, b) => (a.date || '9999').localeCompare(b.date || '9999')).forEach(e => {
+    const it = S.items.find(x => x.id === e.itemId), d = dday(e.date), td = e.todos || [], dn = td.filter(t => t.d).length;
+    h += '<div class="card"><div class="row"><h2 class="grow" style="margin:0">' + esc(e.name) + (e.done ? ' <span class="chip done">완료</span>' : '') + '</h2>' + (e.date ? '<span class="sub">' + esc(e.date) + '</span>' : '') + (d !== null && !e.done ? '<span class="chip ' + (d <= 14 ? 'soon' : 'ok') + '">' + ddayTxt(d) + '</span>' : '') + '</div>';
+    if (it) { const c = calc(it); h += '<div class="note">💰 ' + esc(it.name) + ' · 배정 ' + won(c.alloc) + ' · 집행 ' + won(c.spent) + ' · <b>잔액 ' + won(c.bal) + '원</b></div>'; }
+    h += '<h3 style="margin-top:10px">할 일 ' + (td.length ? '(' + dn + '/' + td.length + ')' : '') + '</h3>' + td.map((t, i) => '<div class="todo' + (t.d ? ' done' : '') + '"><input type="checkbox" data-act="todo" data-id="' + e.id + '" data-i="' + i + '"' + (t.d ? ' checked' : '') + '><span class="grow">' + esc(t.t) + '</span><button class="btn sm del" data-act="delTodo" data-id="' + e.id + '" data-i="' + i + '">×</button></div>').join('') +
+      '<form data-form="addTodo" data-id="' + e.id + '" class="row" style="margin-top:8px"><input name="t" class="grow" placeholder="할 일 추가 (예: 간식 품의)" required><button class="btn sm">추가</button></form>' +
+      '<div class="row" style="margin-top:12px"><button class="btn sm" data-act="doneEvent" data-id="' + e.id + '">' + (e.done ? '진행중으로' : '✔ 행사 완료') + '</button><button class="btn sm del" data-act="delEvent" data-id="' + e.id + '">행사 삭제</button></div></div>';
+  });
+  return h;
+}
+function reqTotals() { const r = ui.req || []; return { prev: r.reduce((a, b) => a + b.prev, 0), next: r.reduce((a, b) => a + b.next, 0) }; }
+function vRequest() {
+  const nextYear = (toNum(S.year) || today().getFullYear()) + 1;
+  let h = '<div class="card noprint"><h2>📝 예산요구서·계획서 초안</h2><div class="hint">작년 자료를 올리면 항목과 금액을 가져와 올해(' + nextYear + '학년도) 요구액 틀을 잡아드려요. 금액·사유는 직접 고치세요.</div>' +
+    '<label class="drop" id="drop2"><b>📂 작년 예산요구서/계획서 올리기</b><div class="sub">엑셀 · csv · txt (hwp·PDF는 복사해서 아래에 붙여넣기)</div><input type="file" id="fileReq" accept=".xlsx,.xls,.csv,.txt,.md,.hwp,.hwpx,.pdf,.docx" hidden></label>' +
+    '<textarea id="reqTxt" style="min-height:90px;margin-top:10px" placeholder="붙여넣기 — 한 줄에 사업 하나씩(이름 + 금액)"></textarea>' +
+    '<div class="row" style="margin-top:10px"><button class="btn pri" data-act="reqParse">✨ 틀 만들기</button><button class="btn" data-act="reqLedger">📒 지금 장부에서 불러오기</button></div></div>';
+  if (ui.req && ui.req.length) {
+    const t = reqTotals();
+    h += '<div class="card"><div class="printonly"><h2>' + nextYear + '학년도 예산요구서(초안)</h2><div>' + esc(S.owner) + '</div></div>' +
+      '<div class="row noprint" style="margin-bottom:10px"><b>한꺼번에</b><input id="reqPct" type="number" step="1" value="' + ui.reqPct + '" style="width:80px"> % 증감 <button class="btn sm yel" data-act="reqApply">전체 적용</button><span class="grow"></span><button class="btn" data-act="reqPrint">🖨️ 출력</button><button class="btn pri" data-act="reqXlsx">⬇️ 엑셀</button></div>' +
+      '<div class="tw"><table><tr><th>항목</th><th class="num">작년</th><th class="num">올해 요구액</th><th class="num">증감</th><th>산출 근거·사유</th><th class="noprint"></th></tr>' +
+      ui.req.map((r, i) => reqRow(r, i)).join('') +
+      '<tr class="total"><td>합계</td><td class="num" id="rtPrev">' + won(t.prev) + '</td><td class="num" id="rtNext">' + won(t.next) + '</td><td class="num" id="rtDiff">' + diffTxt(t.next - t.prev) + '</td><td></td><td class="noprint"></td></tr></table></div>' +
+      '<div class="hint noprint" style="margin-top:8px">※ 초안입니다. 실제 제출 양식(에듀파인 등)에 맞춰 옮겨 쓰세요.</div></div>';
+  }
+  return h;
+}
+const diffTxt = n => (n > 0 ? '+' : '') + won(n);
+function reqRow(r, i) {
+  return '<tr><td><input class="cell" data-ri="' + i + '" data-f="name" value="' + esc(r.name) + '"></td><td class="num">' + won(r.prev) + '</td><td><input class="cell amt" data-ri="' + i + '" data-f="next" inputmode="numeric" value="' + won(r.next) + '"></td><td class="num" id="rd' + i + '">' + diffTxt(r.next - r.prev) + '</td><td><input class="cell" data-ri="' + i + '" data-f="why" value="' + esc(r.why) + '" placeholder="예: 물가 상승 반영"></td><td class="noprint"><button class="btn sm del" data-act="reqDel" data-i="' + i + '">×</button></td></tr>';
+}
+function vSettings() {
+  return '<div class="card"><h2>⚙️ 내 정보</h2><form data-form="meta"><div class="form"><label class="f">이름(출력물에 표시)<input name="owner" value="' + esc(S.owner) + '" placeholder="예: 김OO"></label><label class="f">학년도<input name="year" value="' + esc(S.year) + '"></label><button class="btn pri">저장</button></div></form></div>' +
+    '<div class="card"><h2>💾 백업 · 내보내기</h2><div class="hint">' + (DEMO ? '체험판은 저장되지 않아요. 실제판에서는 이 기기(브라우저)에 저장되고, 아래로 백업할 수 있어요.' : '자료는 <b>이 기기·이 브라우저에만</b> 저장돼요. 폰을 바꾸거나 브라우저 기록을 지우면 사라지니 가끔 백업하세요.') + '</div>' +
+    '<div class="row"><button class="btn pri" data-act="exportXlsx">⬇️ 엑셀로 내려받기</button><button class="btn" data-act="exportJson">⬇️ 백업 파일(.json)</button><label class="btn">⬆️ 백업 불러오기<input type="file" id="jsonIn" accept=".json" hidden></label><button class="btn" data-act="copyJson">📋 백업 글 복사</button></div>' +
+    '<div class="note">카카오톡 안에서 열면 파일 내려받기가 막힐 수 있어요. 그럴 땐 오른쪽 위 메뉴에서 <b>다른 브라우저로 열기</b>(크롬)를 쓰거나 「백업 글 복사」를 메모에 붙여 두세요.</div></div>' +
+    '<div class="card"><h2>🧹 처음부터</h2><div class="row"><button class="btn del" data-act="resetAll">' + (DEMO ? '예시 데이터로 되돌리기' : '모든 자료 지우기') + '</button></div></div>' +
+    (DEMO ? '<div class="note">마음에 드셨다면 <a href="../donworry/"><b>실제판</b></a>에서 내 예산으로 쓰세요.</div>' : '');
+}
+
+/* ---------- 이벤트 ---------- */
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-act]'); if (!b || b.type === 'checkbox') return;
+  act(b.dataset.act, b.dataset);
+});
+document.addEventListener('change', e => {
+  const t = e.target;
+  if (t.dataset.act === 'todo') { const ev = S.events.find(x => x.id === t.dataset.id); if (ev) { ev.todos[+t.dataset.i].d = t.checked; save(); render(); } return; }
+  if (t.id === 'fileIn') { if (t.files[0]) handleFile(t.files[0], 'draft'); return; }
+  if (t.id === 'fileReq') { if (t.files[0]) handleFile(t.files[0], 'req'); return; }
+  if (t.id === 'jsonIn') { if (t.files[0]) importJson(t.files[0]); return; }
+  if (t.dataset.di !== undefined) {
+    const d = ui.draft[+t.dataset.di], f = t.dataset.f;
+    if (f === 'on') d.on = t.checked; else if (f === 'amount') { d.amount = toNum(t.value); t.value = won(d.amount); } else d[f] = t.value;
+  }
+  if (t.dataset.ri !== undefined && t.dataset.f === 'next') { t.value = won(toNum(t.value)); }
+});
+document.addEventListener('input', e => {
+  const t = e.target;
+  if (t.dataset.di !== undefined && t.dataset.f !== 'on' && t.dataset.f !== 'amount') ui.draft[+t.dataset.di][t.dataset.f] = t.value;
+  if (t.dataset.ri !== undefined) {
+    const i = +t.dataset.ri, r = ui.req[i], f = t.dataset.f;
+    if (f === 'next') { r.next = toNum(t.value); const c = $('rd' + i); if (c) c.textContent = diffTxt(r.next - r.prev); recalcReqTotals(); }
+    else r[f] = t.value;
+  }
+});
+function recalcReqTotals() { const t = reqTotals(); if ($('rtNext')) { $('rtNext').textContent = won(t.next); $('rtDiff').textContent = diffTxt(t.next - t.prev); $('rtPrev').textContent = won(t.prev); } }
+['dragover', 'dragleave', 'drop'].forEach(ev => document.addEventListener(ev, e => {
+  const z = e.target.closest && e.target.closest('.drop'); if (!z) return;
+  e.preventDefault();
+  if (ev === 'dragover') z.classList.add('over'); else z.classList.remove('over');
+  if (ev === 'drop' && e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0], z.id === 'drop2' ? 'req' : 'draft');
+}));
+document.addEventListener('submit', e => {
+  const f = e.target.closest('form[data-form]'); if (!f) return; e.preventDefault();
+  const fd = Object.fromEntries(new FormData(f)); const kind = f.dataset.form;
+  if (kind === 'addItem') { S.items.push({ id: uid(), name: fd.name.trim(), dept: (fd.dept || '').trim(), alloc: toNum(fd.alloc), deadline: fd.deadline || '', memo: (fd.memo || '').trim(), spent: [] }); save(); toast('장부에 추가했어요'); render(); }
+  else if (kind === 'saveItem') { const it = S.items.find(x => x.id === f.dataset.id); Object.assign(it, { name: fd.name.trim(), dept: (fd.dept || '').trim(), alloc: toNum(fd.alloc), deadline: fd.deadline || '', memo: (fd.memo || '').trim() }); ui.edit = null; save(); toast('저장했어요'); render(); }
+  else if (kind === 'addSpent') { const it = S.items.find(x => x.id === f.dataset.id); it.spent.push({ id: uid(), date: fd.date || iso(today()), title: fd.title.trim(), amount: toNum(fd.amount) }); save(); const c = calc(it); toast(c.bal < 0 ? '⚠️ 예산을 ' + won(-c.bal) + '원 넘었어요' : '기록했어요 · 잔액 ' + won(c.bal) + '원'); render(); }
+  else if (kind === 'addEvent') { S.events.push({ id: uid(), name: fd.name.trim(), date: fd.date || '', itemId: fd.itemId || '', done: false, todos: [] }); save(); render(); }
+  else if (kind === 'addTodo') { const ev = S.events.find(x => x.id === f.dataset.id); ev.todos.push({ t: fd.t.trim(), d: false }); save(); render(); }
+  else if (kind === 'meta') { S.owner = (fd.owner || '').trim(); S.year = (fd.year || '').trim() || String(today().getFullYear()); save(); toast('저장했어요'); render(); }
+});
+async function handleFile(file, target) {
+  try {
+    const rows = await parseFile(file);
+    if (target === 'draft') { ui.draft = rows; render(); toast(rows.length ? rows.length + '건을 찾았어요' : '찾은 항목이 없어요'); }
+    else { setReq(rows); }
+  } catch (err) { toast(err.message || '파일을 읽지 못했어요'); }
+}
+function setReq(rows) {
+  ui.req = rows.map(r => ({ name: r.name, prev: r.amount, next: r.amount, why: '' })); ui.reqPct = 0;
+  render(); toast(rows.length ? rows.length + '개 항목으로 틀을 만들었어요' : '찾은 항목이 없어요');
+}
+function act(a, d) {
+  if (a === 'tab') { ui.tab = d.k; render(); window.scrollTo(0, 0); }
+  else if (a === 'toggle') { ui.open.has(d.id) ? ui.open.delete(d.id) : ui.open.add(d.id); ui.edit = null; render(); }
+  else if (a === 'editItem') { ui.edit = d.id; render(); }
+  else if (a === 'cancelEdit') { ui.edit = null; render(); }
+  else if (a === 'delItem') { if (confirm('이 사업과 집행 내역을 모두 지울까요?')) { S.items = S.items.filter(x => x.id !== d.id); S.events.forEach(e => { if (e.itemId === d.id) e.itemId = ''; }); save(); render(); } }
+  else if (a === 'delSpent') { const it = S.items.find(x => x.id === d.id); it.spent = it.spent.filter(s => s.id !== d.sid); save(); render(); }
+  else if (a === 'delEvent') { if (confirm('이 행사를 지울까요?')) { S.events = S.events.filter(x => x.id !== d.id); save(); render(); } }
+  else if (a === 'doneEvent') { const ev = S.events.find(x => x.id === d.id); ev.done = !ev.done; save(); render(); }
+  else if (a === 'delTodo') { const ev = S.events.find(x => x.id === d.id); ev.todos.splice(+d.i, 1); save(); render(); }
+  else if (a === 'sampleTxt') { $('pasteTxt').value = '학생인권 교육 운영 500,000원 12월 20일까지\n교권보호 연수 300,000원 2026-12-10\n곡선제 운영 800,000원\n- 인권규정 개정 협의회 20만원 1월 15일'; }
+  else if (a === 'parse') { ui.draft = parseText($('pasteTxt').value); const v = $('pasteTxt').value; render(); $('pasteTxt').value = v; toast(ui.draft.length ? ui.draft.length + '건을 찾았어요' : '찾은 항목이 없어요'); }
+  else if (a === 'draftAdd') {
+    const pick = ui.draft.filter(x => x.on && x.name && x.amount); if (!pick.length) return toast('체크된 항목이 없어요');
+    pick.forEach(x => S.items.push({ id: uid(), name: x.name, dept: x.dept || '', alloc: x.amount, deadline: x.deadline || '', memo: '', spent: [] }));
+    ui.draft = null; save(); ui.tab = 'ledger'; render(); toast(pick.length + '건을 장부에 넣었어요');
+  }
+  else if (a === 'draftClear') { ui.draft = null; render(); }
+  else if (a === 'reqParse') { const rows = parseText($('reqTxt').value); setReq(rows); }
+  else if (a === 'reqLedger') { if (!S.items.length) return toast('장부에 항목이 없어요'); setReq(S.items.map(i => ({ name: i.name, amount: Number(i.alloc) || 0 }))); }
+  else if (a === 'reqApply') { const p = Number($('reqPct').value) || 0; ui.reqPct = p; ui.req.forEach(r => r.next = Math.round(r.prev * (1 + p / 100) / 1000) * 1000); render(); toast('전체 ' + (p >= 0 ? '+' : '') + p + '% 적용(천원 단위 반올림)'); }
+  else if (a === 'reqDel') { ui.req.splice(+d.i, 1); render(); }
+  else if (a === 'reqPrint') { window.print(); }
+  else if (a === 'reqXlsx') { reqXlsx(); }
+  else if (a === 'exportXlsx') { exportXlsx(); }
+  else if (a === 'exportJson') { download('돈워리비해피_백업_' + iso(today()) + '.json', new Blob([JSON.stringify(S, null, 1)], { type: 'application/json' })); }
+  else if (a === 'copyJson') { copyText(JSON.stringify(S)).then(ok => toast(ok ? '복사했어요. 메모 앱에 붙여 두세요' : '복사하지 못했어요')); }
+  else if (a === 'resetAll') { if (confirm(DEMO ? '예시 데이터로 되돌릴까요?' : '모든 예산·행사 자료를 지웁니다. 되돌릴 수 없어요. 계속할까요?')) { S = DEMO ? sample() : empty(); ui.open.clear(); ui.draft = ui.req = null; save(); render(); } }
+}
+async function copyText(t) { try { await navigator.clipboard.writeText(t); return true; } catch (e) { try { const ta = document.createElement('textarea'); ta.value = t; document.body.appendChild(ta); ta.select(); const ok = document.execCommand('copy'); ta.remove(); return ok; } catch (e2) { return false; } } }
+function download(name, blob) {
+  try { const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1500); }
+  catch (e) { toast('내려받기가 막혔어요. 크롬에서 열어 주세요'); }
+}
+function importJson(file) {
+  file.text().then(t => {
+    try { const o = JSON.parse(t); if (!Array.isArray(o.items)) throw 0; S = Object.assign(empty(), o); save(); ui.open.clear(); render(); toast('백업을 불러왔어요'); }
+    catch (e) { toast('백업 파일이 아니에요'); }
+  });
+}
+function needX() { if (window.XLSX) return true; toast('엑셀 도구를 못 불러왔어요. 인터넷을 확인해 주세요'); return false; }
+function exportXlsx() {
+  if (!needX()) return;
+  const a = [['사업', '부서', '배정', '집행', '잔액', '기한', '메모']].concat(S.items.map(i => { const c = calc(i); return [i.name, i.dept, c.alloc, c.spent, c.bal, i.deadline, i.memo]; }));
+  const t = totals(); a.push(['합계', '', t.alloc, t.spent, t.bal, '', '']);
+  const b = [['사업', '날짜', '내용', '금액']]; S.items.forEach(i => (i.spent || []).forEach(s => b.push([i.name, s.date, s.title, s.amount])));
+  const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(a), '예산 현황'); XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(b), '집행 내역');
+  try { XLSX.writeFile(wb, '돈워리비해피_' + iso(today()) + '.xlsx'); } catch (e) { toast('내려받기가 막혔어요. 크롬에서 열어 주세요'); }
+}
+function reqXlsx() {
+  if (!needX()) return;
+  const y = (toNum(S.year) || today().getFullYear()) + 1;
+  const a = [[y + '학년도 예산요구서(초안)'], ['항목', '작년', '올해 요구액', '증감', '산출 근거·사유']].concat(ui.req.map(r => [r.name, r.prev, r.next, r.next - r.prev, r.why]));
+  const t = reqTotals(); a.push(['합계', t.prev, t.next, t.next - t.prev, '']);
+  const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(a), '예산요구서');
+  try { XLSX.writeFile(wb, '예산요구서_초안_' + y + '.xlsx'); } catch (e) { toast('내려받기가 막혔어요. 크롬에서 열어 주세요'); }
+}
+render();
+</script>
+</body>
+</html>
