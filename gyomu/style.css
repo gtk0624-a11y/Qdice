@@ -1184,3 +1184,10 @@ main,.main,#app{padding-left:8px!important;padding-right:8px!important}
 dialog.dlg,dialog{max-width:96vw!important}
 }
 #chatbub{display:none!important}
+/* v181 서랍 막대: 화면 맨 아래 고정 */
+#dwbar{position:fixed;left:0;right:0;bottom:0;z-index:35;display:flex;align-items:center;gap:8px;padding:6px 12px;background:var(--paper,#fffdf5);border-top:2px solid var(--ink,#1f3d2f);overflow-x:auto;white-space:nowrap;font-size:14px}
+#dwbar a{padding:4px 10px;border:1px solid rgba(0,0,0,.2);border-radius:99px;background:#fff;text-decoration:none;color:inherit}
+#dwbar .dwbtn{padding:5px 12px;border:2px solid var(--ink,#1f3d2f);border-radius:10px;background:#9ad6bf;font-weight:700;cursor:pointer}
+body{padding-bottom:52px!important}
+#alarmbar{bottom:58px!important}#chatfab{bottom:58px!important}
+@media print{#dwbar{display:none!important}}

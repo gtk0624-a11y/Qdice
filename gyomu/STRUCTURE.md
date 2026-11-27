@@ -563,3 +563,4 @@ service cloud.firestore {
 - v178: 서랍을 다시 화면 맨 아래(푸터)로, "궁금하면 눌러보세요" 말풍선 숨김(style.css #chatbub)
 - v179: 서랍 데이터(S.links)가 비정상이어도 서랍 칸이 나오도록 방어(drawer.js, app.js footer try/catch)
 - v180: 위쪽 메뉴 줄에 🗄 서랍 버튼(A.dwJump, drawer.js) — 맨 아래로 안 내려가도 서랍 창 열림
+- v181: 서랍을 화면 맨 아래 고정 막대(#dwbar, drawer.js dwBarRender)로. 화면 끝 푸터 서랍 제거

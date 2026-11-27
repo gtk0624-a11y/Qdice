@@ -88,3 +88,14 @@ Object.assign(A, { dwJump() {
   d.innerHTML = '<form method="dialog"><h3>🗄 서랍</h3>' + h.replace('<details class="dwd"', '<details class="dwd" open') + '<div class="btns"><button value="x" class="pri">닫기</button></div></form>';
   document.body.appendChild(d); d.addEventListener('close', () => d.remove()); d.showModal();
 } });
+
+/* v181: 서랍을 화면 맨 아래에 항상 붙어 있는 막대로(즐겨찾기 바로가기 + 서랍 열기 버튼) */
+function dwBarRender() {
+  let b = document.getElementById('dwbar');
+  if (!b) { b = document.createElement('div'); b.id = 'dwbar'; document.body.appendChild(b); }
+  if (!Array.isArray(S.links)) S.links = [];
+  const fav = S.links.filter(l => l && l.fav && l.url).slice(0, 6);
+  b.innerHTML = '<button type="button" class="dwbtn" data-act="dwJump">🗄 서랍 열기 <small>(' + S.links.length + '개)</small></button>' + fav.map(l => '<a href="' + esc(l.url) + '" target="_blank" rel="noopener" data-dwgo="' + esc(l.id) + '">★ ' + esc(l.name) + '</a>').join('');
+}
+{ const _rD = render; render = function () { const r = _rD.apply(this, arguments); try { dwBarRender(); } catch (e) { } return r; }; }
+setTimeout(() => { try { dwBarRender(); } catch (e) { } }, 500);

@@ -67,7 +67,7 @@ function nav(page) {
   return `<nav class="nav" aria-label="메뉴">${L.map(([k, v]) => `<a href="#/${k}" ${page === k || (k === 'notes' && page === 'note') || (k === 'pages' && page === 'page') ? 'aria-current="page"' : ''}>${v}</a>`).join('')}<button class="nvx" data-act="navPick" title="위쪽 메뉴 고르기">☰ 메뉴 고르기</button><button class="nvx" data-act="dwJump">🗄 서랍</button><button class="nvx" data-act="ibx">📨 메신저 붙여넣기</button></nav>`;
 }
 function footer() {
-  return `${(() => { try { return drawerHtml(); } catch (e) { return '<section class="drawer dw"><div class="dwf"><b>서랍</b> <span class="mu">불러오는 중 문제가 생겼습니다(' + esc(e.message) + ')</span></div></section>'; } })()}<footer class="cp">© 김정환 · M.A.D.T (Moral And Digital Teacher)</footer>`;
+  return `<footer class="cp">© 김정환 · M.A.D.T (Moral And Digital Teacher)</footer>`;
 }
 
 /* ---------- 오늘 ---------- */
