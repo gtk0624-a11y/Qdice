@@ -18,24 +18,29 @@
   async function seal() { const iv = crypto.getRandomValues(new Uint8Array(12)), d = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, await aes(), enc.encode(payload())); return { u: Date.now(), iv: b64(iv), d: b64(d) }; }
   async function open(r, k) { return JSON.parse(dec.decode(await crypto.subtle.decrypt({ name: 'AES-GCM', iv: unb64(r.iv) }, await aes(k), unb64(r.d)))); }
   async function remote(k) { const r = await fetch(url(k), { cache: 'no-store' }); if (!r.ok) throw new Error(r.status === 401 || r.status === 403 ? '저장소가 쓰기를 막았습니다(보안 규칙 확인)' : '저장소 응답 오류 ' + r.status); return r.json(); }
-  async function push() { const body = await seal(), r = await fetch(url(), { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) }); if (!r.ok) throw new Error(r.status === 401 || r.status === 403 ? '저장소가 쓰기를 막았습니다(보안 규칙 확인)' : '올리기 실패 ' + r.status); setMk({ base: S.updatedAt || 0, rseen: body.u, h: hsh() }); }
+  async function push() { const body = await seal(), r = await fetch(url(), { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) }); if (!r.ok) throw new Error(r.status === 401 || r.status === 403 ? '저장소가 쓰기를 막았습니다(보안 규칙 확인)' : '올리기 실패 ' + r.status); setMk({ base: S.updatedAt || 0, rseen: body.u, h: hsh(), w: tfWeight(S) }); }
   async function applyRemote(r, k, merge) {
-    const o = await open(r, k), keep = (S.notes || []).filter(n => n.lock), keepP = (S.pages || []).filter(n => n.lock); applying = true;
+    const o = await open(r, k), keep = (S.notes || []).filter(n => n.lock), keepP = (S.pages || []).filter(n => n.lock);
+    { const lw = tfWeight(S), rw = tfWeight(o); if (lw >= 8 && rw < lw * 0.6) { const ch = await askLoss(lw, rw); if (ch === 'cancel') throw new Error('연동을 취소했습니다(이 기기 자료는 그대로입니다)'); if (ch === 'push') { await push(); return; } merge = ch !== 'replace'; } }
+    applying = true;
     try { if (typeof snapPush === 'function') snapPush(merge ? '연동 직전(이 기기 내용)' : '다른 기기 내용 불러오기 직전', JSON.stringify(snapPick())); if (typeof idb !== 'undefined') idb.set('prelink', { t: Date.now(), s: JSON.stringify(S) }).catch(() => { }); } catch (e) { }
     if (merge) { /* 처음 연결할 때는 이 기기에 있던 내용을 버리지 않고 합칩니다(같은 id는 연동된 쪽 기준) */
-      ['items', 'wk', 'duties', 'mine', 'docLog', 'contacts', 'training', 'notes', 'pages', 'yp'].forEach(key => { const L = Array.isArray(S[key]) ? S[key] : null, R = Array.isArray(o[key]) ? o[key] : null; if (L && R && L.length) { const ids = new Set(R.map(x => x && x.id).filter(Boolean)); o[key] = R.concat(L.filter(x => x && (!x.id || !ids.has(x.id)))); } });
-      if (S.dayMemo && o.dayMemo && typeof S.dayMemo === 'object') o.dayMemo = Object.assign({}, S.dayMemo, o.dayMemo);
+      rsMerge(o, JSON.parse(JSON.stringify(S))); /* 모든 항목을 id 기준으로 합집합: 연동본 기준 + 이 기기에만 있던 것 추가 */
     }
-    Object.assign(S, o); S.notes = (o.notes || []).concat(keep); S.pages = (o.pages || []).concat(keepP); save(true); applying = false; setMk({ base: S.updatedAt || 0, rseen: r.u, h: hsh() }); TF.render && TF.render(); toast('다른 기기의 최신 내용을 불러왔습니다.');
+    Object.assign(S, o); S.notes = (o.notes || []).concat(keep); S.pages = (o.pages || []).concat(keepP); save(true); applying = false; setMk({ base: S.updatedAt || 0, rseen: r.u, h: hsh(), w: tfWeight(S) }); TF.render && TF.render(); toast('다른 기기의 최신 내용을 불러왔습니다.');
   }
+  async function bakRemote(r) { const d = today(); if (localStorage.getItem('tf.bakd') === d) return; localStorage.setItem('tf.bakd', d); try { await fetch(`${dbUrl()}/rooms/tfsync_${key().id}_bak${Math.floor(Date.now() / 864e5) % 7}.json`, { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify(r) }); } catch (e) { localStorage.removeItem('tf.bakd'); } }
+  async function safePush(f) { const m = mk(), w = tfWeight(S); if (!f && m.w >= 15 && w < m.w * 0.4) throw new Error('이 기기 자료가 평소의 40% 미만이라 올리지 않았습니다. 설정의 「🛟 자료 복구」를 확인하세요(일부러 많이 지우셨다면 「지금 맞추기」를 누르세요)'); return push(); }
+  window.tfPwBackups = async () => { const out = []; for (let n = 0; n < 7; n++) { try { const r = await (await fetch(`${dbUrl()}/rooms/tfsync_${key().id}_bak${n}.json`, { cache: 'no-store' })).json(); if (r && r.d) out.push({ u: r.u, o: await open(r) }); } catch (e) { } } return out.sort((a, b) => b.u - a.u); };
+  function askLoss(lw, rw) { return new Promise(res => { const d = document.createElement('dialog'); d.className = 'dlg'; d.innerHTML = `<h3>⚠ 자료가 크게 줄어듭니다</h3><p>이 기기: <b>${lw}</b>건 · 연동본: <b>${rw}</b>건. 연동본이 훨씬 적습니다. 그대로 바꾸면 이 기기의 자료가 줄어듭니다.</p><div class="tfm"><button class="btn pri" data-c="merge">🔀 합치기 (추천 · 양쪽 자료를 모두 살립니다)</button><button class="btn" data-c="push">⬆ 이 기기 내용으로 연동본을 덮어쓰기</button><button class="btn" data-c="replace">⬇ 연동본으로 바꾸기 (이 기기 자료는 🛟 보관본에 남습니다)</button><button class="btn" data-c="cancel">취소</button></div>`; document.body.appendChild(d); d.addEventListener('click', e => { const c = e.target.closest('[data-c]'); if (!c) return; d.close(); d.remove(); res(c.dataset.c); }); d.addEventListener('cancel', () => { res('cancel'); d.remove(); }); d.showModal(); }); }
   async function tick(force) {
-    if (!on() || st.busy || applying) return; st.busy = true;
+    if (!on() || st.busy || applying || window.TF_SYNC_HOLD) return; st.busy = true;
     try {
-      const r = await remote(), m = mk(), dirty = hsh() !== m.h, at = () => new Date().toLocaleTimeString('ko-KR');
+      const r = await remote(), m = mk(), dirty = hsh() !== m.h, at = () => new Date().toLocaleTimeString('ko-KR'); if (r) bakRemote(r);
       if (!r) { await push(); st.msg = '올렸습니다 ' + at(); }
-      else if (r.u > m.rseen && dirty) { await applyRemote(r, key(), true); await push(); st.msg = '두 기기 내용을 합쳤습니다 ' + at(); } /* 양쪽 다 바뀐 경우: 어느 쪽도 버리지 않고 합침 */
+      else if (r.u > m.rseen && dirty) { await applyRemote(r, key(), true); await safePush(force); st.msg = '두 기기 내용을 합쳤습니다 ' + at(); } /* 양쪽 다 바뀐 경우: 어느 쪽도 버리지 않고 합침 */
       else if (r.u > m.rseen) { await applyRemote(r, key()); st.msg = '불러왔습니다 ' + at(); }
-      else if (dirty || force) { await push(); st.msg = '올렸습니다 ' + at(); }
+      else if (dirty || force) { await safePush(force); st.msg = '올렸습니다 ' + at(); }
       else st.msg = '최신입니다 ' + at();
     } catch (e) { st.msg = '⚠ ' + e.message; }
     st.busy = false;
@@ -49,7 +54,7 @@
         if (o.pw.length < 8) { toast('8자 이상으로 정해 주세요.'); return; }
         try {
           const d = await derive(o.pw), r = await remote(d), turnOn = () => { localStorage.setItem(K_KEY, JSON.stringify(d)); setMk({ base: 0, rseen: 0, h: null }); };
-          if (r) sure('이 비밀번호로 저장된 내용이 있습니다. 이 기기의 내용을 그것으로 바꿀까요? (되돌리기 가능. 취소하면 연동을 켜지 않습니다)', async () => { try { await open(r, d); turnOn(); await applyRemote(r, d, true); st.msg = '연동 켜짐 · 불러왔습니다'; } catch (e) { toast('불러오지 못했습니다: ' + e.message); } render(); });
+          if (r) sure('이 비밀번호로 저장된 내용이 있습니다. 이 기기의 내용과 합칠까요? (양쪽 자료를 모두 살립니다. 자료가 크게 다르면 한 번 더 물어봅니다. 취소하면 연동을 켜지 않습니다)', async () => { try { await open(r, d); turnOn(); await applyRemote(r, d, true); st.msg = '연동 켜짐 · 불러왔습니다'; } catch (e) { toast('불러오지 못했습니다: ' + e.message); } render(); });
           else sure('이 비밀번호로 저장된 내용이 없습니다. 새로 만들까요? (이미 다른 기기에서 연동했다면 그 비밀번호와 똑같은지 확인하세요. 다르면 따로따로 저장됩니다)', async () => { try { turnOn(); await push(); st.msg = '연동 켜짐 · 처음 올렸습니다'; toast('연동을 켰습니다. 폰에서도 같은 비밀번호를 넣으세요.'); } catch (e) { localStorage.removeItem(K_KEY); toast('연동 실패: ' + e.message); } render(); });
         } catch (e) { toast('연동 실패: ' + e.message); }
       }, '연동 켜기');
@@ -89,6 +94,6 @@
     const m = /^#join=([\w-]+)$/.exec(location.hash); if (!m) return;
     let j; try { j = JSON.parse(unb64u(m[1])); if (!/^https:\/\/[\w.-]+\.(firebasedatabase\.app|firebaseio\.com)\/?$/.test(j.db) || !j.k || !j.k.id || !j.k.k) throw 0; } catch (e) { history.replaceState(null, '', location.pathname + location.search + '#/today'); toast('연결 링크가 올바르지 않습니다.'); return; }
     history.replaceState(null, '', location.pathname + location.search + '#/today');
-    sure('이 기기를 연동할까요? 이 기기의 내용은 연동된 최신 내용으로 바뀝니다(되돌리기 가능).', () => joinWith(j), '연동하기');
+    sure('이 기기를 연동할까요? 이 기기의 내용과 연동된 내용을 합칩니다(양쪽 자료를 모두 살립니다).', () => joinWith(j), '연동하기');
   }, 1200);
 })();

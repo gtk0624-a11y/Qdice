@@ -1169,6 +1169,13 @@ main,#app,.wrap{padding-bottom:max(var(--pb,0px),64px)}
 /* v164: 화면 구조 편집 */
 .lydlg h4{margin:14px 0 4px}.lyr{display:flex;gap:6px;align-items:center;flex-wrap:wrap;padding:5px 0;border-bottom:1px solid #eee}.lyr.off .lyn{opacity:.45;text-decoration:line-through}.lyn{flex:1 1 150px;font-weight:700}.lyb{display:flex;gap:4px}.lyr input[name^=nm_],.lyr input[name^=kn_]{flex:1 1 140px;min-width:0}.lyo{font-size:12px;white-space:nowrap}
 .lymg{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px 10px;margin-top:6px}.lym{display:flex;flex-direction:column;font-size:12px}.lym input{min-width:0}@media(max-width:520px){.lymg{grid-template-columns:1fr}}
+/* v166: 자료 복구 */
+.rsr{border:1px solid #e6e3dc;border-radius:10px;padding:8px 10px;margin:8px 0;display:flex;flex-direction:column;gap:6px}.rsr.more{border-color:#d9822b;background:#fff8ee}.rsb{background:#d9822b;color:#fff;border-radius:6px;padding:1px 6px;font-size:11px}.tfm2{display:flex;gap:6px;flex-wrap:wrap}
+.rshint{border:1px solid #d9822b;background:#fff8ee;border-radius:12px;padding:10px 12px;margin:10px 0}
+/* v166 */
+#chatpan{z-index:90!important}
+body:has(#chatpan:not([hidden])) .scfab,body:has(#chatpan:not([hidden])) #chatbub,body:has(#chatpan:not([hidden])) #pstLayer{display:none!important}
+.tfq1{display:flex;gap:6px;flex-wrap:nowrap;overflow-x:auto;padding:4px 8px}.tfq1 .chip{white-space:nowrap}
 </style>
 </head>
 <body>
@@ -1786,6 +1793,7 @@ function periodInfo() {
   for (let i = 1; i <= 7; i++) { const a = st + (i - 1) * (+p.classMin + +p.breakMin), b = a + +p.classMin; if (mins >= a && mins < b) cur = i; else if (mins < a && !next) next = i; }
   return { dow: now.getDay(), cur, next };
 }
+function tfPList(d) { const set = new Set(); try { (typeof clkPeriods === 'function' ? clkPeriods() : []).forEach(x => set.add(x.p)); } catch (e) {} Object.keys(S.timetable || {}).forEach(k => { const q = k.split('-'); if (+q[0] === d && S.timetable[k] && +q[1] > 0) set.add(+q[1]); }); if (!set.size) [1, 2, 3, 4, 5, 6, 7].forEach(x => set.add(x)); return [...set].sort((x, y) => x - y); }
 const tt = (d, p) => S.timetable[d + '-' + p] || '';
 const lessonPct = l => (+l.total ? Math.round(+l.done / +l.total * 100) : 0);
 
@@ -1845,7 +1853,7 @@ function todayView() {
     const wk = P.dow === 0 || P.dow === 6, sd = UI.tdDay || (wk ? 1 : P.dow), isT = !wk && sd === P.dow;
     const mon = new Date(); mon.setHours(0, 0, 0, 0); mon.setDate(mon.getDate() - ((mon.getDay() + 6) % 7) + (wk ? 7 : 0)); const dd = d => { const x = new Date(mon); x.setDate(x.getDate() + d - 1); return (x.getMonth() + 1) + '/' + x.getDate(); }, dfull = d => { const x = new Date(mon); x.setDate(x.getDate() + d - 1); return ymd(x); };
     const tabs = `<div class="tdtabs" role="tablist">` + [1, 2, 3, 4, 5].map(d => `<button class="${d === sd ? 'on' : ''}${!wk && d === P.dow ? ' tdy' : ''}" role="tab" aria-selected="${d === sd}" data-act="tdDay" data-d="${d}">${DOW[d]}<small>${dd(d)}</small></button>`).join('') + '</div>';
-    let b = `<p class="mu"><b>${DOW[sd]}요일(${dd(sd)}) 시간표${isT ? ' · 오늘' : wk && sd === 1 && !UI.tdDay ? ' · 다음 수업일' : ''}</b></p>${tabs}<div class="strip">` + [1, 2, 3, 4, 5, 6, 7].map(p => { const PL = typeof clkPeriods === 'function' ? clkPeriods() : [], nw = new Date(), mn = nw.getHours() * 60 + nw.getMinutes(), pp = PL.find(y => y.p === p), ended = isT && pp && mn >= pp.e, THX = ['수고했어요^^', '고생했어요♡', '잘했어요!', '오늘도 굿~', '한 시간 끝!', '멋졌어요✿', '푹 쉬어요^^'], has = tt(sd, p); return `<div class="pc ${isT && P.cur === p ? 'now' : ''} ${ended ? 'done' : ''}" style="${typeof cellBg === 'function' && has && !ended ? cellBg(has) : ''}"><b>${p}</b>${esc(has || '—')}${typeof cellLinkHtml === 'function' && has ? cellLinkHtml(sd, p) : ''}${typeof cusSlot === 'function' ? cusSlot(dfull(sd), p) : ''}${ended && has ? `<span class="okm">✅ 수업 완료</span><span class="thx">${THX[(p * 3 + sd) % THX.length]}</span>` : ''}</div>`; }).join('') + '</div>';
+    let b = `<p class="mu"><b>${DOW[sd]}요일(${dd(sd)}) 시간표${isT ? ' · 오늘' : wk && sd === 1 && !UI.tdDay ? ' · 다음 수업일' : ''}</b></p>${tabs}<div class="strip">` + tfPList(sd).map(p => { const PL = typeof clkPeriods === 'function' ? clkPeriods() : [], nw = new Date(), mn = nw.getHours() * 60 + nw.getMinutes(), pp = PL.find(y => y.p === p), ended = isT && pp && mn >= pp.e, THX = ['수고했어요^^', '고생했어요♡', '잘했어요!', '오늘도 굿~', '한 시간 끝!', '멋졌어요✿', '푹 쉬어요^^'], has = tt(sd, p); return `<div class="pc ${isT && P.cur === p ? 'now' : ''} ${ended ? 'done' : ''}" style="${typeof cellBg === 'function' && has && !ended ? cellBg(has) : ''}"><b>${p}</b>${esc(has || '—')}${typeof cellLinkHtml === 'function' && has ? cellLinkHtml(sd, p) : ''}${typeof cusSlot === 'function' ? cusSlot(dfull(sd), p) : ''}${ended && has ? `<span class="okm">✅ 수업 완료</span><span class="thx">${THX[(p * 3 + sd) % THX.length]}</span>` : ''}</div>`; }).join('') + '</div>';
     if (typeof wkGrid === 'function') b += wkGrid(wk);
     b += `<div class="tools"><a class="btn pri" href="#/class">✏️ 시간표 입력·수정하기</a><button class="btn" data-act="comci">🔄 컴시간알리미에서 가져오기</button></div><p class="mu">${has ? '시간표를 고치려면 위 버튼(수업 화면의 시간표 표)을 누르세요. 컴시간과 연동해 자동으로 가져옵니다.' : '<b>아직 시간표가 비어 있어요.</b> 위 [시간표 입력·수정하기]에서 칸에 직접 적거나, [컴시간알리미에서 가져오기]를 누르세요.'}</p>`;
     rows.push(row('r1', '오늘', '일과', st, due, b));
@@ -6086,7 +6094,7 @@ buildChunks = function () {
 };
 
 /* 화면 맨 아래에 버전 표시 — 옛 화면을 보고 있는지 바로 알 수 있게 */
-const TF_VER = 'v165', _cmFt = footer;
+const TF_VER = 'v166', _cmFt = footer;
 footer = function () { return _cmFt.apply(this, arguments).replace('</footer>', ` · <span class="mu">버전 ${TF_VER} (학급 관리 포함)</span></footer>`); };
 
 /* 새 버전 알림: 옛 화면이 남아 있으면 한 번 눌러 새로 받게 함 */
@@ -7407,6 +7415,93 @@ function fabFit() {
 /* 오늘 메모는 선택 기능(기본 꺼짐) */
 { const _pmF = pageMemo; pageMemo = function (page) { return page === 'today' && !featOn('pmemo') ? '' : _pmF.apply(this, arguments); }; }
 
+/* 자료 복구 + 합치기 도구(v166). pwsync.js보다 먼저 불러옵니다.
+   ① 시작하자마자 이 기기에 남은 보관본(연동 직전 전체 내용 · 되돌리기 보관 12개)을 별도 보관함(rescue)으로 옮겨 안전하게 지킵니다. 연동이 그 위에 덮어쓰지 못합니다.
+   ② 「🛟 자료 복구」: 보관본 목록(자료 수 표시) → 합쳐서 가져오기(추천) / 그 시점으로 되돌리기 / 파일로 저장. 복구 직전 현재 내용도 먼저 보관합니다.
+   ③ rsMerge(): 모든 항목을 id 기준으로 합집합 합치기 — 연동의 합치기도 같은 함수를 씁니다. */
+window.TF_SYNC_HOLD = true;
+const RS_K = 'rescue', RS_SKIP = { updatedAt: 1, setup: 1, profile: 1 };
+const rsObj = x => x && typeof x === 'object' && !Array.isArray(x);
+function tfWeight(o) {
+  let n = 0; if (!rsObj(o)) return 0;
+  Object.keys(o).forEach(k => { if (RS_SKIP[k]) return; const v = o[k]; if (Array.isArray(v)) { n += v.length; v.slice(0, 400).forEach(x => { if (rsObj(x)) Object.keys(x).forEach(y => { if (Array.isArray(x[y])) n += x[y].length; }); }); } else if (rsObj(v)) { Object.keys(v).forEach(y => { const w = v[y]; n += Array.isArray(w) ? w.length + 1 : 1; }); } });
+  return n;
+}
+function rsMerge(cur, old) { /* cur에 없는 것을 old에서 채웁니다(같은 id는 cur 기준) */
+  if (!rsObj(cur) || !rsObj(old)) return cur;
+  Object.keys(old).forEach(k => {
+    const a = cur[k], b = old[k]; if (b === undefined) return;
+    if (a === undefined || a === null) { cur[k] = b; return; }
+    if (Array.isArray(a) && Array.isArray(b)) {
+      if (!a.length) { cur[k] = b; return; }
+      if (b.length && b.every(rsObj)) { const ids = new Set(a.filter(x => rsObj(x) && x.id != null).map(x => x.id)), sg = new Set(a.filter(x => rsObj(x) && x.id == null).map(x => JSON.stringify(x))); b.forEach(x => { if (x.id != null ? !ids.has(x.id) : !sg.has(JSON.stringify(x))) a.push(x); }); }
+      else if (b.length && a.every(x => typeof x !== 'object')) b.forEach(x => { if (!a.includes(x)) a.push(x); });
+      return;
+    }
+    if (rsObj(a) && rsObj(b)) rsMerge(a, b);
+  });
+  return cur;
+}
+let RS = [], rsReady;
+const rsSig = j => { let h = 5381; for (let i = 0; i < j.length; i += 37) h = ((h << 5) + h + j.charCodeAt(i)) | 0; return j.length + ':' + h; };
+function rsAdd(e) {
+  try { const o = JSON.parse(e.j), w = tfWeight(o); if (w < 4) return; e.w = w; e.sig = rsSig(e.j); if (RS.some(x => x.sig === e.sig)) return; RS.push(e); rsTrim(); idb.set(RS_K, RS).catch(() => { }); } catch (x) { }
+}
+function rsTrim() {
+  RS.sort((a, b) => b.t - a.t); const best = RS.reduce((m, x) => (x.w > (m ? m.w : -1) && x.full ? x : m), null), keep = [], nf = { full: 0, part: 0 };
+  RS.forEach(x => { const k = x.full ? 'full' : 'part'; if (x === best || (nf[k] < (x.full ? 10 : 30))) { keep.push(x); nf[k]++; } }); RS = keep;
+}
+rsReady = (async () => {
+  try {
+    const [rs, pre, sn] = await Promise.all([idb.get(RS_K).catch(() => null), idb.get('prelink').catch(() => null), idb.get('snaps').catch(() => null)]);
+    RS = Array.isArray(rs) ? rs : [];
+    if (pre && pre.s) rsAdd({ t: pre.t || Date.now(), label: '연동 직전의 이 기기 전체 내용', j: pre.s, full: true });
+    (sn || []).forEach(s => s && s.j && rsAdd({ t: s.t, label: '자동 보관 · ' + (s.label || ''), j: s.j, full: false }));
+  } catch (e) { } finally { window.TF_SYNC_HOLD = false; setTimeout(() => { try { render(); } catch (e) { } }, 600); }
+})();
+{ const _set = idb.set.bind(idb); idb.set = function (k, v) { if (k === 'prelink' && v && v.s) { try { rsAdd({ t: v.t || Date.now(), label: '다른 기기와 맞추기 직전의 이 기기 전체 내용', j: v.s, full: true }); } catch (e) { } } return _set(k, v); }; }
+/* 20분마다·큰 변화 때 전체 내용을 자동 보관(하루 최대 6개) */
+setInterval(() => { try { if (!S.setup || document.hidden) return; const j = JSON.stringify(S), last = RS.filter(x => x.full).sort((a, b) => b.t - a.t)[0]; if (last && Date.now() - last.t < 4 * 3600e3) return; rsAdd({ t: Date.now(), label: '자동 전체 보관', j, full: true }); } catch (e) { } }, 20 * 60e3);
+
+const rsTm = t => { const x = new Date(t); return `${x.getMonth() + 1}/${x.getDate()} ${pad(x.getHours())}:${pad(x.getMinutes())}`; };
+function rsCounts(o) { const c = (k, n) => { const v = o[k]; const m = Array.isArray(v) ? v.length : v && Array.isArray(v.cards) ? v.cards.length : v && typeof v === 'object' ? Object.keys(v).length : 0; return m ? `${n} ${m}` : ''; }; return [c('items', '일정'), c('notes', '기록'), c('wk', '업무카드'), c('pages', '페이지'), c('mine', '내 업무'), c('budget', '예산'), c('docLog', '공문'), c('contacts', '연락망'), c('dayMemo', '날짜메모'), c('training', '연수')].filter(Boolean).join(' · ') || '내용 적음'; }
+function rsKeepLock(o) { const keep = (S.notes || []).filter(n => n.lock), keepP = (S.pages || []).filter(n => n.lock); if (o.notes) o.notes = (o.notes || []).filter(n => !n.lock).concat(keep); if (o.pages) o.pages = (o.pages || []).filter(n => !n.lock).concat(keepP); }
+function rsRestore(o, mode, label) {
+  rsAdd({ t: Date.now(), label: '복구 직전의 현재 내용', j: JSON.stringify(S), full: true });
+  if (mode === 'merge') { const cur = S; rsMerge(cur, JSON.parse(JSON.stringify(o))); }
+  else { rsKeepLock(o); Object.keys(o).forEach(k => { S[k] = o[k]; }); }
+  S.updatedAt = Date.now(); save(true); try { render(); } catch (e) { } toast(mode === 'merge' ? '보관본과 합쳤습니다.' : '그 시점으로 되돌렸습니다. (복구 직전 내용도 보관되어 있습니다)');
+}
+async function rsDlg() {
+  await rsReady; let d = document.getElementById('rsdlg'); if (!d) { d = document.createElement('dialog'); d.id = 'rsdlg'; d.className = 'dlg tfdlg'; document.body.appendChild(d); d.addEventListener('click', rsClick); }
+  const cw = tfWeight(S), L = RS.slice().sort((a, b) => b.t - a.t), pw = typeof window.tfPwBackups === 'function' && window.TF_PW_ON && window.TF_PW_ON();
+  d.innerHTML = `<h3>🛟 자료 복구</h3><p class="mu">이 기기에 자동으로 남아 있던 이전 내용입니다. <b>「합쳐서 가져오기」</b>는 지금 내용을 그대로 두고, 보관본에만 있는 일정·기록·카드·예산 등을 더합니다(가장 안전). 「그 시점으로 되돌리기」는 그때 모습으로 바꿉니다. 어느 쪽이든 복구 직전 내용도 먼저 보관합니다.</p>
+  <p class="mu">현재 이 기기의 자료: <b>${esc(rsCounts(S))}</b></p>
+  ${L.length ? L.map((x, i) => { let o; try { o = JSON.parse(x.j); } catch (e) { o = {}; } return `<div class="rsr ${x.w > cw * 1.3 + 5 ? 'more' : ''}"><div><b>${rsTm(x.t)}</b> · ${esc(x.label)}${x.w > cw * 1.3 + 5 ? ' <span class="rsb">현재보다 자료가 많음</span>' : ''}${x.full ? '' : ' <small class="mu">(일부 항목만)</small>'}<br><small class="mu">${esc(rsCounts(o))}</small></div><div class="tfm2"><button class="btn sm pri" data-rs="merge" data-i="${i}">🔀 합쳐서 가져오기</button><button class="btn sm" data-rs="replace" data-i="${i}">⏪ 그 시점으로</button><button class="btn sm" data-rs="save" data-i="${i}">💾 파일</button></div></div>`; }).join('') : '<p>이 기기에는 복구할 보관본이 없습니다.</p>'}
+  ${pw ? '<div class="tfm"><button class="btn" data-rs="bak">☁ 연동 저장소의 최근 7일 백업 보기</button></div>' : ''}
+  <div class="tfm"><label class="btn file">📂 백업 파일(.json)에서 합쳐서 가져오기<input type="file" accept=".json,application/json" data-rs="file" hidden></label></div><div class="btns"><button class="btn pri" data-rs="close">닫기</button></div>`;
+  if (!d.open) d.showModal(); window.__rsList = L;
+}
+let RSBAK = [];
+async function rsClick(e) {
+  const b = e.target.closest('[data-rs]'); const d = document.getElementById('rsdlg'); if (!b) { if (e.target === d) d.close(); return; } const a = b.dataset.rs, i = +b.dataset.i;
+  if (a === 'close') return d.close(); if (a === 'file') return;
+  const pickO = () => { if (b.dataset.bak) return RSBAK[+b.dataset.bak] && RSBAK[+b.dataset.bak].o; const x = (window.__rsList || [])[i]; return x && JSON.parse(x.j); };
+  if (a === 'bak') { toast('저장소 백업을 가져오는 중…'); try { RSBAK = await window.tfPwBackups(); } catch (x) { return toast('가져오지 못했습니다: ' + x.message); } const ls = RSBAK.map((x, k) => `<div class="rsr"><div><b>${rsTm(x.u)}</b> · 연동 저장소 백업<br><small class="mu">${esc(rsCounts(x.o))}</small></div><div class="tfm2"><button class="btn sm pri" data-rs="merge" data-bak="${k}">🔀 합쳐서 가져오기</button><button class="btn sm" data-rs="replace" data-bak="${k}">⏪ 그 시점으로</button></div></div>`).join(''); d.insertAdjacentHTML('beforeend', `<h4>☁ 저장소 백업</h4>${ls || '<p class="mu">아직 저장소 백업이 없습니다(연동 후 하루에 한 번 만들어집니다).</p>'}`); return; }
+  if (a === 'save') { const o = pickO(); if (o) tfDl('업무파탈_보관본_' + rsTm(Date.now()).replace(/[\/: ]/g, '') + '.json', JSON.stringify({ S: o }), 'application/json'); return; }
+  if (a === 'merge' || a === 'replace') { const o = pickO(); if (!o) return; const go = () => { rsRestore(o, a); d.close(); }; if (a === 'replace') sure('그 시점의 모습으로 바꿀까요? 지금 내용은 먼저 보관됩니다. 연동을 켜 두셨다면 다른 기기에도 퍼집니다.', go); else go(); }
+}
+document.addEventListener('change', async e => { const t = e.target; if (!(t && t.matches && t.matches('[data-rs=file]')) || !t.files[0]) return; try { const j = JSON.parse(await t.files[0].text()), o = j.S || j; if (!rsObj(o)) throw 0; sure(`파일 속 자료(${rsCounts(o)})를 지금 내용에 합칠까요? 지금 내용은 먼저 보관됩니다.`, () => { rsRestore(o, 'merge'); document.getElementById('rsdlg').close(); }); } catch (x) { toast('백업 파일을 읽지 못했습니다.'); } });
+/* 오늘 화면 알림 줄: 보관본이 현재보다 많을 때 */
+function rsHint() {
+  const cw = tfWeight(S), best = RS.reduce((m, x) => (x.w > (m ? m.w : -1) ? x : m), null); if (!best || best.w <= cw * 1.3 + 5) return ''; if (localStorage.getItem('tf.rsHide') === best.sig) return '';
+  let o = {}; try { o = JSON.parse(best.j); } catch (e) { }
+  return `<div class="rshint"><b>🛟 이 기기에 현재보다 자료가 많은 보관본이 있습니다</b><br><small>${rsTm(best.t)} · ${esc(rsCounts(o))}</small><div class="tfm2"><button class="btn sm pri" data-act="rsOpen">복구 화면 열기</button><button class="btn sm" data-act="rsHide">괜찮아요</button></div></div>`;
+}
+{ const _tv = todayView; todayView = function () { const h = _tv.apply(this, arguments), M = '<details class="ncwork nccal"'; if (typeof h === 'string' && h.includes(M)) { const t = rsHint(); if (t) return h.replace(M, t + M); } return h; }; }
+Object.assign(A, { rsOpen: rsDlg, rsHide() { const best = RS.reduce((m, x) => (x.w > (m ? m.w : -1) ? x : m), null); if (best) localStorage.setItem('tf.rsHide', best.sig); render(); } });
+{ const _s = setView; setView = function () { const h = _s.apply(this, arguments), m = '<h3 class="h3">백업</h3>'; return h.includes(m) ? h.replace(m, '<h3 class="h3">🛟 자료 복구</h3><p class="mu">연동하다가, 또는 실수로 자료가 줄었을 때 이 기기에 남은 이전 내용을 되살립니다. 연동 저장소의 최근 7일 백업도 여기서 봅니다.</p><div class="tools"><button class="btn pri" data-act="rsOpen">자료 복구 열기</button></div>' + m) : h; }; }
+
 /* 비밀번호 연동(v85): 구글 로그인 없이 「같은 비밀번호」를 넣은 기기끼리 폰·태블릿·PC가 같은 내용을 씁니다.
    내용은 이 기기에서 비밀번호로 암호화(AES-GCM)한 뒤 올라가므로 저장소에서는 읽을 수 없습니다. 비밀번호는 저장하지 않고 암호 열쇠 조각만 이 기기에 둡니다.
    저장소 주소(Firebase 실시간 DB)는 코드에 넣지 않고 localStorage 'tf.db'에 둡니다(링크 ?sync=이름 으로 한 번 넣음). 대상: 일정·예산·수업·업무 등 S 전체(잠금 노트·올린 문서 원본·AI 키 제외). */
@@ -7427,24 +7522,29 @@ function fabFit() {
   async function seal() { const iv = crypto.getRandomValues(new Uint8Array(12)), d = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, await aes(), enc.encode(payload())); return { u: Date.now(), iv: b64(iv), d: b64(d) }; }
   async function open(r, k) { return JSON.parse(dec.decode(await crypto.subtle.decrypt({ name: 'AES-GCM', iv: unb64(r.iv) }, await aes(k), unb64(r.d)))); }
   async function remote(k) { const r = await fetch(url(k), { cache: 'no-store' }); if (!r.ok) throw new Error(r.status === 401 || r.status === 403 ? '저장소가 쓰기를 막았습니다(보안 규칙 확인)' : '저장소 응답 오류 ' + r.status); return r.json(); }
-  async function push() { const body = await seal(), r = await fetch(url(), { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) }); if (!r.ok) throw new Error(r.status === 401 || r.status === 403 ? '저장소가 쓰기를 막았습니다(보안 규칙 확인)' : '올리기 실패 ' + r.status); setMk({ base: S.updatedAt || 0, rseen: body.u, h: hsh() }); }
+  async function push() { const body = await seal(), r = await fetch(url(), { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) }); if (!r.ok) throw new Error(r.status === 401 || r.status === 403 ? '저장소가 쓰기를 막았습니다(보안 규칙 확인)' : '올리기 실패 ' + r.status); setMk({ base: S.updatedAt || 0, rseen: body.u, h: hsh(), w: tfWeight(S) }); }
   async function applyRemote(r, k, merge) {
-    const o = await open(r, k), keep = (S.notes || []).filter(n => n.lock), keepP = (S.pages || []).filter(n => n.lock); applying = true;
+    const o = await open(r, k), keep = (S.notes || []).filter(n => n.lock), keepP = (S.pages || []).filter(n => n.lock);
+    { const lw = tfWeight(S), rw = tfWeight(o); if (lw >= 8 && rw < lw * 0.6) { const ch = await askLoss(lw, rw); if (ch === 'cancel') throw new Error('연동을 취소했습니다(이 기기 자료는 그대로입니다)'); if (ch === 'push') { await push(); return; } merge = ch !== 'replace'; } }
+    applying = true;
     try { if (typeof snapPush === 'function') snapPush(merge ? '연동 직전(이 기기 내용)' : '다른 기기 내용 불러오기 직전', JSON.stringify(snapPick())); if (typeof idb !== 'undefined') idb.set('prelink', { t: Date.now(), s: JSON.stringify(S) }).catch(() => { }); } catch (e) { }
     if (merge) { /* 처음 연결할 때는 이 기기에 있던 내용을 버리지 않고 합칩니다(같은 id는 연동된 쪽 기준) */
-      ['items', 'wk', 'duties', 'mine', 'docLog', 'contacts', 'training', 'notes', 'pages', 'yp'].forEach(key => { const L = Array.isArray(S[key]) ? S[key] : null, R = Array.isArray(o[key]) ? o[key] : null; if (L && R && L.length) { const ids = new Set(R.map(x => x && x.id).filter(Boolean)); o[key] = R.concat(L.filter(x => x && (!x.id || !ids.has(x.id)))); } });
-      if (S.dayMemo && o.dayMemo && typeof S.dayMemo === 'object') o.dayMemo = Object.assign({}, S.dayMemo, o.dayMemo);
+      rsMerge(o, JSON.parse(JSON.stringify(S))); /* 모든 항목을 id 기준으로 합집합: 연동본 기준 + 이 기기에만 있던 것 추가 */
     }
-    Object.assign(S, o); S.notes = (o.notes || []).concat(keep); S.pages = (o.pages || []).concat(keepP); save(true); applying = false; setMk({ base: S.updatedAt || 0, rseen: r.u, h: hsh() }); TF.render && TF.render(); toast('다른 기기의 최신 내용을 불러왔습니다.');
+    Object.assign(S, o); S.notes = (o.notes || []).concat(keep); S.pages = (o.pages || []).concat(keepP); save(true); applying = false; setMk({ base: S.updatedAt || 0, rseen: r.u, h: hsh(), w: tfWeight(S) }); TF.render && TF.render(); toast('다른 기기의 최신 내용을 불러왔습니다.');
   }
+  async function bakRemote(r) { const d = today(); if (localStorage.getItem('tf.bakd') === d) return; localStorage.setItem('tf.bakd', d); try { await fetch(`${dbUrl()}/rooms/tfsync_${key().id}_bak${Math.floor(Date.now() / 864e5) % 7}.json`, { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify(r) }); } catch (e) { localStorage.removeItem('tf.bakd'); } }
+  async function safePush(f) { const m = mk(), w = tfWeight(S); if (!f && m.w >= 15 && w < m.w * 0.4) throw new Error('이 기기 자료가 평소의 40% 미만이라 올리지 않았습니다. 설정의 「🛟 자료 복구」를 확인하세요(일부러 많이 지우셨다면 「지금 맞추기」를 누르세요)'); return push(); }
+  window.tfPwBackups = async () => { const out = []; for (let n = 0; n < 7; n++) { try { const r = await (await fetch(`${dbUrl()}/rooms/tfsync_${key().id}_bak${n}.json`, { cache: 'no-store' })).json(); if (r && r.d) out.push({ u: r.u, o: await open(r) }); } catch (e) { } } return out.sort((a, b) => b.u - a.u); };
+  function askLoss(lw, rw) { return new Promise(res => { const d = document.createElement('dialog'); d.className = 'dlg'; d.innerHTML = `<h3>⚠ 자료가 크게 줄어듭니다</h3><p>이 기기: <b>${lw}</b>건 · 연동본: <b>${rw}</b>건. 연동본이 훨씬 적습니다. 그대로 바꾸면 이 기기의 자료가 줄어듭니다.</p><div class="tfm"><button class="btn pri" data-c="merge">🔀 합치기 (추천 · 양쪽 자료를 모두 살립니다)</button><button class="btn" data-c="push">⬆ 이 기기 내용으로 연동본을 덮어쓰기</button><button class="btn" data-c="replace">⬇ 연동본으로 바꾸기 (이 기기 자료는 🛟 보관본에 남습니다)</button><button class="btn" data-c="cancel">취소</button></div>`; document.body.appendChild(d); d.addEventListener('click', e => { const c = e.target.closest('[data-c]'); if (!c) return; d.close(); d.remove(); res(c.dataset.c); }); d.addEventListener('cancel', () => { res('cancel'); d.remove(); }); d.showModal(); }); }
   async function tick(force) {
-    if (!on() || st.busy || applying) return; st.busy = true;
+    if (!on() || st.busy || applying || window.TF_SYNC_HOLD) return; st.busy = true;
     try {
-      const r = await remote(), m = mk(), dirty = hsh() !== m.h, at = () => new Date().toLocaleTimeString('ko-KR');
+      const r = await remote(), m = mk(), dirty = hsh() !== m.h, at = () => new Date().toLocaleTimeString('ko-KR'); if (r) bakRemote(r);
       if (!r) { await push(); st.msg = '올렸습니다 ' + at(); }
-      else if (r.u > m.rseen && dirty) { await applyRemote(r, key(), true); await push(); st.msg = '두 기기 내용을 합쳤습니다 ' + at(); } /* 양쪽 다 바뀐 경우: 어느 쪽도 버리지 않고 합침 */
+      else if (r.u > m.rseen && dirty) { await applyRemote(r, key(), true); await safePush(force); st.msg = '두 기기 내용을 합쳤습니다 ' + at(); } /* 양쪽 다 바뀐 경우: 어느 쪽도 버리지 않고 합침 */
       else if (r.u > m.rseen) { await applyRemote(r, key()); st.msg = '불러왔습니다 ' + at(); }
-      else if (dirty || force) { await push(); st.msg = '올렸습니다 ' + at(); }
+      else if (dirty || force) { await safePush(force); st.msg = '올렸습니다 ' + at(); }
       else st.msg = '최신입니다 ' + at();
     } catch (e) { st.msg = '⚠ ' + e.message; }
     st.busy = false;
@@ -7458,7 +7558,7 @@ function fabFit() {
         if (o.pw.length < 8) { toast('8자 이상으로 정해 주세요.'); return; }
         try {
           const d = await derive(o.pw), r = await remote(d), turnOn = () => { localStorage.setItem(K_KEY, JSON.stringify(d)); setMk({ base: 0, rseen: 0, h: null }); };
-          if (r) sure('이 비밀번호로 저장된 내용이 있습니다. 이 기기의 내용을 그것으로 바꿀까요? (되돌리기 가능. 취소하면 연동을 켜지 않습니다)', async () => { try { await open(r, d); turnOn(); await applyRemote(r, d, true); st.msg = '연동 켜짐 · 불러왔습니다'; } catch (e) { toast('불러오지 못했습니다: ' + e.message); } render(); });
+          if (r) sure('이 비밀번호로 저장된 내용이 있습니다. 이 기기의 내용과 합칠까요? (양쪽 자료를 모두 살립니다. 자료가 크게 다르면 한 번 더 물어봅니다. 취소하면 연동을 켜지 않습니다)', async () => { try { await open(r, d); turnOn(); await applyRemote(r, d, true); st.msg = '연동 켜짐 · 불러왔습니다'; } catch (e) { toast('불러오지 못했습니다: ' + e.message); } render(); });
           else sure('이 비밀번호로 저장된 내용이 없습니다. 새로 만들까요? (이미 다른 기기에서 연동했다면 그 비밀번호와 똑같은지 확인하세요. 다르면 따로따로 저장됩니다)', async () => { try { turnOn(); await push(); st.msg = '연동 켜짐 · 처음 올렸습니다'; toast('연동을 켰습니다. 폰에서도 같은 비밀번호를 넣으세요.'); } catch (e) { localStorage.removeItem(K_KEY); toast('연동 실패: ' + e.message); } render(); });
         } catch (e) { toast('연동 실패: ' + e.message); }
       }, '연동 켜기');
@@ -7498,7 +7598,7 @@ function fabFit() {
     const m = /^#join=([\w-]+)$/.exec(location.hash); if (!m) return;
     let j; try { j = JSON.parse(unb64u(m[1])); if (!/^https:\/\/[\w.-]+\.(firebasedatabase\.app|firebaseio\.com)\/?$/.test(j.db) || !j.k || !j.k.id || !j.k.k) throw 0; } catch (e) { history.replaceState(null, '', location.pathname + location.search + '#/today'); toast('연결 링크가 올바르지 않습니다.'); return; }
     history.replaceState(null, '', location.pathname + location.search + '#/today');
-    sure('이 기기를 연동할까요? 이 기기의 내용은 연동된 최신 내용으로 바뀝니다(되돌리기 가능).', () => joinWith(j), '연동하기');
+    sure('이 기기를 연동할까요? 이 기기의 내용과 연동된 내용을 합칩니다(양쪽 자료를 모두 살립니다).', () => joinWith(j), '연동하기');
   }, 1200);
 })();
 
@@ -7630,7 +7730,7 @@ agDo = function (a) {
 
 /* ---- 비서 루프 ---- */
 const B2_SYS = `당신은 교사 업무수첩 「업무파탈」 안의 비서 꿈송이입니다. 늘 존댓말로 짧고 정확하게 답합니다.
-- 수첩과 상관없는 잡담·안부·고민 이야기·아이디어 브레인스토밍·글 다듬기도 편하게 받아 주세요. 이럴 땐 도구 없이 친구 같은 따뜻한 말투(존댓말)로 짧게 대화하고, 필요하면 되물어 주세요. 수첩 내용이 필요한 질문일 때만 도구를 쓰세요.
+- 잡담 말투는 자비스처럼: 정중하고 침착한 집사 톤에 건조한 위트를 한 스푼 섞고, 선생님을 '선생님'이라 부르며 과하지 않게 한두 문장으로 재치 있게 받아 주세요. 수첩과 상관없는 잡담·안부·고민 이야기·아이디어 브레인스토밍·글 다듬기도 편하게 받아 주세요. 이럴 땐 도구 없이 친구 같은 따뜻한 말투(존댓말)로 짧게 대화하고, 필요하면 되물어 주세요. 수첩 내용이 필요한 질문일 때만 도구를 쓰세요.
 - 수첩에 대한 질문에 답하려면 먼저 도구로 수첩을 직접 확인하세요. 추측하거나 기억으로 지어내지 마세요. 필요하면 도구를 여러 번, 여러 개 연달아 부르세요.
 - 규정·지침·학칙·조항을 묻는 질문은 당신의 영역이 아닙니다. "규정은 위쪽 📜 규정줍줍 탭에서 찾아 드려요"라고만 안내하세요. 문서에 없으면 "올려 주신 자료에서는 찾지 못했습니다"라고 말하고 일반 상식으로 단정하지 마세요. 조항 원문은 짧게 인용합니다.
 - 일정·할 일·업무 카드·예산·연수표를 넣거나 고치라는 요청은 쓰기 도구로 "제안"하세요. 제안은 사용자가 [적용]을 눌러야 반영됩니다. 날짜는 YYYY-MM-DD로, "내일·다음 주 금요일"은 오늘 날짜 기준으로 계산하세요. 삭제도 delete_cal_item으로 "제안"만 하며 사용자가 [적용]을 눌러야 지워집니다.
@@ -7845,6 +7945,7 @@ function tfDlg(html) {
 const tfVal = n => { const e = document.querySelector('#tfdlg [name=' + n + ']'); return e ? (e.type === 'checkbox' ? e.checked : e.value) : ''; };
 function tfMenu() {
   tfDlg(`<h3>🧰 도구</h3><div class="tfm">
+  <button class="btn" data-tf="rescue">🛟 자료 복구<small>연동·실수로 줄어든 자료를 되살리기</small></button>
   <button class="btn" data-tf="lay">🧩 화면 구조 편집<small>칸 순서·이름·메뉴·캘린더 옵션·구분 목록</small></button>
   <button class="btn" data-tf="tpl">📋 행사 템플릿<small>곡선제·수행평가·시험 등 D-30 준비표 한 번에</small></button>
   <button class="btn" data-tf="rec">📑 기록 모아보기<small>낱말·기간으로 일정·메모·회의록 모으기</small></button>
@@ -8023,7 +8124,7 @@ function tfChange(e) { const t = e.target; if (!t) return; if (t.name === 'tpl' 
 function tfClick(e) {
   const b = e.target.closest('[data-tf]'); if (!b) { if (e.target.id === 'tfdlg') e.target.close(); return; }
   const d = document.getElementById('tfdlg'), k = b.dataset.tf;
-  const M = { lay: () => { d.close(); lyDlg(); }, close: () => d.close(), menu: tfMenu, tpl: tfTplDlg, tplgo: tfTplGo, rec: () => tfRepDlg('rec'), hand: () => tfRepDlg('hand'), retro: () => tfRepDlg('retro'), imp: tfImpDlg, impgo: tfImpGo, exp: tfExpDlg, ics: tfIcs, csv: tfCsvOut, notif: tfNotifDlg,
+  const M = { rescue: () => { d.close(); rsDlg(); }, lay: () => { d.close(); lyDlg(); }, close: () => d.close(), menu: tfMenu, tpl: tfTplDlg, tplgo: tfTplGo, rec: () => tfRepDlg('rec'), hand: () => tfRepDlg('hand'), retro: () => tfRepDlg('retro'), imp: tfImpDlg, impgo: tfImpGo, exp: tfExpDlg, ics: tfIcs, csv: tfCsvOut, notif: tfNotifDlg,
     copy: () => { const o = document.getElementById('tfout'); if (o) { o.select(); try { navigator.clipboard.writeText(o.value); } catch (x) { document.execCommand('copy'); } toast('복사했습니다.'); } },
     save: () => { const o = document.getElementById('tfout'); if (o) tfDl({ rec: '기록_모음', hand: '인수인계서', retro: '업무_회고' }[TFR.tab] + '.md', o.value, 'text/markdown'); },
     ai: () => sure('이 내용을 Claude(외부 서버)로 보내 다듬을까요? 학생 실명이 없는지 확인해 주세요.', tfAIRun),
@@ -8039,6 +8140,21 @@ const _t4Kb = chatKeyBar;
 chatKeyBar = function () { return _t4Kb.apply(this, arguments) + `<div class="b3q"><button type="button" class="btn sm" data-tfq="file">📷 사진·PDF로 일정</button><button type="button" class="btn sm" data-tfq="mic">🎤 말로 입력</button><button type="button" class="btn sm" data-tfq="tpl">📋 행사 템플릿</button><button type="button" class="btn sm" data-tfq="tools">🧰 도구</button></div>`; };
 document.addEventListener('click', e => { const b = e.target.closest('[data-tfq]'); if (!b) return; e.preventDefault(); ({ file: () => tfFileInput().click(), mic: tfVoice, tpl: tfTplDlg, tools: tfMenu })[b.dataset.tfq](); });
 
+/* v166 챗봇 단순화: 칩 한 줄 + 키 상태는 헤더 버튼으로 */
+{ const _rc = renderChat;
+  renderChat = function () {
+    _rc.apply(this, arguments);
+    const p = document.getElementById('chatpan'); if (!p || p.hidden) return;
+    p.querySelectorAll('.ch-q,.b3q').forEach(n => n.remove());
+    const has = !!localStorage.getItem('tf.claudeKey');
+    if (has) p.querySelectorAll('.ckb').forEach(n => n.remove());
+    const f = p.querySelector('[data-chatform]'); if (!f) return;
+    const row = document.createElement('div'); row.className = 'ch-q tfq1';
+    row.innerHTML = '<button type="button" class="chip" data-chat="ask" data-q="오늘 브리핑 해줘. 오늘 할 일, 밀린 일, 앞으로 일주일을 우선순위 순으로 짧게 정리해줘.">☀️ 브리핑</button><button type="button" class="chip" data-tfq="file">📷 사진</button><button type="button" class="chip" data-tfq="mic">🎤 음성</button><button type="button" class="chip" data-tfq="tools">🧰</button>' + (has ? '<button type="button" class="chip" data-chat="keyedit">🔑</button>' : '');
+    f.parentNode.insertBefore(row, f);
+  };
+}
+
 /* 화면 구조 편집(v164): 오늘 화면 칸(브리핑·캘린더·이번 주 기한·업무들·곡선중 카드)의 순서·숨김·이름·처음 펼침, 위쪽 메뉴 이름·시작 화면,
    캘린더 시작 요일·기본 보기, 일정 구분 목록(이름·순서·삭제·추가). 저장 위치: S.profile.lay (기기 연동에 함께 올라갑니다). */
 const LY_BLOCKS = [['brief', '☀️ 오늘 브리핑 카드', false], ['cal', '📅 캘린더', true], ['soon', '⏰ 이번 주 기한', true], ['work', '🗂 업무들', true], ['sb', '🏫 곡선중 카드(학교 소개·바로가기)', true]];
@@ -8047,7 +8163,7 @@ const lyD = () => ((S.profile = S.profile || {}).lay = S.profile.lay || {});
 const lyName = (k, d) => (lyD().name || {})[k] || d;
 const lyDef = (k, d) => { const o = lyD().open || {}; return o[k] === undefined ? (d === undefined ? true : d) : !!o[k]; };
 function lyOrder(P) {
-  const L = lyD(), all = LY_BLOCKS.map(b => b[0]), ord = [...(L.blocks || []).filter(k => all.includes(k)), ...all.filter(k => !(L.blocks || []).includes(k))], hide = L.hide || {};
+  const L = lyD(), all = LY_BLOCKS.map(b => b[0]), ord = [...(L.blocks || []).filter(k => all.includes(k)), ...all.filter(k => !(L.blocks || []).includes(k))], hide = L.hide || { sb: true };
   return ord.filter(k => !hide[k] && P[k]).map(k => {
     let h = P[k]; const nm = (L.name || {})[k];
     if (nm && (k === 'soon' || k === 'sb')) h = h.replace(/(<summary[^>]*>)([^<]*)/, (m, a) => a + esc(nm) + ' ');

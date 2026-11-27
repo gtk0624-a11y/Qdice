@@ -43,6 +43,7 @@ function tfDlg(html) {
 const tfVal = n => { const e = document.querySelector('#tfdlg [name=' + n + ']'); return e ? (e.type === 'checkbox' ? e.checked : e.value) : ''; };
 function tfMenu() {
   tfDlg(`<h3>🧰 도구</h3><div class="tfm">
+  <button class="btn" data-tf="rescue">🛟 자료 복구<small>연동·실수로 줄어든 자료를 되살리기</small></button>
   <button class="btn" data-tf="lay">🧩 화면 구조 편집<small>칸 순서·이름·메뉴·캘린더 옵션·구분 목록</small></button>
   <button class="btn" data-tf="tpl">📋 행사 템플릿<small>곡선제·수행평가·시험 등 D-30 준비표 한 번에</small></button>
   <button class="btn" data-tf="rec">📑 기록 모아보기<small>낱말·기간으로 일정·메모·회의록 모으기</small></button>
@@ -221,7 +222,7 @@ function tfChange(e) { const t = e.target; if (!t) return; if (t.name === 'tpl' 
 function tfClick(e) {
   const b = e.target.closest('[data-tf]'); if (!b) { if (e.target.id === 'tfdlg') e.target.close(); return; }
   const d = document.getElementById('tfdlg'), k = b.dataset.tf;
-  const M = { lay: () => { d.close(); lyDlg(); }, close: () => d.close(), menu: tfMenu, tpl: tfTplDlg, tplgo: tfTplGo, rec: () => tfRepDlg('rec'), hand: () => tfRepDlg('hand'), retro: () => tfRepDlg('retro'), imp: tfImpDlg, impgo: tfImpGo, exp: tfExpDlg, ics: tfIcs, csv: tfCsvOut, notif: tfNotifDlg,
+  const M = { rescue: () => { d.close(); rsDlg(); }, lay: () => { d.close(); lyDlg(); }, close: () => d.close(), menu: tfMenu, tpl: tfTplDlg, tplgo: tfTplGo, rec: () => tfRepDlg('rec'), hand: () => tfRepDlg('hand'), retro: () => tfRepDlg('retro'), imp: tfImpDlg, impgo: tfImpGo, exp: tfExpDlg, ics: tfIcs, csv: tfCsvOut, notif: tfNotifDlg,
     copy: () => { const o = document.getElementById('tfout'); if (o) { o.select(); try { navigator.clipboard.writeText(o.value); } catch (x) { document.execCommand('copy'); } toast('복사했습니다.'); } },
     save: () => { const o = document.getElementById('tfout'); if (o) tfDl({ rec: '기록_모음', hand: '인수인계서', retro: '업무_회고' }[TFR.tab] + '.md', o.value, 'text/markdown'); },
     ai: () => sure('이 내용을 Claude(외부 서버)로 보내 다듬을까요? 학생 실명이 없는지 확인해 주세요.', tfAIRun),
@@ -236,3 +237,18 @@ Object.assign(A, { tfWk(el) { UI.wk = +el.dataset.n === 0 ? tfMon(today()) : tfA
 const _t4Kb = chatKeyBar;
 chatKeyBar = function () { return _t4Kb.apply(this, arguments) + `<div class="b3q"><button type="button" class="btn sm" data-tfq="file">📷 사진·PDF로 일정</button><button type="button" class="btn sm" data-tfq="mic">🎤 말로 입력</button><button type="button" class="btn sm" data-tfq="tpl">📋 행사 템플릿</button><button type="button" class="btn sm" data-tfq="tools">🧰 도구</button></div>`; };
 document.addEventListener('click', e => { const b = e.target.closest('[data-tfq]'); if (!b) return; e.preventDefault(); ({ file: () => tfFileInput().click(), mic: tfVoice, tpl: tfTplDlg, tools: tfMenu })[b.dataset.tfq](); });
+
+/* v166 챗봇 단순화: 칩 한 줄 + 키 상태는 헤더 버튼으로 */
+{ const _rc = renderChat;
+  renderChat = function () {
+    _rc.apply(this, arguments);
+    const p = document.getElementById('chatpan'); if (!p || p.hidden) return;
+    p.querySelectorAll('.ch-q,.b3q').forEach(n => n.remove());
+    const has = !!localStorage.getItem('tf.claudeKey');
+    if (has) p.querySelectorAll('.ckb').forEach(n => n.remove());
+    const f = p.querySelector('[data-chatform]'); if (!f) return;
+    const row = document.createElement('div'); row.className = 'ch-q tfq1';
+    row.innerHTML = '<button type="button" class="chip" data-chat="ask" data-q="오늘 브리핑 해줘. 오늘 할 일, 밀린 일, 앞으로 일주일을 우선순위 순으로 짧게 정리해줘.">☀️ 브리핑</button><button type="button" class="chip" data-tfq="file">📷 사진</button><button type="button" class="chip" data-tfq="mic">🎤 음성</button><button type="button" class="chip" data-tfq="tools">🧰</button>' + (has ? '<button type="button" class="chip" data-chat="keyedit">🔑</button>' : '');
+    f.parentNode.insertBefore(row, f);
+  };
+}

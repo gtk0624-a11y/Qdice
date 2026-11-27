@@ -1159,3 +1159,10 @@ main,#app,.wrap{padding-bottom:max(var(--pb,0px),64px)}
 /* v164: 화면 구조 편집 */
 .lydlg h4{margin:14px 0 4px}.lyr{display:flex;gap:6px;align-items:center;flex-wrap:wrap;padding:5px 0;border-bottom:1px solid #eee}.lyr.off .lyn{opacity:.45;text-decoration:line-through}.lyn{flex:1 1 150px;font-weight:700}.lyb{display:flex;gap:4px}.lyr input[name^=nm_],.lyr input[name^=kn_]{flex:1 1 140px;min-width:0}.lyo{font-size:12px;white-space:nowrap}
 .lymg{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px 10px;margin-top:6px}.lym{display:flex;flex-direction:column;font-size:12px}.lym input{min-width:0}@media(max-width:520px){.lymg{grid-template-columns:1fr}}
+/* v166: 자료 복구 */
+.rsr{border:1px solid #e6e3dc;border-radius:10px;padding:8px 10px;margin:8px 0;display:flex;flex-direction:column;gap:6px}.rsr.more{border-color:#d9822b;background:#fff8ee}.rsb{background:#d9822b;color:#fff;border-radius:6px;padding:1px 6px;font-size:11px}.tfm2{display:flex;gap:6px;flex-wrap:wrap}
+.rshint{border:1px solid #d9822b;background:#fff8ee;border-radius:12px;padding:10px 12px;margin:10px 0}
+/* v166 */
+#chatpan{z-index:90!important}
+body:has(#chatpan:not([hidden])) .scfab,body:has(#chatpan:not([hidden])) #chatbub,body:has(#chatpan:not([hidden])) #pstLayer{display:none!important}
+.tfq1{display:flex;gap:6px;flex-wrap:nowrap;overflow-x:auto;padding:4px 8px}.tfq1 .chip{white-space:nowrap}

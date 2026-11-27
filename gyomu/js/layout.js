@@ -6,7 +6,7 @@ const lyD = () => ((S.profile = S.profile || {}).lay = S.profile.lay || {});
 const lyName = (k, d) => (lyD().name || {})[k] || d;
 const lyDef = (k, d) => { const o = lyD().open || {}; return o[k] === undefined ? (d === undefined ? true : d) : !!o[k]; };
 function lyOrder(P) {
-  const L = lyD(), all = LY_BLOCKS.map(b => b[0]), ord = [...(L.blocks || []).filter(k => all.includes(k)), ...all.filter(k => !(L.blocks || []).includes(k))], hide = L.hide || {};
+  const L = lyD(), all = LY_BLOCKS.map(b => b[0]), ord = [...(L.blocks || []).filter(k => all.includes(k)), ...all.filter(k => !(L.blocks || []).includes(k))], hide = L.hide || { sb: true };
   return ord.filter(k => !hide[k] && P[k]).map(k => {
     let h = P[k]; const nm = (L.name || {})[k];
     if (nm && (k === 'soon' || k === 'sb')) h = h.replace(/(<summary[^>]*>)([^<]*)/, (m, a) => a + esc(nm) + ' ');

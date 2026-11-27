@@ -546,3 +546,6 @@ service cloud.firestore {
 - v163: js/tools.js 신규 — 주간 보기(ncWeek), 아침 브리핑 카드, 행사 템플릿 8종, 가져오기(노션 CSV·.ics)/내보내기(.ics·CSV), 알림(Notification), 기록 모아보기·인수인계서·연말 회고(+AI 다듬기), 사진·PDF→일정 제안, 음성 입력, AI 도구 plan_project. 캘린더 탭 「🗓 주간」「🧰 도구」.
 - v164: js/layout.js 신규 — 화면 구조 편집(S.profile.lay): 오늘 화면 칸 순서·숨김·이름·처음 펼침, 메뉴 이름·시작 화면, 캘린더 시작 요일·기본 보기, 구분 목록 편집. ncal.js todayView가 칸 조립(P)·lyOrder 사용. 꿈송이 잡담 허용(B2_SYS).
 - v165: js/bot4.js 신규 — 꿈송이가 말로 화면 구조(set_layout·set_menu·set_calendar·edit_kind)·보고서(make_report)·도구 창(open_tool)·캘린더 보기(show_calendar_view) 조작.
+
+## v166
+- rescue.js(자료 복구·합치기·손실 가드), pwsync 병합/가드/서버 7일 백업, 챗봇 단순화(tools.js 끝), 일과표 교시목록 tfPList(app.js), 자비스 말투(bot2.js)
