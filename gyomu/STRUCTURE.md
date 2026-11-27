@@ -560,3 +560,4 @@ service cloud.firestore {
 - v175: 일과표가 저장 안 된 기본값(시작+수업+쉬는시간 계산)일 때도 급식 겹침 정렬하고 일과표로 저장(bellAlignLunch)
 - v176: 새 버전 배포 시 자동 새로고침(rescue.js, 입력·대화창 열림 중엔 미룸)
 - v177: 서랍을 오늘 화면 맨 위 블록(dw)으로(ncal.js P.dw, layout.js), 오늘 화면 푸터의 중복 서랍 제거(app.js footer)
+- v178: 서랍을 다시 화면 맨 아래(푸터)로, "궁금하면 눌러보세요" 말풍선 숨김(style.css #chatbub)
