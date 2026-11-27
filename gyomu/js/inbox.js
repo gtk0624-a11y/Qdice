@@ -130,7 +130,13 @@ function ibxStart() {
   }, '정리하기');
 }
 /* 미리보기 창(메신저·문서 모두 여기로): 체크한 것만 일정·할 일·내 업무로 들어가고 캘린더에 반영됩니다 */
+function ibxNorm(c) { /* 날짜 → 시간 → 내용 순: 제목 맨 앞에 시간, 날짜순 정렬(내 업무는 맨 뒤) */
+  const TM = /(\d{1,2}:\d{2}(?:\s*[~\-–]\s*\d{1,2}:\d{2})?)/;
+  c.forEach(x => { if (x.kind === 'mine') return; let t = String(x.title || ''); const m = t.match(TM); if (m) { const tm = m[1].replace(/\s+/g, ''); t = (tm + ' ' + t.replace(m[0], ' ').replace(/\s{2,}/g, ' ').replace(/\s+(@|\()/g, ' $1').trim()).trim(); x.title = t; } x._tm = m ? m[1] : ''; });
+  return c.map((x, i) => [x, i]).sort((a, b) => { const A = a[0], B = b[0]; if ((A.kind === 'mine') !== (B.kind === 'mine')) return A.kind === 'mine' ? 1 : -1; return (A.date || '9').localeCompare(B.date || '9') || (A._tm || '99').localeCompare(B._tm || '99') || a[1] - b[1]; }).map(p => p[0]);
+}
 function ibxPreview(c) {
+  c = ibxNorm(c);
   {
     const d = document.createElement('dialog'); d.className = 'dlg';
     d.innerHTML = `<form method="dialog"><h3>이렇게 정리했습니다</h3><p class="mu">체크한 것만 추가됩니다. 날짜·제목·종류는 여기서 고칠 수 있습니다.</p>${c.map((x, i) => `<div class="ibx"><label class="chk"><input type="checkbox" name="c${i}" ${x.on === false ? '' : 'checked'}> 추가</label><input type="date" name="d${i}" value="${x.date}"><input name="t${i}" value="${esc(x.title)}"><select name="k${i}">${[['event', '일정'], ['todo', '할 일'], ['mine', '내 업무']].map(([v, n]) => `<option value="${v}" ${x.kind === v ? 'selected' : ''}>${n}</option>`).join('')}</select></div>`).join('')}<div class="btns"><button value="ok" class="pri">추가</button><button value="cancel" formnovalidate>취소</button></div></form>`;
