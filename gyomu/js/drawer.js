@@ -19,6 +19,7 @@ function dwRow(l) {
   return `<li class="dwr" data-q="${esc((l.name + ' ' + l.url + ' ' + c).toLowerCase())}"><button class="dwst ${l.fav ? 'on' : ''}" data-act="dwFav" data-id="${l.id}" aria-label="즐겨찾기">${l.fav ? '★' : '☆'}</button><a data-dwgo="${l.id}" href="${esc(l.url)}" target="_blank" rel="noopener"><i class="dwic" style="background:${dwColor(c)}">${esc(ic)}</i><span class="dwtx"><b>${esc(l.name)}</b><small>${esc(dwHost(l.url))}</small></span></a>${DWEDIT ? `<button class="x" data-act="dwEdit" data-id="${l.id}" aria-label="고치기">✎</button><button class="x" data-act="dwDel" data-id="${l.id}" aria-label="빼기">✕</button>` : ''}</li>`;
 }
 function drawerHtml() {
+  if (!Array.isArray(S.links)) S.links = []; S.links = S.links.filter(l => l && typeof l === 'object');
   const L = S.links, favs = L.filter(l => l.fav), recent = L.filter(l => l.last).sort((a, b) => b.last - a.last).slice(0, 4);
   const cats = [...new Set(L.map(l => l.cat || '기타'))].sort((a, b) => { const o = ['수업', '업무', '개인', '기타'], ia = o.indexOf(a), ib = o.indexOf(b); return (ia < 0 ? 9 : ia) - (ib < 0 ? 9 : ib); });
   const groups = cats.map(c => { const g = L.filter(l => (l.cat || '기타') === c); return `<details class="dwg" open><summary><i style="background:${dwColor(c)}"></i><b>${esc(c)}</b><em>${g.length}</em></summary><ul class="dwl">${g.map(dwRow).join('')}</ul></details>`; }).join('');

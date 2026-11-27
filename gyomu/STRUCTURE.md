@@ -561,3 +561,4 @@ service cloud.firestore {
 - v176: 새 버전 배포 시 자동 새로고침(rescue.js, 입력·대화창 열림 중엔 미룸)
 - v177: 서랍을 오늘 화면 맨 위 블록(dw)으로(ncal.js P.dw, layout.js), 오늘 화면 푸터의 중복 서랍 제거(app.js footer)
 - v178: 서랍을 다시 화면 맨 아래(푸터)로, "궁금하면 눌러보세요" 말풍선 숨김(style.css #chatbub)
+- v179: 서랍 데이터(S.links)가 비정상이어도 서랍 칸이 나오도록 방어(drawer.js, app.js footer try/catch)
