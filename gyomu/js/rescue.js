@@ -87,3 +87,15 @@ function rsHint() {
 { const _tv = todayView; todayView = function () { const h = _tv.apply(this, arguments), M = '<details class="ncwork nccal"'; if (typeof h === 'string' && h.includes(M)) { const t = rsHint(); if (t) return h.replace(M, t + M); } return h; }; }
 Object.assign(A, { rsOpen: rsDlg, rsHide() { const best = RS.reduce((m, x) => (x.w > (m ? m.w : -1) ? x : m), null); if (best) localStorage.setItem('tf.rsHide', best.sig); render(); } });
 { const _s = setView; setView = function () { const h = _s.apply(this, arguments), m = '<h3 class="h3">백업</h3>'; return h.includes(m) ? h.replace(m, '<h3 class="h3">🛟 자료 복구</h3><p class="mu">연동하다가, 또는 실수로 자료가 줄었을 때 이 기기에 남은 이전 내용을 되살립니다. 연동 저장소의 최근 7일 백업도 여기서 봅니다.</p><div class="tools"><button class="btn pri" data-act="rsOpen">자료 복구 열기</button></div>' + m) : h; }; }
+
+/* v176: 새 버전이 배포되면 사용자가 새로고침하지 않아도 스스로 바꿔 끼웁니다(입력 중이면 잠깐 뒤로 미룸) */
+try {
+  if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+    let once = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (once) return; once = true;
+      const go = () => { const a = document.activeElement; if (a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName) || document.querySelector('dialog[open]')) { setTimeout(go, 15000); return; } try { commit && S && localStorage.setItem('travailfatal.v1', JSON.stringify(S)); } catch (e) { } location.reload(); };
+      setTimeout(go, 1500);
+    });
+  }
+} catch (e) { }
