@@ -98,6 +98,7 @@ function dwBarRender() {
   const lost = !S.links.length && typeof RS !== 'undefined' && RS.some(e => { try { const o = JSON.parse(e.j); return Array.isArray(o.links) && o.links.length; } catch (x) { return false; } });
   let h = ''; try { h = drawerHtml(); } catch (e) { h = '<section class="drawer dw"><b>서랍</b> <span class="mu">불러오지 못했습니다(' + esc(e.message) + ')</span></section>'; }
   b.innerHTML = (lost ? '<div style="padding:4px 0"><button type="button" class="btn sm" style="background:#ffd0d8" data-act="dwRestore">🛟 서랍 목록 되살리기</button></div>' : '') + h;
+  const dt = b.querySelector('details.dwd'); if (dt) { dt.open = !!window.__dwbOpen; dt.addEventListener('toggle', () => { window.__dwbOpen = dt.open; }); } /* 평소에는 접어 두고, 열면 위로 펼쳐짐 */
 }
 { const _rD = render; render = function () { const r = _rD.apply(this, arguments); try { dwBarRender(); } catch (e) { } return r; }; }
 setTimeout(() => { try { dwBarRender(); } catch (e) { } }, 500);
