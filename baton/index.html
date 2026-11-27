@@ -97,6 +97,10 @@ details.card>summary::-webkit-details-marker{display:none}
 .miss li{margin:2px 0}
 .link{color:#1c5fa8;text-decoration:underline;cursor:pointer;background:none;border:0;padding:0;font:inherit}
 .steps3 li{margin:6px 0}
+.hero{width:100%;max-width:300px;display:block;margin:0 auto}
+.hero .bt{animation:pass 1.6s ease-in-out infinite alternate}
+@keyframes pass{from{transform:translateX(-7px)}to{transform:translateX(7px)}}
+.herobox{text-align:center;padding:4px 0 2px}
 #printRoot{display:none}
 @media print{
  @page{margin:14mm}
@@ -139,7 +143,8 @@ details.card>summary::-webkit-details-marker{display:none}
 const APP = {name:'도디쌤의 바통', tag:'인수인계, 쓰지 말고 쌓으세요', credit:'© 김정환 · M.A.D.T (Moral And Digital Teacher)', wm:'도디쌤 · M.A.D.T'};
 const KEY = 'dodi.baton.v1';
 const MONTHS = [3,4,5,6,7,8,9,10,11,12,1,2];
-const DODI_SVG = '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="도디쌤"><circle cx="50" cy="50" r="50" fill="#FFE9A8"/><path d="M16 100c2-23 17-33 34-33s32 10 34 33z" fill="#2F6F5E"/><path d="M41 67l9 11 9-11z" fill="#fff"/><circle cx="50" cy="46" r="24" fill="#F6D2B0"/><path d="M25 45c-3-21 12-32 27-31 17 1 25 13 23 31-4-10-11-14-19-15-9 1-21 3-31 15z" fill="#2B2B3A"/><g fill="none" stroke="#2B2B3A" stroke-width="2.6"><circle cx="40" cy="47" r="7.5"/><circle cx="60" cy="47" r="7.5"/><path d="M47.5 47h5"/></g><circle cx="40" cy="47" r="2" fill="#2B2B3A"/><circle cx="60" cy="47" r="2" fill="#2B2B3A"/><path d="M42 58q8 7 16 0" fill="none" stroke="#B4453A" stroke-width="2.6" stroke-linecap="round"/></svg>';
+const DODI_SVG = '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="바통을 든 도디쌤"><circle cx="50" cy="50" r="50" fill="#FFE9A8"/><path d="M14 100c2-23 17-33 34-33s32 10 34 33z" fill="#2F6F5E"/><path d="M39 67l9 11 9-11z" fill="#fff"/><circle cx="48" cy="45" r="23" fill="#F6D2B0"/><path d="M24 44c-3-20 11-31 25-30 16 1 24 12 22 30-4-10-10-13-18-14-9 1-20 3-29 14z" fill="#2B2B3A"/><g fill="none" stroke="#2B2B3A" stroke-width="2.6"><circle cx="38" cy="46" r="7"/><circle cx="57" cy="46" r="7"/><path d="M45 46h5"/></g><circle cx="38" cy="46" r="2" fill="#2B2B3A"/><circle cx="57" cy="46" r="2" fill="#2B2B3A"/><path d="M40 57q8 7 16 0" fill="none" stroke="#B4453A" stroke-width="2.6" stroke-linecap="round"/><g transform="rotate(-38 74 80)"><rect x="56" y="75" width="38" height="10" rx="5" fill="#E8A317"/><rect x="64" y="75" width="4.5" height="10" fill="#B4453A"/><rect x="82" y="75" width="4.5" height="10" fill="#B4453A"/></g><circle cx="64" cy="86" r="6.5" fill="#F6D2B0"/></svg>';
+const HERO_SVG = '<svg class="hero" viewBox="0 0 260 120" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="도디쌤이 후임에게 바통을 넘기는 그림"><ellipse cx="130" cy="113" rx="118" ry="5" fill="#E6DFD0"/><g stroke="#C9BFA6" stroke-width="2" stroke-linecap="round"><path d="M10 52h18M4 66h20M12 80h16"/></g><g><circle cx="58" cy="36" r="17" fill="#F6D2B0"/><path d="M41 34c-2-15 9-23 20-22 12 1 18 9 16 22-3-7-8-10-14-11-7 1-15 2-22 11z" fill="#2B2B3A"/><g fill="none" stroke="#2B2B3A" stroke-width="2"><circle cx="52" cy="37" r="5.2"/><circle cx="65" cy="37" r="5.2"/><path d="M57.2 37h2.6"/></g><path d="M53 45q5 4.5 10 0" fill="none" stroke="#B4453A" stroke-width="2" stroke-linecap="round"/><path d="M45 56l26-2 6 30-24 4z" fill="#2F6F5E"/><path d="M71 60l36 6" stroke="#2F6F5E" stroke-width="8" stroke-linecap="round"/><path d="M54 88l-9 21M68 88l14 18" stroke="#2B2B3A" stroke-width="7" stroke-linecap="round"/></g><g><circle cx="202" cy="36" r="17" fill="#F6D2B0"/><path d="M185 36c-2-16 9-24 19-23 11 1 17 9 14 23-3-6-7-9-13-10-7 0-14 1-20 10z" fill="#6B4E3D"/><circle cx="196" cy="37" r="2" fill="#2B2B3A"/><circle cx="208" cy="37" r="2" fill="#2B2B3A"/><path d="M197 45q5 4.5 10 0" fill="none" stroke="#B4453A" stroke-width="2" stroke-linecap="round"/><path d="M189 56l26 -2 -2 32 -26 -4z" fill="#1F2A44"/><path d="M191 60l-40 6" stroke="#1F2A44" stroke-width="8" stroke-linecap="round"/><path d="M196 86l-12 22M210 86l8 22" stroke="#2B2B3A" stroke-width="7" stroke-linecap="round"/></g><g class="bt"><rect x="108" y="61" width="44" height="10" rx="5" fill="#E8A317"/><rect x="117" y="61" width="5" height="10" fill="#B4453A"/><rect x="138" y="61" width="5" height="10" fill="#B4453A"/></g><circle cx="108" cy="66" r="5.5" fill="#F6D2B0"/><circle cx="152" cy="66" r="5.5" fill="#F6D2B0"/></svg>';
 
 /* ====== 유틸 ====== */
 const $ = (s,r=document)=>r.querySelector(s);
@@ -267,7 +272,7 @@ function vMonth(){
   const list=S.cards.filter(c=>cardMonths(c).has(UI.month)).sort(cmpDeadline);
   let h='<h2>1년 시간표 <span class="mute">3월 → 2월</span></h2>'+monthChips(counts);
   if(!S.cards.length){
-    h+='<div class="empty"><div class="big">📮</div><p><b>아직 업무 카드가 없습니다.</b></p><p>일하다가 생각날 때 <b>1분만</b> 카드를 남기세요.<br>2월에는 버튼 하나로 인계서가 완성됩니다.</p><div class="row" style="justify-content:center;margin-top:10px"><button class="btn acc" data-act="newCard">첫 업무 카드 만들기</button><button class="btn" data-act="sample">예시 5개 불러보기</button></div></div>';
+    h+='<div class="empty"><div class="herobox">'+HERO_SVG+'</div><p><b>아직 업무 카드가 없습니다.</b></p><p>일하다가 생각날 때 <b>1분만</b> 카드를 남기세요.<br>2월에는 버튼 하나로 인계서가 완성됩니다.</p><div class="row" style="justify-content:center;margin-top:10px"><button class="btn acc" data-act="newCard">첫 업무 카드 만들기</button><button class="btn" data-act="sample">예시 5개 불러보기</button></div></div>';
   }else{
     const dl=list.filter(c=>c.deadline&&daysUntil(c.deadline)!==null&&daysUntil(c.deadline)>=0).length;
     h+='<div class="stat"><div><b>'+list.length+'</b><span>'+UI.month+'월 업무</span></div><div><b>'+dl+'</b><span>마감 예정</span></div><div><b>'+S.cards.length+'</b><span>전체 카드</span></div></div>';
@@ -292,7 +297,7 @@ function vHandover(){
   const cards=S.cards.filter(c=>!c.sample||S.cards.every(x=>x.sample));
   const pct=completeness(cards);
   const withMiss=cards.map(c=>({c,m:checks(c)})).filter(x=>x.m.length);
-  let h='<h2>인계하기</h2>';
+  let h='<h2>인계하기</h2><div class="herobox">'+HERO_SVG+'<div class="mute">도디쌤이 후임에게 바통을 넘깁니다</div></div>';
   if(!cards.length) return h+'<div class="empty"><div class="big">📭</div><p>내보낼 업무 카드가 없습니다.</p></div>';
   h+='<div class="stat"><div><b>'+cards.length+'</b><span>업무 카드</span></div><div><b>'+pct+'%</b><span>완성도</span></div><div><b>'+withMiss.length+'</b><span>빈칸 있는 카드</span></div></div>';
   h+='<div class="prog"><i style="width:'+pct+'%"></i></div>';
@@ -349,7 +354,7 @@ function vSettings(){
   +'<div class="box"><b>전체 백업 · 복원</b><p class="mute">내 카드와 받은 인계서 전부를 한 번에 저장합니다.</p><div class="row"><button class="btn pri" data-act="backupCode">백업 코드 만들기</button><button class="btn" data-act="backupFile">백업 파일 저장</button></div>'+(UI.lastCodeKind==='backup'&&UI.lastCode?'<textarea class="codebox" id="codeOut" readonly style="margin-top:8px">'+esc(UI.lastCode)+'</textarea><div class="row" style="margin-top:8px"><button class="btn pri" data-act="copyCode">전체 복사</button></div>':'')+'<p class="mute" style="margin-top:8px">복원은 [받은 인계] 탭의 불러오기 칸을 쓰면 됩니다.</p></div>'
   +'<div class="box"><b>처음 쓰는 선생님을 위한 3단계</b><ol class="steps3"><li><b>크롬으로 여세요.</b> 카카오톡 안에서 열면 저장 공간이 달라질 수 있습니다.</li><li><b>홈 화면에 추가하세요.</b> 크롬 오른쪽 위 메뉴(⋮) → [홈 화면에 추가]. 앱처럼 바로 열립니다.</li><li><b>한 달에 한 번 백업하세요.</b> 서버가 없어 내용은 이 기기에만 저장됩니다.</li></ol><p class="mute">⚠ 학생 개인정보(이름·연락처·상담 내용 등)는 입력하지 마세요. 업무 방법만 적는 도구입니다.</p></div>'
   +'<div class="box"><b>위험 구역</b><p class="mute">이 기기에 저장된 모든 데이터를 삭제합니다.</p><button class="btn danger sm" data-act="wipe">전체 삭제</button></div>'
-  +'<div class="box ctr"><div class="av" style="margin:0 auto 6px">'+avatarHTML()+'</div><b>도디쌤의 바통</b><div class="mute">'+esc(APP.credit)+'</div><div class="mute">무단 복제·재배포를 금합니다.</div></div>';
+  +'<div class="box ctr"><div class="av" style="margin:0 auto 6px">'+avatarHTML()+'</div><b>도디쌤의 바통</b><div class="mute">일 년의 노하우를 다음 사람에게 넘기는 바통터치</div><div class="mute">'+esc(APP.credit)+'</div><div class="mute">무단 복제·재배포를 금합니다.</div></div>';
 }
 
 /* ====== 렌더 ====== */
@@ -474,8 +479,8 @@ const H = {
   dismiss(t){ UI.dis[t.dataset.k]=true; render(); },
   openKakao(){ location.href='kakaotalk://web/openExternal?url='+encodeURIComponent(location.href); },
   async copyLink(){ toast(await copyText(location.href)?'링크를 복사했습니다':'복사에 실패했습니다'); },
-  async genCode(){ const pack=handoverPack(($('#to-name')||{}).value||''); const code=await encodePack(pack); UI.lastCode=shareText(code,pack); UI.lastCodeKind='baton'; S.lastBackup=now(); save(); render(); setTimeout(()=>{ const e=$('#codeOut'); if(e&&e.scrollIntoView) e.scrollIntoView({block:'center'}); },50); },
-  async copyCode(){ const e=$('#codeOut'); const ok=await copyText(UI.lastCode); if(!ok&&e){ e.focus(); e.select(); } toast(ok?'복사했습니다. 카톡에 붙여넣으세요':'자동 복사가 막혀 있어요. 선택된 글자를 길게 눌러 복사하세요',3500); },
+  async genCode(){ const pack=handoverPack(($('#to-name')||{}).value||''); const code=await encodePack(pack); UI.lastCode=shareText(code,pack); UI.lastCodeKind='baton'; S.lastBackup=now(); save(); render(); toast('🏃 바통 터치! 코드를 복사해 카톡으로 넘기세요',3400); setTimeout(()=>{ const e=$('#codeOut'); if(e&&e.scrollIntoView) e.scrollIntoView({block:'center'}); },50); },
+  async copyCode(){ const e=$('#codeOut'); const ok=await copyText(UI.lastCode); if(!ok&&e){ e.focus(); e.select(); } toast(ok?'🏃 복사했습니다. 카톡에 붙여넣어 바통을 넘기세요':'자동 복사가 막혀 있어요. 선택된 글자를 길게 눌러 복사하세요',3500); },
   selCode(){ const e=$('#codeOut'); if(e){ e.focus(); e.select(); } },
   dlFile(){ const pack=handoverPack(($('#to-name')||{}).value||''); const ok=downloadFile('바통_'+(S.profile.name||'인수인계')+'_'+pack.year+'.baton.json',JSON.stringify(pack,null,1)); if(ok){ S.lastBackup=now(); save(); } toast(ok?'파일 저장을 시도했습니다. 안 되면 코드로 보내세요':'파일 저장이 막혀 있습니다. 코드로 보내세요',3600); },
   printIt(){ buildPrint(); try{ window.print(); }catch(e){ toast('이 화면에서는 인쇄가 막혀 있습니다. 크롬에서 열어 주세요',3600); } },
