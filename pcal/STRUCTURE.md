@@ -1,4 +1,4 @@
-# 업무파탈 캘린더 구조 설명서
+# 도디쌤의 일정줍줍 구조 설명서 (업무파탈 Travail Fatal의 첫 번째 조각)
 
 © 김정환 · M.A.D.T (Moral And Digital Teacher) — 「업무파탈」의 한 조각 ① (캘린더)
 

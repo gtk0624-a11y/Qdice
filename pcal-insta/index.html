@@ -1,12 +1,12 @@
 <!DOCTYPE html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="robots" content="noindex"><title>업무파탈 캘린더 인스타 자료</title>
+<meta name="robots" content="noindex"><title>일정줍줍 인스타 자료</title>
 <style>body{margin:0;font-family:-apple-system,"Malgun Gothic",sans-serif;background:#fff6e5;color:#1d2433;word-break:keep-all}
 .w{max-width:560px;margin:0 auto;padding:18px}h1{font-size:22px;color:#31406e;margin:6px 0}
 .btn{display:block;width:100%;border:0;border-radius:14px;padding:16px;font-size:18px;font-weight:800;margin:10px 0;background:#31406e;color:#fff}
 .btn.y{background:#f2b84b;color:#3b2f00}.tip{background:#fff;border-radius:14px;padding:12px 14px;font-size:15px;line-height:1.6}
 figure{margin:16px 0}img{width:100%;border-radius:12px;display:block;box-shadow:0 6px 18px rgba(0,0,0,.12)}figcaption{text-align:center;font-size:13px;color:#888;margin-top:4px}
 pre{white-space:pre-wrap;background:#fff;border-radius:12px;padding:12px;font-size:14px;font-family:inherit}#msg{text-align:center;font-weight:700;color:#2f9e6b;min-height:22px}</style></head><body><div class="w">
-<h1>📸 업무파탈 캘린더 인스타 자료</h1>
+<h1>📸 일정줍줍 인스타 자료</h1>
 <div class="tip">① 노란 버튼 → 뜨는 창에서 <b>[이미지 저장]</b> 또는 <b>[인스타그램]</b>을 누르면 8장이 한 번에 갑니다.<br><b style="color:#c0392b">② 인스타에서 사진 고른 뒤 왼쪽 아래 [⤢ 비율] 버튼을 눌러 원본(세로)으로 맞추세요.</b><br>③ 안 되면 아래 사진을 <b>꾹 눌러 [이미지 저장]</b>을 1번부터 8번까지 하세요.</div>
 <button class="btn y" id="all">📥 8장 한 번에 저장·공유</button>
 <button class="btn" data-copy="body">📋 게시글 문구 복사</button>
@@ -19,7 +19,7 @@ pre{white-space:pre-wrap;background:#fff;border-radius:12px;padding:12px;font-si
 그러다 하나 빠뜨리는 거, 매년 반복되죠.
 
 그래서 만들었습니다.
-「업무파탈(Travail Fatal) 캘린더」
+「도디쌤의 일정줍줍」 (업무파탈 Travail Fatal의 첫 번째 조각)
 
 ✔ 메신저·공문을 통째로 붙여넣으면 일정과 마감으로 자동 정리
 ✔ 학사일정 파일(한글·엑셀·PDF·워드)은 화면에 끌어다 놓기만
@@ -34,11 +34,11 @@ pre{white-space:pre-wrap;background:#fff;border-radius:12px;padding:12px;font-si
 💌 댓글에 &quot;캘린더&quot; 남겨 주시면 DM으로 체험판 링크 보내 드릴게요.
 
 업무파탈(Travail Fatal)은 내 마음대로 커스터마이징 가능한 디지털 교무수첩입니다. 기능을 하나씩 소개하고, 2월에 완전 공개합니다. 마지막 장의 잠긴 칸, 무엇일까요? 👀
-팔로우해 두시면 다음 조각을 가장 먼저 받아 보실 수 있어요.
+댓글에 "다음"이라고 남겨 주시면 다음 조각이 열릴 때 가장 먼저 알려 드릴게요.
 
 #업무파탈 #교사업무 #교사일정관리 #학사일정 #공문 #에듀테크 #도디쌤</pre>
 <h1>DM 문구</h1><pre id="dm">안녕하세요, 도디쌤입니다 🙌
-업무파탈 캘린더 체험판 링크 보내 드려요!
+도디쌤의 일정줍줍 체험판 링크 보내 드려요!
 
 👉 https://gtk0624-a11y.github.io/Qdice/pcal/
 
@@ -51,7 +51,7 @@ const msg=t=>{document.getElementById('msg').textContent=t};
 document.querySelectorAll('[data-copy]').forEach(b=>b.onclick=async()=>{const t=document.getElementById(b.dataset.copy).textContent;
 try{await navigator.clipboard.writeText(t);msg('복사됐어요! 붙여 넣으세요.')}catch(e){const r=document.createRange();r.selectNodeContents(document.getElementById(b.dataset.copy));getSelection().removeAllRanges();getSelection().addRange(r);msg('글이 선택됐어요. [복사]를 누르세요.')}});
 document.getElementById('all').onclick=async()=>{msg('불러오는 중…');
-try{const files=await Promise.all([1,2,3,4,5,6,7,8,9].map(async i=>new File([await (await fetch('card'+i+'.jpg')).blob()],'업무파탈캘린더_'+i+'.jpg',{type:'image/jpeg'})));
+try{const files=await Promise.all([1,2,3,4,5,6,7,8,9].map(async i=>new File([await (await fetch('card'+i+'.jpg')).blob()],'일정줍줍_'+i+'.jpg',{type:'image/jpeg'})));
 if(navigator.canShare&&navigator.canShare({files})){await navigator.share({files});msg('완료!');return}
 for(const f of files){const a=document.createElement('a');a.href=URL.createObjectURL(f);a.download=f.name;document.body.appendChild(a);a.click();a.remove();await new Promise(r=>setTimeout(r,400))}msg('다운로드 폴더에 저장됐어요.')}
 catch(e){msg(e.name==='AbortError'?'':'사진을 꾹 눌러 저장해 주세요.')}};
