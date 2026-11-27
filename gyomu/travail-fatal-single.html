@@ -1176,6 +1176,22 @@ main,#app,.wrap{padding-bottom:max(var(--pb,0px),64px)}
 body:has(#chatpan:not([hidden])) .scfab,body:has(#chatpan:not([hidden])) #chatbub,body:has(#chatpan:not([hidden])) #pstLayer{display:none!important}
 .tfq1{display:flex;gap:6px;flex-wrap:nowrap;overflow-x:auto;padding:4px 8px}.tfq1 .chip{white-space:nowrap}
 .pc.done{background-image:none!important;opacity:.82}.pc.done b{text-decoration:line-through}
+/* v173 폰 화면 정리: 떠 있는 것들을 줄이고 본문을 넓게 */
+@media(max-width:600px){
+#pstLayer,.pst-tray,.pst,#ytfab,#chatbub,#scfab,#cmfab{display:none!important}
+#chatfab{width:60px!important;height:60px!important;right:8px!important;bottom:10px!important}
+#chatfab img{width:100%!important;height:auto!important}
+#alarmbar{left:8px!important;right:76px!important;bottom:10px!important;width:auto!important;height:auto!important;min-height:0!important;padding:6px 10px!important;font-size:13px!important}
+#ttalert{transform:none!important;margin:0!important;left:8px!important;right:8px!important;top:8px!important;width:auto!important;max-height:none!important;padding:8px 10px!important;font-size:13px!important}
+#ttalert button{padding:6px 10px!important;font-size:13px!important;margin:3px 3px 0 0!important;display:inline-block!important;width:auto!important}
+#ttalert ul{margin:4px 0!important;padding-left:16px!important;max-height:80px;overflow:auto}
+body{font-size:15px}
+main,.main,#app{padding-left:8px!important;padding-right:8px!important}
+.nav{gap:6px!important;padding:6px!important}.nav a{padding:6px 12px!important;font-size:14px!important;white-space:nowrap}
+.strip{gap:4px!important}.strip .pc{flex:1 0 64px!important;min-width:64px!important;font-size:12px!important;padding:6px 4px!important}
+.tbl{font-size:13px}.tbl.tt input{width:100%;min-width:0;font-size:13px}
+dialog.dlg,dialog{max-width:96vw!important}
+}
 </style>
 </head>
 <body>
@@ -6105,7 +6121,7 @@ buildChunks = function () {
 };
 
 /* 화면 맨 아래에 버전 표시 — 옛 화면을 보고 있는지 바로 알 수 있게 */
-const TF_VER = 'v172', _cmFt = footer;
+const TF_VER = 'v173', _cmFt = footer;
 footer = function () { return _cmFt.apply(this, arguments).replace('</footer>', ` · <span class="mu">버전 ${TF_VER} (학급 관리 포함)</span></footer>`); };
 
 /* 새 버전 알림: 옛 화면이 남아 있으면 한 번 눌러 새로 받게 함 */
