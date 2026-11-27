@@ -141,7 +141,7 @@ function bellSaveFrom(root) {
   S.profile.bell = L; S.profile.start = clkHM(L[0].s); S.profile.classMin = modeOf(dur); if (gaps.length) S.profile.breakMin = modeOf(gaps);
   const a = root.querySelector('[data-belll="s"]'), b = root.querySelector('[data-belll="e"]');
   if (a && b && clkParse(a.value) != null && clkParse(b.value) != null && clkParse(b.value) > clkParse(a.value)) { S.profile.lunchS = a.value; S.profile.lunchE = b.value; }
-  const moved = bellAlignLunch(); commit(); toast(moved ? '급식 시간과 겹치는 교시를 급식 뒤로 옮겼습니다.' : '일과표를 저장했습니다.');
+  commit(); toast('일과표를 입력하신 그대로 저장했습니다.'); /* 자동 정렬은 「급식 뒤로 교시 자동 정렬」 버튼을 누를 때만 */
 }
 document.addEventListener('change', e => { const t = e.target; if (t.dataset && (t.dataset.bellp || t.dataset.belll)) bellSaveFrom(t.closest('table') || document); });
 Object.assign(A, {

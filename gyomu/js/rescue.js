@@ -10,6 +10,7 @@ function tfWeight(o) {
   Object.keys(o).forEach(k => { if (RS_SKIP[k]) return; const v = o[k]; if (Array.isArray(v)) { n += v.length; v.slice(0, 400).forEach(x => { if (rsObj(x)) Object.keys(x).forEach(y => { if (Array.isArray(x[y])) n += x[y].length; }); }); } else if (rsObj(v)) { Object.keys(v).forEach(y => { const w = v[y]; n += Array.isArray(w) ? w.length + 1 : 1; }); } });
   return n;
 }
+const RS_CFG = new Set(['bell', 'bellOv', 'periods', 'lunch']);
 function rsMerge(cur, old) { /* cur에 없는 것을 old에서 채웁니다(같은 id는 cur 기준) */
   if (!rsObj(cur) || !rsObj(old)) return cur;
   Object.keys(old).forEach(k => {
@@ -18,6 +19,7 @@ function rsMerge(cur, old) { /* cur에 없는 것을 old에서 채웁니다(같�
     if (a === '' && typeof b === 'string' && b !== '') { cur[k] = b; return; }
     if (Array.isArray(a) && Array.isArray(b)) {
       if (!a.length) { cur[k] = b; return; }
+      if (RS_CFG.has(k)) return; /* 일과표 같은 설정 배열은 합치지 않고 이 기기 것을 유지(합치면 교시가 중복됨) */
       if (b.length && b.every(rsObj)) { const ids = new Set(a.filter(x => rsObj(x) && x.id != null).map(x => x.id)), sg = new Set(a.filter(x => rsObj(x) && x.id == null).map(x => JSON.stringify(x))); b.forEach(x => { if (x.id != null ? !ids.has(x.id) : !sg.has(JSON.stringify(x))) a.push(x); }); }
       else if (b.length && a.every(x => typeof x !== 'object')) b.forEach(x => { if (!a.includes(x)) a.push(x); });
       return;

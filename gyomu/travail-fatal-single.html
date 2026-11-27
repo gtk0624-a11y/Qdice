@@ -3969,7 +3969,7 @@ function bellSaveFrom(root) {
   S.profile.bell = L; S.profile.start = clkHM(L[0].s); S.profile.classMin = modeOf(dur); if (gaps.length) S.profile.breakMin = modeOf(gaps);
   const a = root.querySelector('[data-belll="s"]'), b = root.querySelector('[data-belll="e"]');
   if (a && b && clkParse(a.value) != null && clkParse(b.value) != null && clkParse(b.value) > clkParse(a.value)) { S.profile.lunchS = a.value; S.profile.lunchE = b.value; }
-  const moved = bellAlignLunch(); commit(); toast(moved ? '급식 시간과 겹치는 교시를 급식 뒤로 옮겼습니다.' : '일과표를 저장했습니다.');
+  commit(); toast('일과표를 입력하신 그대로 저장했습니다.'); /* 자동 정렬은 「급식 뒤로 교시 자동 정렬」 버튼을 누를 때만 */
 }
 document.addEventListener('change', e => { const t = e.target; if (t.dataset && (t.dataset.bellp || t.dataset.belll)) bellSaveFrom(t.closest('table') || document); });
 Object.assign(A, {
@@ -6100,7 +6100,7 @@ buildChunks = function () {
 };
 
 /* 화면 맨 아래에 버전 표시 — 옛 화면을 보고 있는지 바로 알 수 있게 */
-const TF_VER = 'v169', _cmFt = footer;
+const TF_VER = 'v170', _cmFt = footer;
 footer = function () { return _cmFt.apply(this, arguments).replace('</footer>', ` · <span class="mu">버전 ${TF_VER} (학급 관리 포함)</span></footer>`); };
 
 /* 새 버전 알림: 옛 화면이 남아 있으면 한 번 눌러 새로 받게 함 */
@@ -7433,6 +7433,7 @@ function tfWeight(o) {
   Object.keys(o).forEach(k => { if (RS_SKIP[k]) return; const v = o[k]; if (Array.isArray(v)) { n += v.length; v.slice(0, 400).forEach(x => { if (rsObj(x)) Object.keys(x).forEach(y => { if (Array.isArray(x[y])) n += x[y].length; }); }); } else if (rsObj(v)) { Object.keys(v).forEach(y => { const w = v[y]; n += Array.isArray(w) ? w.length + 1 : 1; }); } });
   return n;
 }
+const RS_CFG = new Set(['bell', 'bellOv', 'periods', 'lunch']);
 function rsMerge(cur, old) { /* cur에 없는 것을 old에서 채웁니다(같은 id는 cur 기준) */
   if (!rsObj(cur) || !rsObj(old)) return cur;
   Object.keys(old).forEach(k => {
@@ -7441,6 +7442,7 @@ function rsMerge(cur, old) { /* cur에 없는 것을 old에서 채웁니다(같�
     if (a === '' && typeof b === 'string' && b !== '') { cur[k] = b; return; }
     if (Array.isArray(a) && Array.isArray(b)) {
       if (!a.length) { cur[k] = b; return; }
+      if (RS_CFG.has(k)) return; /* 일과표 같은 설정 배열은 합치지 않고 이 기기 것을 유지(합치면 교시가 중복됨) */
       if (b.length && b.every(rsObj)) { const ids = new Set(a.filter(x => rsObj(x) && x.id != null).map(x => x.id)), sg = new Set(a.filter(x => rsObj(x) && x.id == null).map(x => JSON.stringify(x))); b.forEach(x => { if (x.id != null ? !ids.has(x.id) : !sg.has(JSON.stringify(x))) a.push(x); }); }
       else if (b.length && a.every(x => typeof x !== 'object')) b.forEach(x => { if (!a.includes(x)) a.push(x); });
       return;

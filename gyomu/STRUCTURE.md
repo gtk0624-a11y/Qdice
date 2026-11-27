@@ -552,3 +552,4 @@ service cloud.firestore {
 - v167: inbox.js ibxNorm(메신저 정리 결과를 날짜→시간→내용 순, 시간 제목 앞으로)
 - v168: 시간표 칸 색 유지(지난 교시도 app.js cellBg, style.css .pc.done), rsMerge 빈 문자열 칸 채우기
 - v169: teach.js 공강 같은 선생님 전체 명단(12명 제한 해제)
+- v170: 일과표 입력값 자동 이동 제거(class2.js bellSaveFrom), rsMerge가 bell 등 설정 배열은 합치지 않음(RS_CFG)
