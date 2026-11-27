@@ -572,3 +572,4 @@ service cloud.firestore {
 - v188: 서랍 막대를 한 줄(약 34px)로 축소(style.css 끝)
 - v189: 서랍 막대 한 줄 고정(:has 선택자 버그 수정)
 - v190: 서랍을 좌하단 작은 토글 버튼으로(style.css 끝)
+- v191: 서랍 팝업 overflow 수정

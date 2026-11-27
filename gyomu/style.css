@@ -1222,3 +1222,5 @@ body{padding-bottom:52px!important}
 #dwbar details.dwd[open]>summary::before{content:"✕ 닫기"}
 #dwbar details.dwd[open]>.dwb{position:absolute!important;left:0;bottom:calc(100% + 8px);width:min(92vw,360px);max-height:60vh;overflow:auto;background:#fffdf3;border:2px solid #2b2b2b;border-radius:14px;box-shadow:3px 3px 0 #2b2b2b;padding:8px}
 #alarmbar{bottom:56px!important}#chatfab{bottom:14px!important}body{padding-bottom:56px!important}
+/* v191 팝업이 잘리지 않게 */
+#dwbar{overflow:visible!important}
