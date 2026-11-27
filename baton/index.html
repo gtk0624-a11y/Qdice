@@ -273,7 +273,7 @@ function vMonth(){
   const list=S.cards.filter(c=>cardMonths(c).has(UI.month)).sort(cmpDeadline);
   let h='<h2>1년 시간표 <span class="mute">3월 → 2월</span></h2>'+monthChips(counts);
   if(!S.cards.length){
-    h+='<div class="empty"><div class="herobox">'+HERO_SVG+'</div><p><b>아직 업무 카드가 없습니다.</b></p><p>일하다가 생각날 때 <b>1분만</b> 카드를 남기세요.<br>2월에는 버튼 하나로 인계서가 완성됩니다.</p><div class="row" style="justify-content:center;margin-top:10px"><button class="btn acc" data-act="newCard">첫 업무 카드 만들기</button><button class="btn" data-act="sample">예시 5개 불러보기</button></div></div>';
+    h+='<div class="empty"><p><b>아직 업무 카드가 없습니다.</b></p><p>일하다가 생각날 때 <b>1분만</b> 카드를 남기세요.<br>2월에는 버튼 하나로 인계서가 완성됩니다.</p><div class="row" style="justify-content:center;margin-top:10px"><button class="btn acc" data-act="newCard">첫 업무 카드 만들기</button><button class="btn" data-act="sample">예시 5개 불러보기</button></div></div>';
   }else{
     const dl=list.filter(c=>c.deadline&&daysUntil(c.deadline)!==null&&daysUntil(c.deadline)>=0).length;
     h+='<div class="stat"><div><b>'+list.length+'</b><span>'+UI.month+'월 업무</span></div><div><b>'+dl+'</b><span>마감 예정</span></div><div><b>'+S.cards.length+'</b><span>전체 카드</span></div></div>';
@@ -298,7 +298,7 @@ function vHandover(){
   const cards=S.cards.filter(c=>!c.sample||S.cards.every(x=>x.sample));
   const pct=completeness(cards);
   const withMiss=cards.map(c=>({c,m:checks(c)})).filter(x=>x.m.length);
-  let h='<h2>인계하기</h2><div class="herobox">'+HERO_SVG+'<div class="mute">도디쌤이 후임에게 바통을 넘깁니다</div></div>';
+  let h='<h2>인계하기</h2>';
   if(!cards.length) return h+'<div class="empty"><div class="big">📭</div><p>내보낼 업무 카드가 없습니다.</p></div>';
   h+='<div class="stat"><div><b>'+cards.length+'</b><span>업무 카드</span></div><div><b>'+pct+'%</b><span>완성도</span></div><div><b>'+withMiss.length+'</b><span>빈칸 있는 카드</span></div></div>';
   h+='<div class="prog"><i style="width:'+pct+'%"></i></div>';
