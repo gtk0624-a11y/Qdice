@@ -1,0 +1,1062 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1,user-scalable=no">
+<title>곡선 마을의 양심 — 마피아</title>
+<link rel="icon" href="ggumsong.png">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+:root{
+  --bg:#fff6ef; --paper:#ffffff; --ink:#3a2f52; --sub:#7b7091; --line:#eadff3;
+  --pri:#8b7cf6; --pri2:#efeaff; --pink:#ff9ab8; --pink2:#ffe6ee; --mint:#7fd8be; --mint2:#e2f7f0;
+  --sky:#8ec5ff; --sun:#ffd36e; --sun2:#fff3cf; --bad:#e5586e; --ok:#2fae8a;
+  --shadow:0 2px 0 rgba(58,47,82,.05),0 10px 26px rgba(58,47,82,.08);
+}
+body.night{ --bg:#17143a; --paper:#241f55; --ink:#f1ecff; --sub:#b3a9e0; --line:#3a3480; --pri2:#2e2870; --pink2:#4a2a5c; --mint2:#1f4458; --sun2:#4d4220; }
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:Pretendard,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;font-size:17px;line-height:1.55;-webkit-tap-highlight-color:transparent;transition:background .6s,color .6s}
+button{font-family:inherit;font-size:inherit;color:inherit;cursor:pointer}
+input{font-family:inherit;font-size:16px;color:var(--ink)}
+.wrap{max-width:560px;margin:0 auto;padding:14px 14px 110px}
+.twrap{max-width:1500px;margin:0 auto;padding:12px 14px 40px}
+.card{background:var(--paper);border:1.5px solid var(--line);border-radius:20px;padding:18px;box-shadow:var(--shadow);margin-bottom:14px}
+h1,h2,h3{margin:0}
+h2{font-size:22px;margin-bottom:10px}
+h3{font-size:17px;margin:14px 0 8px}
+.muted{color:var(--sub);font-size:15px}
+.small{font-size:13.5px}
+.center{text-align:center}
+.pill{display:inline-flex;align-items:center;gap:6px;background:var(--paper);border:1.5px solid var(--line);border-radius:999px;padding:3px 12px;font-size:14px;font-weight:700}
+.pill.live{border-color:var(--ok);color:var(--ok)} .pill.demo{border-color:#e39a1c;color:#a86b00}
+.btn{border:none;border-radius:14px;padding:13px 18px;font-weight:800;background:var(--pri);color:#fff;font-size:17px;box-shadow:0 4px 0 rgba(58,47,82,.18)}
+.btn:active{transform:translateY(2px);box-shadow:0 2px 0 rgba(58,47,82,.18)}
+.btn.pink{background:var(--pink);color:#4a1230} .btn.mint{background:var(--mint);color:#07382b} .btn.sun{background:var(--sun);color:#4a3300}
+.btn.dark{background:#3a2f52} .btn.bad{background:var(--bad)} .btn.ghost{background:transparent;color:var(--ink);border:2px solid var(--line);box-shadow:none}
+.btn.sm{padding:8px 12px;font-size:14.5px;border-radius:10px} .btn.xl{padding:18px 26px;font-size:22px;border-radius:18px}
+.btn.block{display:block;width:100%}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.field{width:100%;border:2px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--paper);color:var(--ink)}
+.field:focus{outline:none;border-color:var(--pri)}
+label.lb{display:block;font-weight:800;margin:14px 0 6px}
+.grid{display:grid;gap:8px} .g2{grid-template-columns:repeat(2,1fr)} .g3{grid-template-columns:repeat(3,1fr)} .g4{grid-template-columns:repeat(4,1fr)}
+.opt{background:var(--paper);border:2px solid var(--line);border-radius:14px;padding:10px 8px;text-align:center;font-weight:700;color:var(--ink);line-height:1.25}
+.opt small{display:block;font-weight:500;color:var(--sub);font-size:12.5px}
+.opt.sel{border-color:var(--pri);background:var(--pri2);box-shadow:0 0 0 3px rgba(139,124,246,.25)}
+.opt:disabled{opacity:.35}
+.chip{display:inline-flex;align-items:center;gap:4px;background:var(--pri2);border-radius:999px;padding:3px 10px;font-size:14px;margin:2px;white-space:nowrap}
+.chip b{font-weight:700}.chip.dead{opacity:.45;text-decoration:line-through}.chip.me{outline:2px solid var(--pri)}
+.chip.hl{background:var(--sun);color:#4a3300}.chip.bad{background:var(--pink2)}
+.say{display:flex;gap:10px;align-items:flex-start;margin-bottom:12px}
+.say img{width:64px;height:64px;object-fit:contain;flex:none}
+.say .bub{background:var(--paper);border:1.5px solid var(--line);border-radius:16px;padding:10px 14px;font-size:16px;box-shadow:var(--shadow)}
+.topbar{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.topbar .t{font-weight:800;flex:1}
+.tmr{font-variant-numeric:tabular-nums;font-weight:900;background:var(--ink);color:var(--bg);border-radius:10px;padding:2px 10px}
+.rolebar{display:flex;align-items:center;gap:8px;background:var(--paper);border:1.5px solid var(--line);border-radius:14px;padding:8px 12px;margin-bottom:12px;user-select:none;-webkit-user-select:none}
+.big{font-size:26px;font-weight:900;line-height:1.3}
+.note{background:var(--sun2);border:2px dashed #e3b84a;border-radius:6px 16px 8px 14px;padding:12px;margin:8px 0;position:relative;box-shadow:3px 4px 0 rgba(0,0,0,.06);transform:rotate(-.6deg)}
+.note:nth-child(even){transform:rotate(.7deg)}
+.note .nh{font-weight:900;color:#8a6200}
+body.night .note .nh{color:#ffd36e}
+.note.fake{border-color:var(--bad);background:var(--pink2)} .note.real{border-color:var(--ok);background:var(--mint2)}
+.stamp{position:absolute;right:8px;top:6px;font-weight:900;border:3px solid;border-radius:8px;padding:0 8px;transform:rotate(8deg);font-size:15px;background:var(--paper)}
+.stamp.f{color:var(--bad)} .stamp.t{color:var(--ok)}
+.stars{display:flex;gap:6px;justify-content:center;margin:6px 0}
+.stars button{flex:1}
+/* 역할 카드 — 쪼는 맛 */
+.rcw{display:flex;justify-content:center;margin:14px 0}
+.rc{--p:0;width:250px;height:340px;border-radius:26px;position:relative;touch-action:none;user-select:none;-webkit-user-select:none;
+  background:conic-gradient(var(--pri) calc(var(--p)*1%),var(--line) 0);padding:7px;transition:transform .15s}
+.rc .in{width:100%;height:100%;border-radius:20px;background:linear-gradient(160deg,#fff,#efeaff);color:#3a2f52;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center;padding:14px}
+body.night .rc .in{background:linear-gradient(160deg,#35307a,#241f55);color:#fff}
+.rc img{width:120px;height:120px;object-fit:contain}
+.rc .fk{font-size:64px;font-weight:900;animation:pop .3s}
+.rc.s1{animation:shk1 .12s infinite} .rc.s2{animation:shk2 .08s infinite} .rc.s3{animation:shk3 .05s infinite}
+@keyframes shk1{50%{transform:translate(1px,-1px) rotate(.4deg)}} @keyframes shk2{50%{transform:translate(-2px,2px) rotate(-1deg)}} @keyframes shk3{50%{transform:translate(3px,-3px) rotate(1.6deg) scale(1.02)}}
+@keyframes pop{from{transform:scale(.3);opacity:0}to{transform:scale(1);opacity:1}}
+.rc.open .in{animation:flipin .6s}
+@keyframes flipin{from{transform:rotateY(90deg)}to{transform:rotateY(0)}}
+.hb{animation:hb 1s infinite} @keyframes hb{0%,100%{transform:scale(1)}15%{transform:scale(1.12)}30%{transform:scale(1)}45%{transform:scale(1.08)}}
+.blink{animation:blink 1.2s infinite} @keyframes blink{50%{opacity:.4}}
+.stars-bg{background:radial-gradient(2px 2px at 20% 30%,#fff8,transparent),radial-gradient(2px 2px at 70% 20%,#fff8,transparent),radial-gradient(1.5px 1.5px at 45% 70%,#fff8,transparent),radial-gradient(2px 2px at 85% 60%,#fff8,transparent)}
+/* 교사/전광판 */
+.tbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.tbar h1{font-size:22px;flex:1;min-width:200px;display:flex;align-items:center;gap:8px}
+.tbar h1 img{width:40px;height:40px;object-fit:contain}
+.vcols{display:grid;gap:12px}
+.vcols.v1{grid-template-columns:1fr} .vcols.v3{grid-template-columns:repeat(3,1fr)}
+@media (max-width:900px){.vcols.v3{grid-template-columns:1fr}}
+.vcol{background:var(--paper);border:2px solid var(--line);border-radius:20px;padding:14px;min-height:340px;box-shadow:var(--shadow)}
+.vcol .vh{display:flex;align-items:center;gap:8px;font-weight:900;margin-bottom:8px}
+.vcol .vh i{width:14px;height:14px;border-radius:50%;display:inline-block}
+.stage{min-height:240px}
+.vcols.v1 .stage .big{font-size:34px} .vcols.v1 .vcol{min-height:420px}
+.ctl{position:sticky;bottom:0;background:var(--paper);border:2px solid var(--line);border-radius:18px;padding:10px 12px;margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;box-shadow:0 -6px 24px rgba(58,47,82,.12)}
+.ctl .grow{flex:1}
+.bar{height:16px;border-radius:9px;background:var(--line);overflow:hidden;margin:4px 0}.bar>i{display:block;height:100%;background:var(--pri);transition:width .3s}
+.bar.y>i{background:var(--ok)} .bar.n>i{background:var(--bad)}
+.rowx{display:flex;align-items:center;gap:8px}.rowx .lab{width:70px;font-weight:800;font-size:14px}.rowx .bar{flex:1}
+.flipgrid{display:flex;flex-wrap:wrap;gap:6px}
+.fcard{width:78px;height:74px;border-radius:12px;background:var(--pri2);border:2px solid var(--line);display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:12.5px;line-height:1.2;text-align:center}
+.fcard .em{font-size:26px}.fcard.m{background:var(--pink2);border-color:var(--bad)}
+.fcard.back{background:var(--ink);color:var(--bg)}
+.fcard.dead{opacity:.55}
+.toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:#3a2f52;color:#fff;padding:10px 18px;border-radius:999px;font-size:15px;z-index:99;max-width:90vw;box-shadow:0 8px 24px rgba(0,0,0,.3)}
+.qr{display:inline-block;background:#fff;padding:8px;border-radius:12px}
+.tbl{width:100%;border-collapse:collapse;font-size:14.5px}.tbl td,.tbl th{padding:5px 6px;border-bottom:1px solid var(--line);text-align:left}
+footer{text-align:center;color:var(--sub);font-size:12.5px;margin:10px 0 18px;padding:0 14px}
+.winb{font-size:30px;font-weight:900;text-align:center;padding:14px;border-radius:18px;margin:8px 0}
+.winb.m{background:var(--pink2);color:var(--bad)} .winb.c{background:var(--mint2);color:var(--ok)}
+.q{background:var(--sun2);border-left:6px solid #e3b84a;border-radius:10px;padding:10px 14px;margin:8px 0;font-weight:700}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<footer>© 김정환 · M.A.D.T (Moral And Digital Teacher) · 캐릭터 ‘꿈송이’ © 김정환, 무단 사용 금지</footer>
+<script type="module">
+/* =========================================================
+   ① 설정 — 여기만 바꾸면 됩니다
+   ========================================================= */
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyAPJAMUITr6w0H63Ze1L1eViCsuq3zXlbE",
+  authDomain: "nation-game-cf684.firebaseapp.com",
+  databaseURL: "https://nation-game-cf684-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "nation-game-cf684",
+  storageBucket: "nation-game-cf684.firebasestorage.app",
+  messagingSenderId: "947361689624",
+  appId: "1:947361689624:web:9f09cd27fbd2334ae0136d"
+};
+const TEACHER_PIN = '0624';          // 교사 화면 비밀번호
+const CHAR = 'ggumsong.png';         // 꿈송이 그림
+const DEF_SEC = {night:45, talk:240, vote:40, def:20, fin:20};   // 기본 시간(초)
+
+/*ENGINE_START*/
+/* =========================================================
+   ② 게임 엔진 — 화면과 무관한 순수 계산 (테스트 가능)
+   ========================================================= */
+const ROLES = {
+  mafia:  {n:'마피아', e:'🎭', k:'kill',  d:'밤마다 시민 한 명을 노립니다. 가짜 소문을 퍼뜨려 마을을 속이세요.'},
+  doctor: {n:'의사',   e:'💉', k:'save',  d:'밤마다 한 명을 지켜 줍니다. 자기 자신도 지킬 수 있어요.'},
+  police: {n:'경찰',   e:'🔍', k:'check', d:'밤마다 한 명을 조사해 마피아인지 알아냅니다.'},
+  citizen:{n:'시민',   e:'🏘️', k:null,    d:'토론과 투표로 마피아를 찾고, 가짜 소문을 가려내세요.'}
+};
+const RND = () => Math.random();
+function shuffle(a, rng=RND){ const b=a.slice(); for(let i=b.length-1;i>0;i--){ const j=Math.floor(rng()*(i+1)); [b[i],b[j]]=[b[j],b[i]]; } return b; }
+function pickOne(a, rng=RND){ return a[Math.floor(rng()*a.length)]; }
+function rolePlan(N){
+  const m = Math.max(1, Math.round(N/5));
+  let d = N>=4 ? Math.max(1, Math.floor(N/12)) : 0;
+  let p = N>=4 ? Math.max(1, Math.floor(N/12)) : 0;
+  while(N-m-d-p < 1 && (d>0||p>0)){ if(p>0) p--; else d--; }
+  return {mafia:m, doctor:d, police:p, citizen:Math.max(0,N-m-d-p)};
+}
+function assignRoles(pids, rng=RND){
+  const pl=rolePlan(pids.length), list=[];
+  Object.keys(pl).forEach(r=>{ for(let i=0;i<pl[r];i++) list.push(r); });
+  const sh=shuffle(pids,rng), out={};
+  sh.forEach((p,i)=>out[p]=list[i]||'citizen');
+  return out;
+}
+const winW = N => Math.max(2, Math.min(6, Math.round(N/5)+1, N-1));
+/* 번호 순서 목록 위에서 연속된 W명을 '구간'으로 쓴다 */
+function genNotes(o){
+  const {order,roles,alive}=o, rng=o.rng||RND, N=order.length, W=winW(N);
+  const isAM=p=>roles[p]==='mafia'&&alive[p];
+  const idxAM=order.map((p,i)=>isAM(p)?i:-1).filter(i=>i>=0);
+  if(!idxAM.length||N<3) return null;
+  const maxS=N-W, cnt=s=>order.slice(s,s+W).filter(isAM).length;
+  const mi=pickOne(idxAM,rng), lo=Math.max(0,mi-W+1), hi=Math.min(mi,maxS);
+  const ts=lo+Math.floor(rng()*(hi-lo+1));
+  const cand=[]; for(let s=0;s<=maxS;s++) if(s!==ts&&cnt(s)===0) cand.push(s);
+  let fs=null, weak=false; const props={};
+  (o.proposals||[]).forEach(s=>{ s=+s; if(cand.includes(s)) props[s]=(props[s]||0)+1; });
+  const ks=Object.keys(props);
+  if(ks.length){ const mx=Math.max(...ks.map(k=>props[k])); fs=+pickOne(ks.filter(k=>props[k]===mx),rng); }
+  else if(cand.length) fs=pickOne(cand,rng);
+  else { weak=true; const any=[]; for(let s=0;s<=maxS;s++) if(s!==ts) any.push(s); fs=any.length?pickOne(any,rng):ts; }
+  const mk=s=>({p:order.slice(s,s+W)});
+  const fakeFirst=rng()<0.5;
+  return {notes:fakeFirst?[mk(fs),mk(ts)]:[mk(ts),mk(fs)], fakeIdx:fakeFirst?0:1, trueIdx:fakeFirst?1:0, weak, W};
+}
+function resolveNight(o){
+  const {roles,alive}=o, acts=o.acts||{}, rng=o.rng||RND, pids=Object.keys(roles);
+  const votes={};
+  pids.forEach(p=>{ const a=acts[p]; if(!a||!alive[p]||roles[p]!=='mafia'||a.k!=='kill') return;
+    if(a.t!=null&&alive[a.t]&&roles[a.t]!=='mafia') votes[a.t]=(votes[a.t]||0)+1; });
+  let target=null; const ks=Object.keys(votes);
+  if(ks.length){ const mx=Math.max(...ks.map(k=>votes[k])); target=pickOne(ks.filter(k=>votes[k]===mx),rng); }
+  const saves=[]; pids.forEach(p=>{ const a=acts[p]; if(alive[p]&&roles[p]==='doctor'&&a&&a.k==='save'&&a.t!=null&&alive[a.t]) saves.push({by:p,t:a.t}); });
+  const savedBy=saves.filter(s=>s.t===target).map(s=>s.by), saved=target!=null&&savedBy.length>0;
+  const checks=[]; pids.forEach(p=>{ const a=acts[p]; if(alive[p]&&roles[p]==='police'&&a&&a.k==='check'&&a.t!=null&&alive[a.t]) checks.push({by:p,t:a.t,m:roles[a.t]==='mafia'}); });
+  return {target, killed:(target!=null&&!saved)?target:null, saved, savedBy, checks};
+}
+function tallyJudge(o){
+  const cnt=[0,0];
+  Object.keys(o.votes||{}).forEach(p=>{ if(!o.alive[p]) return; const v=o.votes[p]; if(v&&(v.n===0||v.n===1)) cnt[v.n]++; });
+  const pick=cnt[0]===cnt[1]?null:(cnt[0]>cnt[1]?0:1);
+  return {cnt, pick, correct:pick==null?null:pick===o.fakeIdx};
+}
+function judgeEffect(t, notes, fakeIdx){
+  const fp=notes[fakeIdx].p; const immune=[], susp={};
+  if(t.correct===true) fp.forEach(p=>immune.push(p));
+  if(t.correct===false) fp.forEach(p=>susp[p]=2);
+  return {immune, susp};
+}
+function pointsJudge(o){      // 판별 점수 + 마피아 '속이기' 점수
+  const pts={}, add=(p,x)=>pts[p]=(pts[p]||0)+x; let ok=0, bad=0;
+  Object.keys(o.votes||{}).forEach(p=>{
+    if(!o.alive[p]) return; const v=o.votes[p]; if(!v||(v.n!==0&&v.n!==1)) return;
+    const c=Math.max(1,Math.min(3,+v.c||1));
+    if(o.roles[p]==='mafia') return;
+    if(v.n===o.fakeIdx){ add(p,c); ok++; } else { add(p,-c); bad++; }
+  });
+  const dec=[];
+  if(o.tally.correct===false) Object.keys(o.roles).forEach(p=>{ if(o.roles[p]==='mafia'&&o.alive[p]){ add(p,2); dec.push(p); } });
+  return {pts, ok, bad, dec};
+}
+function tallyExec(o){
+  const alive=o.alive, aliveP=Object.keys(alive).filter(p=>alive[p]), votes=o.votes||{};
+  const counts={}; let abs=0, real=0;
+  aliveP.forEach(p=>{ const v=votes[p]; if(!v) return; if(v.t==='abs'){ abs++; return; } if(alive[v.t]){ counts[v.t]=(counts[v.t]||0)+1; real++; } });
+  const imm=o.immune||[], sp=o.susp||{}, eff={};
+  aliveP.forEach(p=>{ if(imm.includes(p)) return; const x=(counts[p]||0)+(sp[p]||0); if(x>0) eff[p]=x; });
+  const silent=abs*2>aliveP.length, ks=Object.keys(eff);
+  let top=null, tied=[];
+  if(ks.length&&!silent&&real>0){ const mx=Math.max(...ks.map(k=>eff[k])); tied=ks.filter(k=>eff[k]===mx); top=tied.length===1?tied[0]:pickOne(tied,o.rng||RND); }
+  return {counts, eff, abs, real, silent, top, tied:tied.length>1?tied:[]};
+}
+function pointsExec(o){       // 마피아를 지목하면 +2, 기권(방관)이면 -1
+  const pts={}, add=(p,x)=>pts[p]=(pts[p]||0)+x; let abs=0;
+  Object.keys(o.alive).forEach(p=>{ if(!o.alive[p]) return; const v=(o.votes||{})[p]; if(!v) return;
+    if(v.t==='abs'){ add(p,-1); abs++; }
+    else if(o.roles[v.t]==='mafia'&&o.roles[p]!=='mafia') add(p,2); });
+  return {pts, abs};
+}
+function tallyFinal(o){
+  let yes=0, no=0;
+  Object.keys(o.alive).forEach(p=>{ if(!o.alive[p]||p===o.def) return; const v=(o.votes||{})[p]; if(!v) return; if(v.y===1) yes++; else if(v.y===0) no++; });
+  return {yes, no, executed:yes>no};
+}
+function checkWin(roles, alive){
+  let m=0, o=0; Object.keys(roles).forEach(p=>{ if(!alive[p]) return; if(roles[p]==='mafia') m++; else o++; });
+  if(m===0) return 'citizen'; if(m>=o) return 'mafia'; return null;
+}
+function pointsEnd(roles, alive, win){
+  const pts={};
+  Object.keys(roles).forEach(p=>{ const w=(roles[p]==='mafia')===(win==='mafia'); pts[p]=w?(alive[p]?5:3):1; });
+  return pts;
+}
+const orderOf = (PL, v) => Object.values(PL||{}).filter(p=>p&&p.v===v).sort((a,b)=>(a.num-b.num)||(a.id<b.id?-1:1)).map(p=>p.id);
+/*ENGINE_END*/
+
+/* =========================================================
+   ③ 저장소 (Firebase 실시간 DB 또는 체험 모드)
+   ========================================================= */
+const clean = o => o==null ? null : JSON.parse(JSON.stringify(o));
+let DBMODE='demo', backend=null, SOFF=0;
+async function initBackend(){
+  if(window.__MF_BACKEND){ backend=window.__MF_BACKEND; DBMODE='live'; return; }
+  if(FIREBASE_CONFIG && FIREBASE_CONFIG.apiKey && FIREBASE_CONFIG.databaseURL){
+    try{
+      const A = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js');
+      const D = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js');
+      const db = D.getDatabase(A.initializeApp(FIREBASE_CONFIG,'mafia'));
+      backend = {
+        set:(p,v)=>D.set(D.ref(db,p),clean(v)),
+        update:(p,v)=>D.update(D.ref(db,p),clean(v)),
+        remove:p=>D.remove(D.ref(db,p)),
+        on:(p,cb)=>D.onValue(D.ref(db,p),s=>cb(s.val()),err=>toast('⚠️ 데이터베이스 연결 오류: '+err.message))
+      };
+      D.onValue(D.ref(db,'.info/serverTimeOffset'),s=>{ SOFF=+s.val()||0; });
+      DBMODE='live'; return;
+    }catch(e){ console.error(e); setTimeout(()=>toast('⚠️ Firebase 연결 실패 → 체험 모드로 실행합니다'),500); }
+  }
+  const KEY='mafia_demo_db';
+  const bc = ('BroadcastChannel' in window) ? new BroadcastChannel('mafiagame') : null;
+  const L=[];
+  const read=()=>{ try{ return JSON.parse(localStorage.getItem(KEY))||{}; }catch(e){ return {}; } };
+  const parts=p=>p.split('/').filter(Boolean);
+  const getAt=(t,p)=>parts(p).reduce((o,k)=>o==null?undefined:o[k],t);
+  const setAt=(t,p,v)=>{ const ks=parts(p); let o=t; for(let i=0;i<ks.length-1;i++){ if(typeof o[ks[i]]!=='object'||o[ks[i]]===null) o[ks[i]]={}; o=o[ks[i]]; } const last=ks[ks.length-1]; if(v==null) delete o[last]; else o[last]=clean(v); };
+  const fire=()=>{ const t=read(); L.forEach(l=>l.cb(clean(getAt(t,l.p))??null)); };
+  const write=t=>{ try{ localStorage.setItem(KEY,JSON.stringify(t)); }catch(e){} fire(); bc&&bc.postMessage(1); };
+  if(bc) bc.onmessage=fire;
+  window.addEventListener('storage',e=>{ if(e.key===KEY) fire(); });
+  backend = {
+    set:async(p,v)=>{ const t=read(); setAt(t,p,v); write(t); },
+    update:async(p,obj)=>{ const ks=Object.keys(obj); for(const a of ks) for(const b of ks) if(a!==b&&b.startsWith(a+'/')) throw new Error('경로 충돌: '+a+' ⊃ '+b); const t=read(); for(const k in obj) setAt(t,p+'/'+k,obj[k]); write(t); },
+    remove:async p=>{ const t=read(); setAt(t,p,null); write(t); },
+    on:(p,cb)=>{ const l={p,cb}; L.push(l); setTimeout(()=>cb(clean(getAt(read(),p))??null),0); return ()=>{ const i=L.indexOf(l); if(i>=0) L.splice(i,1); }; }
+  };
+}
+
+/* =========================================================
+   ④ 공통 도구
+   ========================================================= */
+const $app = document.getElementById('app');
+const qs = new URLSearchParams(location.search);
+const MODE = /teacher/i.test(qs.get('mode')||'') ? 'teacher' : (/board/i.test(qs.get('mode')||'') ? 'board' : 'student');
+let ROOM = (qs.get('room')||'').toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,8);
+const BASE = () => `rooms/${ROOM}/mafia`;
+const esc = s => String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const sleep = ms => new Promise(r=>setTimeout(r,ms));
+const raf = window.requestAnimationFrame ? f=>window.requestAnimationFrame(f) : f=>setTimeout(f,16);
+const nowS = () => Date.now() + (SOFF||0);
+const toArr = v => Array.isArray(v)?v.filter(x=>x!=null):(v&&typeof v==='object'?Object.keys(v).sort((a,b)=>a-b).map(k=>v[k]):[]);
+let toastTimer=null;
+function toast(msg){ document.querySelectorAll('.toast').forEach(x=>x.remove()); const t=document.createElement('div'); t.className='toast'; t.textContent=msg; document.body.appendChild(t); clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.remove(),2600); }
+const say=(html)=>`<div class="say"><img src="${CHAR}" alt="꿈송이"><div class="bub">${html}</div></div>`;
+const modeBadge = () => DBMODE==='live' ? `<span class="pill live">● 실시간 연동</span>` : `<span class="pill demo">● 체험 모드(이 기기 안에서만)</span>`;
+const VCOL = ['#ff9ab8','#8ec5ff','#7fd8be'];
+const rid = () => Math.random().toString(36).slice(2,10);
+
+/* --- 소리 (쪼는 맛) --- */
+let AC=null;
+function ac(){ try{ AC=AC||new (window.AudioContext||window.webkitAudioContext)(); if(AC.state==='suspended') AC.resume(); }catch(e){} return AC; }
+function tone(f,d=0.12,type='sine',vol=0.15,when=0){ const a=ac(); if(!a) return; try{ const o=a.createOscillator(), g=a.createGain(); o.type=type; o.frequency.value=f; const t=a.currentTime+when; g.gain.setValueAtTime(vol,t); g.gain.exponentialRampToValueAtTime(0.0001,t+d); o.connect(g); g.connect(a.destination); o.start(t); o.stop(t+d+0.02); }catch(e){} }
+const sfx = {
+  beat(){ tone(60,.18,'sine',.5); tone(52,.22,'sine',.4,.22); },
+  tick(){ tone(900,.04,'square',.05); },
+  sting(){ tone(220,.6,'sawtooth',.1); tone(233,.6,'sawtooth',.08); },
+  win(){ [523,659,784,1047].forEach((f,i)=>tone(f,.25,'triangle',.15,i*.12)); },
+  lose(){ [392,330,262].forEach((f,i)=>tone(f,.35,'sine',.15,i*.2)); },
+  drum(){ tone(90,.12,'sine',.5); }
+};
+const vib = p => { try{ navigator.vibrate&&navigator.vibrate(p); }catch(e){} };
+
+/* --- 상태 --- */
+let META={}, PL={}, ST={}, VS={}, HOST={}, SC={}, ACT={}, JV={}, EV={}, FV={}, GH={}, RV={}, ALLSEC={}, FB={};
+let SEC=null, POL=null, MYACT=null, MYJV=null, MYEV=null, MYFV=null, MYGH=null, MYRV=null;
+let ME=null;                       // {pid,v,num,nick,sess}
+const UI={conf:2, rvOpen:false, showRoles:false, joinV:1, fbDone:false};
+const phase = () => META.phase || '';
+const rk = () => `${META.g||0}.${META.r||0}`;
+const vList = () => (META.mode==='grade')?[1,2,3]:[1];
+const vName = v => (META.mode==='grade') ? `${v}반 마을` : '곡선 마을';
+const orderV = v => orderOf(PL, v);
+const aliveOf = v => { const o={}; orderV(v).forEach(p=>o[p]=!!(ST[p]&&ST[p].a)); return o; };
+const numOf = p => PL[p] ? PL[p].num : (String(p).split('_')[1]||'?');
+const nickOf = p => PL[p] ? PL[p].nick : '?';
+const labelOf = p => `${numOf(p)}번 ${nickOf(p)}`;
+const chip = (p,cls='') => `<span class="chip ${ST[p]&&!ST[p].a?'dead':''} ${cls} ${ME&&ME.pid===p?'me':''}">${numOf(p)}<b>${esc(nickOf(p))}</b>${ST[p]&&!ST[p].a?'💀':''}</span>`;
+const secOf = p => (ALLSEC&&ALLSEC[p]&&ALLSEC[p].role)||null;
+const secs = () => Object.assign({}, DEF_SEC, META.sec||{});
+
+let rq=0, lastHtml='';
+function R(){ if(rq) return; rq=1; raf(()=>{ rq=0; try{ render(); }catch(e){ console.error(e); } }); }
+function subs(){
+  const B=BASE();
+  if(MODE==='student'){
+    backend.on(B+'/meta',v=>{ META=v||{}; R(); });
+    backend.on(B+'/pl',v=>{ PL=v||{}; R(); });
+    backend.on(B+'/st',v=>{ ST=v||{}; R(); });
+    backend.on(B+'/vs',v=>{ VS=v||{}; R(); });
+    backend.on(B+'/sc',v=>{ SC=v||{}; R(); });
+  } else {
+    backend.on(B,v=>{ v=v||{}; META=v.meta||{}; PL=v.pl||{}; ST=v.st||{}; VS=v.vs||{}; HOST=v.host||{}; SC=v.sc||{}; ACT=v.act||{}; JV=v.jv||{}; EV=v.ev||{}; FV=v.fv||{}; GH=v.gh||{}; RV=v.rv||{}; ALLSEC=v.sec||{}; FB=v.fb||{}; R(); });
+  }
+}
+
+let SUBME=false, GSUB=false;
+function subsMe(){
+  if(SUBME||!ME) return; SUBME=true;
+  const B=BASE(), me=ME.pid;
+  backend.on(`${B}/sec/${me}`,v=>{ SEC=v; R(); });
+  backend.on(`${B}/pol/${me}`,v=>{ POL=v; R(); });
+  backend.on(`${B}/act/${me}`,v=>{ MYACT=v; R(); });
+  backend.on(`${B}/jv/${me}`,v=>{ MYJV=v; R(); });
+  backend.on(`${B}/ev/${me}`,v=>{ MYEV=v; R(); });
+  backend.on(`${B}/fv/${me}`,v=>{ MYFV=v; R(); });
+  backend.on(`${B}/gh/${me}`,v=>{ MYGH=v; R(); });
+  backend.on(`${B}/rv/${me}`,v=>{ MYRV=v; R(); });
+}
+function subsGhost(){          // 유령이 된 뒤에만 모두의 역할을 구독
+  if(GSUB) return; GSUB=true;
+  backend.on(`${BASE()}/sec`,v=>{ ALLSEC=v||{}; R(); });
+}
+let TICK=null;
+function startTicker(){
+  if(TICK) return;
+  TICK=setInterval(()=>{
+    document.querySelectorAll('.tmr[data-end]').forEach(el=>{ const e=+el.dataset.end; if(!e){ el.textContent='--:--'; return; } const s=Math.max(0,Math.ceil((e-nowS())/1000)); el.textContent=String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0'); el.style.color=s<=10?'#ff6b81':''; });
+    if(MODE==='teacher') autoTick();
+  },300);
+}
+const tmr = () => `<span class="tmr" data-end="${META.endAt||0}">--:--</span>`;
+
+/* =========================================================
+   ⑤ 학생 화면
+   ========================================================= */
+const HOLD={on:false};
+const QUOTES=['침묵도 선택입니다. 그 선택의 책임은 누구에게 있을까요?','증거 없는 의심은 소문이 됩니다.','다수가 말하면 정말 맞는 걸까요?','억울한 사람이 생기지 않으려면 무엇이 필요할까요?'];
+const MEKEY = () => 'mf_me_'+ROOM+(qs.get('slot')||'');
+function myLoad(){ try{ ME=JSON.parse(localStorage.getItem(MEKEY())||'null'); }catch(e){ ME=null; } }
+function mySave(){ try{ localStorage.setItem(MEKEY(),JSON.stringify(ME)); }catch(e){} }
+const alive = () => !!(ME&&ST[ME.pid]&&ST[ME.pid].a);
+const myRole = () => SEC&&SEC.role;
+
+function studentView(){
+  if(!ROOM) return `<div class="wrap">${say('안녕! 선생님이 알려 준 <b>방 코드</b>를 입력해 줘.')}
+    <div class="card"><label class="lb">방 코드</label><input id="rc" class="field" maxlength="8" placeholder="예) K7QX" style="text-transform:uppercase">
+    <button class="btn block" style="margin-top:12px" data-a="enter">들어가기</button></div></div>`;
+  if(!META.phase) return `<div class="wrap">${say('아직 열리지 않은 방이에요.<br>선생님이 방을 만들 때까지 잠깐만 기다려 줘!')}<div class="center muted blink">방 <b>${esc(ROOM)}</b> 확인 중…</div></div>`;
+  if(!ME || !PL[ME.pid]) return joinView();
+  if(PL[ME.pid].sess!==ME.sess) return `<div class="wrap">${say('다른 기기에서 같은 번호로 접속했어요.')}<button class="btn block" data-a="rejoin">내가 맞아요, 다시 접속</button></div>`;
+  const v=ME.v, vs=VS[v]||{}, ph=phase(), role=myRole();
+  document.body.classList.toggle('night', ph==='night' || ph==='roles');
+  const head=`<div class="topbar"><span class="t">${META.mode==='grade'?esc(vName(v))+' · ':''}${esc(ME.num)}번 ${esc(ME.nick)}</span>${['night','talk','vote','defense','final'].includes(ph)&&META.revealed!==false?tmr():''}</div>`;
+  if(ph==='lobby'){
+    const n=orderV(v).length;
+    return `<div class="wrap">${head}${say('<b>곡선 마을의 양심</b>에 어서 와! 곧 시작해요.<br>휴대폰은 내려놓지 말고 기다려 줘.')}
+      <div class="card center"><div class="big">${esc(ME.num)}번 ${esc(ME.nick)}</div><div class="muted">우리 마을 ${n}명 입장 완료</div></div>
+      <div class="card">${orderV(v).map(p=>chip(p)).join('')}</div></div>`;
+  }
+  if(!role){
+    return `<div class="wrap">${head}${say(vs.skip?'이번 판은 인원이 모자라서 쉬어요.':'이번 판은 이미 시작되어서 구경만 할 수 있어요.')}</div>`;
+  }
+  if(ph==='roles') return `<div class="wrap">${head}${say('아무도 안 보는 곳에서 카드를 <b>꾹 누르고</b> 있어 봐. 천천히… 두근두근!')}${roleCard()}</div>`;
+  const rb = `<div class="rolebar" id="peek" data-a="peek">${ROLES[role].e}<b>내 역할 · ${ROLES[role].n}</b><span class="muted small" style="margin-left:auto">${alive()?'꾹 눌러 확인':'💀 유령'}</span></div>`;
+  if(!alive()) subsGhost();
+  const body = (!alive() && !vs.win) ? ghostView(vs) : phaseView(ph, vs, role);
+  return `<div class="wrap">${head}${rb}${body}</div>`;
+}
+function joinView(){
+  const grade=META.mode==='grade';
+  const open=META.phase==='lobby';
+  if(!open) return `<div class="wrap">${say('이미 게임이 시작되었어요. 다음 판에 같이 하자!')}</div>`;
+  return `<div class="wrap">${say('이름 대신 <b>번호</b>와 <b>별명</b>으로 입장해요. (별명은 6글자까지)')}
+    <div class="card">
+      ${grade?`<label class="lb">우리 반</label><div class="grid g3">${[1,2,3].map(v=>`<button class="opt ${UI.joinV===v?'sel':''}" data-a="jv" data-v="${v}">${v}반</button>`).join('')}</div>`:''}
+      <label class="lb">번호</label><input id="num" class="field" type="number" inputmode="numeric" min="1" max="45" placeholder="예) 7">
+      <label class="lb">별명</label><input id="nick" class="field" maxlength="6" placeholder="예) 꿈송이">
+      <button class="btn block" style="margin-top:16px" data-a="join">입장하기</button></div></div>`;
+}
+function roleCard(){
+  const role=myRole(), seen=!!MYRV, open=UI.rvOpen;
+  const fakes=Object.keys(ROLES).filter(r=>r!==role);
+  const idle=`<img src="${CHAR}" alt=""><div style="font-weight:900;font-size:20px">${seen?'다시 확인':'꾹 눌러서 확인'}</div><div class="muted small">${seen?'잠깐 누르면 돼요':'놓으면 처음으로 돌아가요…'}</div>`;
+  if(open){
+    const mates = role==='mafia' ? toArr(SEC.mates).map(p=>labelOf(p)).join(', ') : '';
+    return `<div class="rcw"><div class="rc open"><div class="in"><div style="font-size:72px">${ROLES[role].e}</div><div class="big">${ROLES[role].n}</div><div class="small">${ROLES[role].d}</div>${role==='mafia'?`<div class="small"><b>동료</b> ${mates||'없음 (혼자예요)'}</div>`:''}</div></div></div>
+      <button class="btn block ghost" data-a="hide">카드 가리기</button>`;
+  }
+  return `<div class="rcw"><div class="rc" id="rc" data-total="${seen?900:3200}" data-idle="${esc(idle)}" data-fakes="${fakes.map(r=>ROLES[r].e).join(',')}"><div class="in face">${idle}</div></div></div>
+    <div class="center muted small">${seen?'확인을 마쳤어요. 선생님이 밤을 시작할 때까지 기다려요.':'⚠️ 옆 사람이 보지 못하게!'}</div>`;
+}
+function bindHold(){
+  const el=document.getElementById('rc'); if(!el||el._b) return; el._b=1;
+  const total=+el.dataset.total||3000, fakes=(el.dataset.fakes||'').split(','), idle=el.dataset.idle;
+  const face=el.querySelector('.face'); let t0=0, id=0, beat=0, st=0;
+  const stop=()=>{ if(!HOLD.on) return; HOLD.on=false; cancelAnimationFrame(id); clearInterval(beat); el.style.setProperty('--p',0); el.classList.remove('s1','s2','s3'); face.innerHTML=idle; };
+  const loop=()=>{
+    if(!HOLD.on) return;
+    const p=Math.min(1,(performance.now()-t0)/total);
+    el.style.setProperty('--p',p*100);
+    el.classList.toggle('s1',p>.2&&p<=.5); el.classList.toggle('s2',p>.5&&p<=.8); el.classList.toggle('s3',p>.8);
+    if(total>2000){
+      if(p>.4&&st<1){ st=1; face.innerHTML='<div class="fk">…?</div>'; vib(60); setTimeout(()=>{ if(HOLD.on&&st===1) face.innerHTML=idle; },550); }
+      if(p>.7&&st<2){ st=2; face.innerHTML=`<div class="fk">${fakes[Math.floor(Math.random()*fakes.length)]||'?'}</div>`; vib([60,40,60]); setTimeout(()=>{ if(HOLD.on&&st===2) face.innerHTML='<div class="fk">…</div>'; },420); }
+    }
+    if(p>=1){ HOLD.on=false; clearInterval(beat); done(); return; }
+    id=requestAnimationFrame(loop);
+  };
+  const done=async()=>{ sfx.sting(); vib([200,80,300]); UI.rvOpen=true; try{ await backend.set(`${BASE()}/rv/${ME.pid}`,{at:Date.now()}); }catch(e){} setTimeout(()=>{ UI.rvOpen=false; R(); },9000); lastHtml=''; R(); };
+  const down=e=>{ e.preventDefault(); ac(); if(HOLD.on) return; HOLD.on=true; st=0; t0=performance.now(); beat=setInterval(()=>{ sfx.beat(); vib(40); },900); id=requestAnimationFrame(loop); };
+  el.addEventListener('pointerdown',down);
+  ['pointerup','pointerleave','pointercancel'].forEach(ev=>el.addEventListener(ev,stop));
+  el.addEventListener('contextmenu',e=>e.preventDefault());
+}
+function notesHtml(vs, judged){
+  const notes=toArr(vs.notes), jr=vs.jr, W=notes[0]?toArr(notes[0].p).length:0;
+  if(!notes.length) return '';
+  return `<h3>📌 마을 게시판</h3>`+notes.map((n,i)=>{
+    const cls=jr&&judged?(i===jr.fakeIdx?'fake':'real'):'';
+    const st=jr&&judged?`<span class="stamp ${i===jr.fakeIdx?'f':'t'}">${i===jr.fakeIdx?'가짜':'진짜'}</span>`:'';
+    return `<div class="note ${cls}">${st}<div class="nh">쪽지 ${i+1}</div><div>“마피아 중 한 명이 <b>이 ${W}명</b> 안에 있다는 제보가 있어요.”</div><div style="margin-top:6px">${toArr(n.p).map(p=>chip(p)).join('')}</div></div>`;
+  }).join('')+`<div class="muted small">둘 중 하나는 마피아가 퍼뜨린 <b>가짜 소문</b>이에요.</div>`;
+}
+function targetGrid(act, opts){
+  const v=ME.v, al=aliveOf(v);
+  return `<div class="grid g3">${orderV(v).filter(p=>al[p]&&(!opts.not||!opts.not(p))).map(p=>`<button class="opt ${MYACT&&MYACT.r===rk()&&MYACT[opts.field||'t']===p?'sel':''}" data-a="act" data-k="${act}" data-f="${opts.field||'t'}" data-t="${p}">${numOf(p)}번<small>${esc(nickOf(p))}</small></button>`).join('')}</div>`;
+}
+function phaseView(ph, vs, role){
+  const v=ME.v, al=aliveOf(v), me=ME.pid;
+  const roster=`<h3>🏘️ 마을 사람들 (${Object.values(al).filter(Boolean).length}명 생존)</h3><div>${orderV(v).map(p=>chip(p)).join('')}</div>`;
+  if(vs.win && ph!=='end'){
+    return `${say('우리 마을의 게임이 끝났어요! 다른 마을이 끝날 때까지 기다려 줘.')}<div class="winb ${vs.win==='mafia'?'m':'c'}">${vs.win==='mafia'?'🎭 마피아 승리':'🏘️ 시민 승리'}</div>`;
+  }
+  if(ph==='night'){
+    const mine = MYACT&&MYACT.r===rk()?MYACT:{};
+    if(role==='mafia'){
+      const N=orderV(v).length, W=winW(N), ord=orderV(v), mates=toArr(SEC.mates);
+      const mafs=[me,...mates], valid=[]; for(let s=0;s<=N-W;s++){ if(!ord.slice(s,s+W).some(p=>mafs.includes(p)&&al[p])) valid.push(s); }
+      return `${say('쉿! 마피아끼리만 아는 시간이에요.')}
+        <div class="card"><h3 style="margin-top:0">① 오늘 밤 노릴 사람</h3>${targetGrid('kill',{not:p=>p===me||mates.includes(p)})}
+        <h3>② 가짜 소문 — 마을을 속일 ‘구간’ 고르기</h3><div class="muted small">마피아가 한 명도 없는 구간을 골라 “이 안에 마피아가 있다”는 거짓 쪽지를 붙여요. 시민이 속으면 그 사람들이 의심받습니다.</div>
+        ${valid.length?`<div class="grid g3" style="margin-top:8px">${valid.map(s=>`<button class="opt ${mine.s===s?'sel':''}" data-a="act" data-k="kill" data-f="s" data-t="${s}">${numOf(ord[s])}~${numOf(ord[s+W-1])}번</button>`).join('')}</div>`:'<div class="muted">고를 수 있는 구간이 없어 자동으로 정해져요.</div>'}
+        <div class="muted small" style="margin-top:8px">${mine.t?'✅ 노릴 사람 선택 완료':'⬜ 노릴 사람을 골라 주세요'} · ${mine.s!=null?'✅ 가짜 소문 선택 완료':'⬜ 가짜 소문을 골라 주세요'}</div></div>
+        <div class="muted small">동료: ${mates.map(p=>labelOf(p)).join(', ')||'없음'}</div>`;
+    }
+    if(role==='doctor') return `${say('누구를 지켜 줄까? 자기 자신도 괜찮아.')}<div class="card"><h3 style="margin-top:0">💉 오늘 밤 지킬 사람</h3>${targetGrid('save',{})}<div class="muted small" style="margin-top:8px">${mine.t?'✅ 선택 완료':'⬜ 한 명을 골라 주세요'}</div></div>`;
+    if(role==='police') return `${say('수상한 사람이 누구야? 한 명만 조사할 수 있어.')}<div class="card"><h3 style="margin-top:0">🔍 오늘 밤 조사할 사람</h3>${targetGrid('check',{not:p=>p===me})}<div class="muted small" style="margin-top:8px">${mine.t?'✅ 선택 완료':'⬜ 한 명을 골라 주세요'}</div></div>`;
+    return `<div class="card center"><div style="font-size:60px" class="hb">🌙</div><div class="big">밤이 깊었어요</div><div class="muted">눈을 감고 조용히 기다려요…</div><div class="q">${QUOTES[(+META.r||0)%QUOTES.length]}</div></div>`;
+  }
+  if(ph==='dawn'){
+    if(META.revealed===false) return `<div class="card center"><div style="font-size:60px" class="blink">🌅</div><div class="big">새벽이 밝아와요…</div><div class="muted">전광판을 봐 주세요. 곧 발표합니다.</div></div>`;
+    return dawnResult(vs);
+  }
+  if(ph==='talk'){
+    const judged=MYJV&&MYJV.r===rk();
+    return `${dawnResult(vs,true)}${notesHtml(vs,false)}
+      <div class="card"><h3 style="margin-top:0">🧐 어느 쪽지가 가짜일까?</h3>
+      <div class="muted small">확신이 클수록 맞히면 점수↑, 틀리면 점수↓. 시간이 끝나기 전에 제출!</div>
+      <div class="stars">${[1,2,3].map(c=>`<button class="opt ${UI.conf===c?'sel':''}" data-a="conf" data-c="${c}">${'★'.repeat(c)}<small>${['긴가민가','꽤 확신','100% 확신'][c-1]}</small></button>`).join('')}</div>
+      <div class="grid g2">${[0,1].map(n=>`<button class="opt ${judged&&MYJV.n===n?'sel':''}" data-a="judge" data-n="${n}">쪽지 ${n+1}이<br>가짜!</button>`).join('')}</div>
+      <div class="muted small" style="margin-top:6px">${judged?`✅ 제출됨: 쪽지 ${MYJV.n+1}번이 가짜 (${'★'.repeat(MYJV.c)})`:'⬜ 아직 제출 전'}</div></div>${roster}`;
+  }
+  if(ph==='vote'){
+    if(META.revealed===false) return `<div class="card center"><div style="font-size:60px" class="blink">🥁</div><div class="big">마을의 판단은…</div><div class="muted">전광판을 봐 주세요!</div></div>`;
+    const my=MYEV&&MYEV.r===rk()?MYEV:null;
+    return `${judgeResult(vs)}<div class="card"><h3 style="margin-top:0">🗳️ 누구를 마을에서 내보낼까요?</h3>
+      <div class="grid g3">${orderV(v).filter(p=>al[p]&&p!==me).map(p=>`<button class="opt ${my&&my.t===p?'sel':''}" data-a="vote" data-t="${p}">${numOf(p)}번<small>${esc(nickOf(p))}</small></button>`).join('')}</div>
+      <button class="opt block ${my&&my.t==='abs'?'sel':''}" style="width:100%;margin-top:8px" data-a="vote" data-t="abs">기권 (방관 −1점)</button>
+      <div class="muted small" style="margin-top:6px">${my?(my.t==='abs'?'✅ 기권했어요':`✅ ${labelOf(my.t)} 님을 지목했어요`):'⬜ 아직 투표 전'} — 말없이 지켜보기만 하는 것도 하나의 선택이에요.</div></div>`;
+  }
+  if(ph==='defense'){
+    if(META.revealed===false) return `<div class="card center"><div style="font-size:60px" class="blink">⚖️</div><div class="big">개표 중…</div><div class="muted">전광판을 봐 주세요!</div></div>`;
+    const ex=vs.ex; if(!ex||!ex.top) return `<div class="card center"><div class="big">오늘은 아무도 지목되지 않았어요</div></div>`;
+    const isMe=ex.top===me;
+    return `<div class="card center"><div class="muted">최후 변론 대상</div><div class="big">${esc(labelOf(ex.top))}</div>${isMe?'<div class="q">당신입니다! 마을 앞에서 억울함을 호소하세요.</div>':'<div class="muted">변론을 끝까지 듣고 판단해 주세요.</div>'}</div>`;
+  }
+  if(ph==='final'){
+    const ex=vs.ex; if(!ex||!ex.top) return `<div class="card center"><div class="big">투표 없음</div></div>`;
+    if(ex.top===me) return `<div class="card center"><div style="font-size:60px" class="hb">😰</div><div class="big">마을이 결정하고 있어요…</div></div>`;
+    return `<div class="card center"><div class="muted">처형 찬반 투표</div><div class="big">${esc(labelOf(ex.top))}</div>
+      <div class="grid g2" style="margin-top:10px"><button class="opt ${MYFV&&MYFV.r===rk()&&MYFV.y===1?'sel':''}" data-a="fin" data-y="1">👍 찬성<small>마을에서 내보낸다</small></button><button class="opt ${MYFV&&MYFV.r===rk()&&MYFV.y===0?'sel':''}" data-a="fin" data-y="0">👎 반대<small>지켜 준다</small></button></div>
+      <div class="muted small" style="margin-top:8px">찬성이 반대보다 많아야 처형됩니다. 같으면 무사!</div></div>`;
+  }
+  if(ph==='exec'){
+    if(META.revealed===false) return `<div class="card center"><div style="font-size:60px" class="blink">🥁</div><div class="big">운명의 순간…</div><div class="muted">전광판을 봐 주세요!</div></div>`;
+    const f=vs.fin, ex=vs.ex;
+    if(!ex||!ex.top) return `<div class="card center"><div class="big">${ex&&ex.silent?'마을이 침묵했습니다':'아무도 처형되지 않았어요'}</div><div class="muted">${ex&&ex.silent?'절반이 넘는 사람이 기권했어요. 방관의 밤…':''}</div></div>`;
+    return `<div class="card center"><div class="big">${f&&f.executed?`💀 ${esc(labelOf(ex.top))}`:`🕊️ ${esc(labelOf(ex.top))}`}</div><div class="muted">${f?`찬성 ${f.yes} · 반대 ${f.no}`:''}</div>
+      <div class="big" style="margin-top:6px">${f&&f.executed?`정체는 ${ROLES[(vs.rl&&vs.rl[ex.top])||'citizen'].e} ${ROLES[(vs.rl&&vs.rl[ex.top])||'citizen'].n}`:'무사히 살아남았어요'}</div></div>`;
+  }
+  if(ph==='end'){
+    if(META.revealed===false) return `<div class="card center"><div style="font-size:60px" class="blink">🎭</div><div class="big">정체가 공개됩니다</div><div class="muted">전광판을 봐 주세요!</div></div>`;
+    const my=SC[me]||{};
+    const stats=(HOSTSTAT(vs));
+    return `<div class="winb ${vs.win==='mafia'?'m':'c'}">${vs.win==='mafia'?'🎭 마피아 승리':'🏘️ 시민 승리'}</div>
+      <div class="card"><div class="big center">이번 판 +${my.last||0}점</div><div class="center muted">누적 ${my.pt||0}점</div></div>
+      <div class="card"><h3 style="margin-top:0">🎭 정체 공개</h3>${orderV(v).map(p=>`<span class="chip ${(vs.rl&&vs.rl[p]==='mafia')?'bad':''}">${numOf(p)}${esc(nickOf(p))} ${(vs.rl&&ROLES[vs.rl[p]])?ROLES[vs.rl[p]].e:''}</span>`).join('')}</div>
+      ${stats}${fbBox()}`;
+  }
+  return `<div class="card center muted">잠시만 기다려 주세요…</div>`;
+}
+function HOSTSTAT(vs){ const s=vs.stats||{}; const out=[];
+  out.push(`방관(기권) ${s.abs||0}표`); out.push(`억울한 처형 ${s.wrong||0}명`); out.push(`가짜 소문 판별 정답 ${s.jok||0} / 오답 ${s.jbad||0}`);
+  const qs=[]; if((s.wrong||0)>0) qs.push('증거가 부족한데도 한 사람을 내보냈다면, 그 책임은 누구에게 있을까요?'); if((s.abs||0)>0) qs.push('투표를 포기한 방관은 중립일까요, 공범일까요?'); if((s.jbad||0)>0) qs.push('가짜 소문을 믿은 사람과 퍼뜨린 사람, 책임은 누가 더 클까요?');
+  if(!qs.length) qs.push('오늘 나는 누구의 말을 근거로 판단했나요? 왜 그 사람을 믿었나요?');
+  return `<div class="card"><h3 style="margin-top:0">📊 우리 마을의 양심 지표</h3><div class="muted">${out.join(' · ')}</div>${qs.slice(0,2).map(q=>`<div class="q">${q}</div>`).join('')}</div>`;
+}
+function fbBox(){ if(UI.fbDone) return `<div class="card center muted">소감을 남겼어요. 고마워요!</div>`;
+  return `<div class="card"><h3 style="margin-top:0">✍️ 오늘의 한 줄 소감</h3><input id="fb" class="field" maxlength="60" placeholder="가장 기억에 남는 순간은?"><button class="btn block" style="margin-top:8px" data-a="fb">남기기</button></div>`; }
+function dawnResult(vs, small){
+  const n=vs.night; if(!n) return '';
+  const k=n.killed, sv=n.saved;
+  let h = k ? `<div class="big">💀 ${esc(labelOf(k))} 님이 희생되었습니다</div>` : (sv ? `<div class="big">💉 의사가 지켜냈어요!</div><div class="muted">마피아가 노렸지만 아무도 죽지 않았습니다.</div>` : `<div class="big">🌅 평화로운 밤이었어요</div>`);
+  const pr = POL&&POL.r===rk() ? `<div class="q">🔍 조사 결과 — ${esc(labelOf(POL.t))} 님은 <b>${POL.m?'마피아입니다!':'마피아가 아닙니다.'}</b></div>` : '';
+  return `<div class="card center" ${small?'style="padding:12px"':''}>${h}</div>${pr}`;
+}
+function judgeResult(vs){
+  const jr=vs.jr; if(!jr) return `<div class="card center muted">이번엔 소문 판단이 보류됐어요.</div>`;
+  const msg = jr.correct==null?'의견이 갈려 판단이 보류됐어요.':(jr.correct?'🎉 마을이 가짜 쪽지를 정확히 가려냈어요! 가짜에 올랐던 사람들은 오늘 의심에서 벗어납니다.':'😱 마을이 속았어요! 가짜 쪽지에 오른 사람들이 의심을 받습니다.');
+  return `${notesHtml(vs,true)}<div class="q">${msg}</div>`;
+}
+function ghostView(vs){
+  const v=ME.v, al=aliveOf(v), ph=phase();
+  const g=MYGH&&MYGH.r===rk()?MYGH.t:null;
+  const roles = Object.keys(ALLSEC||{}).length ? `<h3>👀 유령의 눈 — 모두의 정체</h3><div>${orderV(v).map(p=>`<span class="chip ${secOf(p)==='mafia'?'bad':''} ${al[p]?'':'dead'}">${numOf(p)}${esc(nickOf(p))} ${secOf(p)?ROLES[secOf(p)].e:''}</span>`).join('')}</div>` : '';
+  return `<div class="card center"><div style="font-size:54px">👻</div><div class="big">유령이 되었어요</div><div class="muted">말하거나 힌트를 줄 수는 없어요. 대신 마피아를 맞혀 보세요!</div></div>
+    ${ph==='talk'?`<div class="card"><h3 style="margin-top:0">🔮 유령의 직감 — 마피아는 누구?</h3><div class="grid g3">${orderV(v).filter(p=>al[p]).map(p=>`<button class="opt ${g===p?'sel':''}" data-a="ghost" data-t="${p}">${numOf(p)}번<small>${esc(nickOf(p))}</small></button>`).join('')}</div><div class="muted small" style="margin-top:6px">맞히면 +1점 (토론이 끝날 때 확인)</div></div>`:''}
+    ${ph==='dawn'&&META.revealed!==false||ph==='talk'||ph==='vote'?dawnResult(vs,true)+notesHtml(vs,ph==='vote'&&META.revealed!==false):''}
+    ${roles}`;
+}
+async function putAct(patch){
+  const base=MYACT&&MYACT.r===rk()?MYACT:{r:rk()};
+  const role=myRole(); const next=Object.assign({},base,patch,{r:rk(),k:ROLES[role].k});
+  MYACT=next; await backend.set(`${BASE()}/act/${ME.pid}`,next); R();
+}
+const SH = {
+  async enter(){ const c=(document.getElementById('rc').value||'').toUpperCase().replace(/[^A-Z0-9]/g,''); if(!c) return toast('방 코드를 입력해 주세요'); location.href='?room='+c; },
+  jv(d){ UI.joinV=+d.v; lastHtml=''; R(); },
+  async join(){
+    const num=parseInt(document.getElementById('num').value,10), nick=(document.getElementById('nick').value||'').trim().slice(0,6);
+    if(!(num>=1&&num<=45)) return toast('번호는 1~45 사이로 입력해 주세요');
+    if(!nick) return toast('별명을 입력해 주세요');
+    const v=META.mode==='grade'?UI.joinV:1, pid=`${v}_${num}`, ex=PL[pid];
+    if(ex && !confirm(`${num}번 "${ex.nick}"이(가) 이미 있어요.\n내가 맞나요? (맞으면 확인)`)) return;
+    const sess=rid(); ME={pid,v,num,nick,sess}; mySave();
+    await backend.set(`${BASE()}/pl/${pid}`,{id:pid,v,num,nick,at:Date.now(),sess});
+    subsMe(); lastHtml=''; R();
+  },
+  async rejoin(){ const p=PL[ME.pid]; ME.sess=rid(); mySave(); await backend.update(`${BASE()}/pl/${ME.pid}`,{sess:ME.sess}); lastHtml=''; R(); },
+  hide(){ UI.rvOpen=false; lastHtml=''; R(); },
+  peek(){ },
+  act(d){ const f=d.f||'t', val=f==='s'?+d.t:d.t; putAct({[f]:val}); },
+  conf(d){ UI.conf=+d.c; lastHtml=''; R(); },
+  async judge(d){ if(phase()!=='talk') return; await backend.set(`${BASE()}/jv/${ME.pid}`,{r:rk(),n:+d.n,c:UI.conf}); },
+  async vote(d){ if(phase()!=='vote'||META.revealed===false) return; await backend.set(`${BASE()}/ev/${ME.pid}`,{r:rk(),t:d.t}); },
+  async fin(d){ if(phase()!=='final') return; await backend.set(`${BASE()}/fv/${ME.pid}`,{r:rk(),y:+d.y}); },
+  async ghost(d){ await backend.set(`${BASE()}/gh/${ME.pid}`,{r:rk(),t:d.t}); },
+  async fb(){ const t=(document.getElementById('fb').value||'').trim(); if(!t) return toast('한 줄을 적어 주세요'); await backend.set(`${BASE()}/fb/${ME.pid}`,{t,g:META.g,nm:ME.nick,n:ME.num,v:ME.v}); UI.fbDone=true; lastHtml=''; R(); }
+};
+/* '내 역할' 막대를 누르고 있는 동안만 잠깐 보여 주기 */
+function bindPeek(){
+  const el=document.getElementById('peek'); if(!el||el._b) return; el._b=1;
+  const show=()=>{ el.dataset.old=el.innerHTML; const r=myRole(); el.innerHTML=`${ROLES[r].e}<b style="font-size:20px">${ROLES[r].n}</b><span class="muted small" style="margin-left:auto">${esc(ROLES[r].d)}</span>`; HOLD.on=true; };
+  const hide=()=>{ if(el.dataset.old){ el.innerHTML=el.dataset.old; el.dataset.old=''; } HOLD.on=false; R(); };
+  el.addEventListener('pointerdown',e=>{ e.preventDefault(); show(); });
+  ['pointerup','pointerleave','pointercancel'].forEach(ev=>el.addEventListener(ev,hide));
+  el.addEventListener('contextmenu',e=>e.preventDefault());
+}
+
+/* =========================================================
+   ⑥ 교사(진행) 로직 — 교사 화면이 열려 있는 동안 게임을 진행합니다
+   ========================================================= */
+let BUSY=false, PLAYING=0, SCW={}, REVEALED_AT=0;
+const seqNext = () => (+META.seq||0)+1;
+async function setMeta(patch){ const o={}; Object.keys(patch).forEach(k=>o['meta/'+k]=patch[k]); await backend.update(BASE(),o); META=Object.assign({},META,patch); }
+const actV = v => VS[v] && !VS[v].skip && !VS[v].win;
+const actVs = () => vList().filter(actV);
+function rolesOf(v){ const o={}; orderV(v).forEach(p=>{ o[p]=secOf(p)||'citizen'; }); return o; }
+function actsOf(v){ const o={}; orderV(v).forEach(p=>{ const a=ACT[p]; if(a&&a.r===rk()) o[p]=a; }); return o; }
+async function addPts(map, extra){
+  const o={}; Object.keys(map||{}).forEach(p=>{ if(!map[p]&&!(extra&&extra[p])) return; const cur=Object.assign({pt:0,last:0,dc:0,ok:0,ab:0},SCW[p]||SC[p]||{}); cur.pt=Math.max(0,cur.pt+map[p]); cur.last=(cur.last||0)+map[p]; cur.nm=nickOf(p); cur.n=numOf(p); cur.v=(p+'').split('_')[0];
+    if(extra&&extra[p]) Object.keys(extra[p]).forEach(k=>cur[k]=(cur[k]||0)+extra[p][k]); SCW[p]=cur; o['sc/'+p]=cur; });
+  if(Object.keys(o).length) await backend.update(BASE(),o);
+}
+async function createRoom(mode){
+  const A='ABCDEFGHJKMNPQRSTUVWXYZ23456789'; let c=''; for(let i=0;i<4;i++) c+=A[Math.floor(Math.random()*A.length)];
+  ROOM=c; history.replaceState(null,'',`?mode=teacher&room=${c}`);
+  await backend.set(BASE(),{meta:{mode,phase:'lobby',g:0,r:0,seq:0,open:true,revealed:true,auto:false,sec:DEF_SEC,created:Date.now()}});
+  subs(); lastHtml=''; R();
+}
+async function startGame(){
+  {
+    const clr={}, up={}, g=(+META.g||0)+1;
+    ['act','jv','ev','fv','gh','rv','pol','host','vs','sec','st','fb'].forEach(k=>clr[k]=null);
+    await backend.update(BASE(),clr);
+    for(const v of vList()){
+      const ord=orderV(v);
+      if(ord.length<4){ up[`vs/${v}`]={skip:true}; continue; }
+      const roles=assignRoles(ord);
+      ord.forEach(p=>{ const r=roles[p]; up[`sec/${p}`]={role:r, mates:r==='mafia'?ord.filter(q=>q!==p&&roles[q]==='mafia'):null}; up[`st/${p}`]={a:1}; up[`sc/${p}/last`]=0; });
+      up[`vs/${v}`]={r:1,rl:null,stats:{abs:0,wrong:0,jok:0,jbad:0}};
+      up[`host/${v}`]={stats:{abs:0,wrong:0,jok:0,jbad:0}};
+    }
+    up['meta/g']=g; up['meta/r']=1; up['meta/phase']='roles'; up['meta/open']=false; up['meta/revealed']=true; up['meta/endAt']=0;
+    SCW={};
+    await backend.update(BASE(),up);
+  }
+}
+async function goNight(){
+  const up={'meta/phase':'night','meta/revealed':true,'meta/endAt':nowS()+secs().night*1000};
+  actVs().forEach(v=>{ up[`vs/${v}/night`]=null; up[`vs/${v}/notes`]=null; up[`vs/${v}/jr`]=null; up[`vs/${v}/ex`]=null; up[`vs/${v}/fin`]=null; });
+  await backend.update(BASE(),up);
+}
+async function endNight(){
+  const up={};
+  for(const v of actVs()){
+    const ord=orderV(v), roles=rolesOf(v), al=aliveOf(v), acts=actsOf(v);
+    const res=resolveNight({roles,alive:al,acts});
+    const props=ord.filter(p=>roles[p]==='mafia'&&al[p]&&acts[p]&&acts[p].s!=null).map(p=>+acts[p].s);
+    const gn=genNotes({order:ord,roles,alive:al,proposals:props});
+    up[`host/${v}/night`]=res; up[`host/${v}/gn`]=gn;
+  }
+  Object.assign(up,{'meta/phase':'dawn','meta/revealed':false,'meta/show':{t:'dawn',seq:seqNext()},'meta/seq':seqNext(),'meta/endAt':0});
+  await backend.update(BASE(),up);
+}
+async function applyDawn(){
+  const up={};
+  for(const v of actVs()){
+    const H=HOST[v]||{}, n=H.night||{}, gn=H.gn;
+    if(n.killed!=null){ up[`st/${n.killed}/a`]=0; ST[n.killed]=Object.assign({},ST[n.killed],{a:0}); }
+    up[`vs/${v}/night`]={killed:n.killed==null?null:n.killed, saved:!!n.saved};
+    if(gn) up[`vs/${v}/notes`]=gn.notes;
+    toArr(n.checks).forEach(c=>{ up[`pol/${c.by}`]={r:rk(),t:c.t,m:c.m}; });
+    const w=checkWin(rolesOf(v),aliveOf(v)); if(w) up[`vs/${v}/win`]=w;
+    if(n.saved&&toArr(n.savedBy).length){ const pts={}; toArr(n.savedBy).forEach(p=>pts[p]=3); await addPts(pts); }
+  }
+  up['meta/revealed']=true;
+  await backend.update(BASE(),up);
+}
+async function goTalk(){
+  if(!actVs().length) return goEnd();
+  await backend.update(BASE(),{'meta/phase':'talk','meta/revealed':true,'meta/endAt':nowS()+secs().talk*1000});
+}
+async function endTalk(){
+  const up={};
+  for(const v of actVs()){
+    const H=HOST[v]||{}, gn=H.gn, roles=rolesOf(v), al=aliveOf(v);
+    if(!gn){ up[`host/${v}/judge`]=null; continue; }
+    const votes={}; orderV(v).forEach(p=>{ const j=JV[p]; if(j&&j.r===rk()) votes[p]=j; });
+    const tally=tallyJudge({votes,alive:al,fakeIdx:gn.fakeIdx});
+    const eff=judgeEffect(tally,gn.notes,gn.fakeIdx);
+    const pj=pointsJudge({votes,alive:al,roles,fakeIdx:gn.fakeIdx,tally});
+    const ex={}; pj.dec.forEach(p=>ex[p]={dc:1}); Object.keys(pj.pts).forEach(p=>{ if(roles[p]!=='mafia'&&pj.pts[p]>0) ex[p]=Object.assign(ex[p]||{},{ok:1}); });
+    // 유령의 직감
+    const gp={}; orderV(v).forEach(p=>{ if(al[p]) return; const g=GH[p]; if(g&&g.r===rk()&&roles[g.t]==='mafia'&&al[g.t]) gp[p]=1; });
+    const all=Object.assign({},pj.pts); Object.keys(gp).forEach(p=>all[p]=(all[p]||0)+gp[p]);
+    await addPts(all,ex);
+    const st=Object.assign({abs:0,wrong:0,jok:0,jbad:0},(H.stats||{}));
+    st.jok+=pj.ok; st.jbad+=pj.bad;
+    up[`host/${v}/judge`]={tally,immune:eff.immune,susp:eff.susp};
+    up[`host/${v}/stats`]=st;
+  }
+  Object.assign(up,{'meta/phase':'vote','meta/revealed':false,'meta/show':{t:'judge',seq:seqNext()},'meta/seq':seqNext(),'meta/endAt':0});
+  await backend.update(BASE(),up);
+}
+async function applyJudge(){
+  const up={};
+  actVs().forEach(v=>{ const H=HOST[v]||{}, j=H.judge, gn=H.gn; if(j&&gn) up[`vs/${v}/jr`]={cnt:j.tally.cnt,pick:j.tally.pick,correct:j.tally.correct,fakeIdx:gn.fakeIdx}; });
+  up['meta/revealed']=true; up['meta/endAt']=nowS()+secs().vote*1000;
+  await backend.update(BASE(),up);
+}
+async function endVote(){
+  const up={}; let any=false;
+  for(const v of actVs()){
+    const H=HOST[v]||{}, roles=rolesOf(v), al=aliveOf(v), j=H.judge||{};
+    const votes={}; orderV(v).forEach(p=>{ const e=EV[p]; if(e&&e.r===rk()) votes[p]=e; });
+    const t=tallyExec({votes,alive:al,immune:toArr(j.immune),susp:j.susp||{}});
+    const pe=pointsExec({votes,alive:al,roles});
+    await addPts(pe.pts,Object.keys(pe.pts).reduce((o,p)=>{ if(votes[p]&&votes[p].t==='abs') o[p]={ab:1}; return o; },{}));
+    const st=Object.assign({abs:0,wrong:0,jok:0,jbad:0},(H.stats||{})); st.abs+=pe.abs;
+    up[`host/${v}/exec`]=t; up[`host/${v}/stats`]=st; if(t.top) any=true;
+  }
+  Object.assign(up,{'meta/phase':'defense','meta/revealed':false,'meta/show':{t:'defendant',seq:seqNext()},'meta/seq':seqNext(),'meta/endAt':0});
+  await backend.update(BASE(),up);
+}
+async function applyDefendant(){
+  const up={}, any=actVs().some(v=>(HOST[v]||{}).exec&&HOST[v].exec.top);
+  actVs().forEach(v=>{ const t=(HOST[v]||{}).exec; if(t) up[`vs/${v}/ex`]={counts:t.counts||null,top:t.top||null,tied:t.tied&&t.tied.length?t.tied:null,silent:!!t.silent,abs:t.abs}; });
+  up['meta/revealed']=true; up['meta/endAt']=any?nowS()+secs().def*1000:0;
+  await backend.update(BASE(),up);
+}
+async function goFinal(){
+  const any=actVs().some(v=>(HOST[v]||{}).exec&&HOST[v].exec.top);
+  if(!any) return endFinal();
+  await backend.update(BASE(),{'meta/phase':'final','meta/revealed':true,'meta/endAt':nowS()+secs().fin*1000});
+}
+async function endFinal(){
+  const up={};
+  for(const v of actVs()){
+    const H=HOST[v]||{}, ex=H.exec, al=aliveOf(v);
+    if(!ex||!ex.top){ up[`host/${v}/fin`]=null; continue; }
+    const votes={}; orderV(v).forEach(p=>{ const f=FV[p]; if(f&&f.r===rk()) votes[p]=f; });
+    up[`host/${v}/fin`]=Object.assign(tallyFinal({votes,alive:al,def:ex.top}),{def:ex.top});
+  }
+  Object.assign(up,{'meta/phase':'exec','meta/revealed':false,'meta/show':{t:'exec',seq:seqNext()},'meta/seq':seqNext(),'meta/endAt':0});
+  await backend.update(BASE(),up);
+}
+async function applyExec(){
+  const up={};
+  for(const v of actVs()){
+    const H=HOST[v]||{}, ex=H.exec, fin=H.fin, roles=rolesOf(v);
+    if(ex&&ex.top&&fin){
+      up[`vs/${v}/fin`]={yes:fin.yes,no:fin.no,executed:!!fin.executed};
+      if(fin.executed){
+        up[`st/${ex.top}/a`]=0; ST[ex.top]=Object.assign({},ST[ex.top],{a:0});
+        up[`vs/${v}/rl/${ex.top}`]=roles[ex.top];
+        if(roles[ex.top]!=='mafia'){ const st=Object.assign({abs:0,wrong:0,jok:0,jbad:0},H.stats||{}); st.wrong++; up[`host/${v}/stats`]=st;
+          const dm={}; orderV(v).forEach(p=>{ if(roles[p]==='mafia') dm[p]=1; }); await addPts(dm); }
+      }
+    }
+    const al=aliveOf(v); if(fin&&fin.executed&&ex.top) al[ex.top]=false;
+    const w=checkWin(roles,al); if(w) up[`vs/${v}/win`]=w;
+  }
+  up['meta/revealed']=true;
+  await backend.update(BASE(),up);
+}
+async function afterExec(){
+  if(actVs().length){ const r=(+META.r||0)+1; await backend.update(BASE(),{'meta/r':r}); META.r=r; return goNight(); }
+  return goEnd();
+}
+async function goEnd(){
+  const up={};
+  for(const v of vList()){
+    if(!VS[v]||VS[v].skip) continue;
+    const roles=rolesOf(v), al=aliveOf(v), w=VS[v].win||checkWin(roles,al)||'citizen';
+    const exist=VS[v].ended; if(exist) continue;
+    await addPts(pointsEnd(roles,al,w));
+    up[`vs/${v}/win`]=w; up[`vs/${v}/ended`]=true;
+    const rl={}; orderV(v).forEach(p=>rl[p]=roles[p]); up[`vs/${v}/rl`]=rl;
+    up[`vs/${v}/stats`]=(HOST[v]||{}).stats||null;
+  }
+  Object.assign(up,{'meta/phase':'end','meta/revealed':false,'meta/show':{t:'end',seq:seqNext()},'meta/seq':seqNext(),'meta/endAt':0});
+  await backend.update(BASE(),up);
+}
+async function nextGame(){
+  await backend.update(BASE(),{'meta/phase':'lobby','meta/open':true,'meta/revealed':true,'meta/endAt':0,'meta/show':null});
+}
+async function plusTime(){ await setMeta({endAt:Math.max(nowS(),+META.endAt||0)+30000}); }
+async function toggleAuto(){ await setMeta({auto:!META.auto}); }
+const TIMED=['night','talk','vote','defense','final'];
+/* 현재 단계에서 '다음'으로 넘어가는 함수 */
+function nextFn(){
+  const ph=phase(), rv=META.revealed!==false;
+  if(ph==='lobby') return {t:'🎮 게임 시작', f:startGame, ok:vList().some(v=>orderV(v).length>=4)};
+  if(ph==='roles') return {t:'🌙 밤 시작', f:goNight, ok:true};
+  if(ph==='night') return {t:'🌅 밤 종료 → 새벽', f:endNight, ok:true};
+  if(ph==='dawn') return rv?{t:'☀️ 광장 토론 시작', f:goTalk, ok:true}:{t:'🥁 새벽 발표!', f:()=>playReveal('dawn'), ok:true, reveal:true};
+  if(ph==='talk') return {t:'🧐 토론 종료 → 판단 공개', f:endTalk, ok:true};
+  if(ph==='vote') return rv?{t:'🗳️ 투표 마감 → 개표', f:endVote, ok:true}:{t:'🥁 소문 판단 공개!', f:()=>playReveal('judge'), ok:true, reveal:true};
+  if(ph==='defense') return rv?{t:'⚖️ 변론 끝 → 찬반 투표', f:goFinal, ok:true}:{t:'🥁 개표 발표!', f:()=>playReveal('defendant'), ok:true, reveal:true};
+  if(ph==='final') return {t:'🗳️ 찬반 마감', f:endFinal, ok:true};
+  if(ph==='exec') return rv?(actVs().length?{t:'🌙 다음 밤으로', f:afterExec, ok:true}:{t:'🏁 최종 결과', f:afterExec, ok:true}):{t:'🥁 결과 발표!', f:()=>playReveal('exec'), ok:true, reveal:true};
+  if(ph==='end') return rv?{t:'🔄 한 판 더 (다시 모집)', f:nextGame, ok:true}:{t:'🥁 정체 공개!', f:()=>playReveal('end'), ok:true, reveal:true};
+  return {t:'…', f:async()=>{}, ok:false};
+}
+async function runNext(){
+  if(BUSY||PLAYING) return; const n=nextFn(); if(!n.ok) return;
+  BUSY=true; try{ ac(); await n.f(); }catch(e){ console.error(e); toast('⚠️ 진행 오류: '+(e.message||e)); } finally{ BUSY=false; R(); }
+}
+/* 자동 진행 */
+let autoLock=false;
+async function autoTick(){
+  if(!META.auto||autoLock||BUSY||PLAYING) return;
+  const ph=phase(), rv=META.revealed!==false; let go=false;
+  if(TIMED.includes(ph) && rv && META.endAt && nowS()>=META.endAt) go=true;
+  if(!rv) { if(!REVEALED_AT) REVEALED_AT=Date.now(); if(Date.now()-REVEALED_AT>1500) go=true; }
+  else if(['dawn','exec'].includes(ph)){ if(!REVEALED_AT) REVEALED_AT=Date.now(); if(Date.now()-REVEALED_AT>6000) go=true; }
+  else REVEALED_AT=0;
+  if(go){ autoLock=true; REVEALED_AT=0; try{ await runNext(); } finally{ setTimeout(()=>autoLock=false,800); } }
+}
+
+/* =========================================================
+   ⑦ 전광판 연출 (쪼는 맛)
+   ========================================================= */
+const put=(el,h)=>{ if(el) el.innerHTML=h; };
+async function typeIn(el,text,ms=70,cls='big'){ put(el,`<div class="${cls}" style="min-height:1.4em"></div>`); const d=el.firstChild; for(const ch of text){ d.textContent+=ch; if(ch.trim()) sfx.tick(); await sleep(ms); } return d; }
+async function roulette(el,pids,target,total=3600){
+  const pool=pids.length?pids:[target]; let t=0, i=0; const steps=26;
+  for(let s=0;s<steps;s++){ const d=60+Math.pow(s/steps,2.4)*420; const p=(s===steps-1)?target:pickOne(pool.filter(x=>x!==(el._last))); el._last=p;
+    put(el,`<div class="big center" style="font-size:44px;padding:18px 0">🎯 ${esc(labelOf(p))}</div>`); sfx.tick(); await sleep(d); }
+  sfx.sting(); vib(200);
+}
+const stageEl = v => document.getElementById('stg'+v);
+async function playReveal(kind){
+  if(PLAYING) return; PLAYING=1; ac();
+  try{
+    const vs=actVs().length?actVs():vList().filter(v=>VS[v]&&!VS[v].skip);
+    await Promise.all(vs.map(v=>({dawn:animDawn,judge:animJudge,defendant:animDefendant,exec:animExec,end:animEnd}[kind])(v,stageEl(v))));
+    await sleep(800);
+    BUSY=true; try{
+      if(kind==='dawn') await applyDawn(); else if(kind==='judge') await applyJudge();
+      else if(kind==='defendant') await applyDefendant(); else if(kind==='exec') await applyExec(); else if(kind==='end') await setMeta({revealed:true});
+    } finally{ BUSY=false; }
+  }catch(e){ console.error(e); toast('⚠️ 연출 오류: '+(e.message||e)); }
+  finally{ PLAYING=0; R(); }
+}
+async function animDawn(v,el){
+  const H=HOST[v]||{}, n=H.night||{}, al=aliveOf(v), cand=orderV(v).filter(p=>al[p]&&secOf(p)!=='mafia');
+  sfx.beat(); await typeIn(el,'어젯밤, 마을에서는…',80); await sleep(700);
+  if(n.target==null){ put(el,`<div class="big center" style="padding:30px 0">🌅<br>아무 일도 일어나지 않았습니다</div>`); sfx.win(); return; }
+  await roulette(el,cand,n.target); await sleep(700);
+  if(n.saved){ put(el,`<div class="big center" style="padding:20px 0">💀 ${esc(labelOf(n.target))}</div>`); sfx.drum(); await sleep(1500);
+    put(el,`<div class="big center blink" style="padding:20px 0">…그러나!</div>`); sfx.beat(); await sleep(1600);
+    put(el,`<div class="big center" style="padding:20px 0">💉 의사가 밤새 지켜냈습니다!<br><span style="font-size:.6em">아무도 죽지 않았어요</span></div>`); sfx.win(); }
+  else { put(el,`<div class="big center" style="padding:20px 0">💀 ${esc(labelOf(n.target))}<br><span style="font-size:.6em">님이 희생되었습니다…</span></div>`); sfx.lose(); vib(400); }
+}
+async function animJudge(v,el){
+  const H=HOST[v]||{}, j=H.judge, gn=H.gn; if(!j||!gn){ put(el,`<div class="big center">소문 판단 없음</div>`); return; }
+  const W=toArr(gn.notes[0].p).length;
+  const cards=()=>gn.notes.map((n,i)=>`<div class="note" id="n${v}${i}"><div class="nh">쪽지 ${i+1}</div><div style="margin-top:4px">${toArr(n.p).map(p=>chip(p)).join('')}</div></div>`).join('');
+  sfx.beat(); put(el,`<div class="big center">마을의 판단은…</div>${cards()}<div id="jc${v}" class="center muted"></div>`); await sleep(1400);
+  const t=j.tally, box=document.getElementById('jc'+v);
+  const total=t.cnt[0]+t.cnt[1]; let a=0,b=0;
+  for(let i=0;i<total;i++){ if(a<t.cnt[0]&&(b>=t.cnt[1]||Math.random()<.5)) a++; else b++; if(box) box.innerHTML=`<div class="big">쪽지1 가짜 ${a} : ${b} 쪽지2 가짜</div>`; sfx.tick(); await sleep(total>20?90:160); }
+  await sleep(900); sfx.beat(); await sleep(900);
+  put(el,`<div class="big center">가짜는…</div>${gn.notes.map((n,i)=>`<div class="note ${''}"><div class="nh">쪽지 ${i+1}</div><div>${toArr(n.p).map(p=>chip(p)).join('')}</div></div>`).join('')}`); await sleep(1400);
+  const msg=t.correct==null?'⚖️ 의견이 갈려 판단 보류!':(t.correct?'🎉 정답! 마을이 가짜를 가려냈다':'😱 속았다! 마을이 가짜를 믿었다');
+  put(el,`<div class="big center">가짜 쪽지는 <span style="color:var(--bad)">${gn.fakeIdx+1}번</span>!</div>${gn.notes.map((n,i)=>`<div class="note ${i===gn.fakeIdx?'fake':'real'}"><span class="stamp ${i===gn.fakeIdx?'f':'t'}">${i===gn.fakeIdx?'가짜':'진짜'}</span><div class="nh">쪽지 ${i+1}</div><div>${toArr(n.p).map(p=>chip(p)).join('')}</div></div>`).join('')}<div class="big center">${msg}</div>`);
+  if(t.correct===false) sfx.lose(); else sfx.win();
+}
+async function animDefendant(v,el){
+  const t=(HOST[v]||{}).exec; if(!t){ put(el,`<div class="big center">—</div>`); return; }
+  const al=aliveOf(v), ks=orderV(v).filter(p=>(t.eff&&t.eff[p]));
+  sfx.beat(); put(el,`<div class="big center">개표를 시작합니다…</div>`); await sleep(1400);
+  const mx=Math.max(1,...ks.map(p=>t.eff[p]));
+  let h=`<div class="big center" style="margin-bottom:8px">🗳️ 득표 현황</div>`;
+  const rowsEl=()=>ks.map(p=>`<div class="rowx"><div class="lab">${numOf(p)} ${esc(nickOf(p))}</div><div class="bar"><i id="b${v}${p}" style="width:0"></i></div><b id="c${v}${p}">0</b></div>`).join('');
+  put(el,h+rowsEl()+`<div class="center muted" style="margin-top:6px">기권 ${t.abs}표</div>`);
+  const order=ks.slice().sort((a,b)=>t.eff[a]-t.eff[b]);
+  for(const p of order){ for(let k=1;k<=t.eff[p];k++){ const bi=document.getElementById(`b${v}${p}`), ci=document.getElementById(`c${v}${p}`); if(bi) bi.style.width=(k/mx*100)+'%'; if(ci) ci.textContent=k; sfx.tick(); await sleep(150); } await sleep(300); }
+  await sleep(900);
+  if(!t.top){ put(el,`<div class="big center" style="padding:20px 0">${t.silent?'🤐 절반 넘게 기권했습니다.<br>마을이 침묵했어요':'아무도 지목되지 않았습니다'}</div>`); sfx.lose(); return; }
+  if(t.tied&&t.tied.length>1){ put(el,`<div class="big center">동률! 운명의 룰렛…</div>`); await sleep(1200); await roulette(el,t.tied,t.top); }
+  sfx.sting(); put(el,`<div class="center muted">최후 변론 대상</div><div class="big center" style="font-size:48px;padding:14px 0">⚖️ ${esc(labelOf(t.top))}</div><div class="center muted">변론 시간 ${secs().def}초 — 마을 앞에서 말해 주세요</div>`);
+}
+async function animExec(v,el){
+  const H=HOST[v]||{}, ex=H.exec, fin=H.fin, roles=rolesOf(v);
+  if(!ex||!ex.top){ put(el,`<div class="big center" style="padding:24px 0">${ex&&ex.silent?'🤐 마을이 침묵했습니다':'🕊️ 오늘은 아무도 처형되지 않았습니다'}</div>`); sfx.lose(); await sleep(800); return; }
+  put(el,`<div class="center muted">최후의 찬반 투표</div><div class="big center">⚖️ ${esc(labelOf(ex.top))}</div><div id="fc${v}" class="big center" style="padding:14px 0"></div>`); sfx.beat(); await sleep(1500);
+  const box=document.getElementById('fc'+v); let y=0,n=0; const seq=[]; for(let i=0;i<fin.yes;i++) seq.push(1); for(let i=0;i<fin.no;i++) seq.push(0);
+  const mixed=shuffle(seq);
+  for(const s of mixed){ if(s) y++; else n++; if(box) box.innerHTML=`👍 ${y} : ${n} 👎`; sfx.tick(); await sleep(mixed.length>20?110:200); }
+  await sleep(1000); sfx.drum(); await sleep(500);
+  put(el,`<div class="big center">👍 ${fin.yes} : ${fin.no} 👎</div><div class="big center" style="padding:10px 0">${fin.executed?'처형 결정…':'반대가 많거나 같습니다 — 무사!'}</div>`); await sleep(1500);
+  if(!fin.executed){ put(el,`<div class="big center" style="padding:20px 0">🕊️ ${esc(labelOf(ex.top))}<br>마을이 지켜 주었습니다</div>`); sfx.win(); return; }
+  put(el,`<div class="big center">💀 ${esc(labelOf(ex.top))}</div><div class="big center blink">정체는…</div>`); sfx.beat(); await sleep(1800); sfx.beat(); await sleep(1400);
+  const r=roles[ex.top], mf=r==='mafia';
+  put(el,`<div class="big center">💀 ${esc(labelOf(ex.top))}</div><div class="big center" style="font-size:54px;color:${mf?'var(--ok)':'var(--bad)'}">${ROLES[r].e} ${ROLES[r].n}</div><div class="big center">${mf?'마피아를 잡았습니다!':'무고한 시민이었습니다…'}</div>`);
+  mf?sfx.win():sfx.lose();
+}
+async function animEnd(v,el){
+  const roles=rolesOf(v), ord=orderV(v), al=aliveOf(v), w=(VS[v]||{}).win||'citizen';
+  put(el,`<div class="big center">모든 정체를 공개합니다…</div><div class="flipgrid" id="fg${v}" style="justify-content:center;margin-top:10px">${ord.map(p=>`<div class="fcard back" id="f${v}${p}"><div class="em">❓</div>${numOf(p)} ${esc(nickOf(p))}</div>`).join('')}</div>`); sfx.beat(); await sleep(1500);
+  const sh=shuffle(ord);
+  for(const p of sh){ const e=document.getElementById(`f${v}${p}`); if(e){ e.className=`fcard ${roles[p]==='mafia'?'m':''} ${al[p]?'':'dead'}`; e.innerHTML=`<div class="em">${ROLES[roles[p]].e}</div>${numOf(p)} ${esc(nickOf(p))}`; } roles[p]==='mafia'?sfx.sting():sfx.tick(); await sleep(roles[p]==='mafia'?700:260); }
+  await sleep(900);
+  const st=(HOST[v]||{}).stats||{};
+  put(el,`<div class="winb ${w==='mafia'?'m':'c'}">${w==='mafia'?'🎭 마피아 승리':'🏘️ 시민 승리'}</div><div class="flipgrid" style="justify-content:center">${ord.map(p=>`<div class="fcard ${roles[p]==='mafia'?'m':''} ${al[p]?'':'dead'}"><div class="em">${ROLES[roles[p]].e}</div>${numOf(p)} ${esc(nickOf(p))}</div>`).join('')}</div>`);
+  w==='mafia'?sfx.lose():sfx.win();
+}
+
+/* =========================================================
+   ⑧ 교사 / 전광판 화면
+   ========================================================= */
+const PHN={lobby:'모집',roles:'역할 확인',night:'🌙 밤',dawn:'🌅 새벽',talk:'☀️ 광장 토론',vote:'🗳️ 투표',defense:'⚖️ 최후 변론',final:'👍👎 찬반 투표',exec:'처형 결과',end:'🏁 종료'};
+function joinUrl(){ try{ return new URL('index.html?room='+ROOM, location.href).href; }catch(e){ return location.href; } }
+function progress(v){
+  const ph=phase(), al=aliveOf(v), ord=orderV(v), r=rk();
+  const need=(role)=>ord.filter(p=>al[p]&&secOf(p)===role);
+  if(ph==='roles'){ const seen=ord.filter(p=>RV[p]).length; return `역할 확인 ${seen}/${ord.length}`; }
+  if(ph==='night'){ let tot=0,done=0; ['mafia','doctor','police'].forEach(role=>need(role).forEach(p=>{ tot++; const a=ACT[p]; if(a&&a.r===r&&a.t!=null) done++; })); return `밤 행동 완료 ${done}/${tot}`; }
+  if(ph==='talk'){ const n=ord.filter(p=>al[p]&&JV[p]&&JV[p].r===r).length, t=ord.filter(p=>al[p]).length; return `소문 판별 제출 ${n}/${t}`; }
+  if(ph==='vote'){ const n=ord.filter(p=>al[p]&&EV[p]&&EV[p].r===r).length, t=ord.filter(p=>al[p]).length; return `투표 ${n}/${t}`; }
+  if(ph==='final'){ const d=((VS[v]||{}).ex||{}).top; const n=ord.filter(p=>al[p]&&p!==d&&FV[p]&&FV[p].r===r).length, t=ord.filter(p=>al[p]&&p!==d).length; return `찬반 ${n}/${t}`; }
+  return '';
+}
+function stageStatic(v){
+  const ph=phase(), vs=VS[v]||{}, rv=META.revealed!==false, ord=orderV(v), al=aliveOf(v);
+  const showR = UI.showRoles;
+  const chipR = p => { const r=secOf(p); return `<span class="chip ${ST[p]&&!ST[p].a?'dead':''} ${showR&&r==='mafia'?'bad':''}">${numOf(p)}<b>${esc(nickOf(p))}</b>${showR&&r?ROLES[r].e:''}${ST[p]&&!ST[p].a?'💀':''}</span>`; };
+  if(ph==='lobby') return `<div class="muted">입장 ${ord.length}명 ${ord.length<4?'(4명 이상 필요)':''}</div><div>${ord.map(p=>chipR(p)).join('')||'<span class="muted">아직 없음</span>'}</div>`;
+  if(vs.skip) return `<div class="big center muted">인원 부족으로 이번 판 쉼</div>`;
+  const head=`<div class="muted small">${progress(v)}</div>`;
+  const roster=`<div style="margin-top:8px">${ord.map(p=>chipR(p)).join('')}</div>`;
+  if(ph==='roles') return `<div class="big center">🎭 역할 카드를 확인하세요</div>${head}${roster}`;
+  if(vs.win&&ph!=='end') return `<div class="winb ${vs.win==='mafia'?'m':'c'}">${vs.win==='mafia'?'🎭 마피아 승리':'🏘️ 시민 승리'}</div>${roster}`;
+  if(ph==='night') return `<div class="big center stars-bg" style="padding:30px 0">🌙 밤이 되었습니다<br><span style="font-size:.55em;font-weight:600">모두 눈을 감고 조용히…</span></div>${head}${roster}`;
+  if(ph==='dawn'){
+    if(!rv) return `<div class="big center blink" style="padding:30px 0">🌅 새벽이 밝아옵니다…<br><span style="font-size:.55em">🥁 발표 버튼을 눌러 주세요</span></div>${roster}`;
+    const n=vs.night||{}; return `<div class="big center" style="padding:20px 0">${n.killed?`💀 ${esc(labelOf(n.killed))} 희생`:(n.saved?'💉 의사가 지켜냈습니다':'🌅 평화로운 밤')}</div>${roster}`;
+  }
+  if(ph==='talk') return `<div class="big center">☀️ 광장 토론</div>${head}${notesHtml(vs,false)}${roster}`;
+  if(ph==='vote'){ if(!rv) return `<div class="big center blink" style="padding:30px 0">🥁 마을의 판단은…</div>`; return `${notesHtml(vs,true)}${head}${roster}`; }
+  if(ph==='defense'){ if(!rv) return `<div class="big center blink" style="padding:30px 0">⚖️ 개표 대기</div>`; const ex=vs.ex; return `<div class="big center" style="padding:20px 0">${ex&&ex.top?`⚖️ 최후 변론 · ${esc(labelOf(ex.top))}`:'오늘은 지목된 사람이 없습니다'}</div>${roster}`; }
+  if(ph==='final'){ const ex=vs.ex; return `<div class="big center">${ex&&ex.top?esc(labelOf(ex.top)):''}<br>👍 / 👎 투표 중</div>${head}`; }
+  if(ph==='exec'){ if(!rv) return `<div class="big center blink" style="padding:30px 0">🥁 운명의 순간…</div>`; const ex=vs.ex, f=vs.fin; return `<div class="big center" style="padding:20px 0">${ex&&ex.top&&f?(f.executed?`💀 ${esc(labelOf(ex.top))} 처형`:`🕊️ ${esc(labelOf(ex.top))} 무사`):'아무도 처형되지 않았습니다'}</div>${roster}`; }
+  if(ph==='end'){ if(!rv) return `<div class="big center blink" style="padding:30px 0">🎭 정체 공개 대기</div>`;
+    const rl=vs.rl||{}; return `<div class="winb ${vs.win==='mafia'?'m':'c'}">${vs.win==='mafia'?'🎭 마피아 승리':'🏘️ 시민 승리'}</div><div class="flipgrid" style="justify-content:center">${ord.map(p=>`<div class="fcard ${rl[p]==='mafia'?'m':''} ${ST[p]&&!ST[p].a?'dead':''}"><div class="em">${rl[p]?ROLES[rl[p]].e:''}</div>${numOf(p)} ${esc(nickOf(p))}</div>`).join('')}</div>`; }
+  return '';
+}
+function scoreBoard(){
+  const vs=vList(); const rows=Object.keys(SC).map(p=>Object.assign({p},SC[p])).filter(x=>x.pt>0||x.last).sort((a,b)=>b.pt-a.pt);
+  let vt='';
+  if(META.mode==='grade'){ const sums=vs.map(v=>rows.filter(r=>String(r.v)===String(v)).reduce((a,r)=>a+r.pt,0)); const mx=Math.max(1,...sums);
+    vt=`<h3>🏫 반 대항 점수</h3>`+vs.map((v,i)=>`<div class="rowx"><div class="lab" style="color:${VCOL[i]}">${v}반</div><div class="bar"><i style="width:${sums[i]/mx*100}%;background:${VCOL[i]}"></i></div><b>${sums[i]}</b></div>`).join(''); }
+  const top=rows.slice(0,8);
+  const aw=(key,label,filter)=>{ const c=rows.filter(filter||(()=>true)).sort((a,b)=>(b[key]||0)-(a[key]||0))[0]; return c&&(c[key]||0)>0?`<span class="chip hl">${label} ${c.v&&META.mode==='grade'?c.v+'반 ':''}${c.n}번 ${esc(c.nm)}</span>`:''; };
+  const awards=aw('dc','🤥 최고 사기꾼')+aw('ok','🕵️ 최고 탐정')+(rows.find(r=>!(r.ab>0)&&r.pt>0)?aw('pt','😇 양심상',r=>!(r.ab>0)):'');
+  return `${vt}<h3>🏆 개인 순위</h3><table class="tbl">${top.map((r,i)=>`<tr><td>${i+1}</td><td>${META.mode==='grade'?r.v+'반 ':''}${r.n}번 ${esc(r.nm)}</td><td><b>${r.pt}</b>점</td><td class="muted small">+${r.last||0}</td></tr>`).join('')||'<tr><td class="muted">아직 점수가 없어요</td></tr>'}</table>${awards?`<div style="margin-top:8px">${awards}</div>`:''}`;
+}
+function teacherView(){
+  if(MODE==='teacher' && !sessionStorage.getItem('mf_pin')) return `<div class="wrap" style="max-width:420px;padding-top:60px">${say('선생님 확인 번호를 입력해 주세요.')}<div class="card"><input id="pin" class="field" type="password" inputmode="numeric" placeholder="비밀번호"><button class="btn block" style="margin-top:12px" data-a="pin">확인</button></div></div>`;
+  if(!ROOM || !META.phase){
+    if(MODE==='board') return `<div class="wrap">${say('방 코드가 필요해요. 주소 끝에 ?mode=board&room=코드 를 붙여 주세요.')}</div>`;
+    return `<div class="wrap" style="max-width:640px;padding-top:30px"><div class="center"><img src="${CHAR}" width="110" alt="꿈송이"><h2 style="margin-top:6px">곡선 마을의 양심</h2><div class="muted">마피아 · 가짜 소문 · 2차시 게임</div></div>
+      <div class="card"><h3 style="margin-top:0">${ROOM?'이 방은 아직 없어요. 새로 만들까요?':'새 방 만들기'}</h3>
+        <div class="grid g2" style="margin-top:8px"><button class="opt" data-a="mk" data-m="class">🏫 교실판<small>한 반 약 30명 · 마을 1개</small></button><button class="opt" data-a="mk" data-m="grade">🏟️ 학년판<small>3개 반 약 90명 · 체육관</small></button></div>
+        <div class="muted small" style="margin-top:10px">${modeBadge()}</div></div></div>`;
+  }
+  const ph=phase(), n=nextFn(), vs=vList();
+  const tb=`<div class="tbar"><h1><img src="${CHAR}" alt="">곡선 마을의 양심 <span class="pill">${META.g?`${META.g}판 · ${META.r}일차`:'대기'}</span></h1>
+    <span class="pill">${PHN[ph]||ph}</span>${TIMED.includes(ph)&&META.revealed!==false?tmr():''}${modeBadge()}</div>`;
+  let lobby='';
+  if(ph==='lobby'){
+    const s=secs();
+    lobby=`<div class="card" style="display:flex;gap:18px;flex-wrap:wrap;align-items:center"><div class="center"><div class="qr" id="qrbox"></div><div class="muted small">학생은 QR 또는 코드로 입장</div></div>
+      <div style="flex:1;min-width:240px"><div class="muted">방 코드</div><div class="big" style="font-size:54px;letter-spacing:6px">${esc(ROOM)}</div><div class="muted small" style="word-break:break-all">${esc(joinUrl())}</div>
+      <div class="muted small" style="margin-top:6px">전광판 주소: <b>board.html?room=${esc(ROOM)}</b></div>
+      <div class="grid g4" style="margin-top:10px">${[['night','밤'],['talk','토론'],['vote','투표'],['def','변론']].map(([k,l])=>`<div><div class="muted small">${l}(초)</div><input class="field" type="number" min="10" max="900" value="${s[k]}" data-sec="${k}" style="padding:6px 8px"></div>`).join('')}</div></div></div>`;
+  }
+  const cols=`<div class="vcols v${vs.length}">${vs.map((v,i)=>`<div class="vcol" style="border-color:${META.mode==='grade'?VCOL[i]:'var(--line)'}"><div class="vh">${META.mode==='grade'?`<i style="background:${VCOL[i]}"></i>`:''}${esc(vName(v))} <span class="muted small" style="font-weight:500">${ph==='lobby'?orderV(v).length+'명 입장':Object.values(aliveOf(v)).filter(Boolean).length+'/'+orderV(v).length+'명 생존'}</span></div><div class="stage" id="stg${v}">${stageStatic(v)}</div></div>`).join('')}</div>`;
+  const side=Object.keys(SC).length?`<div class="card" style="margin-top:12px">${scoreBoard()}</div>`:'';
+  const fbs=(ph==='end'&&Object.keys(FB).length)?`<div class="card"><h3 style="margin-top:0">✍️ 학생 한 줄 소감 (${Object.keys(FB).length})</h3>${Object.values(FB).slice(-12).map(f=>`<div class="small">${f.v&&META.mode==='grade'?f.v+'반 ':''}${f.n}번 ${esc(f.nm)} · ${esc(f.t)}</div>`).join('')}</div>`:'';
+  if(MODE==='board') return `<div class="twrap">${tb}${lobby}${cols}${side}</div>`;
+  const ctl=`<div class="ctl"><button class="btn xl ${n.reveal?'sun':''}" id="nx" data-a="next" ${n.ok?'':'disabled'}>${n.t}</button>
+    <div class="grow"></div>${TIMED.includes(ph)?`<button class="btn sm ghost" data-a="plus">+30초</button>`:''}
+    <button class="btn sm ${META.auto?'mint':'ghost'}" data-a="auto">${META.auto?'⏩ 자동 진행 켬':'⏩ 자동 진행'}</button>
+    <button class="btn sm ghost" data-a="roles">👁 역할 ${UI.showRoles?'숨기기':'보기'}</button>
+    <button class="btn sm ghost" data-a="csv">⬇ 점수 CSV</button>
+    <button class="btn sm ghost" data-a="reset">⟲ 처음으로</button></div>`;
+  return `<div class="twrap">${tb}${lobby}${cols}${fbs}${side}${ctl}</div>`;
+}
+const TH = {
+  async pin(){ if((document.getElementById('pin').value||'')===TEACHER_PIN){ sessionStorage.setItem('mf_pin','1'); lastHtml=''; R(); } else toast('비밀번호가 달라요'); },
+  async mk(d){ await createRoom(d.m); },
+  next(){ runNext(); },
+  plus(){ plusTime(); },
+  auto(){ toggleAuto(); },
+  roles(){ UI.showRoles=!UI.showRoles; lastHtml=''; R(); },
+  async reset(){ if(!confirm('진행 중인 판을 끝내고 모집 단계로 돌아갈까요?\n(점수는 유지됩니다)')) return; await nextGame(); },
+  csv(){
+    const rows=[['반','번호','별명','누적점수','마지막 판','사기성공','판별정답','방관']];
+    Object.keys(SC).forEach(p=>{ const r=SC[p]; rows.push([r.v,r.n,r.nm,r.pt||0,r.last||0,r.dc||0,r.ok||0,r.ab||0]); });
+    Object.keys(FB).forEach(p=>{ const f=FB[p]; rows.push(['소감',f.n,f.nm,f.t]); });
+    const csv='﻿'+rows.map(r=>r.map(x=>`"${String(x).replace(/"/g,'""')}"`).join(',')).join('\n');
+    const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'})); a.download=`마피아_${ROOM}.csv`; a.click();
+  }
+};
+
+/* =========================================================
+   ⑨ 렌더링 / 이벤트
+   ========================================================= */
+function render(){
+  if(MODE!=='student' && PLAYING) return;                // 연출 중에는 화면을 건드리지 않음
+  if(HOLD.on) return;                                    // 카드를 누르고 있는 동안은 유지
+  let html;
+  if(MODE==='student') html=studentView(); else { document.body.classList.toggle('night', ['night'].includes(phase())); html=teacherView(); }
+  const act=document.activeElement, keep=act&&act.tagName==='INPUT'&&$app.contains(act)?{id:act.id,v:act.value,s:act.selectionStart,sec:act.dataset.sec}:null;
+  const sig=html+(MODE==='student'?'':'');
+  if(sig===lastHtml) return;
+  lastHtml=sig; $app.innerHTML=html;
+  if(keep&&keep.id){ const e=document.getElementById(keep.id); if(e){ e.value=keep.v; e.focus(); try{ e.setSelectionRange(keep.s,keep.s); }catch(_){} } }
+  if(MODE==='student'){ bindHold(); bindPeek(); }
+  const qb=document.getElementById('qrbox'); if(qb&&window.QRCode){ qb.innerHTML=''; try{ new QRCode(qb,{text:joinUrl(),width:150,height:150}); }catch(e){} }
+  $app.querySelectorAll('.tmr[data-end]').forEach(el=>{ const e=+el.dataset.end; if(e){ const s=Math.max(0,Math.ceil((e-nowS())/1000)); el.textContent=String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0'); } });
+}
+$app.addEventListener('click',e=>{
+  const b=e.target.closest('[data-a]'); if(!b) return; ac();
+  const H=(MODE==='student')?SH:TH; const fn=H[b.dataset.a]; if(fn) Promise.resolve(fn(b.dataset,b)).catch(err=>{ console.error(err); toast('⚠️ '+(err.message||err)); });
+});
+$app.addEventListener('change',e=>{
+  const i=e.target.closest('[data-sec]'); if(!i||MODE!=='teacher') return;
+  const k=i.dataset.sec, v=Math.max(10,Math.min(900,+i.value||DEF_SEC[k])); backend.set(`${BASE()}/meta/sec/${k}`,v);
+});
+
+(async function boot(){
+  await initBackend();
+  if(MODE==='student'){ myLoad(); if(ROOM){ subs(); subsMe(); } }
+  else { if(ROOM) subs(); }
+  startTicker(); R();
+})();
+window.__MF = {engine:{rolePlan,assignRoles,genNotes,resolveNight,tallyJudge,judgeEffect,pointsJudge,tallyExec,pointsExec,tallyFinal,checkWin,pointsEnd,winW}};
+</script>
+</body>
+</html>
