@@ -53,5 +53,5 @@ index.html 안의 순서: `<style>`(디자인) → `<body>`(껍데기) → `<scr
 `gtk0624-a11y/Qdice` 저장소의 `baton/` 폴더 → `https://gtk0624-a11y.github.io/Qdice/baton/`
 
 ## 7. 인스타 카드뉴스
-- `baton/insta/` : 카드 7장(card1~7.jpg, 1080×1350) + 게시글·DM 문구 + 한 번에 저장 페이지. 주소 `.../Qdice/baton/insta/`
+- `baton/insta/` : 카드 8장(card1~8.jpg, 1080×1440, 캘린더 카드뉴스와 같은 틀) + 게시글·DM 문구 + 한 번에 저장 페이지. 주소 `.../Qdice/baton/insta/`
 - 화면 워터마크는 제거(상단 © 표기·인쇄물 워터마크는 유지)

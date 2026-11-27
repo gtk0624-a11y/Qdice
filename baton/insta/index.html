@@ -4,10 +4,10 @@
 figure{margin:16px 0}img{width:100%;border-radius:12px;display:block;box-shadow:0 6px 18px rgba(0,0,0,.12)}figcaption{text-align:center;font-size:13px;color:#888;margin-top:4px}
 pre{white-space:pre-wrap;background:#fff;border-radius:12px;padding:12px;font-size:14px;font-family:inherit}#msg{text-align:center;font-weight:700;color:#2f9e6b;min-height:22px}</style></head><body><div class="w">
 <h1>📸 바통터치 인스타 카드뉴스</h1>
-<button class="btn y" id="all">📥 7장 한 번에 저장·공유</button>
+<button class="btn y" id="all">📥 8장 한 번에 저장·공유</button>
 <button class="btn" data-copy="body">📋 게시글 문구 복사</button>
 <button class="btn" data-copy="dm">💌 DM 문구 복사</button>
-<div id="msg"></div><figure><img src="card1.jpg?v=1" alt="카드 1"><figcaption>1 / 7</figcaption></figure><figure><img src="card2.jpg?v=1" alt="카드 2"><figcaption>2 / 7</figcaption></figure><figure><img src="card3.jpg?v=1" alt="카드 3"><figcaption>3 / 7</figcaption></figure><figure><img src="card4.jpg?v=1" alt="카드 4"><figcaption>4 / 7</figcaption></figure><figure><img src="card5.jpg?v=1" alt="카드 5"><figcaption>5 / 7</figcaption></figure><figure><img src="card6.jpg?v=1" alt="카드 6"><figcaption>6 / 7</figcaption></figure><figure><img src="card7.jpg?v=1" alt="카드 7"><figcaption>7 / 7</figcaption></figure>
+<div id="msg"></div><figure><img src="card1.jpg?v=2" alt="카드 1"><figcaption>1 / 8</figcaption></figure><figure><img src="card2.jpg?v=2" alt="카드 2"><figcaption>2 / 8</figcaption></figure><figure><img src="card3.jpg?v=2" alt="카드 3"><figcaption>3 / 8</figcaption></figure><figure><img src="card4.jpg?v=2" alt="카드 4"><figcaption>4 / 8</figcaption></figure><figure><img src="card5.jpg?v=2" alt="카드 5"><figcaption>5 / 8</figcaption></figure><figure><img src="card6.jpg?v=2" alt="카드 6"><figcaption>6 / 8</figcaption></figure><figure><img src="card7.jpg?v=2" alt="카드 7"><figcaption>7 / 8</figcaption></figure><figure><img src="card8.jpg?v=2" alt="카드 8"><figcaption>8 / 8</figcaption></figure>
 <h1>게시글 문구</h1><pre id="body">바통 넘길 때마다 기억 더듬으시죠? 🏃
 
 2월 마지막 주, 1년치 업무를 하루에 떠올리려면
@@ -41,7 +41,7 @@ const msg=t=>{document.getElementById('msg').textContent=t};
 document.querySelectorAll('[data-copy]').forEach(b=>b.onclick=async()=>{const t=document.getElementById(b.dataset.copy).textContent;
 try{await navigator.clipboard.writeText(t);msg('복사됐어요! 붙여 넣으세요.')}catch(e){const r=document.createRange();r.selectNodeContents(document.getElementById(b.dataset.copy));getSelection().removeAllRanges();getSelection().addRange(r);msg('글이 선택됐어요. [복사]를 누르세요.')}});
 document.getElementById('all').onclick=async()=>{msg('불러오는 중…');
-try{const files=await Promise.all([1,2,3,4,5,6,7].map(async i=>new File([await (await fetch('card'+i+'.jpg?v=1')).blob()],'바통터치_'+i+'.jpg',{type:'image/jpeg'})));
+try{const files=await Promise.all([1,2,3,4,5,6,7,8].map(async i=>new File([await (await fetch('card'+i+'.jpg?v=2')).blob()],'바통터치_'+i+'.jpg',{type:'image/jpeg'})));
 if(navigator.canShare&&navigator.canShare({files})){await navigator.share({files});msg('완료!');return}
 for(const f of files){const a=document.createElement('a');a.href=URL.createObjectURL(f);a.download=f.name;document.body.appendChild(a);a.click();a.remove();await new Promise(r=>setTimeout(r,400))}msg('다운로드 폴더에 저장됐어요.')}
 catch(e){msg(e.name==='AbortError'?'':'사진을 꾹 눌러 저장해 주세요.')}};
