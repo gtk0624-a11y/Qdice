@@ -554,7 +554,7 @@ img,video,canvas,svg{max-width:100%}
 /* 설정 접기 */
 details.sec{border-bottom:1px solid var(--rule2);margin:0}details.sec>summary{cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:space-between}details.sec>summary::-webkit-details-marker{display:none}details.sec>summary h3{margin:14px 0!important;flex:1}details.sec[open]>summary{border-bottom:2px solid var(--cover);margin-bottom:10px}
 .guide{line-height:1.8;font-size:16px}.guide ol,.guide ul{margin:4px 0 12px;padding-left:22px}
-.docdlg{width:min(1000px,96vw);max-width:96vw}.docbig{max-height:70vh;overflow:auto;font-size:16px;line-height:1.8}.shw{overflow:auto;max-height:62vh}.shw table{border-collapse:collapse;font-size:14px}.shw td,.shw th{border:1px solid var(--rule2);padding:4px 8px;white-space:pre-wrap;vertical-align:top}
+.docdlg{width:min(1000px,96vw);max-width:96vw}.docbig{max-height:60vh;overflow:auto;font-size:16px;line-height:1.8}.shw{overflow:auto;max-height:62vh}.shw table{border-collapse:collapse;font-size:14px}.shw td,.shw th{border:1px solid var(--rule2);padding:4px 8px;white-space:pre-wrap;vertical-align:top}
 
 /* ===== 플래너 스킨 (굿노트·캔바 디지털 플래너 느낌: 흰 카드 · 둥근 모서리 · 한 가지 파스텔 포인트) ===== */
 html[data-skin="planner"] body{background:color-mix(in srgb,var(--cover) 13%,#fff) fixed!important}
@@ -1193,5 +1193,5 @@ body{padding-bottom:52px!important}
 @media print{#dwbar{display:none!important}}
 #dwbar{padding-left:64px!important}
 /* v183 서랍 막대 = 원래 서랍 디자인을 화면 맨 아래에 고정 */
-#dwbar{display:block!important;max-height:70vh;overflow:auto;padding:2px 12px 2px 64px!important;white-space:normal!important}
+#dwbar{display:block!important;max-height:60vh;overflow:auto;padding:2px 12px 2px 64px!important;white-space:normal!important}
 #dwbar .drawer,#dwbar .dw{margin:0!important;border:0!important;padding:4px 0!important}
