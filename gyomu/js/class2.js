@@ -126,12 +126,12 @@ classView = function () { const h = _classView1(), i = h.indexOf('<h3 class="h3"
 
 /* 급식 시간과 겹치는 교시는 급식이 끝난 뒤로 자동으로 밀기(이후 교시는 같은 간격 유지) */
 function bellAlignLunch() {
-  const L = (S.profile.bell || []).map(x => ({ ...x })).sort((a, b) => a.s - b.s), lu = clkParse(S.profile.lunchS) != null && clkParse(S.profile.lunchE) != null ? [clkParse(S.profile.lunchS), clkParse(S.profile.lunchE)] : null;
+  const L = (S.profile.bell || []).map(x => ({ ...x })).sort((a, b) => a.s - b.s), lu = (clkParse(S.profile.lunchS) != null && clkParse(S.profile.lunchE) != null) ? [clkParse(S.profile.lunchS), clkParse(S.profile.lunchE)] : (typeof _clkL0 === 'function' ? _clkL0(L) : null);
   if (!lu || L.length < 2) return false;
   const i = L.findIndex(x => x.e > lu[0] && x.s < lu[1] || x.s >= lu[0]); if (i < 0) return false;
   const d = lu[1] - L[i].s; if (d <= 0) return false;
   for (let k = i; k < L.length; k++) { L[k].s += d; L[k].e += d; }
-  S.profile.bell = L.sort((a, b) => a.p - b.p); return true;
+  S.profile.bell = L.sort((a, b) => a.p - b.p); S.profile.lunchS = clkHM(lu[0]); S.profile.lunchE = clkHM(lu[1]); return true;
 }
 function bellSaveFrom(root) {
   const rows = {}; root.querySelectorAll('[data-bellp]').forEach(i => { const p = +i.dataset.bellp, v = clkParse(i.value); (rows[p] = rows[p] || { p })[i.dataset.w] = v; });

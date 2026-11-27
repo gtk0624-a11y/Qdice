@@ -556,3 +556,4 @@ service cloud.firestore {
 - v171: 오늘 시간표 줄에 급식 칸(4교시 뒤, ttTokens 순서) app.js tfTok
 - v172: 급식과 겹친 교시 자동 정렬 복구(저장 시 + 열 때 bellFixNow, class2.js)
 - v173: 폰(<=600px) 화면 정리 CSS(style.css 끝): 포스트잇·음악·손글씨·플로팅 숨김, 알림바/시간표바뀜 팝업 축소
+- v174: 급식 시간이 저장 안 된 경우(기본 12:40~13:30)에도 겹침 자동 정렬 + 급식 시각 저장(bellAlignLunch)
